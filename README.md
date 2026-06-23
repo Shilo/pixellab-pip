@@ -7,14 +7,10 @@ Pip is friendly on the outside and practical under the collar: he maps plain-lan
 ## Table Of Contents
 
 - [What Pip Does](#what-pip-does)
-- [Recommended Install](#recommended-install)
-- [Agent-Assisted Install](#agent-assisted-install)
-- [Manual Fallback](#manual-fallback)
+- [Install](#install)
 - [Usage](#usage)
-- [Updating](#updating)
 - [Authentication](#authentication)
 - [Project Layout](#project-layout)
-- [Design Decisions](#design-decisions)
 - [Official PixelLab Links](#official-pixellab-links)
 
 ## What Pip Does
@@ -29,7 +25,9 @@ Pip:
 - Tells agents when to refresh official PixelLab docs before giving exact endpoint, schema, SDK, auth, or model/mode claims.
 - Warns agents to verify installed SDK coverage before assuming every current REST v2 endpoint or parameter is available.
 
-## Recommended Install
+## Install
+
+### Marketplace Install
 
 Install PixelLab Pip as a plugin when your agent supports plugins or marketplaces. This keeps the skill updatable and avoids copying runtime files into multiple places.
 
@@ -40,21 +38,19 @@ Install PixelLab Pip as a plugin when your agent supports plugins or marketplace
 | GitHub Copilot CLI | `copilot plugin marketplace add Shilo/pixellab-pip`, then `copilot plugin install pixellab-pip@pixellab-pip` | `copilot plugin update pixellab-pip` |
 | VS Code agent plugins | Enable `chat.plugins.enabled`, add `Shilo/pixellab-pip` to `chat.plugins.marketplaces`, or use **Chat: Install Plugin From Source** with this repo URL. | VS Code checks plugin marketplaces for updates automatically when extension updates run. |
 | Cursor | This repo includes Cursor marketplace metadata at `.cursor-plugin/marketplace.json`. Use Cursor's plugin marketplace or team marketplace flow when available for your workspace. | Refresh/update the Cursor marketplace entry for this repo. |
-| Gemini CLI | `gemini extensions install https://github.com/Shilo/pixellab-pip` | `gemini extensions update pixellab-pip` |
+| Gemini CLI | `gemini extensions install <repo-url>` using [Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip) | `gemini extensions update pixellab-pip` |
 
 Gemini uses `GEMINI.md` as a thin wrapper because Gemini extensions are not native Agent Skills plugins.
 
-## Agent-Assisted Install
+### Agent-Assisted Install
 
 You can try this prompt in an agent that can manage its own plugins:
 
-```text
-Install PixelLab Pip from https://github.com/Shilo/pixellab-pip using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
-```
+> Install PixelLab Pip from [Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip) using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
 
 This is intentionally agent-agnostic, but it depends on the host exposing plugin management commands and permission to run them.
 
-## Manual Fallback
+### Manual Install
 
 Manual install is a fallback for hosts that support raw skills but not plugins. Copy only the runtime skill folder:
 
@@ -71,21 +67,7 @@ into the host's documented skill root. Common raw-skill examples include:
 
 Manual copies are harder to update. Prefer plugin install when possible.
 
-## Usage
-
-After installing, invoke the canonical skill/plugin name:
-
-```text
-/pixellab-pip
-```
-
-If your host namespaces plugin skills, use the host's shown name, such as `pixellab-pip:pixellab-pip`.
-
-If your host does not support slash commands, ask your agent to use PixelLab Pip.
-
-To help implicit triggering, the skill metadata includes `PixelLab Pip`; the practical trigger words stay PixelLab-specific: pixel art, sprites, characters, objects, tilesets, tilemaps, UI, backgrounds, animations, MCP, REST v2, SDK/API, and PixelLab docs.
-
-## Updating
+### Updating
 
 Marketplace installs are the update path. Pulling this repository is only enough for development; installed agents usually use cached plugin copies.
 
@@ -93,6 +75,18 @@ Marketplace installs are the update path. Pulling this repository is only enough
 - Claude Code: run `/plugin marketplace update pixellab-pip`, then `/plugin update pixellab-pip`.
 - GitHub Copilot CLI: run `copilot plugin update pixellab-pip`; use `--all` for every installed plugin.
 - Gemini CLI: run `gemini extensions update pixellab-pip`.
+
+## Usage
+
+Recommended explicit trigger:
+
+```text
+/pixellab-pip
+```
+
+If your host namespaces plugin skills, use the host's shown name, such as `pixellab-pip:pixellab-pip`.
+
+Implicit invocation should also work when an agent sees a PixelLab-specific request, such as pixel art, sprites, characters, objects, tilesets, tilemaps, UI, backgrounds, animations, MCP, REST v2, SDK/API, or PixelLab docs. Explicit invocation is still recommended when you want Pip used for sure.
 
 ## Authentication
 
@@ -124,6 +118,8 @@ plugins/
         references/
 ```
 
+`gemini-extension.json` and `GEMINI.md` adapt PixelLab Pip for Gemini CLI extensions. They point Gemini at the same skill contract; they do not create a second Pip skill.
+
 Runtime files:
 
 - `plugins/pixellab-pip/skills/pixellab-pip/SKILL.md` - the canonical skill file.
@@ -135,18 +131,9 @@ Runtime files:
 - `plugins/pixellab-pip/skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
 - `plugins/pixellab-pip/skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
 
-## Design Decisions
-
-- Canonical name: `pixellab-pip`.
-- No `/pip` alias folder: aliases are cute, but duplicated skill folders drift and weaken updateability.
-- One source of truth: every plugin wrapper points at `plugins/pixellab-pip/skills/pixellab-pip`.
-- Plugin-first install: marketplaces are easier to update than copied local skill folders.
-- `skills/` directory: this repo can grow to multiple PixelLab skills without moving the first one again.
-- Claude versioning: the Claude manifest intentionally omits `version` so git marketplace updates can track commits instead of waiting for a version bump.
-
 ## Official PixelLab Links
 
-- MCP endpoint: `https://api.pixellab.ai/mcp`
-- MCP docs: `https://api.pixellab.ai/mcp/docs`
-- REST v2 docs: `https://api.pixellab.ai/v2/docs`
-- REST v2 LLM guide: `https://api.pixellab.ai/v2/llms.txt`
+- [MCP endpoint](https://api.pixellab.ai/mcp)
+- [MCP docs](https://api.pixellab.ai/mcp/docs)
+- [REST v2 docs](https://api.pixellab.ai/v2/docs)
+- [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt)
