@@ -1,0 +1,17 @@
+{
+  "name": "pixellab-pip",
+  "owner": {
+    "name": "Shilo"
+  },
+  "metadata": {
+    "description": "PixelLab Pip plugin marketplace."
+  },
+  "plugins": [
+    {
+      "name": "pixellab-pip",
+      "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1.",
+      "version": "0.1.0",
+      "source": "./plugins/pixellab-pip"
+    }
+  ]
+}

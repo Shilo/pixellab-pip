@@ -1,0 +1,34 @@
+{
+  "name": "pixellab-pip",
+  "version": "0.1.0",
+  "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1.",
+  "author": {
+    "name": "Shilo"
+  },
+  "homepage": "https://github.com/Shilo/pixellab-pip",
+  "repository": "https://github.com/Shilo/pixellab-pip",
+  "keywords": [
+    "pixellab",
+    "pixel-art",
+    "sprites",
+    "tilesets",
+    "mcp",
+    "rest-api",
+    "game-assets"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PixelLab Pip",
+    "shortDescription": "Routes PixelLab asset and API requests.",
+    "longDescription": "PixelLab Pip helps agents choose the right PixelLab surface for asset creation, editing, animation, API integration, MCP setup, and docs troubleshooting.",
+    "developerName": "Shilo",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/Shilo/pixellab-pip",
+    "defaultPrompt": [
+      "Use PixelLab Pip to choose the right PixelLab route for this asset or API request."
+    ]
+  }
+}
