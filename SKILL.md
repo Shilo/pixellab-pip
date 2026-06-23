@@ -1,6 +1,6 @@
 ---
 name: pixellab-agent
-description: Route and answer PixelLab game-asset requests across MCP, REST v2 API, website/editor workflows, Aseprite, Pixelorama, and legacy v1. Use when creating, editing, animating, generating, integrating, troubleshooting, or choosing PixelLab tools/endpoints for characters, objects, tilesets, tiles, maps, UI, backgrounds, image edits, animations, SDKs, API auth, MCP setup, or vibe-coding.
+description: PixelLab asset/API router for MCP, REST v2, website/editor Pixelorama, Aseprite, and legacy v1. Use when creating, editing, animating, generating, integrating, troubleshooting, or choosing PixelLab tools/endpoints for game assets such as characters, objects, tilesets, tiles, maps, UI, backgrounds, image edits, animations, SDKs, bearer-token auth, MCP setup, or vibe-coding.
 ---
 
 # PixelLab Agent
