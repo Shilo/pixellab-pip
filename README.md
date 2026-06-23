@@ -2,9 +2,9 @@
 
 Meet PixelLab Pip: a tiny Pixel Pup who fetches the right route through PixelLab's MCP tools, REST v2 API, website/editor workflows, Aseprite, Pixelorama, and legacy v1.
 
-Pip is friendly on the outside and very practical under the collar: he maps plain-language asset requests to the right supported surface, keeps AI assistants away from undocumented website/session endpoints, and helps untangle overlapping tool names, endpoint paths, model labels, and editor workflows.
+Pip is friendly on the outside and very practical under the collar: he maps plain-language asset requests to the right supported surface, keeps agents away from undocumented website/session endpoints, and helps untangle overlapping tool names, endpoint paths, model labels, and editor workflows.
 
-Use Pip when an AI assistant needs to create, edit, animate, or troubleshoot PixelLab assets such as characters, objects, tilesets, tiles, maps, UI, backgrounds, image edits, and animations.
+Use Pip when an agent needs to create, edit, animate, or troubleshoot PixelLab assets such as characters, objects, tilesets, tiles, maps, UI, backgrounds, image edits, and animations.
 
 ## Name And Triggering
 
@@ -23,8 +23,8 @@ To help implicit triggering, the skill metadata includes `PixelLab Pip`; the pra
 - Routes plain-language asset requests to the best PixelLab tool or endpoint.
 - Separates official public REST/MCP surfaces from undocumented website/session endpoints.
 - Explains confusing PixelLab terms such as `Pro`, `v3`, `new`, `create tiles`, and `create tileset`.
-- Tells AI assistants when to refresh official PixelLab docs before giving exact endpoint, schema, SDK, auth, or model/mode claims.
-- Warns AI assistants to verify installed SDK coverage before assuming every current REST v2 endpoint or parameter is available.
+- Tells agents when to refresh official PixelLab docs before giving exact endpoint, schema, SDK, auth, or model/mode claims.
+- Warns agents to verify installed SDK coverage before assuming every current REST v2 endpoint or parameter is available.
 
 ## Quick Start
 
@@ -60,7 +60,7 @@ cp -R pixellab-pip/references .agents/skills/pip/
 
 PixelLab generation requires a PixelLab bearer token and may spend credits. This skill does not include or store that token.
 
-Configure the PixelLab bearer token locally as `PIXELLAB_SECRET` or through your assistant/MCP host's secret configuration. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Do not paste the token into chat.
+Configure the PixelLab bearer token locally as `PIXELLAB_SECRET` or through your agent/MCP host's secret configuration. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Do not paste the token into chat.
 
 Useful official entry points:
 
@@ -86,6 +86,6 @@ No platform-specific plugin wrapper is required for the first version.
 
 ## Recommended Use
 
-Install Pip, then invoke `/pixellab-pip` or `/pip` if your host supports slash commands. Otherwise, ask your AI assistant to use PixelLab Pip.
+Install Pip, then invoke `/pixellab-pip` or `/pip` if your host supports slash commands. Otherwise, ask your agent to use PixelLab Pip.
 
 The skill is intentionally small: Pip fetches the right route, not a whole PixelLab SDK.

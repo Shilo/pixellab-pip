@@ -16,7 +16,7 @@ Use the bearer token as:
 Authorization: Bearer <PIXELLAB_SECRET value>
 ```
 
-Use one canonical local env var for new Pip/API examples:
+Use one canonical local env var for new agent/API examples:
 
 ```text
 PIXELLAB_SECRET

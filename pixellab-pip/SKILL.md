@@ -14,8 +14,8 @@ Use this skill as a high-level PixelLab assistant. Classify the user's asset, AP
 2. Classify the target asset or surface:
    `general_image | background | character | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
 3. Choose the surface:
-   use hosted MCP for managed coding-assistant assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
-4. Use MCP only if the current assistant environment actually exposes PixelLab MCP tools, either bare or prefixed. If not, say MCP is not configured and offer setup, or REST v2 code only when the user asks for direct API/code.
+   use hosted MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
+4. Use MCP only if the current agent environment actually exposes PixelLab MCP tools, either bare or prefixed. If not, say MCP is not configured and offer setup, or REST v2 code only when the user asks for direct API/code.
    If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
 5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
 6. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
@@ -25,7 +25,7 @@ Use this skill as a high-level PixelLab assistant. Classify the user's asset, AP
 
 | Surface | Use for | Avoid |
 |---|---|---|
-| Hosted MCP | Workflows that need managed PixelLab assets with IDs, polling, downloads, list/get/delete helpers, and project/sandbox/Pip helpers. | Raw image/edit/UI primitives that MCP does not expose, or any MCP call when tools are not available in the current assistant environment. |
+| Hosted MCP | Workflows that need managed PixelLab assets with IDs, polling, downloads, list/get/delete helpers, and project/sandbox/agent helpers. | Raw image/edit/UI primitives that MCP does not expose, or any MCP call when tools are not available in the current agent environment. |
 | REST v2 | Scripts, batch jobs, server integrations, exact endpoint control, generic images, backgrounds, UI, inpaint/edit, prompt enhancement, raw animation, rotate, resize, remove background, and API parity checks. | Guessing SDK methods without checking the installed SDK or current docs. |
 | Website / Map Workshop | Human product surface, full-map manual work, rich libraries, visible browser assistance, and website-only flows. | Programmatic use of copied browser session tokens or undocumented root endpoints. |
 | Aseprite | Local in-editor plugin workflows when the user is actively working inside Aseprite. | Treating local plugin routes as public REST/MCP contracts. |
@@ -57,7 +57,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; treat VFX as a description, not a separate endpoint. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | REST v2. | `GET /background-jobs/{job_id}`. MCP managed assets use resource-specific `get_*` tools instead. |
-| PixelLab projects, sandbox, deployed assistant workflows, chat, MCP help/feedback | MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, and `agent_talk` tools if available. | No public REST v2 equivalent was documented. |
+| PixelLab projects, sandbox, deployed agent workflows, chat, MCP help/feedback | MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, and `agent_talk` tools if available. | No public REST v2 equivalent was documented. |
 
 ## Clarify Only For Collisions
 
@@ -130,7 +130,7 @@ For questions, answer with:
 
 For tasks, execute generation/editing only when the user clearly requested it and both the bearer token and tooling are configured. Ask before ambiguous credit-spending batch work or destructive deletes. Refuse unsupported automation, then route to the closest documented MCP/REST option or a visible manual website flow. Otherwise provide the exact route and minimal code or call shape the user needs.
 
-If no PixelLab bearer token is configured, stop before generation and tell the user to configure it locally in `PIXELLAB_SECRET` or through assistant/MCP secret config. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Never request the token value in chat.
+If no PixelLab bearer token is configured, stop before generation and tell the user to configure it locally in `PIXELLAB_SECRET` or through agent/MCP secret config. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Never request the token value in chat.
 
 After any live PixelLab call, report the surface, tool or endpoint, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, and credit/balance delta when exposed. If usage is not exposed, say so.
 
@@ -141,7 +141,7 @@ Use browser automation only for visible website/editor/Pixelorama assistance aft
 | Request | Route |
 |---|---|
 | "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`. |
-| "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; use MCP `create_sidescroller_tileset` if working inside an MCP-enabled assistant environment. |
+| "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; use MCP `create_sidescroller_tileset` if working inside an MCP-enabled agent environment. |
 | "Create a 512x512 title screen background." | REST v2 `create-image-pixflux-background` or another current image endpoint verified from docs. |
 | "Make HUD buttons and a health bar." | REST v2 `generate-ui-v2`. |
 | "Convert this image to pixel art and remove the background." | REST v2 `image-to-pixelart` or Pro variant, then `remove-background`. |
