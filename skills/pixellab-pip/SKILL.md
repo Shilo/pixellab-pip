@@ -79,6 +79,14 @@ Read only the relevant reference:
 - Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
 
+Optional repo docs may be absent in raw skill installs. If available, read only the relevant doc when broader PixelLab context is needed:
+
+- PixelLab surface/service boundaries: `../../docs/pixellab/surfaces-and-services.md`.
+- Plain-language asset routing: `../../docs/pixellab/asset-routing.md`.
+- Product and endpoint terminology: `../../docs/pixellab/terminology.md`.
+- SDK-vs-REST decision support: `../../docs/pixellab/sdk-compatibility.md`.
+- Public auth/session/security context: `../../docs/pixellab/auth-and-security.md`.
+
 ## Model And Mode Terms
 
 Treat PixelLab model/provider language as product labels unless official docs disclose more.

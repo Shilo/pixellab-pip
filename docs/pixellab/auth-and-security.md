@@ -14,6 +14,7 @@ PixelLab REST v2 and hosted MCP use bearer-token authentication. Pip should guid
 - Do not paste the token into chat.
 - Do not commit tokens to source control.
 - Do not print tokens in logs, generated docs, examples, or error output.
+- When checking auth setup, inspect only user-specified config paths. Do not broadly scan home, auth, or shell-history directories, and never print literal `Authorization` values.
 
 PixelLab UI/docs may use terms such as API key, API token, bearer token, or secret for the account credential. For technical REST/MCP authentication, call it a bearer token. For local environment examples, use `PIXELLAB_SECRET`.
 
@@ -29,7 +30,7 @@ When a requested workflow appears to require a website-only action, route to:
 
 ## Download URLs
 
-Some generated asset download URLs may use an unguessable identifier as the access key. Treat them as intentional-share output links:
+Some generated asset download URLs may be unauthenticated/shareable, with an unguessable identifier acting as the access key. Treat them as intentional-share output links:
 
 - Share only with the user who requested the generation.
 - Avoid committing them to public repos.

@@ -6,6 +6,8 @@ Pip is friendly on the outside and practical under the collar: he maps plain-lan
 
 For [PixelLab.ai](https://www.pixellab.ai/).
 
+> Unofficial community project: PixelLab Pip is not affiliated with PixelLab.
+
 ## Table Of Contents
 
 - [What Pip Does](#what-pip-does)
@@ -14,7 +16,8 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Authentication](#authentication)
 - [Documentation](#documentation)
 - [Project Layout](#project-layout)
-- [Official PixelLab Links](#official-pixellab-links)
+- [Other Unofficial PixelLab Tools](#other-unofficial-pixellab-tools)
+- [Official PixelLab Resources](#official-pixellab-resources)
 
 ## What Pip Does
 
@@ -148,10 +151,26 @@ Runtime files:
 - `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
 - `skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
 
-## Official PixelLab Links
+## Other Unofficial PixelLab Tools
 
-- [PixelLab.ai](https://www.pixellab.ai/)
-- [MCP endpoint](https://api.pixellab.ai/mcp)
-- [MCP docs](https://api.pixellab.ai/mcp/docs)
-- [REST v2 docs](https://api.pixellab.ai/v2/docs)
-- [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt)
+### [PixelLab AI Skill](https://clawhub.ai/uncmatteth/skills/pixellab-ai) (By [@uncmatteth](https://clawhub.ai/uncmatteth))
+
+An **unofficial** asset workflow and API helper for pixel-art generation, conversion, rotation, animation, layered sprites, modular outfits/equipment, tilesets, UI assets, and prompt enhancement.
+
+Use PixelLab AI Skill over Pip when you want a recipe-based production pipeline with manifests, dry runs, candidate folders, contact sheets, approval steps, validation, and local workflow helpers. Use Pip when you want a small agent-agnostic routing skill that helps choose the right PixelLab MCP, REST v2, website/editor, Aseprite, Pixelorama, or legacy v1 surface.
+
+### [Ultimate PixelLab Prompt Generator](https://pixellabpromptgenerator.vercel.app/) (By TheSyntheticFeed)
+
+An **unofficial** browser tool for building PixelLab-style pixel-art prompts from deterministic option sets such as asset type, perspective, camera direction, effects, materials, art style, color, and palette. It also includes a no-API prompt enhancer and a shading/lighting reference guide.
+
+Use it when you want to manually craft or learn stronger PixelLab prompts before generation. Use Pip when you want an agent to route the request, choose the right PixelLab surface, handle auth boundaries, or provide API/MCP implementation guidance.
+
+## Official PixelLab Resources
+
+- [PixelLab.ai](https://www.pixellab.ai/) - PixelLab's official product homepage.
+- [Account page](https://www.pixellab.ai/account) - Sign in and get the PixelLab token used for REST/MCP bearer auth.
+- [MCP endpoint](https://api.pixellab.ai/mcp) - Hosted PixelLab MCP endpoint for compatible agent clients.
+- [MCP docs](https://api.pixellab.ai/mcp/docs) - Official PixelLab MCP tool and setup documentation.
+- [REST v2 docs](https://api.pixellab.ai/v2/docs) - Interactive official REST v2 API documentation.
+- [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt) - LLM-readable REST v2 endpoint guide and auth summary.
+- [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) - Exact current REST v2 schemas for endpoint, field, enum, and response verification.
