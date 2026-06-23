@@ -1,19 +1,19 @@
 # Credentials
 
-Read this for PixelLab credential setup, credential-name labels, or reusing MCP auth for REST API calls.
+Read this for PixelLab bearer-token setup, PixelLab UI naming, or reusing MCP auth for REST API calls.
 
-PixelLab uses one account credential for public REST v2 and hosted MCP. Different surfaces call that same value an API key, API token, bearer token, or secret. Treat those as labels for one credential, not different token types.
+PixelLab uses one account-level bearer token for public REST v2 and hosted MCP. End-user setup should store that token in `PIXELLAB_SECRET`. PixelLab UI and examples may call the same value an API key, API token, or secret; when discussing REST/MCP authentication, use the technical term `bearer token`.
 
-User-facing examples:
+User-facing setup wording:
 
-- The PixelLab API page/account UI may call it an API key.
-- The account page may call it a secret.
-- REST and MCP docs call it an API token or bearer token.
+- Store your PixelLab token in `PIXELLAB_SECRET`.
+- The PixelLab API/account UI may label this value as an API key, API token, or secret.
+- Do not paste the value into chat.
 
-Use the credential as:
+Use the bearer token as:
 
 ```text
-Authorization: Bearer <PixelLab account credential>
+Authorization: Bearer <PIXELLAB_SECRET value>
 ```
 
 Use one canonical local env var for new agent/API examples:
@@ -22,7 +22,7 @@ Use one canonical local env var for new agent/API examples:
 PIXELLAB_SECRET
 ```
 
-Do not create additional env var aliases. Official examples may say `YOUR_API_TOKEN` or `YOUR_SECRET`; put that same account credential in `PIXELLAB_SECRET`.
+Do not create additional env var aliases. Official examples may say `YOUR_API_TOKEN` or `YOUR_SECRET`; put that same bearer token in `PIXELLAB_SECRET`.
 
 ## MCP Reuse
 
@@ -32,7 +32,7 @@ If PixelLab MCP is already configured, reuse its credential source when safe:
 - If the MCP config uses a host secret reference, tell the user to configure REST/API code to use that same secret mechanism when the host supports it.
 - If the MCP config contains a literal `Authorization: Bearer ...` value, do not extract, print, or copy it. Suggest moving it to env/secret config.
 
-Never ask the user to paste the credential into chat. Never use website/Supabase session tokens for REST or MCP.
+Never ask the user to paste the bearer token into chat. Never use website/Supabase session tokens for REST or MCP.
 
 Inspect only named config paths and redact secret-like values. Do not scan broad home/auth/config directories because tool output can leak secrets.
 

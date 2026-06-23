@@ -10,15 +10,15 @@ Use it when an agent needs to create, edit, animate, or troubleshoot PixelLab as
 - Separates official public REST/MCP surfaces from undocumented website/session endpoints.
 - Explains confusing PixelLab terms such as `Pro`, `v3`, `new`, `create tiles`, and `create tileset`.
 - Tells agents when to refresh official PixelLab docs before giving exact endpoint, schema, SDK, auth, or model/mode claims.
-- Warns about the published/default Python and JavaScript SDKs historically defaulting to v1, and when to use direct REST v2 HTTP instead.
+- Warns agents to verify installed SDK coverage before assuming every current REST v2 endpoint or parameter is available.
 
 ## Quick Start
 
 Place this folder wherever your agent loads Agent Skills, such as `~/.codex/skills/pixellab-agent` for Codex or a Claude/Cursor-compatible skills folder.
 
-PixelLab generation requires a PixelLab account credential and may spend credits. This skill does not include or store that credential.
+PixelLab generation requires a PixelLab bearer token and may spend credits. This skill does not include or store that token.
 
-Configure the single PixelLab account credential locally as `PIXELLAB_SECRET` or through your agent/MCP host's secret configuration. PixelLab surfaces may call the same value an API key, API token, bearer token, or secret; these are product labels, not different credentials. Do not paste the credential into agent chat.
+Configure the PixelLab bearer token locally as `PIXELLAB_SECRET` or through your agent/MCP host's secret configuration. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Do not paste the token into agent chat.
 
 Useful official entry points:
 
@@ -32,11 +32,11 @@ Do not use copied website session tokens or undocumented website endpoints for a
 ## Files
 
 - `SKILL.md` - the portable Agent Skills file.
-- `references/credentials.md` - PixelLab credential-name labels, safe local setup, and MCP credential-source reuse.
+- `references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
 - `references/browser-fallback.md` - permission rules for visible website/editor fallback.
 - `references/paperdolling.md` - layered character and outfit workflow contract.
 - `references/tilesets.md` - terrain/platformer/tile-variant routing details.
-- `references/image-inputs.md` - endpoint-specific image input roles and user goals.
+- `references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
 - `references/usage-reporting.md` - usage, balance, job, and result reporting.
 - `references/official-docs.md` - when and how to refresh official PixelLab docs.
 

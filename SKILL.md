@@ -17,7 +17,7 @@ Use this skill as a PixelLab routing brain. Classify the user's asset or API int
    use hosted MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
 4. Use MCP only if the current agent actually exposes PixelLab MCP tools, either bare or prefixed. If not, say MCP is not configured and offer setup, or REST v2 code only when the user asks for direct API/code.
 5. Refresh current facts when exact endpoint names, parameters, auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
-6. Before live generation, confirm the single PixelLab account credential is configured without asking the user to paste it into chat.
+6. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
 7. Act or answer. Ask a short clarification only for known collisions.
 
 ## Surface Rules
@@ -56,7 +56,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | Use animation endpoints; treat VFX as an option/description, not a separate public model. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | REST v2. | `GET /background-jobs/{job_id}`. MCP managed assets use resource-specific `get_*` tools instead. |
-| PixelLab projects, sandbox, agent workflows, chat | MCP `list_projects`, `sandbox_*`, `agent_*`, and `chat_*` tools if available. | No public REST v2 equivalent was documented. |
+| PixelLab projects, sandbox, agent workflows, chat, MCP help/feedback | MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, and `agent_talk` tools if available. | No public REST v2 equivalent was documented. |
 
 ## Clarify Only For Collisions
 
@@ -70,11 +70,11 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 
 Read only the relevant reference:
 
-- Credential naming (`API key`, `API token`, `bearer token`, `secret`) and MCP credential reuse: `references/credentials.md`.
+- Bearer-token setup, PixelLab UI naming, and MCP auth reuse: `references/credentials.md`.
 - Browser fallback and website automation boundaries: `references/browser-fallback.md`.
 - Paperdolling and layered character workflows: `references/paperdolling.md`.
 - Tileset and tile-variant details: `references/tilesets.md`.
-- Image inputs, user goals, and attachment/file-path handling: `references/image-inputs.md`.
+- Image input roles for attachments, file paths, and endpoint fields: `references/image-inputs.md`.
 - Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
 
@@ -93,13 +93,13 @@ Do not invent provider internals where PixelLab docs are silent.
 ## Do Not Use
 
 - Do not automate undocumented website/session endpoints such as root `/tilesets/create` with copied DevTools bearer tokens. Treat them as unsupported unless PixelLab documents them.
-- Do not ask users to paste the PixelLab account credential into chat. Direct them to local environment or MCP secret setup instead.
+- Do not ask users to paste the PixelLab bearer token into chat. Direct them to local environment or MCP secret setup instead.
 - Do not treat `https://api.pixellab.ai/` redirecting to v1 docs as proof that root website routes map to `/v1`.
 - Do not confuse website Create Tileset Pro with public `create_tiles_pro` / `create-tiles-pro`; they are different flows.
 - Do not call website session bearer tokens API tokens. Public REST/MCP bearer tokens and website session tokens are different auth contexts.
 - Do not default to v1 or old SDK README examples for new work.
-- Do not assume `pip install pixellab` or `npm install @pixellab-code/pixellab` gives v2 coverage. The published/default SDKs have historically defaulted to v1; confirm the installed package or call REST v2 directly.
-- Do not claim public SDK coverage without checking the installed package or current official repo state.
+- Do not assume an installed SDK exposes every current v2 endpoint or parameter. Live `llms.txt` links official Python and JavaScript/TypeScript SDKs, but for exact v2 coverage confirm the installed package/docs or call REST v2 directly.
+- Do not claim public SDK coverage without checking the installed package, current docs, or official repo state.
 
 ## Current Docs Refresh
 
@@ -124,9 +124,9 @@ For questions, answer with:
 3. Warnings for unsupported or confusing alternatives.
 4. Official-doc caveat when the answer was not freshly verified.
 
-For tasks, execute generation/editing only when the user clearly requested it and credentials/tooling are configured. Ask before ambiguous credit-spending batch work, destructive deletes, or unsupported automation. Otherwise provide the exact route and minimal code or call shape the user needs.
+For tasks, execute generation/editing only when the user clearly requested it and bearer-token/tooling setup is configured. Ask before ambiguous credit-spending batch work, destructive deletes, or unsupported automation. Otherwise provide the exact route and minimal code or call shape the user needs.
 
-If no PixelLab account credential is configured, stop before generation and tell the user to configure the single credential locally as `PIXELLAB_SECRET` or through agent/MCP secret config. PixelLab surfaces may call the same value an API key, API token, bearer token, or secret; these are product labels, not separate credentials. Never request the credential value in chat.
+If no PixelLab bearer token is configured, stop before generation and tell the user to configure it locally in `PIXELLAB_SECRET` or through agent/MCP secret config. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Never request the token value in chat.
 
 After any live PixelLab call, report the surface, tool or endpoint, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, and credit/balance delta when exposed. If usage is not exposed, say so.
 

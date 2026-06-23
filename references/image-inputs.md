@@ -1,6 +1,6 @@
-# Image Inputs
+# Image Input Roles
 
-Read this when the user supplies image attachments or file paths, or when an endpoint has `reference`, `style`, `concept`, `init`, `color`, `character`, mask, inpainting, or frame image parameters.
+Read this to classify image input roles when the user supplies attachments or file paths, or when an endpoint has `reference`, `style`, `concept`, `init`, `color`, `character`, mask, inpainting, or frame image parameters.
 
 Image input role is endpoint-specific. Do not map every supplied image to `reference_image`. Some PixelLab image inputs are references, but others are edit targets, init/source images, masks, palettes, terrain style guides, or animation frame anchors. Classify the user's goal first, then pick the endpoint field.
 
@@ -80,4 +80,3 @@ Ask one short question when the same file could be more than one role:
 - "For animation, is this the first frame, last frame, or a style/reference image?"
 
 Never guess between identity, style, concept, edit target, palette, and frame roles when credit-spending generation depends on it.
-
