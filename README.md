@@ -4,10 +4,6 @@ Meet PixelLab Pip: a tiny Pixel Pup who fetches the right route through PixelLab
 
 Pip is friendly on the outside and practical under the collar: he maps plain-language asset requests to the right supported surface, keeps agents away from undocumented website/session endpoints, and helps untangle overlapping tool names, endpoint paths, model labels, and editor workflows.
 
-<p>
-  <a href="https://www.pixellab.ai/"><img src="https://www.pixellab.ai/apple-touch-icon.png" alt="PixelLab logo" width="48" /></a>
-</p>
-
 For [PixelLab.ai](https://www.pixellab.ai/).
 
 ## Table Of Contents
@@ -16,6 +12,7 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Install](#install)
 - [Usage](#usage)
 - [Authentication](#authentication)
+- [Documentation](#documentation)
 - [Project Layout](#project-layout)
 - [Official PixelLab Links](#official-pixellab-links)
 
@@ -111,18 +108,25 @@ Get your secret token from the PixelLab [account page](https://www.pixellab.ai/a
 
 Do not use copied website session tokens or undocumented website endpoints for automation unless PixelLab documents them as supported.
 
+## Documentation
+
+Public research summaries live in [docs/](docs/). They cover Pip's design, distribution, PixelLab surfaces, terminology, SDK compatibility, and auth/security boundaries.
+
 ## Project Layout
 
 ```text
 README.md
 .agents/plugins/marketplace.json
 .claude-plugin/marketplace.json
+.claude-plugin/plugin.json
 .cursor-plugin/marketplace.json
+.cursor-plugin/plugin.json
 .github/plugin/marketplace.json
 gemini-extension.json
 GEMINI.md
 .codex-plugin/plugin.json
 plugin.json
+docs/
 skills/
   pixellab-pip/
     SKILL.md
