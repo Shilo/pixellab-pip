@@ -79,7 +79,7 @@ Read only the relevant reference:
 - Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
 
-Optional broader repo docs may exist only in full plugin/repo installs; raw skill installs may omit them. If a needed broader concept is not covered by the runtime `references/` files above, resolve the matching path relative to this `SKILL.md` and read at most one relevant repo doc, only if that exact path exists. If the path is absent, continue from the runtime references and current official docs; do not fail, search for substitutes, or load the whole set.
+Optional broader docs: in full plugin/repo installs, these paths resolve relative to this `SKILL.md`; raw skill installs may omit them. If runtime `references/` are not enough, read at most one matching file if it exists. If absent, continue with `references/official-docs.md` and current official PixelLab docs; do not search or load the set.
 
 - Surface boundaries and service selection: `../../docs/pixellab/surfaces-and-services.md`.
 - Plain-language asset routing: `../../docs/pixellab/asset-routing.md`.
