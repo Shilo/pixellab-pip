@@ -29,7 +29,7 @@ Use this skill as a PixelLab routing brain. Classify the user's asset or API int
 | REST v2 | Scripts, batch jobs, server integrations, exact endpoint control, generic images, backgrounds, UI, inpaint/edit, prompt enhancement, raw animation, rotate, resize, remove background, and API parity checks. | Guessing SDK methods without checking the installed SDK or current docs. |
 | Website / Map Workshop | Human product surface, full-map manual work, rich libraries, visible browser assistance, and website-only flows. | Programmatic use of copied browser session tokens or undocumented root endpoints. |
 | Aseprite | Local in-editor plugin workflows when the user is actively working inside Aseprite. | Treating local plugin routes as public REST/MCP contracts. |
-| Pixelorama / editor | Browser-based website editor powered by Pixelorama for existing website assets and visible save-back workflows. | New asset generation, hidden automation, or public API assumptions. |
+| Pixelorama / editor | Visible browser assistance for website editor workflows, including existing assets, save-back flows, and website-only manual flows after explicit permission. | Hidden automation, undocumented endpoint calls, public API assumptions, or any generation/save/download/edit/delete action without a second confirmation. |
 | REST v1 | Existing legacy code and old SDK compatibility. | New work unless the user explicitly needs v1. |
 
 Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2/...` paths.
@@ -105,17 +105,19 @@ Do not invent provider internals where PixelLab docs are silent.
 
 ## Current Docs Refresh
 
-Use local routing rules for stable judgment. Check official docs before exact current claims or code:
+Use local routing rules for stable route choice. Refresh official docs only when the local skill/reference does not contain the needed tool, endpoint, field, schema, SDK detail, auth setup, pricing/limit, model/mode claim, or latest MCP tool behavior.
 
-- `https://api.pixellab.ai/mcp/docs`
-- `https://api.pixellab.ai/v2/llms.txt`
-- `https://api.pixellab.ai/v2/docs`
-- `https://api.pixellab.ai/v2/openapi.json`
-- `https://www.pixellab.ai/mcp`
-- `https://github.com/pixellab-code` for official SDK/MCP repo state
+Start with lightweight official docs. Fetch `openapi.json` only when exact request/response schema, enum values, required fields, or polling/result shapes are needed.
+
+- `https://api.pixellab.ai/v2/llms.txt` for REST v2 endpoint index and auth summary
+- `https://api.pixellab.ai/v2/docs` for interactive REST v2 endpoint parameters
+- `https://api.pixellab.ai/v2/openapi.json` only for exact REST v2 schema checks
+- `https://api.pixellab.ai/mcp/docs` for MCP tool behavior
+- `https://www.pixellab.ai/mcp` for MCP setup
+- `https://github.com/pixellab-code` only for official SDK/MCP repo state
 - `https://api.pixellab.ai/v1/openapi.json` only for legacy checks
 
-If web access is unavailable, answer from this skill and say which current claim was not freshly verified.
+If web access is unavailable, answer from this skill and say only which necessary current claim could not be freshly verified.
 
 ## Answer Shape
 
@@ -124,7 +126,7 @@ For questions, answer with:
 1. Recommended surface or endpoint/tool.
 2. Why that route fits.
 3. Warnings for unsupported or confusing alternatives.
-4. Official-doc caveat when the answer was not freshly verified.
+4. Verification note only when the answer depends on a current fact that was missing, unclear, or not freshly verified.
 
 For tasks, execute generation/editing only when the user clearly requested it and both the bearer token and tooling are configured. Ask before ambiguous credit-spending batch work or destructive deletes. Refuse unsupported automation, then route to the closest documented MCP/REST option or a visible manual website flow. Otherwise provide the exact route and minimal code or call shape the user needs.
 
@@ -132,7 +134,7 @@ If no PixelLab bearer token is configured, stop before generation and tell the u
 
 After any live PixelLab call, report the surface, tool or endpoint, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, and credit/balance delta when exposed. If usage is not exposed, say so.
 
-Use browser automation only for visible website/editor/Pixelorama assistance after explicit user permission. Ask again before login/session actions, spending credits, submitting generations, downloads, or edits. Never scrape session tokens or call undocumented website endpoints.
+Use browser automation only for visible website/editor/Pixelorama assistance after explicit user permission. Ask again before login/session actions, spending credits, submitting generations, downloads, edits, or deletes. Never scrape session tokens or call undocumented website endpoints.
 
 ## Examples
 
