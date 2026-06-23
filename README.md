@@ -4,6 +4,12 @@ Meet PixelLab Pip: a tiny Pixel Pup who fetches the right route through PixelLab
 
 Pip is friendly on the outside and practical under the collar: he maps plain-language asset requests to the right supported surface, keeps agents away from undocumented website/session endpoints, and helps untangle overlapping tool names, endpoint paths, model labels, and editor workflows.
 
+<p>
+  <a href="https://www.pixellab.ai/"><img src="https://www.pixellab.ai/apple-touch-icon.png" alt="PixelLab logo" width="48" /></a>
+</p>
+
+For [PixelLab.ai](https://www.pixellab.ai/).
+
 ## Table Of Contents
 
 - [What Pip Does](#what-pip-does)
@@ -31,34 +37,36 @@ Pip:
 
 Install PixelLab Pip as a plugin when your agent supports plugins or marketplaces. This keeps the skill updatable and avoids copying runtime files into multiple places.
 
-| Host | Install | Update |
+| Agent app | Install | Update |
 |---|---|---|
-| Codex | `codex plugin marketplace add Shilo/pixellab-pip`, then install `pixellab-pip` from `/plugins` or the Codex plugin directory. | `codex plugin marketplace upgrade pixellab-pip` |
 | Claude Code | `/plugin marketplace add Shilo/pixellab-pip`, then `/plugin install pixellab-pip@pixellab-pip` | `/plugin marketplace update pixellab-pip`, then `/plugin update pixellab-pip` |
+| Cursor | This repo includes Cursor marketplace metadata at `.cursor-plugin/marketplace.json`. Use Cursor's plugin marketplace or team marketplace flow when available for your workspace. | Refresh/update the Cursor marketplace entry for this repo. |
+| Codex | `codex plugin marketplace add Shilo/pixellab-pip`, then install `pixellab-pip` from `/plugins` or the Codex plugin directory. | `codex plugin marketplace upgrade pixellab-pip` |
 | GitHub Copilot CLI | `copilot plugin marketplace add Shilo/pixellab-pip`, then `copilot plugin install pixellab-pip@pixellab-pip` | `copilot plugin update pixellab-pip` |
 | VS Code agent plugins | Enable `chat.plugins.enabled`, add `Shilo/pixellab-pip` to `chat.plugins.marketplaces`, or use **Chat: Install Plugin From Source** with this repo URL. | VS Code checks plugin marketplaces for updates automatically when extension updates run. |
-| Cursor | This repo includes Cursor marketplace metadata at `.cursor-plugin/marketplace.json`. Use Cursor's plugin marketplace or team marketplace flow when available for your workspace. | Refresh/update the Cursor marketplace entry for this repo. |
 | Gemini CLI | `gemini extensions install <repo-url>` using [Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip) | `gemini extensions update pixellab-pip` |
 
-Gemini uses `GEMINI.md` as a thin wrapper because Gemini extensions are not native Agent Skills plugins.
+PixelLab Pip currently targets Claude Code, Cursor, Codex, GitHub Copilot CLI, VS Code agent plugins, and Gemini CLI. It does not auto-install into web-only chats such as Claude.ai, ChatGPT, or Gemini web.
+
+Gemini uses `gemini-extension.json` for installation and `GEMINI.md` for invocation context. Gemini extensions are not native Agent Skills plugins, so those files adapt Gemini to the same Pip instructions in `skills/pixellab-pip/SKILL.md`.
 
 ### Agent-Assisted Install
 
-You can try this prompt in an agent that can manage its own plugins:
+You can try this prompt in a local coding agent that can run plugin-management commands:
 
-> Install PixelLab Pip from [Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip) using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
+> Install PixelLab Pip from [https://github.com/Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip) using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
 
-This is intentionally agent-agnostic, but it depends on the host exposing plugin management commands and permission to run them.
+This is mostly useful in Claude Code, Codex, Gemini CLI, GitHub Copilot CLI, or another local agent with shell access. It is not reliable in web-only assistants or agents that cannot install plugins from GitHub.
 
 ### Manual Install
 
-Manual install is a fallback for hosts that support raw skills but not plugins. Copy only the runtime skill folder:
+Manual install is useful for project-local setup, quick testing, or agent apps that support raw Agent Skills without a marketplace. Copy only the runtime skill folder:
 
 ```text
-plugins/pixellab-pip/skills/pixellab-pip/
+skills/pixellab-pip/
 ```
 
-into the host's documented skill root. Common raw-skill examples include:
+into the agent app's documented skill directory. Common examples include:
 
 ```text
 .agents/skills/pixellab-pip/
@@ -73,6 +81,7 @@ Marketplace installs are the update path. Pulling this repository is only enough
 
 - Codex: run `codex plugin marketplace upgrade pixellab-pip`.
 - Claude Code: run `/plugin marketplace update pixellab-pip`, then `/plugin update pixellab-pip`.
+- Cursor: refresh the marketplace or reinstall/update the plugin through Cursor's plugin UI.
 - GitHub Copilot CLI: run `copilot plugin update pixellab-pip`; use `--all` for every installed plugin.
 - Gemini CLI: run `gemini extensions update pixellab-pip`.
 
@@ -84,7 +93,7 @@ Recommended explicit trigger:
 /pixellab-pip
 ```
 
-If your host namespaces plugin skills, use the host's shown name, such as `pixellab-pip:pixellab-pip`.
+If your agent app namespaces plugin skills, use the name it shows, such as `pixellab-pip:pixellab-pip`.
 
 Implicit invocation should also work when an agent sees a PixelLab-specific request, such as pixel art, sprites, characters, objects, tilesets, tilemaps, UI, backgrounds, animations, MCP, REST v2, SDK/API, or PixelLab docs. Explicit invocation is still recommended when you want Pip used for sure.
 
@@ -92,7 +101,7 @@ Implicit invocation should also work when an agent sees a PixelLab-specific requ
 
 PixelLab generation requires a PixelLab bearer token and may spend credits. This skill does not include or store that token.
 
-Configure the PixelLab bearer token locally as `PIXELLAB_SECRET` or through your agent/MCP host's secret configuration. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Do not paste the token into chat.
+Configure the PixelLab bearer token locally as `PIXELLAB_SECRET` or through your agent app or MCP server's secret configuration. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Do not paste the token into chat.
 
 Do not use copied website session tokens or undocumented website endpoints for automation unless PixelLab documents them as supported.
 
@@ -106,33 +115,32 @@ README.md
 .github/plugin/marketplace.json
 gemini-extension.json
 GEMINI.md
-plugins/
+.codex-plugin/plugin.json
+plugin.json
+skills/
   pixellab-pip/
-    plugin.json
-    .codex-plugin/plugin.json
-    .claude-plugin/plugin.json
-    .cursor-plugin/plugin.json
-    skills/
-      pixellab-pip/
-        SKILL.md
-        references/
+    SKILL.md
+    references/
 ```
 
-`gemini-extension.json` and `GEMINI.md` adapt PixelLab Pip for Gemini CLI extensions. They point Gemini at the same skill contract; they do not create a second Pip skill.
+The root plugin files are thin wrappers for each agent app. The only runtime skill is `skills/pixellab-pip/SKILL.md`.
+
+`gemini-extension.json` installs PixelLab Pip as a Gemini CLI extension. `GEMINI.md` gives Gemini the invocation context and points back to the same skill contract; it does not create a second Pip skill.
 
 Runtime files:
 
-- `plugins/pixellab-pip/skills/pixellab-pip/SKILL.md` - the canonical skill file.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
-- `plugins/pixellab-pip/skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
+- `skills/pixellab-pip/SKILL.md` - the canonical skill file.
+- `skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
+- `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
+- `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
+- `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
+- `skills/pixellab-pip/references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
+- `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
+- `skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
 
 ## Official PixelLab Links
 
+- [PixelLab.ai](https://www.pixellab.ai/)
 - [MCP endpoint](https://api.pixellab.ai/mcp)
 - [MCP docs](https://api.pixellab.ai/mcp/docs)
 - [REST v2 docs](https://api.pixellab.ai/v2/docs)

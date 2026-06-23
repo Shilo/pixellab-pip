@@ -1,5 +1,6 @@
 {
   "name": "pixellab-pip",
+  "displayName": "PixelLab Pip",
   "version": "0.1.0",
   "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1.",
   "author": {
@@ -9,17 +10,34 @@
   "repository": "https://github.com/Shilo/pixellab-pip",
   "keywords": [
     "pixellab",
+    "pixellab-pip",
     "pixel-art",
-    "sprites",
-    "tilesets",
+    "pixel-art-generator",
+    "game-assets",
+    "game-development",
+    "ai-agents",
+    "agent-skills",
+    "agent-plugin",
+    "codex-plugin",
+    "claude-code",
+    "cursor-plugin",
+    "github-copilot",
+    "gemini-cli",
     "mcp",
     "rest-api",
-    "game-assets"
+    "sprites",
+    "pixelorama",
+    "aseprite",
+    "tilesets",
+    "api"
   ],
   "category": "developer-tools",
   "tags": [
     "pixel-art",
     "game-assets",
+    "game-development",
+    "ai-agents",
+    "agent-skills",
     "mcp",
     "api"
   ],

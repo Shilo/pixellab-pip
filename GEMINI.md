@@ -5,13 +5,13 @@ Use PixelLab Pip when the user asks about PixelLab asset generation, editing, an
 The canonical Agent Skills source lives at:
 
 ```text
-plugins/pixellab-pip/skills/pixellab-pip/SKILL.md
+skills/pixellab-pip/SKILL.md
 ```
 
 Follow that routing contract and read only the relevant files under:
 
 ```text
-plugins/pixellab-pip/skills/pixellab-pip/references/
+skills/pixellab-pip/references/
 ```
 
 Prefer documented MCP and REST v2 surfaces. Do not automate undocumented website/session endpoints or ask users to paste bearer tokens into chat.

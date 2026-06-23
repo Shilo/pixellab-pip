@@ -8,7 +8,7 @@
       "name": "pixellab-pip",
       "source": {
         "source": "local",
-        "path": "./plugins/pixellab-pip"
+        "path": "./"
       },
       "policy": {
         "installation": "AVAILABLE",
