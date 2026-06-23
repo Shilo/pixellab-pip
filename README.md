@@ -153,18 +153,6 @@ Runtime files:
 
 ## Other Tools
 
-### [Vibe Coding AI Toolkit](https://www.pixellab.ai/mcp)
-
-PixelLab's MCP setup page for connecting PixelLab to AI coding assistants. It helps users configure direct MCP access so an agent can generate game-ready characters, animations, tilesets, and map objects inside coding workflows.
-
-Use the Vibe Coding AI Toolkit directly when you already know MCP is the right surface and want to configure PixelLab tools in a supported MCP client. Use Pip when you want an agent to decide whether MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, legacy v1, or SDK/API docs are the right route.
-
-### [PixelLab API](https://www.pixellab.ai/pixellab-api)
-
-PixelLab's official API catalog for programmatic pixel-art generation, editing, animation, tilesets, characters, objects, prompt enhancement, Pro tools, pricing, and endpoint links.
-
-Use the PixelLab API directly when you are writing code against REST v2 and already know the endpoint you need. Use Pip when you want help choosing the endpoint or deciding whether REST v2, MCP, website/editor workflows, SDKs, or legacy v1 are a better fit.
-
 ### [PixelLab AI Skill](https://clawhub.ai/uncmatteth/skills/pixellab-ai) (By [@uncmatteth](https://clawhub.ai/uncmatteth))
 
 An **unofficial** asset workflow and API helper for pixel-art generation, conversion, rotation, animation, layered sprites, modular outfits/equipment, tilesets, UI assets, and prompt enhancement.
@@ -176,6 +164,18 @@ Use PixelLab AI Skill over Pip when you want a recipe-based production pipeline 
 An **unofficial** browser tool for building PixelLab-style pixel-art prompts from deterministic option sets such as asset type, perspective, camera direction, effects, materials, art style, color, and palette. It also includes a no-API prompt enhancer and a shading/lighting reference guide.
 
 Use it when you want to manually craft or learn stronger PixelLab prompts before generation. Use Pip when you want an agent to route the request, choose the right PixelLab surface, handle auth boundaries, or provide API/MCP implementation guidance.
+
+### [Vibe Coding AI Toolkit](https://www.pixellab.ai/mcp) (By [PixelLab](https://pixellab.ai))
+
+PixelLab's MCP setup page for connecting PixelLab to AI coding assistants. It helps users configure direct MCP access so an agent can generate game-ready characters, animations, tilesets, and map objects inside coding workflows.
+
+Use the Vibe Coding AI Toolkit directly when you already know MCP is the right surface and want to configure PixelLab tools in a supported MCP client. Use Pip when you want an agent to decide whether MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, legacy v1, or SDK/API docs are the right route.
+
+### [PixelLab API](https://www.pixellab.ai/pixellab-api) (By [PixelLab](https://pixellab.ai))
+
+PixelLab's official API catalog for programmatic pixel-art generation, editing, animation, tilesets, characters, objects, prompt enhancement, Pro tools, pricing, and endpoint links.
+
+Use the PixelLab API directly when you are writing code against REST v2 and already know the endpoint you need. Use Pip when you want help choosing the endpoint or deciding whether REST v2, MCP, website/editor workflows, SDKs, or legacy v1 are a better fit.
 
 ## PixelLab Resources
 

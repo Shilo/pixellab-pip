@@ -79,7 +79,13 @@ Read only the relevant reference:
 - Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
 
-Optional in plugin/repo installs: for broader context, read one relevant `../../docs/pixellab/` file if present: `surfaces-and-services.md`, `asset-routing.md`, `terminology.md`, `sdk-compatibility.md`, or `auth-and-security.md`.
+Optional broader repo docs may exist only in full plugin/repo installs; raw skill installs may omit them. If a needed broader concept is not covered by the runtime `references/` files above, resolve the matching path relative to this `SKILL.md` and read at most one relevant repo doc, only if that exact path exists. If the path is absent, continue from the runtime references and current official docs; do not fail, search for substitutes, or load the whole set.
+
+- Surface boundaries and service selection: `../../docs/pixellab/surfaces-and-services.md`.
+- Plain-language asset routing: `../../docs/pixellab/asset-routing.md`.
+- Product/model/mode terminology: `../../docs/pixellab/terminology.md`.
+- SDK-vs-REST compatibility: `../../docs/pixellab/sdk-compatibility.md`.
+- Bearer-token, session, and security boundaries: `../../docs/pixellab/auth-and-security.md`.
 
 ## Model And Mode Terms
 
