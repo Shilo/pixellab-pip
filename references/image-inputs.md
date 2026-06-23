@@ -4,8 +4,6 @@ Read this to classify image input roles when the user supplies attachments or fi
 
 Image input role is endpoint-specific. Do not map every supplied image to `reference_image`. Some PixelLab image inputs are references, but others are edit targets, init/source images, masks, palettes, terrain style guides, or animation frame anchors. Classify the user's goal first, then pick the endpoint field.
 
-Field names below are routing aids; confirm exact names and enums against `https://api.pixellab.ai/v2/openapi.json` before writing code, since the API evolves.
-
 ## Goal Router
 
 | User goal | Use this role | Meaning | Common fields/endpoints |

@@ -16,7 +16,8 @@ Use this skill as a PixelLab routing brain. Classify the user's asset or API int
 3. Choose the surface:
    use hosted MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
 4. Use MCP only if the current agent actually exposes PixelLab MCP tools, either bare or prefixed. If not, say MCP is not configured and offer setup, or REST v2 code only when the user asks for direct API/code.
-5. Refresh current facts when exact endpoint names, parameters, auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
+   If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
+5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
 6. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
 7. Act or answer. Ask a short clarification only for known collisions.
 
@@ -28,7 +29,7 @@ Use this skill as a PixelLab routing brain. Classify the user's asset or API int
 | REST v2 | Scripts, batch jobs, server integrations, exact endpoint control, generic images, backgrounds, UI, inpaint/edit, prompt enhancement, raw animation, rotate, resize, remove background, and API parity checks. | Guessing SDK methods without checking the installed SDK or current docs. |
 | Website / Map Workshop | Human product surface, full-map manual work, rich libraries, visible browser assistance, and website-only flows. | Programmatic use of copied browser session tokens or undocumented root endpoints. |
 | Aseprite | Local in-editor plugin workflows when the user is actively working inside Aseprite. | Treating local plugin routes as public REST/MCP contracts. |
-| Pixelorama / editor | Browser editor for existing website assets and visible save-back workflows. | New asset generation or public automation. |
+| Pixelorama / editor | Browser-based website editor powered by Pixelorama for existing website assets and visible save-back workflows. | New asset generation, hidden automation, or public API assumptions. |
 | REST v1 | Existing legacy code and old SDK compatibility. | New work unless the user explicitly needs v1. |
 
 Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2/...` paths.
@@ -53,7 +54,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Map object | MCP `create_map_object` plus `get_map_object` by default. | `POST /map-objects`; verify current result and polling behavior from OpenAPI before writing code. |
 | Whole map, Map Workshop, map CRUD/export | Website manually, or generate components with MCP/REST. | No full public REST/MCP map CRUD surface was documented in the research. |
 | Static effect or VFX sprite | REST v2 image/object route depending whether it should be a reusable object. | No standalone public VFX endpoint was documented. |
-| Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | Use animation endpoints; treat VFX as an option/description, not a separate public model. |
+| Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; treat VFX as a description, not a separate endpoint. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | REST v2. | `GET /background-jobs/{job_id}`. MCP managed assets use resource-specific `get_*` tools instead. |
 | PixelLab projects, sandbox, agent workflows, chat, MCP help/feedback | MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, and `agent_talk` tools if available. | No public REST v2 equivalent was documented. |
@@ -66,7 +67,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 - "Effect": ask static sprite or animated effect when not obvious. For static VFX, ask whether it should be a reusable managed object or a one-off sprite.
 - "Isometric tileset": ask whether they need one isometric tile or a full tileset, because public docs expose a single isometric tile route.
 - "Paperdoll": gather base, layers, directions, animations, and isolated-vs-composited output; see `references/paperdolling.md`.
-- Supplied images: infer role from the request, but ask when one file could be identity, style, concept, edit target, palette, pose, first frame, or last frame. Check current endpoint schema before choosing parameter names or base64 shape.
+- Supplied images: infer role from the request, but ask when one file could be identity, style, concept, edit target, palette, pose, first frame, or last frame.
 
 Read only the relevant reference:
 
@@ -97,7 +98,7 @@ Do not invent provider internals where PixelLab docs are silent.
 - Do not ask users to paste the PixelLab bearer token into chat. Direct them to local environment or MCP secret setup instead.
 - Do not treat `https://api.pixellab.ai/` redirecting to v1 docs as proof that root website routes map to `/v1`.
 - Do not confuse website Create Tileset Pro with public `create_tiles_pro` / `create-tiles-pro`; they are different flows.
-- Do not call website session tokens API tokens or PixelLab bearer tokens. Public REST/MCP bearer tokens and website session tokens are different auth contexts.
+- Do not refer to website session tokens as API tokens or PixelLab bearer tokens. Public REST/MCP bearer tokens and website session tokens are different auth contexts.
 - Do not default to v1 or old SDK README examples for new work.
 - Do not assume an installed SDK exposes every current v2 endpoint or parameter. Live `llms.txt` links official Python and JavaScript/TypeScript SDKs, but for exact v2 coverage confirm the installed package/docs or call REST v2 directly.
 - Do not claim public SDK coverage without checking the installed package, current docs, or official repo state.
@@ -125,13 +126,13 @@ For questions, answer with:
 3. Warnings for unsupported or confusing alternatives.
 4. Official-doc caveat when the answer was not freshly verified.
 
-For tasks, execute generation/editing only when the user clearly requested it and bearer-token/tooling setup is configured. Ask before ambiguous credit-spending batch work or destructive deletes. Refuse unsupported automation, then route to the closest documented MCP/REST option or a visible manual website flow. Otherwise provide the exact route and minimal code or call shape the user needs.
+For tasks, execute generation/editing only when the user clearly requested it and both the bearer token and tooling are configured. Ask before ambiguous credit-spending batch work or destructive deletes. Refuse unsupported automation, then route to the closest documented MCP/REST option or a visible manual website flow. Otherwise provide the exact route and minimal code or call shape the user needs.
 
 If no PixelLab bearer token is configured, stop before generation and tell the user to configure it locally in `PIXELLAB_SECRET` or through agent/MCP secret config. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Never request the token value in chat.
 
 After any live PixelLab call, report the surface, tool or endpoint, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, and credit/balance delta when exposed. If usage is not exposed, say so.
 
-Use browser automation only for visible website assistance after explicit user permission. Ask again before login/session actions, spending credits, submitting generations, downloads, or edits. Never scrape session tokens or call undocumented website endpoints.
+Use browser automation only for visible website/editor/Pixelorama assistance after explicit user permission. Ask again before login/session actions, spending credits, submitting generations, downloads, or edits. Never scrape session tokens or call undocumented website endpoints.
 
 ## Examples
 

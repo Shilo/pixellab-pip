@@ -1,8 +1,8 @@
 # Official PixelLab Docs
 
-Read this when exact current endpoint names, MCP tools, parameters, auth setup, model/mode availability, prices, limits, or SDK support matter.
+Read this when a needed endpoint/tool/field is not found in the local skill, or when auth setup, model/mode availability, prices, limits, SDK support, or exact request/response schemas matter.
 
-Official docs can change after this skill. Prefer this skill for routing and ambiguity handling; refresh official docs for exact current schemas and setup.
+Official docs can change after this skill. Prefer this skill for normal routing and ambiguity handling; refresh official docs only when local routing is missing something or code needs exact current schemas/setup.
 
 ## Links
 
@@ -44,4 +44,4 @@ MCP may also expose `pixellab://docs/...` documentation resources for engine/fra
 - Usage reporting expectations.
 - Credential safety rules.
 
-Refresh official docs when a current exact claim matters; use this skill when the user needs the right PixelLab surface or workflow.
+Refresh official docs when local skill coverage is missing/unclear or exact schema/setup details are needed; use this skill when the user needs the right PixelLab surface or workflow.

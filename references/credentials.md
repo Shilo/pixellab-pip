@@ -34,7 +34,7 @@ If PixelLab MCP is already configured, reuse its credential source when safe:
 
 Never ask the user to paste the bearer token into chat. Never use website/Supabase session tokens for REST or MCP.
 
-Inspect only named config paths and redact secret-like values. Do not scan broad home/auth/config directories because tool output can leak secrets.
+When checking MCP config files for credential setup, inspect only the specific config paths referenced by the user. Do not scan broad home/auth/config directories because tool output can leak secrets.
 
 Fallback order:
 
