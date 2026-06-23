@@ -1,6 +1,6 @@
 # Credentials
 
-Read this for PixelLab credential setup, credential-name aliases, or reusing MCP auth for REST API calls.
+Read this for PixelLab credential setup, credential-name labels, or reusing MCP auth for REST API calls.
 
 PixelLab uses one account credential for public REST v2 and hosted MCP. Different surfaces call that same value an API key, API token, bearer token, or secret. Treat those as labels for one credential, not different token types.
 
@@ -16,24 +16,19 @@ Use the credential as:
 Authorization: Bearer <PixelLab account credential>
 ```
 
-Prefer one canonical local env var for new agent/API examples:
+Use one canonical local env var for new agent/API examples:
 
 ```text
-PIXELLAB_API_TOKEN
+PIXELLAB_SECRET
 ```
 
-Compatibility aliases are local names for the same credential. Accept them only when already present in a user's environment, SDK, or existing MCP config:
-
-- `PIXELLAB_API_KEY`
-- `PIXELLAB_SECRET`
-
-Do not tell users to create all three. Do not imply they are different credentials.
+Do not create additional env var aliases. Official examples may say `YOUR_API_TOKEN` or `YOUR_SECRET`; put that same account credential in `PIXELLAB_SECRET`.
 
 ## MCP Reuse
 
 If PixelLab MCP is already configured, reuse its credential source when safe:
 
-- If the MCP config uses an env var, such as `bearer_token_env_var = "PIXELLAB_API_TOKEN"` or `${env:PIXELLAB_API_TOKEN}`, REST code can read the same env var.
+- If the MCP config uses `PIXELLAB_SECRET`, REST code can read the same env var.
 - If the MCP config uses a host secret reference, tell the user to configure REST/API code to use that same secret mechanism when the host supports it.
 - If the MCP config contains a literal `Authorization: Bearer ...` value, do not extract, print, or copy it. Suggest moving it to env/secret config.
 

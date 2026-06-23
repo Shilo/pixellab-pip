@@ -74,7 +74,8 @@ Read only the relevant reference:
 - Browser fallback and website automation boundaries: `references/browser-fallback.md`.
 - Paperdolling and layered character workflows: `references/paperdolling.md`.
 - Tileset and tile-variant details: `references/tilesets.md`.
-- Image input roles and attachment/file-path handling: `references/image-inputs.md`.
+- Image inputs, user goals, and attachment/file-path handling: `references/image-inputs.md`.
+- Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
 
 ## Model And Mode Terms
@@ -125,7 +126,7 @@ For questions, answer with:
 
 For tasks, execute generation/editing only when the user clearly requested it and credentials/tooling are configured. Ask before ambiguous credit-spending batch work, destructive deletes, or unsupported automation. Otherwise provide the exact route and minimal code or call shape the user needs.
 
-If no PixelLab account credential is configured, stop before generation and tell the user to configure the single credential locally. PixelLab surfaces may call the same value an API key, API token, bearer token, or secret. Prefer `PIXELLAB_API_TOKEN` for new examples; treat `PIXELLAB_API_KEY` or `PIXELLAB_SECRET` only as existing compatibility aliases for that same credential. Never request the credential value in chat.
+If no PixelLab account credential is configured, stop before generation and tell the user to configure the single credential locally as `PIXELLAB_SECRET` or through agent/MCP secret config. PixelLab surfaces may call the same value an API key, API token, bearer token, or secret; these are product labels, not separate credentials. Never request the credential value in chat.
 
 After any live PixelLab call, report the surface, tool or endpoint, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, and credit/balance delta when exposed. If usage is not exposed, say so.
 

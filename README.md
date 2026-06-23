@@ -18,7 +18,7 @@ Place this folder wherever your agent loads Agent Skills, such as `~/.codex/skil
 
 PixelLab generation requires a PixelLab account credential and may spend credits. This skill does not include or store that credential.
 
-Configure the single PixelLab account credential locally. PixelLab surfaces may call the same value an API key, API token, bearer token, or secret. Prefer `PIXELLAB_API_TOKEN` or your agent/MCP host's secret configuration for new setup. Existing SDK/MCP setups may call the same value `PIXELLAB_API_KEY` or `PIXELLAB_SECRET`; those are compatibility aliases, not different credentials. Do not paste the credential into agent chat.
+Configure the single PixelLab account credential locally as `PIXELLAB_SECRET` or through your agent/MCP host's secret configuration. PixelLab surfaces may call the same value an API key, API token, bearer token, or secret; these are product labels, not different credentials. Do not paste the credential into agent chat.
 
 Useful official entry points:
 
@@ -32,12 +32,13 @@ Do not use copied website session tokens or undocumented website endpoints for a
 ## Files
 
 - `SKILL.md` - the portable Agent Skills file.
-- `references/credentials.md` - PixelLab credential-name aliases, safe local setup, and MCP credential-source reuse.
+- `references/credentials.md` - PixelLab credential-name labels, safe local setup, and MCP credential-source reuse.
 - `references/browser-fallback.md` - permission rules for visible website/editor fallback.
 - `references/paperdolling.md` - layered character and outfit workflow contract.
 - `references/tilesets.md` - terrain/platformer/tile-variant routing details.
-- `references/image-inputs.md` - endpoint-specific image input roles.
+- `references/image-inputs.md` - endpoint-specific image input roles and user goals.
 - `references/usage-reporting.md` - usage, balance, job, and result reporting.
+- `references/official-docs.md` - when and how to refresh official PixelLab docs.
 
 No platform-specific plugin wrapper is required for the first version.
 
