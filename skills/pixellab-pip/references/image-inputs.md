@@ -6,6 +6,8 @@ Image input role is endpoint-specific. Do not map every supplied image to `refer
 
 When consistency matters, identify which input constrains identity, style, palette, source edit, or animation frames. If no anchor is provided, note that results may vary across a batch.
 
+When images are visible to the agent, inspect them and write task-relevant facts into the text field: subject, direction/view, pose, palette, style, materials, edit target, and intended output. Keep observed input facts separate from requested output changes. If the user says not to enhance, preserve their wording except for required endpoint formatting.
+
 ## Goal Router
 
 | User goal | Use this role | Meaning | Common fields/endpoints |

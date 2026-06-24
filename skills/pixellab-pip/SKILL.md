@@ -19,8 +19,9 @@ Classify the user's asset, API, or question intent first, then choose the suppor
    If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
 5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
 6. For consistency-sensitive work, summarize the user's identity, style, palette, view, and reference anchors. Ask up to three blocking questions before a credit-spending call.
-7. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
-8. Act or answer. Ask a short clarification only for known collisions.
+7. For any PixelLab text field, improve vague user wording into a clear endpoint-ready description unless the user opts out. Use a documented PixelLab enhance endpoint only when it fits the chosen route; otherwise enhance directly from the request and visible inputs.
+8. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
+9. Act or answer. Ask a short clarification only for known collisions.
 
 ## Surface Rules
 
@@ -54,7 +55,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Try on garment/item on character | Website Try on for single-image experimental output; REST `transfer-outfit-v2` only for animation-frame outfit transfer. | Try on returns a composited image, not isolated paperdoll layers. |
 | Multi image combine references | Website experimental flow or closest documented REST image/edit route after verifying docs. | No direct public REST v2/MCP "multi image" route was documented. |
 | Reshape character proportions | Website Reshape or closest documented edit/character route after verifying docs. | Website docs require exactly 64x64 canvas; no public REST v2/MCP reshape endpoint was documented. |
-| Prompt enhancement, improve generation prompt | REST v2. | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, or `enhance-animation-v3-prompt` depending on target asset. |
+| Prompt enhancement, improve generation prompt | Agent-side rewrite by default for unmatched routes; REST v2 only for documented matching enhance endpoints. | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, or `enhance-animation-v3-prompt`. Do not use a mismatched enhance endpoint as a generic optimizer unless the user explicitly asks. |
 | Raw animation, skeleton, interpolation, outfit transfer, rotate | REST v2 unless animating a managed MCP character/object. | `animate-with-text*`, `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`. |
 | Map image, generated level image, visual map concept | REST v2 image/background route; website for map extension/texture workflows. | No full public REST/MCP map CRUD, map extension, or map texture surface was documented. |
 | Map object | MCP `create_map_object` plus `get_map_object` by default. | `POST /map-objects`; MCP map objects auto-delete after 8 hours. Verify current REST result and polling behavior from OpenAPI before writing code. |
@@ -74,6 +75,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 - "Isometric tileset": ask whether they need one isometric tile or a full tileset, because public docs expose a single isometric tile route.
 - "Paperdoll": gather base, layers, directions, animations, and isolated-vs-composited output; see `references/paperdolling.md`.
 - Supplied images are optional unless the chosen route requires image fields. When images are supplied, infer each file's endpoint-specific role from the request; ask only when one file could reasonably be identity, style, concept, edit target, mask, palette, init/source, first frame, or last frame.
+- If prompt enhancement adds material inferred details from images or user shorthand, show the proposed description and get confirmation before a credit-spending generation or edit.
 
 Read only the relevant reference:
 
@@ -105,6 +107,12 @@ Treat PixelLab model/provider language as product labels unless official docs di
 - `Gemini`: observed in website Create Tileset Pro copy, but no public v2 tileset parameter was documented that exactly selects that website Pro/Gemini mode.
 
 Do not invent provider internals where PixelLab docs are silent.
+
+## Text Preparation
+
+Prompt enhancement is opt-out. For text fields such as `description`, `action`, terrain descriptions, edit descriptions, and UI prompts, produce the best concise PixelLab-ready text from the user's request and any visible inputs before calling a tool.
+
+Use REST `enhance-pixen-prompt` for Pixen image prompts, `enhance-character-v3-prompt` for character v3 prompts, and `enhance-animation-v3-prompt` for animation v3 actions with `first_frame` and optional `last_frame`. For other tools, enhance directly as the agent; do not force a nonmatching enhance endpoint.
 
 ## Do Not Use
 
@@ -146,7 +154,7 @@ For tasks, execute generation/editing only when the user clearly requested it an
 
 If no PixelLab bearer token is configured, stop before generation and tell the user to get the bearer token from `https://www.pixellab.ai/account` after signing in, or follow the PixelLab MCP setup page at `https://www.pixellab.ai/mcp`, then configure it locally in `PIXELLAB_SECRET` or through agent/MCP secret config. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token. Never request the token value in chat.
 
-After any live PixelLab call, report the surface, tool or endpoint, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, credit/balance delta when exposed, and candidate/final status. Do not call an output final unless existence and explicitly requested constraints were verified. If usage is not exposed, say so. Do not paste raw base64 or full response JSON unless debugging exact schemas.
+After any live PixelLab call, report the surface, tool or endpoint, text-prep method, final text fields used, mode/model label if supplied, job/asset/result IDs, output paths or URLs, async polling/status when relevant, credit/balance delta when exposed, and candidate/final status. Do not call an output final unless existence and explicitly requested constraints were verified. If usage is not exposed, say so. Do not paste raw base64 or full response JSON unless debugging exact schemas.
 
 Use browser automation only for visible website/editor/Pixelorama assistance after explicit user permission. Ask again before login/session actions, spending credits, submitting generations, downloads, edits, or deletes. Never scrape session tokens or call undocumented website endpoints.
 

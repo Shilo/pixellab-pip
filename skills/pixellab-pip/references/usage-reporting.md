@@ -6,6 +6,8 @@ After every live PixelLab call, report:
 
 - Surface: MCP, REST v2, website/manual, Aseprite, or Pixelorama.
 - Tool or endpoint.
+- Text-prep method: user text unchanged, agent-enhanced, or PixelLab enhance endpoint.
+- Final text fields used, summarized when long.
 - Product/mode/model label requested by the user or returned by PixelLab, if any; do not infer provider internals.
 - Job, asset, or result IDs.
 - Output paths or URLs.
