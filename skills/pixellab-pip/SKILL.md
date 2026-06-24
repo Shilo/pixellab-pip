@@ -16,7 +16,7 @@ Classify the user's asset, API, or question intent first, then choose the suppor
    `general_image | background | character | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
 3. Choose the surface:
    use PixelLab MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
-   For setup intent, read `references/setup.md` and run the setup wizard contract: recommend MCP first, support API/both/manual modes, and change settings only after a token-free preview and explicit approval.
+   For setup intent, read `references/setup.md` and run the setup wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval.
 4. Use MCP only if PixelLab MCP tools are available, either bare or prefixed. If MCP is unavailable, route to the matching REST v2 endpoint when one is documented. If MCP and REST v2 are both unavailable or fail, explain why before using any non-PixelLab fallback.
    If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
 5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.

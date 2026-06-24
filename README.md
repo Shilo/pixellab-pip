@@ -202,24 +202,26 @@ Implicit invocation should also work when an agent sees PixelLab/Pip context plu
 $pixellab-pip setup
 ```
 
-Runs the beginner-friendly PixelLab setup wizard. Pip recommends MCP for AI assistants/editors, can set up API access for code projects, and only changes settings after a token-free preview and explicit approval.
+Runs the beginner-friendly PixelLab setup wizard. Pip recommends MCP + API for AI assistants/editors, can configure REST/API fallback for Pip with the same PixelLab Secret, and only changes settings after a token-free preview and explicit approval.
 
 ## MCP And API Setup
 
-For most users, run `/pixellab-pip setup` and choose MCP. MCP connects PixelLab directly to your AI assistant/editor/app, so the assistant can use PixelLab tools without you writing API code.
+For most users, run `/pixellab-pip setup` and choose MCP + API. MCP connects PixelLab directly to your AI assistant/editor/app, and API fallback lets Pip use documented REST/API routes when MCP tools are unavailable, incomplete, or insufficient.
 
 The setup command behaves like a wizard, not a static help page. It infers what it can, asks at most the next short question when needed, and keeps secrets out of chat and shared files.
 
 | Wizard mode | Use it when | What Pip does |
 |---|---|---|
-| MCP | Recommended. You want an AI assistant, editor, or MCP-compatible app to make PixelLab assets for you. | Detects or asks which app you use, prepares a token-free MCP config preview, and applies it only after confirmation. |
-| API | You are writing your own script, app, backend, batch job, or SDK integration. | Shows runtime-secret guidance and language/platform examples only after you name the platform. |
-| Both | You want PixelLab in an assistant and in your own code. | Sets up MCP first, then reuses the same `PIXELLAB_SECRET` source for API code. |
+| MCP + API | Recommended. You want direct PixelLab tools in your assistant/editor/app plus Pip REST/API fallback. | Sets up MCP first, then confirms the same `PIXELLAB_SECRET` source is visible to the assistant/editor/app session where Pip runs. |
+| MCP only | You only want PixelLab MCP tools in your assistant/editor/app. | Detects or asks which app you use, prepares an MCP config preview, and applies it only after confirmation. This may use an app secret setting, an env/secret reference, or a user-chosen hardcoded MCP config when the app has no token-free option. |
+| API only | You only want Pip to use REST/API fallback when MCP tools are unavailable, incomplete, or insufficient. | Configures or verifies `PIXELLAB_SECRET` for Pip fallback without adding MCP. |
 | Manual | You want to use PixelLab's website instructions yourself. | Opens or links to [PixelLab's MCP setup page](https://www.pixellab.ai/mcp), tells you to pick your app there, and stops. |
 
 PixelLab Pip can tailor MCP setup for the supported assistant/app names already used by this project: Claude Code, Codex, Gemini CLI, Cursor, VS Code Agent Plugins, GitHub Copilot CLI, and generic MCP-compatible apps. It stays agent-agnostic and OS-agnostic until the detected or named app requires a specific settings location.
 
-Both MCP and API use the same PixelLab account secret. Open the PixelLab [account page](https://www.pixellab.ai/account) after signing in and copy the value labeled `Secret`. PixelLab may call this value an API key, API token, secret, or token. Pip calls it a bearer token for MCP/API auth.
+MCP + API and API-only setup require `PIXELLAB_SECRET` because Pip needs that local secret source for REST/API fallback. MCP-only setup also needs the PixelLab account Secret, but some MCP clients can store it directly in their own config instead of exposing it as `PIXELLAB_SECRET`.
+
+Open the PixelLab [account page](https://www.pixellab.ai/account) after signing in and copy the value labeled `Secret`. PixelLab may call this value an API key, API token, secret, or token. Pip calls it a bearer token for MCP/API auth.
 
 Store the token outside chat. The recommended local secret name is:
 
@@ -232,8 +234,8 @@ Token setup options, from safest default to more manual:
 1. App/editor secret settings or app secret store named `PIXELLAB_SECRET`.
 2. OS user environment-variable UI for `PIXELLAB_SECRET`.
 3. A hidden local prompt or secret-store command that does not put the Secret in command text.
-4. A private PixelLab-only `.pixellab` file containing only `PIXELLAB_SECRET`, if you explicitly want a project-local file.
-5. A normal external terminal command such as `setx`, `export`, or PowerShell env setup if you accept shell-history/process-history tradeoffs.
+4. A normal external terminal command such as `setx`, `export`, or PowerShell env setup if you accept shell-history/process-history tradeoffs.
+5. A project-local file such as `.env.local` or `.pixellab`, only when a specific helper, dotenv loader, or wrapper explicitly reads it. Project-local files do not configure MCP, Codex, Claude, Pip, your terminal, or the OS by themselves.
 
 Do not run literal-Secret commands through assistant prompt lines, Claude/Codex shell escapes, or a Codex-readable integrated terminal. `setx` and `export` are not forbidden; the risk is putting the actual Secret in command text that can be saved or exposed. If a Secret is pasted into chat or visible tool output, treat it as exposed and replace it before continuing setup.
 
@@ -242,7 +244,7 @@ Do not run literal-Secret commands through assistant prompt lines, Claude/Codex 
 - Detect the current assistant/editor/app when possible, or ask which one you use.
 - Inspect only the specific config path or setting it explains and you approve; it should not scan home directories or existing `.env*` files.
 - Prefer app secret settings, OS/user-level environment settings, or an app secret store named `PIXELLAB_SECRET`.
-- Show a token-free preview before writing any environment variable, app config, MCP settings file, shell profile, or project file.
+- Show a token-free preview before writing any environment variable, app config, MCP settings file, shell profile, or loader-backed project-local secret file.
 - Use `https://api.pixellab.ai/mcp` for MCP and `https://api.pixellab.ai/v2` for REST API.
 - Verify setup only after you approve a no-credit check, such as MCP `get_balance` or REST `GET /balance`.
 
@@ -264,19 +266,19 @@ Authorization: Bearer <PIXELLAB_SECRET>
 
 In docs and previews, `<PIXELLAB_SECRET>` means a reference to the private local secret, not a value to paste into chat. Use your app's secret settings when available. If the app requires a config file, keep that file private and do not commit it.
 
-Some apps, including some Claude Code MCP header flows, may not provide a reliable token-free secret reference. In that case Pip should not write the config automatically. It can instead offer a manual fallback command for you to run in your own external terminal, with a placeholder such as `<paste-your-Secret-here>`, after warning that the app may store the raw Secret in local MCP config or shell history.
+Some apps, including some Claude Code MCP header flows, may not provide a reliable token-free secret reference. In that case Pip should not write the config automatically. It can instead offer a manual fallback command for you to run in your own external terminal, with a placeholder such as `<paste-your-Secret-here>`, after warning that the app may store the raw Secret in local MCP config or shell history. That can make MCP-only work, but it does not configure `PIXELLAB_SECRET` for Pip REST/API fallback.
 
 ### Backup: REST v2 API
 
-Use the REST API only when you are writing your own code, such as a script, app, backend, batch job, SDK integration, or deployment.
+Use the REST API setup path when you want Pip to fall back to documented REST/API routes because MCP tools are unavailable, incomplete, or insufficient for the requested PixelLab workflow.
 
-For REST v2 API calls, read `PIXELLAB_SECRET` inside your code or deployment runtime and send:
+For REST v2 API calls, Pip uses the same PixelLab account Secret stored as `PIXELLAB_SECRET` and sends:
 
 ```text
 Authorization: Bearer <PIXELLAB_SECRET>
 ```
 
-Pip should provide code examples only after you name the language, framework, deployment platform, or SDK. Do not paste the Secret into chat, commit it, put it in examples, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps.
+Setup mode should not micromanage your frameworks, scripts, backends, SDKs, package files, or deployment platforms. Once `PIXELLAB_SECRET` is visible to the assistant/editor/app session, Pip can route REST calls internally when fallback is needed. Do not paste the Secret into chat, commit it, put it in examples, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps.
 
 ## Authentication
 
@@ -337,7 +339,7 @@ Runtime files:
 
 An **unofficial** asset workflow and API helper for pixel-art generation, conversion, rotation, animation, layered sprites, modular outfits/equipment, tilesets, UI assets, and prompt enhancement.
 
-Use PixelLab AI Skill for its recipe, manifest, and helper-script production workflow. Use Pip for concise, agent-agnostic PixelLab tool selection across MCP, REST v2, website/editor, Aseprite, Pixelorama, and legacy v1. Pip does not install or run PixelLab AI Skill's helper scripts.
+Use PixelLab AI Skill for its recipe, manifest, and helper-script production workflow. Its `.env.local` pattern works because its helper auto-loads that file. Use Pip for concise, agent-agnostic PixelLab tool selection across MCP, REST v2, website/editor, Aseprite, Pixelorama, and legacy v1. Pip does not install or run PixelLab AI Skill's helper scripts, and copying that `.env.local` pattern is not enough unless a loader or wrapper reads it.
 
 ### [Ultimate PixelLab Prompt Generator](https://pixellabpromptgenerator.vercel.app/) (By TheSyntheticFeed)
 
