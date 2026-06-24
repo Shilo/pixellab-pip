@@ -14,6 +14,7 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Install](#install)
 - [Usage](#usage)
 - [Commands](#commands)
+- [MCP And API Setup](#mcp-and-api-setup)
 - [Authentication](#authentication)
 - [Documentation](#documentation)
 - [Showcase](#showcase)
@@ -41,6 +42,7 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 | Clear generation reports | Reports the PixelLab tool or endpoint used, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, credit/balance delta when available, and verification status. |
 | PixelLab terminology support | Explains confusing labels such as `Pro`, `v3`, `new`, `create tiles`, `create tileset`, Pixen, PixFlux, BitForge, and PixPatch at the documented product level. |
 | Agent-agnostic | Works with any agent that supports Agent Skills. |
+| Privacy-focused setup | Helps users connect PixelLab without exposing token values, dumping environment variables, or inspecting private `.env*` files. |
 
 ## Install
 
@@ -196,6 +198,60 @@ Implicit invocation should also work when an agent sees PixelLab/Pip context plu
 ```
 
 Runs guided PixelLab MCP/API setup, diagnoses missing auth, and configures only what the user approves without reading or printing the secret value.
+
+## MCP And API Setup
+
+PixelLab has two supported programmable setup paths:
+
+| Path | Use it when | What it needs |
+|---|---|---|
+| MCP | You want an AI assistant or IDE to create managed PixelLab assets while coding. | A PixelLab MCP server config for `https://api.pixellab.ai/mcp` plus bearer auth. |
+| REST v2 API | You are writing scripts, apps, batch jobs, server code, or direct HTTP/SDK integrations. | Requests to `https://api.pixellab.ai/v2` plus bearer auth. |
+
+Both paths use the same PixelLab account bearer token. Get it from the PixelLab [account page](https://www.pixellab.ai/account) after signing in, or follow PixelLab's [MCP setup page](https://www.pixellab.ai/mcp). PixelLab may call this value an API key, API token, secret, or token. Pip calls it a bearer token for REST/MCP auth.
+
+Store the token outside chat. The recommended local name is:
+
+```text
+PIXELLAB_SECRET
+```
+
+Safe setup options, from best default to fallback:
+
+1. Use your agent app, IDE, OS, or deployment platform's secret store.
+2. Use a user-scoped environment variable named `PIXELLAB_SECRET`.
+3. Use an MCP host setting that references `PIXELLAB_SECRET` or a host-managed secret.
+4. Use a private `.pixellab` file only when you explicitly want an app-local fallback; keep it gitignored and store only `PIXELLAB_SECRET`.
+
+For MCP, configure your host to connect to:
+
+```text
+https://api.pixellab.ai/mcp
+```
+
+Use your host's MCP settings UI when possible. If your host uses config files, prefer a token-free secret reference. Exact syntax varies by host, but the shape is:
+
+```json
+{
+  "mcpServers": {
+    "pixellab": {
+      "url": "https://api.pixellab.ai/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer <secret reference or PIXELLAB_SECRET value at runtime>"
+      }
+    }
+  }
+}
+```
+
+For REST v2 API calls, read `PIXELLAB_SECRET` inside your code or deployment runtime and send it as:
+
+```text
+Authorization: Bearer <PIXELLAB_SECRET value>
+```
+
+Do not paste the token into chat, commit it, put it in examples, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps. Pip can help check setup with `/pixellab-pip setup` or `@pixellab-pip setup`, but it should only inspect specific files or settings that you name and approve.
 
 ## Authentication
 
