@@ -211,7 +211,7 @@ For new PixelLab automation, Pip primarily guides users toward two setup paths:
 | MCP | You want an AI assistant or IDE to create managed PixelLab assets while coding. | A PixelLab MCP server config for `https://api.pixellab.ai/mcp` plus bearer auth. |
 | REST v2 API | You are writing scripts, apps, batch jobs, server code, or direct HTTP/SDK integrations. | Requests to `https://api.pixellab.ai/v2` plus bearer auth. |
 
-Both paths use the same PixelLab account bearer token. Get it from the PixelLab [account page](https://www.pixellab.ai/account) after signing in, or follow PixelLab's [MCP setup page](https://www.pixellab.ai/mcp). PixelLab may call this value an API key, API token, secret, or token. Pip calls it a bearer token for REST/MCP auth.
+Both paths use the same PixelLab account bearer token. Open the PixelLab [account page](https://www.pixellab.ai/account) after signing in and copy the value labeled `Secret`, or follow PixelLab's [MCP setup page](https://www.pixellab.ai/mcp). PixelLab may call this value an API key, API token, secret, or token. Pip calls it a bearer token for REST/MCP auth.
 
 Store the token outside chat. The recommended local name is:
 
@@ -248,15 +248,15 @@ Use your host's MCP settings UI when possible. If your host uses config files, p
 }
 ```
 
-Use your host's environment-variable or secret syntax so `<PIXELLAB_SECRET>` is filled from the local `PIXELLAB_SECRET` value. Do not paste the real token into shared config files.
+Use your host's environment-variable or secret syntax so `<PIXELLAB_SECRET>` is filled from the local `PIXELLAB_SECRET` value. Do not paste the real Secret into shared config files.
 
 For REST v2 API calls, read `PIXELLAB_SECRET` inside your code or deployment runtime and send it as:
 
 ```text
-Authorization: Bearer <PIXELLAB_SECRET value>
+Authorization: Bearer <PIXELLAB_SECRET>
 ```
 
-Do not paste the token into chat, commit it, put it in examples, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps. Pip can help check setup with `@pixellab-pip setup`, `$pixellab-pip setup`, or `/pixellab-pip setup`, but it should only inspect specific files or settings that you name and approve.
+Do not paste the token into chat, commit it, put it in examples, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps. Pip can help check setup with `/pixellab-pip setup`, `@pixellab-pip setup`, or `$pixellab-pip setup`, but it should only inspect specific files or settings that you name and approve.
 
 ## Authentication
 

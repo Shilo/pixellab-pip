@@ -6,15 +6,15 @@ PixelLab uses one account-level bearer token for public REST v2 and hosted MCP. 
 
 User-facing setup wording:
 
-- Get your PixelLab secret token from `https://www.pixellab.ai/account` after signing in, or follow PixelLab's MCP setup page at `https://www.pixellab.ai/mcp`.
-- Store your PixelLab secret token in `PIXELLAB_SECRET`.
+- Open `https://www.pixellab.ai/account` after signing in and copy the value labeled `Secret`, or follow PixelLab's MCP setup page at `https://www.pixellab.ai/mcp`.
+- Store that Secret value in `PIXELLAB_SECRET`.
 - The PixelLab API/account UI may label this value as an API key, API token, or secret.
 - Do not paste the value into chat.
 
 Use the bearer token as:
 
 ```text
-Authorization: Bearer <PIXELLAB_SECRET value>
+Authorization: Bearer <PIXELLAB_SECRET>
 ```
 
 Use one canonical local env var for new agent/API examples:
@@ -30,7 +30,7 @@ Do not create additional env var aliases. Official examples may say `YOUR_API_TO
 If PixelLab MCP is already configured, reuse its credential source when safe:
 
 - If the MCP config uses `PIXELLAB_SECRET`, REST code can read the same env var.
-- If the MCP config uses a host secret reference, tell the user to configure REST/API code to use that same secret mechanism when the host supports it.
+- If the MCP config uses a host secret setting named `PIXELLAB_SECRET`, tell the user to configure REST/API code to use that same `PIXELLAB_SECRET` setting when the host supports it.
 - If the MCP config contains a literal `Authorization: Bearer ...` value, do not extract, print, or copy it. Suggest moving it to env/secret config.
 
 Never ask the user to paste the bearer token into chat. Never use website/Supabase session tokens for REST or MCP.

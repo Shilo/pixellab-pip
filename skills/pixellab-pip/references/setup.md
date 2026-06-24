@@ -7,6 +7,7 @@ The intended first-run command is one short word after the skill trigger:
 ```text
 /pixellab-pip setup
 @pixellab-pip setup
+$pixellab-pip setup
 ```
 
 Some hosts expose text after a slash command as arguments, while others treat it as normal prompt text. Treat `setup` the same either way. Do not require flags, positional syntax, or host-specific argument features.
@@ -50,7 +51,7 @@ Do not scan broad home, auth, shell history, keychain, credential, config, proje
 
 PixelLab uses one account-level bearer token for public REST v2 and hosted MCP. The PixelLab UI may call it an API key, API token, secret, or token. For REST/MCP auth, call it a bearer token.
 
-Tell the user to get the token from `https://www.pixellab.ai/account` after signing in, or follow PixelLab's MCP setup page at `https://www.pixellab.ai/mcp`.
+Tell the user to open `https://www.pixellab.ai/account` after signing in and copy the value labeled `Secret`, or follow PixelLab's MCP setup page at `https://www.pixellab.ai/mcp`.
 
 Never ask the user to paste the bearer token into chat. Never print, echo, log, summarize, transform, validate, or copy a token value from chat or config output. If a token appears in chat or tool output, do not repeat it.
 
@@ -71,10 +72,33 @@ PIXELLAB_SECRET
 Use it for REST as:
 
 ```text
-Authorization: Bearer <PIXELLAB_SECRET value>
+Authorization: Bearer <PIXELLAB_SECRET>
 ```
 
 Do not introduce aliases such as `PIXELLAB_API_KEY`, `PIXELLAB_TOKEN`, or `YOUR_API_TOKEN` in new instructions. If official docs use another placeholder, explain that the same bearer token should be stored in `PIXELLAB_SECRET`.
+
+## User-Facing Setup Output
+
+For setup readiness output, keep wording friendly and action-oriented. Prefer "Next step" language over long diagnostic inventories.
+
+- Tell the user to open `https://www.pixellab.ai/account` and copy the value labeled `Secret`.
+- Use `<PIXELLAB_SECRET>` as the placeholder in prompts and config examples. Explain that it means the actual `Secret` value from the account page, made available locally as `PIXELLAB_SECRET`.
+- In PowerShell hidden-input examples, use:
+
+```powershell
+$secret = Read-Host "<PIXELLAB_SECRET>" -AsSecureString
+```
+
+Then say: "When PowerShell asks for `<PIXELLAB_SECRET>`, paste the actual Secret from your PixelLab account page. It will not be shown in the terminal."
+
+- For MCP examples, show:
+
+```text
+https://api.pixellab.ai/mcp
+Authorization: Bearer <PIXELLAB_SECRET>
+```
+
+Then say: "Configure your MCP host to fill `<PIXELLAB_SECRET>` from your local `PIXELLAB_SECRET` environment variable. If your host has a secret UI, save the value there under `PIXELLAB_SECRET`. Do not paste the real Secret into shared config files."
 
 ## MCP Configuration Guidance
 
@@ -84,7 +108,7 @@ Good guidance:
 
 - Use the host's MCP settings UI or documented MCP config file.
 - Configure PixelLab MCP to read `PIXELLAB_SECRET` from the host environment or secret store.
-- If the host supports secret references, use the host secret reference instead of a literal token.
+- If the host supports a secret store, save the value under `PIXELLAB_SECRET` instead of using a literal token.
 - If a config file already contains a literal bearer token, suggest moving it into env/secret config; do not extract or print it.
 - After config changes, tell the user to restart or reload the MCP host when that host requires it.
 
@@ -118,7 +142,7 @@ Before asking, report:
 
 - Target surface: MCP, API, or both.
 - Exact destination: config file, host setting, env var, app file, or project file.
-- Secret handling: token-free placeholder, env var reference, or host secret reference.
+- Secret handling: token-free placeholder, `PIXELLAB_SECRET` env var, or host secret setting named `PIXELLAB_SECRET`.
 - Reload step: whether a terminal, app, server, or MCP host must restart.
 
 If the user only wants instructions, do not write anything.
@@ -175,7 +199,7 @@ Use this default flow for natural-language setup mode:
 
 1. Identify whether the user wants MCP, API, or both.
 2. Diagnose current readiness using available tools and only user-approved/specific config paths.
-3. Explain the safe credential model: one PixelLab bearer token stored as `PIXELLAB_SECRET` or host secret config.
+3. Explain the safe credential model: one PixelLab bearer token stored as `PIXELLAB_SECRET` in the user environment or host secret settings.
 4. Offer token-free setup steps for the user's host/platform.
 5. Ask before writing config or changing environment.
 6. Run only no-credit readiness checks after approval.
