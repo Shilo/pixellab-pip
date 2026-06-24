@@ -16,7 +16,7 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Authentication](#authentication)
 - [Documentation](#documentation)
 - [Showcase](#showcase)
-- [Project Layout](#project-layout)
+- [Repository Layout](#repository-layout)
 - [Other Tools](#other-tools)
 - [PixelLab Resources](#pixellab-resources)
 - [License](#license)
@@ -29,7 +29,7 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 |---|---|
 | Easy PixelLab workflow | Lets users ask for assets in plain language without knowing PixelLab tool names, endpoint names, modes, or editor differences. |
 | Smart tool selection | Chooses between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
-| Answer PixelLab questions | Answers questions about PixelLab tools, endpoints, docs, setup, auth, SDKs, model labels, troubleshooting, and confusing feature names. |
+| Answer PixelLab questions | Explains setup, auth, docs, SDKs, troubleshooting, and confusing feature names. |
 | Improve prompts and descriptions | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions, using PixelLab enhance endpoints only when they match the task. |
 | Non-English request support | Translates or normalizes PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in the user's language. |
 | Use images and attachments correctly | Classifies supplied files as edit targets, identity references, style references, concept images, masks, palettes, init/source images, or animation frames instead of guessing one generic role. |
@@ -183,7 +183,7 @@ Supplemental PixelLab technical notes live in [docs/pixellab/](docs/pixellab/). 
 
 Example workflow notes live in [docs/showcase/](docs/showcase/), including prompts, selected routes, outputs, and validation notes for real PixelLab Pip runs.
 
-## Project Layout
+## Repository Layout
 
 ```text
 README.md
