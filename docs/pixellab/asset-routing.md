@@ -14,7 +14,7 @@ Use this as routing guidance, not as a frozen schema. Refresh official docs for 
 |---|---|---|
 | Character, player, NPC, enemy, creature | MCP character tools when configured; REST v2 character endpoints for code or exact control. | Character workflows often involve identity, directions, states, animations, and managed asset IDs. |
 | Character state or outfit/layer change | MCP character-state tools when available; REST v2 state/edit routes when exact control is needed. | Clarify whether the output should preserve identity, change pose/state, or generate a new design. |
-| Character animation | MCP animation tools for managed characters; REST v2 animation endpoints for direct API use. | Ask only when animation type, direction, frame count, or source asset is unclear. |
+| Character animation | MCP animation tools for managed characters; REST v2 animation endpoints for direct API use. | For existing multi-direction characters, default unspecified animation direction to south/down for one preview candidate. Ask or confirm before animating all directions, and do not silently choose a diagonal such as north-west. Ask only when animation type, direction, frame count, or source asset is unclear. |
 | Object, prop, pickup, weapon, furniture | MCP object tools when configured; REST v2 object endpoints for code or exact control. | Infer object for props/items/furniture/weapons; infer character for beings with identity or body animation. |
 | Object animation or object state | MCP object animation/state tools when available; REST v2 object animation/state endpoints for direct API use. | Treat reusable objects differently from one-off generated images. |
 | Top-down terrain tileset | MCP top-down tileset tools or REST v2 tileset endpoints. | Usually means terrain/autotile/Wang-style tileset. |
@@ -44,6 +44,7 @@ Ask a short clarification when one phrase maps to multiple PixelLab workflows:
 - `tiles`: terrain tileset, sidescroller tileset, isometric tile, or tile variants.
 - `map`: whole map, map image, map object, tilemap, tileset, or Map Workshop project.
 - `object`: prop/item/furniture/weapon vs a character-like being.
+- `character animation direction`: default to south/down for the first candidate when direction is unspecified and available; ask if south is unavailable or if the desired gameplay-facing direction matters.
 - `effect`: static sprite vs animated effect, and reusable object vs one-off image.
 - `edit this`: edit target, style reference, identity reference, mask, first frame, or last frame.
 

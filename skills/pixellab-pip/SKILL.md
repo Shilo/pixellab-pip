@@ -42,7 +42,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 
 | User intent | Default route after Surface Rules | REST v2 route when coding/exact control is needed |
 |---|---|---|
-| Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers, and `delete_animation` when explicitly requested. | Character endpoints such as `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state, animation, tags, ZIP/list/get/delete endpoints. |
+| Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers, and `delete_animation` when explicitly requested. For a follow-up animation on an existing multi-direction character, default to the south/down direction for the first candidate when the user does not specify direction; ask or get confirmation before animating all directions. | Character endpoints such as `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state, animation, tags, ZIP/list/get/delete endpoints. |
 | Object, prop, item, pickup, weapon, furniture | MCP `create_1_direction_object`, `create_8_direction_object`, `create_map_object`, object state/animation/review/tag tools. | Object endpoints such as `create-1-direction-object`, `create-8-direction-object`, `map-objects`, object state/animation/tags/list/get/delete endpoints. |
 | Top-down terrain tileset, Wang/autotile/RPG tileset | MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
 | Sidescroller/platformer tileset | MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`, sidescroller tileset endpoints. |
@@ -73,6 +73,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 - "Tiles": ask whether the user wants a terrain/autotile tileset, platformer/sidescroller tileset, or individual tile variants.
 - "Map": ask whether they want a whole map, map object, map image, tileset, isometric tile, or tile variants.
 - "Object/character": infer character for people, NPCs, creatures, body templates, or identity/state animation; infer object for props/items/furniture/weapons. Ask only if unclear.
+- "Character animation direction": if the user asks to add an animation to an existing multi-direction character and does not name a direction, default to `south`/down for one preview candidate. Do not animate north-west, diagonal, or all directions by default. Ask which direction only when `south` is unavailable, the asset's directions are unknown, or the user needs a different gameplay-facing direction. Animate all directions only when the user explicitly asks for all/8 directions, a complete direction set, or approves the larger batch.
 - "Effect": ask static sprite or animated effect when not obvious. If a target sprite/image is supplied and the user asks to add an effect to it, infer a one-off image edit. Ask reusable object/layer vs one-off sprite only when there is no clear edit target or the user asks for a separate asset.
 - "Isometric tileset": ask whether they need one isometric tile or a full tileset, because public docs expose a single isometric tile route.
 - "Paperdoll": gather base, layers, directions, animations, and isolated-vs-composited output; see `references/paperdolling.md`.
@@ -167,13 +168,14 @@ Use browser automation only for visible website/editor/Pixelorama assistance aft
 | Request | Route |
 |---|---|
 | "Setup PixelLab." | Setup mode; diagnose MCP/API intent, credential readiness, and ask before config writes. |
-| "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`. |
+| "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`; if direction is unspecified, animate south/down first and ask before expanding to every direction. |
 | "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; use MCP `create_sidescroller_tileset` if working in an MCP-enabled agent. |
 | "Create a title screen background." | REST v2 image generation with a scene/background prompt; verify the current endpoint and size support from docs. |
 | "Make HUD buttons and a health bar." | REST v2 `generate-ui-v2`. |
 | "Convert this image to pixel art and remove the background." | REST v2 `image-to-pixelart-pro`, then `remove-background`. |
 | "Inpaint this masked area." | REST v2 `inpaint` or `inpaint-v3` after checking current docs and inputs. |
 | "Add a wind dash effect to this runner sprite." | REST v2 `edit-image`; preserve the runner as the target image and add the effect to the same canvas. |
+| "Add a walking animation." after creating an 8-direction character | MCP `animate_character` for south/down first unless the user asks for all directions. |
 | "Make an 8-direction treasure chest object." | MCP `create_8_direction_object`; REST v2 `create-8-direction-object` for code. |
 | "Make hex terrain tiles." | MCP `create_tiles_pro`, not top-down Wang tileset. |
 | "Use `/tilesets/create` with my browser token." | Do not use it; route to public MCP/REST tileset tools or manual website use. |
