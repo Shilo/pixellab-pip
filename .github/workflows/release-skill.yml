@@ -1,0 +1,176 @@
+name: Release Skill
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Bump version and release skill
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure branch dispatch
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_TYPE}" != "branch" ]; then
+            echo "This workflow must be run from a branch."
+            exit 1
+          fi
+
+      - name: Find previous tag
+        id: previous_tag
+        shell: bash
+        run: |
+          previous_tag="$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 2>/dev/null || true)"
+          echo "previous_tag=${previous_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump JSON versions
+        id: bump
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+
+          const root = process.cwd();
+          const skillName = "pixellab-pip";
+          const skillDir = path.join(root, "skills", skillName);
+          const manifests = [
+            { file: ".claude-plugin/marketplace.json", versionPaths: [["plugins", 0, "version"]] },
+            { file: ".claude-plugin/plugin.json", versionPaths: [["version"]] },
+            { file: ".codex-plugin/plugin.json", versionPaths: [["version"]] },
+            { file: ".cursor-plugin/plugin.json", versionPaths: [["version"]] },
+            { file: ".github/plugin/marketplace.json", versionPaths: [["plugins", 0, "version"]] },
+            { file: "gemini-extension.json", versionPaths: [["version"]] },
+            { file: "plugin.json", versionPaths: [["version"]] },
+          ];
+
+          if (!fs.existsSync(skillDir) || !fs.statSync(skillDir).isDirectory()) {
+            throw new Error(`Expected skill folder at skills/${skillName}`);
+          }
+
+          const files = manifests.map((manifest) => {
+            const fullPath = path.join(root, manifest.file);
+            if (!fs.existsSync(fullPath)) {
+              throw new Error(`Expected manifest file at ${manifest.file}`);
+            }
+
+            return {
+              ...manifest,
+              fullPath,
+              data: JSON.parse(fs.readFileSync(fullPath, "utf8")),
+            };
+          });
+
+          function getPath(value, pathParts, file) {
+            let current = value;
+            for (const part of pathParts) {
+              if (current == null || !(part in current)) {
+                throw new Error(`Missing version path ${pathParts.join(".")} in ${file}`);
+              }
+              current = current[part];
+            }
+            return current;
+          }
+
+          function setPath(value, pathParts, newVersion) {
+            let current = value;
+            for (const part of pathParts.slice(0, -1)) {
+              current = current[part];
+            }
+            current[pathParts[pathParts.length - 1]] = newVersion;
+          }
+
+          function bumpVersion(version) {
+            const [major, minor] = version.split(".").map(Number);
+            if (minor + 1 >= 10) {
+              return `${major + 1}.0.0`;
+            }
+
+            return `${major}.${minor + 1}.0`;
+          }
+
+          const versions = [
+            ...new Set(files.flatMap(({ data, file, versionPaths }) =>
+              versionPaths.map((versionPath) => getPath(data, versionPath, file))
+            )),
+          ];
+
+          if (versions.length !== 1) {
+            throw new Error(`Expected exactly one current JSON version, found: ${versions.join(", ") || "none"}`);
+          }
+
+          const oldVersion = versions[0];
+          const newVersion = bumpVersion(oldVersion);
+          const updatedFiles = [];
+
+          for (const item of files) {
+            for (const versionPath of item.versionPaths) {
+              setPath(item.data, versionPath, newVersion);
+            }
+
+            fs.writeFileSync(item.fullPath, `${JSON.stringify(item.data, null, 2)}\n`);
+            updatedFiles.push(item.file);
+          }
+
+          if (updatedFiles.length === 0) {
+            throw new Error("No JSON version fields were updated.");
+          }
+
+          fs.mkdirSync(path.join(root, "dist"), { recursive: true });
+          fs.writeFileSync(path.join(root, "dist", "updated-files.txt"), `${updatedFiles.join("\n")}\n`);
+
+          const output = fs.createWriteStream(process.env.GITHUB_OUTPUT, { flags: "a" });
+          output.write(`old_version=${oldVersion}\n`);
+          output.write(`new_version=${newVersion}\n`);
+          output.write(`tag=v${newVersion}\n`);
+          output.write(`skill_name=${skillName}\n`);
+          output.end();
+
+          console.log(`Bumped ${oldVersion} -> ${newVersion}`);
+          console.log(`Updated JSON files: ${updatedFiles.join(", ")}`);
+          NODE
+
+      - name: Build skill archive
+        shell: bash
+        run: |
+          mkdir -p dist
+          cd skills
+          zip -r "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" "${{ steps.bump.outputs.skill_name }}"
+          zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^${{ steps.bump.outputs.skill_name }}/SKILL.md$'
+          ! zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^skills/'
+
+      - name: Commit version bump
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mapfile -t updated_files < dist/updated-files.txt
+          git add -- "${updated_files[@]}"
+          git commit -m "Release ${{ steps.bump.outputs.tag }}"
+          git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
+          git push --atomic origin "HEAD:refs/heads/${GITHUB_REF_NAME}" "${{ steps.bump.outputs.tag }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          notes_args=(--generate-notes)
+          if [ -n "${{ steps.previous_tag.outputs.previous_tag }}" ]; then
+            notes_args+=(--notes-start-tag "${{ steps.previous_tag.outputs.previous_tag }}")
+          fi
+
+          gh release create "${{ steps.bump.outputs.tag }}" \
+            "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" \
+            --title "${{ steps.bump.outputs.skill_name }} ${{ steps.bump.outputs.tag }}" \
+            "${notes_args[@]}" \
+            --verify-tag

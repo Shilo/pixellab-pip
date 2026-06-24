@@ -147,6 +147,8 @@ Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin 
 
 Manual install is useful for project-local setup or agent apps that support raw Agent Skills without plugin installation. Copy the contents of `skills/pixellab-pip/` into a folder named `pixellab-pip` inside your agent's skills directory, so `SKILL.md` is directly inside the final folder.
 
+You can also download the skill zip from the [latest release](https://github.com/Shilo/pixellab-pip/releases/latest) and extract it into your agent's skills directory.
+
 ```text
 .agents/skills/pixellab-pip/SKILL.md
 .claude/skills/pixellab-pip/SKILL.md
