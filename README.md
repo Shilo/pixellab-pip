@@ -38,6 +38,7 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 | Current docs and SDK checks | Tells agents when to refresh official PixelLab docs, OpenAPI schemas, MCP docs, SDK coverage, auth setup, pricing, limits, model labels, or endpoint fields before making exact claims. |
 | Clear generation reports | Reports the PixelLab tool or endpoint used, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, credit/balance delta when available, and verification status. |
 | PixelLab terminology support | Explains confusing labels such as `Pro`, `v3`, `new`, `create tiles`, `create tileset`, Pixen, PixFlux, BitForge, and PixPatch at the documented product level. |
+| Agent-agnostic | Works with any agent that supports Agent Skills. |
 
 ## Install
 
@@ -93,6 +94,8 @@ Install:
 gemini extensions install https://github.com/Shilo/pixellab-pip
 ```
 
+Gemini uses `gemini-extension.json` for installation and `GEMINI.md` for invocation context. Both point back to the same skill contract in `skills/pixellab-pip/SKILL.md`.
+
 Update:
 
 ```text
@@ -121,10 +124,6 @@ Use Cursor's plugin marketplace or team marketplace flow when available, or inst
 #### VS Code Agent Plugins
 
 Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin marketplace flow.
-
-PixelLab Pip is agent-agnostic. It can be used by any agent app that supports Agent Skills or compatible plugin/extension wrappers.
-
-Gemini uses `gemini-extension.json` for installation and `GEMINI.md` for invocation context. Gemini extensions are not native Agent Skills plugins, so those files adapt Gemini to the same Pip instructions in `skills/pixellab-pip/SKILL.md`.
 
 ### Manual Skill Install
 
