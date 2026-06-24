@@ -18,6 +18,7 @@ When images are visible to the agent, inspect them and write task-relevant facts
 | "Use this rough design" | Concept image | Use the image as a design idea or sketch; text can reinterpret it. | `concept_image` in `generate-ui-v2`; `concept_image` with `method=create_from_concept` in `create-character-pro`. |
 | "Start from this and transform it" | Init/source image | The supplied image is the starting state to modify, not merely inspiration. | `init_image` in PixFlux, BitForge, and map object routes. |
 | "Edit/convert this image" | Target image | This is the image being edited, converted, resized, pixelated, or inpainted. | `image` in `edit-image`, `image-to-pixelart`, `image-to-pixelart-pro`; `edit_images` in `edit-images-v2`; `inpainting_image` for BitForge/inpaint targets; pair with `mask_image` only when the user supplies an edit-area mask. |
+| "Add an effect/trail/aura to this sprite" | Target image | The supplied image is the canvas to preserve and augment. Add the requested VFX to the existing sprite/image rather than generating a separate object, unless the user explicitly asks for a reusable layer or isolated effect asset. | `image` in `edit-image`; `edit_images` in `edit-images-v2` for multi-image edits. |
 | "Match these colors" | Palette reference | Extract or force colors from the supplied image/palette, not its subject. | `color_image`, `color_palette`. |
 | "Animate from/to these frames" | Frame reference | The image is an animation boundary or motion anchor. | `first_frame`, `last_frame`, character south frame for animation prompt enhancement. |
 | "Match this terrain/tile" | Terrain/tile style reference | Copy style/material/shape for a terrain layer, transition, or tile variant. | `lower_reference_image`, `upper_reference_image`, `transition_reference_image`, `style_images` in `create-tiles-pro`. |
@@ -62,6 +63,8 @@ When images are visible to the agent, inspect them and write task-relevant facts
 - `edit-image`
   - `image`: target image to edit.
   - `color_image`: style/color guide.
+  - Use for additive sprite effects such as motion streaks, slashes, dust, aura, impact arcs, and wind trails when the user supplies the sprite to modify.
+  - Output is a whole edited image. If the user needs an isolated reusable effect layer, ask before choosing separate object/image generation or post-processing extraction.
 - `edit-images-v2`
   - `edit_images`: targets to edit.
   - `method`: `edit_with_text` or `edit_with_reference`.

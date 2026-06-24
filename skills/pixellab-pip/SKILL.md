@@ -62,7 +62,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Map image, generated level image, visual map concept | REST v2 image/background route; website for map extension/texture workflows. | No full public REST/MCP map CRUD, map extension, or map texture surface was documented. |
 | Map object | MCP `create_map_object` plus `get_map_object` by default. | `POST /map-objects`; MCP map objects auto-delete after 8 hours. Verify current REST result and polling behavior from OpenAPI before writing code. |
 | Whole map, Map Workshop, map CRUD/export | Website manually, or generate components with MCP/REST. | No full public REST/MCP map CRUD surface was documented in the research. |
-| Static effect or VFX sprite | REST v2 image/object route depending whether it should be a reusable object. | No standalone public VFX endpoint was documented. |
+| Static effect or VFX sprite | REST v2 image/edit route. When a target sprite/image is supplied and the user asks to add, draw, overlay, or apply an effect/trail/aura/impact, treat the supplied image as the edit target and use REST image edit. Use object/image generation only when the user asks for a separate reusable effect asset/layer or no target image is supplied. | No standalone public VFX endpoint was documented. PixelLab edit routes return a whole edited image, not an isolated effect layer. |
 | Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; treat VFX as a description, not a separate endpoint. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | REST v2. | `GET /background-jobs/{job_id}`. MCP managed assets use resource-specific `get_*` tools instead. |
@@ -73,7 +73,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 - "Tiles": ask whether the user wants a terrain/autotile tileset, platformer/sidescroller tileset, or individual tile variants.
 - "Map": ask whether they want a whole map, map object, map image, tileset, isometric tile, or tile variants.
 - "Object/character": infer character for people, NPCs, creatures, body templates, or identity/state animation; infer object for props/items/furniture/weapons. Ask only if unclear.
-- "Effect": ask static sprite or animated effect when not obvious. For static VFX, ask whether it should be a reusable managed object or a one-off sprite.
+- "Effect": ask static sprite or animated effect when not obvious. If a target sprite/image is supplied and the user asks to add an effect to it, infer a one-off image edit. Ask reusable object/layer vs one-off sprite only when there is no clear edit target or the user asks for a separate asset.
 - "Isometric tileset": ask whether they need one isometric tile or a full tileset, because public docs expose a single isometric tile route.
 - "Paperdoll": gather base, layers, directions, animations, and isolated-vs-composited output; see `references/paperdolling.md`.
 - Supplied images are optional unless the chosen route requires image fields. When images are supplied, infer each file's endpoint-specific role from the request; ask only when one file could reasonably be identity, style, concept, edit target, mask, palette, init/source, first frame, or last frame.
@@ -173,6 +173,7 @@ Use browser automation only for visible website/editor/Pixelorama assistance aft
 | "Make HUD buttons and a health bar." | REST v2 `generate-ui-v2`. |
 | "Convert this image to pixel art and remove the background." | REST v2 `image-to-pixelart-pro`, then `remove-background`. |
 | "Inpaint this masked area." | REST v2 `inpaint` or `inpaint-v3` after checking current docs and inputs. |
+| "Add a wind dash effect to this runner sprite." | REST v2 `edit-image`; preserve the runner as the target image and add the effect to the same canvas. |
 | "Make an 8-direction treasure chest object." | MCP `create_8_direction_object`; REST v2 `create-8-direction-object` for code. |
 | "Make hex terrain tiles." | MCP `create_tiles_pro`, not top-down Wang tileset. |
 | "Use `/tilesets/create` with my browser token." | Do not use it; route to public MCP/REST tileset tools or manual website use. |
