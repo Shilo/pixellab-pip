@@ -18,7 +18,7 @@ For a standalone `setup` after skill invocation, treat the setup mode as `unknow
 
 `/pixellab-pip setup` behaves like a beginner-friendly wizard, not a static help page. Start from the next safest action, recommend MCP first, and ask only the shortest question needed to continue.
 
-When the assistant app exposes an interactive choice prompt, use it for setup-mode selection instead of a prose-only question. Claude Code may show its `AskUserQuestion` UI. In Codex app, use `request_user_input` when that tool is available; otherwise ask in normal chat. Keep it optional so CLI/noninteractive agents still work.
+When the assistant app exposes an interactive choice prompt, use it for setup-mode selection instead of a prose-only question. Claude Code may show its `AskUserQuestion` UI. In Codex app, use `request_user_input` only when that tool is actually available, typically in Plan mode. Codex full-access/sandbox settings do not imply `request_user_input` availability. If Codex is in normal chat/default mode or the tool is not exposed, ask in normal chat. Keep this optional so CLI/noninteractive agents still work.
 
 For a bare setup command, mode selection is mandatory before any MCP/API-specific setup. Do not ask yes/no questions such as "Should I prepare a Codex MCP config preview?" before the user chooses MCP, API, or Manual. Do not inspect config, prepare write previews, or request write approval until the mode is chosen. A brief readiness note is allowed, but the next user-facing question must be the setup-mode choice.
 
