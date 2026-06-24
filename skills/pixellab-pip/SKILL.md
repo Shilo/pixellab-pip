@@ -91,6 +91,7 @@ Read only the relevant reference:
 - Non-English or mixed-language user requests and response-language handling: `references/localization.md`.
 - Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
+- Local animation preview GIFs, spritesheets, or ImageMagick/`magick` assembly from generated frames: `references/local-asset-assembly.md`.
 
 Optional broader docs: in full plugin/repo installs, these paths resolve relative to this `SKILL.md`; raw skill installs may omit them. If runtime `references/` are not enough, read at most one matching file if it exists. If absent, continue with `references/official-docs.md` and current official PixelLab docs; do not search or load the set.
 
@@ -118,22 +119,6 @@ Do not invent provider internals where PixelLab docs are silent.
 Prompt enhancement is opt-out. For natural-language request parameters such as `description`, `style_description`, `negative_description`, `lower_description`, `upper_description`, `transition_description`, `edit_description`, `action`, `action_description`, `animation_description`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the user's request and any visible inputs before calling a tool.
 
 Use REST `enhance-pixen-prompt` for Pixen image prompts, `enhance-character-v3-prompt` for character v3 prompts, and `enhance-animation-v3-prompt` for animation v3 actions with `first_frame` and optional `last_frame`. For other tools, enhance directly as the agent; do not force a nonmatching enhance endpoint.
-
-## Local Asset Assembly
-
-When turning PixelLab animation frames into a local preview GIF, treat transparent pixel art as a disposal-sensitive format. If using ImageMagick `magick`, put animation settings before the input frames so they apply to every frame, for example:
-
-```powershell
-magick -delay 12 -dispose Previous -loop 0 "frame-*.png" "preview.gif"
-```
-
-Use `-dispose Previous` by default for transparent sprite previews. `-dispose Background` is acceptable only after verifying the viewer/rendered output does not leave trails. Do not put `-delay`, `-dispose`, or `-loop` only after the input frames, because ImageMagick may emit frames with `Dispose: Undefined`, causing past transparent frames to accumulate visually.
-
-After creating a GIF preview from source PNG frames, verify it before reporting success:
-
-1. Inspect metadata with `magick identify -verbose preview.gif` and confirm each frame has the intended delay and a non-undefined disposal method.
-2. Coalesce the GIF back into frames with `magick preview.gif -coalesce "check-%02d.png"`.
-3. Compare coalesced frames to the source PNGs, for example `magick compare -metric AE source.png check.png null:`, and investigate any unexpected nonzero pixel differences.
 
 ## Do Not Use
 
