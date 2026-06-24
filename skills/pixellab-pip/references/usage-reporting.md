@@ -8,6 +8,7 @@ After every live PixelLab call, report:
 - Tool or endpoint.
 - Prompt/description prep method: user wording preserved, agent-enhanced, or PixelLab enhance endpoint.
 - Final natural-language parameter values used, summarized when long.
+- Key non-secret, non-file controls that materially affect the result, especially user-set or inferred values for size/canvas/tile size, view/direction/direction count, mode/method/product label, seed, count, outline/detail/shading/background, frame count/timing, image roles by filename or asset ID, masks, and reused base/asset IDs. Do not dump every default.
 - Product/mode/model label requested by the user or returned by PixelLab, if any; do not infer provider internals.
 - Job, asset, or result IDs.
 - Output paths or URLs.
