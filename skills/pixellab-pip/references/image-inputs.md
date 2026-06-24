@@ -69,9 +69,10 @@ When images are visible to the agent, inspect them and write task-relevant facts
   - No mask input or layer output was documented.
 - `image-to-pixelart` / `image-to-pixelart-pro`
   - `image`: target image to convert, not a style reference.
+  - Treat "same size", "exact size", "exact resolution", and similar wording as a fixed output-size request; inspect the input image dimensions when the size is implied.
   - If no fixed output size is requested, prefer `image-to-pixelart-pro`.
   - If fixed output size is requested and fits current `image-to-pixelart` `output_size` limits, use normal `image-to-pixelart`.
-  - If requested size is outside current `output_size` limits, use Pro, verify dimensions, then warn and ask before PixelLab `resize` or local nearest-neighbor/canvas resize/pad/crop.
+  - If requested size is outside current `output_size` limits, warn that Pro cannot guarantee exact dimensions before spending credits. If the user proceeds, use Pro, verify dimensions, then ask before PixelLab `resize` or local nearest-neighbor/canvas resize/pad/crop.
 - `animate-with-text-v3`
   - `first_frame`: required starting frame.
   - `last_frame`: optional ending frame for interpolation/guidance.
