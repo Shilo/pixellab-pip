@@ -29,6 +29,7 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 |---|---|
 | Easy PixelLab workflow | Lets users ask for assets in plain language without knowing PixelLab tool names, endpoint names, modes, or editor differences. |
 | Smart tool selection | Chooses between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
+| Guided PixelLab setup | Helps agents set up MCP/API access, diagnose missing auth, and configure only what the user approves without reading or printing the secret value. |
 | Answer PixelLab questions | Explains setup, auth, docs, SDKs, troubleshooting, and confusing feature names. |
 | Improve prompts and descriptions | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions, using PixelLab enhance endpoints only when they match the task. |
 | Non-English request support | Translates or normalizes PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in the user's language. |
@@ -163,10 +164,12 @@ If your agent app namespaces plugin skills, use the name it shows, such as `pixe
 Example prompt:
 
 ```text
+/pixellab-pip setup
+@pixellab-pip setup
 /pixellab-pip make a cute knight character sprite
 ```
 
-Implicit invocation should also work when an agent sees PixelLab/Pip context plus asset words such as "create an image", "make a sprite", "draw a character", "generate a tileset", "animate this", "edit this image", "use PixelLab MCP", "call the REST API", or "check PixelLab docs". Explicit invocation is still recommended when you want Pip used for sure.
+Implicit invocation should also work when an agent sees PixelLab/Pip context plus setup or asset words such as "setup PixelLab", "configure PixelLab MCP", "connect the PixelLab API", "create an image", "make a sprite", "draw a character", "generate a tileset", "animate this", "edit this image", "use PixelLab MCP", "call the REST API", or "check PixelLab docs". Explicit invocation is still recommended when you want Pip used for sure.
 
 ## Authentication
 
@@ -214,6 +217,7 @@ Runtime files:
 
 - `skills/pixellab-pip/SKILL.md` - the canonical skill file.
 - `skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
+- `skills/pixellab-pip/references/setup.md` - natural-language setup mode for MCP/API/auth after install.
 - `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
 - `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
 - `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.

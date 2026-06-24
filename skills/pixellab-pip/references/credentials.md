@@ -37,6 +37,8 @@ Never ask the user to paste the bearer token into chat. Never use website/Supaba
 
 When checking MCP config files for credential setup, inspect only the specific config paths referenced by the user. Do not scan broad home/auth/config directories because tool output can leak secrets.
 
+Before writing environment settings, keychain/secret-store entries, MCP host config, `.env.local`, shell profiles, or project files, follow `references/setup.md`: explain the destination, show a token-free preview or secret reference, and get explicit approval.
+
 Fallback order:
 
 1. User-scoped OS environment variable or MCP host secret/env config.

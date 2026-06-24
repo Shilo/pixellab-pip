@@ -1,6 +1,6 @@
 ---
 name: pixellab-pip
-description: Use for PixelLab or PixelLab Pip intents to create, generate, draw, make, edit, convert, animate, upscale, remove backgrounds, route, or troubleshoot pixel-art/game-asset workflows across MCP, REST/API v2, website/editor Pixelorama, Aseprite, and legacy v1. Trigger on sprites, sprite sheets, characters, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, bearer-token auth, docs, endpoint/tool choice, SDK integration, troubleshooting, or vibe-coding. Use for generic asset wording only when the project/conversation implies PixelLab. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
+description: Use for PixelLab or PixelLab Pip intents to setup, configure, connect, install, verify auth, create, generate, draw, make, edit, convert, animate, upscale, remove backgrounds, route, or troubleshoot pixel-art/game-asset workflows across MCP, REST/API v2, website/editor Pixelorama, Aseprite, and legacy v1. Trigger on PixelLab setup, MCP setup, API setup, PIXELLAB_SECRET, bearer-token auth, sprites, sprite sheets, characters, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, docs, endpoint/tool choice, SDK integration, troubleshooting, or vibe-coding. Use for generic asset wording only when the project/conversation implies PixelLab. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
 ---
 
 # PixelLab Pip
@@ -10,11 +10,13 @@ Classify the user's asset, API, or question intent first, then choose the suppor
 ## Workflow
 
 1. Classify the request:
-   `question | create asset | edit/transform | animate | prompt_enhancement | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance`.
+   `question | setup | create asset | edit/transform | animate | prompt_enhancement | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance`.
+   Treat a standalone `setup` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip setup`, as setup intent. If a host exposes structured arguments, use them only as another way to read the same natural-language intent.
 2. Classify the target asset or surface:
    `general_image | background | character | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
 3. Choose the surface:
    use hosted MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
+   For setup intent, read `references/setup.md` and configure only what the user approves.
 4. Use MCP only if PixelLab MCP tools are available, either bare or prefixed. If MCP is unavailable, route to the matching REST v2 endpoint when one is documented. If MCP and REST v2 are both unavailable or fail, explain why before using any non-PixelLab fallback.
    If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
 5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
@@ -80,6 +82,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 Read only the relevant reference:
 
 - Bearer-token setup, PixelLab UI naming, and MCP auth reuse: `references/credentials.md`.
+- Natural-language setup mode for MCP/API/auth after install: `references/setup.md`.
 - Browser fallback and website automation boundaries: `references/browser-fallback.md`.
 - Paperdolling and layered character workflows: `references/paperdolling.md`.
 - Tileset and tile-variant details: `references/tilesets.md`.
@@ -163,6 +166,7 @@ Use browser automation only for visible website/editor/Pixelorama assistance aft
 
 | Request | Route |
 |---|---|
+| "Setup PixelLab." | Setup mode; diagnose MCP/API intent, credential readiness, and ask before config writes. |
 | "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`. |
 | "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; use MCP `create_sidescroller_tileset` if working in an MCP-enabled agent. |
 | "Create a title screen background." | REST v2 image generation with a scene/background prompt; verify the current endpoint and size support from docs. |
