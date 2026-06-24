@@ -155,6 +155,7 @@ Recommended explicit trigger:
 
 ```text
 /pixellab-pip
+@pixellab-pip
 ```
 
 If your agent app namespaces plugin skills, use the name it shows, such as `pixellab-pip:pixellab-pip`.
