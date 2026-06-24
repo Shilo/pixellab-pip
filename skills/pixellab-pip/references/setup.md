@@ -200,15 +200,31 @@ Do not scan broad home, auth, shell history, keychain, credential, config, proje
 
 Keep setup wording friendly, action-oriented, agent-agnostic, and OS-agnostic by default. Prefer "Next step" language over long diagnostic inventories. Avoid jargon such as "host"; say "assistant", "editor", "app", or the named product.
 
+Required setup output:
+
+- If `PIXELLAB_SECRET` is missing, unknown, or mentioned as something the user must configure, always include the PixelLab account link: `https://www.pixellab.ai/account`.
+- In the same sentence or bullet as that link, tell the user to sign in and copy the value labeled `Secret`.
+- Tell the user to store that Secret locally as `PIXELLAB_SECRET`, without pasting it into chat.
+- If the response proposes or reports MCP config while the Secret is still missing, include both next steps: configure/register MCP and separately set `PIXELLAB_SECRET` from the account page.
+- If setup writes or registers MCP successfully but the Secret is still missing from the current session, say PixelLab is registered but not ready for live use until `PIXELLAB_SECRET` is set and the app is reloaded.
+
 Good user-facing setup output:
 
 - "I recommend MCP first because it lets your assistant/editor use PixelLab tools directly."
 - "Which setup do you want: MCP, API, or Manual?"
 - "Manual means I will open PixelLab's MCP setup page, you pick your app there, and I stop."
-- "I will not ask you to paste the Secret here."
+- "Open `https://www.pixellab.ai/account`, sign in, copy the value labeled `Secret`, and store it locally as `PIXELLAB_SECRET`. Do not paste it here."
 - "Token setup options are app secret settings, OS environment-variable UI, a hidden prompt, a private `.pixellab` file, or a normal external terminal command if you accept shell-history tradeoffs."
 - "Before I write anything, I will show a preview that uses `PIXELLAB_SECRET` instead of your token."
 - "I can verify with a no-credit balance check if you approve."
+
+Client-specific output notes:
+
+- Codex MCP preview: include the token-free `codex mcp add ... --bearer-token-env-var PIXELLAB_SECRET` command, then immediately include the account page step for getting the `Secret` if `PIXELLAB_SECRET` is missing or unknown.
+- Codex MCP registered: report the registered MCP endpoint, then say whether `PIXELLAB_SECRET` is visible in this session. If it is missing, link `https://www.pixellab.ai/account` and tell the user to copy `Secret`, store it as `PIXELLAB_SECRET`, and restart/reload Codex before live use.
+- Claude Code MCP blocked fallback: include the account page step before any user-run hardcoded-token command option, because the user must copy `Secret` from the account page to use that option.
+- API setup: include the account page step before language/runtime examples unless `PIXELLAB_SECRET` is already present.
+- Manual setup: link `https://www.pixellab.ai/mcp` for app instructions and also link `https://www.pixellab.ai/account` for the `Secret` if auth/token setup is part of the user's request.
 
 Avoid config-first output for beginners. Do not show OS-specific, shell-specific, package-manager, SDK, or programming-language setup commands unless the user named that platform or asked for that manual path.
 
