@@ -11,6 +11,8 @@ User-facing setup wording:
 - If the user chooses Manual setup, open or link to `https://www.pixellab.ai/mcp`, tell them to pick their app there, and stop.
 - The PixelLab API/account UI may label this value as an API key, API token, or secret.
 - Do not paste the value into chat.
+- Do not put the value in an assistant shell escape such as Claude Code `!`.
+- Prefer app/OS secret settings, environment-variable UI, secret stores, or hidden prompts over literal-token shell commands that can be saved in shell history.
 
 Use the bearer token as:
 
@@ -37,6 +39,8 @@ If PixelLab MCP is already configured, reuse its credential source when safe:
 - If the MCP config contains a literal `Authorization: Bearer ...` value, do not extract, print, or copy it. Suggest moving it to env/secret config.
 
 Never ask the user to paste the bearer token into chat. Never print, echo, log, summarize, measure, transform, or validate token values. Never use website/Supabase session tokens for REST or MCP.
+
+Never suggest `! setx ...`, `! export ...`, or similar assistant-shell commands that include a literal token. Even when a command is executed by the user's local shell, the command text may still be visible to the assistant session, saved in transcripts/logs, or preserved in command history. Do not present literal-token shell commands such as `setx PIXELLAB_SECRET "actual-secret"` or `export PIXELLAB_SECRET="actual-secret"` as the safest default; prefer secret UIs, secret stores, or hidden prompts.
 
 When checking MCP config files for credential setup, inspect only the specific config paths referenced by the user or approved after a token-free explanation. Do not scan broad home/auth/config directories, shell history, keychains, project trees, or existing `.env*` files because tool output can leak secrets.
 

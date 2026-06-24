@@ -52,6 +52,8 @@ PixelLab uses one account-level bearer token for public REST v2 and PixelLab MCP
 
 Tell the user to open `https://www.pixellab.ai/account` after signing in and copy the value labeled `Secret`. Never ask the user to paste the bearer token into chat. Never print, echo, log, summarize, transform, validate, measure, or copy a token value from chat or config output. If a token appears in chat or tool output, do not repeat it.
 
+Do not tell users to run secret-setting commands through an assistant chat, slash-command argument, or Claude Code `!` shell command with the literal Secret value. Commands typed into assistant UIs can appear in chat history, transcripts, debug logs, command history, or tool output. Do not recommend literal-token shell commands such as `setx PIXELLAB_SECRET "actual-secret"` or `export PIXELLAB_SECRET="actual-secret"` as the safest default either, because normal shell history may preserve them. Prefer app secret settings, OS environment-variable UI, secret stores, or hidden prompts that do not put the token in the command text.
+
 Preferred storage order:
 
 1. Assistant/editor/app secret settings, app secret store, or user-scoped OS environment variable named `PIXELLAB_SECRET`.
@@ -112,7 +114,8 @@ For automatic API setup:
 - Provide language/platform examples only after the user names the language, framework, deployment platform, SDK, or runtime.
 - Do not assume shell, OS, package manager, or SDK availability.
 - Do not hard-code token literals or generate commands that echo the secret.
-- Avoid commands that persist secrets in shell history.
+- Avoid commands that persist secrets in shell history, including literal-token `setx`, `export`, `$env:`, or `ENV=value command` examples.
+- Do not prefix secret-setting commands with assistant shell escapes such as Claude Code `!`; the command text can become part of the assistant session.
 - Reuse the same `PIXELLAB_SECRET` source as MCP when mode is `both`.
 - Verify with REST `GET /balance` only after user approval, without printing auth headers or full JSON.
 
@@ -210,6 +213,8 @@ For setup help, report only what helps the user proceed:
 ## What Not To Do
 
 - Do not ask for, paste, print, echo, log, quote, summarize, measure, or transform the bearer token.
+- Do not suggest `! setx ...`, `! export ...`, or any assistant-shell command that includes the literal Secret value.
+- Do not present literal-token shell commands as the safest default for manual setup; prefer secret UIs, secret stores, or hidden prompts.
 - Do not use website/Supabase/browser session tokens for REST or MCP.
 - Do not scrape browser storage or session cookies.
 - Do not call undocumented website endpoints as setup verification.
