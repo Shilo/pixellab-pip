@@ -27,8 +27,8 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 
 | Feature | What Pip helps with |
 |---|---|
-| Create and edit game art | Helps agents create characters, objects, tilesets, tiles, maps, UI, backgrounds, icons, image edits, animations, and VFX. |
-| Pick the right PixelLab tool | Chooses hosted MCP for managed agent assets, REST v2 for direct API/code/batch control, website/editor flows for visible work, Aseprite or Pixelorama for editor workflows, and legacy v1 only when needed. |
+| Easy PixelLab workflow | Lets users ask for assets in plain language without knowing PixelLab tool names, endpoint names, modes, or editor differences. |
+| Smart tool selection | Chooses between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
 | Answer PixelLab questions | Answers questions about PixelLab tools, endpoints, docs, setup, auth, SDKs, model labels, troubleshooting, and confusing feature names. |
 | Improve prompts and descriptions | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions, using PixelLab enhance endpoints only when they match the task. |
 | Non-English request support | Translates or normalizes PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in the user's language. |
