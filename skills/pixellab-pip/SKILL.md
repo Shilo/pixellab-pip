@@ -1,6 +1,6 @@
 ---
 name: pixellab-pip
-description: PixelLab Pip is an assistant for creating, drawing, generating, editing, animating, and answering PixelLab asset/API questions across MCP, REST v2, website/editor Pixelorama, Aseprite, and legacy v1. Use for PixelLab or pixel-art game-asset requests about sprites, sprite sheets, characters, objects, tilesets, tilemaps, tiles, maps, UI, icons, backgrounds, palettes, image edits, animations, SDK/API integration, bearer-token auth, MCP setup, endpoint/tool choice, docs, troubleshooting, or vibe-coding.
+description: PixelLab Pip helps agents create, generate, draw, edit, animate, route, and troubleshoot PixelLab game-asset and API workflows across MCP, REST v2, website/editor Pixelorama, Aseprite, and legacy v1. Use when the user mentions PixelLab or PixelLab Pip; asks to create, generate, draw, make, edit, convert, animate, upscale, remove background, or route pixel-art game assets such as sprites, sprite sheets, characters, objects, tilesets, tilemaps, tiles, maps, UI, icons, backgrounds, palettes, image edits, or animations in a PixelLab-intended project/conversation; or asks about PixelLab MCP, REST/API, bearer-token auth, docs, endpoint/tool choice, SDK integration, troubleshooting, or vibe-coding. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests that do not imply PixelLab.
 ---
 
 # PixelLab Pip

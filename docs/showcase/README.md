@@ -1,8 +1,6 @@
 # PixelLab Pip Showcase
 
-Purpose: document real PixelLab Pip example workflows after they are run.
-
-Planned first example: use Pip to route and generate a Pixel Pup icon for this skill.
+This folder documents real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
 Each showcase should include:
 

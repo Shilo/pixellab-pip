@@ -53,50 +53,74 @@ Install PixelLab Pip from https://github.com/Shilo/pixellab-pip using the proper
 
 Install PixelLab Pip as a plugin or extension when your agent supports marketplaces. Use manual skill install only when your agent does not support plugin installation.
 
-<table>
-  <thead>
-    <tr>
-      <th>Agent app</th>
-      <th>Install</th>
-      <th>Update</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Claude Code</td>
-      <td><pre><code>/plugin marketplace add Shilo/pixellab-pip
-/plugin install pixellab-pip@pixellab-pip</code></pre></td>
-      <td><pre><code>/plugin marketplace update pixellab-pip
-/plugin update pixellab-pip</code></pre></td>
-    </tr>
-    <tr>
-      <td>Codex</td>
-      <td><pre><code>codex plugin marketplace add Shilo/pixellab-pip</code></pre>Install <code>pixellab-pip</code> from <code>/plugins</code> or the Codex plugin directory.</td>
-      <td><pre><code>codex plugin marketplace upgrade pixellab-pip</code></pre></td>
-    </tr>
-    <tr>
-      <td>Gemini CLI</td>
-      <td><pre><code>gemini extensions install https://github.com/Shilo/pixellab-pip</code></pre></td>
-      <td><pre><code>gemini extensions update pixellab-pip</code></pre></td>
-    </tr>
-    <tr>
-      <td>GitHub Copilot CLI</td>
-      <td><pre><code>copilot plugin marketplace add Shilo/pixellab-pip
-copilot plugin install pixellab-pip@pixellab-pip</code></pre></td>
-      <td><pre><code>copilot plugin update pixellab-pip</code></pre></td>
-    </tr>
-    <tr>
-      <td>Cursor</td>
-      <td>Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.</td>
-      <td>Refresh/update the Cursor marketplace entry or reinstall manually.</td>
-    </tr>
-    <tr>
-      <td>VS Code agent plugins</td>
-      <td>Use <strong>Chat: Install Plugin From Source</strong> with this repo URL or VS Code's plugin marketplace flow.</td>
-      <td>Use VS Code's plugin update flow.</td>
-    </tr>
-  </tbody>
-</table>
+#### Claude Code
+
+Install:
+
+```text
+/plugin marketplace add Shilo/pixellab-pip
+/plugin install pixellab-pip@pixellab-pip
+```
+
+Update:
+
+```text
+/plugin marketplace update pixellab-pip
+/plugin update pixellab-pip
+```
+
+#### Codex
+
+Install:
+
+```text
+codex plugin marketplace add Shilo/pixellab-pip
+```
+
+Then install `pixellab-pip` from `/plugins` or the Codex plugin directory.
+
+Update:
+
+```text
+codex plugin marketplace upgrade pixellab-pip
+```
+
+#### Gemini CLI
+
+Install:
+
+```text
+gemini extensions install https://github.com/Shilo/pixellab-pip
+```
+
+Update:
+
+```text
+gemini extensions update pixellab-pip
+```
+
+#### GitHub Copilot CLI
+
+Install:
+
+```text
+copilot plugin marketplace add Shilo/pixellab-pip
+copilot plugin install pixellab-pip@pixellab-pip
+```
+
+Update:
+
+```text
+copilot plugin update pixellab-pip
+```
+
+#### Cursor
+
+Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.
+
+#### VS Code Agent Plugins
+
+Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin marketplace flow.
 
 PixelLab Pip is agent-agnostic. It can be used by any agent app that supports Agent Skills or compatible plugin/extension wrappers.
 
@@ -158,7 +182,7 @@ Supplemental PixelLab technical notes live in [docs/pixellab/](docs/pixellab/). 
 
 ## Showcase
 
-Future examples and generated showcase notes will live in [docs/showcase/](docs/showcase/). The first planned showcase is using Pip to route and generate its own Pixel Pup icon.
+Example workflow notes live in [docs/showcase/](docs/showcase/), including prompts, selected routes, outputs, and validation notes for real PixelLab Pip runs.
 
 ## Project Layout
 
