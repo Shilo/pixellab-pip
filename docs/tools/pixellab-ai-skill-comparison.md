@@ -1,6 +1,6 @@
 # PixelLab AI Skill Comparison
 
-Last reviewed: 2026-06-23.
+Last reviewed: 2026-06-24.
 
 This compares PixelLab Pip with the unofficial [PixelLab AI Skill](https://clawhub.ai/uncmatteth/skills/pixellab-ai) on ClawHub. The goal is to understand adjacent tooling, not to copy its implementation.
 
@@ -17,7 +17,7 @@ PixelLab AI Skill is a production-workflow skill for creating PixelLab asset pac
 
 PixelLab Pip is a compact, agent-agnostic routing assistant. Pip helps an agent choose the right PixelLab surface: hosted MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, SDK/API docs, or legacy v1.
 
-Use PixelLab AI Skill when you want its packaged recipe/script workflow. Use Pip when you want lightweight route selection, API/MCP guidance, auth boundaries, and concise PixelLab decision support across agent apps.
+Use PixelLab AI Skill when you want its packaged recipe/script workflow. Use Pip when you want lightweight route selection, API/MCP guidance, auth and language boundaries, and concise PixelLab decision support across agent apps.
 
 ## Feature Comparison
 
@@ -35,6 +35,7 @@ Use PixelLab AI Skill when you want its packaged recipe/script workflow. Use Pip
 | Candidate review | Uses contact sheets, candidate folders, approval steps, and final asset promotion. | Reports candidate/final status after live calls; does not manage an approval directory workflow. |
 | Output folders | Defines folders such as payloads, results, candidates, approved, downloads, reports, and logs. | Does not prescribe project output folders except reporting returned paths/URLs. |
 | Prompt preparation | Turns rough ideas into visual briefs and PixelLab-ready prompts. | Enhances natural-language request parameters unless the user opts out, using PixelLab enhance endpoints only when route-matched. |
+| Localization / non-English requests | No dedicated localization reference was found in the reviewed package inventory. | Translates or normalizes PixelLab-facing natural-language values to English and keeps user-facing replies in the user's requested or detected language. |
 | Consistency gate | Uses visual briefs, seed/reference planning, and seed candidate review for packs. | Summarizes identity, style, palette, view, and reference anchors; asks up to three blocking questions before credit-spending calls. |
 | Image input handling | Encourages seed/reference images and init images for consistency. | Classifies supplied images by endpoint role: subject, identity, style, concept, init/source, target, mask, palette, or frame. |
 | Paperdolling | Includes modular outfit/equipment concepts and layered sprite validation. | Documents PixelLab layer limitations and routes paperdolling as a composition workflow outside PixelLab. |
@@ -54,7 +55,7 @@ The reviewed v1.5.1 package contains:
 - `_meta.json`, `SKILL.md`, `skill-card.md`, `agents/openai.yaml`, and two OpenClaw config examples.
 - Two Python helper scripts: `scripts/pixellab_client.py` and `scripts/pixellab_workflow.py`.
 - Five recipe JSON files.
-- Thirty-six endpoint example JSON files.
+- Thirty-eight endpoint example JSON files.
 - Nine reference Markdown files:
   - `api-coverage-matrix.md`
   - `endpoint-mapping.md`
@@ -71,12 +72,13 @@ Notable `pixellab_workflow.py` commands include `list-recipes`, `plan`, `run`, `
 ## Useful Ideas For Pip
 
 - Keep prompt preparation opt-out, not opt-in.
+- Keep PixelLab-facing natural-language parameters in English while preserving the user's language for replies.
 - Summarize consistency anchors before spending credits.
 - Report the route, parameters, IDs, outputs, status, and usage details after live calls.
 - Treat MCP as configured-or-not; never pretend tools exist.
 - Preserve paperdoll frame-grid contracts and distinguish composited outputs from reusable layers.
 
-These ideas are already covered in Pip through `SKILL.md`, `references/image-inputs.md`, `references/paperdolling.md`, and `references/usage-reporting.md`.
+These ideas are already covered in Pip through `SKILL.md`, `references/localization.md`, `references/image-inputs.md`, `references/paperdolling.md`, and `references/usage-reporting.md`.
 
 ## Ideas Not Adopted
 
@@ -91,6 +93,7 @@ These ideas are already covered in Pip through `SKILL.md`, `references/image-inp
 No new `skills/pixellab-pip/references/*.md` file is needed just because PixelLab AI Skill has more references. Pip already has the runtime references that match its scope:
 
 - `image-inputs.md` for role classification and prompt facts from attachments.
+- `localization.md` for non-English request translation and response-language handling.
 - `paperdolling.md` for layered character and equipment workflows.
 - `usage-reporting.md` for live-call reporting and final-output checks.
 - `official-docs.md` for current PixelLab docs refresh.

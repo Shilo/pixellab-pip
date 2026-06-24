@@ -6,11 +6,12 @@ PixelLab natural-language parameters must be English even when the conversation 
 
 ## Before PixelLab Actions
 
-- Detect the user's response language from the current request and recent conversation.
-- Before MCP, REST, website/editor, Aseprite, or Pixelorama actions, translate or rewrite every PixelLab natural-language input into concise English, including `description`, `style_description`, `negative_description`, `edit_description`, `action`, `action_description`, `animation_description`, `item_descriptions`, `text`, and `color_palette`.
+- Detect the user's response language from the current request and recent conversation. If response-language confidence is low but the asset/action is clear, proceed in the dominant or most recent user language instead of interrupting.
+- Before MCP, REST, website/editor, Aseprite, or Pixelorama actions, translate or rewrite every PixelLab-facing natural-language input into concise English, including `description`, `*_description`, `style_description`, `negative_description`, `lower_description`, `upper_description`, `transition_description`, `edit_description`, `action`, `action_description`, `animation_description`, `item_descriptions`, `text`, and `color_palette`.
 - Keep non-language values unchanged: file paths, URLs, IDs, endpoint names, tool names, enum values, dimensions, seeds, colors, code identifiers, and bearer-token variable names.
 - Preserve exact quoted names or requested on-image text only when the user explicitly wants that literal text rendered, and keep it inside an otherwise English parameter value. Otherwise translate descriptive wording into English.
-- If a phrase is ambiguous after translation or depends on culture-specific context that affects the generated asset, ask one short clarification in the user's language before spending credits.
+- For mixed-language requests, preserve technical terms, translate descriptive wording, and ask only when language mixing or culture-specific context creates multiple plausible asset meanings, response-language choices, or credit-spending actions.
+- If an ambiguity affects the generated asset, edit target, on-image text, or selected PixelLab surface/tool, ask one short clarification in the user's language before spending credits.
 
 ## User-Facing Responses
 

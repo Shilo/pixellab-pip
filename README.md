@@ -2,7 +2,7 @@
 
 Meet PixelLab Pip: a tiny Pixel Pup who fetches the right route through PixelLab's MCP tools, REST v2 API, website/editor workflows, Aseprite, Pixelorama, and legacy v1.
 
-Pip is friendly on the outside and practical under the collar: he maps plain-language asset requests to the right supported surface, keeps agents away from undocumented website/session endpoints, and helps untangle overlapping tool names, endpoint paths, model labels, and editor workflows.
+Pip is lightweight and practical under the collar: he maps plain-language asset requests to the right supported surface, keeps agents away from undocumented website/session endpoints, and helps untangle overlapping tool names, endpoint paths, model labels, and editor workflows.
 
 For [PixelLab.ai](https://www.pixellab.ai/).
 
@@ -22,15 +22,20 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 
 ## What Pip Does
 
-Use Pip when an agent needs to create, edit, animate, or troubleshoot PixelLab assets such as characters, objects, tilesets, tiles, maps, UI, backgrounds, image edits, and animations.
+Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot PixelLab assets and workflows.
 
-Pip:
-
-- Routes plain-language asset requests to the best PixelLab tool or endpoint.
-- Separates official public REST/MCP surfaces from undocumented website/session endpoints.
-- Explains confusing PixelLab terms such as `Pro`, `v3`, `new`, `create tiles`, and `create tileset`.
-- Tells agents when to refresh official PixelLab docs before giving exact endpoint, schema, SDK, auth, or model/mode claims.
-- Warns agents to verify installed SDK coverage before assuming every current REST v2 endpoint or parameter is available.
+| Feature | What Pip helps with |
+|---|---|
+| Asset routing | Maps plain-language requests to the right PixelLab surface for characters, objects, tilesets, tiles, maps, UI, backgrounds, image edits, animations, and VFX. |
+| MCP and REST v2 selection | Chooses hosted MCP for managed agent assets, REST v2 for direct API/code/batch control, website/editor flows for human-visible work, Aseprite or Pixelorama for editor workflows, and legacy v1 only when needed. |
+| Prompt and description preparation | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions, using PixelLab enhance endpoints only when they match the route. |
+| Non-English request support | Translates or normalizes PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in the user's language. |
+| Image and attachment handling | Classifies supplied files as edit targets, identity references, style references, concept images, masks, palettes, init/source images, or animation frames instead of guessing one generic role. |
+| Paperdoll and layered workflow guidance | Helps route layered character, outfit, equipment, isolated asset, and composited-output requests without pretending PixelLab returns layers where it does not. |
+| Safe auth and automation boundaries | Uses bearer-token and MCP secret setup, avoids copied website session tokens, and keeps agents away from undocumented website/session endpoints. |
+| Current docs and SDK checks | Tells agents when to refresh official PixelLab docs, OpenAPI schemas, MCP docs, SDK coverage, auth setup, pricing, limits, model labels, or endpoint fields before making exact claims. |
+| Usage and result reporting | Reports the surface, tool or endpoint, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, credit/balance delta when available, and verification status. |
+| PixelLab terminology support | Explains confusing labels such as `Pro`, `v3`, `new`, `create tiles`, `create tileset`, Pixen, PixFlux, BitForge, and PixPatch at the documented product level. |
 
 ## Install
 
@@ -154,6 +159,7 @@ Runtime files:
 - `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
 - `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
 - `skills/pixellab-pip/references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
+- `skills/pixellab-pip/references/localization.md` - non-English request translation and response-language handling.
 - `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
 - `skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
 
