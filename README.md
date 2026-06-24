@@ -163,7 +163,7 @@ Runtime files:
 
 An **unofficial** asset workflow and API helper for pixel-art generation, conversion, rotation, animation, layered sprites, modular outfits/equipment, tilesets, UI assets, and prompt enhancement.
 
-Use PixelLab AI Skill over Pip when you want a recipe-based production pipeline with manifests, dry runs, candidate folders, contact sheets, approval steps, validation, and local workflow helpers. Use Pip when you want a small agent-agnostic routing skill that helps choose the right PixelLab MCP, REST v2, website/editor, Aseprite, Pixelorama, or legacy v1 surface.
+Use PixelLab AI Skill for its recipe, manifest, and helper-script production workflow. Use Pip for concise, agent-agnostic PixelLab surface routing across MCP, REST v2, website/editor, Aseprite, Pixelorama, and legacy v1. Pip does not install or run PixelLab AI Skill's helper scripts.
 
 ### [Ultimate PixelLab Prompt Generator](https://pixellabpromptgenerator.vercel.app/) (By TheSyntheticFeed)
 

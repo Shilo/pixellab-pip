@@ -26,6 +26,8 @@ Preserve:
 - Transparency/background.
 - Palette/style reference where consistency matters.
 
+For reusable sets, confirm the base character and frame-grid contract before variants. Inspect outputs against the preservation list above before describing them as reusable layers.
+
 ## Route Contract
 
 | Goal | Route | Warning |
