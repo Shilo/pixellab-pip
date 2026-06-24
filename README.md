@@ -19,6 +19,7 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Project Layout](#project-layout)
 - [Other Tools](#other-tools)
 - [PixelLab Resources](#pixellab-resources)
+- [License](#license)
 
 ## Features
 
@@ -42,55 +43,88 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 
 ### Agent-Assisted Install
 
-You can try this first in local coding agents that can run plugin-management commands:
+Ask your local coding agent:
 
-> Install PixelLab Pip from [https://github.com/Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip) using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
-
-This is realistic for Claude Code, Codex, Gemini CLI, and GitHub Copilot CLI. It may work in Cursor when the agent can run shell commands or plugin commands. It is not reliable in VS Code UI-only flows or web-only chats such as Claude.ai, ChatGPT, or Gemini web.
+```text
+Install PixelLab Pip from https://github.com/Shilo/pixellab-pip using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
+```
 
 ### Marketplace Install
 
-Install PixelLab Pip as a plugin when your agent supports plugins or marketplaces. This keeps the skill updatable and avoids copying runtime files into multiple places.
+Install PixelLab Pip as a plugin or extension when your agent supports marketplaces. Use manual skill install only when your agent does not support plugin installation.
 
-| Agent app | Install | Update |
-|---|---|---|
-| Claude Code | `/plugin marketplace add Shilo/pixellab-pip`, then `/plugin install pixellab-pip@pixellab-pip` | `/plugin marketplace update pixellab-pip`, then `/plugin update pixellab-pip` |
-| Cursor | This repo includes Cursor marketplace metadata at `.cursor-plugin/marketplace.json`. Use Cursor's plugin marketplace or team marketplace flow when available for your workspace. | Refresh/update the Cursor marketplace entry for this repo. |
-| Codex | `codex plugin marketplace add Shilo/pixellab-pip`, then install `pixellab-pip` from `/plugins` or the Codex plugin directory. | `codex plugin marketplace upgrade pixellab-pip` |
-| GitHub Copilot CLI | `copilot plugin marketplace add Shilo/pixellab-pip`, then `copilot plugin install pixellab-pip@pixellab-pip` | `copilot plugin update pixellab-pip` |
-| VS Code agent plugins | Enable `chat.plugins.enabled`, add `Shilo/pixellab-pip` to `chat.plugins.marketplaces`, or use **Chat: Install Plugin From Source** with this repo URL. | VS Code checks plugin marketplaces for updates automatically when extension updates run. |
-| Gemini CLI | `gemini extensions install https://github.com/Shilo/pixellab-pip` | `gemini extensions update pixellab-pip` |
+<table>
+  <thead>
+    <tr>
+      <th>Agent app</th>
+      <th>Install</th>
+      <th>Update</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Claude Code</td>
+      <td><pre><code>/plugin marketplace add Shilo/pixellab-pip
+/plugin install pixellab-pip@pixellab-pip</code></pre></td>
+      <td><pre><code>/plugin marketplace update pixellab-pip
+/plugin update pixellab-pip</code></pre></td>
+    </tr>
+    <tr>
+      <td>Codex</td>
+      <td><pre><code>codex plugin marketplace add Shilo/pixellab-pip</code></pre>Install <code>pixellab-pip</code> from <code>/plugins</code> or the Codex plugin directory.</td>
+      <td><pre><code>codex plugin marketplace upgrade pixellab-pip</code></pre></td>
+    </tr>
+    <tr>
+      <td>Gemini CLI</td>
+      <td><pre><code>gemini extensions install https://github.com/Shilo/pixellab-pip</code></pre></td>
+      <td><pre><code>gemini extensions update pixellab-pip</code></pre></td>
+    </tr>
+    <tr>
+      <td>GitHub Copilot CLI</td>
+      <td><pre><code>copilot plugin marketplace add Shilo/pixellab-pip
+copilot plugin install pixellab-pip@pixellab-pip</code></pre></td>
+      <td><pre><code>copilot plugin update pixellab-pip</code></pre></td>
+    </tr>
+    <tr>
+      <td>Cursor</td>
+      <td>Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.</td>
+      <td>Refresh/update the Cursor marketplace entry or reinstall manually.</td>
+    </tr>
+    <tr>
+      <td>VS Code agent plugins</td>
+      <td>Use <strong>Chat: Install Plugin From Source</strong> with this repo URL or VS Code's plugin marketplace flow.</td>
+      <td>Use VS Code's plugin update flow.</td>
+    </tr>
+  </tbody>
+</table>
 
-PixelLab Pip is agent-agnostic. It can be used by any agent app that supports Agent Skills or compatible plugin/extension wrappers. This repo includes ready-to-use metadata for Claude Code, Cursor, Codex, GitHub Copilot CLI, VS Code agent plugins, and Gemini CLI.
+PixelLab Pip is agent-agnostic. It can be used by any agent app that supports Agent Skills or compatible plugin/extension wrappers.
 
 Gemini uses `gemini-extension.json` for installation and `GEMINI.md` for invocation context. Gemini extensions are not native Agent Skills plugins, so those files adapt Gemini to the same Pip instructions in `skills/pixellab-pip/SKILL.md`.
 
-### Manual Install
+### Manual Skill Install
 
-Manual install is useful for project-local setup, quick testing, or agent apps that support raw Agent Skills without a marketplace. Copy only the runtime skill folder:
-
-```text
-skills/pixellab-pip/
-```
-
-into the agent app's documented skill directory. Common examples include:
+Manual install is useful for project-local setup or agent apps that support raw Agent Skills without plugin installation. Copy the contents of `skills/pixellab-pip/` into a folder named `pixellab-pip` inside your agent's skills directory, so `SKILL.md` is directly inside the final folder.
 
 ```text
-.agents/skills/pixellab-pip/
-.claude/skills/pixellab-pip/
+.agents/skills/pixellab-pip/SKILL.md
+.claude/skills/pixellab-pip/SKILL.md
+.cursor/skills/pixellab-pip/SKILL.md
 ```
 
-Manual copies are harder to update. Prefer plugin install when possible.
+PowerShell:
 
-### Updating
+```powershell
+New-Item -ItemType Directory -Force .agents\skills\pixellab-pip
+Copy-Item -Recurse -Force skills\pixellab-pip\* .agents\skills\pixellab-pip\
+```
 
-Marketplace installs are the update path. Pulling this repository is only enough for development; installed agents usually use cached plugin copies.
+macOS/Linux shell:
 
-- Codex: run `codex plugin marketplace upgrade pixellab-pip`.
-- Claude Code: run `/plugin marketplace update pixellab-pip`, then `/plugin update pixellab-pip`.
-- Cursor: refresh the marketplace or reinstall/update the plugin through Cursor's plugin UI.
-- GitHub Copilot CLI: run `copilot plugin update pixellab-pip`; use `--all` for every installed plugin.
-- Gemini CLI: run `gemini extensions update pixellab-pip`.
+```bash
+mkdir -p .agents/skills/pixellab-pip
+cp -R skills/pixellab-pip/. .agents/skills/pixellab-pip/
+```
 
 ## Usage
 
@@ -108,7 +142,7 @@ Example prompt:
 /pixellab-pip make a cute knight character sprite
 ```
 
-Implicit invocation should also work when an agent sees a PixelLab-specific request such as "create an image", "make a sprite", "draw a character", "generate a tileset", "animate this", "edit this image", "use PixelLab MCP", "call the REST API", or "check PixelLab docs". Explicit invocation is still recommended when you want Pip used for sure.
+Implicit invocation should also work when an agent sees PixelLab/Pip context plus asset words such as "create an image", "make a sprite", "draw a character", "generate a tileset", "animate this", "edit this image", "use PixelLab MCP", "call the REST API", or "check PixelLab docs". Explicit invocation is still recommended when you want Pip used for sure.
 
 ## Authentication
 
@@ -201,3 +235,7 @@ Use the PixelLab API directly when you are writing code against REST v2 and alre
 - [REST v2 docs](https://api.pixellab.ai/v2/docs) - Interactive official REST v2 API documentation.
 - [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt) - LLM-readable REST v2 endpoint guide and auth summary.
 - [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) - Exact current REST v2 schemas for endpoint, field, enum, and response verification.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
