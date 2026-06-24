@@ -1,0 +1,26 @@
+{
+  "source": "PixelLab MCP top-down Wang tileset",
+  "tileset_id": "f6160b19-af75-465b-9aad-a5af6b47f1d7",
+  "source_png": "water_tileset.png",
+  "metadata": "water_tileset_metadata.json",
+  "tile_size": {
+    "width": 32,
+    "height": 32
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4
+  },
+  "frame_count": 4,
+  "frame_duration_ms": 140,
+  "animation_method": "local derived shimmer: bright cyan ripple pixels shifted per tile with wraparound",
+  "frames": [
+    "water_tileset_frame_00.png",
+    "water_tileset_frame_01.png",
+    "water_tileset_frame_02.png",
+    "water_tileset_frame_03.png"
+  ],
+  "strip": "water_tileset_animation_strip.png",
+  "apng": "water_tileset_animated.apng",
+  "gif": "water_tileset_animated.gif"
+}
