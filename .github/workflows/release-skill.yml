@@ -90,6 +90,10 @@ jobs:
           }
 
           function bumpVersion(version) {
+            if (!/^\d+\.\d+\.\d+$/.test(version)) {
+              throw new Error(`Expected version to use MAJOR.MINOR.PATCH format, found: ${version}`);
+            }
+
             const [major, minor] = version.split(".").map(Number);
             if (minor + 1 >= 10) {
               return `${major + 1}.0.0`;
