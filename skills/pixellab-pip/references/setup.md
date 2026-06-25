@@ -25,7 +25,7 @@ For a bare setup command, mode selection is mandatory before any MCP/API-specifi
 For setup selection, prefer these choices:
 
 - MCP + API (recommended): Connect PixelLab tools directly to the assistant/editor and configure `PIXELLAB_SECRET` so Pip can use documented REST v2 fallback.
-- MCP only: Connect PixelLab tools directly to the assistant/editor. Prefer app secret settings or an env/secret reference; use a literal-token MCP config only as an explicit user-chosen fallback when the app has no token-free option, and warn that it does not configure Pip REST v2 fallback.
+- MCP only: Connect PixelLab tools directly to the assistant/editor. Prefer app secret settings or an env/secret reference; use a literal-token MCP config only as an explicit user-chosen fallback when the app has no token-free option, and warn that REST-only features will not be available through Pip fallback.
 - API only: Configure `PIXELLAB_SECRET` for Pip's documented REST v2 fallback without adding MCP.
 - Manual: Open or link PixelLab's MCP setup page and stop; include the account/Secret step only when auth/token setup is part of the request.
 

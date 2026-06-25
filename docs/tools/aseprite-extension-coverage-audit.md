@@ -29,6 +29,34 @@ Observed editor behavior, described without publishing internal source details:
 
 Practical implication: an agent such as Codex or Claude can already automate PixelLab through official MCP/REST and then import files into Aseprite, but it cannot reliably drive the current Aseprite extension directly without either UI automation or an added bridge.
 
+## Efficient Near-Term Path: File Handoff
+
+The most efficient near-term integration is not direct control of the PixelLab Aseprite extension. It is a file handoff:
+
+```text
+MCP-capable agent
+  -> PixelLab MCP or documented REST v2 generation
+  -> verified local image/frame files
+  -> Aseprite CLI or Lua script import/export
+  -> user continues editing in Aseprite
+```
+
+This has practical value for users who prefer Aseprite over the website because it gets generated assets into their normal workspace without depending on private extension internals. It also has lower maintenance risk than a full Aseprite MCP bridge because the moving parts are public PixelLab MCP/REST behavior and documented Aseprite CLI/scripting behavior.
+
+Official Aseprite docs support this shape:
+
+- Aseprite CLI can convert/export sprites, run in batch mode, save files, export sprite sheets, list layers/tags/slices, and execute Lua scripts with `--script` and `--script-param`.
+- Aseprite's Lua API can open files, create new sprites, modify the active sprite, save modified sprites, show dialogs, and add plugin/menu options.
+
+Recommended scope for Pip:
+
+- Generate with PixelLab MCP/REST first.
+- Save generated PNGs, frame sequences, GIF previews, ZIPs, or sprite sheets locally.
+- Use Aseprite only for file handling: open/import, arrange frames/layers, set tags/durations, convert to `.aseprite`, export sprite sheets/metadata, or launch the result for manual editing.
+- Ask before launching visible Aseprite, overwriting files, or running a local script that writes outside the generated output folder.
+
+This route is not a replacement for an Aseprite MCP bridge. It does not solve live control of an already-open document, extension-only PixelLab operations, or interactive plugin dialogs. It is still worth adding to the agent skill because it answers the common user request "I want to work in Aseprite, not the website" with a stable, low-maintenance workflow.
+
 ## Possible Aseprite MCP Bridge
 
 The safest design is a companion local MCP server plus a small extension bridge, not making the Aseprite extension itself host MCP.
@@ -69,11 +97,15 @@ Bridge guardrails:
 - Prefer official PixelLab MCP/REST for pure agent asset generation when the user does not need the result placed into the live Aseprite document.
 - Keep Aseprite-specific commands scoped to the active editor session and visible user workflow.
 
+Efficiency judgment: build the lightweight file handoff into Pip first. Consider a dedicated Aseprite MCP bridge only if users need repeated live-document operations that cannot be handled by opening/importing generated files or by simple Aseprite CLI/scripts.
+
 ## Evidence
 
 - The official Aseprite integration provides interactive editor workflows for generation, editing, progress/status updates, and placing results back into Aseprite.
 - Local compatibility review observed editor workflows including generation tools plus helpers such as reduce-colors, unzoom, skeleton editing, image placement, request history, and update checks.
 - Observed extension operation names include image generation, style/reference generation, multi-image edit, quantize/reduce-colors, unzoom, pixel correction, map-extension, rotation, animation, tileset, UI, update, and review workflows.
+- Official Aseprite CLI docs document batch mode, save/export options, sprite-sheet export, and `--script` / `--script-param` for Lua automation: <https://www.aseprite.org/docs/cli/>.
+- Official Aseprite scripting docs and API docs document Lua scripting, `app.open`, `Sprite()`, `Sprite:saveCopyAs()`, dialogs, and plugin/menu extension points: <https://www.aseprite.org/docs/scripting/> and <https://www.aseprite.org/api/>.
 - Official REST v2 docs list public paths under `/v2`, such as `/generate-image-v2`, `/edit-images-v2`, `/inpaint-v3`, `/animate-with-text-v3`, `/create-tileset`, `/create-tiles-pro`, `/resize`, and `/remove-background`.
 - Official MCP docs explicitly distinguish MCP, REST v2, web interfaces, editor plugins, and legacy v1.
 

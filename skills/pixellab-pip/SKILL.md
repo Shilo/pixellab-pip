@@ -17,6 +17,7 @@ Classify the user's asset, API, or question intent first, then choose the suppor
    `general_image | background | character | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
 3. Choose the surface:
    use PixelLab MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility.
+   When the user mainly wants to keep working in Aseprite, prefer a low-maintenance file handoff: generate through PixelLab MCP or documented REST v2, save verified output files locally, then use Aseprite CLI/scripts only for opening, importing, converting, packaging, or exporting those files. This is an Aseprite handoff, not direct automation of the PixelLab Aseprite extension.
    For setup intent, read `references/setup.md` and run the setup wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval.
 4. Use MCP only if PixelLab MCP tools are available, either bare or prefixed. If MCP is unavailable, route to the matching REST v2 endpoint when one is documented. If MCP and REST v2 are both unavailable or fail, explain why before using any non-PixelLab fallback.
    If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
@@ -34,17 +35,36 @@ Classify the user's asset, API, or question intent first, then choose the suppor
 | REST v2 | Scripts, batch jobs, server integrations, exact endpoint control, generic images, backgrounds, UI, inpaint/edit, prompt enhancement, raw animation, rotate, resize, remove background, and API parity checks. | Guessing SDK methods without checking the installed SDK or current docs. |
 | Website / Map Workshop | Human product surface, full-map manual work, rich libraries, visible browser assistance, and website-only flows. | Programmatic use of copied browser session tokens or undocumented internal endpoints used by first-party surfaces. |
 | Aseprite | Local in-editor plugin workflows when the user is actively working inside Aseprite. | Treating private first-party editor integration endpoints as public REST/MCP contracts. |
+| Aseprite file handoff | Post-generation opening, import/export, sprite-sheet packaging, GIF/PNG conversion, palette conversion, and `.aseprite` workspace creation using documented Aseprite CLI/scripts after PixelLab MCP/REST has produced files. | Mouse/OCR UI automation, hidden control of the PixelLab Aseprite extension, or claiming extension-private operations are public APIs. |
 | Pixelorama / editor | Visible browser assistance for website editor workflows, including existing assets, save-back flows, and website-only manual flows after explicit permission. | Hidden automation, undocumented endpoint calls, public API assumptions, or any generation/save/download/edit/delete action without a second confirmation. |
 | REST v1 | Existing legacy code and old SDK compatibility. | New work unless the user explicitly needs v1. |
 
 Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2/...` paths.
 
+## Aseprite File Handoff
+
+Use this route only when it adds real workflow value: the user prefers Aseprite as the working surface, wants generated files opened or packaged there, or needs Aseprite-specific file export behavior. It is efficient because it relies on stable public PixelLab MCP/REST for generation and documented Aseprite CLI/Lua scripting for file handling, without depending on the PixelLab Aseprite extension's private integration protocol.
+
+Good fit:
+
+- Generate a character, object, tileset, background, UI, or animation with PixelLab MCP/REST, then open the result in Aseprite.
+- Convert verified frames into `.aseprite`, PNG sequence, GIF, or sprite sheet with Aseprite CLI/script support.
+- Import generated frames as layers/frames, set tags, durations, or export metadata with a small local Aseprite Lua script.
+
+Poor fit:
+
+- The user wants Claude/Codex to click through the PixelLab Aseprite extension UI.
+- The requested behavior exists only inside the PixelLab Aseprite extension, such as exact extension reduce-colors/unzoom/pixel-correction behavior, and no public REST/MCP route covers it.
+- The task needs live control of the user's already-open Aseprite document. That requires an explicit Aseprite bridge/MCP design, not this lightweight handoff.
+
+Before using Aseprite CLI/scripts, confirm Aseprite is installed or ask for its executable path, show the local files that will be opened/written, and ask before launching visible Aseprite or modifying existing files. Use Aseprite scripting for local file handling only; do not inspect or copy PixelLab extension credentials, do not scrape extension request payloads, and do not call undocumented extension endpoints.
+
 ## Intent Router
 
 | User intent | Default route after Surface Rules | REST v2 route when coding/exact control is needed |
 |---|---|---|
-| Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers, and `delete_animation` when explicitly requested. For a follow-up animation on an existing multi-direction character, default to the south/down direction for the first candidate when the user does not specify direction; ask or get confirmation before animating all directions. | Character endpoints such as `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state, animation, tags, ZIP/list/get/delete endpoints. |
-| Object, prop, item, pickup, weapon, furniture | MCP `create_1_direction_object`, `create_8_direction_object`, `create_map_object`, object state/animation/review/tag tools. | Object endpoints such as `create-1-direction-object`, `create-8-direction-object`, `map-objects`, object state/animation/tags/list/get/delete endpoints. |
+| Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers, and `delete_animation` when explicitly requested. For a follow-up animation on an existing multi-direction character, default to `south` (down-facing) for the first candidate when the user does not specify direction; ask or get confirmation before animating all directions. | Character endpoints such as `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state, animation, tags, ZIP/list/get/delete endpoints. |
+| Object, prop, item, pickup, weapon, furniture | MCP `create_1_direction_object`, `create_8_direction_object`, `create_map_object`, object state/animation/review tools. | Object endpoints such as `create-1-direction-object`, `create-8-direction-object`, `map-objects`, object state/animation/tags/list/get/delete endpoints. |
 | Top-down terrain tileset, Wang/autotile/RPG tileset | MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
 | Sidescroller/platformer tileset | MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`, sidescroller tileset endpoints. |
 | Isometric tile/block/floor | MCP `create_isometric_tile`. | `create-isometric-tile`. |
@@ -96,7 +116,7 @@ Read only the relevant reference:
 - Non-English or mixed-language user requests and response-language handling: `references/localization.md`.
 - Official PixelLab documentation, MCP documentation, REST documentation, and web-refresh routing: `references/official-pixellab-documentation.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
-- Local animation preview GIFs, spritesheets, or ImageMagick/`magick` assembly from generated frames: `references/local-asset-assembly.md`.
+- Local animation preview GIFs, spritesheets, Aseprite file handoff, or ImageMagick/`magick` assembly from generated frames: `references/local-asset-assembly.md`.
 
 Optional broader docs: in full plugin/repo installs, these paths resolve relative to this `SKILL.md`; raw skill installs may omit them. If runtime `references/` are not enough, read at most one matching file if it exists. If absent, continue with `references/official-pixellab-documentation.md` and current official PixelLab documentation; do not search or load the set.
 
@@ -123,7 +143,7 @@ Do not invent provider internals where PixelLab docs are silent.
 
 Prompt enhancement is opt-out. For natural-language request parameters such as `description`, `style_description`, `negative_description`, `lower_description`, `upper_description`, `transition_description`, `edit_description`, `action`, `action_description`, `animation_description`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the user's request and any visible inputs before calling a tool.
 
-Use REST `enhance-pixen-prompt` for Pixen image prompts, `enhance-character-v3-prompt` for character v3 prompts, and `enhance-animation-v3-prompt` for animation v3 actions with `first_frame` and optional `last_frame`. For `create-character-v3`, set `enhance_prompt` when it fits unless the user opts out. For other tools, enhance directly as the agent; do not force a nonmatching enhance endpoint.
+Use one enhancement path. Use REST `enhance-pixen-prompt` for Pixen image prompts and `enhance-animation-v3-prompt` for animation v3 actions with `first_frame` and optional `last_frame`. For `create-character-v3`, use its `enhance_prompt` option instead of a separate `enhance-character-v3-prompt` call when generating; use `enhance-character-v3-prompt` only for standalone character-v3 prompt enhancement. For other tools, enhance directly as the agent; do not force a nonmatching enhance endpoint.
 
 ## Do Not Use
 
@@ -176,14 +196,14 @@ Use browser automation only for visible website/editor/Pixelorama assistance aft
 | Request | Route |
 |---|---|
 | "Setup PixelLab." | Setup mode; diagnose MCP and REST v2 fallback intent, credential readiness, and ask before config writes. |
-| "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`; if direction is unspecified, animate south/down first and ask before expanding to every direction. |
+| "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`; if direction is unspecified, animate `south` (down-facing) first and ask before expanding to every direction. |
 | "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; use MCP `create_sidescroller_tileset` if working in an MCP-enabled agent. |
 | "Create a title screen background." | REST v2 `create-image-pixflux-background`; verify current fields and size support from docs. |
 | "Make HUD buttons and a health bar." | REST v2 `generate-ui-v2`. |
 | "Convert this image to pixel art and remove the background." | REST v2 `image-to-pixelart-pro`, then `remove-background`. |
 | "Inpaint this masked area." | REST v2 `inpaint` or `inpaint-v3` after checking current docs and inputs. |
 | "Add a wind dash effect to this runner sprite." | REST v2 `edit-image`; preserve the runner as the target image and add the effect to the same canvas. |
-| "Add a walking animation." after creating an 8-direction character | MCP `animate_character` for south/down first unless the user asks for all directions. |
+| "Add a walking animation." after creating an 8-direction character | MCP `animate_character` for `south` (down-facing) first unless the user asks for all directions. |
 | "Make an 8-direction treasure chest object." | MCP `create_8_direction_object`; REST v2 `create-8-direction-object` for code. |
 | "Make hex terrain tiles." | MCP `create_tiles_pro`, not top-down Wang tileset. |
 | "Use `/tilesets/create` with my browser token." | Do not use it; route to public MCP/REST tileset tools or manual website use. |

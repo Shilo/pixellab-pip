@@ -37,7 +37,7 @@ If PixelLab MCP is already configured, reuse its credential source when safe:
 
 - If the MCP config uses `PIXELLAB_SECRET`, Pip's REST v2 fallback can use the same env var.
 - If the MCP config uses an app secret setting or secret store named `PIXELLAB_SECRET`, tell the user to make that same `PIXELLAB_SECRET` source visible to the assistant/editor/app session where Pip runs.
-- If the MCP config contains a literal `Authorization: Bearer ...` value, do not extract, print, or copy it. It can support MCP-only auth, but it does not configure Pip REST v2 fallback. Suggest moving it to env/secret config when the user wants MCP + API or API-only readiness.
+- If the MCP config contains a literal `Authorization: Bearer ...` value, do not extract, print, or copy it. It can support MCP-only auth, but it does not make that token available to Pip's REST v2 fallback. Suggest moving it to env/secret config when the user wants MCP + API or API-only readiness.
 
 Never ask the user to paste the bearer token into chat. Never print, echo, log, summarize, measure, transform, validate, or use token values from chat or config output. If a token appears in chat or tool output, do not repeat it; tell the user to treat it as exposed and replace it before continuing setup. Never use website/Supabase session tokens for REST or MCP.
 
