@@ -17,14 +17,11 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Usage](#usage)
 - [Commands](#commands)
 - [MCP And API Setup](#mcp-and-api-setup)
-- [Authentication](#authentication)
-- [Documentation](#documentation)
-- [Showcase ->](docs/showcase/README.md)
-- [Repository Layout](#repository-layout)
+- [Showcase ↗](docs/showcase/README.md)
 - [Other Tools](#other-tools)
 - [PixelLab Resources](#pixellab-resources)
-- [Developer ->](docs/developer.md)
-- [License](#license)
+- [Developer ↗](docs/developer.md)
+- [MIT License ↗](LICENSE)
 
 ## Features
 
@@ -232,6 +229,8 @@ For most users, run `/pixellab-pip setup` and choose MCP + API. MCP connects Pix
 
 The setup command behaves like a wizard, not a static help page. For a bare setup request, it should ask which setup mode you want before preparing MCP/API-specific changes, and it keeps secrets out of chat and shared files.
 
+PixelLab generation requires a PixelLab bearer token and may spend credits. PixelLab Pip does not include, store, or print that token. Do not use copied website session tokens or undocumented website endpoints for automation unless PixelLab documents them as supported.
+
 | Wizard mode | Use it when | What Pip does |
 |---|---|---|
 | MCP + API | Recommended. You want direct PixelLab tools in your assistant/editor/app plus Pip REST/API fallback. | Sets up MCP first, then confirms the same `PIXELLAB_SECRET` source is visible to the assistant/editor/app session where Pip runs. |
@@ -302,66 +301,9 @@ Authorization: Bearer <PIXELLAB_SECRET>
 
 Setup mode should not micromanage your frameworks, scripts, backends, SDKs, package files, or deployment platforms. Once `PIXELLAB_SECRET` is visible to the assistant/editor/app session, Pip can route REST calls internally when fallback is needed. Do not paste the Secret into chat, commit it, put it in examples, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps.
 
-## Authentication
-
-PixelLab generation requires a PixelLab bearer token and may spend credits. PixelLab Pip does not include, store, or print that token. For setup steps, see [MCP And API Setup](#mcp-and-api-setup).
-
-Do not use copied website session tokens or undocumented website endpoints for automation unless PixelLab documents them as supported.
-
-## Documentation
-
-Supplemental PixelLab technical notes live in [docs/pixellab/](docs/pixellab/). They explain PixelLab tools, workflows, terminology, SDK compatibility, and auth/security boundaries for agents that need deeper implementation context.
-
 ## Showcase
 
 Example workflow notes live in [docs/showcase/](docs/showcase/), including prompts, selected routes, outputs, and validation notes for real PixelLab Pip runs.
-
-## Repository Layout
-
-```text
-README.md
-.agents/plugins/marketplace.json
-.claude-plugin/marketplace.json
-.claude-plugin/plugin.json
-.cursor-plugin/marketplace.json
-.cursor-plugin/plugin.json
-.github/plugin/marketplace.json
-gemini-extension.json
-GEMINI.md
-.codex-plugin/plugin.json
-plugin.json
-docs/
-  showcase/
-skills/
-  pixellab-pip/
-    SKILL.md
-    pixellab-pip.json (created on bark toggle)
-    assets/
-      bark.py
-      bark.wav
-    references/
-```
-
-The root plugin files are thin wrappers for each agent app. The only runtime skill is `skills/pixellab-pip/SKILL.md`.
-
-`gemini-extension.json` installs PixelLab Pip as a Gemini CLI extension. `GEMINI.md` gives Gemini the invocation context and points back to the same skill contract; it does not create a second Pip skill.
-
-Runtime files:
-
-- `skills/pixellab-pip/SKILL.md` - the canonical skill file.
-- `skills/pixellab-pip/pixellab-pip.json` - optional user-local bark preference file, created only when bark is toggled.
-- `skills/pixellab-pip/assets/bark.py` - best-effort local helper for deterministic bark config and sound playback.
-- `skills/pixellab-pip/assets/bark.wav` - bundled bark sound.
-- `skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
-- `skills/pixellab-pip/references/setup.md` - natural-language setup mode for MCP/API/auth after install.
-- `skills/pixellab-pip/references/bark.md` - persistent completion sound toggle and generation-finish rules.
-- `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
-- `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
-- `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
-- `skills/pixellab-pip/references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
-- `skills/pixellab-pip/references/localization.md` - non-English request translation and response-language handling.
-- `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
-- `skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
 
 ## Other Tools
 
@@ -401,6 +343,6 @@ Use the PixelLab API directly when you are writing code against REST v2 and alre
 - [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt) - LLM-readable REST v2 endpoint guide and auth summary.
 - [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) - Exact current REST v2 schemas for endpoint, field, enum, and response verification.
 
-## License
+## MIT License
 
-MIT. See [LICENSE](LICENSE).
+See [LICENSE ↗](LICENSE).

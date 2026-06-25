@@ -33,3 +33,50 @@ codex debug prompt-input '@pixellab-pip bark off'
 ```
 
 `development local` should show this repository as the source and a version containing `+codex.dev-`. `production remote` should show the GitHub marketplace source and the normal release version.
+
+## Repository Layout
+
+```text
+README.md
+.agents/plugins/marketplace.json
+.claude-plugin/marketplace.json
+.claude-plugin/plugin.json
+.cursor-plugin/marketplace.json
+.cursor-plugin/plugin.json
+.github/plugin/marketplace.json
+gemini-extension.json
+GEMINI.md
+.codex-plugin/plugin.json
+plugin.json
+docs/
+  showcase/
+skills/
+  pixellab-pip/
+    SKILL.md
+    pixellab-pip.json (created on bark toggle)
+    assets/
+      bark.py
+      bark.wav
+    references/
+```
+
+The root plugin files are thin wrappers for each agent app. The only runtime skill is `skills/pixellab-pip/SKILL.md`.
+
+`gemini-extension.json` installs PixelLab Pip as a Gemini CLI extension. `GEMINI.md` gives Gemini the invocation context and points back to the same skill contract; it does not create a second Pip skill.
+
+Runtime files:
+
+- `skills/pixellab-pip/SKILL.md` - the canonical skill file.
+- `skills/pixellab-pip/pixellab-pip.json` - optional user-local bark preference file, created only when bark is toggled.
+- `skills/pixellab-pip/assets/bark.py` - best-effort local helper for deterministic bark config and sound playback.
+- `skills/pixellab-pip/assets/bark.wav` - bundled bark sound.
+- `skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
+- `skills/pixellab-pip/references/setup.md` - natural-language setup mode for MCP/API/auth after install.
+- `skills/pixellab-pip/references/bark.md` - persistent completion sound toggle and generation-finish rules.
+- `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
+- `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
+- `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
+- `skills/pixellab-pip/references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
+- `skills/pixellab-pip/references/localization.md` - non-English request translation and response-language handling.
+- `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
+- `skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
