@@ -115,6 +115,7 @@ Before running Aseprite:
 5. For existing `.aseprite` files, default to writing a copy such as `name-pixellab.aseprite`; modify the original only after explicit approval for that exact path.
 6. Keep generated scripts and outputs inside the user's chosen output directory unless they approve another path.
 7. Treat extension startup errors as a diagnostic signal. Do not work around them by reading extension internals.
+8. Treat raw Lua as local host-code execution. Generate small, reviewable scripts, pass paths through parameters, and do not run untrusted user-provided Lua.
 
 Use `--batch` for noninteractive file conversion and export. Launch the GUI only when the user wants to continue editing manually.
 
@@ -130,6 +131,21 @@ Default behavior for existing files:
 4. Verify the original file was not changed when the workflow was meant to be copy-on-write.
 
 Use `spr:saveCopyAs(output)` for existing-file imports unless the user has explicitly approved overwriting or saving back to the original path. Do not pass the original path as `output` by default. If the user does approve an in-place edit, restate the exact file path and action before writing.
+
+## Optional Aseprite MCP Tools
+
+Third-party Aseprite MCP servers can be useful when the user explicitly asks to use one, or when an installed MCP exposes curated tools for iterative Aseprite work. Keep this separate from the default PixelLab route.
+
+Use an Aseprite MCP only when it adds real value beyond direct CLI/Lua, such as:
+
+- Iterative pixel drawing where the agent needs many small canvas/layer/cel operations.
+- Visual feedback loops such as scaled frame exports, onion-skin renders, frame diffs, or color statistics.
+- Structured scene operations such as copying layers between `.aseprite` files, validating missing layers/cels, or auditing animation coverage.
+- A curated tool is safer and clearer than a custom raw Lua script.
+
+Do not use an Aseprite MCP to automate the PixelLab Aseprite extension, call private PixelLab operations, or bypass approval for credit-spending/editor actions. Many Aseprite MCP tools save back to the file they receive; apply the same original-file safety rule: copy first unless the user explicitly approved in-place edits for that exact file.
+
+If an Aseprite MCP exposes a raw Lua escape hatch, treat it like `aseprite --script`: it can run unrestricted local code. Prefer curated MCP tools or small reviewed scripts, and verify expected files/status afterward.
 
 ## CLI Patterns
 
@@ -261,6 +277,10 @@ Use Aseprite's `--save-as` filename placeholders, `--tag`, `--frame-range`, `--l
 ## Lua Script Patterns
 
 Use Lua when the task requires opening an existing `.aseprite` file, creating layers, frames, cels, tags, durations, or a new `.aseprite` workspace from generated images.
+
+Batch-mode Lua should print explicit status because Lua return values are not a reliable agent result channel. Prefer lines such as `OK`, `ERROR:<message>`, `INFO:<json>`, or `MISSING:<name>` and parse them after the command finishes. A clean Aseprite process exit is not enough; verify the printed status and the expected files.
+
+Escape or parameterize all user-provided paths, layer names, tag names, and labels. Prefer `--script-param` plus `app.params` over embedding user strings directly into a generated Lua file.
 
 Parameter access:
 
@@ -464,6 +484,8 @@ Use these examples to recognize valuable Aseprite handling. The exact PixelLab g
 | Convert/palette-check local output in Aseprite | "Convert these generated PNG frames to indexed color with this palette and save the converted copies." |
 | Open a verified result for manual editing | "Generate a chest sprite, save it locally, then open it in Aseprite after you verify the file exists." |
 | Inspect an Aseprite file before deciding | "List the layers, tags, and frame count in this `.aseprite` file before importing anything." |
+| Run visual QA on an animation | "Export frame 3 at 8x, compare frames 2 and 3, and check the color count before I review the animation." |
+| Copy layers between workspaces | "Copy the `PixelLab - effects` layer group from this staging file into a copy of my character `.aseprite` file." |
 
 ## Common Workflows
 
@@ -532,6 +554,16 @@ Use these examples to recognize valuable Aseprite handling. The exact PixelLab g
 
 Use this workflow for file-level edits only. It can modify an existing project file on disk, but it is not live control of the already-open Aseprite editor session.
 
+### Copy Layers Between `.aseprite` Files
+
+1. Confirm the source `.aseprite`, target `.aseprite`, requested layer or group names, frame handling, and output copy path.
+2. Never write into the target original by default. Copy the target to a new output file first, then modify only the copy.
+3. Use Lua to open both source and output copy with `app.open`.
+4. Resolve requested layers by name. If none exist, stop with a clear error instead of creating empty placeholders.
+5. Create missing target frames only when the user asked to preserve the source frame range or the import requires it.
+6. Copy each source cel image and cel position into the matching target layer/frame. Preserve layer names unless the user asked for renamed layers.
+7. Save the target copy, then verify target layers/tags/frame counts and verify the original target hash did not change.
+
 ### Existing `.aseprite` Export
 
 1. Confirm input file and requested output format.
@@ -539,17 +571,29 @@ Use this workflow for file-level edits only. It can modify an existing project f
 3. Use script export only when layer/tag/frame selection needs custom logic.
 4. Verify output files and metadata exist.
 
+### Visual Feedback And QA
+
+Use visual feedback when the user wants to review, iterate, or quality-check an animation/workspace:
+
+1. Export one or more frames at an integer scale such as 4x, 8x, or 10x for human-readable inspection.
+2. For animation continuity, render an onion-skin-style preview or export neighboring frames together when a local script or installed MCP supports it.
+3. Compare neighboring frames when the user asks whether motion changed enough or when a generated animation may have duplicate/near-duplicate frames.
+4. Check color statistics or palette conformance when the user asked for a limited palette or indexed-color output.
+5. Treat these as read-only QA unless the user asks for fixes; any fixes to an existing `.aseprite` still follow copy-on-write by default.
+
 ## Verification
 
 After Aseprite CLI work, verify the result before reporting success:
 
 - Check the expected output files exist.
+- Aseprite can sometimes exit successfully without writing the expected file or while writing numbered sibling files for frame sequences. Check exact outputs and acceptable numbered outputs before reporting success.
 - On launcher-based installs, the command can return before output files are fully visible on disk; wait briefly for expected files before declaring failure.
 - For sprite sheets, check both image and JSON metadata when requested.
 - For GIFs, inspect frame count/delay/disposal if transparency matters; see `local-asset-assembly.md`.
 - For `.aseprite` files, run `--list-layers` and `--list-tags` when the task created layers or tags.
 - For existing-file imports, verify the output copy exists and the original was not changed unless the user approved in-place modification.
 - For exported PNG frames, count the output frames and compare against the requested frame count.
+- For Lua scripts, require an explicit printed success/status line when possible and treat printed `ERROR:` lines as failures even if Aseprite exits with code 0.
 - If Aseprite prints extension errors, report that Aseprite ran but an installed extension emitted startup errors. Do not print credentials or local extension internals.
 
 ## Bridge Escalation
