@@ -82,6 +82,8 @@ Use `--batch` for noninteractive file conversion and export. Launch the GUI only
 
 Prefer direct CLI commands when no custom sprite construction is needed.
 
+Option order matters. Aseprite processes many export filters against the next sprite opened on the command line. Put filters such as `--tag`, `--frame-range`, `--layer`, `--ignore-layer`, `--all-layers`, `--split-layers`, `--split-tags`, and `--split-slices` before the `.aseprite` file they apply to.
+
 Check version:
 
 ```powershell
@@ -103,7 +105,7 @@ Export an `.aseprite` file as PNG frames:
 Export a tagged animation as a GIF:
 
 ```powershell
-& $AsepritePath -b "source.aseprite" --tag "Walk" --save-as "walk.gif"
+& $AsepritePath -b --tag "Walk" "source.aseprite" --save-as "walk.gif"
 ```
 
 Export a sprite sheet plus JSON metadata:
@@ -115,15 +117,54 @@ Export a sprite sheet plus JSON metadata:
 Export layers separately:
 
 ```powershell
-& $AsepritePath -b "source.aseprite" --split-layers --save-as "layer-{layer}-{frame}.png"
+& $AsepritePath -b --split-layers "source.aseprite" --save-as "layer-{layer}-{frame}.png"
 ```
 
 List layers, tags, or slices for inspection:
 
 ```powershell
-& $AsepritePath -b "source.aseprite" --list-layers
-& $AsepritePath -b "source.aseprite" --list-tags
-& $AsepritePath -b "source.aseprite" --list-slices
+& $AsepritePath -b --list-layers "source.aseprite"
+& $AsepritePath -b --list-tags "source.aseprite"
+& $AsepritePath -b --list-slices "source.aseprite"
+```
+
+Preview a command without writing files:
+
+```powershell
+& $AsepritePath -b --preview --tag "Walk" "source.aseprite" --save-as "walk.gif"
+```
+
+Export a single layer or exclude a guide layer:
+
+```powershell
+& $AsepritePath -b --layer "Body" "source.aseprite" --save-as "body-{frame}.png"
+& $AsepritePath -b --ignore-layer "Guides" "source.aseprite" --save-as "clean-{frame}.png"
+```
+
+Export a frame range:
+
+```powershell
+& $AsepritePath -b --frame-range 1,6 "source.aseprite" --save-as "walk-{frame}.png"
+```
+
+Scale, crop, or trim output:
+
+```powershell
+& $AsepritePath -b "source.aseprite" --scale 2 --save-as "source-2x.png"
+& $AsepritePath -b "source.aseprite" --crop 0,0,32,32 --save-as "source-crop.png"
+& $AsepritePath -b "source.aseprite" --trim --save-as "source-trimmed.png"
+```
+
+Convert to indexed color with optional dithering:
+
+```powershell
+& $AsepritePath -b "source.png" --dithering-algorithm none --color-mode indexed --save-as "source-indexed.png"
+```
+
+Export a packed or padded sprite sheet:
+
+```powershell
+& $AsepritePath -b --tag "Walk" "source.aseprite" --sheet "walk-sheet.png" --data "walk-sheet.json" --sheet-type packed --shape-padding 1 --border-padding 1 --trim --ignore-empty
 ```
 
 Run a Lua script with explicit parameters:
@@ -132,7 +173,7 @@ Run a Lua script with explicit parameters:
 & $AsepritePath -b --script "make-workspace.lua" --script-param output="character.aseprite" --script-param frames="frames.json"
 ```
 
-Use Aseprite's filename formatting, `--tag`, `--frame-range`, `--layer`, `--split-layers`, `--split-tags`, and `--sheet-type` options instead of writing custom scripts when they cover the request.
+Use Aseprite's filename formatting, `--tag`, `--frame-range`, `--layer`, `--ignore-layer`, `--split-layers`, `--split-tags`, `--sheet-type`, `--trim`, `--crop`, `--scale`, `--color-mode`, and padding options instead of writing custom scripts when they cover the request.
 
 ## Lua Script Patterns
 
@@ -171,17 +212,27 @@ local spr = Sprite(64, 64, ColorMode.RGB)
 spr.filename = output
 ```
 
-Create a named layer:
+A new sprite already contains one layer and one frame. Reuse them for the first imported item, or explicitly delete them after creating replacement layers/frames. Do not blindly add a new layer and a new frame before importing the first asset, because that creates stray blank content.
+
+Use the default layer for the first imported item:
 
 ```lua
-local layer = spr:newLayer()
+local layer = spr.layers[1]
 layer.name = "PixelLab"
 ```
 
-Create an empty frame:
+Create an additional named layer:
 
 ```lua
-local frame = spr:newEmptyFrame()
+local layer = spr:newLayer()
+layer.name = "PixelLab Extra"
+```
+
+Use the first existing frame, then create additional frames with explicit positions:
+
+```lua
+local frame = spr.frames[1]
+local nextFrame = spr:newEmptyFrame(#spr.frames + 1)
 ```
 
 Create a cel from an image:
@@ -216,6 +267,19 @@ Save a modified copy of an existing workspace:
 spr:saveCopyAs(output)
 ```
 
+Convert color mode or load a palette when the user asks for palette/indexed-color handling:
+
+```lua
+app.command.ChangePixelFormat{
+  format="indexed",
+}
+
+app.command.LoadPalette{
+  ui=false,
+  filename="palette.png",
+}
+```
+
 Export a sprite sheet from a script:
 
 ```lua
@@ -238,6 +302,32 @@ app.command.SaveFileCopyAs{
 }
 ```
 
+Import a grid sprite sheet into frames when PixelLab or another source returned a sheet instead of separate frame files:
+
+```lua
+local spr = app.open("sheet.png")
+if not spr then
+  error("Could not open sprite sheet")
+end
+
+app.command.ImportSpriteSheet{
+  ui=false,
+  type=SpriteSheetType.ROWS,
+  frameBounds=Rectangle(0, 0, 32, 32),
+  padding=Size(0, 0),
+  partialTiles=false,
+}
+```
+
+Open a GIF directly when the source is already animated:
+
+```lua
+local spr = app.open("preview.gif")
+if not spr then
+  error("Could not open GIF")
+end
+```
+
 Prefer script parameters over hard-coded paths so generated scripts are reusable and safe to review.
 
 ## Common Workflows
@@ -258,15 +348,16 @@ Prefer script parameters over hard-coded paths so generated scripts are reusable
 1. Generate or collect frames locally.
 2. Verify dimensions and frame order.
 3. Write a small Lua assembly script or reuse one from the project if present.
-4. Run Aseprite in batch mode with `--script` and `--script-param`.
-5. Verify the `.aseprite` file exists.
-6. Optionally export a GIF or sheet for preview.
+4. Reuse the new sprite's default layer and first frame for the first generated frame, then create additional frames with explicit positions.
+5. Run Aseprite in batch mode with `--script` and `--script-param`.
+6. Verify the `.aseprite` file exists and the layer/frame counts match the inputs.
+7. Optionally export a GIF or sheet for preview.
 
 ### Generated Variants As Layers
 
 1. Put each generated variant in a stable local path.
 2. Create one sprite sized to the largest accepted canvas.
-3. Create one named layer per variant.
+3. Reuse and rename the default layer for the first variant, then create one named layer per additional variant.
 4. Add one cel per layer at frame 1.
 5. Save as `.aseprite`.
 
@@ -274,11 +365,19 @@ Prefer script parameters over hard-coded paths so generated scripts are reusable
 
 1. Sort frames by numeric filename or explicit metadata.
 2. Create a new sprite from the first frame dimensions.
-3. Create one layer for the animation.
-4. Add each image as a cel on successive frames.
+3. Reuse and rename the default layer for the animation.
+4. Add the first image to frame 1, then create explicit new empty frames for subsequent images.
 5. Set duration from PixelLab metadata when available, otherwise use the user's requested FPS.
 6. Add tags such as `idle`, `walk`, `attack`, or the user's action name.
 7. Save `.aseprite`, then export GIF/sheet if requested.
+
+### Import Sprite Sheet Or GIF
+
+1. Confirm whether the source is a grid sheet, packed sheet with JSON metadata, or GIF.
+2. For a grid sheet, open the sheet image and use `app.command.ImportSpriteSheet{ ui=false, type=..., frameBounds=Rectangle(...), padding=Size(...) }`.
+3. For a GIF, open the GIF with `app.open`; Aseprite should load its frames as an animation.
+4. Apply frame durations and tags when metadata or the user's request provides them.
+5. Save a new `.aseprite` file or import the frames into an existing-copy workflow.
 
 ### Import Into Existing `.aseprite`
 

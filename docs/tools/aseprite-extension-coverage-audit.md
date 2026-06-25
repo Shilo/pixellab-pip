@@ -56,6 +56,7 @@ Recommended scope for Pip:
 - Trigger this route only when the user explicitly asks for Aseprite handling, such as creating or updating an `.aseprite` file, importing frames into an existing project, arranging layers/tags, exporting through Aseprite, or continuing work in Aseprite.
 - Ask before launching visible Aseprite, overwriting files, or running a local script that writes outside the generated output folder.
 - For existing `.aseprite` projects, prefer writing a modified copy and require explicit approval before editing the original file in place.
+- Useful Aseprite CLI coverage should include export filters, frame ranges, layer/tag/slice listing, sprite-sheet metadata, preview mode, scale/crop/trim, color-mode/palette conversion, and Lua scripts for creating layers, frames, cels, tags, durations, and imports from existing sheets or GIFs.
 
 This route is not a replacement for an Aseprite MCP bridge. It does not solve live control of an already-open document, extension-only PixelLab operations, or interactive plugin dialogs. It is still worth adding to the agent skill because it answers the common user request "I want to work in Aseprite, not the website" with a stable, low-maintenance workflow.
 
