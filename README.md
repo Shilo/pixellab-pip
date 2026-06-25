@@ -240,11 +240,3 @@ PIXELLAB_SECRET
 ```
 
 Never paste the Secret into chat, commit it, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps. For deeper setup, auth, and service-boundary details, see [More Documentation ↗](docs/README.md) and [PixelLab Auth And Security ↗](docs/pixellab/pixellab-auth-and-security.md).
-
-## Showcase
-
-Example workflow notes live in [Showcase ↗](docs/showcase/README.md), including prompts, selected routes, outputs, and validation notes for real PixelLab Pip runs.
-
-## MIT License
-
-See [LICENSE ↗](LICENSE).
