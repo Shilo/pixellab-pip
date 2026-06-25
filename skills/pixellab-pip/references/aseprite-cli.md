@@ -73,11 +73,24 @@ Before running Aseprite:
 2. Show which files will be read and written.
 3. Ask before launching visible Aseprite.
 4. Ask before overwriting existing files.
-5. For existing `.aseprite` files, default to writing a copy such as `name-pixellab.aseprite`; modify the original only after explicit approval.
+5. For existing `.aseprite` files, default to writing a copy such as `name-pixellab.aseprite`; modify the original only after explicit approval for that exact path.
 6. Keep generated scripts and outputs inside the user's chosen output directory unless they approve another path.
 7. Treat extension startup errors as a diagnostic signal. Do not work around them by reading extension internals.
 
 Use `--batch` for noninteractive file conversion and export. Launch the GUI only when the user wants to continue editing manually.
+
+## Original File Safety
+
+Never write directly into an existing `.aseprite` file unless the user explicitly approves in-place modification of that exact file. A request like "add this to my Aseprite file" is not enough by itself; treat it as permission to create a modified copy.
+
+Default behavior for existing files:
+
+1. Read the original `.aseprite` file.
+2. Write a separate output file, such as `name-pixellab.aseprite`.
+3. Verify the output copy.
+4. Verify the original file was not changed when the workflow was meant to be copy-on-write.
+
+Use `spr:saveCopyAs(output)` for existing-file imports unless the user has explicitly approved overwriting or saving back to the original path. Do not pass the original path as `output` by default. If the user does approve an in-place edit, restate the exact file path and action before writing.
 
 ## CLI Patterns
 
@@ -450,7 +463,7 @@ The script should sort by explicit `frame` value, verify each file exists, verif
 ### Import Into Existing `.aseprite`
 
 1. Confirm the input `.aseprite` file, generated files to import, and intended placement.
-2. Default to a new output file instead of modifying the original.
+2. Default to a new output file instead of modifying the original. Do not write to the input path unless the user explicitly approved in-place modification of that exact file.
 3. Open the existing file in a Lua script with `app.open(input)`.
 4. Inspect existing layer names, frame count, tags, canvas size, and color mode if placement depends on them.
 5. Compare generated image dimensions against the existing canvas before creating cels.
@@ -461,6 +474,7 @@ The script should sort by explicit `frame` value, verify each file exists, verif
 10. Add or update tags only when the user requested them or when the import represents a named animation.
 11. Save with `spr:saveCopyAs(output)` unless the user explicitly approved modifying the original.
 12. Verify the output copy with `--list-layers` and `--list-tags`.
+13. If the workflow was copy-on-write, verify the original file was not changed.
 
 Use this workflow for file-level edits only. It can modify an existing project file on disk, but it is not live control of the already-open Aseprite editor session.
 

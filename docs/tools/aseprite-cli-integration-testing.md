@@ -29,7 +29,9 @@ When a live PixelLab smoke test is useful and the service is healthy, keep it sm
 
 ## Original File Safety
 
-Never write into an existing `.aseprite` original during automated testing. E2E tests must create a new temporary `.aseprite` file or copy an input file first, then write only to the copy.
+Tests should verify the agent-facing contract: Pip must never write directly into an existing `.aseprite` original unless the user explicitly approves in-place modification of that exact file.
+
+During automated testing, create a new temporary `.aseprite` file or copy an input file first, then write only to the copy.
 
 If a test uses an existing source file:
 
@@ -37,7 +39,7 @@ If a test uses an existing source file:
 - Hash it after the run.
 - Fail the test if the hash changed.
 
-In-place writes require explicit user approval for that exact file and should not be part of routine verification.
+In-place writes require explicit user approval for that exact file and should not be part of routine verification. Routine E2E coverage should prove copy-on-write behavior and original-file preservation.
 
 ## Verification Notes
 
