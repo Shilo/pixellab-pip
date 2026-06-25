@@ -1,34 +1,63 @@
-# Repository Guidelines
+# PixelLab Pip
 
-## Project Structure & Module Organization
+PixelLab Pip is an unofficial, agent-agnostic PixelLab workflow router packaged as a plugin and Agent Skill. It helps coding agents handle PixelLab asset generation, editing, animation, MCP setup, REST v2 integration, website/editor fallback, Aseprite and Pixelorama workflows, bearer-token setup, SDK/docs checks, endpoint selection, image input roles, prompt normalization, localization, usage reporting, and completion sound behavior. The core product is not an application server or library build; it is a portable skill contract plus manifests for multiple agent/plugin ecosystems. Treat `skills/pixellab-pip/SKILL.md` as the source of truth, and treat reference files as progressive context that should be opened only when the user's request needs that specialty.
 
-PixelLab Pip is an agent plugin/skill repository. The canonical runtime contract is `skills/pixellab-pip/SKILL.md`; supporting guidance lives in `skills/pixellab-pip/references/`. Bundled local assets, such as the bark helper and sound, are in `skills/pixellab-pip/assets/`.
+Canonical skill contract: `skills/pixellab-pip/SKILL.md`
 
-Root manifests target different agent surfaces: `plugin.json`, `.codex-plugin/plugin.json`, `.claude-plugin/`, `.cursor-plugin/`, `.github/plugin/`, `gemini-extension.json`, and `GEMINI.md`. Human-facing documentation lives in `README.md` and `docs/`. Development helpers are in `dev-tools/`.
+Product overview and install instructions: `README.md`
 
-## Build, Test, and Development Commands
+Developer workflow and repository layout: `docs/developer.md`
 
-- `.\dev-tools\manage-codex-plugin.ps1` refreshes a local or production Codex plugin install for manual testing.
-- `codex plugin list --json` verifies which cached plugin build Codex is using.
-- `codex debug prompt-input '@pixellab-pip bark off'` checks that the installed skill can be invoked.
-- `git diff --check` catches trailing whitespace and patch formatting mistakes.
+Documentation index: `docs/README.md`
 
-There is no app build step. Release packaging is handled by `.github/workflows/release-skill.yml`, which bumps manifest versions and zips `skills/pixellab-pip/`.
+PixelLab terminology and surface model: `docs/pixellab/`
 
-## Coding Style & Naming Conventions
+Tool comparison and integration notes: `docs/tools/`
 
-Use Markdown for skill and docs content, with concise headings and task-oriented language. Keep file names lowercase with hyphens, such as `image-input-roles.md`. JSON manifests use two-space indentation and synchronized `MAJOR.MINOR.PATCH` versions. PowerShell scripts should use strict mode, explicit errors, and repository-relative path resolution as shown in `dev-tools/manage-codex-plugin.ps1`.
+Showcase assets and examples: `docs/showcase/`
 
-## Testing Guidelines
+Root plugin manifest: `plugin.json`
 
-Before opening a PR, validate changed Markdown links and examples by reading the affected workflow end to end. For skill behavior changes, reinstall locally with the dev helper and test at least one representative invocation. For manifest changes, confirm every agent-specific manifest still points to `skills/pixellab-pip/SKILL.md`.
+Codex plugin manifest: `.codex-plugin/plugin.json`
 
-## Commit & Pull Request Guidelines
+Claude plugin manifests: `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`
 
-History uses Conventional Commit style, for example `docs(aseprite): add aseprite-mcp documentation` or `feat(aseprite-cli): enhance safety guidelines`. Prefer `docs(scope): ...`, `feat(scope): ...`, or `fix(scope): ...` with a specific scope.
+Cursor plugin manifests: `.cursor-plugin/plugin.json`, `.cursor-plugin/marketplace.json`
 
-PRs should include a short summary, files or workflows changed, validation performed, and screenshots or terminal excerpts only when they clarify plugin behavior. Link related issues when available.
+GitHub Copilot plugin marketplace manifest: `.github/plugin/marketplace.json`
 
-## Security & Configuration Tips
+Gemini extension context: `gemini-extension.json`, `GEMINI.md`
 
-Do not commit user-local runtime config such as `skills/pixellab-pip/pixellab-pip.json`. Never ask users to paste bearer tokens into chat, print token values, or automate undocumented internal PixelLab endpoints. Prefer documented MCP and REST v2 surfaces.
+Release packaging workflow: `.github/workflows/release-skill.yml`
+
+Codex local install helper: `dev-tools/manage-codex-plugin.ps1`
+
+Credential and bearer-token rules: `skills/pixellab-pip/references/credentials.md`
+
+MCP/API setup flow: `skills/pixellab-pip/references/setup.md`
+
+Official PixelLab docs refresh rules: `skills/pixellab-pip/references/official-pixellab-documentation.md`
+
+Image attachment role routing: `skills/pixellab-pip/references/image-input-roles.md`
+
+Usage, balance, job, and result reporting: `skills/pixellab-pip/references/usage-reporting.md`
+
+Website/editor fallback rules: `skills/pixellab-pip/references/browser-fallback.md`
+
+Localization behavior: `skills/pixellab-pip/references/localization.md`
+
+Prompt and local assembly workflows: `skills/pixellab-pip/references/local-asset-assembly.md`
+
+Layered character and outfit workflows: `skills/pixellab-pip/references/paperdolling.md`
+
+Tileset workflow routing: `skills/pixellab-pip/references/tilesets.md`
+
+Aseprite CLI workflow: `skills/pixellab-pip/references/aseprite-cli.md`
+
+Aseprite MCP workflow: `skills/pixellab-pip/references/aseprite-mcp.md`
+
+Bark completion sound behavior: `skills/pixellab-pip/references/bark.md`, `skills/pixellab-pip/assets/bark.py`, `skills/pixellab-pip/assets/bark.wav`
+
+Git conventional commits: use focused messages such as `docs(aseprite): add aseprite-mcp documentation`, `feat(aseprite-cli): enhance safety guidelines`, or `fix(setup): clarify bearer-token reuse`.
+
+Security posture: never print secrets, ask users to paste bearer tokens into chat, inspect private `.env*` files, or automate undocumented internal PixelLab endpoints.
