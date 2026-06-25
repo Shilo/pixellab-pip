@@ -4,17 +4,23 @@ Last reviewed: 2026-06-25.
 
 ![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png)
 
-This example shows prompt iteration for PixelLab Pip's REST v2 UI generator. The strongest result is the final fantasy MMORPG GUI sheet: a complete, highly usable transparent HUD kit with portrait frames, health and mana bars, action bars, bag slots, minimap frame, quest tracker, chat panel, parchment window, controls, icon frames, and currency buttons. Earlier iterations are kept below because they show why explicit component lists matter.
+PixelLab Pip's REST v2 UI generator can handle related gameplay GUI requests at different levels of specificity. The primary result is the standalone fantasy MMORPG GUI sheet: a complete, highly usable transparent HUD kit with portrait frames, health and mana bars, action bars, bag slots, minimap frame, quest tracker, chat panel, parchment window, controls, icon frames, and currency buttons. Earlier gameplay GUI examples are kept below because they show why explicit component lists matter.
 
 ## Request
 
-Initial:
+### Short MMO Prompt
+
+```text
+pip create a complete world of warcraft gui
+```
+
+### Mood-Only Prompt
 
 ```text
 pip, create deep charcoal slate, framed by cool iron and ignited by sharp hits of heath-fire orange game UI at 344x192 resolution
 ```
 
-Follow-up:
+### Component-Specific Prompt (Follow-up)
 
 ```text
 create a new generation for full gameplay GUI:
@@ -25,17 +31,11 @@ create a new generation for full gameplay GUI:
 - other useful elements
 ```
 
-Final follow-up:
-
-```text
-pip create a complete world of warcraft gui
-```
-
 ## Best Example: Complete Fantasy MMORPG GUI
 
 ![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png)
 
-This pass is the primary showcase example. Pip interpreted the named game as a broad high-fantasy MMORPG interface reference and routed the work to PixelLab REST v2 `generate-ui-v2`, while avoiding a direct copy of an existing game's protected interface.
+The standalone short MMO prompt is the primary showcase example. Pip interpreted the named game as a broad high-fantasy MMORPG interface reference and routed the work to PixelLab REST v2 `generate-ui-v2`, while avoiding a direct copy of an existing game's protected interface.
 
 Route: PixelLab REST v2 `generate-ui-v2`
 
@@ -74,7 +74,7 @@ Request body:
 
 ![First-pass charcoal heath-fire UI](gameplay-gui/gameplay-gui-mood-only-344x192.png)
 
-This pass matched the desired palette and material mood, but it did not specify the gameplay elements that should appear. The output is a small UI sheet with a panel, a smaller frame, and a bar, rather than a full gameplay GUI kit.
+The mood-only prompt matched the desired palette and material mood, but it did not specify the gameplay elements that should appear. The output is a small UI sheet with a panel, a smaller frame, and a bar, rather than a full gameplay GUI kit.
 
 Route: PixelLab REST v2 `generate-ui-v2`
 
@@ -113,7 +113,7 @@ Request body:
 }
 ```
 
-## Earlier Good Example: Component-Specific Prompt
+## Good Example: Component-Specific Prompt
 
 ![Gameplay GUI kit](gameplay-gui/gameplay-gui-component-specific-688x384.png)
 
