@@ -88,7 +88,7 @@ loopable happy idle: Pip stays sitting facing forward with a constant cheerful t
 
 ## Local Assembly Notes
 
-The GIF preview was assembled from transparent PNG frames with ImageMagick. Transparent GIF previews need correct frame disposal metadata; otherwise previous frames can appear to linger. The final GIF was checked for clean looping before being added to the showcase.
+The GIF preview was assembled in Aseprite from the single-frame PNGs, with the first frame duration adjusted for the idle loop.
 
 ## Outputs
 
