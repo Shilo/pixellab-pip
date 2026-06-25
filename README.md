@@ -32,7 +32,7 @@ Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot
 | Smart tool selection | Chooses between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
 | Guided PixelLab setup | Helps agents set up MCP/API access, diagnose missing auth, and configure only what the user approves without reading or printing the secret value. |
 | Answer PixelLab questions | Explains setup, auth, docs, SDKs, troubleshooting, and confusing feature names. |
-| Enhance prompts and descriptions | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions, using PixelLab enhance endpoints only when they match the task. |
+| Auto-enhance prompts and descriptions | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions by default, with opt-out support. |
 | Non-English request support | Translates or normalizes PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in the user's language. |
 | Use images and attachments correctly | Classifies supplied files as edit targets, identity references, style references, concept images, masks, palettes, init/source images, or animation frames instead of guessing one generic role. |
 | Paperdoll and layered workflow guidance | Helps route layered character, outfit, equipment, isolated asset, and composited-output requests without pretending PixelLab returns layers where it does not. |

@@ -32,6 +32,10 @@ MCP may also expose `pixellab://docs/...` documentation resources for engine/fra
 
 `https://api.pixellab.ai/v2/llms.txt` is a REST API guide for agents. It lists v2 endpoints, base URL, bearer auth, async job behavior, and links to OpenAPI/interactive docs.
 
+## Prompt Enhancement Pricing Boundary
+
+Public REST v2 docs list `enhance-pixen-prompt`, `enhance-character-v3-prompt`, and `enhance-animation-v3-prompt`. A live REST v2 check on 2026-06-25 returned `usage.generations: 0.05` with the same balance delta for `enhance-pixen-prompt`. Treat prompt enhancement as low-cost prompt prep, not a generation job. Ask first for bulk or unusually cost-sensitive enhancement, and honor opt-out. These endpoints are not root website/editor endpoints.
+
 ## MCP vs REST Image Editing Boundary
 
 As of the current MCP guide, PixelLab MCP documents managed asset tools for characters, character states, character animations, top-down tilesets, sidescroller tilesets, isometric tiles, tile variants, objects, map objects, projects, chat/sandbox helpers, and balance checks. It does not document raw image-editing tools equivalent to REST v2 `edit-image`, `edit-images-v2`, `inpaint`, `inpaint-v3`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, or `remove-background`.
