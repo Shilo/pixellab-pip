@@ -4,26 +4,31 @@ Last reviewed: 2026-06-25.
 
 ![Pip mascot idle animation](pip/pip.gif)
 
-Pip is a compact honey-tan pixel pup mascot with a cyan collar and a friendly loopable idle animation. This example shows how Pip turns a mascot brief into PixelLab-ready character and animation prompts, routes the work through PixelLab MCP, and records the resulting assets for reuse.
+Pip is a compact honey-tan pixel pup mascot with a cyan collar and a friendly loopable idle animation. PixelLab Pip turned a mascot brief into PixelLab-ready character and animation prompts, routed the work through PixelLab MCP, and recorded the resulting assets for reuse.
 
-## Initial Request
+## Request
+
+### Character Prompt
 
 ```text
 pip create a 64px character based on .pip-mascot.md
 ```
 
+### Idle Animation Prompt (Follow-up)
+
+```text
+it should be happy and also loopable, so dont do stuff like a short smile, must be a repeated smile or tongue out, stuff like that
+```
+
+## Best Example: Pip Mascot Idle Animation
+
+![Pip mascot idle animation](pip/pip.gif)
+
+The final showcase asset is a south-facing happy pant idle loop assembled from the generated PixelLab character animation frames.
+
 ## Brief Summary
 
 The mascot direction was a tiny rounded corgi-inspired scout puppy with honey-tan fur, cream muzzle/chest/belly/paws, oversized floppy ears, simple dark eyes, a cyan collar, and a small route-node/API-style tag. Pip condensed that direction into the generation-ready PixelLab prompt below.
-
-## Outputs
-
-| File | Purpose |
-|---|---|
-| [`pip/pip.png`](pip/pip.png) | Static south-facing Pip sprite. |
-| [`pip/pip.gif`](pip/pip.gif) | South-facing happy pant idle loop. |
-
-The showcase image files are display-ready `34x54px` versions derived from the generated PixelLab character and animation frames.
 
 ## Character Generation
 
@@ -57,12 +62,6 @@ Generation result:
 
 ## Idle Animation
 
-Follow-up direction:
-
-```text
-it should be happy and also loopable, so dont do stuff like a short smile, must be a repeated smile or tongue out, stuff like that
-```
-
 Selected concept:
 
 ```text
@@ -91,7 +90,21 @@ loopable happy idle: Pip stays sitting facing forward with a constant cheerful t
 
 The GIF preview was assembled from transparent PNG frames with ImageMagick. Transparent GIF previews need correct frame disposal metadata; otherwise previous frames can appear to linger. The final GIF was checked for clean looping before being added to the showcase.
 
+## Outputs
+
+| File | Purpose |
+|---|---|
+| [`pip/pip.gif`](pip/pip.gif) | Primary south-facing happy pant idle loop. |
+| [`pip/pip.png`](pip/pip.png) | Static south-facing Pip sprite. |
+
+The showcase image files are display-ready `34x54px` versions derived from the generated PixelLab character and animation frames.
+
+## Validation Notes
+
 Final verification:
 
 - GIF dimensions: `34x54px`.
+- GIF frames: `9`.
+- GIF pixel format: `Format32bppArgb`.
 - Static PNG dimensions: `34x54px`.
+- Static PNG pixel format: `Format32bppArgb`.
