@@ -1,4 +1,4 @@
-# Official PixelLab Docs
+# Official PixelLab Documentation
 
 Read this when a needed endpoint/tool/field is not found in the local skill, or when auth setup, model/mode availability, prices, limits, SDK support, or exact request/response schemas matter.
 

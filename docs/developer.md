@@ -71,12 +71,12 @@ Runtime files:
 - `skills/pixellab-pip/assets/bark.py` - best-effort local helper for deterministic bark config and sound playback.
 - `skills/pixellab-pip/assets/bark.wav` - bundled bark sound.
 - `skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
-- `skills/pixellab-pip/references/setup.md` - natural-language setup mode for MCP/API/auth after install.
+- `skills/pixellab-pip/references/setup.md` - natural-language setup for MCP/API/auth after install.
 - `skills/pixellab-pip/references/bark.md` - persistent completion sound toggle and generation-finish rules.
 - `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
 - `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
 - `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
-- `skills/pixellab-pip/references/image-inputs.md` - image input roles for attachments, file paths, and endpoint fields.
+- `skills/pixellab-pip/references/image-input-roles.md` - image input roles for attachments, file paths, and endpoint fields.
 - `skills/pixellab-pip/references/localization.md` - non-English request translation and response-language handling.
 - `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
-- `skills/pixellab-pip/references/official-docs.md` - when and how to refresh official PixelLab docs.
+- `skills/pixellab-pip/references/official-pixellab-documentation.md` - when and how to refresh official PixelLab documentation.

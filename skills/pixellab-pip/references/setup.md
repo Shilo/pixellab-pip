@@ -1,4 +1,4 @@
-# Setup Mode
+# Setup
 
 Use this reference when the user asks natural-language setup questions such as installing PixelLab Pip, connecting PixelLab to an assistant/editor/app, enabling MCP tools, using REST/API v2, fixing authentication, checking readiness, or deciding between MCP and API. This is a reference for the existing PixelLab Pip skill, not a separate skill.
 
@@ -18,11 +18,11 @@ For a standalone `setup` after skill invocation, treat the setup mode as `unknow
 
 `/pixellab-pip setup` behaves like a beginner-friendly wizard, not a static help page. Start from the next safest action, recommend MCP + API first, and ask only the shortest question needed to continue.
 
-When the assistant app exposes an interactive choice prompt, use it for setup-mode selection instead of a prose-only question. Claude Code may show its `AskUserQuestion` UI. In Codex app, use `request_user_input` only when that tool is actually available, typically in Plan mode. Codex full-access/sandbox settings do not imply `request_user_input` availability. If Codex is in normal chat/default mode or the tool is not exposed, ask in normal chat. Keep this optional so CLI/noninteractive agents still work.
+When the assistant app exposes an interactive choice prompt, use it for setup selection instead of a prose-only question. Claude Code may show its `AskUserQuestion` UI. In Codex app, use `request_user_input` only when that tool is actually available, typically in Plan mode. Codex full-access/sandbox settings do not imply `request_user_input` availability. If Codex is in normal chat/default mode or the tool is not exposed, ask in normal chat. Keep this optional so CLI/noninteractive agents still work.
 
-For a bare setup command, mode selection is mandatory before any MCP/API-specific setup. Do not ask yes/no questions such as "Should I prepare a Codex MCP config preview?" before the user chooses MCP + API, MCP only, API only, or Manual. Do not inspect config, prepare write previews, or request write approval until the mode is chosen. A brief readiness note is allowed, but the next user-facing question must be the setup-mode choice.
+For a bare setup command, mode selection is mandatory before any MCP/API-specific setup. Do not ask yes/no questions such as "Should I prepare a Codex MCP config preview?" before the user chooses MCP + API, MCP only, API only, or Manual. Do not inspect config, prepare write previews, or request write approval until the mode is chosen. A brief readiness note is allowed, but the next user-facing question must be the setup choice.
 
-For setup-mode selection, prefer these choices:
+For setup selection, prefer these choices:
 
 - MCP + API (recommended): Connect PixelLab tools directly to the assistant/editor and configure `PIXELLAB_SECRET` so Pip can use REST/API fallback.
 - MCP only: Connect PixelLab tools directly to the assistant/editor. Prefer app secret settings or an env/secret reference; use a literal-token MCP config only as an explicit user-chosen fallback when the app has no token-free option, and warn that it does not configure Pip REST/API fallback.

@@ -62,6 +62,6 @@ For detailed execution rules used by the skill, see:
 
 - [Tilesets](../../skills/pixellab-pip/references/tilesets.md)
 - [Paperdolling](../../skills/pixellab-pip/references/paperdolling.md)
-- [Image Input Roles](../../skills/pixellab-pip/references/image-inputs.md)
+- [Image Input Roles](../../skills/pixellab-pip/references/image-input-roles.md)
 - [Usage Reporting](../../skills/pixellab-pip/references/usage-reporting.md)
-- [Official PixelLab Docs](../../skills/pixellab-pip/references/official-docs.md)
+- [Official PixelLab Documentation](../../skills/pixellab-pip/references/official-pixellab-documentation.md)

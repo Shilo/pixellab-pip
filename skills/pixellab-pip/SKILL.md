@@ -84,18 +84,18 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 Read only the relevant reference:
 
 - Bearer-token setup, PixelLab UI naming, and MCP auth reuse: `references/credentials.md`.
-- Natural-language setup mode for MCP/API/auth after install: `references/setup.md`.
+- Natural-language setup for MCP/API/auth after install: `references/setup.md`.
 - Browser fallback and website automation boundaries: `references/browser-fallback.md`.
 - Persistent completion sound toggle: `references/bark.md`.
 - Paperdolling and layered character workflows: `references/paperdolling.md`.
 - Tileset and tile-variant details: `references/tilesets.md`.
-- Attachments, file paths, supplied image roles, endpoint fields, or fixed-size image-to-pixel-art: `references/image-inputs.md`.
+- Attachments, file paths, supplied image roles, endpoint fields, or fixed-size image-to-pixel-art: `references/image-input-roles.md`.
 - Non-English or mixed-language user requests and response-language handling: `references/localization.md`.
-- Official PixelLab docs, MCP docs, REST docs, and web-refresh routing: `references/official-docs.md`.
+- Official PixelLab documentation, MCP documentation, REST documentation, and web-refresh routing: `references/official-pixellab-documentation.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
 - Local animation preview GIFs, spritesheets, or ImageMagick/`magick` assembly from generated frames: `references/local-asset-assembly.md`.
 
-Optional broader docs: in full plugin/repo installs, these paths resolve relative to this `SKILL.md`; raw skill installs may omit them. If runtime `references/` are not enough, read at most one matching file if it exists. If absent, continue with `references/official-docs.md` and current official PixelLab docs; do not search or load the set.
+Optional broader docs: in full plugin/repo installs, these paths resolve relative to this `SKILL.md`; raw skill installs may omit them. If runtime `references/` are not enough, read at most one matching file if it exists. If absent, continue with `references/official-pixellab-documentation.md` and current official PixelLab documentation; do not search or load the set.
 
 - Surface boundaries and service selection: `../../docs/pixellab/pixellab-surfaces-and-services.md`.
 - Plain-language asset routing: `../../docs/pixellab/pixellab-asset-routing.md`.

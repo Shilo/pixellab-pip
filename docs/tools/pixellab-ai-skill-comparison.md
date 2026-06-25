@@ -91,7 +91,7 @@ Notable `pixellab_workflow.py` commands include `list-recipes`, `plan`, `run`, `
 - Treat MCP as configured-or-not; never pretend tools exist.
 - Preserve paperdoll frame-grid contracts and distinguish composited outputs from reusable layers.
 
-These ideas are already covered in Pip through `SKILL.md`, `references/localization.md`, `references/image-inputs.md`, `references/paperdolling.md`, and `references/usage-reporting.md`.
+These ideas are already covered in Pip through `SKILL.md`, `references/localization.md`, `references/image-input-roles.md`, `references/paperdolling.md`, and `references/usage-reporting.md`.
 
 ## Ideas Not Adopted
 
@@ -106,11 +106,11 @@ These ideas are already covered in Pip through `SKILL.md`, `references/localizat
 
 No new `skills/pixellab-pip/references/*.md` file is needed just because PixelLab AI Skill has more references. Pip already has the runtime references that match its scope:
 
-- `image-inputs.md` for role classification and prompt facts from attachments.
+- `image-input-roles.md` for role classification and prompt facts from attachments.
 - `localization.md` for non-English request translation and response-language handling.
 - `paperdolling.md` for layered character and equipment workflows.
 - `usage-reporting.md` for live-call reporting and final-output checks.
-- `official-docs.md` for current PixelLab docs refresh.
+- `official-pixellab-documentation.md` for current PixelLab documentation refresh.
 - `tilesets.md`, `credentials.md`, and `browser-fallback.md` for focused edge cases.
 
 Add a new runtime reference only when Pip gains a repeated workflow that cannot fit concisely in the existing files, such as a real manifest runner, a validated showcase recipe format, or a dedicated local asset validator.
