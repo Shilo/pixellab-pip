@@ -6,7 +6,7 @@ Purpose: explain how PixelLab's public APIs, agent tools, website/editor surface
 
 PixelLab is not one API surface. It has public REST endpoints, hosted MCP tools, product websites, editor workflows, SDKs, and local editor integrations. Pip works because it treats those as related but distinct services and chooses the right one for the user's intent.
 
-For exact current schemas and tool lists, verify against the official [REST v2 docs](https://api.pixellab.ai/v2/docs), [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json), and [MCP docs](https://api.pixellab.ai/mcp/docs).
+For exact current schemas and tool lists, verify against the official [REST v2 docs](https://api.pixellab.ai/v2/docs), [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json), and [MCP docs](https://api.pixellab.ai/mcp/docs). For the full official link list, see [PixelLab Pip Resources](../resources.md#official-pixellab-links).
 
 ## Surface Map
 
@@ -47,12 +47,3 @@ Use this order for most agent work:
 - Unversioned website routes under `https://api.pixellab.ai/...` are not public REST v2 just because they share the host.
 - Website login/session credentials are not the same thing as the public REST/MCP bearer token.
 - Product labels such as `Pro`, `v3`, `new`, `Pixen`, `PixFlux`, and `BitForge` need to be interpreted in the context of the selected surface.
-
-## Current Official References
-
-- [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt)
-- [REST v2 docs](https://api.pixellab.ai/v2/docs)
-- [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json)
-- [MCP docs](https://api.pixellab.ai/mcp/docs)
-- [MCP setup](https://www.pixellab.ai/mcp)
-- [PixelLab GitHub organization](https://github.com/pixellab-code)
