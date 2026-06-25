@@ -1,6 +1,6 @@
 # More Documentation
 
-Last reviewed: 2026-06-24.
+Last reviewed: 2026-06-25.
 
 These docs explain PixelLab tools, workflows, terminology, SDK boundaries, and auth rules that Pip needs in order to automate PixelLab correctly. They supplement the repository README; install, update, and plugin metadata stay there.
 

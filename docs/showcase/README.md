@@ -1,5 +1,7 @@
 # Showcase
 
+Last reviewed: 2026-06-25.
+
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
 ## Generated Assets

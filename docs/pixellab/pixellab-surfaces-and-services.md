@@ -1,6 +1,6 @@
 # PixelLab Surfaces And Services
 
-Last reviewed: 2026-06-23.
+Last reviewed: 2026-06-25.
 
 Purpose: explain how PixelLab's public APIs, agent tools, website/editor surfaces, SDKs, and local integrations differ so Pip can choose the right automation boundary.
 

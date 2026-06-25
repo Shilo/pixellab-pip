@@ -1,5 +1,7 @@
 # Developer
 
+Last reviewed: 2026-06-25.
+
 ## Codex Local Plugin Testing
 
 Codex installs both remote and local plugins into its plugin cache. Editing files in this repository, such as `skills/pixellab-pip/SKILL.md`, does not live-update the active Codex skill. Refresh the local development install after repo edits, then open a fresh Codex thread so the new cached snapshot is loaded.

@@ -1,5 +1,7 @@
 # Resources
 
+Last reviewed: 2026-06-25.
+
 ## Official PixelLab
 
 - [PixelLab.ai](https://www.pixellab.ai/) - PixelLab's official product homepage.

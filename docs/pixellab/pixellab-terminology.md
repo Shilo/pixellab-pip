@@ -1,6 +1,6 @@
 # PixelLab Terminology
 
-Last reviewed: 2026-06-23.
+Last reviewed: 2026-06-25.
 
 Purpose: prevent agents from over-interpreting PixelLab labels such as `Pro`, `v3`, `new`, `Pixen`, `PixFlux`, `BitForge`, `tiles`, and `tileset`.
 

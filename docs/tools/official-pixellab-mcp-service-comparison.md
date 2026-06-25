@@ -1,6 +1,6 @@
 # Official PixelLab MCP Service Comparison
 
-Last reviewed: 2026-06-24.
+Last reviewed: 2026-06-25.
 
 This compares PixelLab Pip with the official [PixelLab MCP service](https://api.pixellab.ai/mcp/docs). The goal is to define the technical boundary between the service that executes PixelLab work and the skill that helps an agent choose, configure, and use the right PixelLab surface.
 

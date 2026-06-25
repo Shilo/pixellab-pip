@@ -1,6 +1,6 @@
 # PixelLab AI Skill Comparison
 
-Last reviewed: 2026-06-24.
+Last reviewed: 2026-06-25.
 
 This compares PixelLab Pip with the unofficial [PixelLab AI Skill](https://clawhub.ai/uncmatteth/skills/pixellab-ai) on ClawHub. The goal is to understand adjacent tooling, not to copy its implementation.
 
@@ -9,7 +9,7 @@ Sources reviewed:
 - [ClawHub PixelLab AI Skill page](https://clawhub.ai/uncmatteth/skills/pixellab-ai).
 - [ClawHub package metadata](https://clawhub.ai/api/v1/packages/pixellab-ai).
 - [ClawHub version metadata](https://clawhub.ai/api/v1/packages/pixellab-ai/versions).
-- [ClawHub v1.5.1 file metadata](https://clawhub.ai/api/v1/packages/pixellab-ai/versions/1.5.1).
+- [ClawHub v1.5.5 file metadata](https://clawhub.ai/api/v1/packages/pixellab-ai/versions/1.5.5).
 
 ## Summary
 
@@ -63,7 +63,7 @@ If Pip adopts a similar helper later, it should be an explicit loader/wrapper be
 
 ## PixelLab AI Skill Package Inventory
 
-The reviewed v1.5.1 package contains:
+The reviewed v1.5.5 package contains:
 
 - `_meta.json`, `SKILL.md`, `skill-card.md`, `agents/openai.yaml`, and two OpenClaw config examples.
 - Two Python helper scripts: `scripts/pixellab_client.py` and `scripts/pixellab_workflow.py`.

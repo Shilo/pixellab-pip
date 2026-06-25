@@ -1,6 +1,6 @@
 # PixelLab Asset Routing
 
-Last reviewed: 2026-06-23.
+Last reviewed: 2026-06-25.
 
 Purpose: map plain-language asset requests to the PixelLab workflow family most likely to satisfy the user without asking them to know PixelLab's internal product vocabulary.
 
@@ -22,12 +22,12 @@ Use this as routing guidance, not as a frozen schema. Refresh official docs for 
 | Individual tile variants | MCP tiles-pro tools or REST v2 tiles-pro endpoints. | This is different from a full terrain tileset. Clarify "tiles" vs "tileset" when ambiguous. |
 | Isometric tile | MCP isometric tile tool or REST v2 isometric tile endpoint. | Ask whether the user wants one isometric tile or a full tileset when the wording is ambiguous. |
 | General image, standalone sprite, icon, concept | REST v2 image generation. | MCP may not expose every raw image endpoint; use REST v2 for generic image primitives. |
-| Background, scene, title image | REST v2 background/image generation. | Treat as image generation unless the user needs map/editor semantics. |
+| Background, scene, title image | REST v2 background/image generation. | Use documented `create-image-pixflux-background` for background-image generation when REST v2 is the selected surface; treat as normal image generation unless the user needs map/editor semantics. |
 | UI, HUD, button, panel, menu | REST v2 UI generation. | Website UI libraries are human/editor surfaces unless a public endpoint covers the task. |
 | Image edit, inpaint, remove background, resize, convert to pixel art | REST v2 edit/transform endpoints. | Supplied images are optional unless the selected route requires image fields. For image-to-pixel-art without a requested size, prefer Pro. For fixed output size within current `output_size` limits, use normal `image-to-pixelart`. If the requested size is outside those limits, use Pro, verify dimensions, and if they differ, warn the user and ask before using PixelLab `resize` or local nearest-neighbor/canvas resize/pad/crop. |
 | Add VFX/effect/trail/aura to an existing sprite | REST v2 image edit. | When a target sprite/image is supplied, preserve that image and apply the effect to the same canvas. Generate a separate object/effect asset only when the user asks for an isolated reusable layer or no target image is supplied. |
 | Reduce colors / quantize palette | Website/editor/local image tooling. | No public REST v2/MCP reduce-colors endpoint was documented. |
-| Unzoom pixel art | Aseprite or Pixelorama extension. | Website docs list this as extension-only. |
+| Unzoom pixel art | PixelLab website/editor/manual tool or local tooling. | No public REST v2 or MCP Unzoom endpoint was documented. |
 | Try on garment/item | Website Try on for single-image compositing; REST `transfer-outfit-v2` for animation-frame outfit transfer. | Do not treat either as isolated layer extraction. |
 | Multi image | Website experimental flow or closest documented REST image/edit route after checking current docs. | No direct public REST v2/MCP "multi image" route was documented. |
 | Reshape | Website Reshape or closest documented edit/character route after checking current docs. | Website docs require exactly 64x64 canvas; no public REST v2/MCP reshape endpoint was documented. |

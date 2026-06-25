@@ -1,6 +1,6 @@
 # PixelLab SDK Compatibility
 
-Last reviewed: 2026-06-23.
+Last reviewed: 2026-06-25.
 
 Purpose: help agents decide when to use an official PixelLab SDK and when to call REST v2 directly.
 

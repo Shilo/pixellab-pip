@@ -1,6 +1,6 @@
 # PixelLab Auth And Security
 
-Last reviewed: 2026-06-23.
+Last reviewed: 2026-06-25.
 
 Purpose: document the safe credential and session boundaries agents need before calling PixelLab MCP, REST v2, website/editor workflows, or generated asset links.
 
