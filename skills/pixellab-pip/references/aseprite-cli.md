@@ -13,6 +13,30 @@ PixelLab MCP or documented REST v2
 
 Do not use this route to automate the PixelLab Aseprite extension itself.
 
+## Lua Integration Model
+
+Aseprite Lua is not a separate Lua runtime that controls Aseprite from the outside. The agent launches the Aseprite executable, and Aseprite runs the Lua script inside its own scripting environment.
+
+Use this shape:
+
+```powershell
+& $AsepritePath -b --script-param "output=$Output" --script "script.lua"
+```
+
+In that script, Aseprite exposes globals such as `app`, `Sprite`, `Image`, `Point`, `Rectangle`, and `ColorMode`. `app.params` receives `--script-param` values, `app.open()` loads sprites, and sprite methods or `app.command.*` modify/export them.
+
+This means Lua is useful for file/workspace automation:
+
+- Create a new `.aseprite` file.
+- Open a source image, GIF, sprite sheet, or `.aseprite` file.
+- Add layers, groups, frames, cels, tags, and frame durations.
+- Export PNG sequences, GIFs, sprite sheets, metadata, or copies.
+- Save a modified copy of an existing `.aseprite` file.
+
+This does not make the PixelLab Aseprite extension a stable headless automation API. Extension commands are designed around interactive Aseprite state, dialogs, active sprite/layer/frame, plugin preferences, editor placement behavior, and private first-party communication. Do not call extension modules directly, drive extension dialogs through Lua, or invoke extension commands to spend credits unless a future bridge explicitly exposes a supported command contract with approval gates.
+
+The extension's Aseprite commands are dialog launchers and editor actions, not stable script-callable generation commands. Do not run PixelLab extension files such as `generate-*.lua` through `aseprite --script` to spend PixelLab credits, call private operations, or bypass the visible editor workflow.
+
 ## Positioning
 
 Use Aseprite as a local file and workspace tool after PixelLab has generated files through public automation surfaces.
@@ -38,6 +62,21 @@ Poor fit:
 - Mouse, screenshot, or OCR automation as the default workflow.
 
 If the user wants exact PixelLab extension behavior such as extension-specific reduce-colors, unzoom, pixel correction, or in-editor placement, explain that the stable agent route is PixelLab MCP/REST plus Aseprite CLI workspace handling. Offer visible manual Aseprite use or a separately designed bridge only if they really need live editor behavior.
+
+## Output Mode Mapping
+
+The PixelLab Aseprite extension has live-editor output concepts such as creating a new frame, creating a new layer, or modifying the current layer. In this CLI integration, map those concepts to safer file-level operations:
+
+| User-facing intent | CLI/Lua behavior |
+|---|---|
+| "Make an Aseprite file" | Create a new `.aseprite` workspace from generated files. |
+| "Put each result on a layer" | Create a new sprite or output copy, then add one named layer or group per result. |
+| "Put this animation in frames" | Add generated images across frames, set durations, and add a tag when the action has a name. |
+| "Add this to my existing Aseprite file" | Open the existing file and save a modified copy by default. |
+| "Modify the current/original file" | Only write in place after explicit approval for that exact file path. |
+| "Open it in Aseprite so I can continue" | Create or export the file first, verify it, then ask before launching visible Aseprite. |
+
+Do not treat "modify current layer" as safe by default. In an agent workflow there may be no live current layer, and an existing project file must remain copy-on-write unless the user explicitly approved an in-place edit.
 
 ## Trigger Conditions
 
@@ -410,6 +449,21 @@ For multi-frame imports, prefer a small JSON manifest instead of inventing argum
 ```
 
 The script should sort by explicit `frame` value, verify each file exists, verify image dimensions before adding cels, set frame duration when provided, and create tags only from explicit manifest data or clear user intent.
+
+## Example Use Cases
+
+Use these examples to recognize valuable Aseprite handling. The exact PixelLab generation route still comes first; Aseprite is the local workspace/import/export step.
+
+| Use case | Example user prompt |
+|---|---|
+| Create an editable workspace from generated frames | "Generate a 32x32 idle potion sparkle animation and make an `.aseprite` file with frames, durations, and an `idle` tag." |
+| Import generated variants as layers | "Make three sword pickup variants, then put them as named layers in an Aseprite file so I can compare them." |
+| Add generated frames to an existing project copy | "Use this existing `.aseprite` character file as the base and add a PixelLab walk animation as a new layer group in a copy." |
+| Export an existing Aseprite project for a game engine | "Export this `.aseprite` as a packed sprite sheet with JSON metadata, only the `Attack` tag, and ignore the `Guides` layer." |
+| Build a preview package | "Generate a small torch flame animation, create an Aseprite workspace, then export a GIF preview and sprite sheet." |
+| Convert/palette-check local output in Aseprite | "Convert these generated PNG frames to indexed color with this palette and save the converted copies." |
+| Open a verified result for manual editing | "Generate a chest sprite, save it locally, then open it in Aseprite after you verify the file exists." |
+| Inspect an Aseprite file before deciding | "List the layers, tags, and frame count in this `.aseprite` file before importing anything." |
 
 ## Common Workflows
 
