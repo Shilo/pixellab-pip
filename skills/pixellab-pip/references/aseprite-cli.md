@@ -13,6 +13,8 @@ PixelLab MCP or documented REST v2
 
 Do not use this route to automate the PixelLab Aseprite extension itself.
 
+For explicit Aseprite MCP requests, read `aseprite-mcp.md` next.
+
 ## Lua Integration Model
 
 Aseprite Lua is not a separate Lua runtime that controls Aseprite from the outside. The agent launches the Aseprite executable, and Aseprite runs the Lua script inside its own scripting environment.
@@ -131,21 +133,6 @@ Default behavior for existing files:
 4. Verify the original file was not changed when the workflow was meant to be copy-on-write.
 
 Use `spr:saveCopyAs(output)` for existing-file imports unless the user has explicitly approved overwriting or saving back to the original path. Do not pass the original path as `output` by default. If the user does approve an in-place edit, restate the exact file path and action before writing.
-
-## Optional Aseprite MCP Tools
-
-Third-party Aseprite MCP servers can be useful when the user explicitly asks to use one, or when an installed MCP exposes curated tools for iterative Aseprite work. Keep this separate from the default PixelLab route.
-
-Use an Aseprite MCP only when it adds real value beyond direct CLI/Lua, such as:
-
-- Iterative pixel drawing where the agent needs many small canvas/layer/cel operations.
-- Visual feedback loops such as scaled frame exports, onion-skin renders, frame diffs, or color statistics.
-- Structured scene operations such as copying layers between `.aseprite` files, validating missing layers/cels, or auditing animation coverage.
-- A curated tool is safer and clearer than a custom raw Lua script.
-
-Do not use an Aseprite MCP to automate the PixelLab Aseprite extension, call private PixelLab operations, or bypass approval for credit-spending/editor actions. Many Aseprite MCP tools save back to the file they receive; apply the same original-file safety rule: copy first unless the user explicitly approved in-place edits for that exact file.
-
-If an Aseprite MCP exposes a raw Lua escape hatch, treat it like `aseprite --script`: it can run unrestricted local code. Prefer curated MCP tools or small reviewed scripts, and verify expected files/status afterward.
 
 ## CLI Patterns
 
