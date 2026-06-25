@@ -27,7 +27,7 @@ For setup selection, prefer these choices:
 - MCP + API (recommended): Connect PixelLab tools directly to the assistant/editor and configure `PIXELLAB_SECRET` so Pip can use documented REST v2 fallback.
 - MCP only: Connect PixelLab tools directly to the assistant/editor. Prefer app secret settings or an env/secret reference; use a literal-token MCP config only as an explicit user-chosen fallback when the app has no token-free option, and warn that it does not configure Pip REST v2 fallback.
 - API only: Configure `PIXELLAB_SECRET` for Pip's documented REST v2 fallback without adding MCP.
-- Manual: Open or link PixelLab's MCP setup page and stop.
+- Manual: Open or link PixelLab's MCP setup page and stop; include the account/Secret step only when auth/token setup is part of the request.
 
 Use the same four initial choices in Claude Code, Codex app, and prose fallback. Treat user wording such as "both", "everything", or "recommended" as `both` mode. Do not hide API fallback behind a later follow-up when the user chose the recommended path.
 
@@ -38,7 +38,7 @@ Supported wizard modes:
 - `both`: recommended default for AI assistants, editors, and MCP-compatible apps. Configure MCP first, then confirm the same `PIXELLAB_SECRET` source is available for Pip's documented REST v2 fallback.
 - `mcp`: MCP-only setup for AI assistants, editors, and MCP-compatible apps.
 - `api`: configure `PIXELLAB_SECRET` so PixelLab Pip can use documented REST v2 fallback when MCP tools are unavailable, incomplete, or insufficient for the request.
-- `manual`: open or link to `https://www.pixellab.ai/mcp`, tell the user to pick their app there, and stop. If opening a browser is unavailable, provide the link. Do not inspect, write, verify, or continue setup.
+- `manual`: open or link to `https://www.pixellab.ai/mcp`, tell the user to pick their app there, and stop. If auth/token setup is part of the user's request, also link `https://www.pixellab.ai/account` and tell them to copy the value labeled `Secret` without pasting it into chat. If opening a browser is unavailable, provide the links. Do not inspect, write, verify, or continue setup.
 - `unknown`: recommend MCP + API and ask one short choice question: MCP + API, MCP only, API only, or Manual.
 
 Use user wording to infer intent:
@@ -52,7 +52,7 @@ Use user wording to infer intent:
 
 1. Identify the desired mode from the user's words. If unclear, say MCP + API is recommended for normal assistant/editor use because it enables full MCP tools plus Pip's documented REST v2 fallback, then ask which mode they want. A bare `setup` command is unclear even when the current app is detectable. The next question must be MCP + API/MCP only/API only/Manual, not a yes/no MCP preview or config-write question.
    If you include a brief credential readiness note before mode selection, check only whether the live `PIXELLAB_SECRET` environment variable is visible to the current process. Do not inspect project-local secret files, broad config directories, or recursive paths. Project files such as `.env` or `.env.local` do not configure MCP unless an explicit loader or wrapper reads them.
-2. If mode is `manual`, link or open `https://www.pixellab.ai/mcp`, tell the user to choose their app there, and stop.
+2. If mode is `manual`, link or open `https://www.pixellab.ai/mcp`, tell the user to choose their app there, include the account/Secret step only when auth/token setup is part of the request, and stop.
 3. If mode is `mcp` or `both`, detect the current assistant/editor/app when possible. If detection is unclear, ask which app they use or offer the manual website option.
 4. For known supported apps, tailor only to the named/detected app: Claude Code, Codex, Gemini CLI, Cursor, VS Code Agent Plugins, GitHub Copilot CLI, or generic MCP-compatible apps.
 5. If the user names an unknown app, do not guess config paths or syntax. Link or open `https://www.pixellab.ai/mcp`, tell the user to pick their app there, and stop unless they explicitly provide the exact settings screen, config path, or documented MCP format they want you to use.
