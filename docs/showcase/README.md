@@ -9,7 +9,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 | Asset | Preview | Initial prompt |
 |---|---|---|
 | [Pip Mascot](pip-mascot.md) | ![Pip mascot idle animation](pip/pip.gif) | <pre><code>pip create a 64px character based on .pip-mascot.md</code></pre> |
-| [Gameplay GUI](gameplay-gui.md) | ![Gameplay GUI kit](gameplay-gui/gameplay-gui-component-specific-688x384.png) | <pre><code>create a new generation for full gameplay GUI:<br>- avatar<br>- health bar<br>- window<br>- various buttons<br>- other useful elements</code></pre> |
+| [Gameplay GUI](gameplay-gui.md) | ![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png) | <pre><code>pip create a complete world of warcraft gui</code></pre> |
 
 ## Showcase Format
 

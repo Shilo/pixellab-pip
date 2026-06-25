@@ -2,9 +2,9 @@
 
 Last reviewed: 2026-06-25.
 
-![Gameplay GUI kit](gameplay-gui/gameplay-gui-component-specific-688x384.png)
+![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png)
 
-This example shows prompt iteration for PixelLab Pip's REST v2 UI generator. A first, narrower mood prompt produced an attractive but incomplete UI sample; a second prompt that named the exact gameplay components produced a much stronger transparent GUI kit with avatar and window frames, health-style bars, panels, reusable buttons, icon buttons, arrows, slots, dividers, and HUD trim.
+This example shows prompt iteration for PixelLab Pip's REST v2 UI generator. The strongest result is the final fantasy MMORPG GUI sheet: a complete, highly usable transparent HUD kit with portrait frames, health and mana bars, action bars, bag slots, minimap frame, quest tracker, chat panel, parchment window, controls, icon frames, and currency buttons. Earlier iterations are kept below because they show why explicit component lists matter.
 
 ## Request
 
@@ -23,6 +23,51 @@ create a new generation for full gameplay GUI:
 - window
 - various buttons
 - other useful elements
+```
+
+Final follow-up:
+
+```text
+pip create a complete world of warcraft gui
+```
+
+## Best Example: Complete Fantasy MMORPG GUI
+
+![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png)
+
+This pass is the primary showcase example. Pip interpreted the named game as a broad high-fantasy MMORPG interface reference and routed the work to PixelLab REST v2 `generate-ui-v2`, while avoiding a direct copy of an existing game's protected interface.
+
+Route: PixelLab REST v2 `generate-ui-v2`
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `688x384` |
+| Background | `no_background: true` |
+| Seed | `250625` |
+| Color palette | `dark iron, weathered stone, aged brass, leather brown, parchment tan, crimson health red, arcane blue, emerald green highlights` |
+| Usage reported | `40` subscription generations |
+
+Enhanced prompt sent as `description`:
+
+```text
+Complete original fantasy MMORPG pixel-art GUI kit, inspired by classic high-fantasy raid interfaces but not copying any existing game: ornate carved stone and dark iron frames with aged brass trim, glowing blue mana accents, red health accents, emerald quest accents, leather straps, small runic details, readable modular components arranged on one transparent sprite sheet. Include: player portrait frame, target portrait frame, health bar, mana bar, rage/energy resource bar, experience bar, action bar with twelve square spell slots, secondary action bar row, bag/inventory slot grid, minimap circular frame, quest tracker panel, parchment dialogue window, chat panel, tooltip frame, party member frames, raid-group compact frames, buff/debuff icon frames, menu buttons, checkboxes, sliders, tab headers, close buttons, gold/silver/copper currency icons, empty spell icon placeholders, decorative corners and separators. Clean game-ready UI assets, crisp 2D pixel art, consistent MMO HUD style, high contrast edges, no logos, no copyrighted symbols, no text labels, transparent background.
+```
+
+Request body:
+
+```json
+{
+  "description": "Complete original fantasy MMORPG pixel-art GUI kit, inspired by classic high-fantasy raid interfaces but not copying any existing game: ornate carved stone and dark iron frames with aged brass trim, glowing blue mana accents, red health accents, emerald quest accents, leather straps, small runic details, readable modular components arranged on one transparent sprite sheet. Include: player portrait frame, target portrait frame, health bar, mana bar, rage/energy resource bar, experience bar, action bar with twelve square spell slots, secondary action bar row, bag/inventory slot grid, minimap circular frame, quest tracker panel, parchment dialogue window, chat panel, tooltip frame, party member frames, raid-group compact frames, buff/debuff icon frames, menu buttons, checkboxes, sliders, tab headers, close buttons, gold/silver/copper currency icons, empty spell icon placeholders, decorative corners and separators. Clean game-ready UI assets, crisp 2D pixel art, consistent MMO HUD style, high contrast edges, no logos, no copyrighted symbols, no text labels, transparent background.",
+  "image_size": {
+    "width": 688,
+    "height": 384
+  },
+  "no_background": true,
+  "color_palette": "dark iron, weathered stone, aged brass, leather brown, parchment tan, crimson health red, arcane blue, emerald green highlights",
+  "seed": 250625
+}
 ```
 
 ## Bad Example: Mood-Only Prompt
@@ -68,7 +113,7 @@ Request body:
 }
 ```
 
-## Good Example: Component-Specific Prompt
+## Earlier Good Example: Component-Specific Prompt
 
 ![Gameplay GUI kit](gameplay-gui/gameplay-gui-component-specific-688x384.png)
 
@@ -118,8 +163,9 @@ Request body:
 
 | File | Purpose |
 |---|---|
+| [`gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png`](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png) | Primary transparent fantasy MMORPG GUI kit sheet. |
 | [`gameplay-gui/gameplay-gui-mood-only-344x192.png`](gameplay-gui/gameplay-gui-mood-only-344x192.png) | First-pass mood-focused UI sheet. Useful as a bad example for underspecified gameplay GUI requests. |
-| [`gameplay-gui/gameplay-gui-component-specific-688x384.png`](gameplay-gui/gameplay-gui-component-specific-688x384.png) | Transparent full gameplay GUI kit sheet. |
+| [`gameplay-gui/gameplay-gui-component-specific-688x384.png`](gameplay-gui/gameplay-gui-component-specific-688x384.png) | Earlier transparent full gameplay GUI kit sheet. |
 
 ## Validation Notes
 
@@ -127,4 +173,5 @@ Final verification:
 
 - PNG dimensions: `688x384px`.
 - Pixel format: `Format32bppArgb`.
-- Output has transparent background and separate GUI elements arranged as a reusable sheet.
+- Primary output has transparent background and separate GUI elements arranged as a reusable sheet.
+- Primary output includes portrait frames, status bars, action bars, bag grid, minimap frame, quest tracker, chat panel, parchment panel, controls, icon frames, and currency buttons.
