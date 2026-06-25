@@ -19,8 +19,4 @@ Tileset workflow routing: skills/pixellab-pip/references/tilesets.md
 Aseprite CLI/MCP workflow: skills/pixellab-pip/references/aseprite-cli.md
 Bark completion sound behavior: skills/pixellab-pip/references/bark.md
 Developer context: docs/developer.md only when changing repository structure
-
-Git conventional commits, use focused messages such as:
-docs(aseprite): add aseprite-mcp documentation
-feat(aseprite-cli): enhance safety guidelines
-fix(setup): clarify bearer-token reuse
+Git conventional commits: <type>[optional scope]: <description>
