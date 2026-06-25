@@ -41,6 +41,8 @@ Do not scan broad config, home, shell, credential, or project directories.
 
 Skill-local config is authoritative whenever it can be written. The user config path is only a read fallback when no valid skill-local config exists, and a write fallback when skill-local persistence fails.
 
+Because skill-local config lives inside the installed skill directory, an update or reinstall that replaces that directory may reset bark to the default-on state. If the skill directory is not writable, the exact user-config fallback path is used instead.
+
 If `pixellab-pip.json` exists but is invalid JSON and no valid fallback config exists, treat bark as enabled for the current command. When the user explicitly runs `bark`, `bark on`, or `bark off`, write the valid shape above to the skill-local config first; if that write fails, write the exact user-config fallback path. Do not rewrite config during normal generation completion.
 
 If `pixellab-pip.json` exists and contains extra fields, preserve them when changing `bark` if the available file editing tools make that practical. If preserving extra fields is not practical, keep only `bark`.
@@ -65,6 +67,8 @@ After a successful write, respond briefly with the new state:
 - `Bark is off.`
 
 If `bark` toggles bark on, or if `bark on` enables bark, immediately play the bark sound so the command also tests audio. If `bark` toggles bark off, or if `bark off` disables bark, do not play a bark sound.
+
+Because bark is on by default, a bare first-run `bark` command usually toggles bark off and does not play sound. Use `bark on` when the user only wants to test the sound without risking an off toggle.
 
 If both skill-local and user-config fallback writes fail, say that bark could not be saved persistently. Do not claim the setting changed.
 
@@ -108,7 +112,7 @@ py -3 assets/bark.py play
 
 Use `py -3` only on Windows. Do not install Python or audio tools. The helper uses only standard library code and always prints JSON. Its output includes `bark` and `played`, and `status` may include `config` or `invalid_config`; if `bark` is `true` and `played` is `false`, or if the helper exits with code `2`, use the native fallback below.
 
-If the helper cannot load or run, fall back to a native success or alert sound that does not require the bundled WAV, an MP3, MCP, or any install step:
+If the helper cannot load or run, fall back to a native success or alert sound that does not require the bundled WAV, another audio file, MCP, or any install step:
 
 - If an available host/app notification primitive clearly supports a native `success`, `done`, or `alert` sound, use that without passing a file path.
 - On Windows, an agent with shell access may run PowerShell's native system sound:
