@@ -65,15 +65,10 @@ Before running Aseprite:
 
    ```powershell
    $AsepritePath = (Get-Command aseprite -ErrorAction SilentlyContinue).Source
-   if (-not $AsepritePath) {
-     $roots = @($env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ }
-     $AsepritePath = Get-ChildItem $roots -Recurse -Filter Aseprite.exe -ErrorAction SilentlyContinue |
-       Select-Object -First 1 -ExpandProperty FullName
-   }
    if (-not $AsepritePath) { throw "Aseprite executable not found; ask the user for the path." }
    ```
 
-   Search common install roots only when appropriate, or ask the user for the path. Do not scan private project folders unless the user points you there.
+   Search common install locations only when appropriate, or ask the user for the path. Do not scan private project folders unless the user points you there.
 
 2. Show which files will be read and written.
 3. Ask before launching visible Aseprite.
@@ -160,12 +155,6 @@ Export a frame range:
 & $AsepritePath -b --frame-range 1,6 "source.aseprite" --save-as "walk-{frame}.png"
 ```
 
-Use explicit filename formatting when game tooling expects stable names:
-
-```powershell
-& $AsepritePath -b --split-layers --split-tags "source.aseprite" --filename-format "{title}-{tag}-{layer}-{frame001}" --save-as ".png"
-```
-
 Scale, crop, or trim output:
 
 ```powershell
@@ -178,7 +167,7 @@ Convert to indexed color with optional dithering:
 
 ```powershell
 & $AsepritePath -b "source.png" --dithering-algorithm none --color-mode indexed --save-as "source-indexed.png"
-& $AsepritePath -b --palette "palette.png" "source.png" --color-mode indexed --save-as "source-paletted.png"
+& $AsepritePath -b "source.png" --palette "palette.png" --color-mode indexed --save-as "source-paletted.png"
 ```
 
 For multi-frame sprites, use filename formatting such as `{frame}` or expect Aseprite to number the output files:
@@ -205,12 +194,6 @@ Export slices separately when the user organized hitboxes, UI pieces, or sub-ass
 & $AsepritePath -b --split-slices "source.aseprite" --save-as "slice-{slice}-{frame}.png"
 ```
 
-Collapse to the first frame when a static icon is needed from an animated source:
-
-```powershell
-& $AsepritePath -b --oneframe "source.aseprite" --save-as "icon.png"
-```
-
 Run a Lua script with explicit parameters:
 
 ```powershell
@@ -221,7 +204,7 @@ $Frames = "frames.json"
 
 Pass each `--script-param` value as a single `name=value` argument. In PowerShell, build paths into variables first or quote the whole `name=$Value` string so expressions do not split the key and value into separate arguments.
 
-Use Aseprite's filename formatting, `--tag`, `--frame-range`, `--layer`, `--ignore-layer`, `--split-layers`, `--split-tags`, `--sheet-type`, `--trim`, `--crop`, `--scale`, `--color-mode`, and padding options instead of writing custom scripts when they cover the request.
+Use Aseprite's `--save-as` filename placeholders, `--tag`, `--frame-range`, `--layer`, `--ignore-layer`, `--split-layers`, `--split-tags`, `--sheet-type`, `--trim`, `--crop`, `--scale`, `--color-mode`, and padding options instead of writing custom scripts when they cover the request.
 
 ## Lua Script Patterns
 
