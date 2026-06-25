@@ -24,26 +24,26 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 
 ## Features
 
-Use Pip when an agent needs to create, edit, animate, integrate, or troubleshoot PixelLab assets and workflows.
+Use me when you need to create, edit, animate, integrate, or troubleshoot PixelLab assets and workflows.
 
-| Feature | What Pip helps with |
+| Feature | What you can ask me to do |
 |---|---|
-| Easy PixelLab workflow | Lets users ask for assets in plain language without knowing PixelLab tool names, endpoint names, modes, or editor differences. |
-| Smart tool selection | Chooses between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
-| Guided PixelLab setup | Helps agents set up MCP/API access, diagnose missing auth, and configure only what the user approves without reading or printing the secret value. |
-| Answer PixelLab questions | Explains setup, auth, docs, SDKs, troubleshooting, and confusing feature names. |
-| Auto-enhance prompts and descriptions | Turns rough user wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions by default, with opt-out support. |
-| Non-English request support | Translates or normalizes PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in the user's language. |
-| Use images and attachments correctly | Classifies supplied files as edit targets, identity references, style references, concept images, masks, palettes, init/source images, or animation frames instead of guessing one generic role. |
-| Paperdoll and layered workflow guidance | Helps route layered character, outfit, equipment, isolated asset, and composited-output requests without pretending PixelLab returns layers where it does not. |
-| Local Aseprite CLI workspaces | Helps agents move generated assets into Aseprite without driving the PixelLab extension UI: create or update `.aseprite` copies, import frames as layers/tags, and export PNG sequences, GIFs, sprite sheets, and metadata through documented Aseprite CLI/Lua. |
-| Safer auth and automation | Uses bearer-token and MCP secret setup, avoids copied website session tokens, and keeps agents away from undocumented internal endpoints used by first-party surfaces such as the website or Aseprite extension. |
-| Current docs and SDK checks | Tells agents when to refresh official PixelLab docs, OpenAPI schemas, MCP docs, SDK coverage, auth setup, pricing, limits, model labels, or endpoint fields before making exact claims. |
-| Clear generation reports | Reports the PixelLab tool or endpoint used, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, credit/balance delta when available, and verification status. |
-| Bark completion sound | Can play a generic success sound after PixelLab generation-style jobs finish, with a persistent on/off toggle. |
-| PixelLab terminology support | Explains confusing labels such as `Pro`, `v3`, `new`, `create tiles`, `create tileset`, Pixen, PixFlux, BitForge, and PixPatch at the documented product level. |
-| Agent-agnostic | Works with any agent that supports Agent Skills. |
-| Privacy-focused setup | Helps users connect PixelLab without exposing token values, dumping environment variables, or inspecting private `.env*` files. |
+| Easy PixelLab workflow | Ask for assets in plain language without knowing PixelLab tool names, endpoint names, modes, or editor differences. |
+| Smart tool selection | Choose between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
+| Guided PixelLab setup | Set up MCP/API access, diagnose missing auth, and configure only what you approve without reading or printing the secret value. |
+| Answer PixelLab questions | Explain setup, auth, docs, SDKs, troubleshooting, and confusing feature names. |
+| Auto-enhance prompts and descriptions | Turn rough wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions by default, with opt-out support. |
+| Non-English request support | Translate or normalize PixelLab-facing natural-language inputs to concise English while keeping confirmations, explanations, and reports in your language. |
+| Use images and attachments correctly | Classify supplied files as edit targets, identity references, style references, concept images, masks, palettes, init/source images, or animation frames instead of guessing one generic role. |
+| Paperdoll and layered workflow guidance | Route layered character, outfit, equipment, isolated asset, and composited-output requests without pretending PixelLab returns layers where it does not. |
+| Local Aseprite CLI workspaces | Move generated assets into Aseprite without driving the PixelLab extension UI: create or update `.aseprite` copies, import frames as layers/tags, and export PNG sequences, GIFs, sprite sheets, and metadata through documented Aseprite CLI/Lua. |
+| Safer auth and automation | Use bearer-token and MCP secret setup, avoid copied website session tokens, and stay away from undocumented internal endpoints used by first-party surfaces such as the website or Aseprite extension. |
+| Current docs and SDK checks | Refresh official PixelLab docs, OpenAPI schemas, MCP docs, SDK coverage, auth setup, pricing, limits, model labels, or endpoint fields before making exact claims. |
+| Clear generation reports | Report the PixelLab tool or endpoint used, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, credit/balance delta when available, and verification status. |
+| Bark completion sound | Play a generic success sound after PixelLab generation-style jobs finish, with a persistent on/off toggle. |
+| PixelLab terminology support | Explain confusing labels such as `Pro`, `v3`, `new`, `create tiles`, `create tileset`, Pixen, PixFlux, BitForge, and PixPatch at the documented product level. |
+| Agent-agnostic | Work from any agent that supports Agent Skills. |
+| Privacy-focused setup | Connect PixelLab without exposing token values, dumping environment variables, or inspecting private `.env*` files. |
 
 ## Install
 
