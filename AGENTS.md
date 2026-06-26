@@ -6,3 +6,5 @@ PixelLab terminology and surface-model background: docs/pixellab/ only when chan
 Tool comparison and integration background: docs/tools/ only when changing Aseprite, MCP, REST, or editor-routing claims
 Developer context: docs/developer.md only when changing repository structure or local install guidance
 Git conventional commits: <type>[optional scope]: <description>
+
+Keep skills/pixellab-pip/SKILL.md concise. It should contain the routing contract, common guardrails, and enough triggers to choose the right surface or reference. Do not overengineer SKILL.md with uncommon workflow details, long procedural steps, tool-specific edge cases, or specialty QA checklists. Put those details in progressive-discovery files under skills/pixellab-pip/references/ and leave SKILL.md with a clear pointer to the relevant reference. Preserve efficiency in both directions: common requests should be answerable from SKILL.md without loading niche references, while specialty requests must reliably proxy to the reference that contains the full details.
