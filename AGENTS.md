@@ -7,4 +7,4 @@ Tool comparison and integration background: docs/tools/ only when changing Asepr
 Developer context: docs/developer.md only when changing repository structure or local install guidance
 Git conventional commits: <type>[optional scope]: <description>
 
-Keep skills/pixellab-pip/SKILL.md limited to the core routing contract: common triggers, guardrails, surface selection rules, and pointers to deeper references. Move uncommon workflows, procedural detail, tool-specific edge cases, and specialty QA checklists into topic files under skills/pixellab-pip/references/. Common requests should resolve from SKILL.md alone; specialized requests should route predictably to the reference that contains the full workflow.
+Keep skills/pixellab-pip/SKILL.md as the routing contract: trigger detection, common guardrails, surface/reference selection, and concise pointers. Put full workflows, procedures, tool-specific edge cases, and QA checklists in topic files under skills/pixellab-pip/references/. Common requests should complete from SKILL.md alone; specialized requests should load only the smallest relevant reference set.
