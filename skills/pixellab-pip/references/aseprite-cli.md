@@ -43,7 +43,7 @@ The extension's Aseprite commands are dialog launchers and editor actions, not s
 
 Use Aseprite as a local file and workspace tool after PixelLab has generated files through public automation surfaces.
 
-Aseprite CLI/Lua is workspace automation, not a PixelLab substitute. It may arrange PixelLab/user-supplied images into layers, frames, tags, cels, exports, and workspace files, but must not create or alter requested visual content unless the user explicitly approves a labeled non-PixelLab fallback.
+Aseprite CLI/Lua is workspace automation, not a PixelLab substitute. It may arrange PixelLab/user images into layers, frames, tags, cels, and exports, but must not author content: no Lua draw, brush, shape primitives, or scripted pixel placement unless the user explicitly requests or approves a labeled non-PixelLab fallback.
 
 Good fit:
 
@@ -63,7 +63,6 @@ Poor fit:
 - Reading extension credentials, request payloads, auth headers, private settings, or request history.
 - Controlling an already-open Aseprite document without a user-approved bridge.
 - Spending PixelLab credits from inside Aseprite through hidden automation.
-- Creating or altering requested visual content locally with Aseprite Lua, brush commands, scripted pixels, or shape primitives for a PixelLab request.
 - Mouse, screenshot, or OCR automation as the default workflow.
 
 If the user wants exact PixelLab extension behavior such as extension-specific reduce-colors, unzoom, pixel correction, or in-editor placement, explain that the stable agent route is PixelLab MCP/REST plus Aseprite CLI workspace handling. Offer visible manual Aseprite use or a separately designed bridge only if they really need live editor behavior.

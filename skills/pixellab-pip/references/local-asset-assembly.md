@@ -4,7 +4,7 @@ Read this only when creating local preview files from generated PixelLab frames,
 
 For Aseprite-specific opening, import/export, layers, frames, tags, `.aseprite` workspace creation, or Aseprite CLI/Lua behavior, read `aseprite-cli.md` instead.
 
-Local assembly is not art generation or editing. Use it only to assemble, preview, convert, or verify PixelLab-generated or user-supplied files; do not create or alter requested visual content locally.
+Local assembly is not art generation or editing. Use it only to assemble, preview, format-convert, or verify PixelLab-generated or user-supplied files; do not create or alter requested visual content locally.
 
 ## Transparent GIF Previews
 

@@ -6,7 +6,7 @@ Treat paperdolling as a composition workflow outside PixelLab, not a separate Pi
 
 PixelLab can generate base sprites, edited states, outfit-transfer frames, masked inpaints, and standalone transparent objects. Public REST v2/MCP docs do not expose first-class layer creation, layer assignment, semantic layer extraction, or isolated changed-part outputs.
 
-Paperdoll rule: visible body, hair, clothing, hat, equipment, edit, or cleanup pixels must be PixelLab-generated or user-supplied. Local tools may compose, align, package, import/export, mask, resize, crop, and verify layers, but must not create or alter their art unless the user explicitly approves a labeled non-PixelLab fallback.
+Paperdoll rule: visible body/layer pixels must come from PixelLab or the user. Local tools may compose, align, package, import/export, mask, resize, crop, and verify layers, but must not draw or repaint them unless the user explicitly requests or approves a labeled non-PixelLab fallback.
 
 Ask or infer:
 
@@ -47,7 +47,5 @@ For reusable sets, confirm the base character and frame-grid contract before var
 `edit-animation-v2` and `transfer-outfit-v2` operate on 2-16 frames and return edited/composited frames, not equipment/body layers.
 
 If layer fidelity matters, create and save each art layer separately through PixelLab or user-supplied source files before compositing in Aseprite, Pixelorama, or local tooling.
-
-Anti-pattern: PixelLab base character plus locally drawn hair, clothing, hat, accessory, or equipment layers. That is non-PixelLab art, not completion of a PixelLab request.
 
 Route MCP-managed characters through character/state/animation tools. Use REST v2 raw animation, edit-animation, interpolation, and outfit-transfer routes only when exact file-level control matters. Warn that text-only paperdolling drifts without a base frame, seed, or reference.
