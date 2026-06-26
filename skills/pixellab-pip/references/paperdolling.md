@@ -4,9 +4,9 @@ Read this for layered characters, outfit variants, equipment swaps, or animation
 
 Treat paperdolling as a character-anchored edit workflow first, then a composition workflow. Requests for fitted hair, facial features, horns, wearables, accessories, armor, held gear, footwear, VFX, or similar body-region additions should stay anchored to the base character image instead of being routed as standalone objects.
 
-PixelLab can generate base sprites, edited states, outfit-transfer frames, masked inpaints, image edits, and standalone transparent objects. Public REST v2/MCP docs do not expose first-class layer creation, layer assignment, semantic layer extraction, or isolated changed-part outputs. Some editor integrations, including the Aseprite extension, may expose editor-local changes-only layer import behavior. Treat that as an editor-specific capability, not a REST/MCP contract, and accept the result only after visual/export verification proves it is actually changes-only.
+PixelLab can generate base sprites, edited states, outfit-transfer frames, masked inpaints, image edits, and standalone transparent objects. Public REST v2/MCP docs do not expose first-class editor layer creation, layer assignment, semantic layer extraction, or isolated changed-part outputs. Some editor integrations, including the Aseprite extension, may expose editor-local changes-only layer import behavior. Treat that as an editor-specific capability, not a REST/MCP contract, and accept the result only after visual/export verification proves it is actually changes-only.
 
-Paperdoll rule: visible body/layer pixels must come from PixelLab or the user. Local tools may compose, align, package, import/export, mask, resize, crop, and verify layers, but must not draw or repaint them unless the user explicitly requests or approves a labeled non-PixelLab fallback.
+Paperdoll rule: visible body/layer pixels must come from PixelLab or the user. Local tools may compose, align, package, import/export, mask, resize, crop, compute differences, extract changed pixels into transparent images, and verify layers, but must not draw or repaint them unless the user explicitly requests or approves a labeled non-PixelLab fallback.
 
 Ask or infer:
 
@@ -17,8 +17,15 @@ Ask or infer:
 - Animation list.
 - Layers such as body, hair, outfit, armor, weapon, accessory, shadow, and VFX.
 - For every requested visual addition: identity, intended body region, position, facing/rotation, attachment/occlusion rule, and whether it should appear in front of or behind the base body.
-- Whether outputs must be isolated transparent layers or composited previews.
+- Whether outputs must be separate transparent layer image files, editor-native layers, composited previews, or both.
 - Whether an existing composite may be edited lossily, or whether reusable isolated layers are required.
+
+When the user asks for layers but does not name an editor or output format, ask them to choose between:
+
+- Separate transparent image layer files plus a final composited image.
+- An Aseprite/editor layer workflow where each layer contains only the newly added pixels.
+
+If the user declines to choose, pick the best available character-anchored route. Use verified editor changes-only layers only when the user is already working in that editor or accepts visible editor guidance; otherwise use the API layer-image workflow: PixelLab edited composites, local changed-pixel extraction into transparent image files, then a final composite. Do not choose standalone object generation as the fallback for fitted body additions.
 
 Preserve:
 
@@ -37,13 +44,51 @@ For reusable sets, confirm the base character and frame-grid contract before var
 | Goal | Route | Warning |
 |---|---|---|
 | Fitted isolated paperdoll layer in Aseprite | Use the visible Aseprite extension image-edit workflow on the base character frame. When the installed extension exposes a new-layer changes-only `output_method`, request that mode for isolated layers. Prompt with the character identity, current direction, requested addition, target body region, exact placement, rotation/facing, scale, occlusion, and preservation rules. | This is an editor-surface workflow, not a stable headless API. Do not automate extension internals or call private operation URLs. If the agent cannot operate the visible extension with user participation or inspect exported layers, it must not claim it created fitted changes-only layers; it can guide the user, use public REST for composites, or package already verified exported layers afterward. |
-| Fitted paperdoll edit from code/API | Use a documented REST v2 image-edit endpoint on the base image when a public API route is required; check current docs/schema before naming the exact endpoint. Use a detailed character-anchored edit prompt and same canvas size. If the API returns a composite, label it composite unless a separate changes-only layer is actually produced by an editor/export workflow. | Public REST image-edit endpoints are not Aseprite layer workflows. Public REST docs describe image editing outputs, not editor `output_method` layer modes. Do not promise an isolated layer from REST unless verified in the returned file. |
+| Fitted paperdoll edit from code/API | Use a documented REST v2 image-edit endpoint on the base image when a public API route is required; check current docs/schema before naming the exact endpoint. Use a detailed character-anchored edit prompt and same canvas size. Treat the API result as an edited composite first. | Public REST image-edit endpoints are not Aseprite layer workflows. Public REST docs describe image editing outputs, not editor `output_method` layer modes. |
+| Separate transparent layer images plus final composite, without Aseprite | For each requested addition, create a same-canvas edited composite from the unchanged base image, with a prompt that asks PixelLab to add only that feature/body-region addition and preserve every other base pixel. Locally compare the edited composite to the base, copy changed pixels into a transparent PNG layer image, then compose base plus accepted layer images into the final PNG. Deliver at least `base`, one transparent image per requested layer, each intermediate edited composite if useful for QA, and the final composite. | This is image-file paperdolling, not editor-native layer creation. Reject and retry if the extracted layer contains a duplicated body, large unrelated redraws, moved limbs, background changes, or loose unregistered parts. Do not call the extracted PNG a reusable layer until it passes transparency, bounds, canvas-size, and composite QA. |
 | Masked fitted layer attempt | Use the visible editor image-edit workflow with a body-region selection and changes-only layer output mode when available, or REST `inpaint-v3` only when the user supplies or approves a mask for the body region to edit. | Inpainting returns an edited image, not semantic layer extraction. Editor-local changes-only output is the better layer path when available and verified. |
 | Standalone prop/accessory sprite | Use MCP object tools or REST object/image routes only when the user asks for a separate reusable prop/accessory sprite that does not need to be fitted to the current body pose. | Do not use standalone object generation for fitted hair, clothes, hats, eyes, or accessories on an existing character; it commonly produces unregistered loose parts. |
-| Dressed character preview/state | MCP `create_character_state`, REST character/edit routes, or editor image-edit workflow with normal composite output. | Output is a character variant/composite, not a separate reusable layer unless generated with a changes-only layer mode and visually verified. |
+| Dressed character preview/state | MCP `create_character_state`, REST character/edit routes, or editor image-edit workflow with normal composite output. | Output is a character variant/composite, not a separate reusable layer unless generated with a changes-only layer mode, or extracted into a transparent layer image from a verified same-canvas edit. |
 | Outfit/equipment across animation frames | REST `transfer-outfit-v2` or `edit-animation-v2`; MCP character animation only when working with managed character assets. | Preserve frame count/order and label output as composited animation frames. |
 | Existing composite to isolated layer | Require an explicit mask or editor cleanup plan; use REST inpaint/edit only as a fallback. | PixelLab does not document semantic layer extraction, character subtraction, or occluded addition reconstruction. |
 | Website Try on | Use only as visible/manual website assistance when appropriate. | It returns one composited image and is experimental; it is not a layer pipeline. |
+
+## API Layer-Image Paperdoll Workflow
+
+Use this workflow when the user wants separate image files for paperdoll layers and a final composited image, but is not using Aseprite or another editor with verified changes-only layer output.
+
+1. If the user asks for layers without naming an editor or file format, ask them to choose between separate transparent PNG layer images plus a final composited PNG, or an Aseprite/editor layer workflow where each layer contains only the newly added pixels. Proceed with this workflow when the image-file artifact shape is requested or accepted, or when the user declines to choose and is not already working in an editor or accepting visible editor guidance.
+2. Generate or obtain the base character image first. Save it as the base layer image and keep it unchanged for every subsequent addition edit.
+3. For each requested layer, run a separate existing-image edit against the original base image, not against the previous edited result. This keeps each extracted layer independent.
+4. Prompt each edit as a single body-region addition. Include:
+   - Character identity and silhouette: species/body type, colors, scale, and style.
+   - Direction: south/down-facing, east/right-facing, north/up-facing, west/left-facing, or diagonal.
+   - Target addition: hair, hat, shirt, boots, eyes, armor, held gear, VFX, etc.
+   - Body part and side: top/front of head, torso, left hand, both feet, right hip, behind back, etc.
+   - Placement and geometry: centered, tilted, wrapped around limb, follows perspective, in front of or behind body.
+   - Preservation: keep every base pixel unchanged except where the addition naturally occludes it; keep exact canvas size and transparent background.
+5. Save the PixelLab edited result as an intermediate composite for that layer.
+6. Locally create a transparent layer image by comparing the intermediate composite to the base image and copying only changed pixels from the PixelLab result. Use conservative alpha/difference thresholds that preserve the addition while avoiding noisy unchanged pixels.
+7. Verify the extracted layer image before accepting it:
+   - Same canvas size as the base.
+   - Transparent outside the addition.
+   - Nontransparent bounds overlap the intended body region.
+   - No full-body duplicate, moved limbs, face/body redraw, background, or unrelated changed pixels.
+   - The base plus the layer reads as one coherent character.
+8. Repeat per layer. Then compose the final image from the base plus the accepted transparent layer images in the requested order, such as base, hair, clothing, hat, accessories, VFX.
+9. If extraction fails, do not patch the art manually. Retry with a smaller body-region prompt, an approved mask/inpaint route, or an editor workflow. If the user accepts composite-only output, label it as composite-only and skip layer claims.
+
+Example hair prompt for API layer-image extraction:
+
+```text
+Edit this south-facing 92x92 chibi humanoid creature sprite. Add only short spiky teal hair attached to the top/front of the head, following the head perspective and centered above the forehead. Keep every existing body, face, limb, outline, pose, canvas pixel, and transparent background unchanged except where the hair naturally covers the scalp. Do not redraw the character, do not move any body parts, do not add a second head, and do not create loose detached hair pieces.
+```
+
+Example clothing-and-hat prompt for API layer-image extraction:
+
+```text
+Edit this south-facing 92x92 chibi humanoid creature sprite. Add only a fitted red jacket, dark shorts, small boots, and a soft rounded cap as one clothing paperdoll addition. Place the cap on top of the head with a front brim, the jacket over the torso and arms, shorts at the waist, and boots on both feet. Match the existing pixel-art outline, shading, palette weight, and camera angle. Keep every base character pixel unchanged except where clothing naturally covers it. Keep exact canvas size and transparent background. Do not redraw the character and do not generate loose unregistered parts.
+```
 
 ## Aseprite Extension Paperdoll Workflow
 
@@ -80,7 +125,7 @@ Edit this south-facing 92x92 chibi amphibian-dragon creature sprite. Add only a 
 
 `inpaint-v3` requires `description`, `inpainting_image`, and `mask_image`; white mask areas are generated/replaced and black areas are preserved. Treat its output as a whole edited image, not a layer. `context_image` and `bounding_box` are deprecated in current OpenAPI.
 
-`edit-images-v2` supports `edit_with_text` and `edit_with_reference` for 1-16 images depending on size. It can help keep related edits consistent, but public REST output should be treated as an edited image/composite unless a separate changes-only layer is verified from an editor workflow.
+`edit-images-v2` supports `edit_with_text` and `edit_with_reference` for 1-16 images depending on size. It can help keep related edits consistent, but public REST output should be treated as an edited image/composite unless a separate transparent layer image is extracted and verified, or a changes-only editor layer is verified from an editor workflow.
 
 `edit-animation-v2` and `transfer-outfit-v2` operate on 2-16 frames and return edited/composited frames, not equipment/body layers.
 
