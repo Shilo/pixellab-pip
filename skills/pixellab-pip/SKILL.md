@@ -101,6 +101,7 @@ Read only the relevant reference:
 - Non-English or mixed-language user requests and response-language handling: `references/localization.md`.
 - Official PixelLab documentation, MCP documentation, REST documentation, and web-refresh routing: `references/official-pixellab-documentation.md`.
 - Usage, balance, job, and result reporting: `references/usage-reporting.md`.
+- REST v2 natural-language field character limits or prompt-length rejections: `references/prompt-limits.md`.
 - Explicit Aseprite handling, `.aseprite` workspace creation/update, generated-frame import, Aseprite layers/frames/tags, or Aseprite CLI/Lua export/open behavior: `references/aseprite-cli.md`.
 - Local animation preview GIFs, spritesheets, or ImageMagick/`magick` assembly from generated frames: `references/local-asset-assembly.md`.
 
@@ -128,6 +129,8 @@ Do not invent provider internals where PixelLab docs are silent.
 ## Text Preparation
 
 Prompt enhancement is opt-out. For natural-language request parameters such as `description`, `style_description`, `negative_description`, `lower_description`, `upper_description`, `transition_description`, `edit_description`, `action`, `action_description`, `animation_description`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the user's request and any visible inputs before calling a tool.
+
+Respect documented character limits for natural-language fields. Do not assume every prompt is capped at 500 characters: many REST v2 descriptions are 2000 characters, while `animate-with-text-v3.action`, `animate-with-text-v2.action`, `enhance-animation-v3-prompt.action`, `interpolation-v2.action`, `edit-image.description`, and several style/reference fields are 500. If PixelLab rejects a prompt for length, trim the field without changing intent, report that adjustment, then retry. For exact current REST v2 limits, read `references/prompt-limits.md` or refresh OpenAPI.
 
 Use one enhancement path. Use REST `enhance-pixen-prompt` for Pixen image prompts and `enhance-animation-v3-prompt` for animation v3 actions with `first_frame` and optional `last_frame`. For `create-character-v3`, use its `enhance_prompt` option instead of a separate `enhance-character-v3-prompt` call when generating; use `enhance-character-v3-prompt` only for standalone character-v3 prompt enhancement. For other tools, enhance directly as the agent; do not force a nonmatching enhance endpoint.
 
