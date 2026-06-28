@@ -21,7 +21,7 @@ Use this as routing guidance, not as a frozen schema. Refresh official docs for 
 | Sidescroller/platformer tileset | MCP sidescroller tileset tools or REST v2 sidescroller tileset endpoints. | Distinct from top-down terrain and individual tile variants. |
 | Individual tile variants | MCP tiles-pro tools or REST v2 tiles-pro endpoints. | This is different from a full terrain tileset. Clarify "tiles" vs "tileset" when ambiguous. |
 | Isometric tile | MCP isometric tile tool or REST v2 isometric tile endpoint. | Ask whether the user wants one isometric tile or a full tileset when the wording is ambiguous. |
-| General image, standalone sprite, icon, concept | REST v2 image generation. | MCP may not expose every raw image endpoint; use REST v2 for generic image primitives. |
+| General image, standalone sprite, icon, concept | REST v2 image generation. | MCP may not expose every raw image endpoint; use REST v2 for generic image primitives. For finished skill/ability/action-bar icon sheets, see [PixelLab Skill Icon Generation Spike](pixellab-skill-icon-generation-spike.md): current live-generation winner is REST `generate-image-v2`, not object generation. |
 | Background, scene, title image | REST v2 background/image generation. | Use documented `create-image-pixflux-background` for background-image generation when REST v2 is the selected surface; treat as normal image generation unless the user needs map/editor semantics. |
 | UI, HUD, button, panel, menu | Use REST `/create-ui-asset` as the default structured UI asset route when REST and MCP are both available; use MCP `create_ui_asset` for MCP-first managed asset workflows; use REST `/generate-ui-v2` for loose UI images. | See [PixelLab UI Generation Surfaces Research](pixellab-ui-generation-surfaces-research.md). Website UI libraries are human/editor surfaces unless a public endpoint covers the task. |
 | Image edit, inpaint, remove background, resize, convert to pixel art | REST v2 edit/transform endpoints. | Supplied images are optional unless the selected route requires image fields. For image-to-pixel-art without a requested size, prefer Pro. For fixed output size within current `output_size` limits, use normal `image-to-pixelart`. If the requested size is outside those limits, use Pro, verify dimensions, and if they differ, warn the user and ask before using PixelLab `resize` or local nearest-neighbor/canvas resize/pad/crop. |
@@ -64,6 +64,7 @@ When images are supplied, infer each file's role from the request and the select
 For detailed execution rules used by the skill, see:
 
 - [Tilesets](../../skills/pixellab-pip/references/tilesets.md)
+- [Skill Icon Generation Spike](pixellab-skill-icon-generation-spike.md)
 - [Paperdolling](../../skills/pixellab-pip/references/paperdolling.md)
 - [Image Input Roles](../../skills/pixellab-pip/references/image-input-roles.md)
 - [Usage Reporting](../../skills/pixellab-pip/references/usage-reporting.md)

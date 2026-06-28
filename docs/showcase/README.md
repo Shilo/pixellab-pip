@@ -6,10 +6,21 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 
 ## Generated Assets
 
-| Asset | Preview | Initial prompt |
-|---|---|---|
-| [Pip Mascot](pip-mascot.md) | ![Pip mascot idle animation](pip/pip.gif) | <pre><code>pip create a 64px character based on .pip-mascot.md</code></pre> |
-| [Gameplay GUI](gameplay-gui.md) | ![Textless modular fantasy MMORPG GUI kit](gameplay-gui/modular-mmorpg-gui-textless-688x384.png) | <pre><code>/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.</code></pre> |
+### Gameplay GUI
+
+[<img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="688">](gameplay-gui.md)
+
+```text
+/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.
+```
+
+### Pip Mascot
+
+[![Pip mascot idle animation](pip/pip.gif)](pip-mascot.md)
+
+```text
+pip create a 64px character based on .pip-mascot.md
+```
 
 ## Showcase Format
 
