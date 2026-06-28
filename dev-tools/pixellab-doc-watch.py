@@ -300,9 +300,9 @@ def source_delta(previous: Any, current: dict[str, Any]) -> dict[str, Any]:
         if previous.get("raw_sha256") != current.get("raw_sha256"):
             return {
                 "status": "raw_changed",
-                "skill_relevant_change": False,
-                "action_required": False,
-                "meaning": "Raw bytes changed, but the normalized skill-relevant summary is unchanged.",
+                "normalized_change": False,
+                "manual_review": "Inspect raw before/after only if this source matters for the current task.",
+                "meaning": "Raw bytes changed, but the normalized summary is unchanged. This is not counted as docs drift.",
                 "raw_sha256": {"before": previous.get("raw_sha256"), "after": current.get("raw_sha256")},
             }
         return {"status": "unchanged"}
@@ -364,6 +364,10 @@ def write_sources_file(cache_dir: Path) -> None:
 
 def load_sources(cache_dir: Path) -> list[dict[str, str]]:
     write_sources_file(cache_dir)
+    return read_json(cache_dir / "sources.json", SOURCE_DEFS)
+
+
+def read_sources(cache_dir: Path) -> list[dict[str, str]]:
     return read_json(cache_dir / "sources.json", SOURCE_DEFS)
 
 
@@ -437,7 +441,7 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
             if "link_count" in change:
                 notes.append(f"{change['link_count']} links")
         if change["status"] == "raw_changed":
-            notes.append("report-only raw byte change; no Skill update needed")
+            notes.append("raw byte change only; normalized summary unchanged")
         elif not notes and "raw_sha256" in change:
             notes.append("raw content hash changed")
         lines.append(f"| `{source_id}` | `{change['status']}` | {'; '.join(notes) or ''} |")
@@ -506,6 +510,7 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
     changes: dict[str, Any] = {"generated_at": generated_at, "sources": {}}
     any_changed = False
     any_failed = False
+    any_initialized = False
 
     for source in load_sources(cache_dir):
         try:
@@ -524,9 +529,10 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
         previous = read_json(latest_path)
         delta = source_delta(previous, normalized)
         changes["sources"][source["id"]] = delta
-        changed = delta["status"] not in ("unchanged", "raw_changed")
+        changed = delta["status"] not in ("unchanged", "raw_changed", "initialized")
         reportable = delta["status"] != "unchanged"
         any_changed = any_changed or changed
+        any_initialized = any_initialized or delta["status"] == "initialized"
         if snapshot_mode == "always" or (snapshot_mode == "changed" and reportable):
             if reportable:
                 save_previous_snapshot(cache_dir, run_stamp, source)
@@ -544,6 +550,7 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
             "last_refreshed_at": generated_at,
             "last_report": str(report_path.relative_to(cache_dir)),
             "last_change_detected": any_changed,
+            "last_refresh_initialized_sources": any_initialized,
             "last_refresh_had_failures": any_failed,
         }
     )
@@ -556,7 +563,12 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
             print("Changes were detected in successfully fetched sources, but the refresh is incomplete.")
         print("One or more sources failed to refresh. Existing latest cache entries were kept for failed sources.")
         return 1
-    print("Changes detected." if any_changed else "No changes detected.")
+    if any_changed:
+        print("Changes detected.")
+    elif any_initialized:
+        print("Initialized baseline. No prior cache existed for one or more sources.")
+    else:
+        print("No changes detected.")
     return 2 if any_changed else 0
 
 
@@ -565,7 +577,7 @@ def status(cache_dir: Path) -> int:
     if not manifest:
         print(f"No cache manifest found at {cache_dir}")
         return 1
-    sources = load_sources(cache_dir)
+    sources = read_sources(cache_dir)
     latest_files = {}
     latest_complete = True
     for source in sources:

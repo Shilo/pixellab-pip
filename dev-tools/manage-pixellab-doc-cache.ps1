@@ -234,6 +234,15 @@ function Write-StatusGuidance {
         return
     }
 
+    if ((Test-JsonProperty -Object $manifest -Name "last_refresh_initialized_sources") -and $manifest.last_refresh_initialized_sources -and -not $manifest.last_change_detected) {
+        Write-Host "- Last refresh initialized the local baseline. No prior cache existed for one or more sources, so this is not documentation drift."
+        if (Test-JsonProperty -Object $manifest -Name "last_report") {
+            $reportPath = $manifest.last_report -replace '\\', '/'
+            Write-Host "- Baseline report: .local/pixellab-doc-watch/$reportPath"
+        }
+        return
+    }
+
     if ((Test-JsonProperty -Object $manifest -Name "last_change_detected") -and $manifest.last_change_detected) {
         Write-Host "- Last successful refresh detected skill-relevant PixelLab documentation drift." -ForegroundColor Yellow
         if (Test-JsonProperty -Object $manifest -Name "last_report") {
@@ -277,7 +286,8 @@ function Find-PythonCommand {
 function Invoke-DocWatch {
     param(
         [Parameter(Mandatory = $true)][string]$RepoRoot,
-        [Parameter(Mandatory = $true)][string[]]$Arguments
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [int[]]$AllowedExitCodes = @(0)
     )
 
     $watchScript = Join-Path $RepoRoot "dev-tools\pixellab-doc-watch.py"
@@ -296,6 +306,7 @@ function Invoke-DocWatch {
     finally {
         Pop-Location
     }
+    $script:LastDocWatchExitCode = $exitCode
 
     if ($exitCode -eq 2) {
         Write-Host ""
@@ -303,7 +314,7 @@ function Invoke-DocWatch {
         return
     }
 
-    if ($exitCode -ne 0) {
+    if ($AllowedExitCodes -notcontains $exitCode) {
         throw "pixellab-doc-watch.py failed with exit code $exitCode"
     }
 }
@@ -363,7 +374,7 @@ function Invoke-Main {
             Write-Host "Refresh complete. Run status to see the latest report path." -ForegroundColor Green
         }
         "status" {
-            Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("status")
+            Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("status") -AllowedExitCodes @(0, 1)
             $state = Get-CacheState -CacheRoot $cacheRoot
             Write-StatusGuidance -CacheRoot $cacheRoot -State $state
         }

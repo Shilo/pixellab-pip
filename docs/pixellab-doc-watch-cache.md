@@ -18,7 +18,7 @@ Default sources:
 - `https://www.pixellab.ai/docs`
 - `https://www.pixellab.ai/mcp`
 
-The watcher stores raw files and normalized summaries. The normalized summaries are designed to surface skill-relevant drift such as added REST paths, added MCP tools, schema-name changes, prompt-limit fields, official links, and source hash changes.
+The watcher stores raw files and normalized summaries. The normalized summaries are designed to surface skill-relevant drift such as added REST paths, added MCP tools, schema-name changes, prompt-limit fields, and official links. Raw source hash changes are recorded as a separate review signal.
 
 For REST v2 endpoint truth, treat `https://api.pixellab.ai/v2/openapi.json` as primary. The interactive docs at `https://api.pixellab.ai/v2/docs` and ReDoc at `https://api.pixellab.ai/v2/redoc` are documentation shells that currently load `/v2/openapi.json`. The `llms.txt` file is useful as an agent-readable index and parity cross-check, but it should not replace OpenAPI for exact endpoint, field, enum, required-property, response, or prompt-limit tracking.
 
@@ -43,7 +43,7 @@ After initialization, the local-only cache looks like this:
     YYYYMMDDTHHMMSSZ.md
 ```
 
-`manifest.json` records the cache version, creation time, last refresh time, last report path, and whether the last refresh detected a change.
+`manifest.json` records the cache version, creation time, last refresh time, last report path, whether the last refresh initialized a baseline, and whether the last refresh detected normalized docs drift.
 
 ## Initialize On A Fresh Checkout
 
@@ -107,7 +107,7 @@ The refresh command:
 
 When a source changes, the timestamped snapshot contains the newly fetched content plus a `previous/` subfolder copied from the prior `latest/` cache for that source. Compare those two folders when you need to inspect the actual before/after content.
 
-By default, `refresh` exits with code `2` when normalized skill-relevant changes are detected, `0` when nothing changed or only raw bytes changed, and `1` when one or more sources could not be fetched. Use `--exit-zero` for manual checks where a completed changed-docs refresh should count as success; fetch failures still exit `1` and appear in the generated report.
+By default, `refresh` exits with code `2` when normalized skill-relevant changes are detected, `0` when nothing changed, only raw bytes changed, or a baseline was initialized, and `1` when one or more sources could not be fetched. Use `--exit-zero` for manual checks where a completed changed-docs refresh should count as success; fetch failures still exit `1` and appear in the generated report.
 
 Some agent shells display any nonzero process exit generically. For manual verification, trust the command output and manifest fields: `Changes detected.` plus `last_refresh_had_failures: false` means the refresh succeeded and found drift.
 
@@ -117,7 +117,7 @@ Inspect the latest local state with the wrapper:
 .\dev-tools\manage-pixellab-doc-cache.ps1 -Action status
 ```
 
-The wrapper prints the machine-readable status JSON, then adds plain-English guidance for incomplete caches, failed refreshes, detected drift, old caches, and clean caches.
+The wrapper prints the machine-readable status JSON, then adds plain-English guidance for incomplete caches, failed refreshes, initialized baselines, detected drift, old caches, and clean caches.
 
 For direct machine-readable status:
 
@@ -125,7 +125,7 @@ For direct machine-readable status:
 python dev-tools/pixellab-doc-watch.py status
 ```
 
-`status` prints the manifest plus whether every configured source has a matching `latest/raw` and `latest/normalized` file. Open the report path shown in `last_report` to inspect the latest findings.
+`status` prints the manifest plus whether every configured source has a matching `latest/raw` and `latest/normalized` file. Unlike `init` and `refresh`, direct `status` does not sync source definitions before reading them. Open the report path shown in `last_report` to inspect the latest findings.
 
 ## How To Read A Report
 
@@ -135,7 +135,7 @@ Start with the report summary table. Important signals:
 - MCP tools added or removed: inspect MCP routing and fallback rules.
 - Schemas added or removed: inspect request/response guidance and prompt-limit docs.
 - `llms.txt` links added or removed: inspect SDK, ReDoc, and official-repo references.
-- `raw_changed`: the upstream file bytes changed but the watcher's normalized skill-relevant summary did not. This can recur when upstream serves dynamic documentation bytes. It is report-only, writes `skill_relevant_change: false` and `action_required: false` in the changes JSON, and does not make `refresh` exit `2`. Inspect manually only if the source matters for a current task.
+- `raw_changed`: the upstream file bytes changed but the watcher's normalized summary did not. This can recur when upstream serves dynamic documentation bytes. It is report-only, writes `normalized_change: false` plus manual-review guidance in the changes JSON, and does not make `refresh` exit `2`. Inspect raw before/after content if the source matters for a current task.
 
 The normalized OpenAPI summary is a routing and schema-drift heuristic, not a full compatibility proof. When exact response bodies, nested inline request schemas, or subtle field behavior matter, inspect `latest/raw/rest-openapi.json` or the relevant snapshot directly.
 
