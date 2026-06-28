@@ -10,11 +10,15 @@ Official docs can change after this skill. Prefer this skill for normal routing 
 |---|---|---|
 | `https://www.pixellab.ai/docs` | Human API guides and conceptual docs. | Not a complete machine-readable schema. |
 | `https://api.pixellab.ai/v2/docs` | Interactive REST v2 API docs. | Good for exact endpoint parameters; less useful for high-level agent routing. |
+| `https://api.pixellab.ai/v2/redoc` | REST v2 ReDoc reference pages linked from `llms.txt`. | Browseable operation docs; still use OpenAPI for machine-readable schemas. |
 | `https://api.pixellab.ai/v2/llms.txt` | LLM-friendly REST v2 endpoint index and auth summary. | Curated index only; it intentionally points to OpenAPI/interactive docs for full endpoint parameters, enum values, and request/response shapes. |
 | `https://api.pixellab.ai/v2/openapi.json` | Machine-readable REST v2 schema. | Requires parsing; current skill summarizes only stable routing. |
-| `https://www.pixellab.ai/mcp` | Human Vibe Coding setup page for MCP clients. | Setup-oriented; not a full tool reference. |
+| `https://www.pixellab.ai/mcp` | Human Vibe Coding setup page for MCP clients. | Setup-oriented; its "Available Tools" list can be abbreviated and should not be treated as the full tool inventory. |
 | `https://api.pixellab.ai/mcp` | Hosted MCP server URL. | This is a service endpoint, not documentation. Use through an MCP-capable client. |
-| `https://api.pixellab.ai/mcp/docs` | LLM-readable MCP tool guide. | MCP tools are not REST endpoints; do not curl tool names. |
+| `https://api.pixellab.ai/mcp/docs` | LLM-readable MCP tool guide and authoritative public MCP tool inventory. | MCP tools are not REST endpoints; do not curl tool names. |
+| `https://github.com/pixellab-code/pixellab-python` | Official Python SDK linked from `llms.txt`. | Check installed package/docs before assuming endpoint coverage. |
+| `https://github.com/pixellab-code/pixellab-js` | Official JavaScript/TypeScript SDK linked from `llms.txt`. | Check installed package/docs before assuming endpoint coverage. |
+| `https://github.com/pixellab-code/pixellab-mcp` | Official MCP server repository linked from `llms.txt`. | Hosted MCP tool availability can still vary by client/tool schema. |
 
 ## Vibe Coding Without This Skill
 
@@ -26,11 +30,11 @@ Without `/pixellab-pip`, the official MCP flow is:
 4. User asks the agent to create assets.
 5. Agent uses MCP tools directly and polls with corresponding `get_*` tools.
 
-`https://api.pixellab.ai/mcp/docs` is a tool guide for agents. It explains available MCP tools, non-blocking jobs, polling, downloads, and warns that MCP tools are not REST endpoints.
+`https://api.pixellab.ai/mcp/docs` is the authoritative public MCP tool inventory for agents. It explains available MCP tools, non-blocking jobs, polling, downloads, and warns that MCP tools are not REST endpoints. Use `https://www.pixellab.ai/mcp` for setup instructions, but do not rely on its abbreviated "Available Tools" list to decide whether a current MCP tool exists.
 
 MCP may also expose `pixellab://docs/...` documentation resources for engine/framework guides such as Godot, Unity, Python, Wang tilesets, sidescroller tilesets, isometric tiles, and platform overview. Use those resources when an MCP-capable client exposes them; otherwise fall back to the public docs URLs above.
 
-`https://api.pixellab.ai/v2/llms.txt` is a REST API guide for agents. It lists v2 endpoints, base URL, bearer auth, async job behavior, and links to OpenAPI/interactive docs.
+`https://api.pixellab.ai/v2/llms.txt` is a REST API guide for agents. It lists v2 endpoints, base URL, bearer auth, async job behavior, ReDoc operation links, OpenAPI/interactive docs, and official Python, JavaScript/TypeScript, and MCP GitHub repositories.
 
 ## Prompt Enhancement Pricing Boundary
 

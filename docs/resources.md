@@ -1,6 +1,6 @@
 # Resources
 
-Last reviewed: 2026-06-25.
+Last reviewed: 2026-06-28.
 
 ## Official PixelLab
 
@@ -11,9 +11,13 @@ Last reviewed: 2026-06-25.
 - [MCP endpoint](https://api.pixellab.ai/mcp) - Hosted PixelLab MCP endpoint for compatible agent clients.
 - [MCP docs](https://api.pixellab.ai/mcp/docs) - Official PixelLab MCP tool and setup documentation.
 - [REST v2 docs](https://api.pixellab.ai/v2/docs) - Interactive official REST v2 API documentation.
+- [REST v2 ReDoc](https://api.pixellab.ai/v2/redoc) - Browseable official REST v2 operation documentation linked from the LLM guide.
 - [REST v2 LLM guide](https://api.pixellab.ai/v2/llms.txt) - LLM-readable REST v2 endpoint guide and auth summary.
 - [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) - Exact current REST v2 schemas for endpoint, field, enum, and response verification.
 - [PixelLab GitHub organization](https://github.com/pixellab-code) - Official PixelLab code and SDK organization.
+- [Python SDK](https://github.com/pixellab-code/pixellab-python) - Official Python client linked from the REST v2 LLM guide.
+- [JavaScript/TypeScript SDK](https://github.com/pixellab-code/pixellab-js) - Official JavaScript/TypeScript client linked from the REST v2 LLM guide.
+- [MCP server repository](https://github.com/pixellab-code/pixellab-mcp) - Official MCP server repository linked from the REST v2 LLM guide.
 
 ## Unofficial Tools
 

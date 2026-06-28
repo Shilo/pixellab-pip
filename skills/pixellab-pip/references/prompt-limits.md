@@ -2,7 +2,7 @@
 
 Read this when a PixelLab REST v2 call rejects a natural-language field for length, when writing exact API code, or when preparing unusually long prompts.
 
-These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-06-26. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
+These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-06-28. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
 
 ## Rule
 
@@ -23,7 +23,8 @@ If a call fails because a natural-language field is too long, trim that field wi
 |---|---|---:|
 | `POST /animate-with-text-v2` | `action` | 500 |
 | `POST /animate-with-text-v3` | `action` | 500 |
-| `POST /animate-character`, `POST /characters/animations` | `description` | 2000 |
+| `POST /animate-character` | `description` | 2000 |
+| `POST /characters/animations` | `description` | 2000 |
 | `POST /create-1-direction-object` | `description` | 2000 |
 | `POST /create-8-direction-object` | `description` | 2000 |
 | `POST /create-character-pro` | `description` | 2000 |
