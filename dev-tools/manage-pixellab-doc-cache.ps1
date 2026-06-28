@@ -103,6 +103,9 @@ function Select-MenuItem {
 }
 
 function Pause-BeforeExit {
+    if (-not [string]::IsNullOrWhiteSpace($script:Action)) {
+        return
+    }
     if ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected) {
         return
     }
@@ -234,7 +237,7 @@ function Write-StatusGuidance {
         return
     }
 
-    if ((Test-JsonProperty -Object $manifest -Name "last_refresh_initialized_sources") -and $manifest.last_refresh_initialized_sources -and -not $manifest.last_change_detected) {
+    if ((Test-JsonProperty -Object $manifest -Name "last_refresh_initialized_sources") -and $manifest.last_refresh_initialized_sources -and (-not (Test-JsonProperty -Object $manifest -Name "last_change_detected") -or -not $manifest.last_change_detected)) {
         Write-Host "- Last refresh initialized the local baseline. No prior cache existed for one or more sources, so this is not documentation drift."
         if (Test-JsonProperty -Object $manifest -Name "last_report") {
             $reportPath = $manifest.last_report -replace '\\', '/'
@@ -270,7 +273,7 @@ function Write-StatusGuidance {
 }
 
 function Find-PythonCommand {
-    foreach ($candidate in @("python", "py")) {
+    foreach ($candidate in @("py", "python")) {
         if (-not (Get-Command $candidate -ErrorAction SilentlyContinue)) {
             continue
         }
@@ -308,15 +311,11 @@ function Invoke-DocWatch {
     }
     $script:LastDocWatchExitCode = $exitCode
 
-    if ($exitCode -eq 2) {
-        Write-Host ""
-        Write-Host "Refresh completed and detected documentation changes." -ForegroundColor Yellow
-        return
-    }
-
     if ($AllowedExitCodes -notcontains $exitCode) {
         throw "pixellab-doc-watch.py failed with exit code $exitCode"
     }
+
+    return $exitCode
 }
 
 function Invoke-Main {
@@ -369,12 +368,25 @@ function Invoke-Main {
             Write-Host "Initialized or updated local PixelLab docs cache." -ForegroundColor Green
         }
         "refresh" {
-            Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("refresh")
+            $watchExitCode = Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("refresh") -AllowedExitCodes @(0, 1, 2, 3)
+            $script:ProcessExitCode = $watchExitCode
             Write-Host ""
-            Write-Host "Refresh complete. Run status to see the latest report path." -ForegroundColor Green
+            if ($watchExitCode -eq 1) {
+                Write-Host "Refresh completed with fetch failures. Run status to see the partial report path." -ForegroundColor Yellow
+            }
+            elseif ($watchExitCode -eq 2) {
+                Write-Host "Refresh completed and detected documentation changes. Run status to see the latest report path." -ForegroundColor Yellow
+            }
+            elseif ($watchExitCode -eq 3) {
+                Write-Host "Refresh detected documentation changes, but one or more sources failed. Run status to see the partial report path." -ForegroundColor Yellow
+            }
+            else {
+                Write-Host "Refresh complete. Run status to see the latest report path." -ForegroundColor Green
+            }
         }
         "status" {
-            Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("status") -AllowedExitCodes @(0, 1)
+            $watchExitCode = Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("status") -AllowedExitCodes @(0, 1)
+            $script:ProcessExitCode = $watchExitCode
             $state = Get-CacheState -CacheRoot $cacheRoot
             Write-StatusGuidance -CacheRoot $cacheRoot -State $state
         }
@@ -384,17 +396,17 @@ function Invoke-Main {
     }
 }
 
-$exitCode = 0
+$script:ProcessExitCode = 0
 try {
     Invoke-Main
 }
 catch {
     Write-Host ""
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-    $exitCode = 1
+    $script:ProcessExitCode = 1
 }
 finally {
     Pause-BeforeExit
 }
 
-exit $exitCode
+exit $script:ProcessExitCode

@@ -294,9 +294,28 @@ def source_delta(previous: Any, current: dict[str, Any]) -> dict[str, Any]:
             delta["link_count"] = len(current.get("links", []))
         return delta
 
-    previous_semantic = {key: value for key, value in previous.items() if key != "raw_sha256"}
-    current_semantic = {key: value for key, value in current.items() if key != "raw_sha256"}
+    metadata_keys = {"info", "openapi"} if current["kind"] == "openapi" else set()
+    report_only_keys = {"raw_sha256"}
+    previous_semantic = {key: value for key, value in previous.items() if key not in report_only_keys | metadata_keys}
+    current_semantic = {key: value for key, value in current.items() if key not in report_only_keys | metadata_keys}
+    previous_metadata = {key: previous.get(key) for key in metadata_keys}
+    current_metadata = {key: current.get(key) for key in metadata_keys}
     if previous_semantic == current_semantic:
+        if previous_metadata != current_metadata:
+            delta = {
+                "status": "metadata_changed",
+                "normalized_change": True,
+                "action_required": False,
+                "meaning": "OpenAPI metadata changed, but tracked paths and schemas are unchanged. This is not counted as skill-relevant docs drift.",
+                "metadata": {
+                    key: {"before": previous_metadata.get(key), "after": current_metadata.get(key)}
+                    for key in sorted(metadata_keys)
+                    if previous_metadata.get(key) != current_metadata.get(key)
+                },
+            }
+            if previous.get("raw_sha256") != current.get("raw_sha256"):
+                delta["raw_sha256"] = {"before": previous.get("raw_sha256"), "after": current.get("raw_sha256")}
+            return delta
         if previous.get("raw_sha256") != current.get("raw_sha256"):
             return {
                 "status": "raw_changed",
@@ -442,6 +461,8 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
                 notes.append(f"{change['link_count']} links")
         if change["status"] == "raw_changed":
             notes.append("raw byte change only; normalized summary unchanged")
+        if change["status"] == "metadata_changed":
+            notes.append(f"OpenAPI metadata changed: {', '.join(change.get('metadata', {}).keys())}")
         elif not notes and "raw_sha256" in change:
             notes.append("raw content hash changed")
         lines.append(f"| `{source_id}` | `{change['status']}` | {'; '.join(notes) or ''} |")
@@ -469,6 +490,15 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
                     if len(items) > 100:
                         lines.append(f"- ... {len(items) - 100} more")
                     lines.append("")
+        if "metadata" in change:
+            lines.append("metadata changes:")
+            for key, value in change["metadata"].items():
+                lines.append(f"- `{key}`:")
+                lines.append("  - before:")
+                lines.append(f"    ```json\n{json.dumps(value.get('before'), indent=2, sort_keys=True)}\n    ```")
+                lines.append("  - after:")
+                lines.append(f"    ```json\n{json.dumps(value.get('after'), indent=2, sort_keys=True)}\n    ```")
+            lines.append("")
 
     lines.extend(
         [
@@ -529,7 +559,7 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
         previous = read_json(latest_path)
         delta = source_delta(previous, normalized)
         changes["sources"][source["id"]] = delta
-        changed = delta["status"] not in ("unchanged", "raw_changed", "initialized")
+        changed = delta["status"] not in ("unchanged", "raw_changed", "metadata_changed", "initialized")
         reportable = delta["status"] != "unchanged"
         any_changed = any_changed or changed
         any_initialized = any_initialized or delta["status"] == "initialized"
@@ -562,6 +592,8 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
         if any_changed:
             print("Changes were detected in successfully fetched sources, but the refresh is incomplete.")
         print("One or more sources failed to refresh. Existing latest cache entries were kept for failed sources.")
+        if any_changed and not args.exit_zero:
+            return 3
         return 1
     if any_changed:
         print("Changes detected.")
@@ -607,7 +639,7 @@ def main() -> int:
     refresh_parser.add_argument("--timeout", type=int, default=45)
     refresh_parser.add_argument("--snapshot", choices=["always", "changed", "never"], default="changed")
     refresh_parser.add_argument("--private-git", action="store_true", help="Initialize a nested private git repo inside the ignored cache if missing.")
-    refresh_parser.add_argument("--exit-zero", action="store_true", help="Return exit code 0 even when changes are detected.")
+    refresh_parser.add_argument("--exit-zero", action="store_true", help="Return exit code 0 instead of 2 when changes are detected; fetch failures still return nonzero.")
 
     sub.add_parser("status", help="Print the local cache manifest.")
 

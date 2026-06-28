@@ -107,7 +107,7 @@ The refresh command:
 
 When a source changes, the timestamped snapshot contains the newly fetched content plus a `previous/` subfolder copied from the prior `latest/` cache for that source. Compare those two folders when you need to inspect the actual before/after content.
 
-By default, `refresh` exits with code `2` when normalized skill-relevant changes are detected, `0` when nothing changed, only raw bytes changed, or a baseline was initialized, and `1` when one or more sources could not be fetched. Use `--exit-zero` for manual checks where a completed changed-docs refresh should count as success; fetch failures still exit `1` and appear in the generated report.
+By default, `refresh` exits with code `2` when normalized skill-relevant changes are detected, `3` when skill-relevant changes were detected but one or more sources could not be fetched, `1` when one or more sources could not be fetched and no skill-relevant change was detected, and `0` when nothing changed, only raw bytes changed, only OpenAPI metadata changed, or a baseline was initialized. Use `--exit-zero` for manual checks where a completed changed-docs refresh should count as success; fetch failures still exit nonzero and appear in the generated report.
 
 Some agent shells display any nonzero process exit generically. For manual verification, trust the command output and manifest fields: `Changes detected.` plus `last_refresh_had_failures: false` means the refresh succeeded and found drift.
 
@@ -136,6 +136,7 @@ Start with the report summary table. Important signals:
 - Schemas added or removed: inspect request/response guidance and prompt-limit docs.
 - `llms.txt` links added or removed: inspect SDK, ReDoc, and official-repo references.
 - `raw_changed`: the upstream file bytes changed but the watcher's normalized summary did not. This can recur when upstream serves dynamic documentation bytes. It is report-only, writes `normalized_change: false` plus manual-review guidance in the changes JSON, and does not make `refresh` exit `2`. Inspect raw before/after content if the source matters for a current task.
+- `metadata_changed`: OpenAPI metadata such as title, version, or description changed while tracked paths and schemas stayed the same. This is visible in the report but does not make `refresh` exit `2`.
 
 The normalized OpenAPI summary is a routing and schema-drift heuristic, not a full compatibility proof. When exact response bodies, nested inline request schemas, or subtle field behavior matter, inspect `latest/raw/rest-openapi.json` or the relevant snapshot directly.
 
