@@ -135,7 +135,7 @@ Start with the report summary table. Important signals:
 - MCP tools added or removed: inspect MCP routing and fallback rules.
 - Schemas added or removed: inspect request/response guidance and prompt-limit docs.
 - `llms.txt` links added or removed: inspect SDK, ReDoc, and official-repo references.
-- `raw_changed`: the upstream file bytes changed but the watcher's normalized skill-relevant summary did not. This is report-only and does not make `refresh` exit `2`. Inspect manually if the source matters for a current task.
+- `raw_changed`: the upstream file bytes changed but the watcher's normalized skill-relevant summary did not. This can recur when upstream serves dynamic documentation bytes. It is report-only, writes `skill_relevant_change: false` and `action_required: false` in the changes JSON, and does not make `refresh` exit `2`. Inspect manually only if the source matters for a current task.
 
 The normalized OpenAPI summary is a routing and schema-drift heuristic, not a full compatibility proof. When exact response bodies, nested inline request schemas, or subtle field behavior matter, inspect `latest/raw/rest-openapi.json` or the relevant snapshot directly.
 

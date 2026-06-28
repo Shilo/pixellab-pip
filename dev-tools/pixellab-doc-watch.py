@@ -300,6 +300,9 @@ def source_delta(previous: Any, current: dict[str, Any]) -> dict[str, Any]:
         if previous.get("raw_sha256") != current.get("raw_sha256"):
             return {
                 "status": "raw_changed",
+                "skill_relevant_change": False,
+                "action_required": False,
+                "meaning": "Raw bytes changed, but the normalized skill-relevant summary is unchanged.",
                 "raw_sha256": {"before": previous.get("raw_sha256"), "after": current.get("raw_sha256")},
             }
         return {"status": "unchanged"}
@@ -433,7 +436,9 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
                 notes.append(f"{change['method_path_count']} LLMS method paths")
             if "link_count" in change:
                 notes.append(f"{change['link_count']} links")
-        if not notes and "raw_sha256" in change:
+        if change["status"] == "raw_changed":
+            notes.append("report-only raw byte change; no Skill update needed")
+        elif not notes and "raw_sha256" in change:
             notes.append("raw content hash changed")
         lines.append(f"| `{source_id}` | `{change['status']}` | {'; '.join(notes) or ''} |")
 

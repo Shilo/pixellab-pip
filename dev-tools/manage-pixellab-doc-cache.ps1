@@ -228,7 +228,8 @@ function Write-StatusGuidance {
     if ((Test-JsonProperty -Object $manifest -Name "last_refresh_had_failures") -and $manifest.last_refresh_had_failures) {
         Write-Host "- Last refresh was partial. Choose refresh again; do not update routing claims from a failed source unless that source fetched successfully." -ForegroundColor Yellow
         if (Test-JsonProperty -Object $manifest -Name "last_report") {
-            Write-Host "- Review the partial report: .local/pixellab-doc-watch/$($manifest.last_report)"
+            $reportPath = $manifest.last_report -replace '\\', '/'
+            Write-Host "- Review the partial report: .local/pixellab-doc-watch/$reportPath"
         }
         return
     }
@@ -236,7 +237,8 @@ function Write-StatusGuidance {
     if ((Test-JsonProperty -Object $manifest -Name "last_change_detected") -and $manifest.last_change_detected) {
         Write-Host "- Last successful refresh detected skill-relevant PixelLab documentation drift." -ForegroundColor Yellow
         if (Test-JsonProperty -Object $manifest -Name "last_report") {
-            Write-Host "- Open the report and review the Agent Skill impact checklist: .local/pixellab-doc-watch/$($manifest.last_report)"
+            $reportPath = $manifest.last_report -replace '\\', '/'
+            Write-Host "- Open the report and review the Agent Skill impact checklist: .local/pixellab-doc-watch/$reportPath"
         }
         Write-Host "- Update only the affected Skill/docs files, then refresh again when you want to confirm the current upstream state."
         return
@@ -253,7 +255,8 @@ function Write-StatusGuidance {
 
     Write-Host "- Cache is complete and the last refresh found no skill-relevant drift."
     if (Test-JsonProperty -Object $manifest -Name "last_report") {
-        Write-Host "- Latest report: .local/pixellab-doc-watch/$($manifest.last_report)"
+        $reportPath = $manifest.last_report -replace '\\', '/'
+        Write-Host "- Latest report: .local/pixellab-doc-watch/$reportPath"
     }
 }
 
