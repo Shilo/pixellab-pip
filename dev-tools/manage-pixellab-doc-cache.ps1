@@ -371,7 +371,7 @@ function Invoke-Main {
             if ($state.IsInitialized) {
                 Write-Host "Local PixelLab docs cache is already initialized; syncing cache metadata and sources."
             }
-            Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("init")
+            $script:ProcessExitCode = Invoke-DocWatch -RepoRoot $repoRoot -Arguments @("init")
             Write-Host ""
             Write-Host "Initialized or updated local PixelLab docs cache." -ForegroundColor Green
         }
