@@ -4,7 +4,7 @@ Last reviewed: 2026-06-28.
 
 Purpose: capture live-generation findings for fantasy RPG skill icon and item icon requests so `pixellab-pip` can route future "skill icon", "ability icon", "spell icon", "action bar icon", and similar requests with better defaults.
 
-This spike is based on live PixelLab generations and human visual review. The current human-ranked winner is REST v2 `POST /generate-image-v2` ("Create S-XL image (Pro)") for complete 8x8 finished skill icon sheets, despite the winning run still violating the strict borderless target with a subtle dark card-edge treatment.
+This spike is based on live PixelLab generations and human visual review. The current human-ranked winner remains REST v2 `POST /generate-image-v2` ("Create S-XL image (Pro)") for complete 8x8 finished skill icon sheets. Two `generate-image-v2` prompt variants are close co-winners for different reasons: the original strict-grid prompt has the most authentic RPG hotbar/icon-sheet punch, while the later rich-background prompt reduces some border pressure and improves explicit background guidance.
 
 ## Target Asset Definition
 
@@ -27,6 +27,7 @@ Use REST v2 `POST /generate-image-v2` first when the user asks for a complete fi
 Why:
 
 - It produced the strongest human-rated result in this spike.
+- It produced the two best human-rated outputs, for different aesthetic tradeoffs.
 - It generated the full 8x8 sheet in one call.
 - It created full colorful backgrounds.
 - The foreground symbols were extremely clear and readable.
@@ -36,7 +37,17 @@ Why:
 Known downside:
 
 - It tends to add a subtle 1px dark border/card-slot treatment around each icon even when instructed not to. Future prompts should emphasize "borderless art only", "no black outline around cell edges", "no separating cell lines", and "background continues to cell edges".
-- The likely cause is training-prior vocabulary: `skill icons`, `game UI`, `strict grid`, `cell`, and `spritesheet` often imply action-bar slots. Reframe the sheet as a `borderless spritesheet mosaic`, say the grid is invisible, and avoid `UI`, `button`, `slot`, `card`, and `frame` wording unless the user wants those elements.
+- The likely cause is training-prior vocabulary: `skill icons`, `game UI`, `strict grid`, `cell`, and `spritesheet` often imply action-bar slots. However, `game UI` and strict sheet language also help create the authentic, high-contrast RPG icon look. Treat this as a tradeoff, not a simple ban.
+
+Current ranking:
+
+| Rank | Route | Result |
+|---:|---|---|
+| 1A | REST `generate-image-v2`, original strict-grid prompt | Best authentic RPG icon-sheet feel, punchy colors, strong symbol clarity, but most obvious subtle dark slot/card edge. |
+| 1B | REST `generate-image-v2`, rich-background prompt | Very close to 1A; richer explicit background direction and slightly softer border behavior, but less of the classic hotbar punch. |
+| 2 | REST `generate-ui-v2` | Right general idea and colors, but too noisy/downscaled, lower 32px clarity, rounded/background-slot feel, and some text-like noise. |
+| 3 | MCP `create_ui_asset` with 64 pieces | Clean structure and semantic labels, but poor consistency for pure icons because it strongly creates framed UI buttons/slots. |
+| Fallback | MCP `create_tiles_pro` plus optional sheet edit | Interesting for 4x4 tile-like icon batches, but not the best route for finished 8x8 skill icon sheets. |
 
 Use `create_tiles_pro` as an experimental alternative when the user wants a tile-like set or when Pro image generation keeps failing semantic style, but do not treat it as the default for finished skill icon sheets yet.
 
@@ -71,7 +82,11 @@ Avoid these phrases unless the user explicitly wants them:
 - `frame`
 - `border`
 - `card`
-- `game UI`
+
+Use with caution:
+
+- `game UI` gives desirable authentic icon-sheet punch, but can increase slot/card-edge behavior.
+- `spritesheet`, `strict grid`, and `cell` improve alignment and classic sheet feel, but can increase visible per-cell borders.
 
 Even negative mentions of `rune` and `glyph` helped only when paired with "do not use"; positive use of those words can drift into text-like marks.
 
@@ -87,6 +102,7 @@ Tested parameters:
 - `image_size`: `{ "width": 256, "height": 256 }`
 - `no_background`: `false`
 - Best human-ranked seed so far: `24062805`
+- Rich-background near-best seed: `24062808`
 - Border-reduction trial seed: `24062806`
 
 Best use:
@@ -97,7 +113,8 @@ Best use:
 
 Pros:
 
-- Best human-ranked result so far.
+- Best human-ranked route so far.
+- Produced two closely ranked top outputs with different strengths.
 - Clear, readable symbols.
 - Full colorful backgrounds.
 - Strong consistency across the sheet.
@@ -112,7 +129,16 @@ Cons:
 - Can still hallucinate text if the prompt does not strongly ban all text-like marks.
 - Single-shot sheets can obey the overall grid while not perfectly matching every requested individual skill concept.
 
-Winning trial input:
+#### Top Candidate 1A: Original Strict-Grid Prompt
+
+Human read:
+
+- Best for authentic RPG hotbar/icon-sheet feel.
+- Appealing punchy colors and strong contrast.
+- Very clear symbols and consistent icon language.
+- Weakness: subtle dark outline/card edge around each icon, likely because `spritesheet`, `strict grid`, `cell`, and `game UI skill icons` activate real game-icon-slot priors.
+
+Input:
 
 ```json
 {
@@ -129,7 +155,7 @@ Winning trial input:
 }
 ```
 
-Winning trial verification:
+Verification:
 
 - Output file: `generated/fantasy_skill_icons_create_image_pro_trial/create_image_pro_skill_icons_pictorial_8x8_32px.png`
 - Dimensions: `256x256`
@@ -137,6 +163,49 @@ Winning trial verification:
 - Cropped cell hashes: 64 pixel-hash-unique cells. This proves non-identical pixel data, not semantic uniqueness.
 - Usage: 20 generations
 - Main issue: subtle black border around each icon cell.
+
+#### Top Candidate 1B: Rich-Background Reduced-Slot Prompt
+
+Human read:
+
+- Very close to the original best.
+- Better explicit background direction: luminous gradients, painterly pixel texture, depth, magical light, atmospheric color variation, not flat solid color.
+- Slightly less hard-framed than the original strict-grid winner.
+- Weakness: softened some of the classic installed-in-an-RPG-hotbar punch from the original.
+
+Key prompt differences from 1A:
+
+- Replaced `spritesheet`, `Strict grid`, and `each cell` with softer `sheet`, `icon`, and `square` wording.
+- Kept `skill icons` and `game UI`, because those improve the target vibe.
+- Separated `Pixel art` from the `game UI` phrase.
+- Added explicit high-quality background language.
+- Added more direct anti-border language: `black outlines around icon square edges` and `separating lines`.
+- Expanded ability categories, including `mind`, `time`, `gravity`, `poison`, `holy`, `shadow`, `blood`, `mana`, `rage`, and utility skills.
+
+Input:
+
+```json
+{
+  "endpoint": "POST https://api.pixellab.ai/v2/generate-image-v2",
+  "body": {
+    "description": "A complete 8 by 8 sheet of 64 unique fantasy RPG skill icons for game UI. Exact canvas 256x256 pixels. 8 columns and 8 rows, each icon exactly one 32x32 square, perfectly aligned, edge-to-edge, no spacing, no overlap, no cropped icons. Pixel art, cohesive high fantasy theme, readable at 32x32.\n\nEach icon is a finished opaque square with a rich full-bleed illustrated miniature background behind the skill symbol. Backgrounds should be high quality: luminous gradients, painterly pixel texture, depth, magical light, atmospheric color variation, not flat solid color. Background art touches all four edges and corners. Every pixel painted; no transparent pixels, no alpha, no blank corners, no padding.\n\nPictorial symbols only. Use clear centered pictures and silhouettes: flames, ice shards, lightning bolts, shields, hands, daggers, arrows, skulls, leaves, spirits, portals, stars, wings, claws, weapons, masks, potions, celestial beams, aura effects. Do not use runes or glyphs. No text-like marks, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, or alphabet-like shapes.\n\nUnique varied abilities: elemental magic, weapon attacks, healing, protection, stealth, curses, nature magic, summoning, movement, utility, crafting, survival, resurrection, treasure sense, mind, time, gravity, poison, holy, shadow, blood, mana, rage, tracking, alchemy, lockpicking, leadership, taunt, cleanse, traps, phoenix, dragon breath. No terrain tiles, map tiles, or inventory item sheet. No borders, frames, UI slots, rounded corners, dividers, watermark, black outlines around icon square edges, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": false,
+    "seed": 24062808
+  }
+}
+```
+
+Verification:
+
+- Output file: `generated/fantasy_skill_icons_create_image_pro_hybrid_prompt_trial/create_image_pro_skill_icons_hybrid_prompt_8x8_32px.png`
+- Dimensions: `256x256`
+- Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
+- Cropped cell hashes: 64 pixel-hash-unique cells; semantic uniqueness still needs visual review.
+- Visual result: recovered richer background/gradient quality compared with the over-optimized borderless mosaic prompt, while avoiding the hardest slot-card grid of the original best.
 
 Border-reduction trial:
 
@@ -320,13 +389,16 @@ Observed result:
 
 Pros:
 
-- Strong "actual game icon sheet" feel.
+- Right general idea and colors.
+- Strong "actual game icon sheet" feel at a glance.
 - Rich color and high visual density.
-- Good symbol variety and readability.
+- Good symbol variety.
 - Boundary-edge luminance was close to sheet average in the test, suggesting it did not rely on one uniform dark grid line as heavily as some prior attempts.
 
 Cons:
 
+- Lacked 32px clarity; the image looked too noisy and downscaled.
+- Backgrounds appeared to have rounded/button-like corners or border-radius behavior.
 - Still produced small slot-border/card-edge behavior around many icons.
 - Some tiny text-like or glyph-like noise appeared.
 - Tended toward many small detailed icons, which can hurt clarity at 32px compared with the best `generate-image-v2` runs.
@@ -369,6 +441,8 @@ Pros:
 
 Cons:
 
+- Had poor visual consistency as a finished icon-art sheet.
+- Produced weird unified borders and frames across the sheet.
 - Strongly pushed the result toward framed icon buttons/slots, even with radius `0` and explicit no-border wording.
 - Result felt more like a UI action-bar asset than pure borderless skill-icon art.
 - Piece labels are useful as metadata, but may increase text/glyph risk unless the prompt says labels must not be drawn.

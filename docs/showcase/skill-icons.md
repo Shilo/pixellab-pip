@@ -1,0 +1,185 @@
+# Skill Icons
+
+Last reviewed: 2026-06-28.
+
+![Create Image Pro rich-background skill icons](skill-icons/create-image-pro-rich-background-8x8-32px.png)
+
+![Create Image Pro original strict-grid skill icons](skill-icons/create-image-pro-original-strict-grid-8x8-32px.png)
+
+![Create Image Pro borderless mosaic skill icons](skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png)
+
+PixelLab Pip's strongest skill-icon route is REST `generate-image-v2`, surfaced in the product as Create Image Pro / Create S-XL Image Pro. The best showcased output is the rich-background prompt because it better follows the requested no-border/no-frame constraints while keeping strong readable symbols and colorful illustrated backgrounds. The original strict-grid output is very close and may be prettier for some game UI use cases, but it bakes in a faint card/slot edge.
+
+## Contents
+
+- [Request](#request)
+- [Best Example: Rich-Background Create Image Pro Sheet](#best-example-rich-background-create-image-pro-sheet)
+- [Close Co-Best: Original Strict-Grid Create Image Pro Sheet](#close-co-best-original-strict-grid-create-image-pro-sheet)
+- [Learning Example: Borderless Mosaic Create Image Pro Sheet](#learning-example-borderless-mosaic-create-image-pro-sheet)
+- [Findings](#findings)
+- [Outputs](#outputs)
+- [Validation Notes](#validation-notes)
+
+## Request
+
+```text
+/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
+```
+
+## Best Example: Rich-Background Create Image Pro Sheet
+
+![Create Image Pro rich-background skill icons](skill-icons/create-image-pro-rich-background-8x8-32px.png)
+
+The rich-background prompt is the recommended showcase winner. It keeps `skill icons` and `game UI` because those terms help PixelLab produce a real RPG icon-sheet feel, but it removes stronger slot-triggering wording such as `spritesheet`, `strict grid`, and `cell`. It also adds explicit background-quality guidance so the result keeps gradients and magical lighting instead of flattening into plain color fills.
+
+Route: PixelLab REST v2 `generate-image-v2`
+
+Prompt preparation: agent-optimized from iterative visual review.
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `256x256` |
+| Icon grid | `8x8`, intended `32x32` icons |
+| Background | `no_background: false` |
+| Seed | `24062808` |
+| Usage reported | `20` generations |
+
+Request body:
+
+```json
+{
+  "description": "A complete 8 by 8 sheet of 64 unique fantasy RPG skill icons for game UI. Exact canvas 256x256 pixels. 8 columns and 8 rows, each icon exactly one 32x32 square, perfectly aligned, edge-to-edge, no spacing, no overlap, no cropped icons. Pixel art, cohesive high fantasy theme, readable at 32x32.\n\nEach icon is a finished opaque square with a rich full-bleed illustrated miniature background behind the skill symbol. Backgrounds should be high quality: luminous gradients, painterly pixel texture, depth, magical light, atmospheric color variation, not flat solid color. Background art touches all four edges and corners. Every pixel painted; no transparent pixels, no alpha, no blank corners, no padding.\n\nPictorial symbols only. Use clear centered pictures and silhouettes: flames, ice shards, lightning bolts, shields, hands, daggers, arrows, skulls, leaves, spirits, portals, stars, wings, claws, weapons, masks, potions, celestial beams, aura effects. Do not use runes or glyphs. No text-like marks, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, or alphabet-like shapes.\n\nUnique varied abilities: elemental magic, weapon attacks, healing, protection, stealth, curses, nature magic, summoning, movement, utility, crafting, survival, resurrection, treasure sense, mind, time, gravity, poison, holy, shadow, blood, mana, rage, tracking, alchemy, lockpicking, leadership, taunt, cleanse, traps, phoenix, dragon breath. No terrain tiles, map tiles, or inventory item sheet. No borders, frames, UI slots, rounded corners, dividers, watermark, black outlines around icon square edges, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+  "image_size": {
+    "width": 256,
+    "height": 256
+  },
+  "no_background": false,
+  "seed": 24062808
+}
+```
+
+Findings:
+
+- Best match to the full user requirement among the top outputs.
+- Recovers rich background and gradient quality after the over-optimized borderless attempt became too flat.
+- Preserves readable foreground symbols and a coherent high-fantasy palette.
+- Still uses dark foreground outlines for readability, but does not look as hard-framed as the original strict-grid output.
+- Human ranking: effectively tied with the original strict-grid prompt, but selected as the showcase winner because it better respects the no-border/no-frame instruction.
+
+## Close Co-Best: Original Strict-Grid Create Image Pro Sheet
+
+![Create Image Pro original strict-grid skill icons](skill-icons/create-image-pro-original-strict-grid-8x8-32px.png)
+
+The original strict-grid prompt produced the most appealing classic RPG hotbar/icon-sheet look. The stricter `spritesheet`, `strict grid`, `cell`, and `game UI skill icons` phrasing likely pushed PixelLab toward real game UI icon priors: punchier contrast, darker edge treatment, and very clean silhouettes. The same priors also caused the main flaw: a faint baked-in card/slot edge around many icons.
+
+Route: PixelLab REST v2 `generate-image-v2`
+
+Prompt preparation: agent-optimized no-text/pictorial prompt.
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `256x256` |
+| Icon grid | `8x8`, intended `32x32` icons |
+| Background | `no_background: false` |
+| Seed | `24062805` |
+| Usage reported | `20` generations |
+
+Request body:
+
+```json
+{
+  "description": "A complete 8 by 8 spritesheet of 64 unique fantasy RPG ability icons. Exact canvas 256x256 pixels. Strict grid: 8 columns, 8 rows, each cell exactly 32x32 pixels, no spacing, no overlap, no cropped cells. Pixel art game UI skill icons, cohesive high fantasy theme, readable at 32px.\n\nEach cell is a finished opaque square icon with a full-bleed illustrated fantasy background touching all four edges and all four corners. Every pixel must be painted. No transparent pixels, no alpha, no blank corners, no padding.\n\nPictorial symbols only. Use clear centered pictures and silhouettes: flames, ice shards, lightning bolts, shields, hands, daggers, arrows, skulls, leaves, spirits, portals, stars, wings, claws, weapons, masks, potions, celestial beams, aura effects. Do not use runes or glyphs. No text-like marks. No letters, no words, no numbers, no labels, no captions, no handwriting, no decorative script, no fake writing, no alphabet-like shapes.\n\nUnique varied abilities: elemental magic, weapon attacks, healing, protection, stealth, curses, nature magic, summoning, movement, utility, crafting, survival, resurrection, treasure sense. No terrain tiles, no map tiles, no inventory item sheet. No borders, no frames, no UI slots, no rounded corners, no decorative dividers, no watermark. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+  "image_size": {
+    "width": 256,
+    "height": 256
+  },
+  "no_background": false,
+  "seed": 24062805
+}
+```
+
+Findings:
+
+- Strongest classic game-icon feel: punchy contrast, dark readability edges, and clear symbol silhouettes.
+- Beautiful colors and strong consistency across the sheet.
+- Better visual punch than the rich-background winner, but less faithful to the requested no-border/no-frame constraint.
+- No obvious readable labels were visible during review.
+- Repeats visual categories such as shields, weapons, potions, portals, and elemental effects.
+- Earlier review language underestimated this route compared with tiles-pro; later human review ranked Create Image Pro as the clear best approach overall.
+
+## Learning Example: Borderless Mosaic Create Image Pro Sheet
+
+![Create Image Pro borderless mosaic skill icons](skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png)
+
+The borderless mosaic prompt intentionally attacked the card/slot-border problem by reframing the sheet as an invisible-grid mosaic. It reduced the hard grid/slot feeling, but the stronger anti-border wording also flattened the backgrounds and made the output less visually rich. This is a useful negative/learning example: over-optimizing for no borders can damage the fantasy icon art direction.
+
+Route: PixelLab REST v2 `generate-image-v2`
+
+Prompt preparation: agent-optimized border-reduction prompt.
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `256x256` |
+| Icon grid | `8x8`, intended `32x32` icons |
+| Background | `no_background: false` |
+| Seed | `24062806` |
+
+Request body:
+
+```json
+{
+  "description": "Complete borderless 8x8 pixel-art spritesheet mosaic of 64 unique fantasy RPG ability pictograms. Exact canvas 256x256. Invisible grid only: 8 columns, 8 rows, each adjacent square area exactly 32x32, packed edge-to-edge, no spacing, no gaps, no overlap, no cropped art.\n\nEach 32x32 area is a full-bleed opaque miniature fantasy painting with a large clear centered ability symbol. The painted background must reach all four edges and all four corners and touch neighboring artwork directly. Do not draw the grid. Do not draw separator lines, seams, perimeter strokes, boxes, card edges, icon slots, frames, borders, outlines around square areas, or dark edge pixels along the 32x32 boundaries. Square fully painted corners, never rounded.\n\nPictorial symbols only: flames, ice, lightning, shields, hands, daggers, arrows, skulls, leaves, spirits, portals, stars, wings, claws, weapons, masks, potions, beams, aura effects, waves, stones, vines, eyes, chains, hearts, crowns, hammers, hooks, moons, suns. Large readable symbols, integrated into the background, not enclosed in UI.\n\nNo text, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, runes, glyphs, alphabet-like marks, watermark, transparent pixels, alpha, blank pixels. Varied abilities: elements, healing, protection, stealth, curses, nature, summoning, movement, crafting, survival, resurrection, treasure sense, weapon attacks, mind, time, gravity, poison, holy, shadow, blood, mana, rage, tracking, mining, fishing, cooking, alchemy, lockpicking, leadership, taunt, cleanse, traps, phoenix, dragon breath. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+  "image_size": {
+    "width": 256,
+    "height": 256
+  },
+  "no_background": false,
+  "seed": 24062806
+}
+```
+
+Findings:
+
+- Reduced the hard 1px card-grid border compared with the original strict-grid output.
+- Confirmed that `No borders` alone is not enough; grid and game UI vocabulary can still encourage slot/card edges.
+- Boundary pixels stayed darker than average, and many symbols still used dark outlines.
+- Backgrounds looked flatter and less premium than the original and rich-background prompts.
+- Not the recommended final prompt, but useful as evidence for the border/art-quality tradeoff.
+
+## Findings
+
+Create Image Pro / REST `generate-image-v2` is the best approach discovered in this spike for fantasy skill icons. It is the only route tested that consistently combined a full `8x8` output, opaque backgrounds, readable symbols, cohesive style, and strong visual quality.
+
+Prompt language has tradeoffs:
+
+- `game UI`, `spritesheet`, `strict grid`, and `cell` improve the classic RPG icon-sheet feel but increase baked-in slot/card edges.
+- Rich background language such as `luminous gradients`, `painterly pixel texture`, `depth`, `magical light`, and `not flat solid color` improves background quality.
+- Borderless/invisible-grid language can reduce hard frames, but too much of it can flatten the art direction.
+- `Pictorial symbols only` plus explicit bans on text, letters, numbers, runes, glyphs, fake writing, and labels is essential.
+
+Routes that did not win:
+
+- REST `generate-ui-v2` had the right colors and idea, but looked noisy/downscaled, had lower 32px clarity, and showed rounded/button-like background behavior.
+- MCP `create_ui_asset` with 64 pieces improved layout and semantic targeting, but strongly created framed UI buttons/slots and poor pure-icon consistency.
+- MCP `create_tiles_pro` produced interesting icon-like 4x4 batches, but it was not the best finished 8x8 skill icon route.
+
+## Outputs
+
+| Output | Showcase copy | Original generated file |
+|---|---|---|
+| Rich-background winner | `docs/showcase/skill-icons/create-image-pro-rich-background-8x8-32px.png` | `generated/fantasy_skill_icons_create_image_pro_hybrid_prompt_trial/create_image_pro_skill_icons_hybrid_prompt_8x8_32px.png` |
+| Original strict-grid co-best | `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png` | `generated/fantasy_skill_icons_create_image_pro_trial/create_image_pro_skill_icons_pictorial_8x8_32px.png` |
+| Borderless mosaic learning example | `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png` | `generated/fantasy_skill_icons_create_image_pro_borderless_trial/create_image_pro_skill_icons_borderless_8x8_32px.png` |
+
+## Validation Notes
+
+- All three showcased images are `256x256`.
+- All three are fully opaque with 8-bit `alpha_min=255`, `alpha_max=255`, and `transparent_pixels=0`.
+- All three produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
+- No local repainting or procedural visual fixes were applied. Showcase copies are direct copies of PixelLab-generated outputs.

@@ -6,6 +6,14 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 
 ## Generated Assets
 
+### Skill Icons
+
+[<img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet" width="256">](skill-icons.md)
+
+```text
+/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
+```
+
 ### Gameplay GUI
 
 [<img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="688">](gameplay-gui.md)
