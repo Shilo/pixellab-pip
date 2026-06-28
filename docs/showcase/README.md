@@ -1,6 +1,6 @@
 # Showcase
 
-Last reviewed: 2026-06-25.
+Last reviewed: 2026-06-28.
 
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
@@ -9,7 +9,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 | Asset | Preview | Initial prompt |
 |---|---|---|
 | [Pip Mascot](pip-mascot.md) | ![Pip mascot idle animation](pip/pip.gif) | <pre><code>pip create a 64px character based on .pip-mascot.md</code></pre> |
-| [Gameplay GUI](gameplay-gui.md) | ![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png) | <pre><code>pip create a complete world of warcraft gui</code></pre> |
+| [Gameplay GUI](gameplay-gui.md) | ![Textless modular fantasy MMORPG GUI kit](gameplay-gui/modular-mmorpg-gui-textless-688x384.png) | <pre><code>/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.</code></pre> |
 
 ## Showcase Format
 
@@ -23,9 +23,10 @@ Each showcase should include:
 - Output files and showcase asset locations.
 - Local processing notes for cropping, spritesheets, GIFs, or other assembled files.
 - Validation notes that are useful to readers, such as image size, transparency, frame count, and display caveats.
+- Do not mention PixelLab job IDs, UI asset IDs, managed asset IDs, result IDs, or other run-specific service identifiers. Showcase docs should be reproducible from prompts, request bodies, controls, and local output files without exposing transient service IDs.
 
 Prefer direct prose that names the subject of each paragraph. Avoid starting explanatory paragraphs with placeholders such as "This example", "This pass", or "This result" when a concrete subject would be clearer.
 
 For showcase pages with multiple related outputs, put the primary result first and make the `## Request` prompt subheaders match the order of the showcased images. Use descriptive headers such as `### Short MMO Prompt`, `### Mood-Only Prompt`, or `### Component-Specific Prompt (Follow-up)` instead of vague labels when prompts came from separate sessions or follow-ups.
 
-Do not store PixelLab tokens, cookies, private account data, background job IDs, or unpublished third-party assets here.
+Do not store PixelLab tokens, cookies, private account data, background job IDs, UI asset IDs, managed asset IDs, result IDs, or unpublished third-party assets here.

@@ -1,12 +1,31 @@
 # Gameplay GUI
 
-Last reviewed: 2026-06-25.
+Last reviewed: 2026-06-28.
 
-![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png)
+![Textless modular fantasy MMORPG GUI kit](gameplay-gui/modular-mmorpg-gui-textless-688x384.png)
 
-PixelLab Pip's REST v2 UI generator can handle related gameplay GUI requests at different levels of specificity. The primary result is the standalone fantasy MMORPG GUI sheet: a complete, highly usable transparent HUD kit with portrait frames, health and mana bars, action bars, bag slots, minimap frame, quest tracker, chat panel, parchment window, controls, icon frames, and currency buttons. Earlier gameplay GUI examples are kept below because they show why explicit component lists matter.
+![Compass modular fantasy MMORPG GUI kit](gameplay-gui/modular-mmorpg-gui-compass-688x384.png)
+
+PixelLab Pip's UI generators can handle related gameplay GUI requests at different levels of specificity. The lead examples are the MCP-generated modular MMORPG sheets because they have stronger reusable component separation and 9-slice-compatible rectangular pieces. The older REST example remains below as a broader fantasy MMORPG HUD kit with portrait frames, health and mana bars, action bars, bag slots, minimap frame, quest tracker, chat panel, parchment window, controls, icon frames, and currency buttons.
+
+## Contents
+
+- [Request](#request)
+- [Best Example: Textless Modular MMORPG GUI Sheet](#best-example-textless-modular-mmorpg-gui-sheet)
+- [High-Value Candidate: Compass Modular MMORPG GUI Sheet](#high-value-candidate-compass-modular-mmorpg-gui-sheet)
+- [Broad Example: Complete Fantasy MMORPG GUI](#broad-example-complete-fantasy-mmorpg-gui)
+- [Bad Example: Mood-Only Prompt](#bad-example-mood-only-prompt)
+- [Good Example: Component-Specific Prompt](#good-example-component-specific-prompt)
+- [Outputs](#outputs)
+- [Validation Notes](#validation-notes)
 
 ## Request
+
+### Modular MMORPG GUI Prompt
+
+```text
+/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.
+```
 
 ### Short MMO Prompt
 
@@ -31,11 +50,167 @@ create a new generation for full gameplay GUI:
 - other useful elements
 ```
 
-## Best Example: Complete Fantasy MMORPG GUI
+## Best Example: Textless Modular MMORPG GUI Sheet
+
+![Textless modular fantasy MMORPG GUI kit](gameplay-gui/modular-mmorpg-gui-textless-688x384.png)
+
+The textless modular sheet is the strict final pass for a reusable game-engine UI kit. Pip routed this to PixelLab MCP `create_ui_asset` because the request emphasized modular components, 9-slice-compatible rectangular pieces, and a reusable GUI sheet with explicit component separation.
+
+Route: PixelLab MCP `create_ui_asset`
+
+Prompt preparation: agent-enhanced from the user prompt, then tightened after visual validation of the first candidate.
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `688x384` |
+| Background | `no_background: true` |
+| Seed | `902317` |
+| Elements | `window`, `panel`, `button`, `icon_button`, `toolbar`, `tab`, `health_bar`, `avatar`, `hexagon` |
+| Color palette | `dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights` |
+| Usage reported | `40` subscription generations |
+
+Prompt before enhancement:
+
+```text
+/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.
+```
+
+Enhanced prompt sent as `description`:
+
+```text
+Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. STRICTLY TEXTLESS: no letters, no numbers, no readable runes, no glyphs, no compass letters, no N E S W marks, no labels, no symbols that look like writing anywhere. All components are separate, non-overlapping, fully unique, with clear transparent gutters between them. Every rectangular component must be 9-slice compatible: continuous border, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside the component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, sapphire blue, crimson red, amethyst crystal highlights, carved filigree, high fantasy MMORPG inventory and HUD aesthetic. Include a complete modular set: large blank window frame, compact blank dialogue panel, ornate blank plaque panel, primary command button, secondary command button, raised tab, toolbar strip, health bar, mana bar, experience bar, hero portrait frame, blank circular minimap frame without any compass marks, ornate icon button with blank center, hex spell slot, inventory slot, gem socket, slim scrollbar, and standalone corner ornament. Each component must have a unique silhouette and unique ornamentation; no duplicate components, no overlapping components, no text of any kind.
+```
+
+Request body:
+
+```json
+{
+  "name": "high_fantasy_mmorpg_modular_gui_sheet_textless_retry",
+  "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. STRICTLY TEXTLESS: no letters, no numbers, no readable runes, no glyphs, no compass letters, no N E S W marks, no labels, no symbols that look like writing anywhere. All components are separate, non-overlapping, fully unique, with clear transparent gutters between them. Every rectangular component must be 9-slice compatible: continuous border, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside the component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, sapphire blue, crimson red, amethyst crystal highlights, carved filigree, high fantasy MMORPG inventory and HUD aesthetic. Include a complete modular set: large blank window frame, compact blank dialogue panel, ornate blank plaque panel, primary command button, secondary command button, raised tab, toolbar strip, health bar, mana bar, experience bar, hero portrait frame, blank circular minimap frame without any compass marks, ornate icon button with blank center, hex spell slot, inventory slot, gem socket, slim scrollbar, and standalone corner ornament. Each component must have a unique silhouette and unique ornamentation; no duplicate components, no overlapping components, no text of any kind.",
+  "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
+  "elements": [
+    "window",
+    "panel",
+    "button",
+    "icon_button",
+    "toolbar",
+    "tab",
+    "health_bar",
+    "avatar",
+    "hexagon"
+  ],
+  "pieces": [
+    { "id": "large_window_frame", "kind": "rounded_rect", "label": "large blank ornate 9-slice window frame", "x": 12, "y": 10, "w": 192, "h": 104, "radius": 10 },
+    { "id": "dialog_tooltip_panel", "kind": "rounded_rect", "label": "compact blank 9-slice dialogue panel", "x": 218, "y": 10, "w": 116, "h": 58, "radius": 8 },
+    { "id": "plaque_panel", "kind": "rounded_rect", "label": "asymmetric blank plaque 9-slice panel", "x": 218, "y": 78, "w": 116, "h": 46, "radius": 6 },
+    { "id": "portrait_frame", "kind": "circle", "label": "round hero portrait frame with empty center", "x": 382, "y": 62, "r": 44 },
+    { "id": "blank_minimap_frame", "kind": "circle", "label": "round blank minimap frame with empty center and no compass markings", "x": 468, "y": 62, "r": 34 },
+    { "id": "primary_button", "kind": "rounded_rect", "label": "wide blank primary 9-slice command button", "x": 12, "y": 136, "w": 112, "h": 30, "radius": 7 },
+    { "id": "secondary_button", "kind": "rounded_rect", "label": "narrow blank secondary 9-slice command button", "x": 136, "y": 136, "w": 92, "h": 30, "radius": 5 },
+    { "id": "tab_component", "kind": "rounded_rect", "label": "single raised blank tab component", "x": 240, "y": 136, "w": 70, "h": 28, "radius": 7 },
+    { "id": "toolbar_strip", "kind": "rounded_rect", "label": "ornate modular blank toolbar strip", "x": 322, "y": 136, "w": 174, "h": 28, "radius": 6 },
+    { "id": "health_bar", "kind": "rounded_rect", "label": "crimson health bar frame and fill, no marks", "x": 12, "y": 178, "w": 146, "h": 20, "radius": 4 },
+    { "id": "mana_bar", "kind": "rounded_rect", "label": "sapphire mana bar frame and fill, no marks", "x": 170, "y": 178, "w": 146, "h": 20, "radius": 4 },
+    { "id": "experience_bar", "kind": "rounded_rect", "label": "thin emerald experience bar frame, no marks", "x": 328, "y": 178, "w": 168, "h": 16, "radius": 3 },
+    { "id": "inventory_slot", "kind": "rounded_rect", "label": "single square inventory slot with unique corner metalwork", "x": 12, "y": 216, "w": 44, "h": 44, "radius": 5 },
+    { "id": "gem_socket", "kind": "circle", "label": "round gem socket component with no glyphs", "x": 88, "y": 238, "r": 22 },
+    { "id": "ornate_icon_button", "kind": "circle", "label": "round ornate icon button with blank center and no symbol", "x": 148, "y": 238, "r": 22 },
+    { "id": "hex_spell_slot", "kind": "polygon", "label": "hexagonal spell slot frame with blank center", "x": 210, "y": 238, "r": 25, "sides": 6, "phase": 0.5236 },
+    { "id": "slim_scrollbar", "kind": "rounded_rect", "label": "slim vertical scrollbar with fantasy cap ends and no marks", "x": 266, "y": 208, "w": 22, "h": 62, "radius": 6 },
+    { "id": "corner_ornament", "kind": "polygon", "label": "standalone triangular corner ornament with abstract filigree only", "x": 332, "y": 238, "r": 28, "sides": 3, "phase": 0.7854 }
+  ],
+  "width": 688,
+  "height": 384,
+  "no_background": true,
+  "seed": 902317
+}
+```
+
+## High-Value Candidate: Compass Modular MMORPG GUI Sheet
+
+![Compass modular fantasy MMORPG GUI kit](gameplay-gui/modular-mmorpg-gui-compass-688x384.png)
+
+The compass candidate is a high-value modular sheet with strong reusable parts, but it was not accepted as the strict final pass because the compass/minimap component includes tiny letters. It remains useful as a showcase of how explicit structured pieces produce highly reusable, separated components, and as a validation example for catching text-like marks when the request forbids text.
+
+Route: PixelLab MCP `create_ui_asset`
+
+Prompt preparation: agent-enhanced directly from the user prompt.
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `688x384` |
+| Background | `no_background: true` |
+| Seed | `421973` |
+| Elements | `window`, `panel`, `button`, `icon_button`, `toolbar`, `tab`, `health_bar`, `avatar`, `hexagon` |
+| Color palette | `dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights` |
+| Usage reported | `40` subscription generations |
+
+Prompt before enhancement:
+
+```text
+/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.
+```
+
+Enhanced prompt sent as `description`:
+
+```text
+Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. No text, no letters, no numbers, no readable runes, no labels. All components are separate, non-overlapping, fully unique, with transparent gutters between them. Make every rectangular component 9-slice compatible: clean continuous borders, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside each component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, subtle crystal highlights, carved filigree, fantasy RPG inventory and HUD aesthetic. Include a complete modular set: large window frame, compact dialogue/tooltip panel, quest plaque, primary button, secondary button, tab, toolbar strip, health bar, mana bar, experience bar, portrait frame, minimap frame, ornate icon button, hex spell slot, inventory slot, gem socket, slim scrollbar, and corner ornament. Each component must be visually distinct with different silhouette/ornamentation; no duplicate components, no overlapping components, no text.
+```
+
+Request body:
+
+```json
+{
+  "name": "high_fantasy_mmorpg_modular_gui_sheet",
+  "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. No text, no letters, no numbers, no readable runes, no labels. All components are separate, non-overlapping, fully unique, with transparent gutters between them. Make every rectangular component 9-slice compatible: clean continuous borders, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside each component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, subtle crystal highlights, carved filigree, fantasy RPG inventory and HUD aesthetic. Include a complete modular set: large window frame, compact dialogue/tooltip panel, quest plaque, primary button, secondary button, tab, toolbar strip, health bar, mana bar, experience bar, portrait frame, minimap frame, ornate icon button, hex spell slot, inventory slot, gem socket, slim scrollbar, and corner ornament. Each component must be visually distinct with different silhouette/ornamentation; no duplicate components, no overlapping components, no text.",
+  "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
+  "elements": [
+    "window",
+    "panel",
+    "button",
+    "icon_button",
+    "toolbar",
+    "tab",
+    "health_bar",
+    "avatar",
+    "hexagon"
+  ],
+  "pieces": [
+    { "id": "large_window_frame", "kind": "rounded_rect", "label": "large ornate 9-slice window frame", "x": 12, "y": 10, "w": 192, "h": 104, "radius": 10 },
+    { "id": "dialog_tooltip_panel", "kind": "rounded_rect", "label": "compact 9-slice tooltip dialogue panel", "x": 218, "y": 10, "w": 116, "h": 58, "radius": 8 },
+    { "id": "quest_plaque_panel", "kind": "rounded_rect", "label": "asymmetric quest plaque 9-slice panel", "x": 218, "y": 78, "w": 116, "h": 46, "radius": 6 },
+    { "id": "portrait_frame", "kind": "circle", "label": "round hero portrait frame", "x": 382, "y": 62, "r": 44 },
+    { "id": "minimap_frame", "kind": "circle", "label": "distinct compass minimap frame", "x": 468, "y": 62, "r": 34 },
+    { "id": "primary_button", "kind": "rounded_rect", "label": "wide primary 9-slice command button", "x": 12, "y": 136, "w": 112, "h": 30, "radius": 7 },
+    { "id": "secondary_button", "kind": "rounded_rect", "label": "narrow secondary 9-slice command button", "x": 136, "y": 136, "w": 92, "h": 30, "radius": 5 },
+    { "id": "tab_component", "kind": "rounded_rect", "label": "single raised tab component", "x": 240, "y": 136, "w": 70, "h": 28, "radius": 7 },
+    { "id": "toolbar_strip", "kind": "rounded_rect", "label": "ornate modular toolbar strip", "x": 322, "y": 136, "w": 174, "h": 28, "radius": 6 },
+    { "id": "health_bar", "kind": "rounded_rect", "label": "crimson health bar frame and fill", "x": 12, "y": 178, "w": 146, "h": 20, "radius": 4 },
+    { "id": "mana_bar", "kind": "rounded_rect", "label": "sapphire mana bar frame and fill", "x": 170, "y": 178, "w": 146, "h": 20, "radius": 4 },
+    { "id": "experience_bar", "kind": "rounded_rect", "label": "thin emerald experience bar frame", "x": 328, "y": 178, "w": 168, "h": 16, "radius": 3 },
+    { "id": "inventory_slot", "kind": "rounded_rect", "label": "single square inventory slot with unique corner metalwork", "x": 12, "y": 216, "w": 44, "h": 44, "radius": 5 },
+    { "id": "gem_socket", "kind": "circle", "label": "round gem socket component", "x": 88, "y": 238, "r": 22 },
+    { "id": "ornate_icon_button", "kind": "circle", "label": "round ornate icon button with blank center", "x": 148, "y": 238, "r": 22 },
+    { "id": "hex_spell_slot", "kind": "polygon", "label": "hexagonal spell slot frame", "x": 210, "y": 238, "r": 25, "sides": 6, "phase": 0.5236 },
+    { "id": "slim_scrollbar", "kind": "rounded_rect", "label": "slim vertical scrollbar with fantasy cap ends", "x": 266, "y": 208, "w": 22, "h": 62, "radius": 6 },
+    { "id": "corner_ornament", "kind": "polygon", "label": "standalone triangular corner ornament for frames", "x": 332, "y": 238, "r": 28, "sides": 3, "phase": 0.7854 }
+  ],
+  "width": 688,
+  "height": 384,
+  "no_background": true,
+  "seed": 421973
+}
+```
+
+## Broad Example: Complete Fantasy MMORPG GUI
 
 ![Fantasy MMORPG GUI kit](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png)
 
-The standalone short MMO prompt is the primary showcase example. Pip interpreted the named game as a broad high-fantasy MMORPG interface reference and routed the work to PixelLab REST v2 `generate-ui-v2`, while avoiding a direct copy of an existing game's protected interface.
+The standalone short MMO prompt is a broader fantasy MMORPG HUD kit example. Pip interpreted the named game as a broad high-fantasy MMORPG interface reference and routed the work to PixelLab REST v2 `generate-ui-v2`, while avoiding a direct copy of an existing game's protected interface.
 
 Route: PixelLab REST v2 `generate-ui-v2`
 
@@ -163,7 +338,9 @@ Request body:
 
 | File | Purpose |
 |---|---|
-| [`gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png`](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png) | Primary transparent fantasy MMORPG GUI kit sheet. |
+| [`gameplay-gui/modular-mmorpg-gui-textless-688x384.png`](gameplay-gui/modular-mmorpg-gui-textless-688x384.png) | Primary strict textless transparent modular MMORPG GUI sheet with 9-slice-friendly components. |
+| [`gameplay-gui/modular-mmorpg-gui-compass-688x384.png`](gameplay-gui/modular-mmorpg-gui-compass-688x384.png) | High-value modular MMORPG GUI candidate with tiny compass letters; useful as a validation example and reusable component reference. |
+| [`gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png`](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.png) | Broader transparent fantasy MMORPG GUI kit sheet. |
 | [`gameplay-gui/gameplay-gui-mood-only-344x192.png`](gameplay-gui/gameplay-gui-mood-only-344x192.png) | First-pass mood-focused UI sheet. Useful as a bad example for underspecified gameplay GUI requests. |
 | [`gameplay-gui/gameplay-gui-component-specific-688x384.png`](gameplay-gui/gameplay-gui-component-specific-688x384.png) | Earlier transparent full gameplay GUI kit sheet. |
 
@@ -173,5 +350,6 @@ Final verification:
 
 - PNG dimensions: `688x384px`.
 - Pixel format: `Format32bppArgb`.
-- Primary output has transparent background and separate GUI elements arranged as a reusable sheet.
-- Primary output includes portrait frames, status bars, action bars, bag grid, minimap frame, quest tracker, chat panel, parchment panel, controls, icon frames, and currency buttons.
+- Primary textless modular output has transparent background, separate non-overlapping components, no visible text, and rectangular components with border/center structure suitable for 9-slice slicing.
+- Modular compass candidate has transparent background and strong reusable component separation, but the compass/minimap includes tiny letters, so it is not a strict match for no-text requests.
+- Broad fantasy MMO output has transparent background and includes portrait frames, status bars, action bars, bag grid, minimap frame, quest tracker, chat panel, parchment panel, controls, icon frames, and currency buttons.
