@@ -446,8 +446,8 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
             notes.append(f"MCP identifiers +{len(change['code_identifiers']['added'])}/-{len(change['code_identifiers']['removed'])}")
         if "method_paths" in change:
             notes.append(f"LLMS method paths +{len(change['method_paths']['added'])}/-{len(change['method_paths']['removed'])}")
-        if change["status"] == "fetch_failed":
-            notes.append(change.get("error", "fetch failed"))
+        if change["status"] in ("fetch_failed", "parse_failed"):
+            notes.append(change.get("error", change["status"]))
         if change["status"] == "initialized":
             if "path_count" in change:
                 notes.append(f"{change['path_count']} REST paths")
@@ -512,7 +512,7 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
             "- `skills/pixellab-pip/references/official-pixellab-documentation.md`",
             "- `skills/pixellab-pip/references/prompt-limits.md`",
             "- `skills/pixellab-pip/references/image-input-roles.md`",
-            "- `docs/pixellab-ui-generation-surfaces-research.md`",
+            "- `docs/pixellab/pixellab-ui-generation-surfaces-research.md`",
             "- `docs/pixellab/pixellab-asset-routing.md`",
             "",
         ]
@@ -532,7 +532,7 @@ def init_cache(cache_dir: Path, private_git: bool) -> None:
         subprocess.run(["git", "init"], cwd=cache_dir, check=True)
 
 
-def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool) -> int:
+def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool, exit_zero: bool) -> int:
     init_cache(cache_dir, private_git=private_git)
     now = utc_now()
     run_stamp = stamp(now)
@@ -545,7 +545,7 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
     for source in load_sources(cache_dir):
         try:
             fetched = fetch(source, timeout=timeout)
-        except Exception as exc:  # Keep the existing cache intact on transient upstream failures.
+        except Exception as exc:  # Keep the existing cache intact on transient upstream or parse failures.
             any_failed = True
             changes["sources"][source["id"]] = {
                 "status": "fetch_failed",
@@ -554,7 +554,16 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
             }
             continue
         raw = fetched["body"]
-        normalized = normalize(raw, source, fetched)
+        try:
+            normalized = normalize(raw, source, fetched)
+        except Exception as exc:  # Keep the existing cache intact when upstream returns malformed docs.
+            any_failed = True
+            changes["sources"][source["id"]] = {
+                "status": "parse_failed",
+                "error": f"{type(exc).__name__}: {exc}",
+                "url": source["url"],
+            }
+            continue
         latest_path = cache_dir / "latest" / "normalized" / f"{source['id']}.json"
         previous = read_json(latest_path)
         delta = source_delta(previous, normalized)
@@ -591,8 +600,8 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
     if any_failed:
         if any_changed:
             print("Changes were detected in successfully fetched sources, but the refresh is incomplete.")
-        print("One or more sources failed to refresh. Existing latest cache entries were kept for failed sources.")
-        if any_changed and not args.exit_zero:
+        print("One or more sources failed to refresh or parse. Existing latest cache entries were kept for failed sources.")
+        if any_changed and not exit_zero:
             return 3
         return 1
     if any_changed:
@@ -601,7 +610,9 @@ def refresh(cache_dir: Path, timeout: int, snapshot_mode: str, private_git: bool
         print("Initialized baseline. No prior cache existed for one or more sources.")
     else:
         print("No changes detected.")
-    return 2 if any_changed else 0
+    if any_changed:
+        return 0 if exit_zero else 2
+    return 0
 
 
 def status(cache_dir: Path) -> int:
@@ -639,7 +650,7 @@ def main() -> int:
     refresh_parser.add_argument("--timeout", type=int, default=45)
     refresh_parser.add_argument("--snapshot", choices=["always", "changed", "never"], default="changed")
     refresh_parser.add_argument("--private-git", action="store_true", help="Initialize a nested private git repo inside the ignored cache if missing.")
-    refresh_parser.add_argument("--exit-zero", action="store_true", help="Return exit code 0 instead of 2 when changes are detected; fetch failures still return nonzero.")
+    refresh_parser.add_argument("--exit-zero", action="store_true", help="Return exit code 0 instead of 2 when changes are detected; source failures still return nonzero.")
 
     sub.add_parser("status", help="Print the local cache manifest.")
 
@@ -650,8 +661,7 @@ def main() -> int:
         print(f"Initialized PixelLab docs cache: {cache_dir}")
         return 0
     if args.command == "refresh":
-        code = refresh(cache_dir, args.timeout, args.snapshot, private_git=args.private_git)
-        return 0 if args.exit_zero and code == 2 else code
+        return refresh(cache_dir, args.timeout, args.snapshot, private_git=args.private_git, exit_zero=args.exit_zero)
     if args.command == "status":
         return status(cache_dir)
     return 1

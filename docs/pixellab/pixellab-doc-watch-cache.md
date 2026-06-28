@@ -107,7 +107,7 @@ The refresh command:
 
 When a source changes, the timestamped snapshot contains the newly fetched content plus a `previous/` subfolder copied from the prior `latest/` cache for that source. Compare those two folders when you need to inspect the actual before/after content.
 
-By default, `refresh` exits with code `2` when normalized skill-relevant changes are detected, `3` when skill-relevant changes were detected but one or more sources could not be fetched, `1` when one or more sources could not be fetched and no skill-relevant change was detected, and `0` when nothing changed, only raw bytes changed, only OpenAPI metadata changed, or a baseline was initialized. Use `--exit-zero` for manual checks where a completed changed-docs refresh should count as success; fetch failures still exit nonzero and appear in the generated report.
+By default, `refresh` exits with code `2` when normalized skill-relevant changes are detected, `3` when skill-relevant changes were detected but one or more sources could not be fetched or parsed, `1` when one or more sources could not be fetched or parsed and no skill-relevant change was detected, and `0` when nothing changed, only raw bytes changed, only OpenAPI metadata changed, or a baseline was initialized. Use `--exit-zero` for manual checks where a completed changed-docs refresh should count as success; source failures still exit nonzero and appear in the generated report. With `--exit-zero`, a partial refresh that also found changes exits `1` because the remaining nonzero condition is the source failure.
 
 Some agent shells display any nonzero process exit generically. For manual verification, trust the command output and manifest fields: `Changes detected.` plus `last_refresh_had_failures: false` means the refresh succeeded and found drift.
 
@@ -158,7 +158,7 @@ Common files to update:
 - `skills/pixellab-pip/references/official-pixellab-documentation.md`
 - `skills/pixellab-pip/references/prompt-limits.md`
 - `skills/pixellab-pip/references/image-input-roles.md`
-- `docs/pixellab-ui-generation-surfaces-research.md`
+- `docs/pixellab/pixellab-ui-generation-surfaces-research.md`
 - `docs/pixellab/pixellab-asset-routing.md`
 - `docs/pixellab/pixellab-user-facing-term-backend-mapping.md`
 
@@ -179,6 +179,6 @@ If Python cannot be found, run the command with the Python launcher:
 py dev-tools/pixellab-doc-watch.py refresh
 ```
 
-If a source fails to download, the watcher keeps the existing `latest/` cache entry for that source and writes `fetch_failed` in the report. Rerun later. Do not update routing claims from a partial failed refresh unless the needed source was fetched successfully.
+If a source fails to download or parse, the watcher keeps the existing `latest/` cache entry for that source and writes `fetch_failed` or `parse_failed` in the report. Rerun later. Do not update routing claims from a partial failed refresh unless the needed source was fetched and parsed successfully.
 
 If the report shows a change but the difference is unclear, compare the relevant files under `snapshots/<timestamp>/previous/` with the current files under `snapshots/<timestamp>/`. If there is no `previous/` file, that source was initialized in that run.

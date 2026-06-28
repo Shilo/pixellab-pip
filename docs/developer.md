@@ -58,7 +58,7 @@ python dev-tools/pixellab-doc-watch.py status
 
 The watcher keeps downloaded upstream docs under `.local/pixellab-doc-watch/`, which is ignored by Git. It treats REST OpenAPI as the API source of truth, checks `llms.txt` for parity, tracks the `/v2/docs` and `/v2/redoc` documentation shells, and tracks MCP docs as the MCP tool inventory source.
 
-Fresh checkout and maintenance instructions live in [PixelLab Documentation Watch Cache](pixellab-doc-watch-cache.md).
+Fresh checkout and maintenance instructions live in [PixelLab Documentation Watch Cache](pixellab/pixellab-doc-watch-cache.md).
 
 ## Repository Layout
 

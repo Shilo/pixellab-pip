@@ -112,7 +112,7 @@ Optional broader docs: in full plugin/repo installs, these paths resolve relativ
 - Product/model/mode terminology: `../../docs/pixellab/pixellab-terminology.md`.
 - SDK-vs-REST compatibility: `../../docs/pixellab/pixellab-sdk-compatibility.md`.
 - Bearer-token, session, and security boundaries: `../../docs/pixellab/pixellab-auth-and-security.md`.
-- UI generation, UI asset, shape-piece, and MCP-vs-REST UI routing details: `../../docs/pixellab-ui-generation-surfaces-research.md`.
+- UI generation, UI asset, shape-piece, and MCP-vs-REST UI routing details: `../../docs/pixellab/pixellab-ui-generation-surfaces-research.md`.
 
 ## Model And Mode Terms
 

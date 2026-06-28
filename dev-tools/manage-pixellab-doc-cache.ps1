@@ -228,8 +228,17 @@ function Write-StatusGuidance {
         return
     }
 
+    $staleDays = $null
+    $refreshedAt = [datetime]::MinValue
+    if ([datetime]::TryParse($manifest.last_refreshed_at, [ref]$refreshedAt)) {
+        $age = [datetime]::UtcNow - $refreshedAt.ToUniversalTime()
+        if ($age.TotalDays -ge 7) {
+            $staleDays = [math]::Floor($age.TotalDays)
+        }
+    }
+
     if ((Test-JsonProperty -Object $manifest -Name "last_refresh_had_failures") -and $manifest.last_refresh_had_failures) {
-        Write-Host "- Last refresh was partial. Choose refresh again; do not update routing claims from a failed source unless that source fetched successfully." -ForegroundColor Yellow
+        Write-Host "- Last refresh was partial. Choose refresh again; do not update routing claims from a failed source unless that source fetched and parsed successfully." -ForegroundColor Yellow
         if (Test-JsonProperty -Object $manifest -Name "last_report") {
             $reportPath = $manifest.last_report -replace '\\', '/'
             Write-Host "- Review the partial report: .local/pixellab-doc-watch/$reportPath"
@@ -242,6 +251,9 @@ function Write-StatusGuidance {
         if (Test-JsonProperty -Object $manifest -Name "last_report") {
             $reportPath = $manifest.last_report -replace '\\', '/'
             Write-Host "- Baseline report: .local/pixellab-doc-watch/$reportPath"
+        }
+        if ($null -ne $staleDays) {
+            Write-Host "- Cache is complete, but it is $staleDays days old. Choose refresh before making current PixelLab endpoint or MCP-tool claims." -ForegroundColor Yellow
         }
         return
     }
@@ -256,13 +268,9 @@ function Write-StatusGuidance {
         return
     }
 
-    $refreshedAt = [datetime]::MinValue
-    if ([datetime]::TryParse($manifest.last_refreshed_at, [ref]$refreshedAt)) {
-        $age = [datetime]::UtcNow - $refreshedAt.ToUniversalTime()
-        if ($age.TotalDays -ge 7) {
-            Write-Host "- Cache is complete, but it is $([math]::Floor($age.TotalDays)) days old. Choose refresh before making current PixelLab endpoint or MCP-tool claims." -ForegroundColor Yellow
-            return
-        }
+    if ($null -ne $staleDays) {
+        Write-Host "- Cache is complete, but it is $staleDays days old. Choose refresh before making current PixelLab endpoint or MCP-tool claims." -ForegroundColor Yellow
+        return
     }
 
     Write-Host "- Cache is complete and the last refresh found no skill-relevant drift."
@@ -372,7 +380,7 @@ function Invoke-Main {
             $script:ProcessExitCode = $watchExitCode
             Write-Host ""
             if ($watchExitCode -eq 1) {
-                Write-Host "Refresh completed with fetch failures. Run status to see the partial report path." -ForegroundColor Yellow
+                Write-Host "Refresh completed with source failures. Run status to see the partial report path." -ForegroundColor Yellow
             }
             elseif ($watchExitCode -eq 2) {
                 Write-Host "Refresh completed and detected documentation changes. Run status to see the latest report path." -ForegroundColor Yellow
