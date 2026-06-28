@@ -162,10 +162,10 @@ Common files to update:
 - `docs/pixellab/pixellab-asset-routing.md`
 - `docs/pixellab/pixellab-user-facing-term-backend-mapping.md`
 
-Reusable agent prompt after a drift-detecting refresh:
+Reusable agent prompt for checking and applying upstream docs drift:
 
 ```text
-Update PixelLab Pip from the latest docs-cache refresh.
+Check the PixelLab docs cache, refresh it, then update PixelLab Pip only if the new refresh shows meaningful public-doc changes.
 
 Work from the repository root.
 
@@ -174,13 +174,24 @@ First read:
 - docs/README.md
 - docs/developer.md
 - docs/pixellab/pixellab-doc-watch-cache.md
+
+Then run status for context:
+- `.\dev-tools\manage-pixellab-doc-cache.ps1 -Action status`
+
+The initial status only describes the last completed refresh. Do not no-op only because this first status says there are no changes.
+
+Then refresh and check status again:
+- `.\dev-tools\manage-pixellab-doc-cache.ps1 -Action refresh`
+- `.\dev-tools\manage-pixellab-doc-cache.ps1 -Action status`
+
+After the post-refresh status, inspect:
 - .local/pixellab-doc-watch/manifest.json
 - the latest report named in manifest.last_report
 - the matching .local/pixellab-doc-watch/changes/<timestamp>.json
 - the matching .local/pixellab-doc-watch/snapshots/<timestamp>/ files, including previous/ when present
 
 Goal:
-Determine whether the latest PixelLab REST/MCP/docs refresh changes any public routing, endpoint/tool availability, schemas, parameters, prompt limits, polling behavior, result shapes, auth/setup guidance, or surface boundaries.
+Determine whether the new PixelLab REST/MCP/docs refresh changes any public routing, endpoint/tool availability, schemas, parameters, prompt limits, polling behavior, result shapes, auth/setup guidance, or surface boundaries.
 
 Rules:
 - Do not update Skill/docs for raw_changed alone unless raw before/after inspection reveals meaningful public-doc changes.
@@ -213,7 +224,7 @@ Deliverables:
    - git diff --check
 5. Report any upstream changes that were intentionally not applied and why.
 
-After editing, challenge your own changes: identify any overclaim, stale route, duplicated guidance, or SKILL.md detail that should instead live in references/docs, then fix only valid issues.
+After editing, have a subagent challenge the changes. Ask it to identify any overclaim, stale route, duplicated guidance, or SKILL.md detail that should instead live in references/docs. Review the subagent findings yourself, then fix only valid issues. If subagent tooling is unavailable, do the same adversarial review yourself and say that no subagent tool was available.
 ```
 
 ## Local-Only Rules
