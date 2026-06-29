@@ -16,6 +16,8 @@ Do not default to:
 - `generate-ui-v2`
 - `create-ui-asset`
 
+Use REST `create-image-pixen` only when the user explicitly values a cheap single-icon attempt, exact low-detail/outline/view controls, or fast iteration over candidate variety. Do not use Pixen as the default for complete skill-icon sheets. Pixen can produce crisp symbols, but verify that the result still reads as a skill/ability icon rather than a simple inventory item, flat silhouette, rune-like mark, or unclear pictogram.
+
 Use UI routes only when the user asks for the slot, button, panel, bar, container, or action-bar frame itself.
 
 ## Backgroundless / Transparent Icons

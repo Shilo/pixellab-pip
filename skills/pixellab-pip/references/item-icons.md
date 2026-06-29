@@ -21,13 +21,19 @@ Object routes are for standalone props and managed objects, not icon sheets. In 
 
 Use UI routes only when the user asks for the slot, button, panel, inventory frame, item-card background, or container UI itself.
 
+## Single Item Icons
+
+For a single transparent inventory item icon, still avoid object generation. Prefer REST v2 `POST /generate-image-v2` when the user wants the highest-quality icon-art route or wants several candidates to choose from. At `32x32`, current `generate-image-v2` behavior may return a multi-candidate result because small output sizes produce batches; present those as candidates and select/package one only after visual review.
+
+Use REST `create-image-pixen` only when the user explicitly values a cheap single-image attempt, exact low-detail/outline/view controls, or fast iteration over candidate variety. Pixen can produce clean contours, but verify semantic recognizability carefully.
+
 ## Transparent Icons
 
 Inventory item icons usually need transparent backgrounds. Use `generate-image-v2` with `no_background: true` for the first real candidate.
 
 `create-image-pixen` can be useful as a single comparison test because it exposes `detail`, `outline`, and `view`, but do not treat it as the default sheet route. In testing, Pixen had clearer contours than object generation but produced random-looking or semantically unclear items, duplicated concepts, excessive micro-colors, and sheet-layout drift where multiple shapes occupied the space of two 32px slots.
 
-If the user asks for a large batch and credits matter, propose a single comparison test before running multiple 20-generation Pro candidates. If the user clearly asks to proceed, run the best Pro route and verify honestly.
+If the user asks for a large batch and credits matter, propose a single comparison test before running multiple expensive Pro candidates. If the user clearly asks to proceed, run the best Pro route and verify honestly.
 
 ## Canvas Sizing
 
@@ -53,6 +59,8 @@ Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns a
 
 Prefer category coverage for the first candidate. A long exact 64-item list can over-constrain the model and may produce noisier/downscaled-looking results, mixels, jagged linework, or worse pixel clarity even on the same `generate-image-v2` endpoint. If exact coverage is required, use a concise item list in a follow-up candidate and compare visually against the category-based candidate before calling it final.
 
+Some mild stair-stepping or jagged diagonal linework may appear even in the best `generate-image-v2` item-icon candidates. Treat it as a failure only when it harms 32px readability, makes the object shape unclear, or produces noisy/mixed-resolution pixels. Do not reject an otherwise strong candidate for normal pixel-art diagonal stepping.
+
 Do not over-prompt outline-specific instructions unless the user asks for a particular outline style. The route should naturally produce consistent readable contours. If the output has spotty, broken, incomplete, or inconsistent item contours, treat it as a failed candidate during visual review.
 
 Text should appear in icons only when the user explicitly requests text. By default, item icons should use recognizable object silhouettes, not labels, numbers, fake writing, or UI captions.
@@ -74,6 +82,8 @@ Use this shape for the default route:
 
 Use a seed only when reproducibility or comparison is useful.
 
+Keep `generate-image-v2.description` within the documented character limit. If an exact item list makes the prompt too long or harms visual quality, prefer category coverage for the first candidate and handle exact coverage through a follow-up comparison.
+
 ## Verification
 
 Verify before calling the output final:
@@ -88,7 +98,7 @@ Verify before calling the output final:
 - Human visual check confirms semantic variety across common inventory categories.
 - Human visual check finds no text-like marks unless the user explicitly requested text.
 - Human visual check finds no borders, frames, gutters, rounded corners, slot styling, drawn grid, or checkerboard baked into the PixelLab output.
-- Human visual check confirms crisp readable pixel art, not noisy/downscaled-looking shapes, mixels, smeared detail, stair-stepped linework that harms readability, or broken/inconsistent contours.
+- Human visual check confirms crisp readable pixel art, not noisy/downscaled-looking shapes, mixels, smeared detail, jagged/stair-stepped linework that harms readability, or broken/inconsistent contours.
 - Any local crops, splits, previews, checkerboards, or format conversions preserve original pixels and are labeled as derivatives of the original PixelLab output.
 
 Metadata is not enough. A sheet can have the correct dimensions, binary alpha, and unique cells while still failing as pixel art because the objects are semantically unclear, too noisy, badly aligned, or visually downscaled.
