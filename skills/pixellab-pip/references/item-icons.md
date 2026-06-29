@@ -33,7 +33,7 @@ Use REST `create-image-pixen` only when the user explicitly values a cheap singl
 
 Inventory item icons usually need transparent backgrounds. Use `generate-image-v2` with `no_background: true` for the first real candidate.
 
-If `no_background: true` was sent but PixelLab returns an otherwise valid image with a background, read `background-removal.md` and apply safe local background removal when it can preserve item pixels and readability.
+If `no_background: true` was sent but PixelLab returns an otherwise valid image with a background, read `background-removal.md` and apply safe background removal when it can preserve item pixels and readability.
 
 `create-image-pixen` can be useful as a single comparison test because it exposes `detail`, `outline`, and `view`, but do not treat it as the default sheet route. In testing, Pixen had clearer contours than object generation but produced random-looking or semantically unclear items, duplicated concepts, excessive micro-colors, and sheet-layout drift where multiple shapes occupied the space of two 32px slots.
 
@@ -97,7 +97,7 @@ Verify before calling the output final:
 - `32px icons` are evaluated as 32px per icon/cell, not as the whole sheet size.
 - Items fit the requested cell scale; collapsed layouts, multi-object clusters occupying the wrong number of cells, gutters that change cell math, or 64px-ish symbols fail a 32px item-icon-set request.
 - Alpha is transparent/backgroundless when `no_background: true` was requested.
-- If local background removal was applied after a `no_background: true` request, it passed `background-removal.md` verification.
+- If background removal was applied after a `no_background: true` request, it passed `background-removal.md` verification.
 - Cropped cells are pixel-hash-unique when uniqueness is required; this does not prove semantic uniqueness.
 - Human visual check confirms recognizable RPG item semantics, not just abstract or random shapes.
 - Human visual check confirms semantic variety across common inventory categories.
@@ -108,4 +108,4 @@ Verify before calling the output final:
 
 Metadata is not enough. A sheet can have the correct dimensions, binary alpha, and unique cells while still failing as pixel art because the objects are semantically unclear, too noisy, badly aligned, or visually downscaled.
 
-If the original PixelLab output fails required size, layout, border, text, semantic-recognizability, or readability checks, report it as a failed candidate and ask how to proceed. Do not resize, reassemble, quantize, clean outlines, or otherwise post-process it into a claimed final asset unless the user explicitly approves that repair path. The only default exception is safe local background removal after `no_background: true`, following `background-removal.md`.
+If the original PixelLab output fails required size, layout, border, text, semantic-recognizability, or readability checks, report it as a failed candidate and ask how to proceed. Do not resize, reassemble, quantize, clean outlines, or otherwise post-process it into a claimed final asset unless the user explicitly approves that repair path. The only default exception is safe background removal after `no_background: true`, following `background-removal.md`.

@@ -38,7 +38,7 @@ If the user requests transparent icons or icons without backgrounds:
 - Verify the original PixelLab output for alpha, symbol clarity, grid sizing, per-cell size, and absence of unwanted borders/frames before calling the result final.
 - If the original output has wrong symbol scale, a collapsed layout, border artifacts, text, poor readability, or backgrounds that are not safely separable from the icon art, report the failure against the original output. Do not silently repair those issues locally and claim success.
 
-If `no_background: true` was sent but PixelLab returns an otherwise valid image with a background, read `background-removal.md` and apply safe local background removal when it can preserve symbol/effect pixels and readability.
+If `no_background: true` was sent but PixelLab returns an otherwise valid image with a background, read `background-removal.md` and apply safe background removal when it can preserve symbol/effect pixels and readability.
 
 ## Canvas Sizing
 
@@ -151,7 +151,7 @@ Verify before calling the output final:
 - Symbols fit the requested cell scale; 64px-ish symbols or collapsed 2x2-style layouts fail a 32px icon-set request.
 - Alpha is fully opaque when backgrounded/no transparency is requested.
 - Alpha is transparent/backgroundless when `no_background: true` was requested.
-- If local background removal was applied after a `no_background: true` request, it passed `background-removal.md` verification.
+- If background removal was applied after a `no_background: true` request, it passed `background-removal.md` verification.
 - Cropped cells are pixel-hash-unique when uniqueness is required; this does not prove semantic uniqueness.
 - Human visual check confirms semantic variety.
 - Human visual check finds no text-like marks unless the user explicitly requested text.
@@ -161,4 +161,4 @@ Verify before calling the output final:
 
 Metadata is not enough for border detection. A 1px dark edge can be fully opaque and structurally valid while still violating the art request.
 
-If the original PixelLab output fails required size, layout, border, text, or readability checks, report it as a failed candidate and ask how to proceed. Do not resize, reassemble, or otherwise post-process it into a claimed final asset unless the user explicitly approves that repair path. The only default exception is safe local background removal after `no_background: true`, following `background-removal.md`.
+If the original PixelLab output fails required size, layout, border, text, or readability checks, report it as a failed candidate and ask how to proceed. Do not resize, reassemble, or otherwise post-process it into a claimed final asset unless the user explicitly approves that repair path. The only default exception is safe background removal after `no_background: true`, following `background-removal.md`.
