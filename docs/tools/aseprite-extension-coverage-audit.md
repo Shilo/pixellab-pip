@@ -54,7 +54,7 @@ Recommended scope for Pip:
 - Save generated PNGs, frame sequences, GIF previews, ZIPs, or sprite sheets locally.
 - Use Aseprite only for file/workspace handling: open/import, create or update `.aseprite` files, arrange frames/layers, set tags/durations, export sprite sheets/metadata, or launch the result for manual editing.
 - Trigger this route only when the user explicitly asks for Aseprite handling, such as creating or updating an `.aseprite` file, importing frames into an existing project, arranging layers/tags, exporting through Aseprite, or continuing work in Aseprite.
-- Ask before launching visible Aseprite, overwriting files, or running a local script that writes outside the generated output folder.
+- Ask before launching visible Aseprite, overwriting files, or running a local script that writes outside the approved destination.
 - For existing `.aseprite` projects, prefer writing a modified copy and require explicit approval before editing the original file in place.
 - Useful Aseprite CLI coverage should include export filters, frame ranges, layer/tag/slice listing, sprite-sheet metadata, preview mode, scale/crop/trim, color-mode/palette conversion, and Lua scripts for creating layers, frames, cels, tags, durations, and imports from existing sheets or GIFs.
 

@@ -171,7 +171,7 @@ Input:
 
 Verification:
 
-- Workspace-root output file: `<workspace>/generated/fantasy_skill_icons_create_image_pro_trial/create_image_pro_skill_icons_pictorial_8x8_32px.png`
+- Stable showcase copy: `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png`
 - Dimensions: `256x256`
 - Alpha: fully opaque. Report alpha as `alpha_min=255`, `alpha_max=255` when using 8-bit alpha, or explicitly say `normalized alpha=1.0` if using normalized tooling.
 - Cropped cell hashes: 64 pixel-hash-unique cells. This proves non-identical pixel data, not semantic uniqueness.
@@ -215,7 +215,7 @@ Input:
 
 Verification:
 
-- Workspace-root output file: `<workspace>/generated/fantasy_skill_icons_create_image_pro_hybrid_prompt_trial/create_image_pro_skill_icons_hybrid_prompt_8x8_32px.png`
+- Stable showcase copy: `docs/showcase/skill-icons/create-image-pro-rich-background-8x8-32px.png`
 - Dimensions: `256x256`
 - Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
 - Cropped cell hashes: 64 pixel-hash-unique cells; semantic uniqueness still needs visual review.
@@ -283,7 +283,7 @@ Border-reduction trial:
 
 Border-reduction trial verification:
 
-- Workspace-root output file: `<workspace>/generated/fantasy_skill_icons_create_image_pro_borderless_trial/create_image_pro_skill_icons_borderless_8x8_32px.png`
+- Stable showcase copy: `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png`
 - Dimensions: `256x256`
 - Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
 - Cropped cell hashes: 64 pixel-hash-unique cells; semantic uniqueness still needs visual review.
@@ -440,7 +440,7 @@ Tested parameters:
 
 Observed result:
 
-- Workspace-root output file: `<workspace>/generated/fantasy_skill_icons_generate_ui_trial/generate_ui_v2_skill_icons_8x8_32px.png`
+- No stable showcase asset retained; findings are recorded from visual review and verification metadata only.
 - Dimensions: `256x256`
 - Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
 - Cropped cell hashes: 64 pixel-hash-unique cells; semantic uniqueness still needs visual review.
@@ -485,7 +485,7 @@ Tested parameters:
 
 Observed result:
 
-- Workspace-root output file: `<workspace>/generated/fantasy_skill_icons_create_ui_asset_mcp_trial/mcp_create_ui_asset_skill_icons_pieces_8x8_32px.png`
+- No stable showcase asset retained; findings are recorded from visual review and verification metadata only.
 - UI asset ID: `81bf98ef-4309-4c38-90a3-d39fb8d6ade3`
 - Dimensions: `256x256`
 - Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
