@@ -34,7 +34,7 @@ The mascot direction was a tiny rounded corgi-inspired scout puppy with honey-ta
 
 Route: PixelLab MCP `create_character`
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
@@ -70,7 +70,7 @@ Tongue-Out Happy Pant
 
 Route: PixelLab MCP `animate_character`
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|

@@ -60,13 +60,13 @@ Route: PixelLab MCP `create_ui_asset`
 
 Prompt preparation: agent-enhanced from the user prompt, then tightened after visual validation of the first candidate.
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `688x384` |
 | Background | `no_background: true` |
-| Seed | `902317` |
+| Returned seed | `902317` |
 | Elements | `window`, `panel`, `button`, `icon_button`, `toolbar`, `tab`, `health_bar`, `avatar`, `hexagon` |
 | Color palette | `dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights` |
 | Usage reported | `40` subscription generations |
@@ -138,13 +138,13 @@ Route: PixelLab MCP `create_ui_asset`
 
 Prompt preparation: agent-enhanced directly from the user prompt.
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `688x384` |
 | Background | `no_background: true` |
-| Seed | `421973` |
+| Returned seed | `421973` |
 | Elements | `window`, `panel`, `button`, `icon_button`, `toolbar`, `tab`, `health_bar`, `avatar`, `hexagon` |
 | Color palette | `dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights` |
 | Usage reported | `40` subscription generations |
@@ -214,13 +214,13 @@ The standalone short MMO prompt is a broader fantasy MMORPG HUD kit example. Pip
 
 Route: PixelLab REST v2 `generate-ui-v2`
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `688x384` |
 | Background | `no_background: true` |
-| Seed | `250625` |
+| Returned seed | `250625` |
 | Color palette | `dark iron, weathered stone, aged brass, leather brown, parchment tan, crimson health red, arcane blue, emerald green highlights` |
 | Usage reported | `40` subscription generations |
 
@@ -253,7 +253,7 @@ The mood-only prompt matched the desired palette and material mood, but it did n
 
 Route: PixelLab REST v2 `generate-ui-v2`
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
@@ -294,7 +294,7 @@ Request body:
 
 Route: PixelLab REST v2 `generate-ui-v2`
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|

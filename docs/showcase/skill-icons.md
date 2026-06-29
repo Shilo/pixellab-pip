@@ -39,14 +39,14 @@ Route: PixelLab REST v2 `generate-image-v2`
 
 Prompt preparation: agent-optimized from iterative visual review.
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
-| Seed | `24062808` |
+| Returned seed | `24062808` |
 | Usage reported | `20` generations |
 
 Request body:
@@ -81,14 +81,14 @@ Route: PixelLab REST v2 `generate-image-v2`
 
 Prompt preparation: agent-optimized complete-sheet prompt from the user's fire-magic request.
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
-| Seed | `20260629` |
+| Returned seed | `20260629` |
 | Usage reported | `20` generations |
 | Reported cost | `$0.095` |
 | Description length | `1994` characters |
@@ -124,14 +124,14 @@ Route: PixelLab REST v2 `generate-image-v2`
 
 Prompt preparation: agent-optimized no-text/pictorial prompt.
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
-| Seed | `24062805` |
+| Returned seed | `24062805` |
 | Usage reported | `20` generations |
 
 Request body:
@@ -167,14 +167,14 @@ Route: PixelLab REST v2 `generate-image-v2`
 
 Prompt preparation: agent-optimized border-reduction prompt.
 
-Controls:
+Generation details:
 
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
-| Seed | `24062806` |
+| Returned seed | `24062806` |
 | Usage reported | `20` generations |
 
 Request body:

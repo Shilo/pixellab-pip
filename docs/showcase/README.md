@@ -14,6 +14,14 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 /pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
 ```
 
+### Inventory Item Icons
+
+[<img src="item-icons/fantasy-rpg-inventory-bgremoved-8x8-32px.png" alt="Fantasy RPG inventory item icon sheet" width="256">](item-icons.md)
+
+```text
+/pixellab-pip create complete 32px materials inventory set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.
+```
+
 ### Gameplay GUI
 
 [<img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="688">](gameplay-gui.md)
