@@ -6,7 +6,15 @@ Use this reference when a PixelLab generation request set `no_background: true`,
 
 Attempt background removal when the generated image otherwise satisfies the request and the background is safely separable from the requested art. This is an approved exception to the general no-post-processing rule because the structured request already asked PixelLab for a backgroundless result.
 
-For flat exterior backgrounds, a conservative local edge-connected removal pass is acceptable when it preserves the requested art. If that pass leaves enclosed background inside holes, loops, handles, straps, or similar negative spaces, do not globally remove the color when it may also appear in the art. Prefer PixelLab `POST /remove-background` with the original failed generation as the image input, not a locally altered derivative, unless the user explicitly approves a different source.
+For flat exterior backgrounds, first try the bundled deterministic helper:
+
+```bash
+python assets/outline_aware_background_remove.py input.png output.png --report report.json
+```
+
+Run it on the original failed generation. The helper removes only edge-connected background by default, then analyzes enclosed background-colored components as uncertainty signals. Use the output only when its JSON report says `local_result_status: passed_conservative_checks` and visual verification confirms it preserved the requested art. If the report says `needs_pixellab_fallback`, continue to PixelLab `/remove-background` with the original failed generation.
+
+If the helper cannot execute, such as missing Python, missing Pillow, or a file error, fall back to a conservative local edge-connected removal pass when the background color is still obvious. If the helper ran but reports unsafe or ambiguous background sampling, skip further local guessing and use PixelLab `POST /remove-background` with the original failed generation as the image input. If local removal leaves enclosed background inside holes, loops, handles, straps, or similar negative spaces, do not globally remove the color when it may also appear in the art; use PixelLab fallback unless the user explicitly approves a different source or repair path.
 
 For PixelLab `/remove-background`, set `background_removal_task` to `remove_simple_background` for flat/simple backgrounds. Use `remove_complex_background` only when the background is actually complex or intertwined. Include a concise foreground/text hint when it helps preserve art pixels or remove enclosed negative spaces.
 
@@ -41,6 +49,7 @@ Before calling the post-processed asset final:
 
 - Preserve the original PixelLab output alongside the post-processed file.
 - Track the method and source image used for background removal.
+- If the bundled helper was used, keep or summarize its JSON report, including `local_result_status`, `fallback_reasons`, `remaining_background_like_pixels`, and any significant unresolved enclosed components.
 - When using PixelLab `/remove-background`, confirm the input was the original failed generation unless the user explicitly approved a different source.
 - Confirm output dimensions and requested sheet/cell math still match.
 - Confirm alpha exists and the unwanted background is transparent.
