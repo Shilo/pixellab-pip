@@ -16,6 +16,18 @@ Do not default to:
 
 Use UI routes only when the user asks for the slot, button, panel, bar, container, or action-bar frame itself.
 
+## Backgroundless / Transparent Icons
+
+This reference is validated for complete/backgrounded skill icon sheets. Behavior of `no_background: true` with `generate-image-v2` for skill icon sheets has not been tested.
+
+If the user requests transparent icons or icons without backgrounds:
+
+- State that transparent/backgroundless skill-icon sheet behavior is unverified.
+- Propose a single comparison test before a batch.
+- Use `no_background: true` only after the user confirms the test.
+- Remove background/opacity/full-bleed painted-background clauses from the prompt.
+- Verify alpha, symbol clarity, grid sizing, and absence of unwanted borders/frames before calling the result final.
+
 ## Canvas Sizing
 
 For plural or complete skill-icon sets, treat `32x32 icons` as the per-icon cell size, not the output canvas.
