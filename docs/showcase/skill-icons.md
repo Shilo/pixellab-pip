@@ -20,7 +20,7 @@ PixelLab Pip's strongest skill-icon route is REST `generate-image-v2`, surfaced 
 - [Close Co-Best: Original Strict-Grid Create Image Pro Sheet](#close-co-best-original-strict-grid-create-image-pro-sheet)
 - [Learning Example: Borderless Mosaic Create Image Pro Sheet](#learning-example-borderless-mosaic-create-image-pro-sheet)
 - [Findings](#findings)
-- [Outputs](#outputs)
+- [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
 
 ## Request
@@ -216,14 +216,14 @@ Routes that did not win:
 - MCP `create_ui_asset` with 64 pieces improved layout and semantic targeting, but strongly created framed UI buttons/slots and poor pure-icon consistency.
 - MCP `create_tiles_pro` produced interesting icon-like 4x4 batches, but it was not the best finished 8x8 skill icon route.
 
-## Outputs
+## Showcase Assets
 
-| Output | Showcase copy | Original generated file |
-|---|---|---|
-| Rich-background winner | `docs/showcase/skill-icons/create-image-pro-rich-background-8x8-32px.png` | `<workspace>/generated/fantasy_skill_icons_create_image_pro_hybrid_prompt_trial/create_image_pro_skill_icons_hybrid_prompt_8x8_32px.png` |
-| Fire magic themed follow-up | `docs/showcase/skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png` | `<workspace>/outputs/fire_magic_skill_icons_sheet_32x32_20260629/fire_magic_skill_icons_sheet_8x8_32px.png` |
-| Original strict-grid co-best | `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png` | `<workspace>/generated/fantasy_skill_icons_create_image_pro_trial/create_image_pro_skill_icons_pictorial_8x8_32px.png` |
-| Borderless mosaic learning example | `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png` | `<workspace>/generated/fantasy_skill_icons_create_image_pro_borderless_trial/create_image_pro_skill_icons_borderless_8x8_32px.png` |
+| Output | Stable showcase file |
+|---|---|
+| Rich-background winner | `docs/showcase/skill-icons/create-image-pro-rich-background-8x8-32px.png` |
+| Fire magic themed follow-up | `docs/showcase/skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png` |
+| Original strict-grid co-best | `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png` |
+| Borderless mosaic learning example | `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png` |
 
 ## Validation Notes
 

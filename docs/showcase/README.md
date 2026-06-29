@@ -1,6 +1,6 @@
 # Showcase
 
-Last reviewed: 2026-06-28.
+Last reviewed: 2026-06-29.
 
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
@@ -39,7 +39,7 @@ Each showcase should include:
 - Final prompts or natural-language parameters sent to PixelLab.
 - Route, PixelLab surface, tool, endpoint, and key controls.
 - Reproducibility controls that were intentionally set, such as image size, transparency, palette, direction, frame count, and seed. Do not imply every PixelLab endpoint always returns a seed; record a seed when the request explicitly sent one.
-- Output files and showcase asset locations.
+- Stable showcase asset locations. Do not point showcase pages at temporary generation folders such as `/outputs/` or `/generated/`; copy the selected asset into `docs/showcase/...` first.
 - Local processing notes for cropping, spritesheets, GIFs, or other assembled files.
 - Validation notes that are useful to readers, such as image size, transparency, frame count, and display caveats.
 - Do not mention PixelLab job IDs, UI asset IDs, managed asset IDs, result IDs, or other run-specific service identifiers. Showcase docs should be reproducible from prompts, request bodies, controls, and local output files without exposing transient service IDs.

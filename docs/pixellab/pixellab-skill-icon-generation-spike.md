@@ -251,14 +251,12 @@ Input:
 
 Verification:
 
-- Workspace-root output file: `<workspace>/outputs/fire_magic_skill_icons_sheet_32x32_20260629/fire_magic_skill_icons_sheet_8x8_32px.png`
+- Stable showcase copy: `docs/showcase/skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png`
 - Dimensions: `256x256`
 - Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
 - Usage: 20 generations
 - Reported cost: `$0.095`
 - Prompt length: 1994 characters, just under the observed `generate-image-v2.description` limit.
-- Job id: `0b6e056f-4b38-4a48-8ecd-0b7ca439b3ea`
-- Generation id: `76eb4d3c-228b-4a66-b0d9-2778e90df601`
 
 Lesson:
 
