@@ -35,7 +35,7 @@ Done - [one plain sentence saying what was produced and whether it passed verifi
 
 Use normal Markdown links for every useful output file, directory, URL, ZIP, manifest, preview, or package. Prefer user-facing labels such as `Individual PNGs`, `Spritesheet`, `Preview`, `ZIP package`, and `Manifest` over raw filenames alone.
 
-Unless the user explicitly states another output location, local PixelLab generation artifacts and derived files should live under the active project/workspace `pixellab-pip/` folder. If an external tool returns a temporary URL or cache path, download or copy the selected final files into that folder before reporting them as local outputs.
+Unless the user explicitly states or approves another output location, local PixelLab generation artifacts and derived files should live under the active project/workspace `pixellab-pip/` folder. If an external tool returns a temporary URL or cache path, download or copy the selected final files into that folder before reporting them as local outputs.
 
 Put route and inputs in bullets instead of burying them in prose. Do not lead with internal job IDs. Include job, asset, or result IDs only when the result is pending/review, when the user needs the ID for a follow-up action, or when debugging exact status/schema behavior.
 

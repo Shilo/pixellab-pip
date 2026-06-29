@@ -6,7 +6,7 @@ For Aseprite-specific opening, import/export, layers, frames, tags, `.aseprite` 
 
 Local assembly is not art generation or editing. Use it only to assemble, preview, format-convert, or verify PixelLab-generated or user-supplied files; do not create or alter requested visual content locally.
 
-Write local previews, spritesheets, manifests, ZIPs, and verification scratch files under the same project/workspace `pixellab-pip/` output tree as the source PixelLab generation unless the user explicitly chose another directory. Do not scatter derived files into the repository root, generic `outputs/`, or temp folders except for short-lived tool scratch that is not reported as a final output.
+Write local previews, spritesheets, manifests, ZIPs, and verification scratch files under the same project/workspace `pixellab-pip/` output tree as the source PixelLab generation unless the user explicitly states or approves another directory. Do not scatter derived files into the repository root, generic `outputs/`, or temp folders except for short-lived tool scratch that is not reported as a final output.
 
 ## Transparent GIF Previews
 

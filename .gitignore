@@ -2,4 +2,4 @@
 /.local/
 __pycache__/
 /skills/pixellab-pip/pixellab-pip.json
-outputs/
+/pixellab-pip/
