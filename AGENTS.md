@@ -9,4 +9,5 @@ Topic reference files loaded on demand by the skill: skills/pixellab-pip/referen
 PixelLab terminology and surface-model background: docs/pixellab/ only when changing product terminology or routing claims
 Tool comparison and integration background: docs/tools/ only when changing Aseprite, MCP, REST, or editor-routing claims
 Developer context: docs/developer.md only when changing repository structure or local install guidance
+Showcase rules: docs/showcase/README.md only when adding or editing showcase pages or showcase assets
 Git conventional commits: <type>[optional scope]: <description>

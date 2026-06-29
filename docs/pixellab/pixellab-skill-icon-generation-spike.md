@@ -1,6 +1,6 @@
 # PixelLab Skill Icon Generation Spike
 
-Last reviewed: 2026-06-28.
+Last reviewed: 2026-06-29.
 
 Purpose: capture live-generation findings for fantasy RPG skill icon and item icon requests so `pixellab-pip` can route future "skill icon", "ability icon", "spell icon", "action bar icon", and similar requests with better defaults.
 
@@ -221,6 +221,50 @@ Verification:
 - Cropped cell hashes: 64 pixel-hash-unique cells; semantic uniqueness still needs visual review.
 - Usage: 20 generations
 - Visual result: recovered richer background/gradient quality compared with the over-optimized borderless mosaic prompt, while avoiding the hardest slot-card grid of the original strict-grid output.
+
+#### Themed Follow-up: Fire Magic Complete Sheet
+
+Human read:
+
+- The complete-sheet fire-magic run was a major improvement over a previous standalone 32x32 batch.
+- The previous standalone batch used `image_size: { "width": 32, "height": 32 }` and "one standalone square icon" wording. It produced crisp symbols, but several icons felt like simple silhouettes, item symbols, or rune-like marks on sparse or flat backgrounds.
+- The new run used one complete `256x256` 8x8 sheet and described each icon as one `32x32` square inside that sheet. It produced a more cohesive painted game-skill-sheet look with richer backgrounds.
+- The strongest composition phrases were `rich full-bleed illustrated miniature background`, `background artwork touches neighboring artwork directly`, and `Invisible grid only`.
+- The dense fire-specific ability list improved variety without abandoning the single-theme request.
+
+Input:
+
+```json
+{
+  "endpoint": "POST https://api.pixellab.ai/v2/generate-image-v2",
+  "body": {
+    "description": "A complete 8 by 8 sheet of 64 unique fantasy RPG fire magic skill icons. Exact canvas 256x256 pixels. 8 columns and 8 rows, each icon exactly one 32x32 square, perfectly aligned edge-to-edge, no spacing, no overlap, no cropped icons. Pixel art, consistent fire magic theme, readable at 32x32.\n\nEach icon is a finished Fully opaque square with a rich full-bleed illustrated miniature background behind the skill symbol. Backgrounds: luminous gradients, painterly pixel texture, depth, magical light, atmospheric color variation, not flat solid color. Background artwork touches neighboring artwork directly and touches all four edges and corners. Every pixel painted. No transparent pixels, no alpha, no blank corners, no padding.\n\nPictorial symbols only. Use clear centered pictures and silhouettes. Make all 64 abilities unique, including fireball, flame shield, meteor, phoenix wing, lava wave, burning sword, ember trap, dragon breath, volcano, scorch beam, flame pillar, ash storm, magma armor, solar flare, fire nova, blazing arrow, molten chains, salamander spirit, ignite spark, wildfire, cinder cloak, fire crown, burning skull, furnace heart, flame whip, lava hammer, sun spear, ember eye, fire portal, forge anvil, magma fist, volcanic shield, flame serpent, obsidian shard, ember rain, brazier, lava skull, firestorm spiral, pyromancer hand, flame bow, cinder bomb, smoke vortex, phoenix egg, ember wings, searing chain, heat blade, molten gauntlet, solar disk, volcanic plume.\n\nDo not use runes or glyphs. No text-like marks, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, or alphabet-like shapes. No terrain tiles, map tiles, inventory item sheet, UI slots, buttons, borders, frames, rounded corners, corner radius, dividers, watermark, decorations, black outlines around icon square edges, or separating lines. Invisible grid only. Palette: ember orange, molten gold, crimson red, charcoal smoke, blackened obsidian, hot white highlights.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": false,
+    "seed": 20260629
+  }
+}
+```
+
+Verification:
+
+- Workspace-root output file: `<workspace>/outputs/fire_magic_skill_icons_sheet_32x32_20260629/fire_magic_skill_icons_sheet_8x8_32px.png`
+- Dimensions: `256x256`
+- Alpha: `alpha_min=255`, `alpha_max=255`, `transparent_pixels=0`
+- Usage: 20 generations
+- Reported cost: `$0.095`
+- Prompt length: 1994 characters, just under the observed `generate-image-v2.description` limit.
+- Job id: `0b6e056f-4b38-4a48-8ecd-0b7ca439b3ea`
+- Generation id: `76eb4d3c-228b-4a66-b0d9-2778e90df601`
+
+Lesson:
+
+- For themed complete sets such as fire magic, keep the full-sheet route and only adapt the theme, palette, and ability list.
+- Do not route to separate standalone 32x32 generations unless the user explicitly wants independently generated files.
+- A dense list of concise themed ability names can improve variety, but it must be balanced against the `generate-image-v2` prompt-length limit.
 
 Border-reduction trial:
 

@@ -1,8 +1,10 @@
 # Skill Icons
 
-Last reviewed: 2026-06-28.
+Last reviewed: 2026-06-29.
 
 ![Create Image Pro rich-background skill icons](skill-icons/create-image-pro-rich-background-8x8-32px.png)
+
+![Create Image Pro fire magic skill icons](skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png)
 
 ![Create Image Pro original strict-grid skill icons](skill-icons/create-image-pro-original-strict-grid-8x8-32px.png)
 
@@ -14,6 +16,7 @@ PixelLab Pip's strongest skill-icon route is REST `generate-image-v2`, surfaced 
 
 - [Request](#request)
 - [Best Example: Rich-Background Create Image Pro Sheet](#best-example-rich-background-create-image-pro-sheet)
+- [Themed Follow-up: Fire Magic Complete Sheet](#themed-follow-up-fire-magic-complete-sheet)
 - [Close Co-Best: Original Strict-Grid Create Image Pro Sheet](#close-co-best-original-strict-grid-create-image-pro-sheet)
 - [Learning Example: Borderless Mosaic Create Image Pro Sheet](#learning-example-borderless-mosaic-create-image-pro-sheet)
 - [Findings](#findings)
@@ -67,6 +70,49 @@ Findings:
 - Preserves readable foreground symbols and a coherent high-fantasy palette.
 - Still uses dark foreground outlines for readability, but does not look as hard-framed as the original strict-grid output.
 - Human ranking: effectively tied with the original strict-grid prompt, but selected as the showcase winner because it better respects the no-border/no-frame instruction.
+
+## Themed Follow-up: Fire Magic Complete Sheet
+
+![Create Image Pro fire magic skill icons](skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png)
+
+The fire-magic follow-up confirmed that composition strategy matters more than the theme. A previous batch asked for standalone `32x32` generated icons and produced crisp symbols, but several icons looked like simple silhouettes, inventory items, or rune-like marks on flatter backgrounds. The stronger run kept the same `generate-image-v2` route but asked for one complete `256x256` sheet with `8x8` adjacent `32x32` squares, rich full-bleed backgrounds, background art touching neighboring cells directly, and an invisible grid.
+
+Route: PixelLab REST v2 `generate-image-v2`
+
+Prompt preparation: agent-optimized complete-sheet prompt from the user's fire-magic request.
+
+Controls:
+
+| Field | Value |
+|---|---|
+| Image size | `256x256` |
+| Icon grid | `8x8`, intended `32x32` icons |
+| Background | `no_background: false` |
+| Seed | `20260629` |
+| Usage reported | `20` generations |
+| Reported cost | `$0.095` |
+| Description length | `1994` characters |
+
+Request body:
+
+```json
+{
+  "description": "A complete 8 by 8 sheet of 64 unique fantasy RPG fire magic skill icons. Exact canvas 256x256 pixels. 8 columns and 8 rows, each icon exactly one 32x32 square, perfectly aligned edge-to-edge, no spacing, no overlap, no cropped icons. Pixel art, consistent fire magic theme, readable at 32x32.\n\nEach icon is a finished Fully opaque square with a rich full-bleed illustrated miniature background behind the skill symbol. Backgrounds: luminous gradients, painterly pixel texture, depth, magical light, atmospheric color variation, not flat solid color. Background artwork touches neighboring artwork directly and touches all four edges and corners. Every pixel painted. No transparent pixels, no alpha, no blank corners, no padding.\n\nPictorial symbols only. Use clear centered pictures and silhouettes. Make all 64 abilities unique, including fireball, flame shield, meteor, phoenix wing, lava wave, burning sword, ember trap, dragon breath, volcano, scorch beam, flame pillar, ash storm, magma armor, solar flare, fire nova, blazing arrow, molten chains, salamander spirit, ignite spark, wildfire, cinder cloak, fire crown, burning skull, furnace heart, flame whip, lava hammer, sun spear, ember eye, fire portal, forge anvil, magma fist, volcanic shield, flame serpent, obsidian shard, ember rain, brazier, lava skull, firestorm spiral, pyromancer hand, flame bow, cinder bomb, smoke vortex, phoenix egg, ember wings, searing chain, heat blade, molten gauntlet, solar disk, volcanic plume.\n\nDo not use runes or glyphs. No text-like marks, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, or alphabet-like shapes. No terrain tiles, map tiles, inventory item sheet, UI slots, buttons, borders, frames, rounded corners, corner radius, dividers, watermark, decorations, black outlines around icon square edges, or separating lines. Invisible grid only. Palette: ember orange, molten gold, crimson red, charcoal smoke, blackened obsidian, hot white highlights.",
+  "image_size": {
+    "width": 256,
+    "height": 256
+  },
+  "no_background": false,
+  "seed": 20260629
+}
+```
+
+Findings:
+
+- The full-sheet composition produced a more cohesive painted game-skill-sheet look than standalone 32x32 generation.
+- `Background artwork touches neighboring artwork directly` and `Invisible grid only` helped avoid gutters while preserving a clean sheet.
+- A dense themed ability list improved variety inside a single fire-magic palette.
+- The prompt landed just under the observed `generate-image-v2` description limit, so themed prompts need concise ability names and careful trimming.
 
 ## Close Co-Best: Original Strict-Grid Create Image Pro Sheet
 
@@ -175,12 +221,13 @@ Routes that did not win:
 | Output | Showcase copy | Original generated file |
 |---|---|---|
 | Rich-background winner | `docs/showcase/skill-icons/create-image-pro-rich-background-8x8-32px.png` | `<workspace>/generated/fantasy_skill_icons_create_image_pro_hybrid_prompt_trial/create_image_pro_skill_icons_hybrid_prompt_8x8_32px.png` |
+| Fire magic themed follow-up | `docs/showcase/skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png` | `<workspace>/outputs/fire_magic_skill_icons_sheet_32x32_20260629/fire_magic_skill_icons_sheet_8x8_32px.png` |
 | Original strict-grid co-best | `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png` | `<workspace>/generated/fantasy_skill_icons_create_image_pro_trial/create_image_pro_skill_icons_pictorial_8x8_32px.png` |
 | Borderless mosaic learning example | `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png` | `<workspace>/generated/fantasy_skill_icons_create_image_pro_borderless_trial/create_image_pro_skill_icons_borderless_8x8_32px.png` |
 
 ## Validation Notes
 
-- All three showcased images are `256x256`.
-- All three are fully opaque with 8-bit `alpha_min=255`, `alpha_max=255`, and `transparent_pixels=0`.
-- All three produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
+- All four showcased images are `256x256`.
+- All four are fully opaque with 8-bit `alpha_min=255`, `alpha_max=255`, and `transparent_pixels=0`.
+- All four produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
 - No local repainting or procedural visual fixes were applied. Showcase copies are direct copies of PixelLab-generated outputs.

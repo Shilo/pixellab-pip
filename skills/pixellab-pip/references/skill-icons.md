@@ -54,7 +54,9 @@ Pictorial symbols only. Use clear centered pictures and silhouettes: flames, ice
 Unique varied abilities: elemental magic, weapon attacks, healing, protection, stealth, curses, nature magic, summoning, movement, utility, crafting, survival, resurrection, treasure sense, mind, time, gravity, poison, holy, shadow, blood, mana, rage, tracking, alchemy, lockpicking, leadership, taunt, cleanse, traps, phoenix, dragon breath. No terrain tiles, map tiles, or inventory item sheet. No borders, frames, UI slots, rounded corners, dividers, watermark, black outlines around icon square edges, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.
 ```
 
-For themed sheets, adapt the ability list and palette but keep the sheet/canvas/background/text/border clauses.
+For themed sheets, adapt the theme phrase, ability list, and palette but keep the sheet/canvas/background/text/border clauses. Do not switch themed sets to standalone 32x32 generations just because every icon shares a theme; a complete `256x256` sheet with `8x8` 32px areas produced a better cohesive painted skill-sheet result than generating separate standalone 32x32 fire icons.
+
+Use a dense, concise list of distinct themed abilities when variety matters. Keep the prompt under the `generate-image-v2.description` limit; a successful fire-magic sheet used a 1994-character description, `image_size: { "width": 256, "height": 256 }`, and `no_background: false`.
 
 ## Required Keywords
 
