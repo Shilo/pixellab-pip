@@ -12,6 +12,7 @@ A finished skill icon sheet means:
 
 - A structured grid, usually 8x8 for 64 icons.
 - Each icon is exactly one 32x32 cell when the user asks for 32px icons.
+- For plural or complete skill-icon requests, `32x32 icons` means per-icon cell size, not a 32x32 output canvas. For 64 icons, generate one 256x256 sheet with an 8x8 grid, then crop or split locally only if separate files are needed.
 - Full colorful illustrated background in every cell.
 - A large, readable central pictorial symbol.
 - No text, labels, letters, numbers, fake writing, runes, or glyph-like marks.
@@ -23,6 +24,8 @@ The last point is important: downstream users can add borders in their game UI. 
 ## Current Recommendation
 
 Use REST v2 `POST /generate-image-v2` first when the user asks for a complete finished skill icon sheet, especially an 8x8 or 64-icon sheet.
+
+Do not describe this route as Pixen or Pixen-style. Pixen is the separate REST `create-image-pixen` route evaluated below, and it is not the default for finished skill icon sheets.
 
 Why:
 
@@ -74,6 +77,7 @@ Avoid positive or unqualified mentions of these phrases unless the user explicit
 
 - `rune`
 - `glyph`
+- `sigil`
 - `spellbook labels`
 - `numbered icon labels`
 - `UI slot`
@@ -87,8 +91,11 @@ Use with caution:
 - `game UI` gives desirable authentic icon-sheet punch, but can increase slot/card-edge behavior.
 - `spritesheet`, `strict grid`, and `cell` improve alignment and classic sheet feel, but can increase visible per-cell borders.
 - `Borderless spritesheet mosaic` can reduce hard grid/card behavior, but it flattened backgrounds in the trial; treat it as experimental rather than a default phrase.
+- `Each generated image is one standalone square icon`, `one icon per image`, or `no overlapping multiple icons in one image` should be used only when the user explicitly wants separate generated files. For complete sheets, this wording can push the model toward isolated symbols on flat/simple backgrounds instead of a cohesive rich 8x8 sheet.
 
-Even negative mentions of `rune` and `glyph` helped only when paired with "do not use"; positive use of those words can drift into text-like marks.
+Even negative mentions of `rune`, `glyph`, and `sigil` helped only when paired with "do not use"; positive use of those words can drift into text-like marks.
+
+When the user asks for backgrounded icons, preserve or add the rich-background language from the winning prompt: `rich full-bleed illustrated miniature background`, `luminous gradients`, `painterly pixel texture`, `depth`, `magical light`, `atmospheric color variation`, and `not flat solid color`.
 
 ## Route Findings
 
@@ -110,6 +117,13 @@ Best use:
 - Complete 8x8 skill icon spritesheets.
 - Finished action-bar icon sets.
 - Skill icons where readability and colorful backgrounds matter more than exact per-icon semantic uniqueness.
+
+Canvas sizing:
+
+- For 32px cells, compute the output canvas from the requested grid, not from the cell size.
+- `8x8` or `64` icons at `32x32` each means `image_size: { "width": 256, "height": 256 }`.
+- A `32x32` `image_size` is only appropriate for one single icon, not a complete set.
+- Do not prompt complete sheets as standalone per-image icons unless the requested deliverable is separate files; generate the sheet first, then crop locally if separate PNGs are needed.
 
 Pros:
 
