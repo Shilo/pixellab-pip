@@ -410,7 +410,8 @@ Cons for skill icon sheets:
 Recommendation:
 
 - Do not default to this for finished skill icons.
-- Use it when the user asks for transparent item icons, pickup icons, or object sprites.
+- Do not default to this for transparent item icons or inventory icon sheets; later item-icon tests found poor 32px clarity and inconsistent contours for icon use.
+- Use it for standalone object sprites or managed props that are not icons, icon sheets, or inventory UI artwork.
 
 ### REST `POST /create-image-pixflux`, `POST /create-image-bitforge`, `POST /generate-with-style-v2`
 
@@ -512,19 +513,19 @@ Recommendation:
 
 ## Item Icon Guidance
 
-"Item icon" is ambiguous:
+This spike predates the dedicated item-icon route tests. For current inventory item, equipment, loot, pickup, or transparent RPG item-icon requests, use `skills/pixellab-pip/references/item-icons.md`.
 
-- If the user wants transparent inventory objects or pickups, use MCP `create_1_direction_object` or REST object/image routes.
-- If the user wants finished action-bar item icons with colorful square backgrounds, use the same skill-icon guidance as above and prefer REST `generate-image-v2`.
-- If the user wants both item and skill icons in one sheet, `generate-image-v2` handled mixed symbols well in the winning run.
+Later item-icon testing found that MCP `create_1_direction_object` is a poor default for icons: it produced noisy/downscaled-looking 32px results, incomplete or inconsistent contours, and weak readability. Keep object generation for standalone props and managed objects that are not icon sheets or inventory UI artwork.
+
+For item-icon sheets, the current default is REST `generate-image-v2`, with `no_background: true` for transparent inventory icons. Pixen is useful only when the user explicitly values a cheap single-image attempt or fast comparison and must be verified for semantic recognizability.
 
 ## Suggested `SKILL.md` Routing Update
 
 Future `SKILL.md` guidance should distinguish:
 
 - `skill icon`, `ability icon`, `spell icon`, `action-bar icon`, `hotbar icon`: finished UI icon art, default to REST `generate-image-v2` for complete sheets.
-- `item icon` with transparent/backgroundless wording: object/icon asset, likely object route.
-- `item icon` with action-bar/UI/backgrounded wording: finished icon art, default to REST `generate-image-v2`.
+- `item icon`, `inventory icon`, `equipment icon`, `loot icon`, `pickup icon`, or transparent RPG item sheet: inventory icon art, read `references/item-icons.md` and prefer REST `generate-image-v2`.
+- standalone prop/object requests that are not icons or icon sheets: use object routes.
 
 Draft routing rule:
 

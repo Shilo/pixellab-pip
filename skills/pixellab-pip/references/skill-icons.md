@@ -8,6 +8,8 @@ Prompts such as `generate 32px skill icon set`, `ability icons for this skill tr
 
 Use REST v2 `POST /generate-image-v2` first for complete/backgrounded skill icon sheets.
 
+If the user explicitly asks for cheap, low-cost, budget, or minimum credits, read `cost-routing.md` before spending credits. `generate-image-v2` is a Pro-family route and can be the best quality route for finished sheets, but a cheap request should get a lower-cost Pixen/`new` comparison, a smaller test, or an explicit cost/quality confirmation before a full Pro sheet.
+
 Do not default to:
 
 - Object generation

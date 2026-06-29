@@ -101,6 +101,8 @@ Runtime files:
 - `skills/pixellab-pip/references/bark.md` - persistent completion sound toggle and generation-finish rules.
 - `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
 - `skills/pixellab-pip/references/skill-icons.md` - skill, ability, spell, action-bar, and hotbar icon routing details.
+- `skills/pixellab-pip/references/item-icons.md` - inventory item, equipment, loot, and pickup icon routing details.
+- `skills/pixellab-pip/references/cost-routing.md` - cheap, budget, and Pro-vs-v3/new route selection.
 - `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
 - `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
 - `skills/pixellab-pip/references/image-input-roles.md` - image input roles for attachments, file paths, and endpoint fields.

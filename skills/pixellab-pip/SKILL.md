@@ -1,6 +1,6 @@
 ---
 name: pixellab-pip
-description: Use for PixelLab or PixelLab Pip intents to setup, configure, connect, install, verify auth, create, generate, draw, make, edit, convert, animate, upscale, remove backgrounds, route, bark completion sounds, or troubleshoot pixel-art/game-asset workflows across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger on PixelLab setup, MCP setup, API setup, PIXELLAB_SECRET, bearer-token auth, sprites, sprite sheets, characters, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, bark, docs, endpoint choice, SDK integration, troubleshooting, or PixelLab MCP/vibe-coding context. Use for generic asset wording only when the project/conversation implies PixelLab. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
+description: Use for PixelLab or PixelLab Pip intents to setup, configure, connect, install, verify auth, create, generate, draw, make, edit, convert, animate, upscale, remove backgrounds, route, bark completion sounds, minimize generation cost, or troubleshoot pixel-art/game-asset workflows across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger on PixelLab setup, MCP setup, API setup, PIXELLAB_SECRET, bearer-token auth, sprites, sprite sheets, characters, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, cheap, low-cost, budget, credits, cost, bark, docs, endpoint choice, SDK integration, troubleshooting, or PixelLab MCP/vibe-coding context. Use for generic asset wording only when the project/conversation implies PixelLab. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
 ---
 
 # PixelLab Pip
@@ -10,7 +10,7 @@ Classify the user's asset, API, or question intent first, then choose the suppor
 ## Workflow
 
 1. Classify the request:
-   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration`.
+   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration`.
    Treat a standalone `setup` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip setup`, as setup intent. If an app exposes structured arguments, use them only as another way to read the same natural-language intent.
    Treat a standalone `bark` word after an explicit skill invocation, with optional `on` or `off`, as bark intent. For bark intent, read `references/bark.md` and apply the persistent toggle contract.
 2. Classify the target asset or surface:
@@ -28,8 +28,9 @@ Classify the user's asset, API, or question intent first, then choose the suppor
 5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter.
 6. For consistency-sensitive work, summarize the user's identity, style, palette, view, and reference anchors. Ask up to three blocking questions before a credit-spending call.
 7. For PixelLab natural-language request parameters such as `description`, `action`, `*_description`, `item_descriptions`, `text`, or `color_palette`, improve vague user wording into endpoint-ready English parameter values unless the user opts out. Use a matching PixelLab prompt-enhancement endpoint when it fits the chosen route; otherwise enhance directly from the request and visible inputs. For non-English or mixed-language requests, read `references/localization.md`.
-8. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
-9. Act or answer. Ask a short clarification only for known collisions.
+8. If the user asks for cheap, low-cost, budget, fewer credits, cheapest, or minimizing generations, read `references/cost-routing.md` before choosing a paid route. Prefer documented low-cost routes such as standard, `new`, v3, Pixen, or other non-Pro routes when they satisfy the request. Avoid Pro and Pro Tools routes unless no low-cost route fits or the user approves the cost/quality tradeoff after you name it.
+9. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
+10. Act or answer. Ask a short clarification only for known collisions.
 
 ## Surface Rules
 
@@ -97,6 +98,7 @@ Read only the relevant reference:
 - Persistent completion sound toggle: `references/bark.md`.
 - Skill/ability/spell/action-bar/hotbar icon sheet prompt, sizing, and verification details: `references/skill-icons.md`.
 - Inventory item/equipment/loot icon sheet prompt, transparent-background routing, and verification details: `references/item-icons.md`.
+- Cheap, low-cost, budget, credit-minimizing, and Pro-vs-v3/new route selection: `references/cost-routing.md`.
 - Paperdolling and layered character workflows: `references/paperdolling.md`.
 - Tileset and tile-variant details: `references/tilesets.md`.
 - Attachments, file paths, supplied image roles, endpoint fields, or fixed-size image-to-pixel-art: `references/image-input-roles.md`.
@@ -126,8 +128,8 @@ Treat PixelLab model/provider language as product labels unless official docs di
 
 - `Pixen`, `PixFlux`, `BitForge`: public product/workflow labels, not guaranteed provider names.
 - `PixPatch`: website-surface label; no public v2 `PixPatch` image endpoint was documented.
-- `Pro`: quality/tier/mode label across many unrelated tools, not one endpoint or model.
-- `v3` and `new`: workflow/version labels scoped to a selected operation, not a universal model.
+- `Pro`: quality/tier/mode label across many unrelated tools, not one endpoint or model. Treat Pro and Pro Tools routes as expensive unless current docs prove otherwise.
+- `v3` and `new`: workflow/version labels scoped to a selected operation, not a universal model. Treat them as the preferred cheap family when the user asks to minimize cost and the route fits.
 - `S-XL`, `M-XL`, `S-M`, `M-L`: size/product labels, not asset intents.
 - `Gemini`: stale/low-confidence older website Create Tileset Pro wording; do not mention it as current unless refreshed official website docs reintroduce it.
 
