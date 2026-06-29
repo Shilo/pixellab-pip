@@ -65,6 +65,7 @@ When images are supplied, infer each file's role from the request and the select
 For detailed execution rules used by the skill, see:
 
 - [Tilesets](../../skills/pixellab-pip/references/tilesets.md)
+- [Skill Icons](../../skills/pixellab-pip/references/skill-icons.md)
 - [Skill Icon Generation Spike](pixellab-skill-icon-generation-spike.md)
 - [Paperdolling](../../skills/pixellab-pip/references/paperdolling.md)
 - [Image Input Roles](../../skills/pixellab-pip/references/image-input-roles.md)
