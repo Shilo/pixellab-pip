@@ -233,6 +233,8 @@ For multi-frame sprites, use filename formatting such as `{frame}` or expect Ase
 & $AsepritePath -b "source.aseprite" --color-mode indexed --save-as "indexed-{frame}.png"
 ```
 
+When exporting PixelLab-generated animation frames, preserve frame count and order by default. Do not use `--frame-range`, `--trim`, `--ignore-empty`, `--merge-duplicates`, packed-sheet reshaping, or other frame-count/order-changing export options unless the user explicitly asks for that playback/export behavior.
+
 Export a packed or padded sprite sheet:
 
 ```powershell

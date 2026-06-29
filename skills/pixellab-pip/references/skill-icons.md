@@ -36,7 +36,13 @@ If the user requests transparent icons or icons without backgrounds:
 - Use `no_background: true` when the user clearly wants a transparent result.
 - Remove background, opacity, full-bleed painted-background, and canvas-size clauses from the prompt. Let `no_background` and `image_size` carry those controls.
 - Verify the original PixelLab output for alpha, symbol clarity, grid sizing, per-cell size, and absence of unwanted borders/frames before calling the result final.
-- If the original output has opaque fills, flattened backgrounds, border artifacts, wrong symbol scale, or a collapsed layout, report the failure against the original output. Do not silently repair it locally and claim success.
+- If the original output has wrong symbol scale, a collapsed layout, border artifacts, text, poor readability, or backgrounds that are not safely separable from the icon art, report the failure against the original output. Do not silently repair those issues locally and claim success.
+
+If `no_background: true` was sent and the PixelLab output is otherwise valid but still has a removable opaque background, post-process the image to remove the background before calling the asset final. This is a narrow exception to the general no-post-processing rule because the structured request already asked PixelLab for background removal.
+
+Treat background removal as safe only when the background is clearly separable from the skill symbols, such as a flat or near-flat exterior fill, whitespace, or a simple sheet background that can be removed without deleting symbol pixels, glow/effect pixels that matter to readability, outlines, or interior colors. Do not use local background removal to fix wrong layout, borders, text, checkerboards, merged icons, low readability, noisy art, or any failure other than the missing alpha channel.
+
+Report the final files as PixelLab output with local background-removal post-processing, and verify the post-processed result for alpha, preserved symbol pixels, and 32px readability before packaging crops.
 
 ## Canvas Sizing
 
@@ -149,6 +155,7 @@ Verify before calling the output final:
 - Symbols fit the requested cell scale; 64px-ish symbols or collapsed 2x2-style layouts fail a 32px icon-set request.
 - Alpha is fully opaque when backgrounded/no transparency is requested.
 - Alpha is transparent/backgroundless when `no_background: true` was requested.
+- If local background removal was applied after a `no_background: true` request, the removed background was safely separable and skill symbols, glows/effects, outlines, interior colors, and readability were preserved.
 - Cropped cells are pixel-hash-unique when uniqueness is required; this does not prove semantic uniqueness.
 - Human visual check confirms semantic variety.
 - Human visual check finds no text-like marks unless the user explicitly requested text.
@@ -158,4 +165,4 @@ Verify before calling the output final:
 
 Metadata is not enough for border detection. A 1px dark edge can be fully opaque and structurally valid while still violating the art request.
 
-If the original PixelLab output fails required size, layout, alpha, border, text, or readability checks, report it as a failed candidate and ask how to proceed. Do not resize, reassemble, remove backgrounds, or otherwise post-process it into a claimed final asset unless the user explicitly approves that repair path.
+If the original PixelLab output fails required size, layout, border, text, or readability checks, report it as a failed candidate and ask how to proceed. Do not resize, reassemble, or otherwise post-process it into a claimed final asset unless the user explicitly approves that repair path. The only default exception is safe local background removal after `no_background: true` was requested and PixelLab returned an otherwise valid opaque image.
