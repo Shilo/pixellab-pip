@@ -49,7 +49,7 @@ Generate the sheet first, then verify the original PixelLab output against the r
 
 For complete sheets, preserve sheet language. Do not rewrite the request as separate standalone generated images unless the user explicitly asks for separate generated files.
 
-Build a concise, content-focused description. Avoid redundant metadata already supplied as JSON/tool parameters: do not say canvas size when `image_size` is set, and do not say transparent background when `no_background` is set. Use a single compact prompt string unless readability truly requires line breaks.
+Build a concise, content-focused description. Do not include generic operation language like `create this image` or `the final image should`. Avoid redundant metadata already supplied as JSON/tool parameters: do not say canvas size when `image_size` is set, and do not say transparent background when `no_background` is set. Use a single compact prompt string unless readability truly requires line breaks.
 
 Use this transparent-sheet pattern as a starting point:
 

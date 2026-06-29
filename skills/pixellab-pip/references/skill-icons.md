@@ -16,9 +16,13 @@ Do not default to:
 - `generate-ui-v2`
 - `create-ui-asset`
 
-Use REST `create-image-pixen` only when the user explicitly values a cheap single-icon attempt, exact low-detail/outline/view controls, or fast iteration over candidate variety. Do not use Pixen as the default for complete skill-icon sheets. Pixen can produce crisp symbols, but verify that the result still reads as a skill/ability icon rather than a simple inventory item, flat silhouette, rune-like mark, or unclear pictogram.
-
 Use UI routes only when the user asks for the slot, button, panel, bar, container, or action-bar frame itself.
+
+## Single Skill Icons
+
+For a single skill, ability, spell, action-bar, or hotbar icon, prefer REST v2 `POST /generate-image-v2` when the user wants the highest-quality icon-art route or wants several candidates to choose from. At `32x32`, current `generate-image-v2` behavior may return a multi-candidate result because small output sizes produce batches; present those as candidates and select/package one only after visual review.
+
+Use REST `create-image-pixen` only when the user explicitly values a cheap single-icon attempt, exact low-detail/outline/view controls, or fast iteration over candidate variety. Pixen can produce crisp symbols, but verify that the result still reads as a skill/ability icon rather than a simple inventory item, flat silhouette, rune-like mark, or unclear pictogram.
 
 ## Backgroundless / Transparent Icons
 
