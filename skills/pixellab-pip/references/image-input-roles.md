@@ -94,6 +94,7 @@ These image-editing and image-conversion routes are REST v2 routes unless curren
 - `animate-with-text-v3`
   - `first_frame`: required starting frame.
   - `last_frame`: optional ending frame for interpolation/guidance.
+  - For low-motion or idle loops, read `animation.md` before using `last_frame`; matching endpoints can still produce middle-frame artifacts.
 - `inpaint-v3`
   - `inpainting_image`: target image to edit.
   - `mask_image`: white marks pixels to generate/replace; black preserves pixels.
@@ -114,4 +115,4 @@ Ask one short question when the same file could be more than one role:
 - "For this UI image, should it guide the layout/concept, visual style, or only the color palette?"
 - "For animation, is this the first frame, last frame, or a style/reference image?"
 
-Never guess between identity, style, concept, edit target, palette, and frame roles when credit-spending generation depends on it.
+Infer roles from explicit wording for low-risk setup or explanation. Never guess between identity, style, concept, edit target, mask, palette, and frame roles when credit-spending generation depends on it; ask when the role changes the endpoint, field, or output semantics.

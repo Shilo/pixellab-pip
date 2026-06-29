@@ -25,7 +25,7 @@ When the user asks for layers but does not name an editor or output format, ask 
 - Separate transparent image layer files plus a final composited image.
 - An Aseprite/editor layer workflow where each layer contains only the newly added pixels.
 
-If the user declines to choose, pick the best available character-anchored route. Use verified editor changes-only layers only when the user is already working in that editor or accepts visible editor guidance; otherwise use the API layer-image workflow: PixelLab edited composites, local changed-pixel extraction into transparent image files, then a final composite. Do not choose standalone object generation as the fallback for fitted body additions.
+If the user declines to choose an output shape, do not claim separate layers. Pick the best character-anchored composite route or ask again when layer files are required. Use verified editor changes-only layers only when the user is already working in that editor or accepts visible editor guidance. Use the API layer-image workflow only when the user requests or accepts separate transparent image layer files plus a final composite. Do not choose standalone object generation as the fallback for fitted body additions.
 
 Preserve:
 
@@ -57,7 +57,7 @@ For reusable sets, confirm the base character and frame-grid contract before var
 
 Use this workflow when the user wants separate image files for paperdoll layers and a final composited image, but is not using Aseprite or another editor with verified changes-only layer output.
 
-1. If the user asks for layers without naming an editor or file format, ask them to choose between separate transparent PNG layer images plus a final composited PNG, or an Aseprite/editor layer workflow where each layer contains only the newly added pixels. Proceed with this workflow when the image-file artifact shape is requested or accepted, or when the user declines to choose and is not already working in an editor or accepting visible editor guidance.
+1. If the user asks for layers without naming an editor or file format, ask them to choose between separate transparent PNG layer images plus a final composited PNG, or an Aseprite/editor layer workflow where each layer contains only the newly added pixels. Proceed with this workflow only when the image-file artifact shape is requested or accepted.
 2. Generate or obtain the base character image first. Save it as the base layer image and keep it unchanged for every subsequent addition edit.
 3. For each requested layer, run a separate existing-image edit against the original base image, not against the previous edited result. This keeps each extracted layer independent.
 4. Prompt each edit as a single body-region addition. Include:

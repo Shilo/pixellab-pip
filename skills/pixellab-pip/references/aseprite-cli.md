@@ -13,7 +13,7 @@ PixelLab MCP or documented REST v2
 
 Do not use this route to automate the PixelLab Aseprite extension itself.
 
-For explicit Aseprite MCP requests, read `aseprite-mcp.md` next.
+For explicit Aseprite MCP requests, read `aseprite-mcp.md` instead. Return here only when the task also needs direct Aseprite CLI/Lua file handling.
 
 ## Lua Integration Model
 
@@ -117,7 +117,7 @@ Before running Aseprite:
 3. Ask before launching visible Aseprite.
 4. Ask before overwriting existing files.
 5. For existing `.aseprite` files, default to writing a copy such as `name-pixellab.aseprite`; modify the original only after explicit approval for that exact path.
-6. Keep generated scripts and outputs inside the user's chosen output directory unless they approve another path.
+6. Keep generated scripts and outputs inside the user's chosen output directory; when they did not choose one, use the active project/workspace `pixellab-pip/` output folder. Use another path only after explicit approval.
 7. Treat extension startup errors as a diagnostic signal. Do not work around them by reading extension internals.
 8. Treat raw Lua as local host-code execution. Generate small, reviewable scripts, pass paths through parameters, and do not run untrusted user-provided Lua.
 
@@ -481,7 +481,7 @@ Use these examples to recognize valuable Aseprite handling. The exact PixelLab g
 ### Generate Then Open
 
 1. Generate the asset through PixelLab MCP or documented REST v2.
-2. Download or write the verified output file.
+2. Download or write the verified output file under the active project/workspace `pixellab-pip/` folder unless the user explicitly chose another output path.
 3. Ask before launching GUI Aseprite.
 4. Open the file visibly:
 
@@ -491,7 +491,7 @@ Use these examples to recognize valuable Aseprite handling. The exact PixelLab g
 
 ### Generate Frames Then Create `.aseprite`
 
-1. Generate or collect frames locally.
+1. Generate or collect frames locally under the active project/workspace `pixellab-pip/` folder unless the user explicitly chose another output path.
 2. Verify dimensions and frame order.
 3. Write a small Lua assembly script or reuse one from the project if present.
 4. Reuse the new sprite's default layer and first frame for the first generated frame, then create additional frames with explicit positions.
@@ -501,7 +501,7 @@ Use these examples to recognize valuable Aseprite handling. The exact PixelLab g
 
 ### Generated Variants As Layers
 
-1. Put each generated variant in a stable local path.
+1. Put each generated variant in a stable local path under the active project/workspace `pixellab-pip/` folder unless the user explicitly chose another output path.
 2. Create one sprite sized to the largest accepted canvas.
 3. Reuse and rename the default layer for the first variant, then create one named layer per additional variant.
 4. Add one cel per layer at frame 1.

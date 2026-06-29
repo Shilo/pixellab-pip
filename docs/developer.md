@@ -100,9 +100,17 @@ Runtime files:
 - `skills/pixellab-pip/references/setup.md` - natural-language setup for MCP, documented REST v2 fallback, and auth after install.
 - `skills/pixellab-pip/references/bark.md` - persistent completion sound toggle and generation-finish rules.
 - `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
+- `skills/pixellab-pip/references/skill-icons.md` - skill, ability, spell, action-bar, and hotbar icon routing details.
 - `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
 - `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
 - `skills/pixellab-pip/references/image-input-roles.md` - image input roles for attachments, file paths, and endpoint fields.
 - `skills/pixellab-pip/references/localization.md` - non-English request translation and response-language handling.
 - `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
+- `skills/pixellab-pip/references/job-lifecycle.md` - async status, MCP review state, rate limits, and expiring downloads.
+- `skills/pixellab-pip/references/animation.md` - raw animation, interpolation, outfit transfer, and frame-anchor workflow details.
+- `skills/pixellab-pip/references/editor-only-utilities.md` - editor-only utility routing and unsupported public-route caveats.
+- `skills/pixellab-pip/references/prompt-limits.md` - REST v2 natural-language field limits and prompt-length retry handling.
+- `skills/pixellab-pip/references/aseprite-cli.md` - Aseprite CLI/Lua workspace, import, export, and packaging workflows.
+- `skills/pixellab-pip/references/aseprite-mcp.md` - explicit Aseprite MCP server/tooling routing.
+- `skills/pixellab-pip/references/local-asset-assembly.md` - local GIF, spritesheet, and ImageMagick assembly after generation.
 - `skills/pixellab-pip/references/official-pixellab-documentation.md` - when and how to refresh official PixelLab documentation.

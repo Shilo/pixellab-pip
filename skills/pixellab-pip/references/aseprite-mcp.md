@@ -1,6 +1,6 @@
 # Aseprite MCP Integration
 
-Read this only after `aseprite-cli.md`, and only when the user explicitly asks for an Aseprite MCP server, an installed third-party Aseprite MCP, MCP-based Aseprite drawing tools, or MCP visual QA tooling.
+Read this when the user explicitly asks for an Aseprite MCP server, an installed third-party Aseprite MCP, MCP-based Aseprite drawing tools, or MCP visual QA tooling. Read `aseprite-cli.md` only when the same task also needs direct Aseprite CLI/Lua file handling.
 
 Do not read this for ordinary Aseprite CLI/Lua file handling.
 

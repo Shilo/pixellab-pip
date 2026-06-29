@@ -65,43 +65,14 @@ Use user wording to infer intent:
 
 ## Safe Credential Setup
 
-PixelLab uses one account-level bearer token for public REST v2 and PixelLab MCP. The PixelLab UI may call it an API key, API token, secret, or token. For REST/MCP auth, call it a bearer token.
+Use `credentials.md` as the credential policy source of truth. In setup mode, apply only this summary:
 
-Tell the user to open `https://www.pixellab.ai/account` after signing in and copy the value labeled `Secret`. Never ask the user to paste the bearer token into chat. Never print, echo, log, summarize, transform, validate, measure, use, or copy a token value from chat or config output. If a token appears in chat or tool output, do not repeat it; tell the user to treat it as exposed and replace it before continuing setup.
-
-Do not tell users to run secret-setting commands through an assistant chat, slash-command argument, Claude/Codex shell escape, or a Codex app integrated terminal with the literal Secret value. Commands typed into assistant UIs can appear in chat history, transcripts, debug logs, command history, terminal output, or tool output. Codex app terminal output can be read by Codex, so it is not a secret-entry UI.
-
-`setx`, `export`, PowerShell `$env:`, and `ENV=value command` are not forbidden. They are just lower-safety options when the command contains the literal Secret because shell history or process details may preserve it. Project-local files such as `.env` or `.env.local` do not automatically inject environment variables into Codex, Claude, Pip, MCP clients, terminals, or the OS; they work only when a specific helper, dotenv loader, or wrapper reads them. When token setup is needed, list the options concisely in this order:
-
-1. App/editor secret settings or app secret store named `PIXELLAB_SECRET`.
-2. OS environment-variable UI for a user-scoped `PIXELLAB_SECRET`.
-3. Hidden local prompt or secret-store command that does not place the token in command text.
-4. Normal external terminal command, only if the user chooses it; show value placeholders such as `<paste-your-Secret-here>` and warn not to run it inside an assistant prompt, assistant shell escape, or Codex-readable integrated terminal.
-5. Project-local file such as `.env` or `.env.local`, only for explicit loader or wrapper setups that read that file; do not present it as MCP-ready or Pip-ready by itself.
-
-Preferred storage order:
-
-1. Assistant/editor/app secret settings, app secret store, or user-scoped OS environment variable named `PIXELLAB_SECRET`.
-2. Hidden local prompt or app UI that writes user-scoped env/keychain/secret config.
-3. A project-local file such as `.env` or `.env.local`, only when a specific loader or wrapper explicitly loads it. This is not a default MCP or Pip setup path.
-
-Avoid existing `.env*` files, committed MCP config, generated docs, shell history, chat transcripts, copied website session tokens, and literal token values in config files unless the user explicitly chooses a manual fallback that requires one. Do not read existing `.env*` files unless the user names the exact file, explicitly approves inspection, and confirms the purpose is troubleshooting.
-
-If the user asks for `.env` or `.env.local`, explain that it works only when a helper, dotenv loader, or wrapper reads it. It does not configure MCP, Codex, Claude, Pip, terminals, or the OS by itself. ClawHub `pixellab-ai` uses `.env.local` because its helper auto-loads it; Pip does not currently include that helper loader, so copying the file pattern alone is not enough. Do not inspect an existing `.env` or `.env.local` unless the user names that exact file, explicitly approves inspection, and confirms the purpose is troubleshooting an existing setup. If the purpose is unclear, ask before inspecting. Never print or copy values from it. Before writing `PIXELLAB_SECRET` to any project-local file, explain the loader or wrapper that will read it, show a token-free preview, and get explicit approval.
-
-Use one canonical env var in new examples:
-
-```text
-PIXELLAB_SECRET
-```
-
-Use it for REST/MCP auth as:
-
-```text
-Authorization: Bearer <PIXELLAB_SECRET>
-```
-
-In setup previews, `<PIXELLAB_SECRET>` means a private local secret reference, not a real value to paste into chat. Do not introduce aliases such as `PIXELLAB_API_KEY`, `PIXELLAB_TOKEN`, or `YOUR_API_TOKEN` in new instructions. If official docs use another placeholder, explain that the same bearer token should be stored in `PIXELLAB_SECRET`.
+- PixelLab uses one account-level bearer token for public REST v2 and PixelLab MCP.
+- Tell the user to get the value labeled `Secret` from `https://www.pixellab.ai/account` and store it locally as `PIXELLAB_SECRET`; never ask them to paste it into chat.
+- Prefer app/editor secret settings, app secret stores, user-scoped OS environment settings, or hidden prompts over literal-token commands.
+- Literal-token `setx`, `export`, PowerShell `$env:`, or `ENV=value command` examples are allowed only as user-run external-terminal fallbacks with placeholders and a shell-history/process-history warning.
+- Project-local `.env*` files work only when a named loader or wrapper reads them; they are not MCP-ready or Pip-ready by themselves.
+- Never read broad credential locations or existing `.env*` files unless the user names the exact file and explicitly approves troubleshooting.
 
 ## MCP Wizard
 

@@ -12,5 +12,4 @@ Read this for terrain tilesets, platformer tilesets, isometric tiles, tile varia
 
 Capture tile size, view, terrain pair or tile list, transition description, base tile IDs, style/reference/palette images, seed, and target engine/export convention when relevant.
 
-Do not equate website Create Tileset Pro/Gemini with public `create-tiles-pro`.
-
+Do not equate website Create Tileset Pro with public `create-tiles-pro`. Treat older Gemini wording as stale/low-confidence unless current official website docs reintroduce it.
