@@ -32,6 +32,9 @@ Current working hypothesis:
 - Hair may help the model read the character as a stylized avatar rather than a bald baby-like body.
 - Prompts that over-explain anatomy, safety framing, or template mechanics tend to degrade the result.
 - The desired proportions may need wording such as `tall chibi avatar base`, `young adult proportions`, `tiny pinched torso`, `narrow upside-down hourglass torso`, `longer simple limbs`, and `big simple hands and feet`.
+- `Unisex` appears important. When omitted, PixelLab more often invents gendered body signals, facial styling, or anatomy emphasis instead of treating the image as a neutral outfit base.
+- A visible thigh gap is a failure signal for this target. The desired limb shape is compact and thick, with legs reading as close-set columns or simple wedges rather than separated stick legs.
+- V3 can still look high-detail even when `detail="low detail"` is passed. In MCP V3, detail and outline are soft guidance, while proportions and shading controls are ignored. If lower finish is important in V3, prompt text should explicitly say `flat low-shading`, `minimal interior shading`, or similar, but this is still not a guaranteed control.
 
 ## Closest Candidate 1: Best Overall, But Has Hair
 
@@ -214,6 +217,89 @@ The following directions did not solve the target:
 - `tapered limbs` as the limb-shape phrase.
 - `flared limbs` alone without clearer extremity wording.
 - Repeating the desired limb phrase across all prompt variants without addressing the infant-like bald/no-clothes read.
+- V3 minimal-body-term batch, 10 prompts, size target 64, low top-down, low detail. It confirmed that V3 tends to make random chibi variants instead of respecting the specific torso/limb construction. The `limbs flare outward toward big hands and big feet` variant drifted into extra/overactive arms and hands, not clean flared limbs.
+- Prompting only `narrow torso`, `tiny pinched torso`, or `narrow upside-down hourglass torso` in V3 was not enough to prevent small bald baby-like bodies.
+- Prompting `tall chibi avatar proportions` and `young adult proportions` made some V3 outputs taller, but did not solve the target silhouette.
+
+## External Reference Findings
+
+The target should not be described as generic `chibi` alone. Research and visual comparison suggest the better taxonomy is:
+
+- `semi-chibi`
+- `2.5 to 3 heads tall`
+- `stylized avatar proportions`
+- `graphic/geometric shape language`
+- `tapered geometry`
+- `wedge-shaped feet`
+- `mitten-like hands`
+- `flat low-shading pixel sprite`
+- `silhouette-readable MMO sprite`
+
+Useful references:
+
+- [Ragnarok Online official/concept art gallery](https://www.creativeuncut.com/art_ragnarok-online_a.html) - useful high-level art reference for RO's chibi and semi-chibi identity.
+- [Ragnarok Online chibi characters art](https://www.creativeuncut.com/gallery-14/ro-sd-characters3.html) - useful reference for the official SD/chibi promotional direction.
+- [RagnarokOnline Job Class & NPC Sprite List](https://nn.ai4rei.net/dev/npclist/?qq=8) - useful for inspecting actual RO sprite silhouettes and body/gear readability.
+- [iRO Wiki Character Sprite Simulator](https://costume.irowiki.org/) - useful interactive visual reference for RO body/clothing/headgear combinations.
+- [Custom Characters Sprites (Ragnarok Online Style)](https://cheeseguy.artstation.com/projects/QXKYOB) - useful modern fan/professional reference; the page notes character sizes around 45-60px wide by 70-100px tall, which supports a taller-than-64 visible body target for RO-like work.
+- [Tree of Savior on Steam](https://store.steampowered.com/app/372000/Tree_of_Savior_English_Ver/) - adjacent cute/charming character reference, but not as exact for the target base silhouette.
+- [Tree of Savior concept art gallery](https://toswiki.treeofsaviorgame.com/gallery/concept_art) - adjacent costume/character proportion reference.
+- [La Tale official page](https://latale.papayaplay.com/latale.do?tp=download) - confirms La Tale as a 2D side-scrolling fantasy MMORPG. Useful for 2D avatar/clothing readability, but side-view proportions are less directly comparable to low-top-down base sprites.
+- [Trickster Online overview](https://en.wikipedia.org/wiki/Trickster_Online) - useful adjacent 2D isometric anime MMORPG reference, but likely rounder and more animal/avatar-specific than the target.
+- [Clip Studio chibi proportion guide](https://tips.clip-studio.com/en-us/articles/4829) - useful proportion reference: chibi can range up to about 3 heads tall, which supports testing `2.5 heads tall` and `3 heads tall` instead of generic `chibi`.
+- [What the UPA Style Actually Is](https://animationobsessive.substack.com/p/what-the-upa-style-actually-is) - useful terminology for flat, graphic shape language rather than anatomical realism.
+- [My Life as a Teenage Robot - Rob Renzetti](https://robrenzetti.com/my-life-as-a-teenage-robot/) - useful reference for stylized 1950s animation and "Future Deco" graphic design language, not a direct pixel-art game reference.
+
+Ragnarok Online remains the closest game reference found so far. Tree of Savior and La Tale are useful adjacent references for cute MMO avatars and clothing readability, but they do not appear to describe the exact base body problem as well as RO-like semi-chibi sprite construction.
+
+Panty & Stocking and My Life as a Teenage Robot are useful for the shape-language half of the prompt: flat, graphic, angular, wedge-like, and not pillowy baby-chibi. They should not replace the RPG sprite reference; they should only add geometric language.
+
+## Prompt Implications From Research
+
+Avoid relying on `chibi` alone. It pushes the model toward head size, not necessarily the desired body silhouette.
+
+Promising terms to test:
+
+- `semi-chibi`
+- `2.5 heads tall`
+- `3 heads tall`
+- `Ragnarok Online style semi-chibi MMO sprite`
+- `RO-style semi-chibi base sprite`
+- `flat low-shading`
+- `minimal interior shading`
+- `wedge-shaped feet`
+- `mitten hands`
+- `arms taper from thin shoulders to wide mitten hands`
+- `legs taper from narrow thighs to wide wedge feet`
+- `legs close together`
+- `no thigh gap`
+- `compact thick limbs`
+- `graphic geometric silhouette`
+- `trapezoid torso`
+- `flat chest and narrow waist`
+
+Risky terms:
+
+- `curvy`, which can pull the body toward gendered anatomy.
+- `big eyes` without `unisex`, which can push gendered or infant-like face emphasis.
+- `bald` too early in the prompt, which can dominate the result and produce baby-like heads.
+- `super deformed` alone, which may mean 2-head bobblehead proportions instead of the desired 2.5-3-head semi-chibi avatar.
+
+## Next Six-Prompt Test Plan
+
+Run the next test in two groups:
+
+No game reference, maximum descriptive body language:
+
+1. `Unisex semi-chibi avatar base character, 2.75 heads tall, light peach bare skin, no clothes, bald hairless, flat low-shading pixel sprite, narrow trapezoid torso, flat chest, compact thick limbs, arms taper from thin shoulders to wide mitten hands, legs taper from narrow thighs to wide wedge feet, legs close together, no thigh gap.`
+2. `Unisex stylized chibi base character, light peach bare skin, no clothes, bald hairless, graphic geometric silhouette, tiny pinched torso, narrow waist, simple column legs with thick wedge feet, simple arms with oversized mitten hands, flat low-detail shading, cute neutral avatar proportions.`
+3. `Unisex semi-chibi dress-up avatar base, 3 heads tall, light peach bare skin, no clothes, bald hairless, flat cartoon pixel-art shading, small narrow torso, broad simple hands and heavy wedge feet, thick close-set limbs, tapered geometry, readable outfit-template silhouette.`
+
+Game/reference-anchored:
+
+4. `Unisex Ragnarok Online style semi-chibi MMO base sprite, light peach bare skin, no clothes, bald hairless, 3 heads tall, low top-down RPG view, narrow torso, simplified mitten hands, wedge-shaped feet, compact thick limbs, legs close together, flat low-shading pixel art.`
+5. `Unisex RO-style 2.5D isometric semi-chibi avatar base, light peach bare skin, no clothes, bald hairless, tiny trapezoid torso, narrow waist, arms taper to mitten hands, legs taper to wide wedge feet, no thigh gap, readable clothing-template silhouette, flat low-detail pixel sprite.`
+6. `Unisex semi-chibi MMO avatar base inspired by Ragnarok Online sprite proportions and flat geometric cartoon shape language, light peach bare skin, no clothes, bald hairless, 2.75 heads tall, narrow pinched torso, thick tapered limbs, mitten hands, wedge feet, minimal interior shading.`
 
 ## Suggested Next Test Plan
 
