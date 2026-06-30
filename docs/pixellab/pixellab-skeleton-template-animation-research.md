@@ -70,6 +70,16 @@ Important interpretation:
 - `extra_frozen_first_frame` and calibration image anchor the generated output to the existing character direction.
 - The returned animation is generated output. The preset is not merely a static pre-rendered spritesheet being copied into the user's account.
 
+### Managed Template Rendering Artifacts
+
+A 2026-06-30 live humanoid horse `walking-8-frames` north test showed an important behavior boundary: the preset moved arms and legs according to the humanoid walk, but the generated frames gained consistently heavy dark leg shadows and a rigid, upright gait. Frame inspection showed the dark-pixel share stayed high across all eight frames, which indicates a persistent generation/style interpretation rather than a single bad frame.
+
+The practical model is skeleton-guided frame generation, not a clean composite of prebuilt limb sprites over an unchanged character. PixelLab uses the managed character, stored body/template family, selected `template_animation_id`, direction frame, and style settings to generate new frames. Because the frames are generated, template mode can re-interpret shading, contrast, joint detail, and body stiffness even when the skeleton motion itself is correct.
+
+Public template-mode tuning is limited to generation controls such as `action_description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `color_image`, `force_colors`, `seed`, and explicit `directions`. These can help with style artifacts such as excessive shadows or palette drift, but they are soft controls rather than deterministic animation-rig parameters.
+
+No public managed-template field currently exposes direct 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, shadow-strength controls, editable keyframes, or `bone_scaling` as an animation-generation input. When the gait itself is too robotic, use managed v3/pro custom animation or raw skeleton/Aseprite keypoint authoring rather than expecting `walking-8-frames` to be a full rig editor.
+
 ### Public API Boundary
 
 The website and Aseprite extension expose useful evidence about PixelLab product behavior, but their private request shapes, session behavior, and editor operation channels are not public automation contracts. Use them only as terminology and behavior evidence. Programmatic integrations should use official REST v2 routes or MCP tools unless PixelLab publishes a first-party route in public docs.
@@ -100,7 +110,7 @@ Key request fields:
 | `text_guidance_scale` | Template-mode prompt following strength. |
 | `enhance_prompt` | Only valid for `mode="v3"`; not for template/pro. |
 
-Secondary request fields include `description`, `color_image`, `force_colors`, `isometric`, and `seed`. These can matter for exact API integrations, but they should not be confused with the primary preset contract: `character_id`, `mode="template"`, `template_animation_id`, and explicit `directions`.
+Secondary request fields include `description`, `color_image`, `force_colors`, `isometric`, and `seed`. These can matter for exact API integrations, especially when trying to reduce template-mode style drift, but they should not be confused with the primary preset contract: `character_id`, `mode="template"`, `template_animation_id`, and explicit `directions`.
 
 Response:
 

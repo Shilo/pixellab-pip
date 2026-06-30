@@ -133,6 +133,26 @@ Important fields:
 | `action_description` | Required for custom v3/pro. Optional in template mode; use only for light customization when appropriate. |
 | `enhance_prompt` | Only for v3 custom mode; do not set it for template/pro. |
 
+### Template Rendering And Tuning
+
+Managed template animation is skeleton-guided generation, not a simple layer composite of prebuilt arms/legs over the original frame. The template supplies motion/pose guidance, while PixelLab re-renders frames for the managed character and direction. This can preserve the character and move the limbs correctly while still introducing generation artifacts such as heavier shadows on legs, palette drift, or rigid/robotic body motion.
+
+Use these public controls when a preset walk/idle/jump is close but needs style correction:
+
+| Control | Use |
+|---|---|
+| `action_description` | Lightly bias the template, such as "relaxed natural walk with slight shoulder sway" or "keep flat shading and avoid heavy shadows on the legs". |
+| `text_guidance_scale` | Controls how strongly template mode follows `action_description`; try moderate values first because very high values can distort identity. |
+| `shading` | Main public knob for heavy shadow artifacts. Try values such as `flat shading`, `minimal shading`, or the character's original shading style. |
+| `detail` | Lower detail can reduce noisy limb pixels or over-rendered joints. |
+| `outline` | Reassert the original outline style when limbs become too thick, broken, or overdrawn. |
+| `color_image` + `force_colors` | Constrain palette when template frames introduce extra dark tones or unwanted colors. |
+| `seed` | Try a small number of reproducible candidates; template outputs can vary. |
+
+Preset template mode does not expose direct controls for 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, `bone_scaling`, shadow strength, or skeleton keypoint edits. `frame_count` also does not tune preset motion; choose a different template id such as `walking-4-frames`, `walking-6-frames`, or `walking-8-frames`.
+
+If the issue is mainly rendering style, retry template mode with conservative style controls. If the issue is the gait itself, such as a robotic walk, stiff torso, missing weight shift, or bad limb timing, use v3/pro custom animation or raw skeleton/Aseprite keypoint authoring instead of expecting preset mode to behave like a full animation rig editor.
+
 Polling:
 
 ```text
@@ -544,7 +564,11 @@ Only add `action_description` when the user asks for a variant and the route sup
 ```json
 {
   "template_animation_id": "walking-8-frames",
-  "action_description": "a steady cheerful walk with a slight head bob"
+  "action_description": "a steady cheerful walk with a slight head bob",
+  "text_guidance_scale": 6,
+  "shading": "flat shading",
+  "detail": "low detail",
+  "outline": "single color black outline"
 }
 ```
 
