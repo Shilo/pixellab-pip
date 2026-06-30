@@ -254,11 +254,23 @@ Useful references:
 - [Ragnarok Online chibi characters art](https://www.creativeuncut.com/gallery-14/ro-sd-characters3.html) - useful reference for the official SD/chibi promotional direction.
 - [RagnarokOnline Job Class & NPC Sprite List](https://nn.ai4rei.net/dev/npclist/?qq=8) - useful for inspecting actual RO sprite silhouettes and body/gear readability.
 - [iRO Wiki Character Sprite Simulator](https://costume.irowiki.org/) - useful interactive visual reference for RO body/clothing/headgear combinations.
+- [The Spriters Resource: Ragnarok Online](https://www.spriters-resource.com/pc_computer/ragnarokonline/) - useful for inspecting official ripped RO sprite sheets by class, NPC, enemy, head, weapon, and related categories. Use as visual study/reference only.
+- [The Spriters Resource: Ragnarok Online Novice](https://www.spriters-resource.com/pc_computer/ragnarokonline/asset/141222/) - useful direct reference for a simpler playable-class body with multiple walking/action frames.
+- [The Spriters Resource: Ragnarok Online NPCs Walking](https://www.spriters-resource.com/pc_computer/ragnarokonline/asset/127670/) - useful for broad low-top-down humanoid silhouette comparison.
 - [Custom Characters Sprites (Ragnarok Online Style)](https://cheeseguy.artstation.com/projects/QXKYOB) - useful modern fan/professional reference; the page notes character sizes around 45-60px wide by 70-100px tall, which supports a taller-than-64 visible body target for RO-like work.
+- [Ragnarok Online Base Templates for RPGM VX ACE](https://moonfaeriestudio.com/download/ragnarok-online-base-templates-for-rpgm-vx-ace/) - highly relevant scale reference because it explicitly adapts heavily edited RO-style bases for RPG Maker VX Ace. Terms are non-commercial/personal-use with credit, so treat this as inspiration and proportion study, not production input.
+- [Ragnarok Online Base Female for RPGM VX Ace](https://www.deviantart.com/moonfaeriestudio/art/Ragnarok-Online-Base-Female-for-RPGM-VX-Ace-458217977) - companion MoonFaerie page; useful if accessible in a browser because search metadata confirms it is an RO-based RPG Maker base.
+- [RO Young Male Base for RPGM VX Ace](https://www.deviantart.com/moonfaeriestudio/art/RO-Young-Male-Base-for-RPGM-VX-Ace-458232707) - companion MoonFaerie base variant; useful for comparing less gendered/taller young body proportions.
+- [Ragnarok Online Sprite - 01 by Farheit](https://www.deviantart.com/farheit/art/Ragnarok-Online-Sprite-01-57059213) - useful example of a fan-made RPG Maker XP sprite modeled from a Ragnarok Online character; the page reports a 128x192 image size, implying RPG Maker-style frame layout.
+- [Disgaea RO Sprites on PixelJoint](https://pixeljoint.com/pixelart/39574.htm) - useful art-process reference for what artists perceive as RO palette/shading style. Comments discuss palette/ramp choices in an RO context.
+- [FXFreitas Sprites showcase on Hercules Board](https://board.herc.ws/topic/9831-showcase-fxfreitas-sprites/) - useful for custom/edited RO-style sprite discussion and examples, including Ragnarok DS sprite enhancement and RO color/texture matching notes.
 - [Tree of Savior on Steam](https://store.steampowered.com/app/372000/Tree_of_Savior_English_Ver/) - adjacent cute/charming character reference, but not as exact for the target base silhouette.
 - [Tree of Savior concept art gallery](https://toswiki.treeofsaviorgame.com/gallery/concept_art) - adjacent costume/character proportion reference.
 - [La Tale official page](https://latale.papayaplay.com/latale.do?tp=download) - confirms La Tale as a 2D side-scrolling fantasy MMORPG. Useful for 2D avatar/clothing readability, but side-view proportions are less directly comparable to low-top-down base sprites.
 - [Trickster Online overview](https://en.wikipedia.org/wiki/Trickster_Online) - useful adjacent 2D isometric anime MMORPG reference, but likely rounder and more animal/avatar-specific than the target.
+- [Secret of the Solstice review on MMOs.com](https://mmos.com/review/secret-of-the-solstice) - useful adjacent reference because it describes the game as RO-inspired, with 3D backgrounds and 2D sprites. Visual style is close enough to inspect, but likely not as exact as RO for the flare target.
+- [Celestian Tales: Old North Steam discussion on Ragnarok-like sprites](https://steamcommunity.com/app/315860/discussions/0/541907867783281124/?l=latam) - useful developer-side note: the developer says RO's style was the basis for their assets, but their sprites are larger and structurally different. Good reference for RO-inspired character direction, not for 64px base scale.
+- [Celestian Tales: Old North Kickstarter](https://www.kickstarter.com/projects/ekuatorgames/celestian-tales-old-north-redefining-the-classic-r) - useful adjacent reference; search result text notes inspiration from older Suikoden titles and Ragnarok Online, though the page may block direct fetch.
 - [Clip Studio chibi proportion guide](https://tips.clip-studio.com/en-us/articles/4829) - useful proportion reference: chibi can range up to about 3 heads tall, which supports testing `2.5 heads tall` and `3 heads tall` instead of generic `chibi`.
 - [What the UPA Style Actually Is](https://animationobsessive.substack.com/p/what-the-upa-style-actually-is) - useful terminology for flat, graphic shape language rather than anatomical realism.
 - [My Life as a Teenage Robot - Rob Renzetti](https://robrenzetti.com/my-life-as-a-teenage-robot/) - useful reference for stylized 1950s animation and "Future Deco" graphic design language, not a direct pixel-art game reference.
@@ -266,6 +278,14 @@ Useful references:
 Ragnarok Online remains the closest game reference found so far. Tree of Savior and La Tale are useful adjacent references for cute MMO avatars and clothing readability, but they do not appear to describe the exact base body problem as well as RO-like semi-chibi sprite construction.
 
 Panty & Stocking and My Life as a Teenage Robot are useful for the shape-language half of the prompt: flat, graphic, angular, wedge-like, and not pillowy baby-chibi. They should not replace the RPG sprite reference; they should only add geometric language.
+
+Web-search implications from 2026-06-30:
+
+- For smaller-size inspiration, the best found target is not a generic RO rip; it is `Ragnarok Online Base Templates for RPGM VX ACE`, because it compresses heavily edited RO-style bodies into an RPG Maker-compatible format.
+- Official RO class sheets from The Spriters Resource remain useful for the original bottom-heavy silhouette, but they are too detailed/large to directly describe a 64px PixelLab target.
+- Celestian Tales is confirmed as RO-inspired by developer/community material, but its sprites are intentionally larger than RO, so it is less useful for the requested lower-resolution base.
+- Secret of the Solstice is a valid adjacent game reference for RO-like 2D sprites in a 3D/isometric MMO, but current search results suggest it copies the general RO presentation more than the exact lower-resolution base-body flare.
+- Use all found third-party sprite sheets and galleries as visual inspiration only. Licensing and ownership vary; do not feed them directly into generation or claim derived production rights without separate permission.
 
 ## Prompt Implications From Research
 
