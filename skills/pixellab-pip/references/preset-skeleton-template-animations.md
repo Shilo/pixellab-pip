@@ -168,11 +168,26 @@ color_image
 seed
 ```
 
+Current MCP does not expose standalone raw-skeleton tools equivalent to Aseprite's "Estimate skeleton", "Edit skeleton", "Export skeleton for API", or "Animate with skeleton (new)" editor flow. MCP `create_character` / `animate_character` are managed-character tools; they can use template animations and stored character skeleton metadata internally, but they do not accept arbitrary keypoint arrays. Use REST v2 for raw skeleton estimation/animation.
+
+Programmatic raw-skeleton route:
+
+1. Estimate or author keypoints.
+   - REST: `POST /v2/estimate-skeleton` for a sprite/image.
+   - Aseprite: "Estimate skeleton" creates local editable pose data; "Export skeleton for API" writes normalized keypoints as `pose_keypoints`.
+   - Local agent tooling may edit/validate JSON keypoints, but that is client-side, not a PixelLab API call.
+2. Convert exported keypoints to the target REST field.
+   - Aseprite export shape: `{ "pose_keypoints": [[...], ...] }`.
+   - REST animation field: `skeleton_keypoints: [[...], ...]`.
+   - REST single-image BitForge field: `skeleton_keypoints: [...]`.
+3. Call `POST /v2/animate-with-skeleton` with `image_size`, `reference_image`, `skeleton_keypoints`, and explicit `view` / `direction`.
+4. Add `init_images`, `inpainting_images`, `mask_images`, or `color_image` only when the user supplied those roles or the route requires them.
+
 Current OpenAPI defaults raw `animate-with-skeleton` to `view="side"` and `direction="east"`. Do not infer raw skeleton defaults from website managed-character examples, which may use low top-down/south or another stored character view/direction. Endpoint prose lists common supported sizes `16`, `32`, `64`, `128`, and `256`, while schema behavior can allow other 16-256 dimensions; verify current OpenAPI before writing exact production code for nonstandard sizes.
 
 Before exact calls, refresh OpenAPI. Current schema requires `image_size` and `reference_image`; custom keypoint workflows also need explicit `skeleton_keypoints` or a prior `estimate-skeleton` step. Ask for missing image/keypoint roles before spending credits.
 
-If the user says "custom skeleton", "my keypoints", "pose JSON", "export skeleton", or "animate with this skeleton", ask for or infer the required image/keypoint roles before spending credits. If the user simply says "skeleton walk template" or "preset skeleton animation", use managed template animation instead.
+If the user says "estimate skeleton", "auto rig this sprite", "custom skeleton", "my keypoints", "pose JSON", "export skeleton", or "animate with this skeleton", route to REST raw skeleton primitives or Aseprite visible editor workflow depending on whether they want programmatic generation or interactive editing. Ask for or infer the required image/keypoint roles before spending credits. If the user simply says "skeleton walk template" or "preset skeleton animation", use managed template animation instead.
 
 ## Aseprite Boundary
 
@@ -189,7 +204,23 @@ Aseprite is appropriate for:
 - Creating an `.aseprite` workspace from generated frames.
 - Adding a `walk`, `idle`, `run`, or custom tag.
 - Exporting a spritesheet, GIF, frame sequence, or metadata JSON.
+- Estimating a skeleton onto an open sprite for interactive editing.
+- Editing pose/keypoint overlays visually.
+- Inserting local skeleton templates into frames for authoring.
+- Exporting local skeleton keypoints for API use.
 - Inspecting local skeleton reference files for research only.
+
+Aseprite skeleton features observed in the installed extension:
+
+| Feature | Public equivalent |
+|---|---|
+| Estimate skeleton | REST `POST /v2/estimate-skeleton`; no standalone MCP equivalent. |
+| Edit skeleton | Client/editor-side keypoint editing; no PixelLab-hosted edit endpoint. |
+| Export skeleton for API | Aseprite exports normalized `pose_keypoints`; convert to REST `skeleton_keypoints`. |
+| Insert template skeleton | Local Aseprite reference JSON only; not public template ids. |
+| Animate with skeleton (new) | REST `POST /v2/animate-with-skeleton`; no raw-skeleton MCP equivalent. |
+| Re-pose (skeleton) | Exact Aseprite route is private/editor-only; approximate with REST skeleton/image-edit/managed-state routes based on requested output. |
+| Pose-guided image generation | REST `create-image-bitforge` exposes `skeleton_keypoints` / `skeleton_guidance_scale`; otherwise treat as editor-only unless current OpenAPI shows a field. |
 
 Do not:
 
