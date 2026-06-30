@@ -355,6 +355,34 @@ Next three prompts to test:
 2. `Unisex semi-chibi base character, light peach bare skin, no clothes, bald hairless, simple flat hourglass torso, compact thick limbs, wedge legs, wedge arms, large mitten hands, heavy wedge feet, legs close together, flat low-detail shading.`
 3. `Unisex dress-up chibi avatar base, light peach bare skin, no clothes, bald hairless, small flat torso, thick close-set tapered legs with heavy wedge feet, tapered sleeve-like arms with mitten hands, cute outfit-template silhouette, low-detail flat shading.`
 
+## Liked Result Registry
+
+Use this section to preserve seeds, character IDs, prompts, and failure notes for results worth revisiting.
+
+| Label | Character ID | Seed | Route | Artifact folder | Why it matters | Caveats |
+|---|---|---:|---|---|---|---|
+| Clean Chibi Base Template | `d5e4c061-0d01-43bf-a66f-b9b8feab71c3` | Unknown; not exposed by ZIP metadata, MCP, or REST detail | MCP `create_character`, standard | `pixellab-pip-generations/clean-chibi-base-template-d5e4c061/` | Best overall cute base style, skin color, and clothing-template feel. | Added short dark hair; not bald. |
+| Standard Prompt 3 Flared Limbs Bald | `a829518e-e5ac-411f-bdfa-fea2eff91494` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-lowdetail-bald-prompt-comparison/prompt-3-flared-limbs-bald/` | One of the closer bald partials. | Did not nail torso or wedge limb shape. |
+| Researched Prompt 3 Dress-Up Wedge Feet | `7195dbce-f3dd-40f7-b811-e5270173bafa` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-flat-researched-chibi-base-prompts/03-dress-up-wedge-feet/` | First meaningful wedge-leg direction; useful prompt lineage. | Arms and torso still not right. |
+| Wedge Follow-Up 1 Hourglass Wedge | `bdd7b44f-185f-4ec5-ab28-c4f3d0745ba1` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-flat-wedge-followup-prompts/01-hourglass-wedge/` | Better wedge mass and close-set legs than most prior standard runs. | Less cute than the original hair version. |
+| Wedge Follow-Up 3 Dress-Up Shorter | `28ac6e61-4dfd-4e2c-8616-3cee9c334661` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-flat-wedge-followup-prompts/03-dress-up-shorter/` | Cuter/better base silhouette than follow-up 1. | Less assertively wedge-shaped. |
+| Seeded V3 Best Wedge Low Flat | `4eb5d0a7-4e9a-4855-aa09-0eea36e68714` | `93636` | REST `/create-character-v3` | `pixellab-pip-generations/seeded-v3-pro-bald-style-comparison-93636/01-v3-best-wedge-low-flat/` | Strongest V3 style hit so far; resembles the desired Ragnarok-like detail level and silhouette energy. | Limbs are spread too wide; `mitten hands` was literalized into green glove-like hands. |
+| Seeded Pro Best Wedge Low Flat | `70d2375a-3413-44bd-8f5b-773ddd9a3adb` | `93636` | REST `/create-character-pro` | `pixellab-pip-generations/seeded-v3-pro-bald-style-comparison-93636/03-pro-best-wedge-low-flat/` | Very close to the desired wedge body shape. | Too flat and under-detailed; needs a richer detail/shading prompt. |
+
+Seed note:
+
+- The original `Clean Chibi Base Template` seed could not be recovered from local ZIP metadata, MCP `get_character`, or authenticated REST `/characters/{id}`. Seed `93636` is a new fixed comparison seed derived from the original favorite's creation time `09:36:36`, not the hidden original seed.
+
+Prompt control notes from liked seeded results:
+
+- `Mitten hands` is risky because V3 can interpret it as actual gloves. Prefer `skin-colored simple hands`, `bare simple hands`, or `rounded hands` when no accessories are desired.
+- For V3, add `arms close to body`, `legs close together`, `bare skin-colored hands and feet`, and `no gloves or accessories` when trying to keep the strong #1 style but remove the spread/glove failure.
+- For Pro, keep the wedge body prompt but raise rendering guidance from `very low detail` to `medium-low pixel detail`, `basic pixel shading`, and `small readable body details`, while still forbidding 3D, realistic, painterly, or glossy rendering.
+
+## Operating Rule For Future Numeric Replies
+
+If the user replies with only a single number, interpret it as a request to run that many creative V3 attempts toward the current chibi-base style goal. Use the current best findings, especially seed `93636` unless there is a clear reason to vary seeds, and document relevant findings afterward.
+
 ## Suggested Next Test Plan
 
 Use standard mode first, with 4 directions, chibi proportions, low top-down view, size target 64, low or default detail, and omitted/default outline.
