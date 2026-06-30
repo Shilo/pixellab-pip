@@ -30,7 +30,7 @@ If the user explicitly requested MCP, do not silently fall back to REST. Report 
 
 ## MCP vs REST v2 Capability
 
-MCP `animate_character` is fully suitable for normal managed-character template animation work: template mode, v3 custom mode, explicit directions, and `frame_count` for v3. When the visible MCP schema exposes pro mode with cost confirmation, it can also route pro animation. Use MCP first when the tools are visible.
+MCP `animate_character` is fully suitable for normal managed-character template animation work when the visible runtime schema exposes the needed fields: template mode, v3 custom mode, explicit directions, and `frame_count` for v3. When the visible MCP schema exposes pro mode with cost confirmation, it can also route pro animation. Use MCP first when the tools are visible, but inspect the visible MCP schema before relying on fields such as `mode`, `frame_count`, `pro`, `confirm_cost`, cost reporting, or any future raw-skeleton support.
 
 It is not a complete field-for-field replacement for REST v2 `/characters/animations` or `/animate-character`. The REST request schema currently exposes additional exact-control fields such as `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` for v3 mode. Use REST v2 when those fields matter, when writing integration code, or when validating exact API behavior.
 
@@ -168,7 +168,7 @@ color_image
 seed
 ```
 
-Current MCP does not expose standalone raw-skeleton tools equivalent to Aseprite's "Estimate skeleton", "Edit skeleton", "Export skeleton for API", or "Animate with skeleton (new)" editor flow. MCP `create_character` / `animate_character` are managed-character tools; they can use template animations and stored character skeleton metadata internally, but they do not accept arbitrary keypoint arrays. Use REST v2 for raw skeleton estimation/animation unless a future visible MCP tool explicitly exposes `skeleton_keypoints` or equivalent keypoint fields.
+Current MCP does not expose standalone raw-skeleton tools equivalent to Aseprite's "Estimate skeleton", "Edit skeleton", "Export skeleton for API", or "Animate with skeleton (new)" editor flow. MCP `create_character` / `animate_character` are managed-character tools; they can use template animations and stored character skeleton metadata internally, but they do not accept arbitrary keypoint arrays. Use REST v2 for raw skeleton estimation/animation unless the visible MCP schema explicitly exposes `estimate_skeleton`, `animate_with_skeleton`, `skeleton_keypoints`, or equivalent keypoint fields in the current runtime.
 
 ## Auto-Rig Skeleton Pipeline
 
@@ -208,7 +208,7 @@ For simple humanoid prompts, default the body plan to humanoid/mannequin. If cre
    - REST animation field: `skeleton_keypoints: [[...], ...]`.
    - REST single-image BitForge field: `skeleton_keypoints: [...]`.
 3. Call `POST /v2/animate-with-skeleton` with `image_size`, `reference_image`, `skeleton_keypoints`, and explicit `view` / `direction`.
-4. Add `init_images`, `inpainting_images`, `mask_images`, or `color_image` only when the user supplied those roles or the route requires them.
+4. Add `init_images`, `inpainting_images`, `mask_images`, or `color_image` when the user supplied those roles, the route requires them, or the user asks to match Aseprite's richer "Animate with skeleton (new)" behavior. Aseprite's editor flow can build freeze/inpaint masks and extra per-frame context locally; the minimal REST recipe is the public route, not wire-equivalent output parity.
 
 Important: `estimate-skeleton` returns a skeleton for an image pose; it does not invent a full walk/run sequence by itself. For a real skeleton animation, `animate-with-skeleton` needs a keypoint sequence. If the user provides only one estimated pose and asks for motion, choose one of these:
 
@@ -254,15 +254,18 @@ Aseprite is appropriate for:
 
 Aseprite skeleton features observed in the installed extension:
 
-| Feature | Public equivalent |
+| Feature | Closest public automation equivalent, not the same endpoint |
 |---|---|
 | Estimate skeleton | REST `POST /v2/estimate-skeleton`; no standalone MCP equivalent. |
 | Edit skeleton | Client/editor-side keypoint editing; no PixelLab-hosted edit endpoint. |
 | Export skeleton for API | Aseprite exports normalized `pose_keypoints`; convert to REST `skeleton_keypoints`. |
 | Insert template skeleton | Local Aseprite reference JSON only; not public template ids. |
+| Animations for character / template animation | Private Aseprite template-animation flow using local `template_name` / template catalog values; for public automation, use managed MCP/REST template animation on a character or REST raw skeleton routes after keypoints are exported. |
 | Animate with skeleton (new) | REST `POST /v2/animate-with-skeleton`; no raw-skeleton MCP equivalent. |
 | Re-pose (skeleton) | Exact Aseprite route is private/editor-only; approximate with REST skeleton/image-edit/managed-state routes based on requested output. |
 | Pose-guided image generation | REST `create-image-bitforge` exposes `skeleton_keypoints` / `skeleton_guidance_scale`; otherwise treat as editor-only unless current OpenAPI shows a field. |
+
+Aseprite uses private editor channels for these flows. The public routes above are functional equivalents for automation, not the same endpoints, auth context, or response shape. Aseprite's private template-animation catalog is also older/smaller than the managed website preset ID list below; do not assume every managed id, such as `breathing-idle` or `jumping-1`, exists in the local Aseprite template flow.
 
 Do not:
 
@@ -315,7 +318,7 @@ Default selection:
 
 | User description | MCP create default | REST create default | Aseprite automatic default |
 |---|---|---|---|
-| Human, person, player, NPC, wizard, knight, robot, humanoid monster | `body_type="humanoid"` | `template_id="mannequin"` | `bipedal-realistic` unless chibi/tiny farming-RPG style is requested |
+| Human, person, player, NPC, wizard, knight, robot, humanoid monster | `body_type="humanoid"` | `template_id="mannequin"` | `bipedal-realistic` unless chibi/tiny farming-RPG style is requested; override Aseprite's dialog default if it preselects `bipedal-semi-chibi` |
 | Upright animal with arms or two-footed stance, such as a horse warrior or fox mage | `body_type="humanoid"` | `template_id="mannequin"` | `bipedal-realistic` or `bipedal-semi-chibi` by style |
 | Small/chibi bipedal character | `body_type="humanoid"` plus chibi/cartoon proportions when available | `template_id="mannequin"` | `bipedal-semi-chibi` |
 | Four-legged dog/cat/horse/bear/lion | `body_type="quadruped"` plus matching `template` | matching `template_id` | `quadrupedal-tiny` only for local Aseprite automatic animation |
