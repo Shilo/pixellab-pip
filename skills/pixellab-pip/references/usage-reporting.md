@@ -24,7 +24,8 @@ Done - [one plain sentence saying what was produced and whether it passed verifi
 **Inputs Used**
 - `description`: exact final text sent, or concise excerpt if very long
 - `action`: exact final text sent, when animation/action was used
-- Non-default controls: size, view/direction, seed, count, mode/method/product label, `no_background`, frame count/timing, image roles, masks, references, palette, outline/detail/shading, or reused base asset
+- Required image/frame fields: name each field that materially anchored the result, such as `image`, `first_frame`, `last_frame`, `reference_image`, `style_image`, `init_image`, `mask_image`, or `directions`, and say when an optional paired field was omitted if that changes interpretation, such as `last_frame: omitted`
+- Generation settings: size, view/direction, seed, count, mode/method/product label, `no_background`, frame count/timing, masks, references, palette, outline/detail/shading, reused base asset, or other non-default settings that materially affected the output
 
 **Cost**
 - Total: [usage returned by PixelLab, or balance before -> after and delta]
@@ -41,7 +42,9 @@ Put route and inputs in bullets instead of burying them in prose. Do not lead wi
 
 Always include the final user-facing natural-language values that affected generation, especially `description`, `action`, `edit_description`, `animation_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, and `color_palette`. If prompt enhancement or agent enhancement changed the user's wording, show the final value used. If a value is too long, include the most useful excerpt and say it was truncated for readability.
 
-Report only non-default controls that materially affected the output. Do not dump every schema default. Mention seed when set or returned; otherwise say `seed: random/not exposed` only if reproducibility matters.
+Always name image, mask, reference, and frame input fields by their actual API/tool field names when they define the result. Do this even when the field is required by the selected route, because required inputs can still carry the subject identity, edit target, style, direction, or animation anchor. For animation, explicitly state `first_frame` and whether `last_frame` was used or omitted.
+
+Report only generation settings that materially affected the output. Do not dump every schema default. Mention seed when set or returned; otherwise say `seed: random/not exposed` only if reproducibility matters.
 
 For cost, report total generation cost for the whole generate/promote/edit flow when exposed. Prefer exact per-call `usage` totals when available. If only balance is available, report `before -> after` and the delta. If usage and balance are both unavailable, say `Cost: not exposed by the tool/API`.
 
