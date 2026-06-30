@@ -1,5 +1,5 @@
-/docs/.*
-/.local/
+docs/.*
+.local/
 __pycache__/
-/skills/pixellab-pip/pixellab-pip.json
-/pixellab-pip-generations/
+skills/pixellab-pip/pixellab-pip.json
+pixellab-pip-generations/
