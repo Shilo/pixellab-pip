@@ -1,12 +1,12 @@
 # PixelLab Idle Animation Artifact Research
 
-Last reviewed: 2026-06-29.
+Last reviewed: 2026-06-30.
 
 Purpose: record live-generation findings from attempts to create a clean 9-frame idle loop from a small transparent pixel-art character frame using PixelLab REST v2 `animate-with-text-v3`.
 
 This note intentionally does not link to any generated candidate files. The generation outputs were disposable test artifacts and may be deleted. The useful artifact is the routing lesson: low-motion character animation can produce external effect marks, especially when `last_frame` is supplied.
 
-## Walk-Cycle Route Summary
+## Walk-Cycle Tool/Endpoint Summary
 
 ```text
 PixelLab walk-cycle options from a single idle frame:
@@ -29,15 +29,32 @@ PixelLab walk-cycle options from a single idle frame:
 
 5. animate-with-text-pro / v2
    Pros: May allow stronger motion or a different model path.
-   Cons: Not heavily tested; observed/expected risk is low frame count and more drastic pose changes. 8-frame beta/API access is uncertain.
+   Cons: Not heavily tested; observed/expected risk is low frame count, more drastic pose changes, and stronger color inconsistency. 8-frame beta/API access is uncertain.
 
 6. Skeleton/template animation
    Pros: Better loopability, pose consistency, and explicit limb cycling.
    Cons: Stiff, robotic, uncanny motion; can add weird shading or hard shadows on limbs.
 
 Conclusion
-No route is currently proven reliable for a seamless walk loop from only an idle stance. Each option trades one failure mode for another.
+No tool/endpoint option is currently proven reliable for a seamless walk loop from only an idle stance. Each option trades one failure mode for another.
 ```
+
+## Quick Pitfall Tips
+
+- Treat the starting pose as a major source of failures. A neutral idle frame can bias the model toward mouth movement, arm/leg fidgeting, breathing, blowing, or other idle-like interpretation instead of locomotion.
+- For interpolated walk animations, prefer a mid-walk, contact, or opposite-contact start/end frame over a duplicate idle anchor when available. This is more promising, but still not a complete fix.
+- For interpolated idle animations or transparent outputs, avoid environmental descriptors unless the scene/background is intentional. A working hypothesis from animator feedback is that the model may generate a background and then remove it, so plain-background wording may reduce removal leftovers when `no_background` output is still desired. This is unproven and should be tested per asset.
+- Do not treat frame count as a quality fix. Official tool/endpoint docs define allowed counts, output counts, costs, and iteration workflows, but these tests did not establish a reliable quality best practice for 4, 8, or 16 frames.
+- Treat `animate-with-text-pro` / v2 as a separate tradeoff, not an automatic upgrade. Animator feedback notes substantially more color inconsistency, which matches the caution around drastic movement and limited testing.
+- For skeleton/template tests, separate motion-method issues from generation-quality issues when possible. Stiff gait, uncanny timing, hard shadows, and shading drift can overlap, making root cause hard to isolate.
+
+## Official Frame-Count Notes
+
+Official PixelLab docs checked on 2026-06-30:
+
+- `Animate with text (New)` supports even frame counts from 4 to 16, preserves the supplied image as frame 1, and limits maximum frames by the pixel budget `width x height x frames <= 524,288`. Its examples list 128x128 output costs for 4, 8, and 16 frames, but do not say which is visually best for walk quality.
+- `Animate with text (Pro)` chooses output count by reference size rather than an arbitrary requested count: 32x32 or 64x64 outputs 16 frames, while 65-128px, 129-170px, and 171-256px references output 4 frames at increasing cost.
+- The older `Animation with text` docs describe 4-frame generation, recommend skeleton animation for characters, and describe an iterative workflow: generate a few frames, pick/reorder useful frames, manually fix them, then regenerate with init images/inpainting. This is workflow guidance, not proof that a particular frame count solves idle-to-walk loop quality.
 
 ## Scope
 
@@ -47,7 +64,7 @@ Test subject:
 - A second 128x128 transparent variant with the visible white teeth removed.
 - The user wanted 8 generated frames plus the original first frame, for 9 total frames.
 
-Test route:
+Test endpoint:
 
 - REST v2 `POST /animate-with-text-v3`.
 - `first_frame` was always the supplied character image.
@@ -60,7 +77,7 @@ Additional frame-count finding:
 
 - The endpoint rejects odd `frame_count` values. A request for `frame_count: 7` failed validation; `frame_count: 6` is the nearest valid shorter setting and returns 7 total images including the initial frame.
 
-Two route modes were compared:
+Two endpoint input modes were compared:
 
 - First and last frame supplied: equivalent to the product behavior the user described as "interpolate (new)".
 - First frame only: equivalent to the product behavior the user described as "animate with text (new)".
@@ -86,7 +103,7 @@ Current synthesis from the test series:
 
 A later sprite-sheet test extended this finding from subtle idle loops to walk-cycle generation. The test subject was a transparent 128x128 south-facing futuristic humanoid/robot frame extracted from a multi-direction sprite sheet. The first frame was visually correct as a standing character identity anchor, but it was not a walk contact pose with one foot clearly forward.
 
-The requested result was a natural, seamless south-facing walk cycle with no background. Several prompt and route variants were tried, including short prompts, detailed biomechanical prompts, prompts with negative constraints, prompts without negative constraints, first-frame-only input, identical first/last-frame interpolation, 4-frame-count / 5-total-frame attempts, 8-frame attempts, and a 16-frame attempt using the same seed as an earlier run.
+The requested result was a natural, seamless south-facing walk cycle with no background. Several prompt and input variants were tried, including short prompts, detailed biomechanical prompts, prompts with negative constraints, prompts without negative constraints, first-frame-only input, identical first/last-frame interpolation, 4-frame-count / 5-total-frame attempts, 8-frame attempts, and a 16-frame attempt using the same seed as an earlier run.
 
 Result summary: none of those variants produced a consistent, production-ready seamless walk loop from the single idle stance. First-frame-only attempts could produce motion, but they did not reliably return to the source pose for a clean loop. Identical first/last-frame interpolation improved endpoint pressure, but the output became more constrained and unpredictable instead of reliably solving the walk, and late generated frames could show palette/color shifts near the endpoint. The model tended to preserve or elaborate the idle stance, open or change the mouth/face, create talk-like motion, exaggerate arm swings, or move the body in ways that did not read as clean alternating foot contacts. Breathing/wind/smoke/spark-like artifacts near the head appear connected to inferred breathing or inferred blowing behavior when idle-style prompts or idle-like collapse shape the motion.
 
@@ -99,12 +116,12 @@ Observed `animate-with-text-v3` behavior:
 - Reusing a previous seed helped make comparisons fair, but it did not turn the idle anchor into a reliable walk cycle.
 - Increasing frame count smoothed some transitions but did not solve the underlying motion problem. A longer output still lacked convincing walk mechanics when the only pose anchor was the idle stance.
 
-Other route observations:
+Other tool/endpoint observations:
 
-- `animate-with-text-v2` / Pro-style raw text animation was not heavily tested enough to call it a reliable fallback. The lower-frame behavior can create larger, more drastic pose changes, and any 8-frame beta availability should be verified against the current public MCP/API surface before recommending it.
-- Skeleton or template routes were better for loopability, pose consistency, and explicit limb cycling, but observed outputs could read as stiff, robotic, or uncanny. Hard or strange generated shading on arms and legs made some tests look worse. Shadow/style controls can reduce that symptom, but they do not by themselves create natural weight transfer.
+- `animate-with-text-v2` / Pro-style raw text animation was not heavily tested enough to call it a reliable fallback. The lower-frame behavior can create larger, more drastic pose changes, and animator feedback notes substantially more color inconsistency. Any 8-frame beta availability should be verified against the current public MCP/API surface before recommending it.
+- Skeleton or template methods were better for loopability, pose consistency, and explicit limb cycling, but observed outputs could read as stiff, robotic, or uncanny. Hard or strange generated shading on arms and legs made some tests look worse. Shadow/style controls can reduce that symptom, but they do not by themselves create natural weight transfer.
 
-Practical conclusion: these findings do not show any currently proven fully automatic route that reliably turns a single idle stance into a seamless walk loop. First-frame-only generation is mainly weak at loop closure, while duplicate idle first/last-frame interpolation is mainly risky because the endpoint constraint can create constrained or unpredictable effects. For walk cycles, the key missing input is usually a real motion pose, not a longer prompt. A duplicate idle first/last frame is a weak animation constraint for locomotion because the model has to invent all contact, passing, weight-shift, and recovery poses while also returning to the same planted stance.
+Practical conclusion: these findings do not show any currently proven fully automatic tool/endpoint workflow that reliably turns a single idle stance into a seamless walk loop. First-frame-only generation is mainly weak at loop closure, while duplicate idle first/last-frame interpolation is mainly risky because the start/end-frame constraint can create constrained or unpredictable effects. For walk cycles, the key missing input is usually a real motion pose, not a longer prompt. A duplicate idle first/last frame is a weak animation constraint for locomotion because the model has to invent all contact, passing, weight-shift, and recovery poses while also returning to the same planted stance.
 
 Mid-walk start/end anchors should be treated as more promising than idle anchors because they provide real locomotion poses, but they should not be presented as a complete solution. They still need verification for loop closure, identity stability, artifacts, and natural walk mechanics.
 
@@ -114,7 +131,7 @@ Routing consequence:
 - If the user only has an idle frame, warn that raw interpolation and first-frame-only v3 both need visual inspection and may fail regardless of prompt length, negative prompting, or frame count.
 - Do not keep spending retries on prompt wording alone when the source pose remains a neutral idle.
 - Generate one direction first, preserve all returned frames, and verify foot contacts, mouth/face stability, body scale, detached artifacts, shadows, and loop closure before expanding to a full directional sheet.
-- When natural locomotion matters, consider a managed/template walk only as a rough draft, or route to explicit pose authoring, skeleton/keypoint editing, Aseprite/Pixelorama cleanup, or another manual animation workflow.
+- When natural locomotion matters, consider a managed/template walk only as a rough draft, or move to explicit pose authoring, skeleton/keypoint editing, Aseprite/Pixelorama cleanup, or another manual animation workflow.
 
 ## Observed Prompt Behavior
 
@@ -259,11 +276,11 @@ These are not guaranteed; they are simply more concrete than "idle" and less lik
 
 ## Skill Contract Implications
 
-The skill should preserve this route distinction:
+The skill should preserve this input-mode distinction:
 
 - `animate-with-text-v3` with `first_frame` only is not equivalent to `animate-with-text-v3` with both `first_frame` and `last_frame`.
 - Supplying `last_frame` can improve loop closure but may create interpolation artifacts on low-motion prompts.
-- If a user asks for a clean idle loop, Pip should warn internally that this route needs frame inspection and may require multiple candidates or local assembly.
+- If a user asks for a clean idle loop, Pip should warn internally that this method needs frame inspection and may require multiple candidates or local assembly.
 - If the user explicitly prohibits artifacts, do not trust prompt constraints alone; verify frames.
 
 Recommended answer/report wording after live attempts:
@@ -278,4 +295,4 @@ Recommended answer/report wording after live attempts:
 - Whether a public PixelLab endpoint or mode exposes a stronger "no external effects" control for animation.
 - Whether an official template-based idle animation on a managed character avoids these artifacts better than raw `animate-with-text-v3`.
 - Whether smaller frame counts, different canvas padding, or pre-masked source images reduce artifact frequency.
-- Whether a two-step route, such as first-frame-only generation followed by local ping-pong assembly, should become the default for tiny idle loops.
+- Whether a two-step workflow, such as first-frame-only generation followed by local ping-pong assembly, should become the default for tiny idle loops.
