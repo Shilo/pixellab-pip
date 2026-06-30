@@ -6,6 +6,39 @@ Purpose: record live-generation findings from attempts to create a clean 9-frame
 
 This note intentionally does not link to any generated candidate files. The generation outputs were disposable test artifacts and may be deleted. The useful artifact is the routing lesson: low-motion character animation can produce external effect marks, especially when `last_frame` is supplied.
 
+## Walk-Cycle Route Summary
+
+```text
+PixelLab walk-cycle options from a single idle frame:
+
+1. animate-with-text-v3, first frame only
+   Pros: Can create motion; less constrained than interpolation.
+   Cons: Does not reliably return to the starting pose, so seamless looping is weak.
+
+2. animate-with-text-v3, identical start/end frame
+   Pros: Adds loop/endpoint pressure.
+   Cons: Can become constrained or unpredictable; may collapse into idle/talking motion; inferred blowing or breathing behavior can create head-adjacent wind/smoke/spark artifacts; the last generated frame may show palette/color shifts near the endpoint.
+
+3. animate-with-text-v3, mid-walk start/end frames
+   Pros: More reliable than idle anchors because the model has real walk-pose information to interpolate from.
+   Cons: Not proven to solve the core issues; outputs still require inspection for loop quality, identity drift, artifacts, and believable walk mechanics.
+
+4. animate-with-text-v3, more frames / prompt changes
+   Pros: More frames may smooth transitions; better prompts can clarify intent.
+   Cons: Short/long prompts, negative/no negative prompting, and 4/8/16 frames did not solve the core issue.
+
+5. animate-with-text-pro / v2
+   Pros: May allow stronger motion or a different model path.
+   Cons: Not heavily tested; observed/expected risk is low frame count and more drastic pose changes. 8-frame beta/API access is uncertain.
+
+6. Skeleton/template animation
+   Pros: Better loopability, pose consistency, and explicit limb cycling.
+   Cons: Stiff, robotic, uncanny motion; can add weird shading or hard shadows on limbs.
+
+Conclusion
+No route is currently proven reliable for a seamless walk loop from only an idle stance. Each option trades one failure mode for another.
+```
+
 ## Scope
 
 Test subject:
@@ -55,11 +88,12 @@ A later sprite-sheet test extended this finding from subtle idle loops to walk-c
 
 The requested result was a natural, seamless south-facing walk cycle with no background. Several prompt and route variants were tried, including short prompts, detailed biomechanical prompts, prompts with negative constraints, prompts without negative constraints, first-frame-only input, identical first/last-frame interpolation, 4-frame-count / 5-total-frame attempts, 8-frame attempts, and a 16-frame attempt using the same seed as an earlier run.
 
-Result summary: none of those variants produced a consistent, natural, production-ready walk loop from the single idle stance. The repeated failure mode was not just weak prompting. The model tended to preserve or elaborate the idle stance, open or change the mouth/face, create talk-like motion, exaggerate arm swings, or move the body in ways that did not read as clean alternating foot contacts. Breathing/wind/smoke/spark-like artifacts near the head appear connected to inferred breathing behavior when idle-style prompts or idle-like collapse shape the motion.
+Result summary: none of those variants produced a consistent, production-ready seamless walk loop from the single idle stance. First-frame-only attempts could produce motion, but they did not reliably return to the source pose for a clean loop. Identical first/last-frame interpolation improved endpoint pressure, but the output became more constrained and unpredictable instead of reliably solving the walk, and late generated frames could show palette/color shifts near the endpoint. The model tended to preserve or elaborate the idle stance, open or change the mouth/face, create talk-like motion, exaggerate arm swings, or move the body in ways that did not read as clean alternating foot contacts. Breathing/wind/smoke/spark-like artifacts near the head appear connected to inferred breathing or inferred blowing behavior when idle-style prompts or idle-like collapse shape the motion.
 
 Observed `animate-with-text-v3` behavior:
 
 - Identical first/last-frame interpolation from the idle stance could satisfy endpoint pressure while still failing the walk. The output often looked like an idle/talking loop or contained non-walk artifacts rather than a natural stride.
+- Interpolation with start/end anchors tended to show palette or color changes in the last generated frame near the anchored endpoint.
 - First-frame-only generation avoided the duplicate endpoint constraint, but it did not reliably close the loop even when the prompt explicitly requested a seamless walk cycle.
 - In the observed v3 calls, `frame_count: 4`, `frame_count: 8`, and `frame_count: 16` returned 5, 9, and 17 images respectively, apparently including the supplied anchor frame(s). This should be treated as observed return behavior for those tests, not as a reason to trim or reorder frames without verification.
 - Reusing a previous seed helped make comparisons fair, but it did not turn the idle anchor into a reliable walk cycle.
@@ -68,9 +102,11 @@ Observed `animate-with-text-v3` behavior:
 Other route observations:
 
 - `animate-with-text-v2` / Pro-style raw text animation was not heavily tested enough to call it a reliable fallback. The lower-frame behavior can create larger, more drastic pose changes, and any 8-frame beta availability should be verified against the current public MCP/API surface before recommending it.
-- Skeleton or template routes provided more explicit limb cycling, but observed outputs could read as stiff, robotic, or uncanny. Hard generated shadows on arms and legs made some tests look worse. Shadow/style controls can reduce that symptom, but they do not by themselves create natural weight transfer.
+- Skeleton or template routes were better for loopability, pose consistency, and explicit limb cycling, but observed outputs could read as stiff, robotic, or uncanny. Hard or strange generated shading on arms and legs made some tests look worse. Shadow/style controls can reduce that symptom, but they do not by themselves create natural weight transfer.
 
-Practical conclusion: these findings do not show any currently proven fully automatic route that reliably turns a single idle stance into a natural seamless walk loop. For walk cycles, the key missing input is usually a real motion pose, not a longer prompt. A duplicate idle first/last frame is a weak animation constraint for locomotion because the model has to invent all contact, passing, weight-shift, and recovery poses while also returning to the same planted stance.
+Practical conclusion: these findings do not show any currently proven fully automatic route that reliably turns a single idle stance into a seamless walk loop. First-frame-only generation is mainly weak at loop closure, while duplicate idle first/last-frame interpolation is mainly risky because the endpoint constraint can create constrained or unpredictable effects. For walk cycles, the key missing input is usually a real motion pose, not a longer prompt. A duplicate idle first/last frame is a weak animation constraint for locomotion because the model has to invent all contact, passing, weight-shift, and recovery poses while also returning to the same planted stance.
+
+Mid-walk start/end anchors should be treated as more promising than idle anchors because they provide real locomotion poses, but they should not be presented as a complete solution. They still need verification for loop closure, identity stability, artifacts, and natural walk mechanics.
 
 Routing consequence:
 
