@@ -21,7 +21,7 @@ Infer low-risk frame roles from explicit wording. Ask when role uncertainty woul
 
 ## Idle Loop Risk
 
-Do not assume `animate-with-text-v3` with a matching `last_frame` is safe for tiny or low-motion idle loops. Identical or near-identical first/last frames can still match the endpoints while adding detached puffs, arcs, symbols, trails, or other external marks in middle frames.
+Do not assume `animate-with-text-v3` with an identical or near-identical `last_frame` is safe for tiny or low-motion idle loops. The endpoint frames can still match while middle frames add detached puffs, arcs, symbols, trails, or other external marks.
 
 Use `last_frame` when the user needs interpolation between distinct poses, the action has clear internal body motion, or external motion marks are acceptable and will be inspected.
 
@@ -37,7 +37,7 @@ When the user does not specify `frame_count`, use the endpoint default or docume
 
 ## Walk Loops From Idle Stances
 
-Treat natural walk loops generated from a single idle or neutral stance frame as high risk. Observed attempts failed across prompt length, negative prompting, no negative prompting, first-frame-only input, identical first/last-frame interpolation, and 4-, 8-, and 16-frame requests. Common failures included idle collapse, mouth/talking motion, poof/smoke-like artifacts, exaggerated arm movement, weak foot contacts, stiff skeleton/template motion, and hard limb shadows.
+Treat natural walk loops generated from a single idle or neutral stance frame as high risk. Observed attempts failed across short and long prompts, negative prompting, no negative prompting, first-frame-only input, identical first/last-frame anchors, and 4-, 8-, and 16-frame requests. Common failures included idle collapse, mouth/talking motion, exaggerated arm movement, weak foot contacts, stiff skeleton/template motion, and hard limb shadows. Breathing/wind/smoke/spark-like artifacts near the head appear connected to inferred breathing behavior when the model interprets the request as idle-like motion.
 
 If this route fails or the agent needs more detail, read `../../docs/pixellab/pixellab-idle-animation-artifact-research.md`.
 

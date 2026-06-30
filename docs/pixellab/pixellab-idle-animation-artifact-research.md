@@ -55,7 +55,7 @@ A later sprite-sheet test extended this finding from subtle idle loops to walk-c
 
 The requested result was a natural, seamless south-facing walk cycle with no background. Several prompt and route variants were tried, including short prompts, detailed biomechanical prompts, prompts with negative constraints, prompts without negative constraints, first-frame-only input, identical first/last-frame interpolation, 4-frame-count / 5-total-frame attempts, 8-frame attempts, and a 16-frame attempt using the same seed as an earlier run.
 
-Result summary: none of those variants produced a consistent, natural, production-ready walk loop from the single idle stance. The repeated failure mode was not just weak prompting. The model tended to preserve or elaborate the idle stance, open or change the mouth/face, create talk-like motion, add smoke/poof-like artifacts, exaggerate arm swings, or move the body in ways that did not read as clean alternating foot contacts.
+Result summary: none of those variants produced a consistent, natural, production-ready walk loop from the single idle stance. The repeated failure mode was not just weak prompting. The model tended to preserve or elaborate the idle stance, open or change the mouth/face, create talk-like motion, exaggerate arm swings, or move the body in ways that did not read as clean alternating foot contacts. Breathing/wind/smoke/spark-like artifacts near the head appear connected to inferred breathing behavior when idle-style prompts or idle-like collapse shape the motion.
 
 Observed `animate-with-text-v3` behavior:
 
