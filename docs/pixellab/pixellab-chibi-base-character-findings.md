@@ -357,21 +357,25 @@ Next three prompts to test:
 
 ## Liked Result Registry
 
-Use this section to preserve seeds, character IDs, prompts, and failure notes for results worth revisiting.
+Use this section to preserve the ranked set of results worth revisiting. These are the only current high-value anchors; the rest are lower-priority references unless a future result changes the pattern.
 
-| Label | Character ID | Seed | Route | Artifact folder | Why it matters | Caveats |
-|---|---|---:|---|---|---|---|
-| Clean Chibi Base Template | `d5e4c061-0d01-43bf-a66f-b9b8feab71c3` | Unknown; not exposed by ZIP metadata, MCP, or REST detail | MCP `create_character`, standard | `pixellab-pip-generations/clean-chibi-base-template-d5e4c061/` | Best overall cute base style, skin color, and clothing-template feel. | Added short dark hair; not bald. |
-| Standard Prompt 3 Flared Limbs Bald | `a829518e-e5ac-411f-bdfa-fea2eff91494` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-lowdetail-bald-prompt-comparison/prompt-3-flared-limbs-bald/` | One of the closer bald partials. | Did not nail torso or wedge limb shape. |
-| Researched Prompt 3 Dress-Up Wedge Feet | `7195dbce-f3dd-40f7-b811-e5270173bafa` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-flat-researched-chibi-base-prompts/03-dress-up-wedge-feet/` | First meaningful wedge-leg direction; useful prompt lineage. | Arms and torso still not right. |
-| Wedge Follow-Up 1 Hourglass Wedge | `bdd7b44f-185f-4ec5-ab28-c4f3d0745ba1` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-flat-wedge-followup-prompts/01-hourglass-wedge/` | Better wedge mass and close-set legs than most prior standard runs. | Less cute than the original hair version. |
-| Wedge Follow-Up 3 Dress-Up Shorter | `28ac6e61-4dfd-4e2c-8616-3cee9c334661` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-flat-wedge-followup-prompts/03-dress-up-shorter/` | Cuter/better base silhouette than follow-up 1. | Less assertively wedge-shaped. |
-| Seeded V3 Best Wedge Low Flat | `4eb5d0a7-4e9a-4855-aa09-0eea36e68714` | `93636` | REST `/create-character-v3` | `pixellab-pip-generations/seeded-v3-pro-bald-style-comparison-93636/01-v3-best-wedge-low-flat/` | Strongest V3 style hit so far; resembles the desired Ragnarok-like detail level and silhouette energy. | Limbs are spread too wide; `mitten hands` was literalized into green glove-like hands. |
-| Seeded Pro Best Wedge Low Flat | `70d2375a-3413-44bd-8f5b-773ddd9a3adb` | `93636` | REST `/create-character-pro` | `pixellab-pip-generations/seeded-v3-pro-bald-style-comparison-93636/03-pro-best-wedge-low-flat/` | Very close to the desired wedge body shape. | Too flat and under-detailed; needs a richer detail/shading prompt. |
+| Rank | Label | Character ID | Seed | Route | Artifact folder | Pros | Cons |
+|---:|---|---|---:|---|---|---|---|
+| 1 | Seeded V3 Best Wedge Low Flat | `4eb5d0a7-4e9a-4855-aa09-0eea36e68714` | `93636` | REST `/create-character-v3` | `pixellab-pip-generations/seeded-v3-pro-bald-style-comparison-93636/01-v3-best-wedge-low-flat/` | Highest-quality current direction; still reads hourglass; most reminiscent of Ragnarok Online without going too detailed or realistic. | Has glove-like hands and spread limbs. |
+| 2 | Clean Chibi Base Template | `d5e4c061-0d01-43bf-a66f-b9b8feab71c3` | Unknown; not exposed by ZIP metadata, MCP, or REST detail | MCP `create_character`, standard | `pixellab-pip-generations/clean-chibi-base-template-d5e4c061/` | Best all-around shape, balanced detail, skin color, and cute clothing-template feel. | Added short dark hair; not bald. |
+| 3 | Seeded Pro Best Wedge Low Flat | `70d2375a-3413-44bd-8f5b-773ddd9a3adb` | `93636` | REST `/create-character-pro` | `pixellab-pip-generations/seeded-v3-pro-bald-style-comparison-93636/03-pro-best-wedge-low-flat/` | Has the right hourglass flare and wedge body shape. | Far too flat and low quality. |
+| 4 | Unified Limbs Narrow Torso | `dbd5b876-f7ec-4ae1-abf9-00f2a737332b` | Unknown; MCP run did not expose seed | MCP `create_character`, standard | `pixellab-pip-generations/standard-64-unified-simple-limbs-soft-rounded/narrow-torso/` | Sort of resembles the hourglass flare. | Proportions look unnatural and gender-based. |
 
 Seed note:
 
 - The original `Clean Chibi Base Template` seed could not be recovered from local ZIP metadata, MCP `get_character`, or authenticated REST `/characters/{id}`. Seed `93636` is a new fixed comparison seed derived from the original favorite's creation time `09:36:36`, not the hidden original seed.
+- Seed `93636` appears to carry a strong style/quality bias across V3 and Pro. This helped create the current rank-1 V3 result, but it also appears to preserve failure modes such as Pro flatness and V3 anatomy/spread. Do not assume it is universally good.
+- `e45281cf-b1e2-4af0-bee1-53bfcc7ca924` reused seed `93636` from the same Pro lineage as `70d2375a-3413-44bd-8f5b-773ddd9a3adb` and stayed extremely flat/low quality. This suggests it may be worth giving up on `93636` for Pro, even if it remains useful for V3.
+- `32122f1b-9011-421a-941f-37ee3dfc9c68` also used seed `93636`; it looks Ragnarok-like, but far too heavily detailed and muscular for the desired blank base.
+
+Dismissed or low-priority anchors:
+
+- `a829518e-e5ac-411f-bdfa-fea2eff91494`, `7195dbce-f3dd-40f7-b811-e5270173bafa`, `bdd7b44f-185f-4ec5-ab28-c4f3d0745ba1`, and `28ac6e61-4dfd-4e2c-8616-3cee9c334661` are useful history but not current anchors. Do not prioritize generating from them unless a future prompt needs to revisit standard-mode wedge experiments.
 
 Prompt control notes from liked seeded results:
 
@@ -382,6 +386,8 @@ Prompt control notes from liked seeded results:
 ## Operating Rule For Future Numeric Replies
 
 If the user replies with only a single number, interpret it as a request to run that many creative V3 attempts toward the current chibi-base style goal. Use the current best findings, especially seed `93636` unless there is a clear reason to vary seeds, and document relevant findings afterward.
+
+When naming new generations, prefix the name with the route family: `V3 ...` for V3 generations and `PRO ...` for Pro generations. This keeps result folders and character lists scannable during prompt exploration.
 
 ## Seed 93636 Glove/Detail Follow-Up
 
