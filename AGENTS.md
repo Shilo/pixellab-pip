@@ -10,5 +10,5 @@ PixelLab terminology and surface-model background: docs/pixellab/ only when chan
 Tool comparison and integration background: docs/tools/ only when changing Aseprite, MCP, REST, or editor-routing claims
 Developer context: docs/developer.md only when changing repository structure or local install guidance
 Showcase rules: docs/showcase/README.md only when adding or editing showcase pages or showcase assets
-Temporary agent-facing generated files: put them under unversioned .local/, not root folders such as analysis/
+Temporary agent-facing generated files belong inside: .local/
 Git conventional commits: <type>[optional scope]: <description>
