@@ -177,7 +177,7 @@ function Select-MenuItem {
         }
         $answer = Read-Host "Choose 1-$($Options.Count)"
         if ([string]::IsNullOrWhiteSpace($answer)) {
-            return $Options[$Options.Count - 1]
+            return $Options[0]
         }
         if ($answer -match '^\d+$') {
             $index = [int]$answer - 1
@@ -418,8 +418,8 @@ function Invoke-Main {
         $targetMode = if ($state.IsLocal) { "production remote" } else { "development local" }
         $targetAction = if ($state.IsLocal) { "install-remote" } else { "install-local" }
         $options = @(
-            [pscustomobject]@{ Action = $targetAction; Label = "Install $targetMode" },
             [pscustomobject]@{ Action = "update-current"; Label = "Update $($state.Mode)" },
+            [pscustomobject]@{ Action = $targetAction; Label = "Install $targetMode" },
             [pscustomobject]@{ Action = "uninstall"; Label = "Uninstall $($state.Mode)" },
             [pscustomobject]@{ Action = "cancel"; Label = "Cancel" }
         )
