@@ -49,6 +49,37 @@ Current synthesis from the test series:
 - Some interpolated outputs showed late-frame visual instability, including color or palette shifts near the final generated frame before the anchored endpoint.
 - The strongest positive lever was not frame count or anchor similarity; it was action clarity. When the `action` described a more expressive character motion, such as a friendly hand wave, the model had enough internal body movement to animate and avoided the detached idle artifacts in the observed run.
 
+## Follow-up: Walk Loops From A Single Idle Pose
+
+A later sprite-sheet test extended this finding from subtle idle loops to walk-cycle generation. The test subject was a transparent 128x128 south-facing futuristic humanoid/robot frame extracted from a multi-direction sprite sheet. The first frame was visually correct as a standing character identity anchor, but it was not a walk contact pose with one foot clearly forward.
+
+The requested result was a natural, seamless south-facing walk cycle with no background. Several prompt and route variants were tried, including short prompts, detailed biomechanical prompts, prompts with negative constraints, prompts without negative constraints, first-frame-only input, identical first/last-frame interpolation, 4-frame-count / 5-total-frame attempts, 8-frame attempts, and a 16-frame attempt using the same seed as an earlier run.
+
+Result summary: none of those variants produced a consistent, natural, production-ready walk loop from the single idle stance. The repeated failure mode was not just weak prompting. The model tended to preserve or elaborate the idle stance, open or change the mouth/face, create talk-like motion, add smoke/poof-like artifacts, exaggerate arm swings, or move the body in ways that did not read as clean alternating foot contacts.
+
+Observed `animate-with-text-v3` behavior:
+
+- Identical first/last-frame interpolation from the idle stance could satisfy endpoint pressure while still failing the walk. The output often looked like an idle/talking loop or contained non-walk artifacts rather than a natural stride.
+- First-frame-only generation avoided the duplicate endpoint constraint, but it did not reliably close the loop even when the prompt explicitly requested a seamless walk cycle.
+- In the observed v3 calls, `frame_count: 4`, `frame_count: 8`, and `frame_count: 16` returned 5, 9, and 17 images respectively, apparently including the supplied anchor frame(s). This should be treated as observed return behavior for those tests, not as a reason to trim or reorder frames without verification.
+- Reusing a previous seed helped make comparisons fair, but it did not turn the idle anchor into a reliable walk cycle.
+- Increasing frame count smoothed some transitions but did not solve the underlying motion problem. A longer output still lacked convincing walk mechanics when the only pose anchor was the idle stance.
+
+Other route observations:
+
+- `animate-with-text-v2` / Pro-style raw text animation was not heavily tested enough to call it a reliable fallback. The lower-frame behavior can create larger, more drastic pose changes, and any 8-frame beta availability should be verified against the current public MCP/API surface before recommending it.
+- Skeleton or template routes provided more explicit limb cycling, but observed outputs could read as stiff, robotic, or uncanny. Hard generated shadows on arms and legs made some tests look worse. Shadow/style controls can reduce that symptom, but they do not by themselves create natural weight transfer.
+
+Practical conclusion: these findings do not show any currently proven fully automatic route that reliably turns a single idle stance into a natural seamless walk loop. For walk cycles, the key missing input is usually a real motion pose, not a longer prompt. A duplicate idle first/last frame is a weak animation constraint for locomotion because the model has to invent all contact, passing, weight-shift, and recovery poses while also returning to the same planted stance.
+
+Routing consequence:
+
+- Prefer a real walk contact or opposite-contact frame as `last_frame` instead of reusing the idle frame.
+- If the user only has an idle frame, warn that raw interpolation and first-frame-only v3 both need visual inspection and may fail regardless of prompt length, negative prompting, or frame count.
+- Do not keep spending retries on prompt wording alone when the source pose remains a neutral idle.
+- Generate one direction first, preserve all returned frames, and verify foot contacts, mouth/face stability, body scale, detached artifacts, shadows, and loop closure before expanding to a full directional sheet.
+- When natural locomotion matters, consider a managed/template walk only as a rough draft, or route to explicit pose authoring, skeleton/keypoint editing, Aseprite/Pixelorama cleanup, or another manual animation workflow.
+
 ## Observed Prompt Behavior
 
 The following prompt families were tested with first and last frame supplied. All returned technically looped endpoint frames, but all produced external artifacts in the middle frames:
