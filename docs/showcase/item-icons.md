@@ -12,6 +12,10 @@ Last reviewed: 2026-06-29.
 
 ![Fantasy RPG material item icons](item-icons/fantasy-rpg-materials-8x8-32px.png)
 
+![Candy sweets and treats item icons](item-icons/candy-sweets-treats-8x8-32px.png)
+
+![Glossy candy sweets and treats item icons](item-icons/candy-sweets-treats-glossy-8x8-32px.png)
+
 PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complete 8 by 8 sheets. The showcased winner is the general inventory sheet after PixelLab background removal because it covers the broadest RPG inventory surface while keeping readable 32px items, transparent background, and no slot/frame treatment. The weapon, armor, consumable, and material sheets show the same route holding a consistent style across more specialized inventory categories.
 
 ## Contents
@@ -21,6 +25,8 @@ PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complet
 - [Armor Sheet](#armor-sheet)
 - [Consumable Sheet](#consumable-sheet)
 - [Material Sheet](#material-sheet)
+- [Candy Sweets and Treats Sheet](#candy-sweets-and-treats-sheet)
+- [Glossy Candy Sweets and Treats Sheet](#glossy-candy-sweets-and-treats-sheet)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -248,9 +254,105 @@ Findings:
 - Category breadth is high while still avoiding equipment, skills, terrain, and UI slots.
 - The direct transparent generation did not need local visual repair.
 
+## Candy Sweets and Treats Sheet
+
+![Candy sweets and treats item icons](item-icons/candy-sweets-treats-8x8-32px.png)
+
+Original prompt:
+
+```text
+pip create 32px icon set in 8 by 8 sheet that is candy themed with sweets and treats. they must all be individually unique foods. no text, no borders, no backgrounds
+```
+
+The candy sweets and treats sheet demonstrates the item-icon route for a non-RPG-food category. It stays within edible candy and dessert subjects, including lollipops, candy cane, gummy bear, jelly bean, chocolates, peppermint, marshmallow, cotton candy, licorice, candy apple, cakes, pastries, ice cream, pudding, honeycomb, fruit, jam, and other treats while preserving transparent background and no slot/frame treatment.
+
+Route: PixelLab REST v2 `generate-image-v2`
+
+Prompt preparation: agent-optimized from the user's candy icon set request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `256x256` |
+| Icon grid | `8x8`, intended `32x32` icons |
+| Background | `no_background: true` |
+| Returned seed | `1660277576` |
+| Usage reported | `20` generations |
+| Reported cost | `$0.095` |
+
+Request body:
+
+```json
+{
+  "description": "Complete 8 by 8 sheet of 64 individually unique candy, sweets, and dessert food item icons, 8 columns and 8 rows, each cell a readable centered 32x32 edible treat, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with crisp hard edges, clear silhouettes, low visual noise, limited bright candy palette, consistent cute game inventory style. Include distinct foods such as lollipop, candy cane, gummy bear, jelly bean, wrapped caramel, chocolate bar, chocolate truffle, bonbon, peppermint swirl, marshmallow, cotton candy, licorice twist, rock candy, candy apple, toffee square, fudge cube, gumdrop, sour belt, candy necklace, peanut brittle, cupcake, frosted donut, macaron, cookie, gingerbread cookie, brownie, cake slice, cheesecake slice, pie slice, tart, eclair, cream puff, churro, waffle cone, ice cream cone, popsicle, sundae, pudding cup, jelly dessert, flan, cinnamon roll, croissant, sweet bun, muffin, fruit tartlet, honeycomb, candied orange, praline, nougat, baklava, mochi, taiyaki, wafer roll, jelly roll, trifle cup, cupcake liner treat, frosted pretzel, popcorn ball, rice crispy treat, caramel popcorn, sugar cube, syrup bottle, jam jar, chocolate dipped strawberry. No text, letters, words, numbers, labels, captions, fake writing, runes, glyphs, UI slots, buttons, borders, frames, rounded corners, watermark, checkerboard, decorative grid lines, plates, bowls, napkins, scenery, shadows cast onto a background, or non-food objects.",
+  "image_size": {
+    "width": 256,
+    "height": 256
+  },
+  "no_background": true
+}
+```
+
+Findings:
+
+- Strongest candy-food sheet for broad sweets and dessert coverage.
+- The direct transparent generation preserved exact 256x256 sheet dimensions and 32px cell math.
+- All 64 cropped cells had unique RGBA hashes, and visual review confirmed the icons read as distinct edible treats.
+- No local repainting, quantization, cleanup, or procedural visual fixes were applied to the showcase copy.
+
+## Glossy Candy Sweets and Treats Sheet
+
+![Glossy candy sweets and treats item icons](item-icons/candy-sweets-treats-glossy-8x8-32px.png)
+
+Original prompt:
+
+```text
+pip, create 32px icon set in 8 by 8 sheet that is candy themed with sweets and treats. saturated, shiny, glossy and tasty looking. they must all be individually unique foods. no text, no borders, no backgrounds
+```
+
+The glossy candy sweets and treats sheet uses the same route with stronger style constraints for saturated color and shiny highlights. The output leans harder into candy-store surfaces and includes varied candy, fruit-flavored sweets, pastries, chocolate, ice cream, and dessert shapes without adding text, borders, backgrounds, or UI slots.
+
+Route: PixelLab REST v2 `generate-image-v2`
+
+Prompt preparation: agent-optimized from the user's glossy candy icon set request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `256x256` |
+| Icon grid | `8x8`, intended `32x32` icons |
+| Background | `no_background: true` |
+| Returned seed | `1641624740` |
+| Usage reported | `20` generations |
+| Reported cost | `$0.095` |
+
+Request body:
+
+```json
+{
+  "description": "Complete 8 by 8 sheet of 64 individually unique candy, sweet, and dessert food item icons, 8 columns and 8 rows, each readable as one centered 32x32 food item, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with saturated candy-store colors, shiny glossy highlights, tasty edible surfaces, crisp hard edges, clear silhouettes, low visual noise, cohesive cute fantasy inventory style. Include varied treats such as lollipops, hard candies, gummies, jelly beans, chocolate pieces, bonbons, truffles, fudge, peppermint, candy cane, caramel, taffy, marshmallow, cotton candy, licorice, macarons, cupcakes, donuts, cookies, cake slices, pie slices, ice cream, popsicles, churros, waffles, pastries, eclairs, cream puffs, pudding, flan, fruit tart, candied apple, brittle, nougat, praline, honeycomb, mochi, and sweet buns. No repeated food concepts, no text, letters, words, numbers, labels, captions, handwriting, fake writing, packaging logos, watermarks, UI slots, buttons, borders, frames, rounded corners, plates, utensils, scenery, shadows as backdrops, terrain tiles, map tiles, or decorative grid lines.",
+  "image_size": {
+    "width": 256,
+    "height": 256
+  },
+  "no_background": true
+}
+```
+
+Findings:
+
+- Best candy-food sheet for saturated, glossy, high-highlight styling.
+- The style prompt changed the feel without changing the stable route or sheet math.
+- All 64 cropped cells had unique RGBA hashes, and visual review confirmed broad candy and dessert variety.
+- No local repainting, quantization, cleanup, or procedural visual fixes were applied to the showcase copy.
+
 ## Findings
 
 REST `generate-image-v2` is the best route currently showcased for complete fantasy RPG item-icon sheets. It handled broad and narrow item categories, transparent backgrounds, 8 by 8 composition, and readable 32px silhouettes better than object-style generation would for this use case.
+
+The candy and glossy candy sheets show the same route is useful outside fantasy RPG equipment and materials when the user needs food-themed inventory or pickup icons. Strong subject constraints such as `individually unique foods`, exact candy and dessert category lists, and negative constraints against plates, utensils, packaging, scenery, borders, and text helped keep the sheets focused on standalone edible icons.
 
 Prompt language that helped:
 
@@ -270,14 +372,16 @@ The general inventory sheet is the best hero image because it demonstrates the b
 | Armor inventory sheet | `docs/showcase/item-icons/fantasy-rpg-armor-8x8-32px.png` |
 | Consumable inventory sheet | `docs/showcase/item-icons/fantasy-rpg-consumables-8x8-32px.png` |
 | Material inventory sheet | `docs/showcase/item-icons/fantasy-rpg-materials-8x8-32px.png` |
+| Candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-8x8-32px.png` |
+| Glossy candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-glossy-8x8-32px.png` |
 
 ## Validation Notes
 
-- All five showcased images are `256x256`.
-- All five divide exactly into `8x8` grids of `32x32` cells.
-- All five have alpha transparency with `alpha_min=0` and `alpha_max=255`.
-- All five produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
+- All seven showcased images are `256x256`.
+- All seven divide exactly into `8x8` grids of `32x32` cells.
+- All seven have alpha transparency with `alpha_min=0` and `alpha_max=255`.
+- All seven produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
 - The selected general inventory sheet is a PixelLab background-removed derivative of the original PixelLab sheet.
 - The retained generation responses reported seeds for these runs, but the retained request bodies do not show seed values being intentionally sent.
-- The weapon, armor, consumable, and material showcase files were copied from saved PixelLab sheet outputs into stable showcase locations.
+- The weapon, armor, consumable, material, candy, and glossy candy showcase files were copied from saved PixelLab sheet outputs into stable showcase locations.
 - No local repainting, quantization, cleanup, or procedural visual fixes were applied to the showcase copies.
