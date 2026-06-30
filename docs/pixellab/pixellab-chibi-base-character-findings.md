@@ -383,6 +383,37 @@ Prompt control notes from liked seeded results:
 
 If the user replies with only a single number, interpret it as a request to run that many creative V3 attempts toward the current chibi-base style goal. Use the current best findings, especially seed `93636` unless there is a clear reason to vary seeds, and document relevant findings afterward.
 
+## Seed 93636 Glove/Detail Follow-Up
+
+Artifact folder:
+
+```text
+pixellab-pip-generations/seed-93636-v3-pro-fix-gloves-detail-set/
+```
+
+Settings:
+
+| Prompt | Character ID | Seed | Route | Main result |
+|---|---|---:|---|---|
+| V3 close limbs bare hands | `32122f1b-9011-421a-941f-37ee3dfc9c68` | `93636` | REST `/create-character-v3` | Removed the green glove issue, but stance remained wide and anatomy became too muscular/defined. |
+| V3 compact wedge RPG detail | `babe78c9-8765-413f-a9b9-1d6834f308e4` | `93636` | REST `/create-character-v3` | Kept skin-colored hands and the strong V3 wedge/RPG energy, but still had a wide stance and anatomical torso. |
+| Pro wedge with readable detail | `e45281cf-b1e2-4af0-bee1-53bfcc7ca924` | `93636` | REST `/create-character-pro` | Maintained Pro's wedge body shape and added a little readable detail, but remained restrained and less charming than the V3 direction. |
+
+Findings:
+
+- `bare skin-colored hands` and `no gloves` fixed the literal glove problem caused by `mitten hands`.
+- The wide-limb spread did not resolve just from `arms close to body` and `legs close together`.
+- `Ragnarok-like low top-down RPG sprite detail` helped preserve the appealing V3 energy, but may pull the torso toward too much anatomy.
+- Pro can be nudged away from totally flat output with `medium-low readable detail`, `basic pixel shading`, and `subtle skin shading`, but the result still lacks the charm and visual punch of the best V3 seeded result.
+
+Next prompt implications:
+
+- Avoid `mitten hands`.
+- Try `small bare hands` or `simple rounded bare hands` instead of `large hands` or `mitten hands`.
+- To reduce wide stance in V3, try pose/silhouette wording such as `standing straight`, `feet below shoulders`, `compact vertical stance`, or `arms hanging down`.
+- Avoid `Ragnarok-like detail` when the torso starts getting too anatomical; use `RPG sprite detail` or `cute sprite detail` instead.
+- The best current V3 path is still seed `93636`, but with pose constraints and accessory avoidance.
+
 ## Suggested Next Test Plan
 
 Use standard mode first, with 4 directions, chibi proportions, low top-down view, size target 64, low or default detail, and omitted/default outline.
