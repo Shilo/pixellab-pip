@@ -211,11 +211,42 @@ bear
 lion
 ```
 
-MCP `create_character` uses `body_type="quadruped"` plus `template` for animals that stand and move on four legs. Humanoid/mannequin characters use `body_type="humanoid"` and humanoid proportion controls when available. Do not pass `template="mannequin"` to MCP `create_character`; `template` is quadruped-only there. REST v2 `create-character-v3` uses `template_id="mannequin"` for this humanoid/mannequin workflow.
+Use the right vocabulary for the surface:
+
+| Surface | Field | Valid values | Notes |
+|---|---|---|---|
+| MCP `create_character` | `body_type` | `humanoid`, `quadruped` | Use `humanoid` for bipedal/mannequin body plans. Use `quadruped` only for four-legged animals. |
+| MCP `create_character` | `template` | `bear`, `cat`, `dog`, `horse`, `lion` | Required only when `body_type="quadruped"`. Ignored for humanoid characters. |
+| MCP `create_character` | `proportions` | preset `default`, `chibi`, `cartoon`, `stylized`, `realistic_male`, `realistic_female`, `heroic`, or custom scale JSON | Humanoid only. This is how MCP expresses realistic/chibi humanoid proportions; it is not a separate `body_type`. |
+| REST managed character create | `template_id` | `mannequin`, `bear`, `cat`, `dog`, `horse`, `lion` | `mannequin` is the bipedal/humanoid skeleton reconstruction template and the default in current OpenAPI. |
+| REST managed animation | `template_animation_id` | Exact animation ids from the character's family | Does not take `body_type`; the managed character already carries the body plan/template family. |
+| Website Add Animation | `Template` | `mannequin`, `dog`, `cat`, `horse`, `bear`, `lion` | UI label for the managed character's animation family. |
+| Aseprite automatic character animation | `character_type` | `bipedal-realistic`, `bipedal-semi-chibi`, `quadrupedal-tiny` | Local extension labels for its automatic complete-character flow. These are not MCP `body_type` values or public REST `template_id` values. |
+| Aseprite local skeleton references | folder/type labels | `bipedal_realistic`, `bipedal_semi-chibi`, `quadrupedal_tiny`; UI labels `bipedal realistic`, `bipedal semi-chibi`, `quadrupedal tiny` | Research/import context only. Do not treat these local folders as stable public PixelLab template ids. |
+
+MCP `create_character` uses `body_type="quadruped"` plus `template` for animals that stand and move on four legs. Humanoid/mannequin characters use `body_type="humanoid"` and humanoid proportion controls when available. Do not pass `template="mannequin"` to MCP `create_character`; `template` is quadruped-only there. REST v2 create routes use `template_id="mannequin"` for this humanoid/mannequin workflow.
+
+Normalize user wording carefully:
+
+- Treat "mannequin" and misspellings such as "manniquin" as the humanoid/mannequin body plan.
+- For MCP, that means `body_type="humanoid"` and optional humanoid `proportions`; it does not mean `template="mannequin"`.
+- For REST managed character creation, that means `template_id="mannequin"`.
+- For Aseprite automatic complete-character flows, map humanoid/mannequin work to `bipedal-realistic` or `bipedal-semi-chibi` based on requested proportions/style.
+- If a user says "bipedal chibi", prefer MCP `body_type="humanoid"` with chibi-like `proportions`, REST `template_id="mannequin"`, or Aseprite `bipedal-semi-chibi` depending on the surface.
 
 Choose the template family by body plan and stance, not by species name alone. Map human/person/player/NPC/wizard/knight/robot/biped requests to the mannequin/humanoid animation family. Also map humanoid-stance animals or monsters, such as a horse person, cat warrior, fox mage, or any animal walking on two feet with arms, to mannequin/humanoid unless the existing managed character metadata proves it is quadruped.
 
 If a character already exists, prefer its stored `template_id` from `get_character` or REST `GET /characters/{character_id}` over guessing from the prompt.
+
+Default selection:
+
+| User description | MCP create default | REST create default | Aseprite automatic default |
+|---|---|---|---|
+| Human, person, player, NPC, wizard, knight, robot, humanoid monster | `body_type="humanoid"` | `template_id="mannequin"` | `bipedal-realistic` unless chibi/tiny farming-RPG style is requested |
+| Upright animal with arms or two-footed stance, such as a horse warrior or fox mage | `body_type="humanoid"` | `template_id="mannequin"` | `bipedal-realistic` or `bipedal-semi-chibi` by style |
+| Small/chibi bipedal character | `body_type="humanoid"` plus chibi/cartoon proportions when available | `template_id="mannequin"` | `bipedal-semi-chibi` |
+| Four-legged dog/cat/horse/bear/lion | `body_type="quadruped"` plus matching `template` | matching `template_id` | `quadrupedal-tiny` only for local Aseprite automatic animation |
+| Four-legged animal outside the five managed quadruped families | `body_type="quadruped"` plus closest body-plan `template`, or ask if the stand-in changes output quality | closest `template_id`, or ask | `quadrupedal-tiny` only if using Aseprite's local automatic flow |
 
 ## Preset Animation IDs
 
@@ -395,13 +426,14 @@ sitting
 standing
 ```
 
-If a user asks for a label that maps cleanly to one id, choose it. Examples:
+If a user asks for a label that maps cleanly to one id, choose it. Common mappings and exact-id passthroughs:
 
 | User says | Use id |
 |---|---|
 | "human walk 8 frames" | `walking-8-frames` |
 | "person idle" | `breathing-idle` |
 | "wizard jump" | `jumping-1` or `jumping-2` |
+| "bark" | `bark` |
 | "dog walk 8 frames" | `walk-8-frames` |
 | "dog fast walk" | `fast-walk` |
 | "humanoid walk 8 frames" | `walking-8-frames` |
