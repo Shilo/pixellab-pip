@@ -32,7 +32,7 @@ Treat structured API fields as controls, not prompt text. Set or change controls
 
 When the user asks for maximum, 100%, or forced text guidance, map that request to the maximum valid `text_guidance_scale` exposed by the chosen tool or schema. Do not also change `transition_size`, `tile_strength`, `tileset_adherence`, or `tileset_adherence_freedom` unless the user requested those controls or the failure mode specifically calls for them.
 
-If the user does not specify `transition_size`, omit it when the chosen route allows omission so the route default is used. If a local helper must send a value, use the known default for the route, not `1.0`. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar prompt wording.
+For any MCP or REST tileset route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar prompt wording.
 
 If the desired result depends on a strict palette, prefer REST tileset generation when it exposes `color_image` and the visible MCP tool does not. Use prompt-only MCP retries only after checking that the needed palette controls are unavailable in the current surface.
 
