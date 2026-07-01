@@ -24,10 +24,10 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 
 ### Tiles
 
-[<img src="tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.png" alt="Minecraft mod 32px tile sheet" width="256">](tiles.md)
+[<img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="256">](tiles.md)
 
 ```text
-/pixellab-pip create a 64-tile Minecraft-inspired 32x32 terrain pack.
+/pixellab-pip create a 16x16 tile atlas for Minecraft-inspired terrain textures.
 ```
 
 ### Gameplay GUI
