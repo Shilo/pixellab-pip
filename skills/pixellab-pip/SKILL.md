@@ -88,7 +88,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 ## Clarify Only For Collisions
 
 - "Tiles": ask whether the user wants a terrain/autotile tileset, platformer/sidescroller tileset, or individual tile variants.
-- "Create Image Pro" with exact cells below `32px`: read `references/create-image-pro.md`.
+- "Create Image Pro" with exact cells below `32px`, packed tile sheets, no-margin texture grids, or Minecraft-style `16x16` sheets: read `references/create-image-pro.md`.
 - "Map": ask whether they want a whole map, map object, map image, tileset, isometric tile, or tile variants.
 - "Object/character": infer character for people, NPCs, creatures, body templates, or identity/state animation; infer object for standalone props, pickups, furniture, or weapons. Ask only if unclear.
 - "Character animation direction": if the user asks to add an animation to an existing multi-direction character and does not name a direction, default to `south` (down-facing) for one preview candidate. Do not animate north-west, diagonal, or all directions by default. Ask which direction only when `south` is unavailable, the asset's directions are unknown, or the user needs a different gameplay-facing direction. Animate all directions only when the user explicitly asks for all/8 directions, a complete direction set, or approves the larger batch.

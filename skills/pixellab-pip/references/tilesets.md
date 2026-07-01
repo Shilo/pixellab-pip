@@ -8,9 +8,12 @@ Read this for terrain tilesets, platformer tilesets, isometric tiles, tile varia
 - Platformer/sidescroller tileset.
 - Individual tile variants such as hex, octagon, square, or isometric.
 - One isometric tile/block.
+- Packed texture sheet/image grid via Create Image Pro.
 - Manual website Create Tileset Pro.
 
 Capture tile size, view, terrain pair or tile list, transition description, base tile IDs, style/reference/palette images, seed, and target engine/export convention when relevant.
+
+For an explicit Create Image Pro packed texture sheet or exact small-cell image grid, route to `create-image-pro.md`; do not reinterpret it as a Wang/autotile tileset just because the user says tiles.
 
 Route top-down terrain/autotile wording to top-down tileset generation unless the user explicitly asks for platformer, sidescroller, side-view, or platform tiles. Phrases such as `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, `Wang`, `autotile`, or `terrain pair` describe top-down tileset structure when no side-view/platformer intent is present; do not reinterpret them as sidescroller center/top layers just because the words include floor or wall.
 
@@ -25,7 +28,11 @@ Before spending repeated generations on prompt wording, check the visible MCP sc
 - `color_image`: REST control for palette anchoring; for top-down REST tilesets, prepare it as a 64x64 palette reference unless current docs or route behavior prove another size is accepted.
 - Pro-only shape controls such as `spread_x`, `slope_size`, and `raggedness`.
 
+Treat structured API fields as controls, not prompt text. Set or change controls only when the user explicitly requested that control, the route requires it, a documented default must be supplied by a helper, or a verified failure mode specifically calls for that control. Do not infer control values from descriptive words when those words can live safely in `lower_description`, `upper_description`, or `transition_description`.
+
 When the user asks for maximum, 100%, or forced text guidance, map that request to the maximum valid `text_guidance_scale` exposed by the chosen tool or schema. Do not also change `transition_size`, `tile_strength`, `tileset_adherence`, or `tileset_adherence_freedom` unless the user requested those controls or the failure mode specifically calls for them.
+
+If the user does not specify `transition_size`, omit it when the chosen route allows omission so the route default is used. If a local helper must send a value, use the known default for the route, not `1.0`. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar prompt wording.
 
 If the desired result depends on a strict palette, prefer REST tileset generation when it exposes `color_image` and the visible MCP tool does not. Use prompt-only MCP retries only after checking that the needed palette controls are unavailable in the current surface.
 
@@ -35,7 +42,7 @@ For REST top-down tilesets, treat `lower_reference_image`, `upper_reference_imag
 
 Use REST `color_image` when the user clearly wants a fixed palette, such as an explicit color list, `1-bit`, `black and white`, or a supplied palette image. For top-down REST tilesets, the request validator may accept a smaller PNG but the background job can fail later with an internal `Expected image of size 64x64` error. Avoid that process trap by sending a 64x64 palette reference image for `color_image` unless current route behavior proves a different size works. If a tileset job fails with that size expectation and the palette image was smaller or unknown, retry once with a 64x64 `color_image` when the user's budget/attempt count allows; report the mismatch as a PixelLab validation/background-job caveat.
 
-`color_image` constrains the palette, not where colors or texture appear inside each Wang tile. If the user needs texture on a pure terrain tile, put the texture placement in that terrain's description, not only in the transition description. Be aware that strict 1-bit wording plus terms such as `white`, `pale`, or `solid` can collapse a pure terrain tile into a single-color fill even when the same description also mentions dirt, grain, or speckles. Reference images can force placement more strongly, but use them only under the reference-image conditions above.
+`color_image` constrains the palette, not where colors or texture appear inside each Wang tile. If the user needs texture on a pure terrain tile, put the texture placement in that terrain's description, not only in the transition description. Reference images can force placement more strongly, but use them only under the reference-image conditions above.
 
 For REST top-down tilesets, distinguish the canonical tileset image/layout from the returned tile object list. Some responses expose a 4x4 `tileset15` layout or `tileset_image` while also returning 25 tile objects with transition/context variants. Do not reassemble the tile objects into a 5x5 sheet and present that as the final 16-tile Wang tileset. Prefer the canonical spritesheet/tileset image when the metadata says the layout is 4x4/16, and label any decoded tile-object sheet as an inspection artifact.
 
