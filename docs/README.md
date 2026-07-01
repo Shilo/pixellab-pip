@@ -1,8 +1,12 @@
 # More Documentation
 
-Last reviewed: 2026-06-25.
+Last reviewed: 2026-07-01.
 
 These docs explain PixelLab tools, workflows, terminology, SDK boundaries, and auth rules that Pip needs in order to automate PixelLab correctly. They supplement the repository README; install, update, and plugin metadata stay there.
+
+This folder is developer-facing. Use it for research spikes, test notes, findings, audits, comparisons, terminology background, and maintainer QA policy. Do not treat `docs/` files as the canonical agent instruction contract.
+
+Agent-facing routing and operational instructions belong in `../skills/pixellab-pip/references/`, with `../skills/pixellab-pip/SKILL.md` as the core router. When research here changes agent behavior, update the matching reference file instead of expecting agents to load developer notes.
 
 ## Showcase
 
