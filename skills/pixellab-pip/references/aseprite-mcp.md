@@ -56,6 +56,7 @@ Even when no Aseprite MCP is used, these patterns are useful for CLI/Lua workflo
 - Render onion-skin-style previews when animation continuity matters.
 - Compare neighboring frames to detect duplicate or near-duplicate animation frames.
 - Count colors or inspect color histograms when the user asked for palette discipline.
+- For exact palette clamps, 1-bit black/white output, or "replace the palette with only these colors" requests, follow `aseprite-cli.md`'s palette quantization contract even if an MCP tool performs the mechanics: distinguish visible pixel colors from document palette entries, preserve or explicitly resolve transparency, and verify every touched frame.
 - Validate expected layers/cels/tags before and after imports.
 - Copy layers between a staging `.aseprite` file and a copy of the target `.aseprite` file.
 - Require explicit printed script status such as `OK` or `ERROR:<message>` when running generated Lua.

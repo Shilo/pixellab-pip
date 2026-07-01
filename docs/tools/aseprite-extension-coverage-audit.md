@@ -1,6 +1,6 @@
 # PixelLab Aseprite Extension Coverage Audit
 
-Last investigated: 2026-06-25.
+Last investigated: 2026-07-01.
 
 Review basis: local compatibility review of the official PixelLab Aseprite editor integration.
 
@@ -113,9 +113,11 @@ Efficiency judgment: build the lightweight Aseprite CLI integration into Pip fir
 
 - The official Aseprite integration provides interactive editor workflows for generation, editing, progress/status updates, and placing results back into Aseprite.
 - Local compatibility review observed editor workflows including generation tools plus helpers such as reduce-colors, unzoom, skeleton editing, image placement, request history, and update checks.
+- Local compatibility review of the reduce-colors helper found that it is not just client-side Aseprite quantization: the editor sends image data to a PixelLab quantize operation and places the returned image back into the document. It supports auto, specified color count, selected palette, dithering, active-frame/all-frame processing, and output placement choices. It should still be treated as private editor behavior, not a public REST/MCP or headless agent contract.
+- The observed reduce-colors helper changes placed image pixels; public Pip docs should not assume it also replaces the `.aseprite` document palette. For exact palette-entry control, Pip should use documented Aseprite CLI/Lua palette APIs on local copies.
 - Observed extension operation names include image generation, style/reference generation, multi-image edit, quantize/reduce-colors, unzoom, pixel correction, map-extension, rotation, animation, tileset, UI, update, and review workflows.
-- Official Aseprite CLI docs document batch mode, save/export options, sprite-sheet export, and `--script` / `--script-param` for Lua automation: <https://www.aseprite.org/docs/cli/>.
-- Official Aseprite scripting docs and API docs document Lua scripting, `app.open`, `Sprite()`, `Sprite:saveCopyAs()`, dialogs, and plugin/menu extension points: <https://www.aseprite.org/docs/scripting/> and <https://www.aseprite.org/api/>.
+- Official Aseprite CLI docs document batch mode, save/export options, `--palette`, `--dithering-algorithm`, `--dithering-matrix`, `--color-mode indexed`, sprite-sheet export, and `--script` / `--script-param` for Lua automation: <https://www.aseprite.org/docs/cli/>.
+- Official Aseprite scripting docs and API docs document Lua scripting, `app.open`, `Sprite()`, `Sprite:saveCopyAs()`, `Sprite:setPalette()`, `Sprite:loadPalette()`, `Palette()`, `Palette:setColor()`, `Palette:saveAs()`, `app.command.LoadPalette`, `app.command.ChangePixelFormat`, dialogs, and plugin/menu extension points: <https://www.aseprite.org/docs/scripting/> and <https://www.aseprite.org/api/>.
 - Official REST v2 docs list public paths under `/v2`, such as `/generate-image-v2`, `/edit-images-v2`, `/inpaint-v3`, `/animate-with-text-v3`, `/create-tileset`, `/create-tiles-pro`, `/resize`, and `/remove-background`.
 - Official MCP docs explicitly distinguish MCP, REST v2, web interfaces, editor plugins, and legacy v1.
 
@@ -133,7 +135,7 @@ Efficiency judgment: build the lightweight Aseprite CLI integration into Pip fir
 | Tiles, tilesets, isometric tiles | In-editor tile, tileset, sidescroller, isometric, and tile-variant workflows; observed operation names include `generate-tiles`, `generate-tiles-style`, `generate-tileset`, `generate-tileset-sidescroller`, `generate-isometric-tile`, and `generate-tiles-pro`. | MCP tileset/tile tools by default; REST v2 `create-tileset`, `create-tileset-sidescroller`, `create-isometric-tile`, `create-tiles-pro`. |
 | Map image, map extension, texture | In-editor map image, map-extension, and texture workflows; observed operation names include `generate-map-flux`, `generate-inpainting-map`, `generate-inpainting-map-v2`, and `generate-texture`. | REST v2 image/background or tileset routes for generated assets; website/Aseprite for exact map-extension or texture editor workflows. No full public REST/MCP map CRUD or map-extension surface was documented. |
 | Try-on and reshape | In-editor single-image compositing and reshape workflows; observed operation names include `generate-try-on` and `generate-reshape`. | Website/editor for single-image try-on/reshape behavior; REST v2 `transfer-outfit-v2` only for animation-frame outfit transfer. No public REST v2/MCP reshape endpoint was documented. |
-| Quantize/reduce colors, unzoom, pixel correction | In-editor color reduction, unzooming, and pixel-art correction workflows; observed operation names include `quantize-image`, `unzoom-pixelart`, and `correct-pixelart`. | Aseprite/Pixelorama editor workflow. Use local fallback only when clearly labeled as non-PixelLab. No public REST v2/MCP route was documented for these exact tools. |
+| Quantize/reduce colors, unzoom, pixel correction | In-editor color reduction, unzooming, and pixel-art correction workflows; observed operation names include `quantize-image`, `unzoom-pixelart`, and `correct-pixelart`. The observed reduce-colors flow is server-backed PixelLab editor behavior, not local-only Aseprite quantization. | For exact PixelLab editor behavior, use visible Aseprite/Pixelorama editor workflow. For local file-level palette clamps, indexed conversion, 1-bit black/white, or document palette replacement, use documented Aseprite CLI/Lua on local copies and verify visible colors plus palette entries when requested. No public REST v2/MCP route was documented for the exact editor-only PixelLab tools. |
 
 ## Gaps Fixed In Pip
 

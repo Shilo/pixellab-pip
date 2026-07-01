@@ -55,6 +55,8 @@ Good fit:
 - Export an `.aseprite` file to PNG frames, GIF, sprite sheet, or JSON metadata.
 - Inspect layers, tags, slices, or export metadata from an Aseprite file.
 - Convert palette/color mode when Aseprite's documented CLI supports the needed conversion.
+- Quantize or reduce local image colors with explicit Aseprite CLI/Lua palette handling after PixelLab/user images already exist.
+- Clamp visible pixels to a supplied or named palette, such as "only #000000 and #ffffff", and optionally replace the `.aseprite` document palette when the user asks for palette replacement too.
 
 Poor fit:
 
@@ -64,6 +66,7 @@ Poor fit:
 - Controlling an already-open Aseprite document without a user-approved bridge.
 - Spending PixelLab credits from inside Aseprite through hidden automation.
 - Mouse, screenshot, or OCR automation as the default workflow.
+- Claiming PixelLab extension reduce-colors is local-only Aseprite quantization. The observed extension workflow sends the image to a PixelLab quantize operation, then places the returned image in Aseprite.
 
 If the user wants exact PixelLab extension behavior such as extension-specific reduce-colors, unzoom, pixel correction, or in-editor placement, explain that the stable agent route is PixelLab MCP/REST plus Aseprite CLI workspace handling. Offer visible manual Aseprite use or a separately designed bridge only if they really need live editor behavior.
 
@@ -97,6 +100,12 @@ Use this reference only when Aseprite is part of the requested outcome. Examples
 - "export this .aseprite as a sprite sheet"
 - "I prefer working in Aseprite"
 - "use Aseprite CLI"
+- "reduce colors in Aseprite"
+- "quantize this with Aseprite"
+- "convert this to indexed color"
+- "limit this sprite to these colors"
+- "make it 1-bit black and white"
+- "replace the Aseprite palette with only these colors"
 
 Do not trigger just because PixelLab generated local images. Most local preview work belongs in `local-asset-assembly.md`.
 
@@ -227,6 +236,8 @@ Convert to indexed color with optional dithering:
 & $AsepritePath -b "source.png" --palette "palette.png" --color-mode indexed --save-as "source-paletted.png"
 ```
 
+For palette-constrained output, prefer a supplied palette file or a Lua-created palette over vague color-count conversion. The CLI documents `--palette`, `--dithering-algorithm`, `--dithering-matrix`, and `--color-mode indexed`, but it does not document a standalone `--num-colors` option. If the user asks for an exact visible palette, create/load that palette first, convert to indexed, then verify the used colors.
+
 For multi-frame sprites, use filename formatting such as `{frame}` or expect Aseprite to number the output files:
 
 ```powershell
@@ -264,6 +275,102 @@ $Frames = "frames.json"
 Pass each `--script-param` value as a single `name=value` argument. In PowerShell, build paths into variables first or quote the whole `name=$Value` string so expressions do not split the key and value into separate arguments.
 
 Use Aseprite's `--save-as` filename placeholders, `--tag`, `--frame-range`, `--layer`, `--ignore-layer`, `--split-layers`, `--split-tags`, `--sheet-type`, `--trim`, `--crop`, `--scale`, `--color-mode`, and padding options instead of writing custom scripts when they cover the request.
+
+## Palette Quantization
+
+Use this workflow when the user asks to reduce colors, quantize colors, force a limited palette, convert to indexed color, or make a bit-depth-style result such as "1-bit black and white."
+
+### Intent Mapping
+
+Distinguish the pixel transform from the document palette:
+
+| User wording | Pixel transform | Document palette |
+|---|---|---|
+| "reduce to N colors" | Reduce or convert visible pixels toward N colors. | Leave the existing `.aseprite` palette alone unless output must be indexed or the user asks to replace it. |
+| "use only these colors", "clamp to #..." | Map visible pixels to the listed colors. | Replace the palette only when the user also says "palette", "indexed", "no stray palette colors", "only these palette entries", or similar. |
+| "replace/set/limit the palette to these colors" | Map visible pixels to the listed colors unless the user asks only for a palette setup. | Set the `.aseprite` palette to exactly the requested color entries, subject to transparency handling below. |
+| "1-bit", "black and white only", "#000000 and #ffffff only" | Treat as the explicit palette `#000000`, `#ffffff`; use no dithering unless requested. | Replace palette only when the wording asks for palette replacement or indexed output. |
+| "2-bit grayscale" | Use four grayscale colors from black to white. | Replace palette only when requested. |
+| "Game Boy palette", "DB16", "PICO-8", or supplied `.gpl/.pal/.png` palette | Use that named or supplied palette. | Replace palette only when requested. |
+
+If the request says only "2-bit color" or "reduce to 4 colors" without naming the colors, infer `2^bits` or N visible colors, but do not invent a specific art palette when exact palette identity matters. Use the current/supplied palette if present; otherwise ask for the palette or explain that Aseprite CLI can convert to indexed but does not expose a documented exact source-derived `N`-color quantizer flag.
+
+### Transparency
+
+Visible color limits exclude fully transparent pixels by default. Preserve alpha unless the user explicitly asks to flatten transparency.
+
+For indexed `.aseprite` output, transparency may require a transparent index in addition to visible colors. If the user asks for the document palette to contain exactly `#000000` and `#ffffff` and the sprite has transparency, ask whether to preserve transparency with an extra transparent entry or flatten transparent pixels to one of the listed colors.
+
+### Dithering
+
+Default to no dithering for strict palette clamps, binary/1-bit output, UI masks, collision masks, silhouettes, and any request that says "only", "exact", "no stray colors", or "hard threshold." Enable ordered dithering only when the user asks for dithering, smoother gradients, retro dither, Bayer, or similar. Preserve the user's requested matrix when given, such as `bayer2x2`, `bayer4x4`, or `bayer8x8`.
+
+### Lua Palette Clamp Pattern
+
+Use Lua when the palette must be created from hex colors or when the output `.aseprite` palette must be replaced. This is file/workspace automation, so keep the original-file safety rules: write a copy by default and verify the original did not change.
+
+```lua
+local input = app.params["input"]
+local output = app.params["output"]
+local colors = app.params["colors"] -- comma-separated hex, e.g. #000000,#ffffff
+local replacePalette = app.params["replace_palette"] == "true"
+local dither = app.params["dither"] or "none"
+
+local spr = app.open(input)
+if not spr then error("Could not open input: " .. tostring(input)) end
+
+local parsed = {}
+for hex in string.gmatch(colors or "", "([^,]+)") do
+  hex = hex:gsub("^%s+", ""):gsub("%s+$", ""):gsub("^#", "")
+  if not hex:match("^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$") then
+    error("Invalid color: " .. hex)
+  end
+  local r = tonumber(hex:sub(1, 2), 16)
+  local g = tonumber(hex:sub(3, 4), 16)
+  local b = tonumber(hex:sub(5, 6), 16)
+  table.insert(parsed, Color{ r=r, g=g, b=b, a=255 })
+end
+if #parsed < 2 then error("At least two colors are required for indexed conversion") end
+
+local pal = Palette(#parsed)
+for i, color in ipairs(parsed) do
+  pal:setColor(i - 1, color)
+end
+
+spr:setPalette(pal)
+local changePixelFormatArgs = {
+  format="indexed",
+}
+if dither ~= "none" then
+  changePixelFormatArgs.dithering = dither
+end
+app.command.ChangePixelFormat(changePixelFormatArgs)
+
+if replacePalette then
+  spr:setPalette(pal)
+end
+spr:saveCopyAs(output)
+print("OK:quantized")
+```
+
+Launch shape:
+
+```powershell
+& $AsepritePath -b --script-param "input=$Input" --script-param "output=$Output" --script-param "colors=#000000,#ffffff" --script-param "replace_palette=true" --script-param "dither=none" --script "quantize-palette.lua"
+```
+
+For named palettes or palette files, use `Sprite:loadPalette()`, `Sprite:setPalette(Palette{ fromFile=... })`, `Palette{ fromResource=... }`, or `app.command.LoadPalette{ ui=false, filename=... }` in Lua, then convert to indexed.
+
+### Verification
+
+After palette quantization:
+
+1. Verify the output file exists.
+2. Count visible colors in exported PNGs or cels and fail if any opaque/semitransparent pixel uses a color outside the requested palette.
+3. If palette replacement was requested, inspect the `.aseprite` palette and verify it contains exactly the requested entries, plus only an approved transparent entry when needed.
+4. For multi-frame sprites, verify every frame, not only the active frame.
+5. Report whether the result is RGB pixels constrained to the palette or an indexed `.aseprite`/PNG with a replaced palette. These are different outcomes.
+6. For "1-bit black and white", verify visible RGB values are exactly `#000000` and/or `#ffffff`; do not accept near-black, near-white, grayscale ramps, antialias colors, or unused stray palette entries when the user asked for strict output.
 
 ## Lua Script Patterns
 
