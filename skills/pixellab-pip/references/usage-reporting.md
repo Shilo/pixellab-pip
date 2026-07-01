@@ -48,7 +48,7 @@ Always name image, mask, reference, and frame input fields by their actual API/t
 
 Report only generation settings that materially affected the output. Do not dump every schema default. Mention seed when set or returned; otherwise say `seed: random/not exposed` only if reproducibility matters.
 
-For cost, report total generation cost for the whole generate/promote/edit flow when exposed. Prefer exact per-call `usage` totals when available. If only balance is available, report `before -> after` and the delta. If usage and balance are both unavailable, say `Cost: not exposed by the tool/API`.
+For cost, report total generation cost for the whole generate/promote/edit flow when exposed. Prefer exact per-call `usage` totals when available. If only balance is available, report `before -> after` and the delta. If other PixelLab jobs may have run concurrently, do not present a balance delta as the cost of one specific job; label it as an overlapping balance observation and prefer the job's own `usage` when available. If usage and balance are both unavailable, say `Cost: not exposed by the tool/API`.
 
 Use `get_balance` or REST `GET /balance` before and after nontrivial generation when available. If only balance is available, report the delta. If neither per-call usage nor balance is exposed, say usage was not exposed. Label estimates as estimates.
 
