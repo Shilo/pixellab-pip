@@ -236,7 +236,7 @@ Convert to indexed color with optional dithering:
 & $AsepritePath -b "source.png" --palette "palette.png" --color-mode indexed --save-as "source-paletted.png"
 ```
 
-For palette-constrained output, prefer a supplied palette file or a Lua-created palette over vague color-count conversion. The CLI documents `--palette`, `--dithering-algorithm`, `--dithering-matrix`, and `--color-mode indexed`, but it does not document a standalone `--num-colors` option. If the user asks for an exact visible palette, create/load that palette first, convert to indexed, then verify the used colors.
+For palette-constrained output, prefer a supplied palette file or a Lua-created palette when the user names exact colors. The CLI documents `--palette`, `--dithering-algorithm`, `--dithering-matrix`, and `--color-mode indexed`, but it does not document a standalone `--num-colors` option. For broad source-derived requests such as "reduce to 12 colors", use Lua `app.command.ColorQuantization{ ui=false, maxColors=12, ... }` followed by indexed conversion and verification.
 
 For multi-frame sprites, use filename formatting such as `{frame}` or expect Aseprite to number the output files:
 
@@ -286,38 +286,86 @@ Distinguish the pixel transform from the document palette:
 
 | User wording | Pixel transform | Document palette |
 |---|---|---|
-| "reduce to N colors" | Reduce or convert visible pixels toward N colors. | Leave the existing `.aseprite` palette alone unless output must be indexed or the user asks to replace it. |
+| "reduce to N colors" | Use Aseprite `ColorQuantization` to derive up to N colors from the source, then convert pixels to indexed or export a constrained RGB copy. | Leave the existing `.aseprite` palette alone only for RGB/exported-image output. Indexed `.aseprite` output necessarily has a palette; replace it only when the user asked for indexed/palette output. |
 | "use only these colors", "clamp to #..." | Map visible pixels to the listed colors. | Replace the palette only when the user also says "palette", "indexed", "no stray palette colors", "only these palette entries", or similar. |
 | "replace/set/limit the palette to these colors" | Map visible pixels to the listed colors unless the user asks only for a palette setup. | Set the `.aseprite` palette to exactly the requested color entries, subject to transparency handling below. |
 | "1-bit", "black and white only", "#000000 and #ffffff only" | Treat as the explicit palette `#000000`, `#ffffff`; use no dithering unless requested. | Replace palette only when the wording asks for palette replacement or indexed output. |
 | "2-bit grayscale" | Use four grayscale colors from black to white. | Replace palette only when requested. |
 | "Game Boy palette", "DB16", "PICO-8", or supplied `.gpl/.pal/.png` palette | Use that named or supplied palette. | Replace palette only when requested. |
 
-If the request says only "2-bit color" or "reduce to 4 colors" without naming the colors, infer `2^bits` or N visible colors, but do not invent a specific art palette when exact palette identity matters. Use the current/supplied palette if present; otherwise ask for the palette or explain that Aseprite CLI can convert to indexed but does not expose a documented exact source-derived `N`-color quantizer flag.
+If the request says only "2-bit color" or "reduce to 4 colors" without naming the colors, infer `2^bits` or N visible colors and use Aseprite `ColorQuantization`. Do not invent a specific named art palette when exact palette identity matters.
 
 ### Transparency
 
 Visible color limits exclude fully transparent pixels by default. Preserve alpha unless the user explicitly asks to flatten transparency.
 
-For indexed `.aseprite` output, transparency may require a transparent index in addition to visible colors. If the user asks for the document palette to contain exactly `#000000` and `#ffffff` and the sprite has transparency, ask whether to preserve transparency with an extra transparent entry or flatten transparent pixels to one of the listed colors.
+For indexed `.aseprite` output, transparent layers use a palette index as the transparent color. In Aseprite indexed sprites this is commonly index `0`; do not put a visible requested color such as `#000000` at that transparent index when transparency is preserved. Reserve index `0` for transparency and put visible colors at later indices, or ask whether to flatten transparency when the user insists the document palette contain only visible entries such as `#000000` and `#ffffff`.
 
 ### Dithering
 
-Default to no dithering for strict palette clamps, binary/1-bit output, UI masks, collision masks, silhouettes, and any request that says "only", "exact", "no stray colors", or "hard threshold." Enable ordered dithering only when the user asks for dithering, smoother gradients, retro dither, Bayer, or similar. Preserve the user's requested matrix when given, such as `bayer2x2`, `bayer4x4`, or `bayer8x8`.
+Default to no dithering for strict palette clamps, binary/1-bit output, UI masks, collision masks, silhouettes, and any request that says "only", "exact", "no stray colors", or "hard threshold." Enable ordered dithering only when the user asks for dithering, smoother gradients, retro dither, Bayer, or similar. In Lua, pass the algorithm and matrix as separate `ChangePixelFormat` fields: `dithering="ordered"` and `["dithering-matrix"]="bayer4x4"`.
 
-### Lua Palette Clamp Pattern
+### Lua Patterns
 
-Use Lua when the palette must be created from hex colors or when the output `.aseprite` palette must be replaced. This is file/workspace automation, so keep the original-file safety rules: write a copy by default and verify the original did not change.
+Use Lua when the palette must be created from hex colors, source-derived N-color quantization is needed, or the output `.aseprite` palette must be replaced. This is file/workspace automation, so keep the original-file safety rules: write a copy by default and verify the original did not change. Always reject `output == input` unless the user explicitly approved in-place modification of that exact path.
+
+Source-derived N-color reduction:
+
+```lua
+local input = app.params["input"]
+local output = app.params["output"]
+local maxColors = tonumber(app.params["max_colors"] or "16")
+local outputMode = app.params["output_mode"] or "rgb" -- "rgb" or "indexed"
+local dithering = app.params["dithering"] or "none"
+local matrix = app.params["dithering_matrix"]
+
+if input == output then error("Output must be a copy path, not the input path") end
+local spr = app.open(input)
+if not spr then error("Could not open input: " .. tostring(input)) end
+local originalPalette = spr.palettes[1] and Palette(spr.palettes[1]) or nil
+
+app.command.ColorQuantization{
+  ui=false,
+  withAlpha=false,
+  maxColors=maxColors,
+  algorithm="octree",
+}
+
+local changePixelFormatArgs = { format="indexed" }
+if dithering ~= "none" then
+  changePixelFormatArgs.dithering = dithering
+  if matrix and matrix ~= "" then
+    changePixelFormatArgs["dithering-matrix"] = matrix
+  end
+end
+app.command.ChangePixelFormat(changePixelFormatArgs)
+
+if outputMode == "rgb" then
+  app.command.ChangePixelFormat{ format="rgb" }
+  if originalPalette then
+    spr:setPalette(originalPalette)
+  end
+end
+spr:saveCopyAs(output)
+print("OK:color-quantized")
+```
+
+Exact palette clamp with optional palette replacement:
 
 ```lua
 local input = app.params["input"]
 local output = app.params["output"]
 local colors = app.params["colors"] -- comma-separated hex, e.g. #000000,#ffffff
 local replacePalette = app.params["replace_palette"] == "true"
-local dither = app.params["dither"] or "none"
+local preserveTransparency = app.params["preserve_transparency"] ~= "false"
+local outputMode = app.params["output_mode"] or (replacePalette and "indexed" or "rgb")
+local dithering = app.params["dithering"] or "none"
+local matrix = app.params["dithering_matrix"]
 
+if input == output then error("Output must be a copy path, not the input path") end
 local spr = app.open(input)
 if not spr then error("Could not open input: " .. tostring(input)) end
+local originalPalette = spr.palettes[1] and Palette(spr.palettes[1]) or nil
 
 local parsed = {}
 for hex in string.gmatch(colors or "", "([^,]+)") do
@@ -332,34 +380,45 @@ for hex in string.gmatch(colors or "", "([^,]+)") do
 end
 if #parsed < 2 then error("At least two colors are required for indexed conversion") end
 
-local pal = Palette(#parsed)
+local transparentOffset = preserveTransparency and 1 or 0
+local pal = Palette(#parsed + transparentOffset)
+if preserveTransparency then
+  pal:setColor(0, Color{ r=0, g=0, b=0, a=0 })
+  spr.transparentColor = 0
+end
 for i, color in ipairs(parsed) do
-  pal:setColor(i - 1, color)
+  pal:setColor(i - 1 + transparentOffset, color)
 end
 
 spr:setPalette(pal)
-local changePixelFormatArgs = {
-  format="indexed",
-}
-if dither ~= "none" then
-  changePixelFormatArgs.dithering = dither
+local changePixelFormatArgs = { format="indexed" }
+if dithering ~= "none" then
+  changePixelFormatArgs.dithering = dithering
+  if matrix and matrix ~= "" then
+    changePixelFormatArgs["dithering-matrix"] = matrix
+  end
 end
 app.command.ChangePixelFormat(changePixelFormatArgs)
 
-if replacePalette then
+if outputMode == "rgb" then
+  app.command.ChangePixelFormat{ format="rgb" }
+  if originalPalette then
+    spr:setPalette(originalPalette)
+  end
+elseif replacePalette then
   spr:setPalette(pal)
 end
 spr:saveCopyAs(output)
-print("OK:quantized")
+print("OK:palette-clamped")
 ```
 
 Launch shape:
 
 ```powershell
-& $AsepritePath -b --script-param "input=$Input" --script-param "output=$Output" --script-param "colors=#000000,#ffffff" --script-param "replace_palette=true" --script-param "dither=none" --script "quantize-palette.lua"
+& $AsepritePath -b --script-param "input=$Input" --script-param "output=$Output" --script-param "colors=#000000,#ffffff" --script-param "replace_palette=true" --script-param "preserve_transparency=true" --script-param "dithering=none" --script "palette-clamp.lua"
 ```
 
-For named palettes or palette files, use `Sprite:loadPalette()`, `Sprite:setPalette(Palette{ fromFile=... })`, `Palette{ fromResource=... }`, or `app.command.LoadPalette{ ui=false, filename=... }` in Lua, then convert to indexed.
+For named palettes or palette files, use `Sprite:loadPalette()`, `Sprite:setPalette(Palette{ fromFile=... })`, `Palette{ fromResource=... }`, or `app.command.LoadPalette{ ui=false, filename=... }` in Lua, then convert to indexed. If the user did not ask for indexed or palette replacement, convert back to RGB and restore the original palette before saving so the output is a pixel-clamped image rather than a document palette replacement.
 
 ### Verification
 
@@ -367,10 +426,11 @@ After palette quantization:
 
 1. Verify the output file exists.
 2. Count visible colors in exported PNGs or cels and fail if any opaque/semitransparent pixel uses a color outside the requested palette.
-3. If palette replacement was requested, inspect the `.aseprite` palette and verify it contains exactly the requested entries, plus only an approved transparent entry when needed.
+3. If palette replacement was requested, inspect the `.aseprite` palette and verify it contains exactly the requested visible entries, plus only an approved transparent index when needed.
 4. For multi-frame sprites, verify every frame, not only the active frame.
 5. Report whether the result is RGB pixels constrained to the palette or an indexed `.aseprite`/PNG with a replaced palette. These are different outcomes.
-6. For "1-bit black and white", verify visible RGB values are exactly `#000000` and/or `#ffffff`; do not accept near-black, near-white, grayscale ramps, antialias colors, or unused stray palette entries when the user asked for strict output.
+6. For "1-bit black and white", verify visible RGB values are exactly `#000000` and/or `#ffffff`; do not accept near-black, near-white, grayscale ramps, antialias colors, black pixels exported as transparent, or unused stray palette entries when the user asked for strict output.
+7. A simple verification script may export PNG frames and count nonzero-alpha RGB tuples, or use Aseprite Lua to print palette entries, `transparentColor`, frame count, and per-frame used visible colors as JSON-like status lines.
 
 ## Lua Script Patterns
 

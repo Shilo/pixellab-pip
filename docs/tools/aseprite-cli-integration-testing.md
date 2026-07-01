@@ -15,7 +15,7 @@ The Aseprite CLI integration should prove that generated or fixture image files 
 - Export PNG sequences, GIFs, sprite sheets, and JSON metadata.
 - Import grid sprite sheets and GIFs back into `.aseprite` files.
 - Verify output files, metadata, layer names, tag names, frame counts, and original-file preservation.
-- Quantize or reduce fixture images to explicit palettes, including strict `#000000`/`#ffffff` 1-bit output, and verify both visible pixel colors and optional `.aseprite` palette replacement.
+- Quantize or reduce fixture images to source-derived N-color palettes and explicit palettes, including strict `#000000`/`#ffffff` 1-bit output, and verify both visible pixel colors and optional `.aseprite` palette replacement.
 
 ## PixelLab Service Stability
 
@@ -54,5 +54,7 @@ Palette quantization tests should cover both halves of the contract:
 - Palette replacement: output visible pixels use only the requested colors and the `.aseprite` palette entries match the requested list, allowing only an explicitly approved transparent entry when the source has transparency.
 
 For strict 1-bit tests, use fixtures with near-black, near-white, mid-gray, and colored pixels so the test catches accidental grayscale ramps or unverified palette entries. Default dithering should be disabled; add a separate fixture only when testing a requested dither mode.
+
+For transparent indexed tests, include black visible pixels and transparent pixels in the same fixture. Fail if `#000000` is assigned to the transparent index or exports as transparency. Palette-replacement tests should verify the requested visible colors plus only an explicitly approved transparent index.
 
 Do not publish local machine paths, account data, tokens, extension credentials, copied request payloads, or private extension internals in test output or public docs.
