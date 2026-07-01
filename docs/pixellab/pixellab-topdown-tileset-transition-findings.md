@@ -71,6 +71,30 @@ Observed conclusion: `text_guidance_scale` is a soft prompt-following control, n
 
 `color_image` is a REST-only palette reference image field for tileset generation. It should not be used when the experiment is specifically measuring text-only obedience, because it changes the test from prompt-following to palette anchoring.
 
+### Transition Reference Image Test
+
+A two-generation REST `POST /v2/tilesets` batch tested whether a small ordered-dither `transition_reference_image` could force wall-surface dithering. Both generations used the same concise prompts and settings:
+
+- `lower_description: 1-bit black floor`
+- `upper_description: 1-bit black wall`
+- `transition_description: dithered black and white wall`
+- `tile_size: 16x16`
+- `mode: standard`
+- `view: high top-down`
+- `transition_size: 0.5`
+- `outline: lineless`
+- `shading: flat shading`
+- `detail: low detail`
+- `transition_reference_image`: a 16x16 black-and-white ordered dither checker
+
+The first generation omitted `text_guidance_scale` and metadata confirmed the default value `8.0`. The second set `text_guidance_scale: 20.0`.
+
+Both REST tileset objects contained 16 tiles at `16x16`, and the assembled canonical atlases were `64x64`. The default-guidance result was visually stronger: it was closer to black and white and picked up horizontal wall-band structure from the reference. The max-guidance result preserved more block/grid structure but drifted purple and had more colors. Neither copied the ordered dither pattern into the transition surface.
+
+Observed conclusion: `transition_reference_image` can influence the transition style, but it is still a style/reference input, not an exact texture stamp or mask. Raising `text_guidance_scale` does not increase reference-image adherence; it can make text and model priors compete harder with the reference image. In this test, max text guidance worsened palette drift.
+
+The 16x16 dither reference was a reasonable first test because the tileset tile size was 16x16 and REST does not document a separate required size for transition references. However, `transition_size: 0.5` means the visible wall/transition surface is roughly half-tile scale in many tiles. For future tests, prefer a 16x16 reference that includes tile context and an 8-pixel-high transition/wall band, rather than a pure full-tile checker. A bare 8x8 reference might match the half-tile idea, but it loses context and may be resized or interpreted only as generic texture.
+
 ## Routing Guidance
 
 For a strict 4x4 graybox top-down tileset, start with:
@@ -88,6 +112,8 @@ Avoid Pro mode for this specific graybox blockout workflow unless testing Pro-on
 Use `transition_size: 1.0` only when the richer expanded transition set is acceptable. It may be visually preferable, but it should be treated as a different export layout rather than a compact 16-tile replacement.
 
 Do not spend large prompt-only batches trying to force exact 1-bit palettes or transition-surface dithering. First decide whether the goal is text-obedience research or production control. For production control, move to REST palette/reference inputs or approved Aseprite/indexed-color processing instead of escalating prompt wording alone.
+
+When testing `transition_reference_image`, keep `text_guidance_scale` at the default first. Increase it only when the text wording itself is more important than the reference style, because high text guidance does not mean high reference adherence.
 
 ## Verification
 

@@ -27,4 +27,6 @@ If the desired result depends on strict palette, dithering placement, or a speci
 
 Live Standard top-down tests showed that even `text_guidance_scale: 20` did not force strict 1-bit black-and-white output or readable wall-surface dithering from text alone. Treat `1-bit`, `dithered`, `stippled`, `checker`, `no gray`, and similar wording as soft hints unless a palette/reference control or approved post-processing route is also used.
 
+For REST top-down tileset reference-image tests, treat `transition_reference_image` as a style reference rather than an exact mask or stamp. If `tile_size` is 16 and `transition_size` is 0.5, a 16x16 reference remains valid, but a reference with an 8-pixel transition/wall band inside a 16x16 tile context may be a better next test than a bare 8x8 checker. Start with default `text_guidance_scale` when testing reference adherence; max text guidance can make text/model priors compete with the reference and may worsen palette drift.
+
 Do not equate website Create Tileset Pro with public `create-tiles-pro`. Treat older Gemini wording as stale/low-confidence unless current official website docs reintroduce it.

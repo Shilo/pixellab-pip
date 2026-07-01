@@ -6,6 +6,10 @@ Read this for live PixelLab calls that return a job, asset ID, managed MCP asset
 
 REST v2 async jobs use `GET /background-jobs/{job_id}` when the create response returns a background job ID. MCP managed assets use the matching `get_*` tool, not REST background-job polling.
 
+For REST `POST /v2/tilesets`, the create response can contain both `background_job_id` and `tileset_id` while the status is still `processing`. Poll `GET /background-jobs/{background_job_id}` first. `GET /tilesets/{tileset_id}` may return `404` until the background job has completed and the tileset object has been persisted; treat that as an early lifecycle lookup when the background job is still processing, not as a reason to resubmit the paid generation.
+
+For REST tilesets, prefer the completed `GET /tilesets/{tileset_id}` object as the canonical output. The background-job `last_response.image` can be a preview/result payload and may not have the same shape as the final tile array; in one live top-down test it decoded to a larger preview while the final tileset object contained the expected 16 individual `16x16` tiles. Verify `tileset.total_tiles`, `tileset.tile_size`, tile images, and metadata generation parameters from the tileset object.
+
 Poll gently. Start with a short delay, then back off instead of tight loops. Stop polling in the current turn when the job is still pending after a reasonable wait, report the job or asset ID, and tell the user which status route or getter can resume the check. Do not resubmit a paid job just because polling timed out.
 
 Handle statuses as:
