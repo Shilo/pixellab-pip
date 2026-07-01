@@ -4,6 +4,8 @@ Last reviewed: 2026-07-01.
 
 ![Minecraft-inspired 16x16 tile atlas](tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png)
 
+![Minecraft mod 32px tile sheet](tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.png)
+
 PixelLab Pip can showcase tile workflows from several surfaces: Create Image Pro texture sheets, `create_tiles_pro` tile variants, top-down Wang tilesets, sidescroller tilesets, and isometric tiles. The primary Create Image Pro example is a proper `256x256` atlas that mechanically slices into a `16x16` grid of `16x16` Minecraft-inspired tiles. It is useful as a first-pass atlas showcase, with one important caveat: strict uniqueness did not fully pass.
 
 ## Contents

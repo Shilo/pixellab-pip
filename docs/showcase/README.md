@@ -6,7 +6,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 
 ## Generated Assets
 
-### Skill Icons
+### [Skill Icons](skill-icons.md)
 
 [<img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet" width="256">](skill-icons.md)
 
@@ -14,7 +14,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 /pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
 ```
 
-### Inventory Item Icons
+### [Inventory Item Icons](item-icons.md)
 
 [<img src="item-icons/fantasy-rpg-inventory-bgremoved-8x8-32px.png" alt="Fantasy RPG inventory item icon sheet" width="256">](item-icons.md)
 
@@ -22,7 +22,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 /pixellab-pip create complete 32px inventory item set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.
 ```
 
-### Tiles
+### [Tiles](tiles.md)
 
 [<img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="256">](tiles.md)
 
@@ -30,7 +30,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 /pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.
 ```
 
-### Gameplay GUI
+### [Gameplay GUI](gameplay-gui.md)
 
 [<img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="688">](gameplay-gui.md)
 
@@ -38,7 +38,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 /pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.
 ```
 
-### Pip Mascot
+### [Pip Mascot](pip-mascot.md)
 
 [![Pip mascot idle animation](pip/pip.gif)](pip-mascot.md)
 
@@ -50,7 +50,8 @@ pip create a 64px character based on .pip-mascot.md
 
 Each showcase should include:
 
-- The generated result first, including the lead image and the request that produced it.
+- All showcased images first, immediately after the title and review date, before prose or contents.
+- The request that produced each result near its detailed section.
 - Source inputs or brief summaries.
 - Final prompts or natural-language parameters sent to PixelLab.
 - Route, PixelLab surface, tool, endpoint, and key controls.
