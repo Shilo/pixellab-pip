@@ -63,7 +63,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Isometric tile/block/floor | MCP `create_isometric_tile`. | `create-isometric-tile`. |
 | Tile variants / tiles pro | MCP `create_tiles_pro` for individual tile variants such as hex, octagon, square top-down, and isometric tiles. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
 | Skill icon, ability icon, spell icon, action-bar icon, hotbar icon, or icon set for a skill tree/ability tree | Read `references/skill-icons.md` before choosing an endpoint or generating. | Use the reference for REST v2 route choice, background handling, sheet sizing, prompt wording, anti-patterns, and verification. |
-| General image, sprite, icon-like standalone asset that is not a skill/ability/spell/action-bar/hotbar/inventory-item icon | REST v2. | `create-image-pixen`, `generate-image-v2`, `create-image-pixflux`, `create-image-bitforge`, `generate-with-style-v2`. |
+| General image, sprite, icon-like standalone asset that is not a skill/ability/spell/action-bar/hotbar/inventory-item icon | REST v2. For explicit Create Image Pro, `generate-image-v2`, exact grid/sheet, or below-32px cell requests, read `references/create-image-pro.md` before generating. | `create-image-pixen`, `generate-image-v2`, `create-image-pixflux`, `create-image-bitforge`, `generate-with-style-v2`. |
 | Background, scene, environment, backdrop | REST v2 image generation; no direct hosted MCP background tool was documented. | Use the documented `create-image-pixflux-background` endpoint for background-image generation when REST v2 is the selected surface; verify current size and field support from official docs before writing exact code. |
 | UI, HUD, button, panel, health bar, menu | Prefer REST v2 `/create-ui-asset` for structured/saved UI assets, panels, windows, HUD pieces, shape `pieces`, named `elements`, `style_image`, `project_id`, or exact schema control. Use MCP `create_ui_asset` when the user is in an MCP-first workflow and the visible tool has the needed fields. Use REST `/generate-ui-v2` for loose/raw UI images such as a standalone button, slot, bar, or dialogue-box image, especially when `concept_image` should guide the design. | `create-ui-asset` for structured UI assets; `generate-ui-v2` for loose UI images. Do not route shape-piece/layout requests to `generate-ui-v2`. Website UI libraries are human/editor surfaces unless public lifecycle endpoints exist. |
 | Image edit, inpaint, mask, convert, resize, remove background | REST v2. | `inpaint`, `inpaint-v3`, `edit-image`, `edit-images-v2`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, `remove-background`. |
@@ -88,6 +88,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 ## Clarify Only For Collisions
 
 - "Tiles": ask whether the user wants a terrain/autotile tileset, platformer/sidescroller tileset, or individual tile variants.
+- "Create Image Pro" with exact cells below `32px`: read `references/create-image-pro.md`.
 - "Map": ask whether they want a whole map, map object, map image, tileset, isometric tile, or tile variants.
 - "Object/character": infer character for people, NPCs, creatures, body templates, or identity/state animation; infer object for standalone props, pickups, furniture, or weapons. Ask only if unclear.
 - "Character animation direction": if the user asks to add an animation to an existing multi-direction character and does not name a direction, default to `south` (down-facing) for one preview candidate. Do not animate north-west, diagonal, or all directions by default. Ask which direction only when `south` is unavailable, the asset's directions are unknown, or the user needs a different gameplay-facing direction. Animate all directions only when the user explicitly asks for all/8 directions, a complete direction set, or approves the larger batch.
@@ -107,6 +108,7 @@ Read only the relevant reference:
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
 - Skill/ability/spell/action-bar/hotbar icon sheet prompt, sizing, and verification details: `references/skill-icons.md`.
 - Inventory item/equipment/loot icon sheet prompt, transparent-background routing, and verification details: `references/item-icons.md`.
+- Create Image Pro / `generate-image-v2`, exact grid or sheet requests, and below-32px cell-size caveats: `references/create-image-pro.md`.
 - Cheap, affordable, low-cost, budget, credit-minimizing, and cost-driven Pro-vs-v3/new route selection: `references/cost-routing.md`.
 - Paperdolling and layered character workflows: `references/paperdolling.md`.
 - Tileset and tile-variant details: `references/tilesets.md`.
