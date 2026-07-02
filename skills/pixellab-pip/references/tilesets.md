@@ -11,7 +11,51 @@ Read this for terrain tilesets, platformer tilesets, isometric tiles, tile varia
 - Packed texture sheet/image grid via Create Image Pro.
 - Manual website Create Tileset Pro.
 
-Capture tile size, view, terrain pair or tile list, transition description, base tile IDs, style/reference/palette images, seed, and target engine/export convention when relevant.
+Capture tile size, route/view, terrain pair or platform body/surface descriptions, transition description/size, base tile IDs, style/reference/palette images, seed, and target engine/export convention when relevant.
+
+## MCP Route Inputs
+
+MCP `create_topdown_tileset` and `create_sidescroller_tileset` are sibling routes. Keep shared guidance shared, and separate route-specific instructions when a field means something different or only exists on one route.
+
+Shared MCP controls currently visible on both routes:
+
+- `tile_size`: tile dimensions; sidescroller supports 16 or 32, top-down supports 16 or 32 in `standard` mode and 64 in `pro` mode.
+- `transition_size`: amount of transition/top layer; use route-specific meaning below.
+- `detail`: `low detail`, `medium detail`, `highly detailed`.
+- `shading`: `flat shading`, `basic shading`, `medium shading`, `detailed shading`, `highly detailed shading`.
+- `outline`: `single color outline`, `selective outline`, `lineless`.
+- `text_guidance_scale`, `tile_strength`, `tileset_adherence`, `tileset_adherence_freedom`, `seed`: generation controls.
+
+Top-down MCP `create_topdown_tileset` route:
+
+- Required terrain fields: `lower_description`, `upper_description`.
+- Optional transition field: `transition_description`.
+- Base tile fields for chaining: `lower_base_tile_id`, `upper_base_tile_id`.
+- Route-only fields: `mode` (`standard` or `pro`) and `view` (`low top-down` or `high top-down`).
+- Pro-only shape fields: `spread_x`, `slope_size`, `raggedness`.
+- `transition_size` controls terrain blending/height behavior for top-down tiles; documented examples include 0.0, 0.25, 0.5, and 1.0.
+
+Sidescroller MCP `create_sidescroller_tileset` route:
+
+- Required platform body field: `lower_description`.
+- Required platform surface/top field: `transition_description`.
+- Base tile field for chaining: `base_tile_id`.
+- No `upper_description`, `view`, `mode`, or Pro-only shape fields are exposed by the current MCP sidescroller tool.
+- `transition_size` controls how much of the surface/top layer appears on the platform tile; documented examples include 0.0, 0.25, and 0.5.
+
+## Human Label To API Mapping
+
+Website, Aseprite extension, and MCP/REST labels sometimes differ. Map only non-obvious human-facing wording to the route's actual structured parameters before generating; do not duplicate schema fields whose names are already symmetric or directly inferable.
+
+These labels are not symmetric with the MCP parameter names:
+
+| Human UI wording | Applies to | MCP parameter | Notes |
+|---|---|---|---|
+| `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. It is not the same as `transition_size`. |
+| `Center tile description`, `Center Tile`, `platform center` | `create_sidescroller_tileset` | `lower_description` | Sidescroller MCP calls this the platform material/body. |
+| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed by the chosen route, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
+
+No extra top-down human-label mapping is currently needed for schema-like labels such as lower, upper, or transition. Route top-down terrain wording to `create_topdown_tileset`; do not reuse sidescroller top/center label mapping unless the user explicitly asks for side-view/platformer tiles.
 
 For an explicit Create Image Pro packed texture sheet or exact small-cell image grid, route to `create-image-pro.md`; do not reinterpret it as a Wang/autotile tileset just because the user says tiles.
 
@@ -34,7 +78,7 @@ When the user asks for maximum, 100%, or forced text guidance, map that request 
 
 For any MCP or REST tileset route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar prompt wording.
 
-The Standard top-down generator does not reliably enforce strict 1-bit black-and-white output from text alone, even with high `text_guidance_scale`. Treat `1-bit`, `no gray`, and similar wording as soft hints unless a palette control or approved post-processing route is also used.
+Tileset generators do not reliably enforce strict 1-bit black-and-white output from text alone, even with high `text_guidance_scale`. Treat `1-bit`, `black-and-white only`, `no gray`, and named exact palettes as palette requirements unless the user explicitly accepts approximation. If the chosen route exposes a palette/control image parameter, use or ask for that route-specific control. If the chosen route does not expose palette control, state that limitation before generation, or deliver an honestly labeled palette-clamped derivative after saving the untouched PixelLab original.
 
 When the user requests a 1-bit tileset and the chosen tileset route exposes style controls, default any unspecified style controls to `detail: low detail`, `shading: flat shading`, and `outline: lineless`. Preserve explicit user-supplied values for those controls.
 
