@@ -1,6 +1,6 @@
 # Usage Reporting
 
-Read this before the first credit-spending live PixelLab call when cost may require a before/after balance check, and after live PixelLab calls when preparing the final report. For polling, MCP review state, rate limits, and expiring download URLs, read `job-lifecycle.md`.
+Read this after live PixelLab calls when preparing generation output details, the final user report, or a PixelLab generation manifest. For polling, MCP review state, rate limits, and expiring download URLs, read `job-lifecycle.md`.
 
 After final success verification for a live PixelLab generation, edit, transform, conversion, background-removal, or animation job, apply the bark completion-sound contract in `bark.md`, then give the user a concise Markdown report. Bark must run only for successful live PixelLab generation-style work, not for setup, auth checks, balance/status checks, docs, failures, pending jobs, downloads alone, or local post-processing alone.
 
@@ -53,9 +53,7 @@ For every PixelLab call or managed asset in a manifest, include the fields that 
 - `job_id` or `background_job_id`: the async PixelLab job ID returned by REST or MCP, when present.
 - `asset_id`: the persistent PixelLab/MCP asset ID, such as character, object, tileset, tile, UI asset, font, animation, or map-object ID, when present.
 - `result_id` or route-specific child IDs: IDs for selected candidates, child tiles, animation groups, frames, or other follow-up handles when the route exposes them.
-- `seed`: the exact integer sent to PixelLab when the route accepts a seed.
-- `seed`: the exact resolved integer returned by PixelLab when the request used random/default seed and the final response exposes a resolved seed.
-- `seed`: `null` only when the selected tool or endpoint has no seed input and no returned seed.
+- `seed`: the exact integer sent to PixelLab, the resolved integer returned by PixelLab when random/default seed was used and exposed, or `null` only when the selected route has no seed input and no returned seed.
 - `seed_provenance`: `user_provided`, `agent_generated`, `pixellab_returned`, `not_supported`, or `not_exposed`.
 
 When the selected MCP tool or REST endpoint exposes a `seed` input and the user did not provide one, choose a non-zero integer seed before the first paid call, send it in the request, and record `seed_provenance: agent_generated`. Do not pass `0`, `null`, or omit `seed` merely to ask PixelLab for a random seed unless the user specifically wants PixelLab-random output or the endpoint only documents that behavior. If a legacy/random run already used `0`, `null`, or an omitted seed and the final job/status response exposes a resolved seed, update the final manifest to the resolved value with `seed_provenance: pixellab_returned`; otherwise record the original request value and `seed_provenance: not_exposed`.
