@@ -66,3 +66,7 @@ Prefer direct prose that names the subject of each paragraph. Avoid starting exp
 For showcase pages with multiple related outputs, put the primary result first and make the `## Request` prompt subheaders match the order of the showcased images. Use descriptive headers such as `### Short MMO Prompt`, `### Mood-Only Prompt`, or `### Component-Specific Prompt (Follow-up)` instead of vague labels when prompts came from separate sessions or follow-ups.
 
 Do not store PixelLab tokens, cookies, private account data, background job IDs, UI asset IDs, managed asset IDs, result IDs, or unpublished third-party assets here.
+
+## License
+
+All showcase assets are free to use without restriction under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/). See [LICENSE.md](LICENSE.md) for the showcase asset license scope and legal text link.

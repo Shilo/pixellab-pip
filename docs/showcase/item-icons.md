@@ -18,6 +18,9 @@ Last reviewed: 2026-06-29.
   <tr>
     <td colspan="2" align="center"><img src="item-icons/candy-sweets-treats-glossy-8x8-32px.png" alt="Glossy candy sweets and treats item icons"></td>
   </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-inventory-64px-4x4.png" alt="Fantasy RPG 64px individual inventory items"></td>
+  </tr>
 </table>
 
 PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complete 8 by 8 sheets. The showcased winner is the general inventory sheet after PixelLab background removal because it covers the broadest RPG inventory surface while keeping readable 32px items, transparent background, and no slot/frame treatment. The weapon, armor, consumable, and material sheets show the same route holding a consistent style across more specialized inventory categories.
@@ -31,6 +34,7 @@ PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complet
 - [Material Sheet](#material-sheet)
 - [Candy Sweets and Treats Sheet](#candy-sweets-and-treats-sheet)
 - [Glossy Candy Sweets and Treats Sheet](#glossy-candy-sweets-and-treats-sheet)
+- [Individual 64px Fantasy Inventory Items](#individual-64px-fantasy-inventory-items)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -352,6 +356,66 @@ Findings:
 - All 64 cropped cells had unique RGBA hashes, and visual review confirmed broad candy and dessert variety.
 - No local repainting, quantization, cleanup, or procedural visual fixes were applied to the showcase copy.
 
+## Individual 64px Fantasy Inventory Items
+
+![Fantasy RPG 64px individual inventory items](item-icons/fantasy-rpg-inventory-64px-4x4.png)
+
+Original prompt:
+
+```text
+/pixellab-pip do the following simultaneously:
+1. create a set of 64x64 inventory items.
+...
+each task must consist of named unique variations, no duplicates.
+```
+
+The 64px fantasy inventory item batch demonstrates the native small-image behavior of REST `generate-image-v2`: one `64x64` request returns a set of separate generated PNGs instead of one packed sheet. The showcase grid above was locally arranged from the 16 original PixelLab PNGs with no margins, resizing, repainting, quantization, or procedural visual fixes.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2`.
+
+Prompt preparation: agent-optimized from the user's simultaneous batch request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `64x64` per generated item |
+| Returned image count | `16` separate PNGs |
+| Showcase grid | `4x4`, `256x256`, assembled from original `64x64` PNGs |
+| Background | `no_background: true` |
+| Usage reported | `20` generations |
+| Reported cost | `$0.095` |
+
+Request body:
+
+```json
+{
+  "description": "Sixteen unique fantasy RPG inventory item icons as separate 64x64 generated images: emberglass potion, moonsteel dagger, thornhide boots, sunmarked shield, frostberry ration, stormglass lantern, gravegold ring, wolfsalt charm, ironroot hatchet, starfall scroll, copperwing key, deepmoss herb bundle, bloodruby ore, seasilk cloak, ashbone horn, and clockwork bomb. Each image contains exactly one centered readable item silhouette with crisp hard pixel edges, limited palette, consistent high-fantasy inventory style, strong shape language, and no duplicate item concepts. No text, letters, numbers, labels, captions, fake writing, UI slots, borders, frames, terrain tiles, skill effects, watermark, or decorative grid.",
+  "image_size": {
+    "width": 64,
+    "height": 64
+  },
+  "no_background": true
+}
+```
+
+Generated item names:
+
+```text
+emberglass_potion, moonsteel_dagger, thornhide_boots, sunmarked_shield,
+frostberry_ration, stormglass_lantern, gravegold_ring, wolfsalt_charm,
+ironroot_hatchet, starfall_scroll, copperwing_key, deepmoss_herb,
+bloodruby_ore, seasilk_cloak, ashbone_horn, clockwork_bomb
+```
+
+Findings:
+
+- Native `64x64` generation is a good route for named item variations when separate files are preferred over a packed sheet.
+- The returned item PNGs have transparent backgrounds and unique pixel hashes.
+- The no-margin showcase grid is only an arrangement of the original PixelLab outputs for documentation.
+
 ## Findings
 
 REST `generate-image-v2` is the best route currently showcased for complete fantasy RPG item-icon sheets. It handled broad and narrow item categories, transparent backgrounds, 8 by 8 composition, and readable 32px silhouettes better than object-style generation would for this use case.
@@ -378,14 +442,19 @@ The general inventory sheet is the best hero image because it demonstrates the b
 | Material inventory sheet | `docs/showcase/item-icons/fantasy-rpg-materials-8x8-32px.png` |
 | Candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-8x8-32px.png` |
 | Glossy candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-glossy-8x8-32px.png` |
+| 64px fantasy inventory item grid | `docs/showcase/item-icons/fantasy-rpg-inventory-64px-4x4.png` |
 
 ## Validation Notes
 
-- All seven showcased images are `256x256`.
+- The seven 32px sheet examples are `256x256`.
 - All seven divide exactly into `8x8` grids of `32x32` cells.
 - All seven have alpha transparency with `alpha_min=0` and `alpha_max=255`.
 - All seven produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
+- The 64px fantasy inventory batch was generated as `16` original `64x64` PNGs before showcase assembly.
+- The 64px fantasy inventory grid is exactly `256x256` and divides exactly into a `4x4` grid of `64x64` cells.
+- All 16 64px fantasy inventory originals have unique pixel hashes and alpha transparency.
 - The selected general inventory sheet is a PixelLab background-removed derivative of the original PixelLab sheet.
 - The retained generation responses reported seeds for these runs, but the retained request bodies do not show seed values being intentionally sent.
 - The weapon, armor, consumable, material, candy, and glossy candy showcase files were copied from saved PixelLab sheet outputs into stable showcase locations.
+- The 64px fantasy inventory grid was copied into a stable showcase location as the showcased asset.
 - No local repainting, quantization, cleanup, or procedural visual fixes were applied to the showcase copies.

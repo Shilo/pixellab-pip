@@ -7,6 +7,9 @@ Last reviewed: 2026-07-01.
     <td><img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas"></td>
     <td><img src="tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.png" alt="Minecraft mod 32px tile sheet"></td>
   </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="tiles/minecraft-block-face-64px-4x4.png" alt="Minecraft-inspired 64px individual block face textures"></td>
+  </tr>
 </table>
 
 PixelLab Pip can showcase tile workflows from several surfaces: Create Image Pro texture sheets, `create_tiles_pro` tile variants, top-down Wang tilesets, sidescroller tilesets, and isometric tiles. The primary Create Image Pro example is a proper `256x256` atlas that mechanically slices into a `16x16` grid of `16x16` Minecraft-inspired tiles. It is useful as a first-pass atlas showcase, with one important caveat: strict uniqueness did not fully pass.
@@ -15,6 +18,7 @@ PixelLab Pip can showcase tile workflows from several surfaces: Create Image Pro
 
 - [Primary Example: Minecraft-Inspired 16x16 Atlas](#primary-example-minecraft-inspired-16x16-atlas)
 - [Follow-Up Example: Minecraft Mod 32px Terrain Pack](#follow-up-example-minecraft-mod-32px-terrain-pack)
+- [Individual 64px Minecraft-Inspired Block Face Textures](#individual-64px-minecraft-inspired-block-face-textures)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -125,6 +129,67 @@ Findings:
 - The generated set is well suited to a Minecraft-inspired terrain pack because each source tile has the intended native size.
 - This is still a texture-pack workflow, not a Wang/autotile terrain-transition workflow.
 
+## Individual 64px Minecraft-Inspired Block Face Textures
+
+![Minecraft-inspired 64px individual block face textures](tiles/minecraft-block-face-64px-4x4.png)
+
+Original prompt:
+
+```text
+/pixellab-pip do the following simultaneously:
+...
+3. use create image pro to create 64x64 minecraft tile textures.
+each task must consist of named unique variations, no duplicates.
+```
+
+The 64px block-face batch demonstrates Create Image Pro producing separate terrain texture files at native `64x64` size. This route is appropriate when the target is a set of independent block-face textures rather than a Wang/autotile terrain-transition sheet. The no-margin showcase grid above was locally assembled from the original PixelLab PNGs for browsing.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2`, surfaced in product language as Create Image Pro.
+
+Prompt preparation: agent-optimized from the user's simultaneous batch request. A first longer texture prompt timed out, so the showcased request is the shorter successful retry.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `64x64` per generated block face |
+| Returned image count | `16` separate PNGs |
+| Showcase grid | `4x4`, `256x256`, assembled from original `64x64` PNGs |
+| Background | `no_background: false` |
+| Usage reported | `20` generations |
+| Reported cost | `$0.095` |
+
+Request body:
+
+```json
+{
+  "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
+  "image_size": {
+    "width": 64,
+    "height": 64
+  },
+  "no_background": false
+}
+```
+
+Generated texture names:
+
+```text
+sunlit_grass_block, granite_ore_fleck, mossy_cobblestone, birch_plank_face,
+deep_slate_crack, red_sandstone_cut, snowy_dirt_cap, glowstone_cluster,
+obsidian_sheen, clay_brick_square, jungle_leaf_block, copper_oxidized,
+amethyst_cluster_stone, muddy_root_block, nether_ember_rock, prismarine_wave
+```
+
+Findings:
+
+- Native `64x64` generation is useful for independent block-face texture variations and direct per-texture files.
+- The returned block-face PNGs are fully opaque and have unique pixel hashes.
+- The no-margin showcase grid is only an arrangement of the original PixelLab outputs for documentation.
+- This is a texture-pack workflow, not an autotile or transition-aware tileset workflow.
+
 ## Findings
 
 Create Image Pro / REST `generate-image-v2` can produce mechanically valid atlas images when the whole atlas is generated at once, as shown by the `16x16` Minecraft-inspired atlas. Exact semantic uniqueness is still a separate verification step; a correct grid can contain repeated or visually similar cells.
@@ -151,6 +216,7 @@ Prompt language that helped:
 |---|---|
 | Minecraft-inspired 16x16 atlas | `docs/showcase/tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png` |
 | Minecraft mod 32px terrain spritesheet | `docs/showcase/tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.png` |
+| 64px Minecraft-inspired block-face grid | `docs/showcase/tiles/minecraft-block-face-64px-4x4.png` |
 
 ## Validation Notes
 
@@ -163,4 +229,7 @@ Prompt language that helped:
 - Each generated 32px tile is exactly `32x32`.
 - The assembled 32px sheet is exactly `256x256` and divides exactly into an `8x8` grid.
 - All `64` 32px tiles have unique PNG hashes and full-square opaque coverage.
+- The 64px block-face batch was generated as `16` original `64x64` PNGs before showcase assembly.
+- The 64px block-face grid is exactly `256x256` and divides exactly into a `4x4` grid of `64x64` cells.
+- All 16 64px block-face originals have unique pixel hashes and are fully opaque.
 - No local repainting, resizing, quantization, cleanup, or procedural visual fixes were applied to the showcased tile pixels.

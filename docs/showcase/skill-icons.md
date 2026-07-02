@@ -11,6 +11,9 @@ Last reviewed: 2026-06-29.
     <td><img src="skill-icons/create-image-pro-original-strict-grid-8x8-32px.png" alt="Create Image Pro original strict-grid skill icons"></td>
     <td><img src="skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png" alt="Create Image Pro borderless mosaic skill icons"></td>
   </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
+  </tr>
 </table>
 
 PixelLab Pip's strongest skill-icon route is REST `generate-image-v2`, surfaced in the product as Create Image Pro / Create S-XL Image Pro. The best showcased output is the rich-background prompt because it better follows the requested no-border/no-frame constraints while keeping strong readable symbols and colorful illustrated backgrounds. The original strict-grid output is very close and may be prettier for some game UI use cases, but it bakes in a faint card/slot edge.
@@ -22,6 +25,7 @@ PixelLab Pip's strongest skill-icon route is REST `generate-image-v2`, surfaced 
 - [Themed Follow-up: Fire Magic Complete Sheet](#themed-follow-up-fire-magic-complete-sheet)
 - [Close Co-Best: Original Strict-Grid Create Image Pro Sheet](#close-co-best-original-strict-grid-create-image-pro-sheet)
 - [Learning Example: Borderless Mosaic Create Image Pro Sheet](#learning-example-borderless-mosaic-create-image-pro-sheet)
+- [Individual 64px Fantasy Skill Icons](#individual-64px-fantasy-skill-icons)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -202,6 +206,67 @@ Findings:
 - Backgrounds looked flatter and less premium than the original and rich-background prompts.
 - Not the recommended final prompt, but useful as evidence for the border/art-quality tradeoff.
 
+## Individual 64px Fantasy Skill Icons
+
+![Fantasy RPG 64px individual skill icons](skill-icons/fantasy-rpg-skill-64px-4x4.png)
+
+Original prompt:
+
+```text
+/pixellab-pip do the following simultaneously:
+...
+2. create 64x64 skill icons.
+...
+each task must consist of named unique variations, no duplicates.
+```
+
+The 64px fantasy skill icon batch shows Create Image Pro's native small-image batch behavior for ability icons. The request asked for named unique variations, so the route produced separate `64x64` PNGs rather than one packed sheet. The no-margin showcase grid above was locally assembled from the original PixelLab PNGs for browsing.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2`.
+
+Prompt preparation: agent-optimized from the user's simultaneous batch request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `64x64` per generated skill icon |
+| Returned image count | `16` separate PNGs |
+| Showcase grid | `4x4`, `256x256`, assembled from original `64x64` PNGs |
+| Background | `no_background: false` |
+| Usage reported | `20` generations |
+| Reported cost | `$0.095` |
+
+Request body:
+
+```json
+{
+  "description": "Sixteen unique fantasy RPG skill icons as separate 64x64 generated images: Ember Lance, Glacier Guard, Storm Step, Vine Snare, Solar Mend, Void Mark, Iron Barrage, Mist Veil, Phoenix Rise, Serpent Venom, Arcane Lockpick, Gravity Well, Spirit Howl, Crystal Barrier, Blood Pact, and Time Shear. Each icon has a distinct centered pictorial symbol with a rich full-bleed miniature painted background, luminous effects, crisp pixel texture, readable game UI composition, and no duplicate ability concepts. No text, letters, words, numbers, labels, captions, fake writing, runes, glyphs, UI button frames, rounded corners, borders, separating lines, inventory items, terrain tiles, watermark, or black square-edge outlines.",
+  "image_size": {
+    "width": 64,
+    "height": 64
+  },
+  "no_background": false
+}
+```
+
+Generated skill names:
+
+```text
+ember_lance, glacier_guard, storm_step, vine_snare,
+solar_mend, void_mark, iron_barrage, mist_veil,
+phoenix_rise, serpent_venom, arcane_lockpick, gravity_well,
+spirit_howl, crystal_barrier, blood_pact, time_shear
+```
+
+Findings:
+
+- Native `64x64` generation is useful for named ability variations and direct per-icon files.
+- The returned skill PNGs are fully opaque and have unique pixel hashes.
+- The no-margin showcase grid is only an arrangement of the original PixelLab outputs for documentation.
+
 ## Findings
 
 Create Image Pro / REST `generate-image-v2` is the best approach discovered in this spike for fantasy skill icons. It is the only route tested that consistently combined a full `8x8` output, opaque backgrounds, readable symbols, cohesive style, and strong visual quality.
@@ -227,10 +292,14 @@ Routes that did not win:
 | Fire magic themed follow-up | `docs/showcase/skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png` |
 | Original strict-grid co-best | `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png` |
 | Borderless mosaic learning example | `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png` |
+| 64px fantasy skill icon grid | `docs/showcase/skill-icons/fantasy-rpg-skill-64px-4x4.png` |
 
 ## Validation Notes
 
-- All four showcased images are `256x256`.
+- The four 32px sheet examples are `256x256`.
 - All four are fully opaque with 8-bit `alpha_min=255`, `alpha_max=255`, and `transparent_pixels=0`.
 - All four produced `64/64` pixel-hash-unique cropped `32x32` cells. Pixel-hash uniqueness does not prove semantic uniqueness; visual review is still required.
+- The 64px fantasy skill batch was generated as `16` original `64x64` PNGs before showcase assembly.
+- The 64px fantasy skill grid is exactly `256x256` and divides exactly into a `4x4` grid of `64x64` cells.
+- All 16 64px fantasy skill originals have unique pixel hashes and are fully opaque.
 - No local repainting or procedural visual fixes were applied. Showcase copies are direct copies of PixelLab-generated outputs.
