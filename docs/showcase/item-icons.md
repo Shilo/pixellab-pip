@@ -1,6 +1,6 @@
 # Item Icons
 
-Last reviewed: 2026-06-29.
+Last reviewed: 2026-07-02.
 
 <table>
   <tr>
@@ -21,6 +21,9 @@ Last reviewed: 2026-06-29.
   <tr>
     <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-inventory-64px-4x4.png" alt="Fantasy RPG 64px individual inventory items"></td>
   </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-inventory-64px-8x8.png" alt="Fantasy RPG 64px inventory item atlas"></td>
+  </tr>
 </table>
 
 PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complete 8 by 8 sheets. The showcased winner is the general inventory sheet after PixelLab background removal because it covers the broadest RPG inventory surface while keeping readable 32px items, transparent background, and no slot/frame treatment. The weapon, armor, consumable, and material sheets show the same route holding a consistent style across more specialized inventory categories.
@@ -35,6 +38,7 @@ PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complet
 - [Candy Sweets and Treats Sheet](#candy-sweets-and-treats-sheet)
 - [Glossy Candy Sweets and Treats Sheet](#glossy-candy-sweets-and-treats-sheet)
 - [Individual 64px Fantasy Inventory Items](#individual-64px-fantasy-inventory-items)
+- [Complete 64px Fantasy Inventory Atlas](#complete-64px-fantasy-inventory-atlas)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -424,6 +428,58 @@ Findings:
 - The returned item PNGs have transparent backgrounds and unique pixel hashes.
 - The no-margin showcase grid is only an arrangement of the original PixelLab outputs for documentation.
 
+## Complete 64px Fantasy Inventory Atlas
+
+![Fantasy RPG 64px inventory item atlas](item-icons/fantasy-rpg-inventory-64px-8x8.png)
+
+Original prompt:
+
+```text
+/pixellab-pip do the following simultaneously:
+1. create a grid of 64x64 inventory items.
+...
+each task must consist of unique variations, no duplicates.
+```
+
+The 64px inventory atlas shows Create Image Pro producing one complete `512x512` sheet with an `8x8` grid of readable `64x64` item icons. The generated sheet passed the first final review and did not need the retry workflow used by the skill and tile examples from the same session.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2`, surfaced in product language as Create Image Pro.
+
+Prompt preparation: agent-optimized from the user's simultaneous grid request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `512x512` |
+| Output structure | `Atlas image` |
+| Icon grid | `8x8`, intended `64x64` icons |
+| Background | `no_background: true` |
+| Returned seed | `999920438` |
+| Usage reported | `40` generations |
+| Reported generation cost | `$0.185` |
+
+Request body:
+
+```json
+{
+  "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns and 8 rows, each cell a readable 64x64 item, perfectly aligned edge-to-edge with zero spacing, no overlap, no cropped items, no dividers, no drawn grid. Pixel art with clear centered object silhouettes, crisp hard edges, limited palette, consistent high-fantasy inventory style. Include varied categories: swords, axes, daggers, bows, arrows, shields, helmets, armor, boots, gloves, rings, amulets, potions, scrolls, spell books, maps, food, coins, gems, ores, ingots, wood, herbs, mushrooms, monster parts, bottles, lanterns, torches, lockpicks, tools, keys, chests, bags, bedrolls, bombs, elemental crystals, holy relics, cursed charms, crafting materials, fishing gear, traps, rope, compass, horn, and rare artifacts. No text, letters, words, numbers, labels, captions, handwriting, fake writing, runes, glyphs, UI slots, buttons, borders, frames, rounded corners, watermark, terrain tiles, map tiles, skill icons, or decorative grid lines.",
+  "image_size": {
+    "width": 512,
+    "height": 512
+  },
+  "no_background": true
+}
+```
+
+Findings:
+
+- Best 64px inventory atlas from the simultaneous request.
+- The sheet is a direct PixelLab atlas output, not a locally assembled sheet.
+- All cropped `64x64` cells had unique pixel hashes, and visual review found no obvious duplicate item concepts.
+
 ## Findings
 
 REST `generate-image-v2` is the best route currently showcased for complete fantasy RPG item-icon sheets. It handled broad and narrow item categories, transparent backgrounds, 8 by 8 composition, and readable 32px silhouettes better than object-style generation would for this use case.
@@ -451,6 +507,7 @@ The general inventory sheet is the best hero image because it demonstrates the b
 | Candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-8x8-32px.png` |
 | Glossy candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-glossy-8x8-32px.png` |
 | 64px fantasy inventory item grid | `docs/showcase/item-icons/fantasy-rpg-inventory-64px-4x4.png` |
+| 64px fantasy inventory atlas | `docs/showcase/item-icons/fantasy-rpg-inventory-64px-8x8.png` |
 
 ## Validation Notes
 
@@ -461,6 +518,8 @@ The general inventory sheet is the best hero image because it demonstrates the b
 - The 64px fantasy inventory batch was generated as `16` original `64x64` PNGs before showcase assembly.
 - The 64px fantasy inventory grid is exactly `256x256` and divides exactly into a `4x4` grid of `64x64` cells.
 - All 16 64px fantasy inventory originals have unique pixel hashes and alpha transparency.
+- The 64px fantasy inventory atlas is exactly `512x512` and divides exactly into an `8x8` grid of `64x64` cells.
+- The 64px fantasy inventory atlas has `64/64` pixel-hash-unique cropped cells and alpha transparency.
 - The selected general inventory sheet is a PixelLab background-removed derivative of the original PixelLab sheet.
 - The retained generation responses reported seeds for these runs, but the retained request bodies do not show seed values being intentionally sent.
 - The weapon, armor, consumable, material, candy, and glossy candy showcase files were copied from saved PixelLab sheet outputs into stable showcase locations.
