@@ -18,8 +18,10 @@ Done - [one plain sentence saying what was produced and whether it passed verifi
 - [Package](path-or-url)
 
 **Route**
-- Surface/tool: `MCP create_1_direction_object` or `REST POST /generate-image-v2`
-- Output structure: `Atlas image`, `Separate images`, `Single image`, `Animation frames`, `Managed asset`, or another concise label when those do not apply.
+- Surface/tool: `MCP create_1_direction_object` or `REST POST /v2/generate-image-v2`
+- Output structure: `Atlas image`, `Separate images`, `Single image`, `Animation frames`, `Drafts`, or another concise pixel/file-shape label when those do not apply
+- Asset lifecycle: `Managed asset` when the result is backed by a PixelLab/MCP asset ID, plus the retrieved output shape when useful
+- Delivered package: ZIP, archive, or packaged folder when one was delivered
 - Prompt prep: user wording preserved, agent-enhanced, PixelLab inline `enhance_prompt`, or PixelLab enhance endpoint
 
 **Inputs Used**
@@ -43,7 +45,11 @@ Put route and inputs in bullets instead of burying them in prose. Do not lead wi
 
 For REST routes, report the exact public v2 HTTP path that was actually used, such as `REST POST /v2/create-tileset` for top-down tileset creation, `REST POST /v2/create-tileset-sidescroller` for sidescroller creation, or `GET /v2/tilesets/{tileset_id}` for top-down retrieval. Do not omit the `/v2` prefix or collapse create and retrieval routes into one shorthand.
 
-When the output is a grid, sheet, atlas, spritesheet, or packaged set, state how PixelLab produced the underlying images. Use `Atlas image` for a single PixelLab output image that already contains the full grid/sheet/atlas. Use `Separate images` for multiple separate PixelLab output images that were locally arranged or packaged after generation. Use `Single image` for one non-atlas still image, `Animation frames` for frame sequences, and `Managed asset` for MCP/REST assets represented by an asset ID plus retrieved files. If local assembly was used, report it as local processing and make clear the assembly preserved original PixelLab pixels.
+Output structure describes the pixel/file shape, not the lifecycle. Use `Atlas image` for a single PixelLab output image that already contains the full grid/sheet/atlas. Use `Separate images` for multiple separate PixelLab output images that were locally arranged or packaged after generation. Use `Single image` for one non-atlas still image. Use `Animation frames` for frame sequences. Use `Drafts` for generated options that still need selection; after selection, report the selected output structure and note the selection step.
+
+Report managed assets and packages separately from output structure. If an MCP/REST asset ID is involved, add `Asset lifecycle: Managed asset` and explain the retrieved shape, such as `Managed asset; retrieved as separate directional PNGs`, `Managed tileset; retrieved tile PNGs assembled locally into a 4x4 sheet`, or `Managed character; retrieved animation frames`. If a ZIP, archive, or packaged folder is delivered, add `Delivered package` and describe whether it contains original PixelLab outputs, locally assembled sheets, frames, or metadata.
+
+When the output is a grid, sheet, atlas, spritesheet, or package assembled locally, state how PixelLab produced the underlying images. If local assembly was used, report it as local processing and make clear the assembly preserved original PixelLab pixels.
 
 Always include every final user-facing natural-language value that was sent to PixelLab or otherwise affected generation, especially `description`, `action`, `edit_description`, `animation_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, and `color_palette`. This is mandatory for both successful reports and completed-but-failed-verification reports. If a `description` field was used, the report must display `description` under `Inputs Used`; do not omit it because the output failed, because the report is short, or because the field seems obvious from the request. If prompt enhancement or agent enhancement changed the user's wording, show the final value used. Show the exact value for `description` unless it is too large for the chat response; when truncation is unavoidable, label it as truncated and include the saved local request/manifest file that contains the full exact value.
 
