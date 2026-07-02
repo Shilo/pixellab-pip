@@ -1,6 +1,6 @@
 # Showcase
 
-Last reviewed: 2026-06-29.
+Last reviewed: 2026-07-02.
 
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
@@ -51,6 +51,14 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <p><code>pip create a 64px character based on .pip-mascot.md</code></p>
 </details>
 <a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
+</td>
+<td width="50%" valign="top">
+<h3><a href="tilesets.md">Tilesets</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.</code></p>
+</details>
+<img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example" width="320">
 </td>
 </tr>
 </table>
