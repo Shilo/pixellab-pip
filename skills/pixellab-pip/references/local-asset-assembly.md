@@ -8,7 +8,7 @@ Local assembly is not art generation or editing. Use it only to assemble, previe
 
 Preserve animation frame order by default. Do not create ping-pong, reversed, duplicated, trimmed, interpolated, or otherwise reordered playback variants unless the user explicitly asks for that style. If the direct sequence does not loop cleanly, report that verification result instead of silently packaging a repaired-looking derivative as the final animation.
 
-Write local previews, spritesheets, manifests, ZIPs, and verification scratch files under the same project/workspace `pixellab-pip-generations/` output tree as the source PixelLab generation unless the user explicitly states or approves another directory. Do not scatter derived files into the repository root, generic `outputs/`, or temp folders except for short-lived tool scratch that is not reported as a final output.
+Write local previews, spritesheets, manifests, ZIPs, and verification scratch files under the same project/workspace `pixellab-pip-generations/` output tree as the source PixelLab generation unless the user explicitly states or approves another directory. For PixelLab generation manifests, follow `usage-reporting.md` and store the route's job IDs, asset IDs, child/result IDs, seeds, and seed provenance when those fields exist. Do not scatter derived files into the repository root, generic `outputs/`, or temp folders except for short-lived tool scratch that is not reported as a final output.
 
 ## Transparent GIF Previews
 
