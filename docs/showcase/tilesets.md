@@ -5,6 +5,7 @@ Last reviewed: 2026-07-02.
 <table>
   <tr>
     <td><img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example"></td>
+    <td><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
   </tr>
 </table>
 
@@ -80,7 +81,7 @@ Findings:
 - The raw PixelLab output did not natively pass strict 1-bit palette validation.
 - Palette clamping produced exact two-color variants without changing tile shapes.
 - The gameplay-green copy is a recolor of the accepted black-and-white copy, not a separate PixelLab generation.
-- A later palette-controlled REST tileset attempt produced stricter black output but lost the visible stripe detail, so it was not selected for the showcase.
+- A later REST tileset attempt with a palette reference produced stricter black output but lost the visible stripe detail, so it was not selected for the showcase.
 
 ## Findings
 
@@ -96,6 +97,12 @@ Prompt language that remained soft:
 
 - `1-bit`, `pure black`, and `no gray tones` did not fully constrain the raw PixelLab palette.
 - The horizontal stripe request influenced the transition but did not produce perfectly uniform scanlines across every transition tile.
+
+Practical notes from follow-up trials:
+
+- Palette reference images can improve strict black-and-white output, but may reduce the transition texture that made the selected example readable. For this showcase, local palette clamping preserved the preferred PixelLab structure and texture better than selecting a palette-referenced generation.
+- Transition reference images are most useful when authored in single-tile context, such as `16x16` for a `16x16` tileset. For `transition_size: 0.5`, the transition pattern belongs in the relevant half-tile band inside that tile context, not in a full `4x4` output-sheet-sized reference.
+- Higher text guidance and stricter palette wording did not reliably improve the artistic result. Verification should check both structure readability and exact palette, because improving one can hurt the other.
 
 ## Showcase Assets
 
