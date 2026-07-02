@@ -94,7 +94,7 @@ Findings:
 Original prompt:
 
 ```text
-[$pixellab-pip:pixellab-pip](C:\Users\shilo\.codex\plugins\cache\pixellab-pip\pixellab-pip\0.4.0+codex.dev-20260702212055\skills\pixellab-pip\SKILL.md) create 1-bit sidescroller tileset with black center with white outline, and sparse white top. after done, create a copy with gameboy 1 bit green colors.
+/pixellab-pip create 1-bit sidescroller tileset with black center with white outline, and sparse white top. after done, create a copy with gameboy 1 bit green colors.
 ```
 
 This example demonstrates a sidescroller/platformer workflow where the generated structure was accepted, but the raw PixelLab palette drifted away from strict 1-bit colors. The raw output contained 13 dark bluish-gray visible colors. The accepted final assets were local palette-clamped copies made from that PixelLab output: one exact black-and-white version and one exact Game Boy green recolor.

@@ -184,7 +184,7 @@ $pixellab-pip <prompt>
 pip <prompt>
 ```
 
-The plain `pip` form can work as an implicit skill call because Pip's metadata describes PixelLab and Pip intents. Explicit invocation is still recommended when you want this skill used for sure. If your agent app namespaces plugin skills, use the name it shows, such as `pixellab-pip:pixellab-pip`.
+The plain `pip` form can work as an implicit skill call because Pip's metadata describes PixelLab and Pip intents. Explicit `/pixellab-pip` invocation is still recommended when you want this skill used for sure.
 
 Examples:
 
