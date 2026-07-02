@@ -9,14 +9,6 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <table>
 <tr>
 <td width="50%" valign="top">
-<h3><a href="tiles.md">Tiles</a></h3>
-<details>
-<summary>Prompt</summary>
-<p><code>/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.</code></p>
-</details>
-<a href="tiles.md"><img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas"></a>
-</td>
-<td width="50%" valign="top">
 <h3><a href="item-icons.md">Inventory Item Icons</a></h3>
 <details>
 <summary>Prompt</summary>
@@ -24,8 +16,6 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 </details>
 <a href="item-icons.md"><img src="item-icons/fantasy-rpg-inventory-bgremoved-8x8-32px.png" alt="Fantasy RPG inventory item icon sheet"></a>
 </td>
-</tr>
-<tr>
 <td width="50%" valign="top">
 <h3><a href="skill-icons.md">Skill Icons</a></h3>
 <details>
@@ -34,23 +24,15 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 </details>
 <a href="skill-icons.md"><img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet"></a>
 </td>
-<td width="50%" valign="top">
-<h3><a href="gameplay-gui.md">Gameplay GUI</a></h3>
-<details>
-<summary>Prompt</summary>
-<p><code>/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.</code></p>
-</details>
-<a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="320"></a>
-</td>
 </tr>
 <tr>
 <td width="50%" valign="top">
-<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
+<h3><a href="tiles.md">Tiles</a></h3>
 <details>
 <summary>Prompt</summary>
-<p><code>pip create a 64px character based on .pip-mascot.md</code></p>
+<p><code>/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.</code></p>
 </details>
-<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
+<a href="tiles.md"><img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas"></a>
 </td>
 <td width="50%" valign="top">
 <h3><a href="tilesets.md">Tilesets</a></h3>
@@ -59,6 +41,24 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <p><code>/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.</code></p>
 </details>
 <img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example" width="320">
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="gameplay-gui.md">Gameplay GUI</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.</code></p>
+</details>
+<a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="320"></a>
+</td>
+<td width="50%" valign="top">
+<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>pip create a 64px character based on .pip-mascot.md</code></p>
+</details>
+<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
 </td>
 </tr>
 </table>

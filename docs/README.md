@@ -10,17 +10,6 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 ## Showcase
 
-<table>
-<tr>
-<td>
-<a href="showcase/tiles.md"><img src="showcase/tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="256"></a>
-</td>
-<td>
-<a href="showcase/tilesets.md"><img src="showcase/tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase" width="320"></a>
-</td>
-</tr>
-</table>
-
 - [Showcase](showcase/README.md) - examples of using Pip to route PixelLab requests, enhance prompts, generate assets, and document results.
 
 ## Research
