@@ -6,45 +6,54 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 
 ## Generated Assets
 
-### [Tiles](tiles.md)
-
-[<img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="256">](tiles.md)
-
-```text
-/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.
-```
-
-### [Inventory Item Icons](item-icons.md)
-
-[<img src="item-icons/fantasy-rpg-inventory-bgremoved-8x8-32px.png" alt="Fantasy RPG inventory item icon sheet" width="256">](item-icons.md)
-
-```text
-/pixellab-pip create complete 32px inventory item set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.
-```
-
-### [Skill Icons](skill-icons.md)
-
-[<img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet" width="256">](skill-icons.md)
-
-```text
-/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
-```
-
-### [Gameplay GUI](gameplay-gui.md)
-
-[<img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="688">](gameplay-gui.md)
-
-```text
-/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.
-```
-
-### [Pip Mascot](pip-mascot.md)
-
-[![Pip mascot idle animation](pip/pip.gif)](pip-mascot.md)
-
-```text
-pip create a 64px character based on .pip-mascot.md
-```
+<table>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="tiles.md">Tiles</a></h3>
+<a href="tiles.md"><img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="220"></a>
+<details>
+<summary>Prompt</summary>
+<pre><code>/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.</code></pre>
+</details>
+</td>
+<td width="50%" valign="top">
+<h3><a href="item-icons.md">Inventory Item Icons</a></h3>
+<a href="item-icons.md"><img src="item-icons/fantasy-rpg-inventory-bgremoved-8x8-32px.png" alt="Fantasy RPG inventory item icon sheet" width="220"></a>
+<details>
+<summary>Prompt</summary>
+<pre><code>/pixellab-pip create complete 32px inventory item set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.</code></pre>
+</details>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="skill-icons.md">Skill Icons</a></h3>
+<a href="skill-icons.md"><img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet" width="220"></a>
+<details>
+<summary>Prompt</summary>
+<pre><code>/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.</code></pre>
+</details>
+</td>
+<td width="50%" valign="top">
+<h3><a href="gameplay-gui.md">Gameplay GUI</a></h3>
+<a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="320"></a>
+<details>
+<summary>Prompt</summary>
+<pre><code>/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.</code></pre>
+</details>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
+<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation" width="160"></a>
+<details>
+<summary>Prompt</summary>
+<pre><code>pip create a 64px character based on .pip-mascot.md</code></pre>
+</details>
+</td>
+</tr>
+</table>
 
 ## Showcase Format
 
