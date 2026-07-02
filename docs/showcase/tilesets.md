@@ -36,7 +36,7 @@ Route: PixelLab MCP `create_topdown_tileset`.
 
 Prompt preparation: agent-optimized from the user's 1-bit tileset request.
 
-Local processing: the accepted black-and-white copy was palette-clamped to `#000000` and `#FFFFFF`; the gameplay-green copy was palette-clamped to `#0F380F` and `#9BBC0F`; the showcase image was locally assembled by placing those two accepted copies side by side and scaling them with nearest-neighbor for browsing. No local shape edits were made.
+Local processing: the accepted black-and-white copy was palette-clamped to `#000000` and `#FFFFFF`; the gameplay-green copy was palette-clamped to `#0F380F` and `#9BBC0F`; the showcase image was locally assembled by placing those two accepted copies side by side at native size. No local shape edits or scaling were made.
 
 Generation details:
 
@@ -46,7 +46,7 @@ Generation details:
 | Source sheet | PixelLab MCP generated tileset |
 | Source sheet size | `64x64` |
 | Tile size | `16x16` |
-| Final showcase image | `512x256`, nearest-neighbor scaled side-by-side composition |
+| Final showcase image | `128x64`, native-size side-by-side composition |
 | View | `high top-down` |
 | Detail | `low detail` |
 | Shading | `flat shading` |
@@ -113,9 +113,9 @@ Practical notes from follow-up trials:
 
 ## Validation Notes
 
-- The showcased composition is exactly `512x256`.
+- The showcased composition is exactly `128x64`.
 - The showcased composition contains only `#000000`, `#FFFFFF`, `#0F380F`, and `#9BBC0F` as visible colors.
 - The black-and-white half uses only `#000000` and `#FFFFFF`.
 - The gameplay-green half uses only `#0F380F` and `#9BBC0F`.
-- The showcase composition is scaled for browsing; the accepted source copies were `64x64`.
+- The showcase composition preserves the accepted source copies at native `64x64` size.
 - Local processing changed palette colors and assembled the two accepted copies into one showcase image.
