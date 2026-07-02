@@ -4,7 +4,7 @@ Last reviewed: 2026-07-02.
 
 <table>
   <tr>
-    <td colspan="2"><img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example"></td>
+    <td colspan="2" align="center"><img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example"></td>
   </tr>
   <tr>
     <td><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
@@ -176,12 +176,15 @@ Practical notes from follow-up trials:
 
 | Output | Stable showcase file |
 |---|---|
-| One-bit 16px top-down tilesets example | `docs/showcase/tilesets/one-bit-16px-top-down-tilesets.png` |
+| Black-and-white plus Game Boy green one-bit 16px top-down tilesets example | `docs/showcase/tilesets/one-bit-16px-top-down-tilesets.png` |
 | Black-and-white plus gameplay-green tileset composition | `docs/showcase/tilesets/one-bit-black-green-topdown-tileset.png` |
 | Black-and-white plus Game Boy green sidescroller tileset composition | `docs/showcase/tilesets/one-bit-black-gameboy-green-sidescroller-tileset.png` |
 
 ## Validation Notes
 
+- The one-bit 16px top-down tilesets example is exactly `256x128`.
+- The one-bit 16px top-down tilesets example contains only `#000000`, `#FFFFFF`, `#0F380F`, and `#9BBC0F` as visible colors.
+- The one-bit 16px top-down tilesets example preserves the original black-and-white copy on the left and adds the Game Boy green copy on the right.
 - The showcased composition is exactly `128x64`.
 - The showcased composition contains only `#000000`, `#FFFFFF`, `#0F380F`, and `#9BBC0F` as visible colors.
 - The black-and-white half uses only `#000000` and `#FFFFFF`.
