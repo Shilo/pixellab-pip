@@ -12,8 +12,10 @@ Last reviewed: 2026-07-02.
     <td><img src="skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png" alt="Create Image Pro borderless mosaic skill icons"></td>
   </tr>
   <tr>
-    <td><img src="skill-icons/fantasy-rpg-skill-64px-8x8-curated.png" alt="Curated fantasy RPG 64px skill icon atlas"></td>
-    <td><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
+    <td colspan="2" align="center"><img src="skill-icons/fantasy-rpg-skill-64px-8x8-curated.png" alt="Curated fantasy RPG 64px skill icon atlas"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
   </tr>
 </table>
 
