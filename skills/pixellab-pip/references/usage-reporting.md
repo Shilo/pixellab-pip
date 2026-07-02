@@ -19,7 +19,8 @@ Done - [one plain sentence saying what was produced and whether it passed verifi
 
 **Route**
 - Surface/tool: `MCP create_1_direction_object` or `REST POST /v2/generate-image-v2`
-- Output structure: `Atlas image`, `Separate images`, `Single image`, `Animation frames`, `Drafts`, or another concise pixel/file-shape label when those do not apply
+- Output structure: `Atlas image`, `Separate images`, `Single image`, `Animation frames`, or another concise pixel/file-shape label when those do not apply
+- Selection state: `Drafts` when generated options still need selection
 - Asset lifecycle: `Managed asset` when the result is backed by a PixelLab/MCP asset ID, plus the retrieved output shape when useful
 - Delivered package: ZIP, archive, or packaged folder when one was delivered
 - Prompt prep: user wording preserved, agent-enhanced, PixelLab inline `enhance_prompt`, or PixelLab enhance endpoint
@@ -45,7 +46,7 @@ Put route and inputs in bullets instead of burying them in prose. Do not lead wi
 
 For REST routes, report the exact public v2 HTTP path that was actually used, such as `REST POST /v2/create-tileset` for top-down tileset creation, `REST POST /v2/create-tileset-sidescroller` for sidescroller creation, or `GET /v2/tilesets/{tileset_id}` for top-down retrieval. Do not omit the `/v2` prefix or collapse create and retrieval routes into one shorthand.
 
-Output structure describes the pixel/file shape, not the lifecycle. Use `Atlas image` for a single PixelLab output image that already contains the full grid/sheet/atlas. Use `Separate images` for multiple separate PixelLab output images that were locally arranged or packaged after generation. Use `Single image` for one non-atlas still image. Use `Animation frames` for frame sequences. Use `Drafts` for generated options that still need selection; after selection, report the selected output structure and note the selection step.
+Output structure describes the pixel/file shape, not the lifecycle or selection state. Use `Atlas image` for a single PixelLab output image that already contains the full grid/sheet/atlas. Use `Separate images` for multiple PixelLab output images delivered individually, whether or not they are later arranged or packaged. Use `Single image` for one non-atlas still image. Use `Animation frames` for frame sequences. Use `Selection state: Drafts` for generated options that still need selection; after selection, report the selected output structure and note the selection step.
 
 Report managed assets and packages separately from output structure. If an MCP/REST asset ID is involved, add `Asset lifecycle: Managed asset` and explain the retrieved shape, such as `Managed asset; retrieved as separate directional PNGs`, `Managed tileset; retrieved tile PNGs assembled locally into a 4x4 sheet`, or `Managed character; retrieved animation frames`. If a ZIP, archive, or packaged folder is delivered, add `Delivered package` and describe whether it contains original PixelLab outputs, locally assembled sheets, frames, or metadata.
 
@@ -61,6 +62,6 @@ For cost, report total generation cost for the whole generate/promote/edit flow 
 
 Use `get_balance` or REST `GET /balance` before and after nontrivial generation when available. If only balance is available, report the delta. If neither per-call usage nor balance is exposed, say usage was not exposed. Label estimates as estimates.
 
-If an async call times out or remains pending, keep the job or asset ID and use the matching status/get route or MCP getter. Do not resubmit a paid generation unless the user explicitly wants a fresh run. If a managed object returns `review` status, report the candidate-selection step instead of treating the job as incomplete.
+If an async call times out or remains pending, keep the job or asset ID and use the matching status/get route or MCP getter. Do not resubmit a paid generation unless the user explicitly wants a fresh run. If a managed object returns `review` status, report the selection step instead of treating the job as incomplete.
 
 For REST error handling, rate limits, MCP review states, stale download URLs, and map-object expiry, use `job-lifecycle.md`.
