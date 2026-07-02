@@ -8,10 +8,10 @@ Last reviewed: 2026-07-02.
     <td><img src="tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.png" alt="Minecraft mod 32px tile sheet"></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="tiles/minecraft-block-face-64px-4x4.png" alt="Minecraft-inspired 64px individual block face textures"></td>
+    <td colspan="2" align="center"><img src="tiles/minecraft-block-face-64px-8x8-atlas.png" alt="Minecraft-inspired 64px block face texture atlas"></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="tiles/minecraft-block-face-64px-8x8-atlas.png" alt="Minecraft-inspired 64px block face texture atlas"></td>
+    <td colspan="2" align="center"><img src="tiles/minecraft-block-face-64px-4x4.png" alt="Minecraft-inspired 64px individual block face textures"></td>
   </tr>
 </table>
 
@@ -21,8 +21,8 @@ PixelLab Pip can showcase tile workflows from several surfaces: Create Image Pro
 
 - [Primary Example: Minecraft-Inspired 16x16 Atlas](#primary-example-minecraft-inspired-16x16-atlas)
 - [Follow-Up Example: Minecraft Mod 32px Terrain Pack](#follow-up-example-minecraft-mod-32px-terrain-pack)
-- [Individual 64px Minecraft-Inspired Block Face Textures](#individual-64px-minecraft-inspired-block-face-textures)
 - [Compiled 64px Minecraft-Inspired Block Face Atlas](#compiled-64px-minecraft-inspired-block-face-atlas)
+- [Individual 64px Minecraft-Inspired Block Face Textures](#individual-64px-minecraft-inspired-block-face-textures)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -135,6 +135,57 @@ Findings:
 - The generated set is well suited to a Minecraft-inspired terrain pack because each source tile has the intended native size.
 - This is still a texture-pack workflow, not a Wang/autotile terrain-transition workflow.
 
+## Compiled 64px Minecraft-Inspired Block Face Atlas
+
+![Minecraft-inspired 64px block face texture atlas](tiles/minecraft-block-face-64px-8x8-atlas.png)
+
+Original prompt:
+
+```text
+/pixellab-pip do the following simultaneously:
+...
+3. use create image pro to create atlas of 64x64 minecraft tile textures.
+each task must consist of unique variations, no duplicates.
+```
+
+The compiled 64px block-face atlas uses native `64x64` PixelLab outputs assembled into a final `512x512` sheet. Two full-atlas attempts were rejected because the generated materials visually continued across cell boundaries, so the final showcase uses separate-image batches for clean independent tiles.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2`, surfaced in product language as Create Image Pro.
+
+Prompt preparation: agent-optimized from the user's Create Image Pro atlas request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Final sheet | `512x512` |
+| Output structure | `Separate images`; final sheet assembled locally |
+| Tile grid | `8x8`, intended `64x64` textures |
+| Background | fully opaque |
+| Batch usage reported | `20` generations per separate-image batch |
+| Retry note | One separate-image material batch failed and was rerun with the same input |
+
+Initial request body:
+
+```json
+{
+  "description": "A 512x512 atlas of 64 unique Minecraft-inspired voxel sandbox block-face tile textures, arranged as 8 columns and 8 rows. Each tile occupies exactly one independent 64 by 64 pixel cell, cells touch edge-to-edge with zero pixels between cells. Every cell is filled completely edge-to-edge including edge and corner pixels. Include varied block materials: grass top, dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sand, clay, snow, ice, packed ice, water, lava, oak planks, birch planks, spruce planks, jungle planks, acacia planks, dark oak planks, stripped logs, bark, leaves, cactus, hay bale, wool colors, brick, nether brick, obsidian, quartz, copper, iron, gold, diamond ore, emerald ore, redstone ore, coal ore, lapis ore, amethyst, glowstone, netherrack, soul sand, mud, roots, moss, tilled soil, glass, bookshelves, furnace front, crafting table, barrel top, chest top, rails, path, gravel, concrete, terracotta, and decorative carved stone. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, drawn grid, labels, numbers, letters, watermark, connected terrain rows, wide textures, planks or veins continuing into neighboring cells, repeated duplicates, or copied vanilla game textures.",
+  "image_size": {
+    "width": 512,
+    "height": 512
+  },
+  "no_background": false
+}
+```
+
+Findings:
+
+- Separate-image generation was the reliable route for independent `64x64` block-face textures.
+- The compiled sheet preserves PixelLab-generated pixels; local processing only arranged original `64x64` outputs.
+- All final cropped `64x64` cells had unique pixel hashes, and visual review found independent cell boundaries.
+
 ## Individual 64px Minecraft-Inspired Block Face Textures
 
 ![Minecraft-inspired 64px individual block face textures](tiles/minecraft-block-face-64px-4x4.png)
@@ -197,57 +248,6 @@ Findings:
 - The no-margin showcase grid is only an arrangement of the original PixelLab outputs for documentation.
 - This is a texture-pack workflow, not an autotile or transition-aware tileset workflow.
 
-## Compiled 64px Minecraft-Inspired Block Face Atlas
-
-![Minecraft-inspired 64px block face texture atlas](tiles/minecraft-block-face-64px-8x8-atlas.png)
-
-Original prompt:
-
-```text
-/pixellab-pip do the following simultaneously:
-...
-3. use create image pro to create atlas of 64x64 minecraft tile textures.
-each task must consist of unique variations, no duplicates.
-```
-
-The compiled 64px block-face atlas uses native `64x64` PixelLab outputs assembled into a final `512x512` sheet. Two full-atlas attempts were rejected because the generated materials visually continued across cell boundaries, so the final showcase uses separate-image batches for clean independent tiles.
-
-Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
-
-Route: PixelLab REST v2 `generate-image-v2`, surfaced in product language as Create Image Pro.
-
-Prompt preparation: agent-optimized from the user's Create Image Pro atlas request.
-
-Generation details:
-
-| Field | Value |
-|---|---|
-| Final sheet | `512x512` |
-| Output structure | `Separate images`; final sheet assembled locally |
-| Tile grid | `8x8`, intended `64x64` textures |
-| Background | fully opaque |
-| Batch usage reported | `20` generations per separate-image batch |
-| Retry note | One separate-image material batch failed and was rerun with the same input |
-
-Initial request body:
-
-```json
-{
-  "description": "A 512x512 atlas of 64 unique Minecraft-inspired voxel sandbox block-face tile textures, arranged as 8 columns and 8 rows. Each tile occupies exactly one independent 64 by 64 pixel cell, cells touch edge-to-edge with zero pixels between cells. Every cell is filled completely edge-to-edge including edge and corner pixels. Include varied block materials: grass top, dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sand, clay, snow, ice, packed ice, water, lava, oak planks, birch planks, spruce planks, jungle planks, acacia planks, dark oak planks, stripped logs, bark, leaves, cactus, hay bale, wool colors, brick, nether brick, obsidian, quartz, copper, iron, gold, diamond ore, emerald ore, redstone ore, coal ore, lapis ore, amethyst, glowstone, netherrack, soul sand, mud, roots, moss, tilled soil, glass, bookshelves, furnace front, crafting table, barrel top, chest top, rails, path, gravel, concrete, terracotta, and decorative carved stone. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, drawn grid, labels, numbers, letters, watermark, connected terrain rows, wide textures, planks or veins continuing into neighboring cells, repeated duplicates, or copied vanilla game textures.",
-  "image_size": {
-    "width": 512,
-    "height": 512
-  },
-  "no_background": false
-}
-```
-
-Findings:
-
-- Separate-image generation was the reliable route for independent `64x64` block-face textures.
-- The compiled sheet preserves PixelLab-generated pixels; local processing only arranged original `64x64` outputs.
-- All final cropped `64x64` cells had unique pixel hashes, and visual review found independent cell boundaries.
-
 ## Findings
 
 Create Image Pro / REST `generate-image-v2` can produce mechanically valid atlas images when the whole atlas is generated at once, as shown by the `16x16` Minecraft-inspired atlas. Exact semantic uniqueness is still a separate verification step; a correct grid can contain repeated or visually similar cells.
@@ -274,8 +274,8 @@ Prompt language that helped:
 |---|---|
 | Minecraft-inspired 16x16 atlas | `docs/showcase/tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png` |
 | Minecraft mod 32px terrain spritesheet | `docs/showcase/tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.png` |
-| 64px Minecraft-inspired block-face grid | `docs/showcase/tiles/minecraft-block-face-64px-4x4.png` |
 | Compiled 64px Minecraft-inspired block-face atlas | `docs/showcase/tiles/minecraft-block-face-64px-8x8-atlas.png` |
+| 64px Minecraft-inspired block-face grid | `docs/showcase/tiles/minecraft-block-face-64px-4x4.png` |
 
 ## Validation Notes
 

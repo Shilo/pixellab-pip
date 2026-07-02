@@ -16,10 +16,8 @@ Last reviewed: 2026-07-02.
     <td><img src="item-icons/candy-sweets-treats-8x8-32px.png" alt="Candy sweets and treats item icons"></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="item-icons/candy-sweets-treats-glossy-8x8-32px.png" alt="Glossy candy sweets and treats item icons"></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-inventory-64px-4x4.png" alt="Fantasy RPG 64px individual inventory items"></td>
+    <td><img src="item-icons/candy-sweets-treats-glossy-8x8-32px.png" alt="Glossy candy sweets and treats item icons"></td>
+    <td><img src="item-icons/fantasy-rpg-inventory-64px-4x4.png" alt="Fantasy RPG 64px individual inventory items"></td>
   </tr>
   <tr>
     <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-inventory-64px-8x8.png" alt="Fantasy RPG 64px inventory item atlas"></td>

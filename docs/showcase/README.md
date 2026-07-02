@@ -6,12 +6,12 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 
 ## Generated Assets
 
-### [Skill Icons](skill-icons.md)
+### [Tiles](tiles.md)
 
-[<img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet" width="256">](skill-icons.md)
+[<img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="256">](tiles.md)
 
 ```text
-/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
+/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.
 ```
 
 ### [Inventory Item Icons](item-icons.md)
@@ -22,12 +22,12 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 /pixellab-pip create complete 32px inventory item set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.
 ```
 
-### [Tiles](tiles.md)
+### [Skill Icons](skill-icons.md)
 
-[<img src="tiles/minecraft-inspired-generate-image-v2-16x16-atlas.png" alt="Minecraft-inspired 16x16 tile atlas" width="256">](tiles.md)
+[<img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet" width="256">](skill-icons.md)
 
 ```text
-/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.
+/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.
 ```
 
 ### [Gameplay GUI](gameplay-gui.md)

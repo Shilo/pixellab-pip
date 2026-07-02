@@ -12,8 +12,8 @@ Last reviewed: 2026-07-02.
     <td><img src="skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png" alt="Create Image Pro borderless mosaic skill icons"></td>
   </tr>
   <tr>
-    <td><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
     <td><img src="skill-icons/fantasy-rpg-skill-64px-8x8-curated.png" alt="Curated fantasy RPG 64px skill icon atlas"></td>
+    <td><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
   </tr>
 </table>
 
@@ -26,8 +26,8 @@ PixelLab Pip's strongest skill-icon route is REST `generate-image-v2`, surfaced 
 - [Themed Follow-up: Fire Magic Complete Sheet](#themed-follow-up-fire-magic-complete-sheet)
 - [Close Co-Best: Original Strict-Grid Create Image Pro Sheet](#close-co-best-original-strict-grid-create-image-pro-sheet)
 - [Learning Example: Borderless Mosaic Create Image Pro Sheet](#learning-example-borderless-mosaic-create-image-pro-sheet)
-- [Individual 64px Fantasy Skill Icons](#individual-64px-fantasy-skill-icons)
 - [Curated 64px Fantasy Skill Atlas](#curated-64px-fantasy-skill-atlas)
+- [Individual 64px Fantasy Skill Icons](#individual-64px-fantasy-skill-icons)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -218,6 +218,58 @@ Findings:
 - Backgrounds looked flatter and less premium than the original and rich-background prompts.
 - Not the recommended final prompt, but useful as evidence for the border/art-quality tradeoff.
 
+## Curated 64px Fantasy Skill Atlas
+
+![Curated fantasy RPG 64px skill icon atlas](skill-icons/fantasy-rpg-skill-64px-8x8-curated.png)
+
+Original prompt:
+
+```text
+/pixellab-pip do the following simultaneously:
+...
+2. create a complete set of 64x64 skill icons.
+...
+each task must consist of unique variations, no duplicates.
+```
+
+The curated 64px skill atlas combines the best no-caption PixelLab cells from a full-atlas attempt and separate-image batches. The first atlas had repeated motifs, and a stricter retry added visible captions, so the final showcase sheet was locally assembled from PixelLab-origin cells without repainting, resizing, quantization, or procedural fixes.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2`, surfaced in product language as Create Image Pro.
+
+Prompt preparation: agent-optimized from the user's simultaneous complete-set request.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Final sheet | `512x512` |
+| Output structure | Mixed source: `Atlas image` plus `Separate images`; final sheet assembled locally |
+| Icon grid | `8x8`, intended `64x64` icons |
+| Background | fully opaque |
+| Base atlas seed | `2003365359` |
+| Usage reported | `40` generations for the base atlas, then `20` generations per separate-image batch |
+
+Initial request body:
+
+```json
+{
+  "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG skill icons for game UI, 8 columns and 8 rows, each cell a readable 64x64 icon, perfectly aligned edge-to-edge with zero spacing, no overlap, no cropped icons, no dividers, no drawn grid. Rich full-bleed illustrated miniature backgrounds behind clear centered pictorial symbols, luminous pixel texture, depth, magical light, atmospheric color variation. Varied abilities across fire, ice, lightning, earth, wind, water, healing, shields, holy light, shadow strike, poison, blood magic, mana burst, rage, stealth, tracking, traps, lockpicking, alchemy, crafting, survival, leadership, taunt, cleanse, curse, summoning, portals, teleport, time, gravity, mind control, spirit, phoenix, dragon breath, nature thorns, roots, claws, arrows, daggers, hammers, banners, treasure sense, resurrection, aura buffs, debuffs, and movement. Pictorial symbols only. No text, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, runes, glyphs, alphabet-like shapes, terrain tiles, map tiles, inventory items, borders, frames, UI slots, rounded corners, watermark, black square-edge outlines, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+  "image_size": {
+    "width": 512,
+    "height": 512
+  },
+  "no_background": false
+}
+```
+
+Findings:
+
+- The final atlas is best for the strict no-duplicates 64px request because it curates away repeated motifs and captioned retry cells.
+- The compiled sheet preserves PixelLab-generated pixels; local processing only cropped and arranged cells.
+- All final cropped `64x64` cells had unique pixel hashes, and visual review found no visible text labels.
+
 ## Individual 64px Fantasy Skill Icons
 
 ![Fantasy RPG 64px individual skill icons](skill-icons/fantasy-rpg-skill-64px-4x4.png)
@@ -280,58 +332,6 @@ Findings:
 - The returned skill PNGs are fully opaque and have unique pixel hashes.
 - The no-margin showcase grid is only an arrangement of the original PixelLab outputs for documentation.
 
-## Curated 64px Fantasy Skill Atlas
-
-![Curated fantasy RPG 64px skill icon atlas](skill-icons/fantasy-rpg-skill-64px-8x8-curated.png)
-
-Original prompt:
-
-```text
-/pixellab-pip do the following simultaneously:
-...
-2. create a complete set of 64x64 skill icons.
-...
-each task must consist of unique variations, no duplicates.
-```
-
-The curated 64px skill atlas combines the best no-caption PixelLab cells from a full-atlas attempt and separate-image batches. The first atlas had repeated motifs, and a stricter retry added visible captions, so the final showcase sheet was locally assembled from PixelLab-origin cells without repainting, resizing, quantization, or procedural fixes.
-
-Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
-
-Route: PixelLab REST v2 `generate-image-v2`, surfaced in product language as Create Image Pro.
-
-Prompt preparation: agent-optimized from the user's simultaneous complete-set request.
-
-Generation details:
-
-| Field | Value |
-|---|---|
-| Final sheet | `512x512` |
-| Output structure | Mixed source: `Atlas image` plus `Separate images`; final sheet assembled locally |
-| Icon grid | `8x8`, intended `64x64` icons |
-| Background | fully opaque |
-| Base atlas seed | `2003365359` |
-| Usage reported | `40` generations for the base atlas, then `20` generations per separate-image batch |
-
-Initial request body:
-
-```json
-{
-  "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG skill icons for game UI, 8 columns and 8 rows, each cell a readable 64x64 icon, perfectly aligned edge-to-edge with zero spacing, no overlap, no cropped icons, no dividers, no drawn grid. Rich full-bleed illustrated miniature backgrounds behind clear centered pictorial symbols, luminous pixel texture, depth, magical light, atmospheric color variation. Varied abilities across fire, ice, lightning, earth, wind, water, healing, shields, holy light, shadow strike, poison, blood magic, mana burst, rage, stealth, tracking, traps, lockpicking, alchemy, crafting, survival, leadership, taunt, cleanse, curse, summoning, portals, teleport, time, gravity, mind control, spirit, phoenix, dragon breath, nature thorns, roots, claws, arrows, daggers, hammers, banners, treasure sense, resurrection, aura buffs, debuffs, and movement. Pictorial symbols only. No text, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, runes, glyphs, alphabet-like shapes, terrain tiles, map tiles, inventory items, borders, frames, UI slots, rounded corners, watermark, black square-edge outlines, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
-  "image_size": {
-    "width": 512,
-    "height": 512
-  },
-  "no_background": false
-}
-```
-
-Findings:
-
-- The final atlas is best for the strict no-duplicates 64px request because it curates away repeated motifs and captioned retry cells.
-- The compiled sheet preserves PixelLab-generated pixels; local processing only cropped and arranged cells.
-- All final cropped `64x64` cells had unique pixel hashes, and visual review found no visible text labels.
-
 ## Findings
 
 Create Image Pro / REST `generate-image-v2` is the best approach discovered in this spike for fantasy skill icons. It is the only route tested that consistently combined a full `8x8` output, opaque backgrounds, readable symbols, cohesive style, and strong visual quality.
@@ -357,8 +357,8 @@ Routes that did not win:
 | Fire magic themed follow-up | `docs/showcase/skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png` |
 | Original strict-grid co-best | `docs/showcase/skill-icons/create-image-pro-original-strict-grid-8x8-32px.png` |
 | Borderless mosaic learning example | `docs/showcase/skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png` |
-| 64px fantasy skill icon grid | `docs/showcase/skill-icons/fantasy-rpg-skill-64px-4x4.png` |
 | Curated 64px fantasy skill atlas | `docs/showcase/skill-icons/fantasy-rpg-skill-64px-8x8-curated.png` |
+| 64px fantasy skill icon grid | `docs/showcase/skill-icons/fantasy-rpg-skill-64px-4x4.png` |
 
 ## Validation Notes
 
