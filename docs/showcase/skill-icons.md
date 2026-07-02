@@ -51,6 +51,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
 | Returned seed | `24062808` |
@@ -82,6 +83,12 @@ Findings:
 
 ![Create Image Pro fire magic skill icons](skill-icons/create-image-pro-fire-magic-sheet-8x8-32px.png)
 
+Original prompt:
+
+```text
+/pixellab-pip create a complete fantasy fire-based backgrounded skill icons. 32x32 icons only. consistent fire magic theme, illustrated backgrounds. all unique skill icons. no overlapping icons, no borders, no frames, no decorations, no corner radius.
+```
+
 The fire-magic follow-up confirmed that composition strategy matters more than the theme. A previous batch asked for standalone `32x32` generated icons and produced crisp symbols, but several icons looked like simple silhouettes, inventory items, or rune-like marks on flatter backgrounds. The stronger run kept the same `generate-image-v2` route but asked for one complete `256x256` sheet with `8x8` adjacent `32x32` squares, rich full-bleed backgrounds, background art touching neighboring cells directly, and an invisible grid.
 
 Route: PixelLab REST v2 `generate-image-v2`
@@ -93,6 +100,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
 | Returned seed | `20260629` |
@@ -136,6 +144,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
 | Returned seed | `24062805` |
@@ -179,6 +188,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: false` |
 | Returned seed | `24062806` |
@@ -233,6 +243,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `64x64` per generated skill icon |
+| Output structure | `Separate images` |
 | Returned image count | `16` separate PNGs |
 | Showcase grid | `4x4`, `256x256`, assembled from original `64x64` PNGs |
 | Background | `no_background: false` |

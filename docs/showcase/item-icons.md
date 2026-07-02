@@ -60,6 +60,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | PixelLab background removal after generation |
 | Returned seed | `316504359` |
@@ -106,6 +107,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: true` |
 | Returned seed | `968116202` |
@@ -152,6 +154,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: true` |
 | Returned seed | `532909434` |
@@ -198,6 +201,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | transparent output |
 | Returned seed | `1970483769` |
@@ -237,6 +241,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: true` |
 | Returned seed | `747867093` |
@@ -283,6 +288,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: true` |
 | Returned seed | `1660277576` |
@@ -330,6 +336,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Icon grid | `8x8`, intended `32x32` icons |
 | Background | `no_background: true` |
 | Returned seed | `1641624740` |
@@ -382,6 +389,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `64x64` per generated item |
+| Output structure | `Separate images` |
 | Returned image count | `16` separate PNGs |
 | Showcase grid | `4x4`, `256x256`, assembled from original `64x64` PNGs |
 | Background | `no_background: true` |

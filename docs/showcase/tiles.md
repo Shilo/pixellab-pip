@@ -44,6 +44,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `256x256` |
+| Output structure | `Atlas image` |
 | Atlas grid | `16x16` |
 | Tile size | `16x16` |
 | Background | `no_background: false` |
@@ -95,6 +96,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `32x32` per generated tile |
+| Output structure | `Separate images` |
 | Tile count | `64` |
 | Final sheet | `8x8`, `256x256` |
 | Background | `no_background: false` |
@@ -155,6 +157,7 @@ Generation details:
 | Field | Value |
 |---|---|
 | Image size | `64x64` per generated block face |
+| Output structure | `Separate images` |
 | Returned image count | `16` separate PNGs |
 | Showcase grid | `4x4`, `256x256`, assembled from original `64x64` PNGs |
 | Background | `no_background: false` |

@@ -19,6 +19,7 @@ Done - [one plain sentence saying what was produced and whether it passed verifi
 
 **Route**
 - Surface/tool: `MCP create_1_direction_object` or `REST POST /generate-image-v2`
+- Output structure: `Atlas image`, `Separate images`, `Single image`, `Animation frames`, `Managed asset`, or another concise label when those do not apply.
 - Prompt prep: user wording preserved, agent-enhanced, PixelLab inline `enhance_prompt`, or PixelLab enhance endpoint
 
 **Inputs Used**
@@ -41,6 +42,8 @@ Unless the user explicitly states or approves another output location, local Pix
 Put route and inputs in bullets instead of burying them in prose. Do not lead with internal job IDs. Include job, asset, or result IDs only when the result is pending/review, when the user needs the ID for a follow-up action, or when debugging exact status/schema behavior.
 
 For REST routes, report the exact public v2 HTTP path that was actually used, such as `REST POST /v2/create-tileset` for top-down tileset creation, `REST POST /v2/create-tileset-sidescroller` for sidescroller creation, or `GET /v2/tilesets/{tileset_id}` for top-down retrieval. Do not omit the `/v2` prefix or collapse create and retrieval routes into one shorthand.
+
+When the output is a grid, sheet, atlas, spritesheet, or packaged set, state how PixelLab produced the underlying images. Use `Atlas image` for a single PixelLab output image that already contains the full grid/sheet/atlas. Use `Separate images` for multiple separate PixelLab output images that were locally arranged or packaged after generation. Use `Single image` for one non-atlas still image, `Animation frames` for frame sequences, and `Managed asset` for MCP/REST assets represented by an asset ID plus retrieved files. If local assembly was used, report it as local processing and make clear the assembly preserved original PixelLab pixels.
 
 Always include every final user-facing natural-language value that was sent to PixelLab or otherwise affected generation, especially `description`, `action`, `edit_description`, `animation_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, and `color_palette`. This is mandatory for both successful reports and completed-but-failed-verification reports. If a `description` field was used, the report must display `description` under `Inputs Used`; do not omit it because the output failed, because the report is short, or because the field seems obvious from the request. If prompt enhancement or agent enhancement changed the user's wording, show the final value used. Show the exact value for `description` unless it is too large for the chat response; when truncation is unavoidable, label it as truncated and include the saved local request/manifest file that contains the full exact value.
 
