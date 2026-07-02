@@ -12,10 +12,8 @@ Last reviewed: 2026-07-02.
     <td><img src="skill-icons/create-image-pro-borderless-mosaic-8x8-32px.png" alt="Create Image Pro borderless mosaic skill icons"></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><img src="skill-icons/fantasy-rpg-skill-64px-8x8-curated.png" alt="Curated fantasy RPG 64px skill icon atlas"></td>
+    <td><img src="skill-icons/fantasy-rpg-skill-64px-4x4.png" alt="Fantasy RPG 64px individual skill icons"></td>
+    <td><img src="skill-icons/fantasy-rpg-skill-64px-8x8-curated.png" alt="Curated fantasy RPG 64px skill icon atlas"></td>
   </tr>
 </table>
 
@@ -313,10 +311,9 @@ Generation details:
 | Icon grid | `8x8`, intended `64x64` icons |
 | Background | fully opaque |
 | Base atlas seed | `2003365359` |
-| Separate batch seeds | `293779607`, `2047054238`, `236968395`, `1027625918` |
 | Usage reported | `40` generations for the base atlas, then `20` generations per separate-image batch |
 
-Representative atlas request body:
+Initial request body:
 
 ```json
 {
@@ -324,19 +321,6 @@ Representative atlas request body:
   "image_size": {
     "width": 512,
     "height": 512
-  },
-  "no_background": false
-}
-```
-
-Representative separate-image batch request body:
-
-```json
-{
-  "description": "Sixteen separate 64x64 fantasy RPG skill icon images, each returned image a single icon-only pictorial ability symbol with a rich painted background. The 16 returned images should cover different concepts from this set, with no repeated concept or near-duplicate: fireball, ice shard, lightning strike, stone armor, wind dash, water wave, healing hand, holy shield, shadow cloak, poison cloud, blood pact, mana burst, rage shout, stealth step, animal tracking, spike trap. No text, no captions, no labels, no letters, no numbers, no handwriting, no runes, no glyphs, no UI frames, no borders, no grids.",
-  "image_size": {
-    "width": 64,
-    "height": 64
   },
   "no_background": false
 }

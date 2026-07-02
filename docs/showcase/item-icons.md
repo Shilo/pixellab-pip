@@ -461,7 +461,7 @@ Generation details:
 | Usage reported | `40` generations |
 | Reported generation cost | `$0.185` |
 
-Request body:
+Initial request body:
 
 ```json
 {

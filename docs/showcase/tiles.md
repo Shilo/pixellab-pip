@@ -229,26 +229,17 @@ Generation details:
 | Batch usage reported | `20` generations per separate-image batch |
 | Retry note | One separate-image material batch failed and was rerun with the same input |
 
-Representative separate-image batch request body:
+Initial request body:
 
 ```json
 {
-  "description": "Sixteen separate 64x64 Minecraft-inspired voxel sandbox block-face texture images, each returned image one independent tileable square material texture. The 16 returned images should cover different materials from this set, with no repeated material or near-duplicate: grass top, grass side, dirt, coarse dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sandstone, clay, snow, ice. No atlas, no grid, no text, no labels, no letters, no numbers, no borders, no frames, no copied vanilla game textures.",
+  "description": "A 512x512 atlas of 64 unique Minecraft-inspired voxel sandbox block-face tile textures, arranged as 8 columns and 8 rows. Each tile occupies exactly one independent 64 by 64 pixel cell, cells touch edge-to-edge with zero pixels between cells. Every cell is filled completely edge-to-edge including edge and corner pixels. Include varied block materials: grass top, dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sand, clay, snow, ice, packed ice, water, lava, oak planks, birch planks, spruce planks, jungle planks, acacia planks, dark oak planks, stripped logs, bark, leaves, cactus, hay bale, wool colors, brick, nether brick, obsidian, quartz, copper, iron, gold, diamond ore, emerald ore, redstone ore, coal ore, lapis ore, amethyst, glowstone, netherrack, soul sand, mud, roots, moss, tilled soil, glass, bookshelves, furnace front, crafting table, barrel top, chest top, rails, path, gravel, concrete, terracotta, and decorative carved stone. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, drawn grid, labels, numbers, letters, watermark, connected terrain rows, wide textures, planks or veins continuing into neighboring cells, repeated duplicates, or copied vanilla game textures.",
   "image_size": {
-    "width": 64,
-    "height": 64
+    "width": 512,
+    "height": 512
   },
   "no_background": false
 }
-```
-
-Material groups:
-
-```text
-grass top through ice;
-packed ice through red wool;
-blue wool through netherrack;
-soul sand through carved stone.
 ```
 
 Findings:
