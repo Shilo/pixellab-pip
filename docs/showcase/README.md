@@ -40,7 +40,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <summary>Prompt</summary>
 <p><code>/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.</code></p>
 </details>
-<img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example" width="320">
+<img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example">
 </td>
 </tr>
 <tr>
@@ -50,7 +50,7 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <summary>Prompt</summary>
 <p><code>/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.</code></p>
 </details>
-<a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="320"></a>
+<a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="256"></a>
 </td>
 <td width="50%" valign="top">
 <h3><a href="pip-mascot.md">Pip Mascot</a></h3>
