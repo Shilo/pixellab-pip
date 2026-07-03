@@ -101,6 +101,10 @@ Renderer modes:
 
 The simulator is intentionally not PixelLab. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce PixelLab model taste. Use it to inspect request shape, output layout, and broad terrain/transition semantics before deciding whether a live generation is worth running.
 
+Read the simulator PNGs as placement diagrams, not as visual previews. A simulator image answers questions like "did this prompt put white on the boundary, top surface, interior, or body?" and "did this sidescroller request preserve transparency and avoid middle-seam highlights?" It does not answer whether PixelLab will draw the same contour, bricks, dithering, gray palette drift, or appealing material style.
+
+For prompt optimization, agents should inspect `sim-report.json` and the `components/` images first, then translate the schematic result into a human-readable conclusion. Useful conclusions look like "this wording collapses sparse white texture to black," "this wording creates explicit white boundary highlights," or "this wording puts light pixels in the platform body instead of only the exposed top." Do not present a simulator PNG as if it were a predicted live PixelLab result.
+
 The execution-oriented runbook for agents lives in [PixelLab MCP Tileset Simulator](../dev-tools/pixellab_mcp_tileset_sim.md).
 
 ## Repository Layout

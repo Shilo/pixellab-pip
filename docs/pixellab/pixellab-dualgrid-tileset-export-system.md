@@ -6,6 +6,8 @@ Purpose: document the observed DualGrid/Wang export contract for PixelLab tilese
 
 This note is about structure, JSON fields, export layout, and verification. It does not claim to simulate PixelLab's image model, prompt interpretation, palette drift, or texture generation.
 
+For prompt optimization, treat the simulator as a placement-class and request-shape tool. It can help decide whether wording points light pixels toward a boundary, top surface, interior texture, or transparent/body region. It cannot predict the final PixelLab silhouette, material style, palette drift, or exact white rim contour.
+
 ## Sources Reviewed
 
 - Official REST v2 OpenAPI: `https://api.pixellab.ai/v2/openapi.json`
@@ -177,6 +179,16 @@ The simulator should not claim to predict:
 - Palette enforcement from text
 - Whether generated white/edge pixels land in the desired visual place
 - Internal backend model behavior not exposed by public metadata
+
+Observed corpus behavior for 1-bit prompt tests:
+
+- Generic `sparse white texture`, `white speckles`, `white stipple`, or `black and white dirt` wording is weak. Live PixelLab often dulls it, stylizes it into gray material texture, or ignores it.
+- Explicit placement wording is stronger. Phrases such as `white rim`, `white outline`, `white edge highlights`, `exposed top surface`, `end-cap edges only`, and `never on middle seams` are more useful for controlling placement.
+- Schematic simulator pixels should be interpreted as semantic classes. A straight white line, checker dither, or diagonal dot field means "the prompt was interpreted as light boundary/dither/speckle," not "PixelLab will draw this exact line or dot field."
+- Live PixelLab may produce attractive gray/purple/blue brick or cave styling despite strict `1-bit`, `black and white only`, or `no gray` text. Palette compliance must be verified separately and may need a labeled palette-clamped derivative.
+- The practical simulator question is usually "does this prompt put lightness in the right class of pixels?" not "does this image look like the live output?"
+
+When using the simulator to choose live PixelLab attempts, agents should inspect `sim-report.json` and component PNGs first, then use `tileset.png` as a placement diagram. Reject prompts that put light pixels in the wrong semantic class. Promote only a small number of candidates to live MCP tests, then update prompt wording from the live results.
 
 ## Reverse-Engineering Next Steps
 

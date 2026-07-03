@@ -22,6 +22,8 @@ Fastest top-down smoke test:
 
 The simulator accepts the same MCP create-tool JSON object an agent would pass to PixelLab MCP and writes local PNGs. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
 
+Important: the PNG is a schematic semantic preview, not a PixelLab-style visual prediction. Use it to classify where colors/details are expected to land, not to judge whether the final PixelLab art will have the same silhouette, brick texture, wobble, palette drift, dithering taste, or hand-drawn contour.
+
 Pass MCP JSON, not REST JSON. REST-only fields such as `color_image`, `lower_reference_image`, `upper_reference_image`, and `transition_reference_image` are intentionally rejected here.
 
 If no request JSON is provided and stdin is empty, the simulator uses `{}` and fails when required MCP fields are missing.
@@ -62,7 +64,7 @@ Omitted optional fields use the documented MCP defaults for simulation only. The
 Common accepted MCP fields:
 
 - Sidescroller: `lower_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `tile_strength`, `base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`.
-- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `spread_x`, `slope_size`, `raggedness`.
+- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`.
 
 By default, it writes to:
 
@@ -97,6 +99,57 @@ Generated files:
 - `sim-report.json`
 
 Use `tileset.png` as the output under test. `native-tileset.png` is the compact 4x4 source sheet before export-layout repacking. The `components/` folder has stable per-tile names for quick agent inspection: lower, upper, top, transition, and center where applicable. The legacy `component-*.png` files mirror those previews at the run root for compatibility. `corner-key-preview.png` is a schematic for checking the source corner classes. `sim-report.json` records the exact request, omitted MCP defaults used internally, native 15-tileset source cells, exported cell placements, and any AI render recipe; it is not a PixelLab MCP response.
+
+## How To Interpret The Images
+
+Read the simulator output as a placement-class diagram:
+
+- Black or dark regions mean "the request is being interpreted as base terrain/platform/body here."
+- White or light regions mean "the request is being interpreted as visible accent, rim, outline, transition, top surface, speckle, stripe, or dither here."
+- Transparent regions in sidescroller output mean "outside the platform body."
+- Hard geometric shapes mean "DualGrid/corner mask," not "PixelLab will draw this exact silhouette."
+- Repeated diagonal dots, checker-like dither, or straight stripes mean "the prompt produced a texture class," not "PixelLab will use this exact pattern."
+
+Do not compare the simulator and live PixelLab by exact appearance. A useful comparison asks:
+
+- Did both put light pixels mostly on the boundary/rim?
+- Did both keep the terrain interior mostly dark?
+- Did both avoid light pixels on repeatable middle seams?
+- Did both collapse generic sparse texture to mostly black?
+- For sidescroller, did light pixels land on exposed top/cap pixels instead of the full platform body?
+- Did transparency/occupancy appear in the same broad places?
+
+The simulator is not useful for:
+
+- Choosing between two prompts that only differ by visual style adjectives.
+- Predicting PixelLab's exact wall contour, brick rows, dirt clumps, jagged rim shape, or gray/purple/blue palette drift.
+- Deciding whether PixelLab will make a beautiful result.
+- Verifying exact 1-bit palette compliance. Use palette statistics or an explicitly labeled palette-clamped derivative for that.
+
+## Agent Optimization Contract
+
+When an agent uses this tool to optimize PixelLab descriptions, it must translate the schematic result into prompt decisions. Do not show a user a simulator PNG and imply it is a preview of the live art.
+
+Recommended loop:
+
+1. Write 3-8 candidate MCP JSON requests that differ in one meaningful wording/control at a time.
+2. Run each candidate with `--renderer deterministic` for a fast structural sanity check, or `--renderer deepseek-v4-pro` when description interpretation matters.
+3. Inspect `sim-report.json` first. The `render_recipe` is the clearest explanation of how the text was interpreted: base color, accent color, texture class, and placement.
+4. Inspect `components/*.png` before `tileset.png`. Components tell whether lower/upper/top/transition semantics are being interpreted correctly.
+5. Inspect `tileset.png` only for placement class: boundary, top, interior, body, transparency, and repeat seams.
+6. Reject candidates where the simulator places light pixels in the wrong class, such as interior instead of boundary, full body instead of top, or middle seams instead of exposed ends.
+7. Prefer candidates whose live PixelLab goal is expressed in strong placement language: `white rim`, `white outline`, `white edge highlights`, `exposed top surface`, `end-cap edges only`, `black interior`, `no middle seam highlights`.
+8. Treat generic wording such as `sparse white texture`, `white speckles`, `black and white dirt`, or `1-bit` as weak. Live PixelLab often ignores, dulls, or stylizes those details.
+9. Pick the best 1-3 simulator candidates for live MCP tests.
+10. Compare live results semantically, then update the prompt wording from the live result, not from the simulator's exact pixels.
+
+Decision guide for common 1-bit prompt work:
+
+- If the simulator is all black, the prompt likely lacks strong placement language. Add explicit `white edge/rim/outline/highlight` wording where needed.
+- If the simulator shows white throughout the interior, add `black interior`, `white only on exposed edges`, and remove broad `black and white texture` wording.
+- If the simulator shows white on sidescroller middle seams, add `never on repeatable middle tile seams`, `center tile touches left and right edges with no seam highlights`, and `white only on exposed end-cap edges`.
+- If the simulator shows sidescroller white on the whole body, move the white wording from `lower_description` to `transition_description` and say `exposed top surface` or `top cap`.
+- If live PixelLab repeatedly ignores sparse white speckles, escalate to `crisp white rim`, `white edge highlights`, `white scratch marks`, or use approved reference/control-image routes instead of relying on text.
 
 ## Export Layouts
 
