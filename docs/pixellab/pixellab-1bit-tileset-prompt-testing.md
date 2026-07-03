@@ -121,6 +121,8 @@ Current selected clamp previews live under `pixellab-pip-generations/1bit-palett
 
 A follow-up REST sidescroller prompt-only test, `side-prompt-d-high-contrast-no-controls`, tried to ask directly for high-contrast bright white top/end-cap pixels, darker interiors, and no controls. It did not improve the situation: the raw output contained no bright or whiteish pixels, shifted accents into purple midtones, and produced more interior texture. Threshold clamps only recovered white at low/mid thresholds where body noise also becomes white. This did not beat the earlier MCP `transition_size: 0.5` candidate.
 
+A follow-up MCP sidescroller prompt-only test, `side-d-smooth-cap-05`, tried to remove texture language and ask for a smooth black silhouette with a crisp white cap. It also did not improve on `side-c-broken-rim-05`: the raw output became chunkier/noisier, and high-threshold clamps lost the clean broken ledge line. Keep `side-c-broken-rim-05` as the current sidescroller clamp baseline.
+
 For top-down wall tests, prefer:
 
 - `mode: "standard"`.
