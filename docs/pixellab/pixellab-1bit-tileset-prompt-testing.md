@@ -96,6 +96,31 @@ Three REST top-down checks tested the same black floor, black wall, and white co
 
 Observed conclusion: for black-on-black 1-bit top-down terrain, `color_image` can suppress the desired white transition instead of merely constraining the palette. `transition_reference_image` is currently the better first REST control for edge placement. Add `color_image` only as a separate follow-up test after confirming it does not erase the transition, or palette-clamp a shape-approved PixelLab output as labeled local processing.
 
+Three REST sidescroller checks then tested a black platform body with white top/end-cap pixels.
+
+| Test | Controls | Result |
+|---|---|---|
+| `side-transition-ref-a-no-color-image` | `16x16` top/surface `transition_reference_image`, `transition_size: 0.25`, no `color_image` | Completed with good transparent platform topology, but PixelLab remapped the intended white rim into dark blue/purple; no bright or whiteish pixels. |
+| `side-transition-ref-b-strong-top-no-color-image` | Stronger white top reference, `transition_size: 0.5`, no `color_image` | Completed with more top/surface coverage, but still no bright or whiteish pixels; white was remapped into dark teal/blue. |
+| `side-color-transition-ref-c-balanced` | Stronger top reference plus balanced black/white `64x64` `color_image` | Completed as strict black/transparent, but the white top layer disappeared. |
+
+Observed conclusion: sidescroller REST controls currently preserve platform topology better than prompt-only testing, but they still do not force a white top rim. `transition_reference_image` can influence where the top layer belongs, while `color_image` again risks erasing the requested white transition. For sidescroller 1-bit work, keep using reference-free or reference-only live tests for shape, then palette-clamp only after the edge/top placement is acceptable.
+
+## Palette Clamp Findings
+
+A local black/white threshold study tested whether the raw PixelLab outputs contain enough luminance separation to become usable strict 1-bit assets after palette snapping. These outputs are labeled local derivatives, not raw PixelLab generations.
+
+| Source | Clamp result |
+|---|---|
+| REST top-down `transition_reference_image` only | Strong candidate. Near-white contours survive strict clamping across high thresholds, so the top-down pipeline is close: shape with `transition_reference_image`, then clamp after approval. |
+| REST sidescroller `transition_reference_image` only | Weak candidate. Top-layer information exists, but it is dark blue/teal; low thresholds reveal too much body texture, while high thresholds lose the rim. |
+| REST sidescroller `color_image` + reference | Not recoverable. The output is black/transparent with no white rim to recover. |
+| Prompt-only MCP sidescroller `transition_size: 0.5` | Best current sidescroller clamp candidate. It has brighter top/end-cap accents than REST sidescroller reference runs, and high thresholds preserve a cleaner ledge line. |
+
+Current selected clamp previews live under `pixellab-pip-generations/1bit-palette-clamp-study-20260703/selected-candidates/`.
+
+A follow-up REST sidescroller prompt-only test, `side-prompt-d-high-contrast-no-controls`, tried to ask directly for high-contrast bright white top/end-cap pixels, darker interiors, and no controls. It did not improve the situation: the raw output contained no bright or whiteish pixels, shifted accents into purple midtones, and produced more interior texture. Threshold clamps only recovered white at low/mid thresholds where body noise also becomes white. This did not beat the earlier MCP `transition_size: 0.5` candidate.
+
 For top-down wall tests, prefer:
 
 - `mode: "standard"`.

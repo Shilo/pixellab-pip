@@ -8,6 +8,7 @@ Last reviewed: 2026-07-03.
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
+- [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
 
 ## Quality Assurance
@@ -106,6 +107,21 @@ Read the simulator PNGs as placement diagrams, not as visual previews. A simulat
 For prompt optimization, agents should inspect `sim-report.json` and the `components/` images first, then translate the schematic result into a human-readable conclusion. Useful conclusions look like "this wording collapses sparse white texture to black," "this wording creates explicit white boundary highlights," or "this wording puts light pixels in the platform body instead of only the exposed top." Do not present a simulator PNG as if it were a predicted live PixelLab result.
 
 The execution-oriented runbook for agents lives in [PixelLab MCP Tileset Simulator](../dev-tools/pixellab_mcp_tileset_sim.md).
+
+## Tileset Research Notes
+
+Live PixelLab tileset experiments that are useful for future routing and simulator work should be saved under `pixellab-pip-generations/` with a short `REPORT.md`, exact requests, raw responses, PixelLab originals, assembled sheets, and any clearly labeled QA derivatives.
+
+Current 1-bit tileset findings live in:
+
+- [PixelLab 1-Bit Tileset Prompt Testing](pixellab/pixellab-1bit-tileset-prompt-testing.md)
+- [PixelLab 1-Bit Tileset Optimization Workflow](pixellab/pixellab-1bit-tileset-optimization-workflow.md)
+- [REST 1-Bit Control Validation Report](../pixellab-pip-generations/rest-1bit-control-validation-20260703/REPORT.md)
+- [1-Bit Palette Clamp Study](../pixellab-pip-generations/1bit-palette-clamp-study-20260703/REPORT.md)
+
+The key maintainer lesson from the 2026-07-03 REST validation is that `color_image` is not a safe automatic fix for strict black/white tilesets with white transition pixels. In both top-down and sidescroller checks, black/white `color_image` could erase the requested white transition and collapse the result toward black. Preserve this as a routing caution in `skills/pixellab-pip/references/tilesets.md`: optimize PixelLab-generated shape and transition placement first, then use palette controls only as a separately verified follow-up or report palette-clamped derivatives as local processing.
+
+The palette-clamp study shows that top-down and sidescroller are at different maturity levels. Top-down REST reference-only output can clamp cleanly because the raw result already contains high-luminance contour pixels. Sidescroller still needs prompt discovery because REST reference-only outputs put the top layer in dark colors that do not survive a clean threshold without adding body noise.
 
 ## Repository Layout
 
