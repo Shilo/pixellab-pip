@@ -26,6 +26,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab Top-Down Tileset Transition Findings](pixellab/pixellab-topdown-tileset-transition-findings.md) - live-generation findings for `create_topdown_tileset` transition sizes, compact 4x4 graybox exports, and the `transition_size: 1.0` expanded-layout caveat.
 - [PixelLab DualGrid Tileset Export System](pixellab/pixellab-dualgrid-tileset-export-system.md) - reverse-engineering notes for PixelLab's compact DualGrid/Wang tileset metadata, layout order, public tileset surfaces, and local simulator scope.
 - [PixelLab 1-Bit Tileset Prompt Testing](pixellab/pixellab-1bit-tileset-prompt-testing.md) - simulator and live MCP findings for black-and-white top-down and sidescroller prompt tests.
+- [PixelLab 1-Bit Tileset Optimization Workflow](pixellab/pixellab-1bit-tileset-optimization-workflow.md) - practical workflow for using simulator and live MCP tests to place white 1-bit edge, rim, ledge, and boundary pixels in top-down and sidescroller tilesets.
 - [PixelLab Skeleton And Template Animation Research](pixellab/pixellab-skeleton-template-animation-research.md) - managed template animations, raw skeleton keypoint routes, Aseprite skeleton workflow parity, and MCP/REST boundaries.
 - [PixelLab Auth And Security](pixellab/pixellab-auth-and-security.md) - bearer-token handling and automation boundaries.
 - [PixelLab SDK Compatibility](pixellab/pixellab-sdk-compatibility.md) - official SDK guidance and when to call REST v2 directly.

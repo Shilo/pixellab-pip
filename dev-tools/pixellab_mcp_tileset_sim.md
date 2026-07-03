@@ -151,6 +151,8 @@ Decision guide for common 1-bit prompt work:
 - If the simulator shows sidescroller white on the whole body, move the white wording from `lower_description` to `transition_description` and say `exposed top surface` or `top cap`.
 - If live PixelLab repeatedly ignores sparse white speckles, escalate to `crisp white rim`, `white edge highlights`, `white scratch marks`, or use approved reference/control-image routes instead of relying on text.
 
+For the full 1-bit testing workflow, read `docs/pixellab/pixellab-1bit-tileset-optimization-workflow.md`. The short version is: top-down white boundary pixels belong in `transition_description`, sidescroller white top/rim pixels belong in `transition_description`, and repeatable black body/interior language belongs in `lower_description` or `upper_description`. Avoid `white border around the tile` because it can imply seams around every packed tile instead of exposed terrain boundaries.
+
 ## Export Layouts
 
 Use PixelLab's native compact export:
