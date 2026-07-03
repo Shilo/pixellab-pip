@@ -9,6 +9,7 @@ create_sidescroller_tileset requests with a simple deterministic renderer.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -36,6 +37,21 @@ DEFAULT_OUT_DIR = Path(".local") / "mcp-tileset-sim-output"
 MCP_TOOLS = {
     "create_sidescroller_tileset": {
         "required": ("lower_description", "transition_description"),
+        "allowed": {
+            "lower_description",
+            "transition_description",
+            "transition_size",
+            "tile_size",
+            "outline",
+            "shading",
+            "detail",
+            "tile_strength",
+            "base_tile_id",
+            "tileset_adherence",
+            "tileset_adherence_freedom",
+            "text_guidance_scale",
+            "seed",
+        },
         "default_request": {
             "lower_description": "",
             "transition_description": "",
@@ -50,6 +66,28 @@ MCP_TOOLS = {
     },
     "create_topdown_tileset": {
         "required": ("lower_description", "upper_description"),
+        "allowed": {
+            "lower_description",
+            "upper_description",
+            "transition_description",
+            "transition_size",
+            "tile_size",
+            "outline",
+            "shading",
+            "detail",
+            "view",
+            "mode",
+            "tile_strength",
+            "lower_base_tile_id",
+            "upper_base_tile_id",
+            "tileset_adherence",
+            "tileset_adherence_freedom",
+            "text_guidance_scale",
+            "seed",
+            "spread_x",
+            "slope_size",
+            "raggedness",
+        },
         "default_request": {
             "lower_description": "",
             "upper_description": "",
@@ -135,7 +173,7 @@ KEYWORD_COLORS = [
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Render a schematic PixelLab MCP DualGrid/Wang tileset from a "
+            "Render a local PixelLab MCP-style tileset result from a "
             "create_topdown_tileset or create_sidescroller_tileset request."
         )
     )
@@ -145,6 +183,17 @@ def parse_args() -> argparse.Namespace:
         nargs="?",
         type=Path,
         help="Optional JSON request file. If omitted, reads JSON from stdin when present, otherwise uses a minimal empty request.",
+    )
+    parser.add_argument(
+        "--renderer",
+        choices=["deterministic"],
+        default="deterministic",
+        help="Renderer backend. Only deterministic local rendering is currently implemented.",
+    )
+    parser.add_argument(
+        "--allow-compact-expanded",
+        action="store_true",
+        help="Allow compact fallback rendering for top-down requests that PixelLab may export as expanded sheets.",
     )
     parser.add_argument(
         "--scale",
@@ -184,7 +233,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_request(tool: str, request_json: Path | None) -> dict[str, Any]:
+def load_request(tool: str, request_json: Path | None) -> tuple[dict[str, Any], dict[str, Any]]:
     base = dict(MCP_TOOLS[tool]["default_request"])
     raw = ""
     if request_json is not None:
@@ -192,12 +241,12 @@ def load_request(tool: str, request_json: Path | None) -> dict[str, Any]:
     elif not sys.stdin.isatty():
         raw = sys.stdin.read()
     if not raw.strip():
-        return base
+        return base, {}
     data = json.loads(raw)
     if not isinstance(data, dict):
         raise SystemExit("Request JSON must be an object.")
     base.update(data)
-    return base
+    return base, data
 
 
 def tile_size_from_request(request: dict[str, Any]) -> tuple[int, int]:
@@ -209,9 +258,18 @@ def tile_size_from_request(request: dict[str, Any]) -> tuple[int, int]:
     return width, height
 
 
-def validate_request(tool: str, request: dict[str, Any], tile_width: int, tile_height: int) -> list[str]:
+def validate_request(
+    tool: str,
+    request: dict[str, Any],
+    tile_width: int,
+    tile_height: int,
+    allow_compact_expanded: bool,
+) -> tuple[list[str], list[str]]:
     config = MCP_TOOLS[tool]
     warnings: list[str] = []
+    ignored_fields = sorted(set(request) - set(config["allowed"]))
+    if ignored_fields:
+        warnings.append(f"Fields not exposed by {tool} MCP schema are ignored locally: {', '.join(ignored_fields)}.")
     for field in config["required"]:
         if field not in request:
             raise SystemExit(f"{tool} requires {field}.")
@@ -227,6 +285,8 @@ def validate_request(tool: str, request: dict[str, Any], tile_width: int, tile_h
         if request.get("view", "high top-down") not in {"low top-down", "high top-down"}:
             raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
         if mode == "pro":
+            if not allow_compact_expanded:
+                raise SystemExit("Top-down pro mode can expand beyond compact output; rerun with --allow-compact-expanded to force compact fallback.")
             warnings.append("Top-down pro mode may not preserve the compact 4x4 output shape.")
 
     raw_transition = float(request.get("transition_size", 0.0))
@@ -234,6 +294,8 @@ def validate_request(tool: str, request: dict[str, Any], tile_width: int, tile_h
         values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
         raise SystemExit(f"{tool} transition_size must be one of {values}.")
     if tool == "create_topdown_tileset" and raw_transition == 1.0:
+        if not allow_compact_expanded:
+            raise SystemExit("Top-down transition_size 1.0 can expand beyond compact output; rerun with --allow-compact-expanded to force compact fallback.")
         warnings.append("Top-down transition_size 1.0 can expand beyond a compact 4x4 sheet.")
 
     detail = request.get("detail")
@@ -251,7 +313,7 @@ def validate_request(tool: str, request: dict[str, Any], tile_width: int, tile_h
     outline = request.get("outline")
     if outline is not None and outline not in {"single color outline", "selective outline", "lineless"}:
         raise SystemExit("outline must be single color outline, selective outline, or lineless.")
-    return warnings
+    return warnings, ignored_fields
 
 
 def transition_pixels(tool: str, request: dict[str, Any], tile_height: int) -> int:
@@ -287,7 +349,7 @@ def draw_corner_preview(
     draw_grid: bool,
     tiles: list[tuple[str, dict[str, str], int]],
 ) -> Image.Image:
-    sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), COLORS["upper_preview"])
+    sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), COLORS["preview_background"])
     draw = ImageDraw.Draw(sheet)
     half_w = tile_width // 2
     half_h = tile_height // 2
@@ -306,6 +368,33 @@ def draw_corner_preview(
         if draw_grid:
             draw.rectangle((ox, oy, ox + tile_width - 1, oy + tile_height - 1), outline=COLORS["grid"])
     return sheet
+
+
+def description_color(description: str, fallback: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    text = description.lower()
+    for token, color in KEYWORD_COLORS:
+        if token in text:
+            return color
+    return fallback
+
+
+def lighten(color: tuple[int, int, int, int], amount: int = 36) -> tuple[int, int, int, int]:
+    return (min(255, color[0] + amount), min(255, color[1] + amount), min(255, color[2] + amount), color[3])
+
+
+def texture_pixel(description: str, x: int, y: int, base: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    text = description.lower()
+    if "1-bit" in text or "one-bit" in text:
+        if "sparse" in text and ((x * 11 + y * 7) % 29 == 0):
+            return (255, 255, 255, 255) if base[:3] == (0, 0, 0) else (0, 0, 0, 255)
+        return base
+    if any(word in text for word in ("speckle", "sparse", "broken", "noise")) and ((x * 13 + y * 5) % 23 == 0):
+        return lighten(base, 60)
+    if any(word in text for word in ("stripe", "line", "horizontal")) and y % 5 == 0:
+        return lighten(base, 52)
+    if "dither" in text and ((x + y) % 2 == 0):
+        return lighten(base, 44)
+    return base
 
 
 def dualgrid_lower_mask(corners: dict[str, str], tile_width: int, tile_height: int) -> Image.Image:
@@ -382,7 +471,7 @@ def boundary_mask(lower_mask: Image.Image, thickness: int) -> Image.Image:
     return boundary
 
 
-def draw_platform_preview(
+def draw_tileset(
     tool: str,
     request: dict[str, Any],
     tile_width: int,
@@ -391,9 +480,13 @@ def draw_platform_preview(
     tiles: list[tuple[str, dict[str, str], int]],
     template_sheet: Image.Image | None = None,
 ) -> Image.Image:
-    sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), COLORS["upper_preview"])
+    background = COLORS["transparent"] if tool == "create_sidescroller_tileset" else COLORS["preview_background"]
+    sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), background)
     draw = ImageDraw.Draw(sheet)
     thickness = transition_pixels(tool, request, tile_height)
+    lower_color = description_color(request.get("lower_description", ""), (50, 50, 54, 255))
+    upper_color = description_color(request.get("upper_description", ""), (184, 184, 188, 255))
+    transition_color = description_color(request.get("transition_description", ""), lighten(lower_color, 76))
 
     for index, (_, corners, _) in enumerate(tiles):
         ox = (index % 4) * tile_width
@@ -409,8 +502,19 @@ def draw_platform_preview(
         edge_mask = boundary_mask(lower_mask, thickness)
         for y in range(tile_height):
             for x in range(tile_width):
-                if lower_mask.getpixel((x, y)):
-                    color = COLORS["boundary"] if edge_mask.getpixel((x, y)) else COLORS[LOWER]
+                terrain = terrain_at(corners, x, y, tile_width, tile_height)
+                if tool == "create_topdown_tileset":
+                    description_field = "lower_description" if terrain == LOWER else "upper_description"
+                    base = lower_color if terrain == LOWER else upper_color
+                    color = texture_pixel(request.get(description_field, ""), x, y, base)
+                    if edge_mask.getpixel((x, y)):
+                        color = texture_pixel(request.get("transition_description", ""), x, y, transition_color)
+                    sheet.putpixel((ox + x, oy + y), color)
+                elif lower_mask.getpixel((x, y)):
+                    if thickness and (edge_mask.getpixel((x, y)) or y < thickness):
+                        color = texture_pixel(request.get("transition_description", ""), x, y, transition_color)
+                    else:
+                        color = texture_pixel(request.get("lower_description", ""), x, y, lower_color)
                     sheet.putpixel((ox + x, oy + y), color)
         if draw_grid:
             draw.rectangle((ox, oy, ox + tile_width - 1, oy + tile_height - 1), outline=COLORS["grid"])
@@ -435,11 +539,12 @@ def build_report(
     tiles: list[tuple[str, dict[str, str], int]],
 ) -> dict[str, Any]:
     return {
-        "source": "PixelLab MCP DualGrid metadata-derived simulator",
+        "source": "PixelLab MCP tileset simulator",
         "tool": tool,
+        "renderer": "deterministic",
         "limits": [
-            "This simulates DualGrid/Wang corner layout only.",
-            "It does not predict PixelLab's AI texture, palette, or exact compositing.",
+            "This simulates PixelLab MCP request shape and compact tileset layout locally.",
+            "The deterministic renderer uses simple keyword/semantic colors and does not predict PixelLab's model taste.",
             "expected_pattern_4x4 is derived from corners; observed PixelLab metadata often disagrees across surfaces.",
             "Boundary preview is per-tile schematic and does not model cross-tile seam continuity.",
             "Template alpha masks count any opaque pixel as occupied, including upper/detail pixels.",
@@ -532,20 +637,20 @@ def main() -> None:
             raise SystemExit(f"Template sheet must be {expected_size[0]}x{expected_size[1]}, got {template_sheet.size}.")
 
     corner = draw_corner_preview(tile_width, tile_height, args.draw_grid, tiles)
-    platform = draw_platform_preview(args.tool, request, tile_width, tile_height, args.draw_grid, tiles, template_sheet)
+    tileset = draw_tileset(args.tool, request, tile_width, tile_height, args.draw_grid, tiles, template_sheet)
 
     save_scaled(corner, DEFAULT_OUT_DIR / "dualgrid-corner-preview.png", args.scale)
-    save_scaled(platform, DEFAULT_OUT_DIR / "dualgrid-tileset-preview.png", args.scale)
+    save_scaled(tileset, DEFAULT_OUT_DIR / "tileset.png", args.scale)
 
     report = build_report(args.tool, request, warnings, tile_width, tile_height, args.layout, filled_bit, tiles)
     if args.template_sheet:
         report["template_sheet"] = str(args.template_sheet)
-    with (DEFAULT_OUT_DIR / "dualgrid-patterns.json").open("w", encoding="utf-8") as handle:
+    with (DEFAULT_OUT_DIR / "mcp-response.json").open("w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2)
 
     print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-corner-preview.png'}")
-    print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-tileset-preview.png'}")
-    print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-patterns.json'}")
+    print(f"Wrote {DEFAULT_OUT_DIR / 'tileset.png'}")
+    print(f"Wrote {DEFAULT_OUT_DIR / 'mcp-response.json'}")
 
 
 if __name__ == "__main__":

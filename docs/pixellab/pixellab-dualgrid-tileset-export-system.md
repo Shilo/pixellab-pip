@@ -143,41 +143,42 @@ For strict 1-bit results, Aseprite or local palette verification can create an e
 
 ## Simulator Contract
 
-The local simulator now lives at:
+The local MCP tileset simulator now lives at:
 
 ```text
-dev-tools/dualgrid_tileset_sim.py
+dev-tools/pixellab_mcp_tileset_sim.py
 ```
 
 Run a PixelLab-layout sidescroller simulation with:
 
 ```powershell
-python dev-tools/dualgrid_tileset_sim.py create_sidescroller_tileset --draw-grid --layout pixellab
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --draw-grid --layout pixellab
 ```
 
 Run a PixelLab-layout top-down simulation with a session-local request:
 
 ```powershell
-python dev-tools/dualgrid_tileset_sim.py create_topdown_tileset .local/topdown-request.json --draw-grid --layout pixellab
+python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset .local/topdown-request.json --draw-grid --layout pixellab
 ```
 
-The simulator uses a minimal built-in request when no JSON is supplied. It always writes to:
+The simulator accepts MCP-style request JSON from a file or stdin and uses a minimal built-in request when no JSON is supplied. It always writes to:
 
 ```text
-.local/dualgrid-sim-output
+.local/mcp-tileset-sim-output
 ```
 
 The current simulator covers the compact 16-tile layout for MCP-style `create_sidescroller_tileset` and `create_topdown_tileset` requests. It should focus on:
 
-- Request-field shape and future schema validation
+- Request-field shape and local schema validation
 - Bitmask and corner math
 - PixelLab compact 4x4 layout order
 - TileMapDual remapping
 - Pattern report generation
 - Palette and dimension verification
+- Deterministic semantic rendering from description text
 - Template-mask previews from observed PixelLab sheets
 
-It validates only the route fields that matter for local structure simulation. It does not yet simulate expanded top-down transition sheets.
+It validates only the route fields that matter for local simulation. It does not yet simulate expanded top-down transition sheets.
 
 The platform preview is a per-tile schematic. It can highlight tile edges that would become internal seams in a composed map, and template-sheet mode treats any opaque pixel as occupied, including decorative top/transition pixels.
 
