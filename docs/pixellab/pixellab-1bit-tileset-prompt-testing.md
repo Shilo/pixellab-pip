@@ -113,6 +113,7 @@ A local black/white threshold study tested whether the raw PixelLab outputs cont
 | Source | Clamp result |
 |---|---|
 | REST top-down `transition_reference_image` only | Strong candidate. Near-white contours survive strict clamping across high thresholds, so the top-down pipeline is close: shape with `transition_reference_image`, then clamp after approval. |
+| REST top-down cave-rim `transition_reference_image` only | Strongest current top-down clamp target. Raw output has no true white, but the lighter contour is placed on the wall/floor boundary and clamps cleanly at threshold 96 with dark interiors preserved. |
 | REST sidescroller `transition_reference_image` only | Weak candidate. Top-layer information exists, but it is dark blue/teal; low thresholds reveal too much body texture, while high thresholds lose the rim. |
 | REST sidescroller `color_image` + reference | Not recoverable. The output is black/transparent with no white rim to recover. |
 | Prompt-only MCP sidescroller `transition_size: 0.5` | Best current sidescroller clamp candidate. It has brighter top/end-cap accents than REST sidescroller reference runs, and high thresholds preserve a cleaner ledge line. |
@@ -122,6 +123,8 @@ Current selected clamp previews live under `pixellab-pip-generations/1bit-palett
 A follow-up REST sidescroller prompt-only test, `side-prompt-d-high-contrast-no-controls`, tried to ask directly for high-contrast bright white top/end-cap pixels, darker interiors, and no controls. It did not improve the situation: the raw output contained no bright or whiteish pixels, shifted accents into purple midtones, and produced more interior texture. Threshold clamps only recovered white at low/mid thresholds where body noise also becomes white. This did not beat the earlier MCP `transition_size: 0.5` candidate.
 
 A follow-up MCP sidescroller prompt-only test, `side-d-smooth-cap-05`, tried to remove texture language and ask for a smooth black silhouette with a crisp white cap. It also did not improve on `side-c-broken-rim-05`: the raw output became chunkier/noisier, and high-threshold clamps lost the clean broken ledge line. Keep `side-c-broken-rim-05` as the current sidescroller clamp baseline.
+
+A follow-up REST top-down reference-only test, `topdown-cave-rim-ref-a`, used a 16x16 broken-rim transition reference and cave-wall wording. It produced the best top-down 1-bit shape candidate so far: raw PixelLab colors remained dark gray/blue with no true white, but edge placement was correct and local clamps from threshold 32 through 96 preserved a readable white rim without flooding the interior. This reinforces the shape-first workflow: use PixelLab/reference controls for boundary placement, then palette-clamp only after the generated shape is accepted.
 
 For top-down wall tests, prefer:
 

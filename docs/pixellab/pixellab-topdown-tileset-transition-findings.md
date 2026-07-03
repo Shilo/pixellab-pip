@@ -1,6 +1,6 @@
 # PixelLab Top-Down Tileset Transition Findings
 
-Last reviewed: 2026-07-01.
+Last reviewed: 2026-07-03.
 
 This note records live-generation findings for PixelLab top-down Wang/autotile tilesets when using the hosted MCP `create_topdown_tileset` tool for grid-based graybox prototyping assets.
 
@@ -67,7 +67,7 @@ All ten outputs preserved the expected compact atlas size: each downloaded PNG w
 
 The strongest visual cluster came from prompts that kept both lower and upper terrain black or monochrome and described the transition as a white-on-black or black-and-white wall surface. Prompts that made the upper terrain white tended to brighten the whole terrain too much. However, even the strongest cluster did not place readable dithering on the wall surface.
 
-Observed conclusion: `text_guidance_scale` is a soft prompt-following control, not a hard palette, dithering, or material-placement constraint. For strict palette or precise dithering-placement tests, prompt-only MCP generation should be treated as low-confidence. Prefer REST `color_image` for palette anchoring, REST reference-image fields for terrain or transition anchoring, or an explicitly approved local/editor post-process workflow when the user wants deterministic 1-bit indexed output or ordered dithering.
+Observed conclusion: `text_guidance_scale` is a soft prompt-following control, not a hard palette, dithering, or material-placement constraint. For strict palette or precise dithering-placement tests, prompt-only MCP generation should be treated as low-confidence. Prefer REST reference-image fields for terrain or transition anchoring first. Use REST `color_image` only as a separate palette-control test after verifying it does not erase needed transition pixels, or use an explicitly approved local/editor post-process workflow when the user wants deterministic 1-bit indexed output or ordered dithering.
 
 `color_image` is a REST-only palette reference image field for tileset generation. It should not be used when the experiment is specifically measuring text-only obedience, because it changes the test from prompt-following to palette anchoring. When the goal is production palette control, it is appropriate to use `color_image`; observed REST behavior suggests top-down tilesets may require the palette reference image to be `64x64` internally even when smaller PNGs pass initial request validation.
 
@@ -95,6 +95,14 @@ Observed conclusion: `transition_reference_image` can influence the transition s
 
 The 16x16 dither reference was a reasonable first test because the tileset tile size was 16x16 and REST does not document a separate required size for transition references. However, `transition_size: 0.5` means the visible wall/transition surface is roughly half-tile scale in many tiles. For future tests, prefer a 16x16 reference that includes tile context and an 8-pixel-high transition/wall band, rather than a pure full-tile checker. A bare 8x8 reference might match the half-tile idea, but it loses context and may be resized or interpreted only as generic texture.
 
+### One-Bit Cave Rim Reference Test
+
+A later REST reference-only test, `topdown-cave-rim-ref-a`, used black lower/upper terrain prompts, a 16x16 broken white contour `transition_reference_image`, `transition_size: 0.5`, and no `color_image`.
+
+The result was not strict black and white in raw form. It contained 16 dark RGB colors and no true white or bright pixels. However, it placed the lighter contour information in the correct cave-wall boundary zone while keeping most interiors very dark. Local threshold clamps from 32 through 96 preserved a readable white rim without flooding the terrain interior; threshold 96 was the cleanest current preview. Thresholds 112 and above erased most of the rim.
+
+Observed conclusion: for top-down 1-bit cave/wall work, `transition_reference_image` can be useful even when raw PixelLab colors are too dark, because palette clamping can recover a correctly placed luminance boundary. Judge the raw output by boundary placement and luminance separation before judging exact palette. Do not add `color_image` as the automatic next step, because later 1-bit live checks showed black/white `color_image` can erase white transition information.
+
 ## Routing Guidance
 
 For a strict 4x4 graybox top-down tileset, start with:
@@ -111,7 +119,7 @@ Avoid Pro mode for this specific graybox blockout workflow unless testing Pro-on
 
 Use `transition_size: 1.0` only when the richer expanded transition set is acceptable. It may be visually preferable, but it should be treated as a different export layout rather than a compact 16-tile replacement.
 
-Do not spend large prompt-only batches trying to force exact 1-bit palettes or transition-surface dithering. First decide whether the goal is text-obedience research or production control. For production control, move to REST palette/reference inputs or approved Aseprite/indexed-color processing instead of escalating prompt wording alone. If using REST `color_image` for top-down tilesets, start with a `64x64` palette reference image so the background job does not fail after accepting a smaller request payload.
+Do not spend large prompt-only batches trying to force exact 1-bit palettes or transition-surface dithering. First decide whether the goal is text-obedience research or production control. For production control, move to REST reference inputs or approved Aseprite/indexed-color processing instead of escalating prompt wording alone. If using REST `color_image` for top-down tilesets, start with a `64x64` palette reference image so the background job does not fail after accepting a smaller request payload, but treat `color_image` as a risky follow-up because later 1-bit live checks showed it can collapse black terrain plus white transition requests into all-black output.
 
 When testing `transition_reference_image`, keep `text_guidance_scale` at the default first. Increase it only when the text wording itself is more important than the reference style, because high text guidance does not mean high reference adherence.
 
