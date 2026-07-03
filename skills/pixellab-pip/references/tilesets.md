@@ -78,7 +78,11 @@ When the user asks for maximum, 100%, or forced text guidance, map that request 
 
 For any MCP or REST tileset route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar prompt wording.
 
+For strict 1-bit top-down wall/floor prompt tests, prefer standard mode before Pro. Local corpus checks showed observed Pro outputs can expand at `transition_size: 0.5`, while standard mode is the safer compact 16-tile path for simulator-to-live comparisons.
+
 Tileset generators do not reliably enforce strict 1-bit black-and-white output from text alone, even with high `text_guidance_scale`. Treat `1-bit`, `black-and-white only`, `no gray`, and named exact palettes as palette requirements unless the user explicitly accepts approximation. If the chosen route exposes a palette/control image parameter, use or ask for that route-specific control. If the chosen route does not expose palette control, state that limitation before generation, or deliver an honestly labeled palette-clamped derivative after saving the untouched PixelLab original.
+
+For strict 1-bit tilesets, prioritize PixelLab-generated shape over raw palette. Palette clamping can make a good PixelLab shape exact black/white, but it cannot fix a wrong silhouette, wrong exposed edge, bad center-tile seam, or misplaced transition without locally altering the art.
 
 When the user requests a 1-bit tileset and the chosen tileset route exposes style controls, default any unspecified style controls to `detail: low detail`, `shading: flat shading`, and `outline: lineless`. Preserve explicit user-supplied values for those controls.
 

@@ -137,9 +137,13 @@ The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and low
 
 This is an MCP-shape simulator, not PixelLab. The deterministic renderer uses simple keyword colors and texture rules, so it can compare request wording cheaply but does not predict PixelLab's generated texture, palette, prompt adherence, or exact compositing.
 
+For strict 1-bit prompt work, judge simulator runs by the shape question first: which layer receives the body, top surface, boundary, or transition pixels. Exact black/white palette is a secondary check because live PixelLab color drift can be palette-clamped later, while a bad silhouette or bad seam cannot be repaired without changing PixelLab-generated art.
+
 The simulator validates only the MCP-facing request shape that matters for local simulation. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce expanded top-down transition sheets.
 
-Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0`. MCP documents `transition_size` as a float and describes `0`, `0.25`, and `0.5` as guidepost values; the simulator accepts compact values below `1.0` and uses the numeric value directly. `1.0` can produce an expanded top-down sheet, so this compact simulator reports it as valid-but-unsupported instead of producing a misleading 4x4 PNG.
+Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0`. MCP documents `transition_size` as a float and describes `0`, `0.25`, and `0.5` as guidepost values; the simulator accepts compact standard-mode values below `1.0` and uses the numeric value directly. `1.0` can produce an expanded top-down sheet, so this compact simulator reports it as valid-but-unsupported instead of producing a misleading 4x4 PNG.
+
+Top-down `mode: "pro"` is also conservative: observed PixelLab Pro corpus outputs can expand at `transition_size: 0.5`, so the simulator refuses Pro requests at `0.5` or higher instead of pretending compact parity.
 
 AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. The recipe schema is tool-shaped: sidescroller uses lower plus transition, while top-down uses lower, upper, and transition. `transition_size` remains the simulator's geometry control; the AI cannot disable a requested transition. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
 
