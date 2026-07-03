@@ -1,0 +1,21 @@
+name: QA
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    name: Repository QA
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run QA checks
+        shell: bash
+        run: python dev-tools/qa.py

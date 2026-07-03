@@ -78,7 +78,7 @@ Report only generation settings that materially affected the output. Do not dump
 
 For cost, report total generation cost for the whole generate/promote/edit flow when exposed. Prefer exact per-call `usage` totals when available. If only balance is available, report `before -> after` and the delta. If other PixelLab jobs may have run concurrently, do not present a balance delta as the cost of one specific job; label it as an overlapping balance observation and prefer the job's own `usage` when available. If usage and balance are both unavailable, say `Cost: not exposed by the tool/API`.
 
-Use `get_balance` or REST `GET /balance` before and after nontrivial generation when available. If only balance is available, report the delta. If neither per-call usage nor balance is exposed, say usage was not exposed. Label estimates as estimates.
+Use `get_balance` or REST `GET /balance` before and after nontrivial generation when available after the user has approved live work. If only balance is available, report the delta. If neither per-call usage nor balance is exposed, say usage was not exposed. Label estimates as estimates.
 
 If an async call times out or remains pending, keep the job or asset ID and use the matching status/get route or MCP getter. Do not resubmit a paid generation unless the user explicitly wants a fresh run. If a managed object returns `review` status, report the selection step instead of treating the job as incomplete.
 

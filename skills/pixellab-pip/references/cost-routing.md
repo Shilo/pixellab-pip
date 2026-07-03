@@ -56,7 +56,7 @@ When the user says cheap:
 
 When a cheap request needs more paid attempts, ask before spending again. This includes prompt tweaks, reruns for quality, generating more candidates, Pro comparison runs, paid retries after failures, batch expansion, animation pass expansion, or switching to a paid edit route. Report the route/tool you would use, the expected or observed cost category, cost already spent, and what will change in the next attempt.
 
-Do not ask for permission for free/local work such as status polling, downloads, cropping, spritesheet assembly, ZIP packaging, manifest writing, filesystem verification, or balance checks, unless that work would trigger PixelLab to create or repaint assets.
+Do not ask for permission for free/local work such as status polling, downloads, cropping, spritesheet assembly, ZIP packaging, manifest writing, or filesystem verification. For balance checks, no extra permission is needed when the user has already approved live generation and the check is only for cost reporting; for setup, readiness, status-only, or account-data requests, follow `setup.md` and ask before checking balance.
 
 ## User-Facing Behavior
 

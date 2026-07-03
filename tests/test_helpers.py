@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -83,6 +85,29 @@ class BarkConfigTests(unittest.TestCase):
                 self.assertEqual(data, {"bark": False, "other": 7})
             finally:
                 bark.SKILL_CONFIG = original_skill_config
+
+
+class HelperCliSmokeTests(unittest.TestCase):
+    def run_help(self, script: Path) -> str:
+        completed = subprocess.run(
+            [sys.executable, str(script), "--help"],
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+        return completed.stdout
+
+    def test_doc_watch_help(self) -> None:
+        output = self.run_help(REPO_ROOT / "dev-tools/pixellab-doc-watch.py")
+        self.assertIn("usage:", output.lower())
+        self.assertIn("refresh", output)
+
+    def test_tileset_simulator_help(self) -> None:
+        output = self.run_help(REPO_ROOT / "dev-tools/pixellab_mcp_tileset_sim.py")
+        self.assertIn("usage:", output.lower())
+        self.assertIn("create_topdown_tileset", output)
 
 
 if __name__ == "__main__":

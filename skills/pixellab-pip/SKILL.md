@@ -83,7 +83,7 @@ Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2
 | Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; treat VFX as a description, not a separate endpoint. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | REST v2. | `GET /background-jobs/{job_id}`. MCP managed assets use resource-specific `get_*` tools instead. |
-| PixelLab projects, sandbox, deployed agent workflows, chat, MCP help/feedback | MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, and `agent_talk` tools if available. | No public REST v2 equivalent was documented. |
+| PixelLab projects, sandbox, deployed agent workflows, chat, MCP help/feedback | Read `references/mcp-platform-tools.md` before using MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, or `agent_talk` tools. | No public REST v2 equivalent was documented. |
 
 ## Clarify Only For Collisions
 
@@ -120,6 +120,7 @@ Read only the relevant reference:
 - Skeleton/template/preset character animations and raw skeleton route boundaries: `references/preset-skeleton-template-animations.md`.
 - Raw animation, interpolation, outfit transfer, frame anchors, and idle-loop artifact risk: `references/animation.md`.
 - Editor-only utilities and unsupported public route caveats: `references/editor-only-utilities.md`.
+- PixelLab project, sandbox, chat, deployed-agent, MCP help, and feedback tools: `references/mcp-platform-tools.md`.
 - REST v2 natural-language field character limits or prompt-length rejections: `references/prompt-limits.md`.
 - Explicit Aseprite handling, `.aseprite` workspace creation/update, generated-frame import, Aseprite layers/frames/tags, Aseprite palette quantization/color reduction/indexed conversion/palette replacement, or Aseprite CLI/Lua export/open behavior: `references/aseprite-cli.md`.
 - Explicit Aseprite MCP server/tooling requests: `references/aseprite-mcp.md`.

@@ -84,7 +84,7 @@ Install:
 
 ```text
 codex plugin marketplace add Shilo/pixellab-pip
-# Install pixellab-pip from /plugins or the Codex plugin directory.
+codex plugin add pixellab-pip@pixellab-pip
 @pixellab-pip setup
 ```
 
@@ -92,6 +92,8 @@ Update:
 
 ```text
 codex plugin marketplace upgrade pixellab-pip
+codex plugin remove pixellab-pip
+codex plugin add pixellab-pip@pixellab-pip
 ```
 
 #### Gemini CLI

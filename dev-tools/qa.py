@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import html
 import json
-import py_compile
 import re
 import subprocess
 import sys
@@ -67,7 +66,8 @@ def check_versions() -> None:
 
 def check_python_compiles() -> None:
     for path in run_git_ls_files("*.py", "*/*.py", "*/*/*.py"):
-        py_compile.compile(str(path), doraise=True)
+        source = path.read_text(encoding="utf-8")
+        compile(source, str(path), "exec")
 
 
 def strip_link_target(target: str) -> str:
