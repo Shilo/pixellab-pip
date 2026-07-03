@@ -789,6 +789,8 @@ def run_ai_renderer(
 ) -> dict[str, Any] | None:
     if renderer == "deterministic":
         return None
+    if renderer == "claude":
+        raise SystemExit("--renderer claude is temporarily disabled.")
     if timeout < 1:
         raise SystemExit("--agent-timeout must be at least 1 second.")
 
