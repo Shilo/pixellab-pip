@@ -81,11 +81,17 @@ Generated files:
 
 - `corner-key-preview.png`
 - `corner-key-preview-x8.png`
+- `native-tileset.png`
+- `native-tileset-x8.png`
+- `component-lower.png`
+- `component-upper.png`
+- `component-transition.png`
+- `component-center-tile.png`
 - `tileset.png`
 - `tileset-x8.png`
 - `sim-report.json`
 
-Use `tileset.png` as the output under test. `corner-key-preview.png` is a schematic for checking the source corner classes. `sim-report.json` records the exact request, omitted MCP defaults used internally, native 15-tileset source cells, and exported cell placements; it is not a PixelLab MCP response.
+Use `tileset.png` as the output under test. `native-tileset.png` is the compact 4x4 source sheet before export-layout repacking. Component images show the interpreted lower, upper, transition, and center tile previews. `corner-key-preview.png` is a schematic for checking the source corner classes. `sim-report.json` records the exact request, omitted MCP defaults used internally, native 15-tileset source cells, exported cell placements, and any AI render recipe; it is not a PixelLab MCP response.
 
 ## Export Layouts
 
@@ -113,7 +119,10 @@ The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and low
 
 - `--draw-grid`: draw magenta tile boundaries in preview PNGs.
 - `--scale N`: set the nearest-neighbor preview scale. Default is `8`.
-- `--renderer deterministic`: use the local deterministic renderer. This is the only renderer currently implemented.
+- `--renderer deterministic`: use local keyword/semantic rendering. This is the default.
+- `--renderer codex`: call `codex exec` to convert descriptions into a constrained semantic render recipe, then render locally.
+- `--renderer claude`: call `claude -p` to convert descriptions into a constrained semantic render recipe, then render locally.
+- `--agent-timeout N`: timeout in seconds for `codex` or `claude` renderers. Default is `180`.
 - `--layout NAME`: choose `15-tileset`, `wang`, or `godot-3x3`.
 - `--output NAME`: write under `.local/mcp-tileset-sim-output/NAME`.
 - `--template-sheet PATH`: reuse alpha masks from an existing compact 4x4 PixelLab sheet.
@@ -126,7 +135,7 @@ The simulator validates only the MCP-facing request shape that matters for local
 
 Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and Pro top-down `transition_size >= 0.5`. Those can be valid MCP request shapes, but they may export expanded sheets this compact simulator does not render.
 
-Future agent renderers such as `--renderer codex` or `--renderer claude` should be added as explicitly experimental modes. They must write labeled non-PixelLab outputs and must not be described as PixelLab predictions.
+AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
 
 `expected_pattern_4x4` in the JSON report is derived from tile corners. Do not assume downloaded PixelLab `pattern_4x4` fields are authoritative; local fixtures show they can disagree with `wang_N`, corners, and visual sheet position.
 

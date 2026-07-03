@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -176,7 +177,42 @@ COLORS = {
 }
 HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
 RECIPE_TEXTURES = {"solid", "sparse", "broken", "speckle", "dither", "stripe", "none"}
-RECIPE_PLACEMENTS = {"auto", "top", "boundary", "none"}
+RECIPE_PLACEMENTS = {"auto", "top", "boundary"}
+RECIPE_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["summary", "lower", "upper", "transition"],
+    "properties": {
+        "summary": {"type": "string"},
+        "lower": {"$ref": "#/$defs/terrain"},
+        "upper": {"$ref": "#/$defs/terrain"},
+        "transition": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["label", "color", "accent_color", "texture", "placement"],
+            "properties": {
+                "label": {"type": "string"},
+                "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+                "accent_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+                "texture": {"type": "string", "enum": sorted(RECIPE_TEXTURES)},
+                "placement": {"type": "string", "enum": sorted(RECIPE_PLACEMENTS)},
+            },
+        },
+    },
+    "$defs": {
+        "terrain": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["label", "color", "accent_color", "texture"],
+            "properties": {
+                "label": {"type": "string"},
+                "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+                "accent_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+                "texture": {"type": "string", "enum": sorted(RECIPE_TEXTURES)},
+            },
+        }
+    },
+}
 KEYWORD_COLORS = [
     ("#000000", (0, 0, 0, 255)),
     ("pure black", (0, 0, 0, 255)),
@@ -287,12 +323,18 @@ def output_dir_from_name(name: str | None) -> Path:
 def load_request(request_json: Path | None) -> dict[str, Any]:
     raw = ""
     if request_json is not None:
-        raw = request_json.read_text(encoding="utf-8")
+        try:
+            raw = request_json.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise SystemExit(f"Could not read request JSON file: {request_json}") from exc
     elif not sys.stdin.isatty():
         raw = sys.stdin.read()
     if not raw.strip():
         return {}
-    data = json.loads(raw)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Request JSON is invalid: {exc.msg} at line {exc.lineno}, column {exc.colno}.") from exc
     if not isinstance(data, dict):
         raise SystemExit("Request JSON must be an object.")
     return data
@@ -531,6 +573,179 @@ def texture_pixel(
     return base
 
 
+def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, tile_height: int) -> str:
+    return (
+        "You are helping a local PixelLab MCP tileset simulator interpret descriptions. "
+        "Return JSON only, with no Markdown. Do not draw pixels and do not call tools. "
+        "Your job is to choose a compact semantic rendering recipe; the simulator will "
+        "handle DualGrid math, masks, and export layout composition.\n\n"
+        "Schema:\n"
+        "{\n"
+        '  "summary": "short plain-English interpretation",\n'
+        '  "lower": {"label": "terrain/platform body", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
+        '  "upper": {"label": "upper/background terrain", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
+        '  "transition": {"label": "edge/top transition", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none", "placement": "auto|top|boundary"}\n'
+        "}\n\n"
+        "Rules:\n"
+        "- Use only valid #RRGGBB colors.\n"
+        "- For 1-bit or monochrome prompts, prefer only #000000 and #FFFFFF.\n"
+        "- For sidescroller requests, lower is the platform body and transition is the top/surface layer.\n"
+        "- For top-down requests, lower and upper are the two terrain classes and transition is their boundary style.\n"
+        "- The input descriptions are inside lower_description, upper_description, and transition_description.\n"
+        "- Never return an error object; always infer the best recipe from the JSON fields provided.\n"
+        "- Do not include keys outside the schema.\n\n"
+        f"Tool: {tool}\n"
+        f"Tile size: {tile_width}x{tile_height}\n"
+        f"MCP request JSON:\n{json.dumps(request, indent=2, sort_keys=True)}\n"
+    )
+
+
+def extract_json_object(text: str) -> dict[str, Any]:
+    stripped = text.strip()
+    try:
+        data = json.loads(stripped)
+    except json.JSONDecodeError as exc:
+        excerpt = stripped[:500]
+        raise SystemExit(f"AI renderer did not return exactly one JSON object: {exc.msg}. Output excerpt: {excerpt}") from exc
+    if not isinstance(data, dict):
+        raise SystemExit("AI renderer JSON must be an object.")
+    return data
+
+
+def require_hex(value: Any, field: str, renderer: str) -> str:
+    if not isinstance(value, str) or not HEX_COLOR.match(value):
+        raise SystemExit(f"--renderer {renderer} returned invalid {field}; expected #RRGGBB.")
+    return value.upper()
+
+
+def validate_ai_recipe(data: dict[str, Any], renderer: str, tool: str) -> dict[str, Any]:
+    allowed_top = {"summary", "lower", "upper", "transition"}
+    unknown_top = sorted(set(data) - allowed_top)
+    if unknown_top:
+        raise SystemExit(f"--renderer {renderer} returned unknown recipe fields: {', '.join(unknown_top)}.")
+    recipe: dict[str, Any] = {
+        "renderer": renderer,
+        "summary": str(data.get("summary", ""))[:500],
+        "raw": data,
+    }
+    for section_name in ("lower", "upper", "transition"):
+        section_in = data.get(section_name)
+        section_out: dict[str, Any] = {}
+        if not isinstance(section_in, dict):
+            raise SystemExit(f"--renderer {renderer} returned missing or invalid {section_name} section.")
+        allowed_section = {"label", "color", "accent_color", "texture"}
+        if section_name == "transition":
+            allowed_section.add("placement")
+        unknown_section = sorted(set(section_in) - allowed_section)
+        if unknown_section:
+            raise SystemExit(
+                f"--renderer {renderer} returned unknown {section_name} fields: {', '.join(unknown_section)}."
+            )
+        section_out["label"] = str(section_in.get("label", section_name))[:120]
+        section_out["color"] = require_hex(section_in.get("color"), f"{section_name}.color", renderer)
+        section_out["accent_color"] = require_hex(section_in.get("accent_color"), f"{section_name}.accent_color", renderer)
+        texture = str(section_in.get("texture", "")).lower()
+        if texture not in RECIPE_TEXTURES:
+            raise SystemExit(f"--renderer {renderer} returned invalid {section_name}.texture: {texture}.")
+        section_out["texture"] = texture
+        if section_name == "transition":
+            placement = str(section_in.get("placement", "auto")).lower()
+            if placement not in RECIPE_PLACEMENTS:
+                raise SystemExit(f"--renderer {renderer} returned invalid transition.placement: {placement}.")
+            section_out["placement"] = placement
+        recipe[section_name] = section_out
+    required_sections = ("lower", "transition") if tool == "create_sidescroller_tileset" else ("lower", "upper")
+    missing = [section for section in required_sections if "color" not in recipe[section]]
+    if missing:
+        raise SystemExit(f"--renderer {renderer} returned an incomplete recipe; missing colors for: {', '.join(missing)}.")
+    return recipe
+
+
+def run_ai_renderer(
+    renderer: str,
+    tool: str,
+    request: dict[str, Any],
+    tile_width: int,
+    tile_height: int,
+    timeout: int,
+) -> dict[str, Any] | None:
+    if renderer == "deterministic":
+        return None
+    if timeout < 1:
+        raise SystemExit("--agent-timeout must be at least 1 second.")
+
+    executable = shutil.which(renderer)
+    if executable is None:
+        raise SystemExit(f"--renderer {renderer} requires the {renderer} CLI on PATH.")
+
+    prompt = agent_recipe_prompt(tool, request, tile_width, tile_height)
+    if renderer == "claude":
+        command = [
+            executable,
+            "-p",
+            "--safe-mode",
+            "--no-session-persistence",
+            "--permission-mode",
+            "dontAsk",
+            "--tools=",
+            "--json-schema",
+            json.dumps(RECIPE_JSON_SCHEMA),
+            prompt,
+        ]
+        stdout_path = None
+        stdin_text = None
+    elif renderer == "codex":
+        temp_dir = tempfile.TemporaryDirectory(prefix="pixellab-sim-codex-")
+        schema_path = Path(temp_dir.name) / "recipe-schema.json"
+        stdout_path = Path(temp_dir.name) / "last-message.json"
+        schema_path.write_text(json.dumps(RECIPE_JSON_SCHEMA), encoding="utf-8")
+        command = [
+            executable,
+            "exec",
+            "--cd",
+            os.getcwd(),
+            "--sandbox",
+            "read-only",
+            "--ephemeral",
+            "--ignore-rules",
+            "--color",
+            "never",
+            "--output-schema",
+            str(schema_path),
+            "--output-last-message",
+            str(stdout_path),
+            "-",
+        ]
+        stdin_text = prompt
+    else:  # pragma: no cover - argparse prevents this
+        raise SystemExit(f"Unsupported renderer: {renderer}")
+
+    try:
+        try:
+            result = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                input=stdin_text,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise SystemExit(f"--renderer {renderer} timed out after {timeout} seconds.") from exc
+        if result.returncode != 0:
+            stderr = result.stderr.strip()[-1200:]
+            raise SystemExit(f"--renderer {renderer} failed with exit code {result.returncode}: {stderr}")
+        output_text = stdout_path.read_text(encoding="utf-8") if stdout_path and stdout_path.exists() else result.stdout
+        recipe = validate_ai_recipe(extract_json_object(output_text), renderer, tool)
+        recipe["agent_stdout_excerpt"] = result.stdout.strip()[:2000]
+        return recipe
+    finally:
+        if renderer == "codex":
+            temp_dir.cleanup()
+
+
 def dualgrid_lower_mask(corners: dict[str, str], tile_width: int, tile_height: int) -> Image.Image:
     """Draw a stylized DualGrid lower-terrain mask.
 
@@ -615,14 +830,36 @@ def draw_tileset(
     draw_grid: bool,
     tiles: list[tuple[str, dict[str, str], int]],
     template_sheet: Image.Image | None = None,
+    render_recipe: dict[str, Any] | None = None,
 ) -> Image.Image:
     background = COLORS["transparent"] if tool == "create_sidescroller_tileset" else COLORS["preview_background"]
     sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), background)
     draw = ImageDraw.Draw(sheet)
     thickness = transition_pixels(tool, request, tile_height)
-    lower_color = description_color(str(request.get("lower_description", "")), (50, 50, 54, 255))
-    upper_color = description_color(str(request.get("upper_description", "")), (184, 184, 188, 255))
-    transition_color = description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76))
+    lower_color = recipe_color(
+        render_recipe,
+        "lower",
+        "color",
+        description_color(str(request.get("lower_description", "")), (50, 50, 54, 255)),
+    )
+    upper_color = recipe_color(
+        render_recipe,
+        "upper",
+        "color",
+        description_color(str(request.get("upper_description", "")), (184, 184, 188, 255)),
+    )
+    transition_color = recipe_color(
+        render_recipe,
+        "transition",
+        "color",
+        description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+    )
+    lower_recipe = section_from_recipe(render_recipe, "lower")
+    upper_recipe = section_from_recipe(render_recipe, "upper")
+    transition_recipe = section_from_recipe(render_recipe, "transition")
+    transition_placement = str(transition_recipe.get("placement", "auto")).lower()
+    if transition_placement not in RECIPE_PLACEMENTS:
+        transition_placement = "auto"
 
     for index, (_, corners, _) in enumerate(tiles):
         ox = (index % 4) * tile_width
@@ -642,15 +879,33 @@ def draw_tileset(
                 if tool == "create_topdown_tileset":
                     description_field = "lower_description" if terrain == LOWER else "upper_description"
                     base = lower_color if terrain == LOWER else upper_color
-                    color = texture_pixel(str(request.get(description_field, "")), x, y, base)
-                    if edge_mask.getpixel((x, y)):
-                        color = texture_pixel(str(request.get("transition_description") or ""), x, y, transition_color)
+                    recipe_section = lower_recipe if terrain == LOWER else upper_recipe
+                    color = texture_pixel(str(request.get(description_field, "")), x, y, base, recipe_section)
+                    if transition_placement != "none" and edge_mask.getpixel((x, y)):
+                        color = texture_pixel(
+                            str(request.get("transition_description") or ""),
+                            x,
+                            y,
+                            transition_color,
+                            transition_recipe,
+                        )
                     sheet.putpixel((ox + x, oy + y), color)
                 elif lower_mask.getpixel((x, y)):
-                    if thickness and y < thickness:
-                        color = texture_pixel(str(request.get("transition_description") or ""), x, y, transition_color)
+                    use_transition = (
+                        transition_placement != "none"
+                        and thickness
+                        and (y < thickness if transition_placement in {"auto", "top"} else bool(edge_mask.getpixel((x, y))))
+                    )
+                    if use_transition:
+                        color = texture_pixel(
+                            str(request.get("transition_description") or ""),
+                            x,
+                            y,
+                            transition_color,
+                            transition_recipe,
+                        )
                     else:
-                        color = texture_pixel(str(request.get("lower_description", "")), x, y, lower_color)
+                        color = texture_pixel(str(request.get("lower_description", "")), x, y, lower_color, lower_recipe)
                     sheet.putpixel((ox + x, oy + y), color)
         if draw_grid:
             draw.rectangle((ox, oy, ox + tile_width - 1, oy + tile_height - 1), outline=COLORS["grid"])
@@ -686,11 +941,80 @@ def compose_export_sheet(
     return out
 
 
-def save_scaled(image: Image.Image, path: Path, scale: int) -> None:
+def draw_component_previews(
+    tool: str,
+    request: dict[str, Any],
+    tile_width: int,
+    tile_height: int,
+    native_tileset: Image.Image,
+    render_recipe: dict[str, Any] | None,
+) -> dict[str, Image.Image]:
+    lower_color = recipe_color(
+        render_recipe,
+        "lower",
+        "color",
+        description_color(str(request.get("lower_description", "")), (50, 50, 54, 255)),
+    )
+    upper_color = recipe_color(
+        render_recipe,
+        "upper",
+        "color",
+        description_color(str(request.get("upper_description", "")), (184, 184, 188, 255)),
+    )
+    transition_color = recipe_color(
+        render_recipe,
+        "transition",
+        "color",
+        description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+    )
+    sections = {
+        "component_lower": ("lower_description", lower_color, section_from_recipe(render_recipe, "lower")),
+        "component_upper": ("upper_description", upper_color, section_from_recipe(render_recipe, "upper")),
+        "component_transition": ("transition_description", transition_color, section_from_recipe(render_recipe, "transition")),
+    }
+    previews: dict[str, Image.Image] = {}
+    for key, (field, color, recipe_section) in sections.items():
+        image = Image.new("RGBA", (tile_width, tile_height), COLORS["transparent"] if tool == "create_sidescroller_tileset" else COLORS["preview_background"])
+        for y in range(tile_height):
+            for x in range(tile_width):
+                image.putpixel((x, y), texture_pixel(str(request.get(field) or ""), x, y, color, recipe_section))
+        previews[key] = image
+
+    center_index = PIXELLAB_TILE_ORDER.index(0)
+    sx = (center_index % 4) * tile_width
+    sy = (center_index // 4) * tile_height
+    previews["component_center_tile"] = native_tileset.crop((sx, sy, sx + tile_width, sy + tile_height))
+    return previews
+
+
+def save_scaled(image: Image.Image, path: Path, scale: int) -> list[Path]:
+    written = [path]
     image.save(path)
     if scale > 1:
         scaled = image.resize((image.width * scale, image.height * scale), Image.Resampling.NEAREST)
-        scaled.save(path.with_name(path.stem + f"-x{scale}" + path.suffix))
+        scaled_path = path.with_name(path.stem + f"-x{scale}" + path.suffix)
+        scaled.save(scaled_path)
+        written.append(scaled_path)
+    return written
+
+
+def remove_known_outputs(output_dir: Path) -> None:
+    patterns = (
+        "corner-key-preview*.png",
+        "native-tileset*.png",
+        "component-lower*.png",
+        "component-upper*.png",
+        "component-transition*.png",
+        "component-center-tile*.png",
+        "tileset*.png",
+        "sim-report.json",
+    )
+    if not output_dir.exists():
+        return
+    for pattern in patterns:
+        for path in output_dir.glob(pattern):
+            if path.is_file():
+                path.unlink()
 
 
 def stable_id(prefix: str, payload: dict[str, Any]) -> str:
@@ -753,12 +1077,14 @@ def export_cell_records(
 def build_report(
     tool: str,
     request: dict[str, Any],
+    renderer: str,
+    render_recipe: dict[str, Any] | None,
     warnings: list[str],
     tile_width: int,
     tile_height: int,
     layout: str,
     tiles: list[tuple[str, dict[str, str], int]],
-    output_files: dict[str, Path],
+    output_files: dict[str, list[Path]],
     sim_run_id: str,
 ) -> dict[str, Any]:
     spec = EXPORT_LAYOUTS[layout]
@@ -766,11 +1092,12 @@ def build_report(
         "source": "PixelLab MCP tileset simulator",
         "tool": tool,
         "sim_run_id": sim_run_id,
-        "renderer": "deterministic",
+        "renderer": renderer,
+        "render_recipe": render_recipe,
         "limits": [
             "This simulates PixelLab MCP request shape and compact tileset layout locally.",
             "It writes local PNG layout previews and does not attempt to reproduce PixelLab MCP create/get JSON.",
-            "The deterministic renderer uses simple keyword/semantic colors and does not predict PixelLab's model taste.",
+            "Renderers use simple keyword/semantic colors or AI-authored semantic recipes and do not predict PixelLab's model taste.",
             "expected_pattern_4x4 is derived from corners; observed PixelLab metadata often disagrees across surfaces.",
             "Boundary preview is per-tile schematic and does not model cross-tile seam continuity.",
             "Template alpha masks count any opaque pixel as occupied, including upper/detail pixels.",
@@ -784,7 +1111,7 @@ def build_report(
             for key, value in MCP_TOOLS[tool]["defaults"].items()
             if key not in request
         },
-        "output_files": {key: str(path) for key, path in output_files.items()},
+        "output_files": {key: [str(path) for path in paths] for key, paths in output_files.items()},
         "terrain_encoding": {LOWER: 0, UPPER: 1, "wildcard": WILDCARD},
         "sheet_layout": {
             "columns": spec["columns"],
@@ -832,15 +1159,23 @@ def main() -> None:
         tile_width,
         tile_height,
     )
+    render_recipe = run_ai_renderer(args.renderer, args.tool, request, tile_width, tile_height, args.agent_timeout)
     tiles = make_tiles()
 
     output_dir = output_dir_from_name(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_files = {
+    remove_known_outputs(output_dir)
+    output_paths = {
         "corner_preview": output_dir / "corner-key-preview.png",
+        "native_tileset": output_dir / "native-tileset.png",
+        "component_lower": output_dir / "component-lower.png",
+        "component_transition": output_dir / "component-transition.png",
+        "component_center_tile": output_dir / "component-center-tile.png",
         "tileset": output_dir / "tileset.png",
         "sim_report": output_dir / "sim-report.json",
     }
+    if args.tool == "create_topdown_tileset":
+        output_paths["component_upper"] = output_dir / "component-upper.png"
 
     template_sheet = None
     if args.template_sheet:
@@ -850,35 +1185,51 @@ def main() -> None:
             raise SystemExit(f"Template sheet must be {expected_size[0]}x{expected_size[1]}, got {template_sheet.size}.")
 
     corner = draw_corner_preview(tile_width, tile_height, args.draw_grid, tiles)
-    native_tileset = draw_tileset(args.tool, request, tile_width, tile_height, False, tiles, template_sheet)
+    native_tileset = draw_tileset(args.tool, request, tile_width, tile_height, False, tiles, template_sheet, render_recipe)
     tileset = compose_export_sheet(native_tileset, args.layout, tile_width, tile_height, args.draw_grid)
+    component_previews = draw_component_previews(args.tool, request, tile_width, tile_height, native_tileset, render_recipe)
 
-    save_scaled(corner, output_files["corner_preview"], args.scale)
-    save_scaled(tileset, output_files["tileset"], args.scale)
+    written_files: dict[str, list[Path]] = {}
+    written_files["corner_preview"] = save_scaled(corner, output_paths["corner_preview"], args.scale)
+    written_files["native_tileset"] = save_scaled(native_tileset, output_paths["native_tileset"], args.scale)
+    for key, image in component_previews.items():
+        written_files[key] = save_scaled(image, output_paths[key], args.scale)
+    written_files["tileset"] = save_scaled(tileset, output_paths["tileset"], args.scale)
 
     sim_run_id = stable_id(
         "run",
-        {"tool": args.tool, "request": request, "layout": args.layout, "output": str(output_dir)},
+        {"tool": args.tool, "request": request, "layout": args.layout, "renderer": args.renderer, "output": str(output_dir)},
     )
     sim_report = build_report(
         args.tool,
         request,
+        args.renderer,
+        render_recipe,
         warnings,
         tile_width,
         tile_height,
         args.layout,
         tiles,
-        output_files,
+        written_files | {"sim_report": [output_paths["sim_report"]]},
         sim_run_id,
     )
     if args.template_sheet:
         sim_report["template_sheet"] = str(args.template_sheet)
-    with output_files["sim_report"].open("w", encoding="utf-8") as handle:
+    with output_paths["sim_report"].open("w", encoding="utf-8") as handle:
         json.dump(sim_report, handle, indent=2)
 
-    print(f"Wrote {output_files['corner_preview']}")
-    print(f"Wrote {output_files['tileset']}")
-    print(f"Wrote {output_files['sim_report']}")
+    for key in (
+        "corner_preview",
+        "native_tileset",
+        "component_lower",
+        "component_upper",
+        "component_transition",
+        "component_center_tile",
+        "tileset",
+        "sim_report",
+    ):
+        if key in output_paths:
+            print(f"Wrote {output_paths[key]}")
 
 
 if __name__ == "__main__":
