@@ -14,7 +14,7 @@ The simulator is useful for request shape, compact layout size, DualGrid packing
 
 ## Current State
 
-Top-down has a workable recipe. `topdown-cave-rim-ref-a` shows that a black lower terrain, black upper terrain, `transition_size: 0.5`, and a compact `transition_reference_image` can put lighter pixels on the correct cave/wall boundary. The raw output is not exact black/white, but threshold clamping preserves the intended rim.
+Top-down has a workable recipe. `topdown-cave-rim-ref-a` shows that a black lower terrain, black upper terrain, `transition_size: 0.5`, and a compact `transition_reference_image` can put lighter pixels on the correct cave/wall boundary. The raw output is not exact black/white, but threshold clamping preserves the intended rim. `topdown-b-cave-rim-production-ref` is a stronger production branch with true near-white raw pixels and a more readable ledge, but the clamp becomes thicker and more cap-like than the older sparse rim.
 
 Sidescroller does not yet have the exact sparse-rim ideal. The live tests suggest this behavior:
 
@@ -23,7 +23,9 @@ Sidescroller does not yet have the exact sparse-rim ideal. The live tests sugges
 - `transition_description` is where bright top/edge pixels appear, but PixelLab tends to turn them into a cap/surface material.
 - `base_tile_id` chaining from a clean dark body preserved darkness but did not add a bright rim.
 
-Current sidescroller options are therefore two imperfect branches: `side-c-broken-rim-05` for sparse rim placement, or `side-k-featureless-silhouette-capstones-05` for a more polished bright-cap platform after local clamp.
+Current sidescroller options are therefore two imperfect branches: `side-c-broken-rim-05` for sparse rim placement, or `side-k-featureless-silhouette-capstones-05` for a more polished bright-cap platform after local clamp. `side-n-serrated-cap-no-blue-05` showed that adding stricter `no blue/no purple` drift wording can erase the usable white cap entirely, so do not use negative color-drift wording as the next automatic fix.
+
+The unresolved sidescroller gap is full connected-shape outlining. Top-down tests can place white pixels on the wall/floor contour because `transition_description` maps to a terrain boundary. Sidescroller tests have not shown an equivalent control: the same kind of white-edge request maps to top caps, ledge highlights, or localized surface material instead of a consistent outline around the whole platform tileset shape.
 
 ## Corpus Findings
 
@@ -152,7 +154,11 @@ A follow-up MCP sidescroller prompt-only test, `side-e-white-crust-surface-05`, 
 
 `side-m-chained-silhouette-rim-05` used `side-l`'s clean-body `base_tile_id` and reintroduced a broken white rim through `transition_description` at `transition_size: 0.5`. Chaining preserved a dark body but did not combine the desired behaviors: max luminance was only 71, and no white rim survived normal clamp thresholds. For this 1-bit target, base-tile chaining is useful for continuity but is not currently a reliable way to add bright top/rim pixels to a clean body.
 
+`side-n-serrated-cap-no-blue-05` tried to refine `side-k` by keeping the bright cap idea while explicitly banning blue shadows, purple blocks, bricks, planks, and internal linework. It regressed: max luminance was only 49, no near-white pixels survived, and threshold clamps stayed black. This suggests strong negative color/material wording can suppress the very bright transition material we need. Keep `side-k` as the cap branch; avoid spending another run on negative color-drift wording unless a new control variable is added.
+
 A follow-up REST top-down reference-only test, `topdown-cave-rim-ref-a`, used a 16x16 broken-rim transition reference and cave-wall wording. It produced the best top-down 1-bit shape candidate so far: raw PixelLab colors remained dark gray/blue with no true white, but edge placement was correct and local clamps from threshold 32 through 96 preserved a readable white rim without flooding the interior. This reinforces the shape-first workflow: use PixelLab/reference controls for boundary placement, then palette-clamp only after the generated shape is accepted.
+
+`topdown-b-cave-rim-production-ref` reused the same REST reference-only recipe with a denser broken-rim guide and production-facing cave wording. It produced true near-white pixels in the raw output and a high-contrast readable wall boundary. Compared with `topdown-cave-rim-ref-a`, it is stronger and more immediately visible, but the clamped result is thicker and more cap-like. Treat these as two valid top-down branches: sparse cave contour versus bolder ledge/cap.
 
 For top-down wall tests, prefer:
 
@@ -168,6 +174,7 @@ For sidescroller ground tests, prefer:
 - White rim/top pixels in `transition_description`, not only in `outline`.
 - `transition_size: 0.25` as the first test when subtle top accents are acceptable; try `0.5` when rim coverage is too sparse, accepting higher risk of color/texture drift.
 - Avoid relying on `outline: "single color outline"` alone; it can encourage stylized gray/purple outlines.
+- Do not spend repeated prompt-only attempts on a full connected-shape white outline unless a new control route is being tested; current evidence says the sidescroller route does not expose that contour concept cleanly.
 
 ## Shape-First Rubric
 

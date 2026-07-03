@@ -94,6 +94,8 @@ Tileset generators do not reliably enforce strict 1-bit black-and-white output f
 
 For strict 1-bit tilesets, prioritize PixelLab-generated shape over raw palette. Palette clamping can make a good PixelLab shape exact black/white, but it cannot fix a wrong silhouette, wrong exposed edge, bad center-tile seam, or misplaced transition without locally altering the art.
 
+Current evidence: top-down terrain transitions are much more reliable than sidescroller generation for full connected-shape white outlines. Do not spend repeated sidescroller prompt-only attempts on that exact outline goal without a new control route or user-approved post-process.
+
 When the user requests a 1-bit tileset and the chosen tileset route exposes style controls, default any unspecified style controls to `detail: low detail`, `shading: flat shading`, and `outline: lineless`. Preserve explicit user-supplied values for those controls.
 
 For REST top-down tilesets, treat `lower_reference_image`, `upper_reference_image`, and `transition_reference_image` as stronger composition/style controls than `color_image`. Do not author or add terrain/transition reference images just because the user asks for a material, texture, dither, wall, or floor. Use reference-image fields when the user supplies a reference, explicitly asks for a reference/control image, or approves a retry after the previous attempt misses the desired placement or material read. When using `transition_reference_image`, treat it as a style reference rather than an exact mask or stamp. Keep `text_guidance_scale` at the default unless the user's text description is more important than matching the reference image; high text guidance can make text/model priors compete with the reference and may worsen palette drift.
