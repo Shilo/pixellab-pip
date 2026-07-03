@@ -70,6 +70,33 @@ def check_python_compiles() -> None:
         compile(source, str(path), "exec")
 
 
+def check_workflows() -> None:
+    qa_workflow = (REPO_ROOT / ".github/workflows/qa.yml").read_text(encoding="utf-8")
+    release_workflow = (REPO_ROOT / ".github/workflows/release-skill.yml").read_text(encoding="utf-8")
+    if "actions/setup-python@v6" not in qa_workflow:
+        raise AssertionError("qa.yml must set up Python explicitly")
+    if "actions/setup-python@v6" not in release_workflow:
+        raise AssertionError("release-skill.yml must set up Python explicitly before QA")
+    if "actions/setup-node@v6" not in release_workflow:
+        raise AssertionError("release-skill.yml must set up Node.js explicitly before version bump")
+    if release_workflow.find("actions/setup-node@v6") > release_workflow.find("node <<'NODE'"):
+        raise AssertionError("release-skill.yml must set up Node.js before running node")
+
+
+def check_no_tracked_generated_artifacts() -> None:
+    generated = run_git_ls_files(
+        ".local/*",
+        "pixellab-pip-generations/*",
+        "__pycache__/*",
+        "*/__pycache__/*",
+        "*/*/__pycache__/*",
+        "*/*/*/__pycache__/*",
+    )
+    if generated:
+        rels = [str(path.relative_to(REPO_ROOT)) for path in generated]
+        raise AssertionError("generated/cache files are tracked:\n" + "\n".join(rels))
+
+
 def strip_link_target(target: str) -> str:
     target = html.unescape(target.strip())
     if target.startswith("<") and target.endswith(">"):
@@ -131,6 +158,8 @@ CHECKS = [
     ("JSON manifests parse", check_json_files),
     ("manifest versions match", check_versions),
     ("Python files compile", check_python_compiles),
+    ("workflows declare required runtimes", check_workflows),
+    ("no generated cache artifacts are tracked", check_no_tracked_generated_artifacts),
     ("Markdown local links resolve", check_markdown_local_links),
     ("SKILL.md reference files exist", check_skill_reference_files),
     ("tracked media signatures are valid", check_media_files),

@@ -43,6 +43,13 @@ Sidescroller MCP `create_sidescroller_tileset` route:
 - No `upper_description`, `view`, `mode`, or Pro-only shape fields are exposed by the current MCP sidescroller tool.
 - `transition_size` controls how much of the surface/top layer appears on the platform tile; documented examples include 0.0, 0.25, and 0.5.
 
+Isometric MCP `create_isometric_tile` route:
+
+- Required content field: `description`.
+- Primary shape field: `tile_shape`; use `thin` for floor slabs, `thick` for raised platforms, and `block` for cubes, chunky objects, or full-height terrain blocks.
+- Other common controls include `size`, `outline`, `shading`, `detail`, `text_guidance_scale`, and `seed`.
+- REST `create-isometric-tile` uses different field names for the same ideas: `image_size`, `isometric_tile_size`, and `isometric_tile_shape` with values `thin tile`, `thick tile`, or `block`.
+
 ## Human Label To API Mapping
 
 Website, Aseprite extension, and MCP/REST labels sometimes differ. Map only non-obvious human-facing wording to the route's actual structured parameters before generating; do not duplicate schema fields whose names are already symmetric or directly inferable.
@@ -53,6 +60,9 @@ These labels are not symmetric with the MCP parameter names:
 |---|---|---|---|
 | `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. It is not the same as `transition_size`. |
 | `Center tile description`, `Center Tile`, `platform center` | `create_sidescroller_tileset` | `lower_description` | Sidescroller MCP calls this the platform material/body. |
+| `thin floor`, `floor slab`, `flat tile` | `create_isometric_tile` | `tile_shape: "thin"` | REST uses `isometric_tile_shape: "thin tile"`. |
+| `thick platform`, `raised platform` | `create_isometric_tile` | `tile_shape: "thick"` | REST uses `isometric_tile_shape: "thick tile"`. |
+| `block`, `cube`, `full-height tile` | `create_isometric_tile` | `tile_shape: "block"` | Same value on REST `isometric_tile_shape`. |
 | `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed by the chosen route, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
 No extra top-down human-label mapping is currently needed for schema-like labels such as lower, upper, or transition. Route top-down terrain wording to `create_topdown_tileset`; do not reuse sidescroller top/center label mapping unless the user explicitly asks for side-view/platformer tiles.

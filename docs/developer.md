@@ -1,6 +1,6 @@
 # Developer
 
-Last reviewed: 2026-07-02.
+Last reviewed: 2026-07-03.
 
 ## Table of Contents
 
@@ -19,6 +19,8 @@ python dev-tools/qa.py
 ```
 
 The gate validates tracked JSON, version consistency, Python compilation, local Markdown links, skill reference pointers, media signatures, and helper smoke tests.
+
+Local helper scripts target Python 3.10 or newer.
 
 ## Codex Local Plugin Testing
 

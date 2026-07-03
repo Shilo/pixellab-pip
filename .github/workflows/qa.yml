@@ -16,6 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
       - name: Run QA checks
         shell: bash
         run: python dev-tools/qa.py
