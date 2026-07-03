@@ -12,18 +12,20 @@ As of the latest 2026-07-03 tests, top-down and sidescroller should be handled d
 
 For top-down 1-bit wall/floor or cave work, use REST `create-tileset` with black lower terrain, black upper terrain, `transition_size: 0.5`, a compact `transition_reference_image`, and no `color_image`. Judge the raw result by whether lighter pixels sit on the wall/floor boundary; then palette-clamp only after the generated shape is acceptable. There are now two useful top-down branches: `topdown-cave-rim-ref-a` for a sparse contour, and `topdown-b-cave-rim-production-ref` for a bolder high-contrast ledge/cap.
 
-For sidescroller 1-bit platform work, do not spend more runs trying to make `lower_description` carry white contour pixels. `transition_size: 0.0` can produce a clean dark platform body, but it suppresses white rims. `transition_description` is required for bright white top/edge pixels, but PixelLab tends to treat those pixels as a top cap or surface material rather than a sparse outline. Unlike top-down, the sidescroller route has not shown a reliable way to request a consistent white outline around the entire connected tileset shape.
+For sidescroller 1-bit platform work, do not spend more runs trying to make `lower_description` carry white contour pixels. `transition_size: 0.0` can produce a clean dark platform body, but it suppresses white rims. `transition_description` is required for bright white top/edge pixels, but PixelLab tends to treat those pixels as a top cap or surface material rather than a sparse outline. Unlike top-down, the sidescroller route has not shown a reliable way to request a consistent white outline around the entire connected tileset shape. The best current production path is PixelLab for the platform silhouette and cap style, then Aseprite's built-in FX Outline with `place="inside"` and 4 sides only, followed by an optional black/white clamp.
 
 Current best candidates:
 
 - Top-down: `topdown-cave-rim-ref-a`, then local black/white threshold clamp.
 - Top-down bold production branch: `topdown-b-cave-rim-production-ref`, then local black/white threshold clamp.
 - Sidescroller sparse rim: `side-c-broken-rim-05`, but it is dim and less polished.
-- Sidescroller practical/professional platform: `side-k-featureless-silhouette-capstones-05`, then local black/white threshold clamp.
+- Sidescroller practical/professional platform: `side-k-featureless-silhouette-capstones-05`, then Aseprite FX Outline inside/4-side plus local black/white clamp.
 
 Do not retry these branches unless a new variable is being tested: `color_image` as a first fix, lower-plus-transition REST references for sidescroller, direct broken-ledge-highlight wording, chaining from the clean dark body to add white rim pixels, or stronger `no blue/no purple` negative wording for the sidescroller cap. All failed or regressed in live tests.
 
 The unresolved sidescroller gap is specifically "consistent outline around the whole connected shape." Top-down can place white pixels along the wall/floor contour because its `transition_description` maps to a terrain boundary. Sidescroller `transition_description` maps to a decorative top/surface layer, so it has repeatedly produced caps, ledges, or localized highlights instead of a whole-shape outline.
+
+The first useful second-pass test was `side-cap-c196-outline-edit-20260703`: REST `edit-image` on `side-k-featureless-silhouette-capstones-05`. PixelLab added clear white perimeter pixels on several outside platform edges, increasing near-white pixels from `250` to `552`, but it also changed opacity and some source details. A better follow-up, `side-cap-c196-aseprite-fx-outline-20260703`, used Aseprite's built-in `app.command.Outline` with `place="inside"` and `matrix=170` for 4 sides only. It added `242` pure-white inside-outline pixels, preserved transparency and opaque pixel count, and exactly matched the manually exported Aseprite result supplied by the user. Prefer the Aseprite FX route for sidescroller whole-shape outlines; use `edit-image` only when the desired fix must be PixelLab-generated rather than a labeled local derivative.
 
 ## Source Summary
 

@@ -100,6 +100,9 @@ Use this reference only when Aseprite is part of the requested outcome. Examples
 - "export this .aseprite as a sprite sheet"
 - "I prefer working in Aseprite"
 - "use Aseprite CLI"
+- "apply/create an Aseprite outline"
+- "use Edit > FX > Outline"
+- "inside outline", "outside outline", "4-side outline", or "8-side outline"
 - "reduce colors in Aseprite"
 - "quantize this with Aseprite"
 - "convert this to indexed color"
@@ -235,6 +238,33 @@ Convert to indexed color with optional dithering:
 & $AsepritePath -b "source.png" --dithering-algorithm none --color-mode indexed --save-as "source-indexed.png"
 & $AsepritePath -b "source.png" --palette "palette.png" --color-mode indexed --save-as "source-paletted.png"
 ```
+
+### Built-In FX Outline
+
+When the user asks for an outline through Aseprite, prefer Aseprite's built-in `Edit > FX > Outline` command through batch Lua. Do not hand-roll pixel outline logic unless the built-in command cannot express the requested behavior.
+
+The direct CLI has no standalone `--outline` flag. Use `app.command.Outline` in a script:
+
+```lua
+app.command.Outline{
+  ui=false,
+  place="inside", -- or "outside"
+  matrix=170, -- 4 sides only: top, left, right, bottom
+  color=Color{ r=255, g=255, b=255, a=255 },
+  bgColor=Color{ r=0, g=0, b=0, a=0 },
+  tiledMode="none"
+}
+```
+
+Use these settings:
+
+- `place="inside"`: keeps the outline inside the existing alpha silhouette and preserves transparency.
+- `place="outside"`: expands the outline into transparent pixels.
+- `matrix=170`: 4 sides only, matching top/left/right/bottom.
+- `matrix="square"`: 8 sides, including diagonals/corners.
+- `tiledMode="none"` unless the user explicitly asks for tiled wrapping.
+
+Write to a copy, verify the output file exists, and compare alpha/visible colors against the request. If this modifies PixelLab art locally, report it as an Aseprite derivative rather than a raw PixelLab generation.
 
 For palette-constrained output, prefer a supplied palette file or a Lua-created palette when the user names exact colors. The CLI documents `--palette`, `--dithering-algorithm`, `--dithering-matrix`, and `--color-mode indexed`, but it does not document a standalone `--num-colors` option. For broad source-derived requests such as "reduce to 12 colors", use Lua `app.command.ColorQuantization{ ui=false, maxColors=12, ... }` followed by indexed conversion and verification.
 
