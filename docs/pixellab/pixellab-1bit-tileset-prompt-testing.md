@@ -27,6 +27,36 @@ Current sidescroller options are therefore two imperfect branches: `side-c-broke
 
 The unresolved sidescroller gap is full connected-shape outlining. Top-down tests can place white pixels on the wall/floor contour because `transition_description` maps to a terrain boundary. Sidescroller tests have not shown an equivalent control: the same kind of white-edge request maps to top caps, ledge highlights, or localized surface material instead of a consistent outline around the whole platform tileset shape.
 
+## Style Control Findings
+
+PixelLab's public option docs describe `outline`, `shading`, and `detail` as weak controls. The Outline docs say it "Weakly controls the outlines of the generated image." The Shading docs say it "Weakly controls the shading of the generated image." The Details docs say it "Weakly controls how detailed the generated image should be."
+
+The REST v2 OpenAPI describes tileset style knobs only broadly: both top-down and sidescroller endpoints list "Style control via outline, shading, and detail parameters." It describes top-down as generating "two terrain levels" that connect seamlessly, and sidescroller as "floating platforms with transparent backgrounds." The API field descriptions are likewise broad: top-down `transition_description` is the "transition area between lower and upper"; sidescroller `transition_description` is the "decorative layer on top of platform."
+
+The MCP docs describe the same coarse layer model. For top-down, they say "Creates 16 tiles covering all corner combinations" and summarize `transition_size` as `0=sharp, 0.25=medium, 0.5=wide blend`. For sidescroller, they say it "Creates 16 tiles with transparent backgrounds" and `transition_description` is "Top decoration (grass, snow, moss, rust, etc.)."
+
+Live MCP sidescroller tests matched that official framing: these fields can nudge style, but they do not behave like deterministic switches for edge placement, palette, texture density, or tile readability.
+
+Confidence: high. `outline` is not a reliable border-placement control for sidescroller tilesets. In controlled tests, `lineless`, `single color outline`, and `selective outline` all still produced visible contour/edge pixels. None reliably created the desired whole-shape white outline. The corrected black-body/white-top matrix showed that white top placement was driven primarily by `transition_description`, not by `outline`.
+
+Confidence: high. `shading` is a soft color/material complexity control, not a precise 1-bit or edge-placement control. In the selective-outline dirt/grass test, `flat shading` kept the best organic platform read, `basic shading` introduced more block/brick separation, and `medium shading` muted the grass/top contrast. In the corrected black-body/white-top matrix, differences across shading modes were visible but subtle, and higher shading often introduced blue, gray, or purple accents rather than useful 1-bit structure.
+
+Confidence: medium-low. `detail` probably affects texture density, but this project does not yet have a clean one-variable detail matrix comparable to the outline/shading tests. Keep using `low detail` for strict 1-bit experiments because it reduces the risk of noisy material texture, but do not claim that `low detail` guarantees clean interiors, sparse pixels, or fewer colors.
+
+Practical conclusion: for sidescroller 1-bit work, spend test budget on `lower_description`, `transition_description`, `transition_size`, reference/control routes, and approved Aseprite post-processing before spending more large matrices on `outline`, `shading`, or `detail`. Use `outline`, `shading`, and `detail` as taste nudges after a prompt already puts light pixels in the right semantic location.
+
+Practical limitation: PixelLab tileset tools are good at common terrain concepts such as dirt, grass, stone, moss, snow, beach, water, and platform materials. They are not reliable for heavily specific or niche constraints such as exact 1-bit palettes, exact monochrome output, exact white-pixel placement, or a consistent connected-shape outline across all sidescroller tiles. Treat those as controlled experiments or post-processing workflows, not as guaranteed prompt-only outputs.
+
+Follow-up generic dirt/grass matrices tested `detail` x `outline` for sidescroller and top-down with common terrain wording instead of niche 1-bit constraints. These showed the style controls more clearly:
+
+- Sidescroller dirt/grass: `detail` visibly changed texture density and platform-material interpretation, but not monotonically or predictably enough to choose quality by label alone. Low detail often looked simpler/blockier, medium and highly detailed often added more texture or contour variation, but each outline mode changed the read.
+- Top-down dirt/grass: `detail` visibly changed dirt texture, color count, and terrain patterning. Higher detail generally added more small marks, but the exact palette and contrast still varied by outline mode.
+- `single color outline` is the most visually aggressive outline option in these common terrain tests. It often adds strong colored borders or tile-material separation.
+- `selective outline` often reads darker or more organic than `single color outline`, but it is still a style cue, not a precise border rule.
+- `lineless` still produces visible terrain boundaries because the tileset generator must separate terrain regions. It does not mean boundary-free output.
+
+Updated confidence: medium. `detail` does have visible effects on common terrain/material requests. It is still not a hard control for exact color count, texture density, 1-bit cleanup, or final quality.
+
 ## Corpus Findings
 
 A replay audit scanned the local generation corpus for MCP-shaped tileset inputs and live-looking PNGs.
