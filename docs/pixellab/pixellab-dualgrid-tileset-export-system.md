@@ -34,9 +34,7 @@ The deterministic contract is:
 15, 14,  9,  7
 ```
 
-This is not the same atlas order as `TileMapDual`'s standard Godot preset. A local simulator or engine importer should remap when targeting TileMapDual rather than assuming PixelLab's row-major sheet can be dropped into that preset unchanged.
-
-TileMapDual also uses a different legacy corner key scheme: `TOP_LEFT = 1`, `LOW_LEFT = 2`, `TOP_RIGHT = 4`, and `LOW_RIGHT = 8`. The simulator's `tilemapdual-standard` layout uses that key scheme and defaults filled/lower terrain to bit value `1`.
+This is not the same atlas order as some third-party DualGrid implementations. For example, `TileMapDualLegacy` uses `TOP_LEFT = 1`, `LOW_LEFT = 2`, `TOP_RIGHT = 4`, and `LOW_RIGHT = 8`, then maps the resulting key to atlas coordinates. That is useful research background, but it is not exposed as a PixelLab website/MCP export layout in the simulator.
 
 ## DualGrid Math
 
@@ -152,33 +150,35 @@ dev-tools/pixellab_mcp_tileset_sim.py
 Run a PixelLab-layout sidescroller simulation with:
 
 ```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --draw-grid --layout pixellab
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/sidescroller-request.json --draw-grid --layout 15-tileset
 ```
 
 Run a PixelLab-layout top-down simulation with a session-local request:
 
 ```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset .local/topdown-request.json --draw-grid --layout pixellab
+python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset .local/topdown-request.json --draw-grid --layout 15-tileset
 ```
 
-The simulator accepts MCP-style request JSON from a file or stdin and uses a minimal built-in request when no JSON is supplied. It always writes to:
+The simulator accepts MCP-style request JSON from a file or stdin. If no request JSON is provided and stdin is empty, it uses `{}` and fails when required MCP fields are missing. By default it writes to:
 
 ```text
-.local/mcp-tileset-sim-output
+.local/mcp-tileset-sim-output/latest
 ```
+
+Use `--output NAME` to compare attempts under separate child directories.
 
 The current simulator covers the compact 16-tile layout for MCP-style `create_sidescroller_tileset` and `create_topdown_tileset` requests. It should focus on:
 
 - Request-field shape and local schema validation
 - Bitmask and corner math
 - PixelLab compact 4x4 layout order
-- TileMapDual remapping
+- PixelLab website export repacking for `15-tileset`, `wang`, `godot-3x3`, and `preview`
 - Pattern report generation
 - Palette and dimension verification
 - Deterministic semantic rendering from description text
 - Template-mask previews from observed PixelLab sheets
 
-It writes `tileset.png`, `corner-key-preview.png`, `create-response.json`, `get-response.json`, and `sim-report.json`. The create/get JSON files are intentionally MCP-shaped local stand-ins, while `sim-report.json` contains simulator-only evidence such as ignored fields, normalized request JSON, output paths, layout order, and computed corner patterns.
+It writes `tileset.png`, `corner-key-preview.png`, `create-response.json`, `get-response.json`, and `sim-report.json`. The create/get JSON files are intentionally MCP-shaped local stand-ins, while `sim-report.json` contains simulator-only evidence such as the exact request JSON, omitted MCP defaults used for simulation, output paths, layout order, and computed corner patterns.
 
 It validates only the route fields that matter for local simulation. It rejects top-down cases that may export as expanded sheets unless `--allow-compact-expanded` is supplied, and it does not yet simulate expanded top-down transition sheets.
 
@@ -212,7 +212,7 @@ Then add simulator checks in this order:
 1. Validate the request against the route family.
 2. Predict expected compact or expanded output dimensions where known.
 3. Emit the PixelLab/Lexaloffle 4x4 layout.
-4. Emit a TileMapDual remapped sheet.
+4. Emit PixelLab website export layouts such as Wang and Godot 3x3 when requested.
 5. Compare a returned PixelLab sheet's alpha/occupancy mask against expected `wang_N` corner classes.
 6. Verify exact palette requirements separately from structural correctness.
 

@@ -3,12 +3,14 @@
 Use this developer tool from the `pixellab-pip/` repository root.
 
 ```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --draw-grid --layout pixellab
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/sidescroller-request.json --draw-grid
 ```
 
 The simulator accepts MCP-style `create_sidescroller_tileset` and `create_topdown_tileset` request JSON and writes a local compact tileset PNG plus metadata. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
 
-If no request JSON is provided, it uses a minimal built-in request for the selected tool. For realistic testing, create a session-local request under `.local/` and pass it as the second argument:
+Pass the same JSON object you would send to the MCP tool. If no request JSON is provided and stdin is empty, the simulator uses `{}` and fails when required MCP fields are missing.
+
+For realistic testing, create a session-local request under `.local/` and pass it as the second argument:
 
 ```powershell
 python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset .local/topdown-request.json --draw-grid
@@ -23,29 +25,35 @@ Get-Content .local/topdown-request.json | python dev-tools/pixellab_mcp_tileset_
 
 Minimal sidescroller request:
 
-- empty `lower_description`
-- empty `transition_description`
-- `tile_size: 16x16`
-- `detail: low detail`
-- `shading: flat shading`
-- `outline: lineless`
+```json
+{
+  "lower_description": "stone brick",
+  "transition_description": "moss"
+}
+```
 
 Minimal top-down request:
 
-- empty `lower_description`
-- empty `upper_description`
-- empty `transition_description`
-- `tile_size: 16x16`
-- `mode: standard`
-- `view: high top-down`
-- `detail: low detail`
-- `shading: flat shading`
-- `outline: lineless`
+```json
+{
+  "lower_description": "ocean water",
+  "upper_description": "sandy beach"
+}
+```
 
-It always writes to:
+Omitted optional fields use the documented MCP defaults for simulation only. The simulator does not inject style defaults such as `low detail`, `flat shading`, or `lineless`; include those fields explicitly in the JSON when you want to test them.
+
+By default, it writes to:
 
 ```text
-.local/mcp-tileset-sim-output/
+.local/mcp-tileset-sim-output/latest/
+```
+
+Use `--output NAME` to compare multiple attempts:
+
+```powershell
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/a.json --output attempt-a
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/b.json --output attempt-b
 ```
 
 Generated files:
@@ -58,29 +66,29 @@ Generated files:
 - `get-response.json`
 - `sim-report.json`
 
-## Layouts
+## Export Layouts
 
-Use PixelLab's observed compact sheet order:
-
-```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --layout pixellab
-```
-
-Use the Lexaloffle row order alias:
+Use PixelLab's native compact export:
 
 ```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --layout lexaloffle-row
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/request.json --layout 15-tileset
 ```
 
-Use the TileMapDual standard atlas/key convention:
+Use the website Wang export geometry:
 
 ```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --layout tilemapdual-standard
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/request.json --layout wang
 ```
 
-PixelLab/Lexaloffle uses bit weights `NW=8, NE=4, SW=2, SE=1` and defaults lower/filled terrain to bit value `0`.
+Use the website Godot 3x3 export geometry:
 
-TileMapDual uses bit weights `NW=1, NE=4, SW=2, SE=8` and defaults lower/filled terrain to bit value `1`.
+```powershell
+python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/request.json --layout godot-3x3
+```
+
+Use `preview` when you want a local stand-in for the website/background-job preview surface instead of a final engine export.
+
+The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and lower/filled terrain as bit value `0`. `wang` and `godot-3x3` repack the native simulated tiles into observed PixelLab website export dimensions.
 
 ## Options
 
@@ -88,8 +96,8 @@ TileMapDual uses bit weights `NW=1, NE=4, SW=2, SE=8` and defaults lower/filled 
 - `--scale N`: set the nearest-neighbor preview scale. Default is `8`.
 - `--renderer deterministic`: use the local deterministic renderer. This is the only renderer currently implemented.
 - `--allow-compact-expanded`: force compact fallback for top-down `pro` or `transition_size: 1.0` requests that PixelLab may export as expanded sheets.
-- `--layout NAME`: choose `pixellab`, `lexaloffle-row`, or `tilemapdual-standard`.
-- `--filled-bit 0|1`: override which bit value maps to lower terrain.
+- `--layout NAME`: choose `15-tileset`, `wang`, `godot-3x3`, or `preview`.
+- `--output NAME`: write under `.local/mcp-tileset-sim-output/NAME`.
 - `--template-sheet PATH`: reuse alpha masks from an existing compact 4x4 PixelLab sheet.
 
 ## Caveats
