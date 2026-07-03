@@ -46,6 +46,7 @@ If a call fails because a natural-language field is too long, trim that field wi
 | `POST /generate-font-pro` | `description` | 2000 |
 | `POST /generate-image-v2` | `description` | 2000 |
 | `POST /generate-image-v2` | `reference_images[].usage_description` | 500 |
+| `POST /generate-image-v2` | `style_image.usage_description` | 500 |
 | `POST /generate-ui-v2` | `color_palette` | 200 |
 | `POST /generate-ui-v2` | `description` | 2000 |
 | `POST /generate-with-style-v2` | `description` | 2000 |

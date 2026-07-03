@@ -1,13 +1,24 @@
 # Developer
 
-Last reviewed: 2026-07-03.
+Last reviewed: 2026-07-02.
 
 ## Table of Contents
 
+- [Quality Assurance](#quality-assurance)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
 - [Repository Layout](#repository-layout)
+
+## Quality Assurance
+
+Run the repository QA gate before release-oriented changes:
+
+```powershell
+python dev-tools/qa.py
+```
+
+The gate validates tracked JSON, version consistency, Python compilation, local Markdown links, skill reference pointers, media signatures, and helper smoke tests.
 
 ## Codex Local Plugin Testing
 
@@ -30,7 +41,7 @@ The menu offers:
 
 When no plugin is installed, the menu offers `Install development local`, `Install production remote`, `Uninstall pixellab-pip (not installed)`, and `Cancel`.
 
-For `development local`, the script temporarily writes a Codex cachebuster version to `.codex-plugin/plugin.json`, installs from this repository, then restores the manifest. This creates a fresh cache path such as `0.2.0+codex.dev-YYYYMMDDHHMMSS` without permanently changing the repo version.
+For `development local`, the script temporarily writes a Codex cachebuster version to `.codex-plugin/plugin.json`, installs from this repository, then restores the manifest. This creates a fresh cache path such as `0.4.0+codex.dev-YYYYMMDDHHMMSS` without permanently changing the repo version.
 
 For `production remote`, the script installs from the GitHub marketplace source in `plugin.json`. Production updates run `codex plugin marketplace upgrade` before reinstalling because Codex does not currently provide a `codex plugin update` command.
 

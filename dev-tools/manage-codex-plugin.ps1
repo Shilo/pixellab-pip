@@ -1,5 +1,20 @@
+[CmdletBinding()]
+param(
+    [switch]$Help
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+function Show-Usage {
+    Write-Host "Usage: powershell -NoProfile -File dev-tools\manage-codex-plugin.ps1 [-Help]"
+    Write-Host ""
+    Write-Host "Refresh the local Codex install for this plugin or switch between development and production installs."
+    Write-Host "Interactive menu actions can install, update, or uninstall the plugin."
+    Write-Host ""
+    Write-Host "Options:"
+    Write-Host "  -Help    Show this help and exit without changing Codex plugin state."
+}
 
 function Get-NormalizedPath {
     param([AllowNull()][string]$Path)
@@ -177,7 +192,7 @@ function Select-MenuItem {
         }
         $answer = Read-Host "Choose 1-$($Options.Count)"
         if ([string]::IsNullOrWhiteSpace($answer)) {
-            return $Options[0]
+            return $Options[$Options.Count - 1]
         }
         if ($answer -match '^\d+$') {
             $index = [int]$answer - 1
@@ -367,6 +382,11 @@ function Write-InstallState {
 }
 
 function Invoke-Main {
+    if ($Help) {
+        Show-Usage
+        return
+    }
+
     $scriptDir = Split-Path -Parent $PSCommandPath
     $repoRoot = Get-NormalizedPath (Split-Path -Parent $scriptDir)
     $manifestPath = Join-Path $repoRoot "plugin.json"

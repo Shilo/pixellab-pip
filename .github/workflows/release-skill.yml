@@ -25,6 +25,10 @@ jobs:
             exit 1
           fi
 
+      - name: Run QA checks
+        shell: bash
+        run: python dev-tools/qa.py
+
       - name: Find previous tag
         id: previous_tag
         shell: bash
