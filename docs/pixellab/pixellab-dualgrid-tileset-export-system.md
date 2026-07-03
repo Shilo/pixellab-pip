@@ -1,6 +1,6 @@
 # PixelLab DualGrid Tileset Export System
 
-Last reviewed: 2026-07-02.
+Last reviewed: 2026-07-03.
 
 Purpose: document the observed DualGrid/Wang export contract for PixelLab tilesets so local tools can simulate the deterministic parts of tileset assembly before spending generations.
 
@@ -117,9 +117,11 @@ REST v2 routes:
 - `POST /v2/create-tiles-pro`
 - `GET /v2/tiles-pro/{tile_id}`
 
-Top-down tileset creation uses `CreateTilesetRequest`. Key fields are `lower_description`, `upper_description`, `transition_description`, `tile_size`, `mode`, `view`, `transition_size`, style controls, guidance/adherence controls, base tile IDs, reference images, `color_image`, and `seed`.
+REST top-down tileset creation uses `CreateTilesetRequest`. Key fields are `lower_description`, `upper_description`, `transition_description`, `tile_size`, `mode`, `view`, `transition_size`, style controls, guidance/adherence controls, base tile IDs, reference images, `color_image`, and `seed`.
 
-Sidescroller tileset creation uses `CreateTilesetSidescrollerRequest`. It uses `lower_description` for the platform body and `transition_description` for the top/surface layer. REST exposes `lower_reference_image`, `transition_reference_image`, and `color_image`. Current MCP sidescroller docs expose the main descriptions, tile size, style controls, guidance/adherence controls, `base_tile_id`, and seed, but not the REST reference or palette image fields.
+Current MCP `create_topdown_tileset` docs expose the main descriptions, transition size, tile size, mode, Pro shape controls, style controls, view, adherence/guidance controls, and base tile IDs. They do not expose the REST reference-image, palette-image, or seed fields.
+
+REST sidescroller tileset creation uses `CreateTilesetSidescrollerRequest`. It uses `lower_description` for the platform body and `transition_description` for the top/surface layer. REST exposes `lower_reference_image`, `transition_reference_image`, and `color_image`. Current MCP sidescroller docs expose the main descriptions, tile size, style controls, guidance/adherence controls, `base_tile_id`, and seed, but not the REST reference or palette image fields.
 
 `create_tiles_pro` and `POST /v2/create-tiles-pro` are for independent shaped tile variants, not a connected Wang/DualGrid terrain tileset.
 
@@ -141,31 +143,15 @@ For strict 1-bit results, Aseprite or local palette verification can create an e
 
 ## Simulator Contract
 
-The local MCP tileset simulator now lives at:
+The local MCP tileset simulator lives at:
 
 ```text
 dev-tools/pixellab_mcp_tileset_sim.py
 ```
 
-Run a PixelLab-layout sidescroller simulation with:
+Use `dev-tools/pixellab_mcp_tileset_sim.md` as the agent-facing runbook. This document is the evidence/background note, not the fastest way to operate the tool.
 
-```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/sidescroller-request.json --draw-grid --layout 15-tileset
-```
-
-Run a PixelLab-layout top-down simulation with a session-local request:
-
-```powershell
-python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset .local/topdown-request.json --draw-grid --layout 15-tileset
-```
-
-The simulator accepts MCP-style request JSON from a file or stdin. If no request JSON is provided and stdin is empty, it uses `{}` and fails when required MCP fields are missing. By default it writes to:
-
-```text
-.local/mcp-tileset-sim-output/latest
-```
-
-Use `--output NAME` to compare attempts under separate child directories.
+The simulator accepts MCP-style request JSON from a file or stdin, writes to `.local/mcp-tileset-sim-output/latest` by default, and supports `--output NAME` to compare attempts under separate child directories.
 
 The current simulator covers the compact 16-tile layout for MCP-style `create_sidescroller_tileset` and `create_topdown_tileset` requests. It should focus on:
 
@@ -180,7 +166,7 @@ The current simulator covers the compact 16-tile layout for MCP-style `create_si
 
 It writes `tileset.png`, `corner-key-preview.png`, and `sim-report.json`. The report contains simulator-only evidence such as the exact request JSON, omitted MCP defaults used for simulation, output paths, native 15-tileset source cells, exported cell placements, and computed corner patterns. It does not attempt to reproduce PixelLab MCP create/get JSON responses.
 
-It validates only the route fields that matter for local simulation. It rejects top-down cases that may export as expanded sheets, because it does not yet simulate expanded top-down transition sheets.
+It validates the MCP-facing route fields used by local simulation. REST-only fields such as reference images and `color_image` are intentionally outside this MCP simulator. It rejects top-down cases that may export as expanded sheets, because it does not yet simulate expanded top-down transition sheets.
 
 The platform preview is a per-tile schematic. It can highlight tile edges that would become internal seams in a composed map, and template-sheet mode treats any opaque pixel as occupied, including decorative top/transition pixels.
 
@@ -216,4 +202,4 @@ Then add simulator checks in this order:
 5. Compare a returned PixelLab sheet's alpha/occupancy mask against expected `wang_N` corner classes.
 6. Verify exact palette requirements separately from structural correctness.
 
-The practical target is a simulator that can say, "this JSON is structurally plausible and should export as this DualGrid layout," before a live generation. It should not promise that PixelLab will obey a difficult visual prompt such as exact 1-bit edge-only highlights.
+The practical target is a simulator that can say, "this MCP JSON is structurally plausible and should export as this DualGrid layout," before a live generation. It should not promise that PixelLab will obey a difficult visual prompt such as exact 1-bit edge-only highlights.

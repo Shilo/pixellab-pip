@@ -11,6 +11,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -31,7 +35,8 @@ PIXELLAB_BIT_ORDER = [("NW", 8), ("NE", 4), ("SW", 2), ("SE", 1)]
 PIXELLAB_FILLED_BIT = 0
 
 # Website/export layouts derived from observed PixelLab Maps downloads for a
-# 16px sidescroller sheet. Values are native 15-tileset cell indexes.
+# 16px sidescroller sheet. Values are source positions in the native 4x4
+# 15-tileset sheet, not wang bitmask values.
 EXPORT_LAYOUTS = {
     "15-tileset": {
         "columns": 4,
@@ -169,6 +174,9 @@ COLORS = {
     "grid": (255, 0, 255, 255),
     "boundary": (255, 255, 255, 255),
 }
+HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
+RECIPE_TEXTURES = {"solid", "sparse", "broken", "speckle", "dither", "stripe", "none"}
+RECIPE_PLACEMENTS = {"auto", "top", "boundary", "none"}
 KEYWORD_COLORS = [
     ("#000000", (0, 0, 0, 255)),
     ("pure black", (0, 0, 0, 255)),
@@ -208,9 +216,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--renderer",
-        choices=["deterministic"],
+        choices=["deterministic", "codex", "claude"],
         default="deterministic",
-        help="Renderer backend. Only deterministic local rendering is currently implemented.",
+        help="Renderer backend. AI renderers create a constrained semantic recipe before local rendering.",
+    )
+    parser.add_argument(
+        "--agent-timeout",
+        type=int,
+        default=180,
+        help="Timeout in seconds for --renderer codex or --renderer claude.",
     )
     parser.add_argument(
         "--scale",
@@ -356,7 +370,10 @@ def validate_request(
         values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
         raise SystemExit(f"{tool} transition_size must be one of {values}.")
     if tool == "create_topdown_tileset" and raw_transition == 1.0:
-        raise SystemExit("Top-down transition_size 1.0 expands beyond compact output and is not simulated.")
+        raise SystemExit(
+            "This is a valid MCP request shape, but top-down transition_size 1.0 "
+            "can export an expanded sheet that this compact simulator does not render."
+        )
 
     if tool == "create_topdown_tileset":
         mode = request_value(tool, request, "mode")
@@ -368,7 +385,11 @@ def validate_request(
             raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
         if mode == "pro":
             if raw_transition >= 0.5:
-                raise SystemExit("Top-down pro mode with transition_size >= 0.5 can expand beyond compact output and is not simulated.")
+                raise SystemExit(
+                    "This is a valid MCP request shape, but top-down pro mode with "
+                    "transition_size >= 0.5 can export an expanded sheet that this "
+                    "compact simulator does not render."
+                )
             warnings.append("Top-down pro mode is simulated only for compact transition_size 0.0 or 0.25 cases.")
 
     detail = request_value(tool, request, "detail")
@@ -451,12 +472,52 @@ def description_color(description: str, fallback: tuple[int, int, int, int]) -> 
     return fallback
 
 
+def color_from_hex(value: Any) -> tuple[int, int, int, int] | None:
+    if not isinstance(value, str) or not HEX_COLOR.match(value):
+        return None
+    return (int(value[1:3], 16), int(value[3:5], 16), int(value[5:7], 16), 255)
+
+
+def section_from_recipe(recipe: dict[str, Any] | None, name: str) -> dict[str, Any]:
+    if not recipe:
+        return {}
+    value = recipe.get(name)
+    return value if isinstance(value, dict) else {}
+
+
+def recipe_color(
+    recipe: dict[str, Any] | None,
+    section: str,
+    key: str,
+    fallback: tuple[int, int, int, int],
+) -> tuple[int, int, int, int]:
+    parsed = color_from_hex(section_from_recipe(recipe, section).get(key))
+    return parsed or fallback
+
+
 def lighten(color: tuple[int, int, int, int], amount: int = 36) -> tuple[int, int, int, int]:
     return (min(255, color[0] + amount), min(255, color[1] + amount), min(255, color[2] + amount), color[3])
 
 
-def texture_pixel(description: str, x: int, y: int, base: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+def texture_pixel(
+    description: str,
+    x: int,
+    y: int,
+    base: tuple[int, int, int, int],
+    recipe_section: dict[str, Any] | None = None,
+) -> tuple[int, int, int, int]:
     text = description.lower()
+    recipe_section = recipe_section or {}
+    recipe_texture = str(recipe_section.get("texture", "")).lower()
+    accent = color_from_hex(recipe_section.get("accent_color")) or lighten(base, 60)
+    if recipe_texture == "none":
+        return base
+    if recipe_texture in {"sparse", "broken", "speckle"} and ((x * 13 + y * 5) % 23 == 0):
+        return accent
+    if recipe_texture == "stripe" and y % 5 == 0:
+        return accent
+    if recipe_texture == "dither" and ((x + y) % 2 == 0):
+        return accent
     if "1-bit" in text or "one-bit" in text:
         if "sparse" in text and ((x * 11 + y * 7) % 29 == 0):
             return (255, 255, 255, 255) if base[:3] == (0, 0, 0) else (0, 0, 0, 255)
@@ -755,6 +816,7 @@ def self_check() -> None:
     }
     for layout, spec in EXPORT_LAYOUTS.items():
         assert len(spec["cells"]) == spec["columns"] * spec["rows"], layout
+        assert all(isinstance(cell, int) and 0 <= cell < len(PIXELLAB_TILE_ORDER) for cell in spec["cells"]), layout
 
 
 def main() -> None:
