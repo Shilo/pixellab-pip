@@ -178,6 +178,9 @@ COLORS = {
 HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
 RECIPE_TEXTURES = {"solid", "sparse", "broken", "speckle", "dither", "stripe", "none"}
 RECIPE_PLACEMENTS = {"auto", "top", "boundary"}
+OPENCODE_RENDERER_MODELS = {
+    "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
+}
 RECIPE_JSON_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -260,7 +263,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--renderer",
-        choices=["deterministic", "codex", "claude"],
+        choices=["deterministic", "codex", "claude", *sorted(OPENCODE_RENDERER_MODELS)],
         default="deterministic",
         help="Renderer backend. AI renderers create a constrained semantic recipe before local rendering.",
     )
@@ -268,7 +271,7 @@ def parse_args() -> argparse.Namespace:
         "--agent-timeout",
         type=int,
         default=180,
-        help="Timeout in seconds for --renderer codex or --renderer claude.",
+        help="Timeout in seconds for AI renderers.",
     )
     parser.add_argument(
         "--scale",
@@ -615,8 +618,45 @@ def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, til
     )
 
 
+def opencode_agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, tile_height: int) -> str:
+    required_sections = "summary, lower, transition"
+    upper_shape = ""
+    topdown_rule = ""
+    if tool == "create_topdown_tileset":
+        required_sections = "summary, lower, upper, transition"
+        upper_shape = (
+            ', "upper": {"label": "short label", "color": "#RRGGBB", '
+            '"accent_color": "#RRGGBB", "texture": "solid"}'
+        )
+        topdown_rule = "For top-down, lower and upper are terrain classes; transition is their boundary style. "
+    return (
+        "Output raw JSON only. Your entire response must be a single JSON object. "
+        "No markdown, no code fence, no explanation. "
+        f"Interpret this PixelLab MCP request for {tool}. "
+        f"Required top-level keys: {required_sections}. "
+        "Do not include any other keys, including size, transition_size, confidence, notes, or errors. "
+        "Each terrain section has exactly label, color, accent_color, texture. "
+        "The transition section has exactly label, color, accent_color, texture, placement. "
+        "Valid textures are exactly: solid, sparse, broken, speckle, dither, stripe, none. "
+        "Valid placements are exactly: auto, top, boundary. "
+        "Use valid #RRGGBB colors. For 1-bit or monochrome prompts, use only #000000 and #FFFFFF. "
+        "For sidescroller, lower is the platform body and transition is the top/surface layer. "
+        f"{topdown_rule}"
+        "Return this exact object shape with inferred values: "
+        '{"summary":"short interpretation", '
+        '"lower":{"label":"short label","color":"#RRGGBB","accent_color":"#RRGGBB","texture":"solid"}'
+        f"{upper_shape}, "
+        '"transition":{"label":"short label","color":"#RRGGBB","accent_color":"#RRGGBB","texture":"solid","placement":"auto"}}. '
+        f"Tile size: {tile_width}x{tile_height}. "
+        f"MCP request JSON: {json.dumps(request, sort_keys=True)}"
+    )
+
+
 def extract_json_object(text: str) -> dict[str, Any]:
     stripped = text.strip()
+    fence_match = re.fullmatch(r"```(?:json)?\s*(\{.*\})\s*```", stripped, flags=re.IGNORECASE | re.DOTALL)
+    if fence_match:
+        stripped = fence_match.group(1).strip()
     try:
         data = json.loads(stripped)
     except json.JSONDecodeError as exc:
@@ -625,6 +665,30 @@ def extract_json_object(text: str) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise SystemExit("AI renderer JSON must be an object.")
     return data
+
+
+def opencode_text_from_jsonl(stdout: str) -> str:
+    chunks: list[str] = []
+    saw_jsonl_event = False
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            event = json.loads(stripped)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        saw_jsonl_event = True
+        part = event.get("part")
+        if event.get("type") == "text" and isinstance(part, dict) and isinstance(part.get("text"), str):
+            chunks.append(part["text"])
+    if chunks:
+        return "".join(chunks).strip()
+    if saw_jsonl_event:
+        raise SystemExit("OpenCode renderer returned JSONL events but no text response.")
+    return stdout.strip()
 
 
 def require_hex(value: Any, field: str, renderer: str) -> str:
@@ -692,11 +756,16 @@ def run_ai_renderer(
     if timeout < 1:
         raise SystemExit("--agent-timeout must be at least 1 second.")
 
-    executable = shutil.which(renderer)
+    executable_name = "opencode" if renderer in OPENCODE_RENDERER_MODELS else renderer
+    executable = shutil.which(executable_name)
     if executable is None:
-        raise SystemExit(f"--renderer {renderer} requires the {renderer} CLI on PATH.")
+        raise SystemExit(f"--renderer {renderer} requires the {executable_name} CLI on PATH.")
 
-    prompt = agent_recipe_prompt(tool, request, tile_width, tile_height)
+    prompt = (
+        opencode_agent_recipe_prompt(tool, request, tile_width, tile_height)
+        if renderer in OPENCODE_RENDERER_MODELS
+        else agent_recipe_prompt(tool, request, tile_width, tile_height)
+    )
     if renderer == "claude":
         command = [
             executable,
@@ -735,6 +804,21 @@ def run_ai_renderer(
             "-",
         ]
         stdin_text = prompt
+    elif renderer in OPENCODE_RENDERER_MODELS:
+        command = [
+            executable,
+            "run",
+            "--pure",
+            "--model",
+            OPENCODE_RENDERER_MODELS[renderer],
+            "--format",
+            "json",
+            "--dir",
+            os.getcwd(),
+            prompt,
+        ]
+        stdout_path = None
+        stdin_text = None
     else:  # pragma: no cover - argparse prevents this
         raise SystemExit(f"Unsupported renderer: {renderer}")
 
@@ -755,7 +839,10 @@ def run_ai_renderer(
         if result.returncode != 0:
             stderr = result.stderr.strip()[-1200:]
             raise SystemExit(f"--renderer {renderer} failed with exit code {result.returncode}: {stderr}")
-        output_text = stdout_path.read_text(encoding="utf-8") if stdout_path and stdout_path.exists() else result.stdout
+        if renderer in OPENCODE_RENDERER_MODELS:
+            output_text = opencode_text_from_jsonl(result.stdout)
+        else:
+            output_text = stdout_path.read_text(encoding="utf-8") if stdout_path and stdout_path.exists() else result.stdout
         recipe = validate_ai_recipe(extract_json_object(output_text), renderer, tool)
         recipe["agent_stdout_excerpt"] = result.stdout.strip()[:2000]
         return recipe

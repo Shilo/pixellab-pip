@@ -1,6 +1,13 @@
 # Developer
 
-Last reviewed: 2026-06-25.
+Last reviewed: 2026-07-03.
+
+## Table of Contents
+
+- [Codex Local Plugin Testing](#codex-local-plugin-testing)
+- [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
+- [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
+- [Repository Layout](#repository-layout)
 
 ## Codex Local Plugin Testing
 
@@ -59,6 +66,30 @@ python dev-tools/pixellab-doc-watch.py status
 The watcher keeps downloaded upstream docs under `.local/pixellab-doc-watch/`, which is ignored by Git. It treats REST OpenAPI as the API source of truth, checks `llms.txt` for parity, tracks the `/v2/docs` and `/v2/redoc` documentation shells, and tracks MCP docs as the MCP tool inventory source.
 
 Fresh checkout and maintenance instructions live in [PixelLab Documentation Watch Cache](pixellab/pixellab-doc-watch-cache.md).
+
+## PixelLab MCP Tileset Simulator
+
+Use [dev-tools/pixellab_mcp_tileset_sim.py](../dev-tools/pixellab_mcp_tileset_sim.py) for cheap local PNG preflights of PixelLab MCP `create_sidescroller_tileset` and `create_topdown_tileset` request JSON before spending live PixelLab generations. The simulator accepts MCP create-tool JSON, validates the request shape, renders local component previews, and repacks the compact simulated sheet into PixelLab-style export layouts.
+
+Run it from the repository root:
+
+```powershell
+'{"lower_description":"stone brick","transition_description":"moss","transition_size":0.25}' | python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --draw-grid
+'{"lower_description":"ocean water","upper_description":"sandy beach","transition_description":"sea foam","transition_size":0.25}' | python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --draw-grid
+```
+
+By default, generated PNGs and `sim-report.json` are written under `.local/mcp-tileset-sim-output/latest/`. Use `--output NAME` to keep multiple prompt/request attempts side by side, and `--layout 15-tileset`, `--layout wang`, or `--layout godot-3x3` to preview the supported PixelLab export layouts.
+
+Renderer modes:
+
+- `--renderer deterministic` - local keyword/semantic rendering; fastest and default.
+- `--renderer codex` - asks Codex for a constrained semantic recipe, then renders locally.
+- `--renderer claude` - asks Claude for a constrained semantic recipe, then renders locally.
+- `--renderer deepseek-v4-pro` - asks OpenCode's `deepseek/deepseek-v4-pro` model for the same constrained semantic recipe, then renders locally.
+
+The simulator is intentionally not PixelLab. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce PixelLab model taste. Treat it as an MCP-shaped request and layout simulator for narrowing descriptions and JSON inputs.
+
+Full agent-facing usage lives in [PixelLab MCP Tileset Simulator](../dev-tools/pixellab_mcp_tileset_sim.md).
 
 ## Repository Layout
 
