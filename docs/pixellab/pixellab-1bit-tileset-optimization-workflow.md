@@ -232,3 +232,4 @@ If text-only MCP keeps missing edge placement, the next controlled route is REST
 
 Treat those as production controls, not as text-only prompt tests. Keep the untouched PixelLab output separate from any palette-clamped derivative.
 
+Do not assume `color_image` is always the safest first fix. In 2026-07-03 top-down REST tests with black lower terrain, black upper terrain, and white boundary pixels, both a mostly black palette image and a balanced black/white checker palette image collapsed the result to all black. The same prompt with `transition_reference_image` and no `color_image` restored visible near-white contour pixels on the wall/floor boundary. For black-on-black 1-bit terrain, test placement with `transition_reference_image` first; add `color_image` only as its own controlled follow-up after verifying it does not erase the transition.

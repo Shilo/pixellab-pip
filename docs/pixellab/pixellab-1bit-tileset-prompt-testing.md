@@ -59,6 +59,43 @@ The best structural prompt was the plain top-down wall outline request:
 
 ## Prompt Guidance
 
+## Live Prompt Ladder Findings
+
+A small simulator-to-live ladder tested one top-down candidate and one sidescroller candidate after local deterministic and DeepSeek simulator review.
+
+Top-down request:
+
+- `lower_description`: black floor void.
+- `upper_description`: black wall mass.
+- `transition_description`: one-pixel pure white rim pixels on the wall/floor boundary.
+- `transition_size: 0.5`.
+
+Live result: compact `64x64`; placement mostly passed. PixelLab placed the brighter pixels on the wall/floor contour, matching the intended boundary/rim class. Palette failed strict 1-bit: highlights drifted to dark yellow/brown rather than white.
+
+Sidescroller request:
+
+- `lower_description`: solid black horizontally tileable platform center body with no seam highlights.
+- `transition_description`: pure white broken rim pixels only on exposed top surface and outside end-cap edges.
+- `transition_size: 0.25`.
+
+Live result: compact `64x64`; placement partially passed. PixelLab placed brighter pixels mostly along top/ledge runs and kept much of the body dark. Palette failed strict 1-bit: highlights drifted to blue/cyan/purple rather than white, and the rim was subtle.
+
+The same sidescroller wording was then tested with `transition_size: 0.5`. The larger transition produced a stronger top/rim accent mask than `0.25` and better emphasized exposed top/vertical edge runs, but it also increased opaque coverage, color count, and blue/purple texture drift. This suggests `transition_size` is a real coverage control for sidescroller top/rim placement, but not a palette-control or clean-1-bit control.
+
+Observed conclusion: prompt-only MCP wording is useful for steering the semantic placement of light accents into `transition_description`, but it is not enough to enforce exact black/white palette. For production 1-bit work, continue to prioritize shape and placement in MCP tests, then use REST palette/reference controls or an explicitly labeled palette-clamped derivative after the PixelLab-generated shape is approved.
+
+## REST Control Findings
+
+Three REST top-down checks tested the same black floor, black wall, and white contour prompt with locally authored control images.
+
+| Test | Controls | Result |
+|---|---|---|
+| `topdown-color-transition-ref-a` | Mostly black `64x64` `color_image` with small white swatches, plus `16x16` `transition_reference_image` | Completed, but collapsed to pure black. Strict 1-bit passed only because all white contour information disappeared. |
+| `topdown-color-transition-ref-b-balanced` | Balanced black/white checker `64x64` `color_image`, plus stronger `16x16` `transition_reference_image` | Completed, but still collapsed to pure black. |
+| `topdown-transition-ref-c-no-color-image` | Stronger `16x16` `transition_reference_image`, no `color_image` | Completed with visible near-white contour pixels on the wall/floor boundary. Palette was not strict black/white, but placement was useful. |
+
+Observed conclusion: for black-on-black 1-bit top-down terrain, `color_image` can suppress the desired white transition instead of merely constraining the palette. `transition_reference_image` is currently the better first REST control for edge placement. Add `color_image` only as a separate follow-up test after confirming it does not erase the transition, or palette-clamp a shape-approved PixelLab output as labeled local processing.
+
 For top-down wall tests, prefer:
 
 - `mode: "standard"`.
@@ -71,7 +108,7 @@ For sidescroller ground tests, prefer:
 
 - Solid black body in `lower_description`.
 - White rim/top pixels in `transition_description`, not only in `outline`.
-- `transition_size: 0.25` as the first test.
+- `transition_size: 0.25` as the first test when subtle top accents are acceptable; try `0.5` when rim coverage is too sparse, accepting higher risk of color/texture drift.
 - Avoid relying on `outline: "single color outline"` alone; it can encourage stylized gray/purple outlines.
 
 ## Shape-First Rubric
