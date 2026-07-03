@@ -250,9 +250,20 @@ KEYWORD_COLORS = [
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Render a local PixelLab MCP-style tileset result from a "
-            "create_topdown_tileset or create_sidescroller_tileset request."
-        )
+            "Render local PNG previews from PixelLab MCP create_topdown_tileset "
+            "or create_sidescroller_tileset JSON."
+        ),
+        epilog=(
+            "Agent pattern:\n"
+            "  Pass MCP JSON by stdin or file.\n"
+            "  Inspect tileset.png and sim-report.json under .local/mcp-tileset-sim-output/<output>.\n\n"
+            "Examples:\n"
+            "  '{\"lower_description\":\"stone brick\",\"transition_description\":\"moss\",\"transition_size\":0.25}' "
+            "| python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --output attempt-a\n"
+            "  '{\"lower_description\":\"ocean\",\"upper_description\":\"sand\",\"transition_description\":\"foam\",\"transition_size\":0.25}' "
+            "| python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --layout wang --output attempt-b"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("tool", choices=sorted(MCP_TOOLS))
     parser.add_argument(
@@ -277,7 +288,7 @@ def parse_args() -> argparse.Namespace:
         "--scale",
         type=int,
         default=8,
-        help="Nearest-neighbor scale for human-readable preview PNGs.",
+        help="Nearest-neighbor scale for enlarged preview PNGs.",
     )
     parser.add_argument(
         "--draw-grid",
@@ -526,6 +537,25 @@ def description_color(description: str, fallback: tuple[int, int, int, int]) -> 
     return fallback
 
 
+def transition_description_color(
+    description: str,
+    fallback: tuple[int, int, int, int],
+) -> tuple[int, int, int, int]:
+    text = description.lower()
+    outline_words = list(re.finditer(r"\b(border|outline|edge)\b", text))
+    color_words = list(re.finditer(r"\b(black|white)\b", text))
+    candidates: list[tuple[int, str]] = []
+    for outline_word in outline_words:
+        for color_word in color_words:
+            distance = min(abs(outline_word.start() - color_word.end()), abs(color_word.start() - outline_word.end()))
+            if distance <= 32:
+                candidates.append((distance, color_word.group(1)))
+    if candidates:
+        color_name = min(candidates, key=lambda candidate: candidate[0])[1]
+        return (255, 255, 255, 255) if color_name == "white" else (0, 0, 0, 255)
+    return description_color(description, fallback)
+
+
 def color_from_hex(value: Any) -> tuple[int, int, int, int] | None:
     if not isinstance(value, str) or not HEX_COLOR.match(value):
         return None
@@ -576,11 +606,11 @@ def texture_pixel(
         if "sparse" in text and ((x * 11 + y * 7) % 29 == 0):
             return (255, 255, 255, 255) if base[:3] == (0, 0, 0) else (0, 0, 0, 255)
         return base
-    if any(word in text for word in ("speckle", "sparse", "broken", "noise")) and ((x * 13 + y * 5) % 23 == 0):
+    if re.search(r"\b(speckle|sparse|broken|noise)\b", text) and ((x * 13 + y * 5) % 23 == 0):
         return lighten(base, 60)
-    if any(word in text for word in ("stripe", "line", "horizontal")) and y % 5 == 0:
+    if re.search(r"\b(stripe|stripes|line|lines|horizontal)\b", text) and y % 5 == 0:
         return lighten(base, 52)
-    if "dither" in text and ((x + y) % 2 == 0):
+    if re.search(r"\bdither(?:ed|ing)?\b", text) and ((x + y) % 2 == 0):
         return lighten(base, 44)
     return base
 
@@ -957,7 +987,7 @@ def draw_tileset(
         render_recipe,
         "transition",
         "color",
-        description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+        transition_description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
     )
     lower_recipe = section_from_recipe(render_recipe, "lower")
     upper_recipe = section_from_recipe(render_recipe, "upper")
@@ -1070,7 +1100,7 @@ def draw_component_previews(
         render_recipe,
         "transition",
         "color",
-        description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+        transition_description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
     )
     sections = {
         "component_lower": ("lower_description", lower_color, section_from_recipe(render_recipe, "lower")),
