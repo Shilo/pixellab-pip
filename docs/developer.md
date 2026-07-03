@@ -78,7 +78,7 @@ Typical smoke tests from the repository root:
 '{"lower_description":"ocean water","upper_description":"sandy beach","transition_description":"sea foam","transition_size":0.25}' | python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --draw-grid
 ```
 
-By default, generated PNGs and `sim-report.json` are written under `.local/mcp-tileset-sim-output/latest/`. Use `--output NAME` to keep multiple attempts side by side, and `--layout 15-tileset`, `--layout wang`, or `--layout godot-3x3` to preview the supported PixelLab export layouts.
+By default, generated PNGs and `sim-report.json` are written under `.local/mcp-tileset-sim-output/latest/`. Each run also writes stable component previews under `components/`, such as `lower-tile.png`, `upper-tile.png`, `top-tile.png`, `transition-tile.png`, and `center-tile.png` when applicable. Use `--output NAME` to keep multiple attempts side by side, and `--layout 15-tileset`, `--layout wang`, or `--layout godot-3x3` to preview the supported PixelLab export layouts.
 
 Renderer modes:
 
