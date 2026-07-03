@@ -103,7 +103,7 @@ MCP_TOOLS = {
             "seed": None,
         },
         "tile_sizes": {(16, 16), (32, 32)},
-        "transition_sizes": {0.0, 0.25, 0.5},
+        "transition_range": (0.0, 1.0),
     },
     "create_topdown_tileset": {
         "required": ("lower_description", "upper_description"),
@@ -148,7 +148,7 @@ MCP_TOOLS = {
             "raggedness": 0.0,
         },
         "tile_sizes": {(16, 16), (32, 32), (64, 64)},
-        "transition_sizes": {0.0, 0.25, 0.5},
+        "transition_range": (0.0, 1.0),
     },
 }
 
@@ -408,9 +408,19 @@ def validate_request(
     if (tile_width, tile_height) not in config["tile_sizes"]:
         raise SystemExit(f"{tool} does not support tile_size {tile_width}x{tile_height}.")
     raw_transition = float(request_value(tool, request, "transition_size"))
-    if raw_transition not in config["transition_sizes"]:
-        values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
-        raise SystemExit(f"{tool} transition_size must be one of {values}.")
+    min_transition, max_transition = config["transition_range"]
+    if raw_transition < min_transition or raw_transition > max_transition:
+        raise SystemExit(f"{tool} transition_size must be between {min_transition} and {max_transition}.")
+    if raw_transition not in {0.0, 0.25, 0.5, 1.0}:
+        warnings.append(
+            f"{tool} transition_size {raw_transition} is not one of PixelLab's documented guidepost values; "
+            "the compact renderer uses the numeric value directly."
+        )
+    if tool == "create_topdown_tileset" and raw_transition >= 1.0:
+        raise SystemExit(
+            "This is a valid top-down tileset request shape, but transition_size 1.0 can export an expanded "
+            "23-tile/4x8-style sheet that this compact simulator does not render."
+        )
     if tool == "create_topdown_tileset":
         mode = request_value(tool, request, "mode")
         if mode not in {"standard", "pro"}:
@@ -420,13 +430,9 @@ def validate_request(
         if request_value(tool, request, "view") not in {"low top-down", "high top-down"}:
             raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
         if mode == "pro":
-            if raw_transition >= 0.5:
-                raise SystemExit(
-                    "This is a valid MCP request shape, but top-down pro mode with "
-                    "transition_size >= 0.5 can export an expanded sheet that this "
-                    "compact simulator does not render."
-                )
-            warnings.append("Top-down pro mode is simulated only for compact transition_size 0.0 or 0.25 cases.")
+            warnings.append("Top-down pro mode is approximated with the compact deterministic renderer.")
+        if raw_transition > 0 and not str(request_value(tool, request, "transition_description") or "").strip():
+            warnings.append("Top-down transition_size > 0 normally needs a transition_description for meaningful output.")
 
     detail = request_value(tool, request, "detail")
     if detail is not None and detail not in {"low detail", "medium detail", "highly detailed"}:
