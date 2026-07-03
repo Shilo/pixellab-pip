@@ -50,11 +50,13 @@ It always writes to:
 
 Generated files:
 
-- `dualgrid-corner-preview.png`
-- `dualgrid-corner-preview-x8.png`
+- `corner-key-preview.png`
+- `corner-key-preview-x8.png`
 - `tileset.png`
 - `tileset-x8.png`
-- `mcp-response.json`
+- `create-response.json`
+- `get-response.json`
+- `sim-report.json`
 
 ## Layouts
 
@@ -85,6 +87,7 @@ TileMapDual uses bit weights `NW=1, NE=4, SW=2, SE=8` and defaults lower/filled 
 - `--draw-grid`: draw magenta tile boundaries in preview PNGs.
 - `--scale N`: set the nearest-neighbor preview scale. Default is `8`.
 - `--renderer deterministic`: use the local deterministic renderer. This is the only renderer currently implemented.
+- `--allow-compact-expanded`: force compact fallback for top-down `pro` or `transition_size: 1.0` requests that PixelLab may export as expanded sheets.
 - `--layout NAME`: choose `pixellab`, `lexaloffle-row`, or `tilemapdual-standard`.
 - `--filled-bit 0|1`: override which bit value maps to lower terrain.
 - `--template-sheet PATH`: reuse alpha masks from an existing compact 4x4 PixelLab sheet.

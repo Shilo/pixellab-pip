@@ -178,7 +178,9 @@ The current simulator covers the compact 16-tile layout for MCP-style `create_si
 - Deterministic semantic rendering from description text
 - Template-mask previews from observed PixelLab sheets
 
-It validates only the route fields that matter for local simulation. It does not yet simulate expanded top-down transition sheets.
+It writes `tileset.png`, `corner-key-preview.png`, `create-response.json`, `get-response.json`, and `sim-report.json`. The create/get JSON files are intentionally MCP-shaped local stand-ins, while `sim-report.json` contains simulator-only evidence such as ignored fields, normalized request JSON, output paths, layout order, and computed corner patterns.
+
+It validates only the route fields that matter for local simulation. It rejects top-down cases that may export as expanded sheets unless `--allow-compact-expanded` is supplied, and it does not yet simulate expanded top-down transition sheets.
 
 The platform preview is a per-tile schematic. It can highlight tile edges that would become internal seams in a composed map, and template-sheet mode treats any opaque pixel as occupied, including decorative top/transition pixels.
 

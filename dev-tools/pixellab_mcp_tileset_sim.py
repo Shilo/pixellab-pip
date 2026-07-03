@@ -528,19 +528,198 @@ def save_scaled(image: Image.Image, path: Path, scale: int) -> None:
         scaled.save(path.with_name(path.stem + f"-x{scale}" + path.suffix))
 
 
-def build_report(
+def stable_id(prefix: str, payload: dict[str, Any]) -> str:
+    encoded = json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
+    digest = hashlib.sha1(encoded).hexdigest()
+    return f"sim-{prefix}-{digest[:12]}"
+
+
+def tile_records(
+    tile_width: int,
+    tile_height: int,
+    layout: str,
+    tiles: list[tuple[str, dict[str, str], int]],
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": stable_id("tile", {"name": name, "layout": layout, "bitmask": bitmask}),
+            "name": name,
+            "sheet_col": index % 4,
+            "sheet_row": index // 4,
+            "bounding_box": {
+                "x": (index % 4) * tile_width,
+                "y": (index // 4) * tile_height,
+                "width": tile_width,
+                "height": tile_height,
+            },
+            "corners": corners,
+            "expected_pattern_4x4": expected_pattern_4x4(corners),
+            "bitmask": bitmask,
+            "bitmask_binary": format(bitmask, "04b"),
+            "bit_order": ", ".join(f"{corner}={weight}" for corner, weight in BIT_ORDERS[layout]),
+        }
+        for index, (name, corners, bitmask) in enumerate(tiles)
+    ]
+
+
+def build_base_tile_ids(tool: str, request: dict[str, Any]) -> dict[str, str]:
+    if tool == "create_sidescroller_tileset":
+        return {
+            "base": request.get("base_tile_id")
+            or stable_id("base", {"tool": tool, "lower": request.get("lower_description", "")})
+        }
+    return {
+        "lower": request.get("lower_base_tile_id")
+        or stable_id("lower", {"tool": tool, "lower": request.get("lower_description", "")}),
+        "upper": request.get("upper_base_tile_id")
+        or stable_id("upper", {"tool": tool, "upper": request.get("upper_description", "")}),
+    }
+
+
+def build_tileset_data(
     tool: str,
     request: dict[str, Any],
-    warnings: list[str],
     tile_width: int,
     tile_height: int,
     layout: str,
     filled_bit: int,
     tiles: list[tuple[str, dict[str, str], int]],
+    output_files: dict[str, Path],
+) -> dict[str, Any]:
+    records = tile_records(tile_width, tile_height, layout, tiles)
+    return {
+        "tileset_type": "sidescroller" if tool == "create_sidescroller_tileset" else "topdown",
+        "format": "tileset15",
+        "tile_size": {"width": tile_width, "height": tile_height},
+        "tile_count": len(records),
+        "total_tiles": len(records),
+        "spritesheet_url": str(output_files["tileset"]),
+        "spritesheet_layout": "tileset15_4x4",
+        "spritesheet_grid": {"cols": 4, "rows": 4},
+        "layout": {
+            "type": "tileset15",
+            "grid_size": {"width": 4, "height": 4},
+            "tile_count": len(records),
+            "atlas_order": LAYOUTS[layout],
+            "simulator_layout": layout,
+            "filled_bit": filled_bit,
+        },
+        "pattern_system": {
+            "type": "4x4_wildcard",
+            "terrain_encoding": {LOWER: 0, UPPER: 1, "wildcard": WILDCARD},
+            "bit_weights": {corner: weight for corner, weight in BIT_ORDERS[layout]},
+        },
+        "generation_parameters": {
+            key: value
+            for key, value in request.items()
+            if key in MCP_TOOLS[tool]["allowed"]
+        },
+        "tiles": records,
+    }
+
+
+def build_mcp_outputs(
+    tool: str,
+    request: dict[str, Any],
+    request_original: dict[str, Any],
+    warnings: list[str],
+    ignored_fields: list[str],
+    tile_width: int,
+    tile_height: int,
+    layout: str,
+    filled_bit: int,
+    tiles: list[tuple[str, dict[str, str], int]],
+    output_files: dict[str, Path],
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    identity_payload = {
+        "tool": tool,
+        "request": request,
+        "layout": layout,
+        "filled_bit": filled_bit,
+    }
+    tileset_id = stable_id("tileset", identity_payload)
+    background_job_id = stable_id("job", identity_payload)
+    base_tile_ids = build_base_tile_ids(tool, request)
+    tileset_data = build_tileset_data(tool, request, tile_width, tile_height, layout, filled_bit, tiles, output_files)
+
+    create_response: dict[str, Any] = {
+        "tool": tool,
+        "tileset_id": tileset_id,
+        "background_job_id": background_job_id,
+        "status": "completed",
+        "simulated": True,
+        "tile_count": len(tiles),
+        "tile_size": {"width": tile_width, "height": tile_height},
+        "download_png": str(output_files["tileset"]),
+        "metadata_json": str(output_files["get_response"]),
+        "warnings": warnings,
+    }
+    if tool == "create_sidescroller_tileset":
+        create_response["base_tile_id"] = base_tile_ids["base"]
+    else:
+        create_response["base_tile_ids"] = base_tile_ids
+
+    get_response = {
+        "tool": tool,
+        "tileset_id": tileset_id,
+        "background_job_id": background_job_id,
+        "status": "completed",
+        "simulated": True,
+        "download_png": str(output_files["tileset"]),
+        "tile_count": len(tiles),
+        "base_tile_ids": base_tile_ids,
+        "metadata": {
+            "format": "tileset15",
+            "layout": "tileset15_4x4",
+            "sheet_width": tile_width * 4,
+            "sheet_height": tile_height * 4,
+            "renderer": "deterministic",
+        },
+        "tileset_data": tileset_data,
+        "warnings": warnings,
+    }
+
+    sim_report = build_report(
+        tool,
+        request,
+        request_original,
+        warnings,
+        ignored_fields,
+        tile_width,
+        tile_height,
+        layout,
+        filled_bit,
+        tiles,
+        output_files,
+        tileset_id,
+        background_job_id,
+        base_tile_ids,
+    )
+    return create_response, get_response, sim_report
+
+
+def build_report(
+    tool: str,
+    request: dict[str, Any],
+    request_original: dict[str, Any],
+    warnings: list[str],
+    ignored_fields: list[str],
+    tile_width: int,
+    tile_height: int,
+    layout: str,
+    filled_bit: int,
+    tiles: list[tuple[str, dict[str, str], int]],
+    output_files: dict[str, Path],
+    tileset_id: str,
+    background_job_id: str,
+    base_tile_ids: dict[str, str],
 ) -> dict[str, Any]:
     return {
         "source": "PixelLab MCP tileset simulator",
         "tool": tool,
+        "tileset_id": tileset_id,
+        "background_job_id": background_job_id,
+        "base_tile_ids": base_tile_ids,
         "renderer": "deterministic",
         "limits": [
             "This simulates PixelLab MCP request shape and compact tileset layout locally.",
@@ -551,18 +730,10 @@ def build_report(
             "When template_sheet is used, fill masks are copied from that observed PixelLab output.",
         ],
         "warnings": warnings,
-        "request": {
-            "lower_description": request.get("lower_description", ""),
-            "upper_description": request.get("upper_description", ""),
-            "transition_description": request.get("transition_description", ""),
-            "tile_size": {"width": tile_width, "height": tile_height},
-            "transition_size": request.get("transition_size", 0.0),
-            "mode": request.get("mode"),
-            "view": request.get("view"),
-            "detail": request.get("detail"),
-            "shading": request.get("shading"),
-            "outline": request.get("outline"),
-        },
+        "ignored_fields": ignored_fields,
+        "request_original": request_original,
+        "request_normalized": request,
+        "output_files": {key: str(path) for key, path in output_files.items()},
         "terrain_encoding": {LOWER: 0, UPPER: 1, "wildcard": WILDCARD},
         "sheet_layout": {
             "columns": 4,
@@ -573,25 +744,7 @@ def build_report(
             "bit_weights": {corner: weight for corner, weight in BIT_ORDERS[layout]},
             "note": "bit_weights describe the tile key; filled_bit controls which key value maps to lower terrain.",
         },
-        "tiles": [
-            {
-                "name": name,
-                "sheet_col": index % 4,
-                "sheet_row": index // 4,
-                "bounding_box": {
-                    "x": (index % 4) * tile_width,
-                    "y": (index // 4) * tile_height,
-                    "width": tile_width,
-                    "height": tile_height,
-                },
-                "corners": corners,
-                "expected_pattern_4x4": expected_pattern_4x4(corners),
-                "bitmask": bitmask,
-                "bitmask_binary": format(bitmask, "04b"),
-                "bit_order": ", ".join(f"{corner}={weight}" for corner, weight in BIT_ORDERS[layout]),
-            }
-            for index, (name, corners, bitmask) in enumerate(tiles)
-        ],
+        "tiles": tile_records(tile_width, tile_height, layout, tiles),
     }
 
 
@@ -621,13 +774,26 @@ def self_check() -> None:
 def main() -> None:
     self_check()
     args = parse_args()
-    request = load_request(args.tool, args.request_json)
+    request, request_original = load_request(args.tool, args.request_json)
     tile_width, tile_height = tile_size_from_request(request)
-    warnings = validate_request(args.tool, request, tile_width, tile_height)
+    warnings, ignored_fields = validate_request(
+        args.tool,
+        request,
+        tile_width,
+        tile_height,
+        args.allow_compact_expanded,
+    )
     filled_bit = args.filled_bit if args.filled_bit is not None else DEFAULT_FILLED_BITS[args.layout]
     tiles = make_tiles(args.layout, filled_bit)
 
     DEFAULT_OUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_files = {
+        "corner_preview": DEFAULT_OUT_DIR / "corner-key-preview.png",
+        "tileset": DEFAULT_OUT_DIR / "tileset.png",
+        "create_response": DEFAULT_OUT_DIR / "create-response.json",
+        "get_response": DEFAULT_OUT_DIR / "get-response.json",
+        "sim_report": DEFAULT_OUT_DIR / "sim-report.json",
+    }
 
     template_sheet = None
     if args.template_sheet:
@@ -639,18 +805,36 @@ def main() -> None:
     corner = draw_corner_preview(tile_width, tile_height, args.draw_grid, tiles)
     tileset = draw_tileset(args.tool, request, tile_width, tile_height, args.draw_grid, tiles, template_sheet)
 
-    save_scaled(corner, DEFAULT_OUT_DIR / "dualgrid-corner-preview.png", args.scale)
-    save_scaled(tileset, DEFAULT_OUT_DIR / "tileset.png", args.scale)
+    save_scaled(corner, output_files["corner_preview"], args.scale)
+    save_scaled(tileset, output_files["tileset"], args.scale)
 
-    report = build_report(args.tool, request, warnings, tile_width, tile_height, args.layout, filled_bit, tiles)
+    create_response, get_response, sim_report = build_mcp_outputs(
+        args.tool,
+        request,
+        request_original,
+        warnings,
+        ignored_fields,
+        tile_width,
+        tile_height,
+        args.layout,
+        filled_bit,
+        tiles,
+        output_files,
+    )
     if args.template_sheet:
-        report["template_sheet"] = str(args.template_sheet)
-    with (DEFAULT_OUT_DIR / "mcp-response.json").open("w", encoding="utf-8") as handle:
-        json.dump(report, handle, indent=2)
+        sim_report["template_sheet"] = str(args.template_sheet)
+    with output_files["create_response"].open("w", encoding="utf-8") as handle:
+        json.dump(create_response, handle, indent=2)
+    with output_files["get_response"].open("w", encoding="utf-8") as handle:
+        json.dump(get_response, handle, indent=2)
+    with output_files["sim_report"].open("w", encoding="utf-8") as handle:
+        json.dump(sim_report, handle, indent=2)
 
-    print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-corner-preview.png'}")
-    print(f"Wrote {DEFAULT_OUT_DIR / 'tileset.png'}")
-    print(f"Wrote {DEFAULT_OUT_DIR / 'mcp-response.json'}")
+    print(f"Wrote {output_files['corner_preview']}")
+    print(f"Wrote {output_files['tileset']}")
+    print(f"Wrote {output_files['create_response']}")
+    print(f"Wrote {output_files['get_response']}")
+    print(f"Wrote {output_files['sim_report']}")
 
 
 if __name__ == "__main__":
