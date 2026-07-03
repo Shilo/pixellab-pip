@@ -12,6 +12,19 @@ The primary success criterion is PixelLab-generated shape. Palette snapping is a
 
 The simulator is useful for request shape, compact layout size, DualGrid packing, and rough layer targeting. It is not yet a PixelLab model predictor for final shape quality.
 
+## Current State
+
+Top-down has a workable recipe. `topdown-cave-rim-ref-a` shows that a black lower terrain, black upper terrain, `transition_size: 0.5`, and a compact `transition_reference_image` can put lighter pixels on the correct cave/wall boundary. The raw output is not exact black/white, but threshold clamping preserves the intended rim.
+
+Sidescroller does not yet have the exact sparse-rim ideal. The live tests suggest this behavior:
+
+- `lower_description` controls the dark platform body.
+- `transition_size: 0.0` can produce a clean dark silhouette, but it suppresses bright white rim requests.
+- `transition_description` is where bright top/edge pixels appear, but PixelLab tends to turn them into a cap/surface material.
+- `base_tile_id` chaining from a clean dark body preserved darkness but did not add a bright rim.
+
+Current sidescroller options are therefore two imperfect branches: `side-c-broken-rim-05` for sparse rim placement, or `side-k-featureless-silhouette-capstones-05` for a more polished bright-cap platform after local clamp.
+
 ## Corpus Findings
 
 A replay audit scanned the local generation corpus for MCP-shaped tileset inputs and live-looking PNGs.
@@ -115,6 +128,7 @@ A local black/white threshold study tested whether the raw PixelLab outputs cont
 | REST top-down `transition_reference_image` only | Strong candidate. Near-white contours survive strict clamping across high thresholds, so the top-down pipeline is close: shape with `transition_reference_image`, then clamp after approval. |
 | REST top-down cave-rim `transition_reference_image` only | Strongest current top-down clamp target. Raw output has no true white, but the lighter contour is placed on the wall/floor boundary and clamps cleanly at threshold 96 with dark interiors preserved. |
 | REST sidescroller `transition_reference_image` only | Weak candidate. Top-layer information exists, but it is dark blue/teal; low thresholds reveal too much body texture, while high thresholds lose the rim. |
+| REST sidescroller `lower_reference_image` + `transition_reference_image`, no `color_image` | Not a candidate. `side-i-ref-lower-transition-no-color-05` over-anchored the structure into flat gray horizontal slabs; clampable light pixels became broad mid-band strips rather than sparse top/end ledge chips. |
 | REST sidescroller `color_image` + reference | Not recoverable. The output is black/transparent with no white rim to recover. |
 | Prompt-only MCP sidescroller `transition_size: 0.5` | Best current sidescroller clamp candidate. It has brighter top/end-cap accents than REST sidescroller reference runs, and high thresholds preserve a cleaner ledge line. |
 
@@ -123,6 +137,20 @@ Current selected clamp previews live under `pixellab-pip-generations/1bit-palett
 A follow-up REST sidescroller prompt-only test, `side-prompt-d-high-contrast-no-controls`, tried to ask directly for high-contrast bright white top/end-cap pixels, darker interiors, and no controls. It did not improve the situation: the raw output contained no bright or whiteish pixels, shifted accents into purple midtones, and produced more interior texture. Threshold clamps only recovered white at low/mid thresholds where body noise also becomes white. This did not beat the earlier MCP `transition_size: 0.5` candidate.
 
 A follow-up MCP sidescroller prompt-only test, `side-d-smooth-cap-05`, tried to remove texture language and ask for a smooth black silhouette with a crisp white cap. It also did not improve on `side-c-broken-rim-05`: the raw output became chunkier/noisier, and high-threshold clamps lost the clean broken ledge line. Keep `side-c-broken-rim-05` as the current sidescroller clamp baseline.
+
+A follow-up MCP sidescroller prompt-only test, `side-e-white-crust-surface-05`, tried a structurally different branch: treat the white pixels as the sidescroller top/surface material rather than as an outline. This worked as a placement control, producing bright top material that clamps cleanly at threshold 96, but it overfilled into a continuous white cap/snow-platform read instead of sparse rim pixels. `side-f-white-chips-surface-025` then kept the same surface-material framing with `transition_size: 0.25` and separated-chip wording. That was a regression: all bright recoverable pixels disappeared. Keep `side-c-broken-rim-05` as the sparse-rim baseline; keep `side-e-white-crust-surface-05` only as a bright solid-cap branch.
+
+`side-g-broken-ledge-highlight-05` attempted the next sparse-rim branch with `transition_size: 0.5`, no cap/crust/snow/surface-material wording, and a direct broken ledge highlight request. PixelLab failed the job with `unknown error` before producing an image, and balance did not change. `side-h-short-ledge-highlight-05` retried the same idea with shorter transition wording and also failed without a charge. Do not treat these as visual evidence, but stop this exact direct broken-ledge-highlight branch for now; use the known-working `side-c-broken-rim-05` wording family or REST/reference controls for the next sidescroller attempt.
+
+`side-i-ref-lower-transition-no-color-05` tested the REST/reference route after the prompt-only ledge-highlight failures. It sent a black slab `lower_reference_image`, a sparse white top/end-chip `transition_reference_image`, and no `color_image`. The job completed, but the result showed that sidescroller reference images can over-anchor the platform into literal gray slab bands. The brightest pixels reached only luminance 128, landed mostly in the middle of the 16px tiles, and clamped into long horizontal strips rather than a professional 1-bit ledge. This makes lower+transition references a poor first fix for the sidescroller rim problem.
+
+`side-j-chipped-capstones-05` returned to MCP prompt-only generation and kept the surface-material branch from `side-e`, but asked for sparse chipped capstones instead of a white crust. This restored true bright pixels and clamps cleanly, but PixelLab still interpreted the wording as a mostly continuous top cap with dangling teeth, and it reintroduced dark purple platform linework. Treat `capstone`/`chipped capstone` as a way to force bright top material, not as a sparse-rim control.
+
+`side-k-featureless-silhouette-capstones-05` kept the chipped-top idea but strengthened the lower prompt with `featureless`, `pure black ink silhouette`, `no seams`, and `no internal linework`, plus `text_guidance_scale: 12`. PixelLab still drew purple block/platform texture in the body. This suggests the sidescroller body generator has a strong platform-material prior; stronger negative texture wording and higher text guidance do not reliably make a flat black interior.
+
+`side-l-body-contour-transition0` moved the white contour request into `lower_description` and set `transition_size: 0.0`. This produced the cleanest dark platform silhouette so far, but PixelLab suppressed the requested white contour entirely: max luminance was only 26 and every clamp stayed black. This suggests sidescroller white edge/top pixels need the transition/top layer; `lower_description` can shape a dark body, but it is not reliable for bright rim placement when the transition layer is off. The useful follow-up is chaining from `side-l`'s `base_tile_id` and reintroducing a controlled transition.
+
+`side-m-chained-silhouette-rim-05` used `side-l`'s clean-body `base_tile_id` and reintroduced a broken white rim through `transition_description` at `transition_size: 0.5`. Chaining preserved a dark body but did not combine the desired behaviors: max luminance was only 71, and no white rim survived normal clamp thresholds. For this 1-bit target, base-tile chaining is useful for continuity but is not currently a reliable way to add bright top/rim pixels to a clean body.
 
 A follow-up REST top-down reference-only test, `topdown-cave-rim-ref-a`, used a 16x16 broken-rim transition reference and cave-wall wording. It produced the best top-down 1-bit shape candidate so far: raw PixelLab colors remained dark gray/blue with no true white, but edge placement was correct and local clamps from threshold 32 through 96 preserved a readable white rim without flooding the interior. This reinforces the shape-first workflow: use PixelLab/reference controls for boundary placement, then palette-clamp only after the generated shape is accepted.
 
