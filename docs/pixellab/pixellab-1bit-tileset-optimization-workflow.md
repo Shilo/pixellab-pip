@@ -8,6 +8,8 @@ This is a practical workflow for humans and agents. It documents what is known f
 
 ## Current Decision
 
+Stop spending large prompt-only batches on PixelLab tilesets for strict 1-bit or exact-outline goals. The evidence gathered on 2026-07-03 is enough to treat the tileset tools as useful for common terrain/material generation, but not dependable for exact niche constraints such as strict monochrome, exact white-pixel placement, or consistent whole-shape sidescroller outlines.
+
 As of the latest 2026-07-03 tests, top-down and sidescroller should be handled differently.
 
 For top-down 1-bit wall/floor or cave work, use REST `create-tileset` with black lower terrain, black upper terrain, `transition_size: 0.5`, a compact `transition_reference_image`, and no `color_image`. Judge the raw result by whether lighter pixels sit on the wall/floor boundary; then palette-clamp only after the generated shape is acceptable. There are now two useful top-down branches: `topdown-cave-rim-ref-a` for a sparse contour, and `topdown-b-cave-rim-production-ref` for a bolder high-contrast ledge/cap.
@@ -30,6 +32,12 @@ The first useful second-pass test was `side-cap-c196-outline-edit-20260703`: RES
 The `outline`, `shading`, and `detail` fields should be treated as weak style controls. Official PixelLab docs say these options "Weakly" control outlines, shading, and detail. The REST API describes them only as broad style controls, and the MCP docs describe tilesets in broad layer terms: top-down creates corner-combination terrain transitions, while sidescroller uses a platform body plus a top decoration layer. Live matrices confirmed that these controls do not act like hard switches. `outline` did not reliably add or remove a gameplay outline. `shading` changed color/material treatment more than structural edge placement. A later generic dirt/grass matrix showed `detail` does visibly affect normal terrain texture and color variation, but not as a precise control for exact texture density, exact palette, or 1-bit cleanup. In practice, optimize the descriptions and `transition_size` first; use these style controls only as secondary nudges.
 
 The tileset tools are most dependable for common terrain/material requests. They are not currently dependable for heavily niche constraints such as exact 1-bit black/white output, exact monochrome output, exact single-pixel rim placement, or whole-shape sidescroller outlines. For those goals, use PixelLab to generate the best shape and material read, then use a verified reference/control route or a labeled Aseprite/local post-process where appropriate.
+
+If the user needs a production-ready strict 1-bit tileset, prefer one of these routes instead of more prompt-only tileset matrices:
+
+- Generate a good-looking PixelLab tileset, then use Aseprite/local processing for palette clamp and inside outline when the user approves local derivatives.
+- Generate individual tiles or a texture sheet through a non-tileset image route when exact visual art direction matters more than native DualGrid/autotile composition.
+- Use human-authored or purchased 1-bit tilesets when the goal is professional consistency rather than PixelLab-behavior research.
 
 ## Source Summary
 

@@ -47,7 +47,9 @@ Practical conclusion: for sidescroller 1-bit work, spend test budget on `lower_d
 
 Practical limitation: PixelLab tileset tools are good at common terrain concepts such as dirt, grass, stone, moss, snow, beach, water, and platform materials. They are not reliable for heavily specific or niche constraints such as exact 1-bit palettes, exact monochrome output, exact white-pixel placement, or a consistent connected-shape outline across all sidescroller tiles. Treat those as controlled experiments or post-processing workflows, not as guaranteed prompt-only outputs.
 
-Follow-up generic dirt/grass matrices tested `detail` x `outline` for sidescroller and top-down with common terrain wording instead of niche 1-bit constraints. These showed the style controls more clearly:
+Follow-up generic dirt/grass matrices tested `detail` x `outline` with common terrain wording instead of niche 1-bit constraints. The sidescroller matrix used the same seed for all 9 requests. The top-down MCP callable rejected the requested `seed` parameter, so the top-down matrix is not a controlled seed-stable comparison; treat it only as visual examples from the same input family.
+
+These showed the style controls more clearly:
 
 - Sidescroller dirt/grass: `detail` visibly changed texture density and platform-material interpretation, but not monotonically or predictably enough to choose quality by label alone. Low detail often looked simpler/blockier, medium and highly detailed often added more texture or contour variation, but each outline mode changed the read.
 - Top-down dirt/grass: `detail` visibly changed dirt texture, color count, and terrain patterning. Higher detail generally added more small marks, but the exact palette and contrast still varied by outline mode.
@@ -56,6 +58,8 @@ Follow-up generic dirt/grass matrices tested `detail` x `outline` for sidescroll
 - `lineless` still produces visible terrain boundaries because the tileset generator must separate terrain regions. It does not mean boundary-free output.
 
 Updated confidence: medium. `detail` does have visible effects on common terrain/material requests. It is still not a hard control for exact color count, texture density, 1-bit cleanup, or final quality.
+
+Final practical conclusion: stop large prompt-only tileset batches for strict 1-bit or exact-outline goals. The route is useful for common terrain/material generation and for learning broad layer behavior, but not for reliably enforcing exact niche constraints. Future work should either use a labeled post-process, a different PixelLab image route, or hand-authored/purchased 1-bit tilesets when professional consistency matters.
 
 ## Corpus Findings
 
