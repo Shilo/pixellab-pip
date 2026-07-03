@@ -124,6 +124,7 @@ MCP_TOOLS = {
             "tileset_adherence",
             "tileset_adherence_freedom",
             "text_guidance_scale",
+            "seed",
             "spread_x",
             "slope_size",
             "raggedness",
@@ -143,6 +144,7 @@ MCP_TOOLS = {
             "tileset_adherence": 100.0,
             "tileset_adherence_freedom": 500.0,
             "text_guidance_scale": 8.0,
+            "seed": None,
             "spread_x": 0.5,
             "slope_size": 0.0,
             "raggedness": 0.0,
@@ -912,6 +914,8 @@ def text_is_unsupported_topdown_wall_face_stripes(description: str) -> bool:
 
 def text_is_topdown_black_texture_that_live_dulls(description: str) -> bool:
     text = description.lower()
+    if re.search(r"\b(crack|cracks|scratch|scratches|highlight|highlights)\b", text):
+        return False
     has_black_surface = re.search(r"\bblack|dark|dungeon|wall|floor|terrain|surface|transition\b", text)
     has_sparse_white_detail = re.search(
         r"\b(sparse|speckle|speckled|fleck|flecks|stipple|stippled|dust|chipped|isolated|single[- ]?pixel|tiny|small|minimal)\b.*\bwhite\b|\bwhite\b.*\b(sparse|speckle|speckled|fleck|flecks|stipple|stippled|dust|chipped|isolated|single[- ]?pixel|tiny|small|minimal)\b",
@@ -928,8 +932,17 @@ def text_is_topdown_black_texture_that_live_dulls(description: str) -> bool:
 def text_is_unspecified_bw_topdown_edge(description: str) -> bool:
     text = description.lower()
     has_bw_edge = re.search(r"\b(1-bit|one-bit|monochrome|black and white|black[- ]and[- ]white)\b", text) and re.search(r"\bedge\b", text)
-    explicit_white_edge = re.search(r"\bwhite\s+(?:edge|outline|rim|border|highlight|line|lines)\b|\b(?:edge|outline|rim|border|highlight|line|lines)\s+white\b", text)
-    return bool(has_bw_edge and not explicit_white_edge)
+    return bool(has_bw_edge and not text_has_explicit_white_edge(description))
+
+
+def text_has_explicit_white_edge(description: str) -> bool:
+    text = description.lower()
+    return bool(
+        re.search(
+            r"\bwhite\s+(?:(?:pixel|pixels|sparse|clean|crisp)\s+)*(?:edge|outline|rim|border|highlight|highlights|line|lines)\b|\b(?:edge|outline|rim|border|highlight|highlights|line|lines)\s+white\b",
+            text,
+        )
+    )
 
 
 def normalize_ai_recipe_for_request(recipe: dict[str, Any], tool: str, request: dict[str, Any]) -> dict[str, Any]:
@@ -949,6 +962,12 @@ def normalize_ai_recipe_for_request(recipe: dict[str, Any], tool: str, request: 
             section_recipe["accent_color"] = "#000000"
             section_recipe["texture"] = "none"
             section_recipe["placement"] = "none"
+            continue
+        if tool == "create_topdown_tileset" and section == "transition" and text_has_explicit_white_edge(description):
+            section_recipe["color"] = "#FFFFFF"
+            section_recipe["accent_color"] = "#FFFFFF"
+            section_recipe["texture"] = "solid"
+            section_recipe["placement"] = "boundary"
             continue
         if tool == "create_topdown_tileset" and text_is_topdown_black_texture_that_live_dulls(description):
             section_recipe["color"] = "#000000"
