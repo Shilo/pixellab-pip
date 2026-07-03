@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Simulate deterministic PixelLab MCP DualGrid tileset structure.
+"""Simulate deterministic PixelLab MCP tileset results.
 
 This does not predict PixelLab's generated art. It previews the 16 returned
 corner patterns for MCP-style create_topdown_tileset and
-create_sidescroller_tileset requests.
+create_sidescroller_tileset requests with a simple deterministic renderer.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ LAYOUTS = {
     "lexaloffle-row": [13, 10, 4, 12, 6, 8, 0, 1, 11, 3, 2, 5, 15, 14, 9, 7],
     "tilemapdual-standard": [4, 10, 13, 12, 9, 14, 15, 7, 2, 3, 11, 5, 0, 8, 6, 1],
 }
-DEFAULT_OUT_DIR = Path(".local") / "dualgrid-sim-output"
+DEFAULT_OUT_DIR = Path(".local") / "mcp-tileset-sim-output"
 MCP_TOOLS = {
     "create_sidescroller_tileset": {
         "required": ("lower_description", "transition_description"),
@@ -103,12 +103,33 @@ def make_tiles(layout: str, filled_bit: int) -> list[tuple[str, dict[str, str], 
 
 COLORS = {
     "transparent": (0, 0, 0, 0),
-    "upper_preview": (255, 255, 255, 255),
+    "preview_background": (255, 255, 255, 255),
     LOWER: (0, 0, 0, 255),
     UPPER: (255, 255, 255, 255),
     "grid": (255, 0, 255, 255),
     "boundary": (255, 255, 255, 255),
 }
+KEYWORD_COLORS = [
+    ("#000000", (0, 0, 0, 255)),
+    ("pure black", (0, 0, 0, 255)),
+    ("black", (0, 0, 0, 255)),
+    ("#ffffff", (255, 255, 255, 255)),
+    ("pure white", (255, 255, 255, 255)),
+    ("white", (255, 255, 255, 255)),
+    ("grass", (84, 154, 65, 255)),
+    ("moss", (77, 132, 75, 255)),
+    ("water", (56, 132, 214, 255)),
+    ("ocean", (42, 101, 184, 255)),
+    ("sand", (218, 189, 118, 255)),
+    ("snow", (232, 238, 240, 255)),
+    ("stone", (112, 112, 120, 255)),
+    ("rock", (100, 100, 108, 255)),
+    ("metal", (120, 132, 138, 255)),
+    ("lava", (226, 74, 38, 255)),
+    ("ice", (150, 216, 232, 255)),
+    ("wood", (128, 80, 44, 255)),
+    ("dirt", (104, 72, 42, 255)),
+]
 
 
 def parse_args() -> argparse.Namespace:
