@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Simulate the deterministic part of PixelLab sidescroller DualGrid tilesets.
+"""Simulate deterministic PixelLab MCP DualGrid tileset structure.
 
 This does not predict PixelLab's generated art. It previews the 16 returned
-corner patterns and where the lower terrain versus transition/upper terrain
-can influence each tile.
+corner patterns for MCP-style create_topdown_tileset and
+create_sidescroller_tileset requests.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -32,13 +33,38 @@ LAYOUTS = {
     "tilemapdual-standard": [4, 10, 13, 12, 9, 14, 15, 7, 2, 3, 11, 5, 0, 8, 6, 1],
 }
 DEFAULT_OUT_DIR = Path(".local") / "dualgrid-sim-output"
-DEFAULT_REQUEST: dict[str, Any] = {
-    "lower_description": "",
-    "transition_description": "",
-    "tile_size": {"width": 16, "height": 16},
-    "detail": "low detail",
-    "shading": "flat shading",
-    "outline": "lineless",
+MCP_TOOLS = {
+    "create_sidescroller_tileset": {
+        "required": ("lower_description", "transition_description"),
+        "default_request": {
+            "lower_description": "",
+            "transition_description": "",
+            "tile_size": {"width": 16, "height": 16},
+            "transition_size": 0.0,
+            "detail": "low detail",
+            "shading": "flat shading",
+            "outline": "lineless",
+        },
+        "tile_sizes": {(16, 16), (32, 32)},
+        "transition_sizes": {0.0, 0.25, 0.5},
+    },
+    "create_topdown_tileset": {
+        "required": ("lower_description", "upper_description"),
+        "default_request": {
+            "lower_description": "",
+            "upper_description": "",
+            "transition_description": "",
+            "tile_size": {"width": 16, "height": 16},
+            "mode": "standard",
+            "view": "high top-down",
+            "transition_size": 0.0,
+            "detail": "low detail",
+            "shading": "flat shading",
+            "outline": "lineless",
+        },
+        "tile_sizes": {(16, 16), (32, 32), (64, 64)},
+        "transition_sizes": {0.0, 0.25, 0.5, 1.0},
+    },
 }
 
 # PixelLab bit order from observed metadata and the Lexaloffle reference:
@@ -88,9 +114,16 @@ COLORS = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Render a schematic PixelLab sidescroller DualGrid/Wang tileset "
-            "from the minimal built-in create_sidescroller_tileset-style request."
+            "Render a schematic PixelLab MCP DualGrid/Wang tileset from a "
+            "create_topdown_tileset or create_sidescroller_tileset request."
         )
+    )
+    parser.add_argument("tool", choices=sorted(MCP_TOOLS))
+    parser.add_argument(
+        "request_json",
+        nargs="?",
+        type=Path,
+        help="Optional JSON request file. If omitted, reads JSON from stdin when present, otherwise uses a minimal empty request.",
     )
     parser.add_argument(
         "--scale",
@@ -130,6 +163,22 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def load_request(tool: str, request_json: Path | None) -> dict[str, Any]:
+    base = dict(MCP_TOOLS[tool]["default_request"])
+    raw = ""
+    if request_json is not None:
+        raw = request_json.read_text(encoding="utf-8")
+    elif not sys.stdin.isatty():
+        raw = sys.stdin.read()
+    if not raw.strip():
+        return base
+    data = json.loads(raw)
+    if not isinstance(data, dict):
+        raise SystemExit("Request JSON must be an object.")
+    base.update(data)
+    return base
+
+
 def tile_size_from_request(request: dict[str, Any]) -> tuple[int, int]:
     tile_size = request.get("tile_size", {"width": 16, "height": 16})
     width = int(tile_size.get("width", 16))
@@ -139,10 +188,55 @@ def tile_size_from_request(request: dict[str, Any]) -> tuple[int, int]:
     return width, height
 
 
-def transition_pixels(request: dict[str, Any], tile_height: int) -> int:
+def validate_request(tool: str, request: dict[str, Any], tile_width: int, tile_height: int) -> list[str]:
+    config = MCP_TOOLS[tool]
+    warnings: list[str] = []
+    for field in config["required"]:
+        if field not in request:
+            raise SystemExit(f"{tool} requires {field}.")
+
+    if (tile_width, tile_height) not in config["tile_sizes"]:
+        raise SystemExit(f"{tool} does not support tile_size {tile_width}x{tile_height}.")
+    if tool == "create_topdown_tileset":
+        mode = request.get("mode", "standard")
+        if mode not in {"standard", "pro"}:
+            raise SystemExit("create_topdown_tileset mode must be standard or pro.")
+        if mode == "standard" and tile_width == 64:
+            raise SystemExit("create_topdown_tileset standard mode supports 16x16 or 32x32; use pro for 64x64.")
+        if request.get("view", "high top-down") not in {"low top-down", "high top-down"}:
+            raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
+        if mode == "pro":
+            warnings.append("Top-down pro mode may not preserve the compact 4x4 output shape.")
+
+    raw_transition = float(request.get("transition_size", 0.0))
+    if raw_transition not in config["transition_sizes"]:
+        values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
+        raise SystemExit(f"{tool} transition_size must be one of {values}.")
+    if tool == "create_topdown_tileset" and raw_transition == 1.0:
+        warnings.append("Top-down transition_size 1.0 can expand beyond a compact 4x4 sheet.")
+
+    detail = request.get("detail")
+    if detail is not None and detail not in {"low detail", "medium detail", "highly detailed"}:
+        raise SystemExit("detail must be low detail, medium detail, or highly detailed.")
+    shading = request.get("shading")
+    if shading is not None and shading not in {
+        "flat shading",
+        "basic shading",
+        "medium shading",
+        "detailed shading",
+        "highly detailed shading",
+    }:
+        raise SystemExit("shading is not a recognized PixelLab MCP shading value.")
+    outline = request.get("outline")
+    if outline is not None and outline not in {"single color outline", "selective outline", "lineless"}:
+        raise SystemExit("outline must be single color outline, selective outline, or lineless.")
+    return warnings
+
+
+def transition_pixels(tool: str, request: dict[str, Any], tile_height: int) -> int:
     raw = float(request.get("transition_size", 0.0))
-    if raw not in {0.0, 0.25, 0.5, 1.0}:
-        raise SystemExit("transition_size must be one of 0, 0.25, 0.5, 1.0.")
+    if raw not in MCP_TOOLS[tool]["transition_sizes"]:
+        raise SystemExit("transition_size is invalid for this MCP tool.")
     return max(1, round(tile_height * raw)) if raw > 0 else 0
 
 
@@ -268,6 +362,7 @@ def boundary_mask(lower_mask: Image.Image, thickness: int) -> Image.Image:
 
 
 def draw_platform_preview(
+    tool: str,
     request: dict[str, Any],
     tile_width: int,
     tile_height: int,
@@ -277,7 +372,7 @@ def draw_platform_preview(
 ) -> Image.Image:
     sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), COLORS["upper_preview"])
     draw = ImageDraw.Draw(sheet)
-    thickness = transition_pixels(request, tile_height)
+    thickness = transition_pixels(tool, request, tile_height)
 
     for index, (_, corners, _) in enumerate(tiles):
         ox = (index % 4) * tile_width
@@ -309,7 +404,9 @@ def save_scaled(image: Image.Image, path: Path, scale: int) -> None:
 
 
 def build_report(
+    tool: str,
     request: dict[str, Any],
+    warnings: list[str],
     tile_width: int,
     tile_height: int,
     layout: str,
@@ -317,7 +414,8 @@ def build_report(
     tiles: list[tuple[str, dict[str, str], int]],
 ) -> dict[str, Any]:
     return {
-        "source": "PixelLab sidescroller metadata-derived simulator",
+        "source": "PixelLab MCP DualGrid metadata-derived simulator",
+        "tool": tool,
         "limits": [
             "This simulates DualGrid/Wang corner layout only.",
             "It does not predict PixelLab's AI texture, palette, or exact compositing.",
@@ -326,11 +424,15 @@ def build_report(
             "Template alpha masks count any opaque pixel as occupied, including upper/detail pixels.",
             "When template_sheet is used, fill masks are copied from that observed PixelLab output.",
         ],
+        "warnings": warnings,
         "request": {
             "lower_description": request.get("lower_description", ""),
+            "upper_description": request.get("upper_description", ""),
             "transition_description": request.get("transition_description", ""),
             "tile_size": {"width": tile_width, "height": tile_height},
             "transition_size": request.get("transition_size", 0.0),
+            "mode": request.get("mode"),
+            "view": request.get("view"),
             "detail": request.get("detail"),
             "shading": request.get("shading"),
             "outline": request.get("outline"),
@@ -393,8 +495,9 @@ def self_check() -> None:
 def main() -> None:
     self_check()
     args = parse_args()
-    request = dict(DEFAULT_REQUEST)
+    request = load_request(args.tool, args.request_json)
     tile_width, tile_height = tile_size_from_request(request)
+    warnings = validate_request(args.tool, request, tile_width, tile_height)
     filled_bit = args.filled_bit if args.filled_bit is not None else DEFAULT_FILLED_BITS[args.layout]
     tiles = make_tiles(args.layout, filled_bit)
 
@@ -408,19 +511,19 @@ def main() -> None:
             raise SystemExit(f"Template sheet must be {expected_size[0]}x{expected_size[1]}, got {template_sheet.size}.")
 
     corner = draw_corner_preview(tile_width, tile_height, args.draw_grid, tiles)
-    platform = draw_platform_preview(request, tile_width, tile_height, args.draw_grid, tiles, template_sheet)
+    platform = draw_platform_preview(args.tool, request, tile_width, tile_height, args.draw_grid, tiles, template_sheet)
 
     save_scaled(corner, DEFAULT_OUT_DIR / "dualgrid-corner-preview.png", args.scale)
-    save_scaled(platform, DEFAULT_OUT_DIR / "dualgrid-platform-preview.png", args.scale)
+    save_scaled(platform, DEFAULT_OUT_DIR / "dualgrid-tileset-preview.png", args.scale)
 
-    report = build_report(request, tile_width, tile_height, args.layout, filled_bit, tiles)
+    report = build_report(args.tool, request, warnings, tile_width, tile_height, args.layout, filled_bit, tiles)
     if args.template_sheet:
         report["template_sheet"] = str(args.template_sheet)
     with (DEFAULT_OUT_DIR / "dualgrid-patterns.json").open("w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2)
 
     print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-corner-preview.png'}")
-    print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-platform-preview.png'}")
+    print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-tileset-preview.png'}")
     print(f"Wrote {DEFAULT_OUT_DIR / 'dualgrid-patterns.json'}")
 
 
