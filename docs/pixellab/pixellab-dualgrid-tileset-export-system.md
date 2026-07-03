@@ -79,7 +79,7 @@ Observed compact PixelLab tilesets usually include:
 - `pattern_system.terrain_encoding.upper: 1`
 - `pattern_system.terrain_encoding.wildcard: 255`
 
-Top-down exports are not always compact across every PixelLab surface. Current MCP docs expose compact-oriented transition values `0`, `0.25`, and `0.5`; REST schema and local live findings also include expanded `tileset15_4x8` behavior for `transition_size: 1.0`. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
+Top-down exports are not always compact across every PixelLab surface. Current MCP docs describe `transition_size` as a float with `0`, `0.25`, and `0.5` as guidepost values; REST schema and local live findings also include expanded behavior for `transition_size: 1.0`. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
 
 Each returned tile may include:
 

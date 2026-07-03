@@ -213,6 +213,14 @@ RECIPE_JSON_SCHEMA: dict[str, Any] = {
         }
     },
 }
+
+
+def recipe_json_schema(tool: str) -> dict[str, Any]:
+    schema = json.loads(json.dumps(RECIPE_JSON_SCHEMA))
+    if tool == "create_sidescroller_tileset":
+        schema["required"] = ["summary", "lower", "transition"]
+        schema["properties"].pop("upper", None)
+    return schema
 KEYWORD_COLORS = [
     ("#000000", (0, 0, 0, 255)),
     ("pure black", (0, 0, 0, 255)),
@@ -454,7 +462,8 @@ def validate_request(
 
 def transition_pixels(tool: str, request: dict[str, Any], tile_height: int) -> int:
     raw = float(request_value(tool, request, "transition_size"))
-    if raw not in MCP_TOOLS[tool]["transition_sizes"]:
+    min_transition, max_transition = MCP_TOOLS[tool]["transition_range"]
+    if raw < min_transition or raw > max_transition:
         raise SystemExit("transition_size is invalid for this MCP tool.")
     return max(1, round(tile_height * raw)) if raw > 0 else 0
 
@@ -574,6 +583,12 @@ def texture_pixel(
 
 
 def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, tile_height: int) -> str:
+    upper_line = (
+        '  "upper": {"label": "upper/background terrain", "color": "#RRGGBB", '
+        '"accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
+        if tool == "create_topdown_tileset"
+        else ""
+    )
     return (
         "You are helping a local PixelLab MCP tileset simulator interpret descriptions. "
         "Return JSON only, with no Markdown. Do not draw pixels and do not call tools. "
@@ -583,7 +598,7 @@ def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, til
         "{\n"
         '  "summary": "short plain-English interpretation",\n'
         '  "lower": {"label": "terrain/platform body", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
-        '  "upper": {"label": "upper/background terrain", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
+        f"{upper_line}"
         '  "transition": {"label": "edge/top transition", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none", "placement": "auto|top|boundary"}\n'
         "}\n\n"
         "Rules:\n"
@@ -619,7 +634,9 @@ def require_hex(value: Any, field: str, renderer: str) -> str:
 
 
 def validate_ai_recipe(data: dict[str, Any], renderer: str, tool: str) -> dict[str, Any]:
-    allowed_top = {"summary", "lower", "upper", "transition"}
+    allowed_top = {"summary", "lower", "transition"}
+    if tool == "create_topdown_tileset":
+        allowed_top.add("upper")
     unknown_top = sorted(set(data) - allowed_top)
     if unknown_top:
         raise SystemExit(f"--renderer {renderer} returned unknown recipe fields: {', '.join(unknown_top)}.")
@@ -628,7 +645,8 @@ def validate_ai_recipe(data: dict[str, Any], renderer: str, tool: str) -> dict[s
         "summary": str(data.get("summary", ""))[:500],
         "raw": data,
     }
-    for section_name in ("lower", "upper", "transition"):
+    section_names = ("lower", "upper", "transition") if tool == "create_topdown_tileset" else ("lower", "transition")
+    for section_name in section_names:
         section_in = data.get(section_name)
         section_out: dict[str, Any] = {}
         if not isinstance(section_in, dict):
@@ -689,7 +707,7 @@ def run_ai_renderer(
             "dontAsk",
             "--tools=",
             "--json-schema",
-            json.dumps(RECIPE_JSON_SCHEMA),
+            json.dumps(recipe_json_schema(tool)),
             prompt,
         ]
         stdout_path = None
@@ -698,7 +716,7 @@ def run_ai_renderer(
         temp_dir = tempfile.TemporaryDirectory(prefix="pixellab-sim-codex-")
         schema_path = Path(temp_dir.name) / "recipe-schema.json"
         stdout_path = Path(temp_dir.name) / "last-message.json"
-        schema_path.write_text(json.dumps(RECIPE_JSON_SCHEMA), encoding="utf-8")
+        schema_path.write_text(json.dumps(recipe_json_schema(tool)), encoding="utf-8")
         command = [
             executable,
             "exec",

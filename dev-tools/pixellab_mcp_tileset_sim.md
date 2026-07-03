@@ -133,9 +133,9 @@ This is an MCP-shape simulator, not PixelLab. The deterministic renderer uses si
 
 The simulator validates only the MCP-facing request shape that matters for local simulation. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce expanded top-down transition sheets.
 
-Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and Pro top-down `transition_size >= 0.5`. Current MCP docs expose top-down `transition_size` values `0`, `0.25`, and `0.5`; `1.0` is REST/observed expanded-output research, not accepted by this MCP simulator.
+Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0`. MCP documents `transition_size` as a float and describes `0`, `0.25`, and `0.5` as guidepost values; the simulator accepts compact values below `1.0` and uses the numeric value directly. `1.0` can produce an expanded top-down sheet, so this compact simulator reports it as valid-but-unsupported instead of producing a misleading 4x4 PNG.
 
-AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. `transition_size` remains the simulator's geometry control; the AI cannot disable a requested transition. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
+AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. The recipe schema is tool-shaped: sidescroller uses lower plus transition, while top-down uses lower, upper, and transition. `transition_size` remains the simulator's geometry control; the AI cannot disable a requested transition. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
 
 `expected_pattern_4x4` in the JSON report is derived from tile corners. Do not assume downloaded PixelLab `pattern_4x4` fields are authoritative; local fixtures show they can disagree with `wang_N`, corners, and visual sheet position.
 
