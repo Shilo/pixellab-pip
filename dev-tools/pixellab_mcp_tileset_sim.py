@@ -275,7 +275,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--renderer",
-        choices=["deterministic", "codex", *sorted(OPENCODE_RENDERER_MODELS)],
+        choices=["deterministic", "codex", "claude", *sorted(OPENCODE_RENDERER_MODELS)],
         default="deterministic",
         help="Renderer backend. AI renderers create a constrained semantic recipe before local rendering.",
     )
@@ -789,6 +789,8 @@ def run_ai_renderer(
 ) -> dict[str, Any] | None:
     if renderer == "deterministic":
         return None
+    if renderer == "claude":
+        raise SystemExit("--renderer claude is temporarily disabled.")
     if timeout < 1:
         raise SystemExit("--agent-timeout must be at least 1 second.")
 
