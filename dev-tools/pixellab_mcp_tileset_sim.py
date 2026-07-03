@@ -256,7 +256,8 @@ def parse_args() -> argparse.Namespace:
         epilog=(
             "Agent pattern:\n"
             "  Pass MCP JSON by stdin or file.\n"
-            "  Inspect tileset.png and sim-report.json under .local/mcp-tileset-sim-output/<output>.\n\n"
+            "  Inspect tileset.png, components/*.png, and sim-report.json under "
+            ".local/mcp-tileset-sim-output/<output>.\n\n"
             "Examples:\n"
             "  '{\"lower_description\":\"stone brick\",\"transition_description\":\"moss\",\"transition_size\":0.25}' "
             "| python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --output attempt-a\n"
@@ -1142,6 +1143,7 @@ def remove_known_outputs(output_dir: Path) -> None:
         "component-upper*.png",
         "component-transition*.png",
         "component-center-tile*.png",
+        "components/*.png",
         "tileset*.png",
         "sim-report.json",
     )
@@ -1299,7 +1301,9 @@ def main() -> None:
     tiles = make_tiles()
 
     output_dir = output_dir_from_name(args.output)
+    component_dir = output_dir / "components"
     output_dir.mkdir(parents=True, exist_ok=True)
+    component_dir.mkdir(parents=True, exist_ok=True)
     remove_known_outputs(output_dir)
     output_paths = {
         "corner_preview": output_dir / "corner-key-preview.png",
@@ -1307,11 +1311,17 @@ def main() -> None:
         "component_lower": output_dir / "component-lower.png",
         "component_transition": output_dir / "component-transition.png",
         "component_center_tile": output_dir / "component-center-tile.png",
+        "lower_tile": component_dir / "lower-tile.png",
+        "transition_tile": component_dir / "transition-tile.png",
+        "center_tile": component_dir / "center-tile.png",
         "tileset": output_dir / "tileset.png",
         "sim_report": output_dir / "sim-report.json",
     }
     if args.tool == "create_topdown_tileset":
         output_paths["component_upper"] = output_dir / "component-upper.png"
+        output_paths["upper_tile"] = component_dir / "upper-tile.png"
+    else:
+        output_paths["top_tile"] = component_dir / "top-tile.png"
 
     template_sheet = None
     if args.template_sheet:
@@ -1334,6 +1344,17 @@ def main() -> None:
     written_files["corner_preview"] = save_scaled(corner, output_paths["corner_preview"], args.scale)
     written_files["native_tileset"] = save_scaled(native_tileset, output_paths["native_tileset"], args.scale)
     for key, image in component_previews.items():
+        written_files[key] = save_scaled(image, output_paths[key], args.scale)
+    component_aliases = {
+        "lower_tile": component_previews["component_lower"],
+        "transition_tile": component_previews["component_transition"],
+        "center_tile": component_previews["component_center_tile"],
+    }
+    if args.tool == "create_topdown_tileset":
+        component_aliases["upper_tile"] = component_previews["component_upper"]
+    else:
+        component_aliases["top_tile"] = component_previews["component_transition"]
+    for key, image in component_aliases.items():
         written_files[key] = save_scaled(image, output_paths[key], args.scale)
     written_files["tileset"] = save_scaled(tileset, output_paths["tileset"], args.scale)
 
@@ -1366,6 +1387,11 @@ def main() -> None:
         "component_upper",
         "component_transition",
         "component_center_tile",
+        "lower_tile",
+        "upper_tile",
+        "top_tile",
+        "transition_tile",
+        "center_tile",
         "tileset",
         "sim_report",
     ):

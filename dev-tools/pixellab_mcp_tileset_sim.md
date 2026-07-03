@@ -87,11 +87,16 @@ Generated files:
 - `component-upper.png` for top-down only
 - `component-transition.png`
 - `component-center-tile.png`
+- `components/lower-tile.png`
+- `components/upper-tile.png` for top-down only
+- `components/top-tile.png` for sidescroller only
+- `components/transition-tile.png`
+- `components/center-tile.png`
 - `tileset.png`
 - `tileset-x8.png`
 - `sim-report.json`
 
-Use `tileset.png` as the output under test. `native-tileset.png` is the compact 4x4 source sheet before export-layout repacking. Component images show the interpreted lower, upper, transition, and center tile previews. `corner-key-preview.png` is a schematic for checking the source corner classes. `sim-report.json` records the exact request, omitted MCP defaults used internally, native 15-tileset source cells, exported cell placements, and any AI render recipe; it is not a PixelLab MCP response.
+Use `tileset.png` as the output under test. `native-tileset.png` is the compact 4x4 source sheet before export-layout repacking. The `components/` folder has stable per-tile names for quick agent inspection: lower, upper, top, transition, and center where applicable. The legacy `component-*.png` files mirror those previews at the run root for compatibility. `corner-key-preview.png` is a schematic for checking the source corner classes. `sim-report.json` records the exact request, omitted MCP defaults used internally, native 15-tileset source cells, exported cell placements, and any AI render recipe; it is not a PixelLab MCP response.
 
 ## Export Layouts
 
