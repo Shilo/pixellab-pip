@@ -24,6 +24,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab Documentation Watch Cache](pixellab/pixellab-doc-watch-cache.md) - local-only watcher workflow for caching upstream PixelLab docs, detecting REST/MCP drift, and deciding when the Agent Skill needs updates.
 - [PixelLab Changelog 2026-07-01](pixellab/pixellab-changelog-2026-07-01.md) - dated summary of the July 1 public-doc drift and corresponding PixelLab Pip routing/reference updates.
 - [PixelLab Top-Down Tileset Transition Findings](pixellab/pixellab-topdown-tileset-transition-findings.md) - live-generation findings for `create_topdown_tileset` transition sizes, compact 4x4 graybox exports, and the `transition_size: 1.0` expanded-layout caveat.
+- [PixelLab DualGrid Tileset Export System](pixellab/pixellab-dualgrid-tileset-export-system.md) - reverse-engineering notes for PixelLab's compact DualGrid/Wang tileset metadata, layout order, public tileset surfaces, and local simulator scope.
 - [PixelLab Skeleton And Template Animation Research](pixellab/pixellab-skeleton-template-animation-research.md) - managed template animations, raw skeleton keypoint routes, Aseprite skeleton workflow parity, and MCP/REST boundaries.
 - [PixelLab Auth And Security](pixellab/pixellab-auth-and-security.md) - bearer-token handling and automation boundaries.
 - [PixelLab SDK Compatibility](pixellab/pixellab-sdk-compatibility.md) - official SDK guidance and when to call REST v2 directly.
