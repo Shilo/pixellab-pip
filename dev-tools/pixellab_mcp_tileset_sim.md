@@ -1,12 +1,12 @@
 # PixelLab MCP Tileset Simulator
 
-Use this developer tool from the `pixellab-pip/` repository root.
+Agent bootstrap: use this tool when you need a cheap local PNG preflight for PixelLab MCP `create_sidescroller_tileset` or `create_topdown_tileset` JSON. Run it from the `pixellab-pip/` repository root.
 
 ```powershell
 python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/sidescroller-request.json --draw-grid
 ```
 
-The simulator accepts MCP-style `create_sidescroller_tileset` and `create_topdown_tileset` request JSON and writes a local compact tileset PNG plus metadata. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
+The simulator accepts the same JSON object an agent would pass to the MCP create tool and writes local PNGs. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
 
 Pass the same JSON object you would send to the MCP tool. If no request JSON is provided and stdin is empty, the simulator uses `{}` and fails when required MCP fields are missing.
 
@@ -62,9 +62,9 @@ Generated files:
 - `corner-key-preview-x8.png`
 - `tileset.png`
 - `tileset-x8.png`
-- `create-response.json`
-- `get-response.json`
 - `sim-report.json`
+
+Use `tileset.png` as the output under test. `corner-key-preview.png` is a schematic for checking the source corner classes. `sim-report.json` records the exact request, omitted MCP defaults used internally, native 15-tileset source cells, and exported cell placements; it is not a PixelLab MCP response.
 
 ## Export Layouts
 
@@ -86,8 +86,6 @@ Use the website Godot 3x3 export geometry:
 python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset .local/request.json --layout godot-3x3
 ```
 
-Use `preview` when you want a local stand-in for the website/background-job preview surface instead of a final engine export.
-
 The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and lower/filled terrain as bit value `0`. `wang` and `godot-3x3` repack the native simulated tiles into observed PixelLab website export dimensions.
 
 ## Options
@@ -95,8 +93,7 @@ The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and low
 - `--draw-grid`: draw magenta tile boundaries in preview PNGs.
 - `--scale N`: set the nearest-neighbor preview scale. Default is `8`.
 - `--renderer deterministic`: use the local deterministic renderer. This is the only renderer currently implemented.
-- `--allow-compact-expanded`: force compact fallback for top-down `pro` or `transition_size: 1.0` requests that PixelLab may export as expanded sheets.
-- `--layout NAME`: choose `15-tileset`, `wang`, `godot-3x3`, or `preview`.
+- `--layout NAME`: choose `15-tileset`, `wang`, or `godot-3x3`.
 - `--output NAME`: write under `.local/mcp-tileset-sim-output/NAME`.
 - `--template-sheet PATH`: reuse alpha masks from an existing compact 4x4 PixelLab sheet.
 
@@ -105,6 +102,8 @@ The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and low
 This is an MCP-shape simulator, not PixelLab. The deterministic renderer uses simple keyword colors and texture rules, so it can compare request wording cheaply but does not predict PixelLab's generated texture, palette, prompt adherence, or exact compositing.
 
 The simulator validates only the MCP-facing request shape that matters for local simulation. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce expanded top-down transition sheets.
+
+Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and Pro top-down `transition_size >= 0.5`.
 
 Future agent renderers such as `--renderer codex` or `--renderer claude` should be added as explicitly experimental modes. They must write labeled non-PixelLab outputs and must not be described as PixelLab predictions.
 

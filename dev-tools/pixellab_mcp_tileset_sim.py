@@ -63,13 +63,6 @@ EXPORT_LAYOUTS = {
         "format": "godot_3x3",
         "spritesheet_layout": "godot_3x3_24x8",
     },
-    "preview": {
-        "columns": 4,
-        "rows": 4,
-        "cells": list(range(16)),
-        "format": "preview",
-        "spritesheet_layout": "preview_4x4",
-    },
 }
 DEFAULT_OUT_DIR = Path(".local") / "mcp-tileset-sim-output"
 MCP_TOOLS = {
@@ -125,7 +118,6 @@ MCP_TOOLS = {
             "tileset_adherence",
             "tileset_adherence_freedom",
             "text_guidance_scale",
-            "seed",
             "spread_x",
             "slope_size",
             "raggedness",
@@ -221,11 +213,6 @@ def parse_args() -> argparse.Namespace:
         help="Renderer backend. Only deterministic local rendering is currently implemented.",
     )
     parser.add_argument(
-        "--allow-compact-expanded",
-        action="store_true",
-        help="Allow compact fallback rendering for top-down requests that PixelLab may export as expanded sheets.",
-    )
-    parser.add_argument(
         "--scale",
         type=int,
         default=8,
@@ -274,6 +261,8 @@ def output_dir_from_name(name: str | None) -> Path:
     leaf = name or "latest"
     if leaf in {".", ".."} or "/" in leaf or "\\" in leaf or ":" in leaf:
         raise SystemExit("--output must be a leaf directory name, not a path.")
+    if leaf != leaf.rstrip(". "):
+        raise SystemExit("--output cannot end with a dot or space.")
     if not leaf or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-" for char in leaf):
         raise SystemExit("--output may contain only letters, numbers, dots, underscores, and hyphens.")
     if leaf.rstrip(". ").upper() in WINDOWS_RESERVED_NAMES:
@@ -303,8 +292,19 @@ def request_value(tool: str, request: dict[str, Any], key: str) -> Any:
 
 def tile_size_from_request(tool: str, request: dict[str, Any]) -> tuple[int, int]:
     tile_size = request_value(tool, request, "tile_size") or {"width": 16, "height": 16}
-    width = int(tile_size.get("width", 16))
-    height = int(tile_size.get("height", 16))
+    if not isinstance(tile_size, dict):
+        raise SystemExit("tile_size must be an object with width and height.")
+    if "width" not in tile_size or "height" not in tile_size:
+        raise SystemExit("tile_size must include both width and height.")
+    if (
+        isinstance(tile_size["width"], bool)
+        or isinstance(tile_size["height"], bool)
+        or not isinstance(tile_size["width"], int)
+        or not isinstance(tile_size["height"], int)
+    ):
+        raise SystemExit("tile_size width and height must be integers.")
+    width = tile_size["width"]
+    height = tile_size["height"]
     if width <= 0 or height <= 0:
         raise SystemExit("tile_size width and height must be positive.")
     return width, height
@@ -315,19 +315,49 @@ def validate_request(
     request: dict[str, Any],
     tile_width: int,
     tile_height: int,
-    allow_compact_expanded: bool,
-) -> tuple[list[str], list[str]]:
+) -> list[str]:
     config = MCP_TOOLS[tool]
     warnings: list[str] = []
-    ignored_fields = sorted(set(request) - set(config["allowed"]))
-    if ignored_fields:
-        raise SystemExit(f"Fields not exposed by {tool} MCP schema: {', '.join(ignored_fields)}.")
+    unknown_fields = sorted(set(request) - set(config["allowed"]))
+    if unknown_fields:
+        raise SystemExit(f"Fields not exposed by {tool} MCP schema: {', '.join(unknown_fields)}.")
     for field in config["required"]:
         if field not in request:
             raise SystemExit(f"{tool} requires {field}.")
+        if not isinstance(request[field], str):
+            raise SystemExit(f"{tool} requires {field} to be a string.")
+
+    optional_text = request.get("transition_description")
+    if optional_text is not None and not isinstance(optional_text, str):
+        raise SystemExit("transition_description must be a string or null.")
+    for field in ("base_tile_id", "lower_base_tile_id", "upper_base_tile_id"):
+        if field in request and request[field] is not None and not isinstance(request[field], str):
+            raise SystemExit(f"{field} must be a string or null.")
+    for field in (
+        "transition_size",
+        "tile_strength",
+        "tileset_adherence",
+        "tileset_adherence_freedom",
+        "text_guidance_scale",
+        "spread_x",
+        "slope_size",
+        "raggedness",
+    ):
+        if field in request and (isinstance(request[field], bool) or not isinstance(request[field], (int, float))):
+            raise SystemExit(f"{field} must be a number.")
+    if "seed" in request and request["seed"] is not None:
+        if isinstance(request["seed"], bool) or not isinstance(request["seed"], int):
+            raise SystemExit("seed must be an integer or null.")
 
     if (tile_width, tile_height) not in config["tile_sizes"]:
         raise SystemExit(f"{tool} does not support tile_size {tile_width}x{tile_height}.")
+    raw_transition = float(request_value(tool, request, "transition_size"))
+    if raw_transition not in config["transition_sizes"]:
+        values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
+        raise SystemExit(f"{tool} transition_size must be one of {values}.")
+    if tool == "create_topdown_tileset" and raw_transition == 1.0:
+        raise SystemExit("Top-down transition_size 1.0 expands beyond compact output and is not simulated.")
+
     if tool == "create_topdown_tileset":
         mode = request_value(tool, request, "mode")
         if mode not in {"standard", "pro"}:
@@ -337,18 +367,9 @@ def validate_request(
         if request_value(tool, request, "view") not in {"low top-down", "high top-down"}:
             raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
         if mode == "pro":
-            if not allow_compact_expanded:
-                raise SystemExit("Top-down pro mode can expand beyond compact output; rerun with --allow-compact-expanded to force compact fallback.")
-            warnings.append("Top-down pro mode may not preserve the compact 4x4 output shape.")
-
-    raw_transition = float(request_value(tool, request, "transition_size"))
-    if raw_transition not in config["transition_sizes"]:
-        values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
-        raise SystemExit(f"{tool} transition_size must be one of {values}.")
-    if tool == "create_topdown_tileset" and raw_transition == 1.0:
-        if not allow_compact_expanded:
-            raise SystemExit("Top-down transition_size 1.0 can expand beyond compact output; rerun with --allow-compact-expanded to force compact fallback.")
-        warnings.append("Top-down transition_size 1.0 can expand beyond a compact 4x4 sheet.")
+            if raw_transition >= 0.5:
+                raise SystemExit("Top-down pro mode with transition_size >= 0.5 can expand beyond compact output and is not simulated.")
+            warnings.append("Top-down pro mode is simulated only for compact transition_size 0.0 or 0.25 cases.")
 
     detail = request_value(tool, request, "detail")
     if detail is not None and detail not in {"low detail", "medium detail", "highly detailed"}:
@@ -365,7 +386,7 @@ def validate_request(
     outline = request_value(tool, request, "outline")
     if outline is not None and outline not in {"single color outline", "selective outline", "lineless"}:
         raise SystemExit("outline must be single color outline, selective outline, or lineless.")
-    return warnings, ignored_fields
+    return warnings
 
 
 def transition_pixels(tool: str, request: dict[str, Any], tile_height: int) -> int:
@@ -514,7 +535,9 @@ def boundary_mask(lower_mask: Image.Image, thickness: int) -> Image.Image:
                 for dx in range(-thickness, thickness + 1):
                     nx = x + dx
                     ny = y + dy
-                    if nx < 0 or ny < 0 or nx >= width or ny >= height or not pixels[nx, ny]:
+                    if nx < 0 or ny < 0 or nx >= width or ny >= height:
+                        continue
+                    if not pixels[nx, ny]:
                         found_empty_neighbor = True
                         break
                 if found_empty_neighbor:
@@ -563,7 +586,7 @@ def draw_tileset(
                         color = texture_pixel(str(request.get("transition_description") or ""), x, y, transition_color)
                     sheet.putpixel((ox + x, oy + y), color)
                 elif lower_mask.getpixel((x, y)):
-                    if thickness and (edge_mask.getpixel((x, y)) or y < thickness):
+                    if thickness and y < thickness:
                         color = texture_pixel(str(request.get("transition_description") or ""), x, y, transition_color)
                     else:
                         color = texture_pixel(str(request.get("lower_description", "")), x, y, lower_color)
@@ -642,170 +665,58 @@ def tile_records(
     ]
 
 
-def build_base_tile_ids(tool: str, request: dict[str, Any]) -> dict[str, str]:
-    if tool == "create_sidescroller_tileset":
-        return {
-            "base": request.get("base_tile_id")
-            or stable_id("base", {"tool": tool, "lower": request.get("lower_description", "")})
+def export_cell_records(
+    layout: str,
+    tile_width: int,
+    tile_height: int,
+    tiles: list[tuple[str, dict[str, str], int]],
+) -> list[dict[str, Any]]:
+    spec = EXPORT_LAYOUTS[layout]
+    return [
+        {
+            "export_col": index % spec["columns"],
+            "export_row": index // spec["columns"],
+            "source_native_index": source_index,
+            "source_tile_name": tiles[source_index][0],
+            "bounding_box": {
+                "x": (index % spec["columns"]) * tile_width,
+                "y": (index // spec["columns"]) * tile_height,
+                "width": tile_width,
+                "height": tile_height,
+            },
         }
-    return {
-        "lower": request.get("lower_base_tile_id")
-        or stable_id("lower", {"tool": tool, "lower": request.get("lower_description", "")}),
-        "upper": request.get("upper_base_tile_id")
-        or stable_id("upper", {"tool": tool, "upper": request.get("upper_description", "")}),
-    }
-
-
-def build_tileset_data(
-    tool: str,
-    request: dict[str, Any],
-    tile_width: int,
-    tile_height: int,
-    layout: str,
-    tiles: list[tuple[str, dict[str, str], int]],
-    output_files: dict[str, Path],
-) -> dict[str, Any]:
-    records = tile_records(tile_width, tile_height, tiles)
-    spec = EXPORT_LAYOUTS[layout]
-    return {
-        "tileset_type": "sidescroller" if tool == "create_sidescroller_tileset" else "topdown",
-        "format": spec["format"],
-        "tile_size": {"width": tile_width, "height": tile_height},
-        "tile_count": len(records),
-        "total_tiles": len(records),
-        "spritesheet_url": str(output_files["tileset"]),
-        "spritesheet_layout": spec["spritesheet_layout"],
-        "spritesheet_grid": {"cols": spec["columns"], "rows": spec["rows"]},
-        "layout": {
-            "type": layout,
-            "grid_size": {"width": spec["columns"], "height": spec["rows"]},
-            "tile_count": len(records),
-            "native_tile_order": PIXELLAB_TILE_ORDER,
-            "export_cell_sources": spec["cells"],
-            "filled_bit": PIXELLAB_FILLED_BIT,
-        },
-        "pattern_system": {
-            "type": "4x4_wildcard",
-            "terrain_encoding": {LOWER: 0, UPPER: 1, "wildcard": WILDCARD},
-            "bit_weights": {corner: weight for corner, weight in PIXELLAB_BIT_ORDER},
-        },
-        "generation_parameters": {
-            key: value
-            for key, value in request.items()
-            if key in MCP_TOOLS[tool]["allowed"]
-        },
-        "tiles": records,
-    }
-
-
-def build_mcp_outputs(
-    tool: str,
-    request: dict[str, Any],
-    warnings: list[str],
-    ignored_fields: list[str],
-    tile_width: int,
-    tile_height: int,
-    layout: str,
-    tiles: list[tuple[str, dict[str, str], int]],
-    output_files: dict[str, Path],
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    identity_payload = {
-        "tool": tool,
-        "request": request,
-        "layout": layout,
-    }
-    tileset_id = stable_id("tileset", identity_payload)
-    background_job_id = stable_id("job", identity_payload)
-    base_tile_ids = build_base_tile_ids(tool, request)
-    tileset_data = build_tileset_data(tool, request, tile_width, tile_height, layout, tiles, output_files)
-    spec = EXPORT_LAYOUTS[layout]
-
-    create_response: dict[str, Any] = {
-        "tool": tool,
-        "tileset_id": tileset_id,
-        "background_job_id": background_job_id,
-        "status": "completed",
-        "simulated": True,
-        "tile_count": len(tiles),
-        "tile_size": {"width": tile_width, "height": tile_height},
-        "download_png": str(output_files["tileset"]),
-        "metadata_json": str(output_files["get_response"]),
-        "warnings": warnings,
-    }
-    if tool == "create_sidescroller_tileset":
-        create_response["base_tile_id"] = base_tile_ids["base"]
-    else:
-        create_response["base_tile_ids"] = base_tile_ids
-
-    get_response = {
-        "tool": tool,
-        "tileset_id": tileset_id,
-        "background_job_id": background_job_id,
-        "status": "completed",
-        "simulated": True,
-        "download_png": str(output_files["tileset"]),
-        "tile_count": len(tiles),
-        "base_tile_ids": base_tile_ids,
-        "metadata": {
-            "format": spec["format"],
-            "layout": spec["spritesheet_layout"],
-            "sheet_width": tile_width * spec["columns"],
-            "sheet_height": tile_height * spec["rows"],
-            "renderer": "deterministic",
-        },
-        "tileset_data": tileset_data,
-        "warnings": warnings,
-    }
-
-    sim_report = build_report(
-        tool,
-        request,
-        warnings,
-        ignored_fields,
-        tile_width,
-        tile_height,
-        layout,
-        tiles,
-        output_files,
-        tileset_id,
-        background_job_id,
-        base_tile_ids,
-    )
-    return create_response, get_response, sim_report
+        for index, source_index in enumerate(spec["cells"])
+    ]
 
 
 def build_report(
     tool: str,
     request: dict[str, Any],
     warnings: list[str],
-    ignored_fields: list[str],
     tile_width: int,
     tile_height: int,
     layout: str,
     tiles: list[tuple[str, dict[str, str], int]],
     output_files: dict[str, Path],
-    tileset_id: str,
-    background_job_id: str,
-    base_tile_ids: dict[str, str],
+    sim_run_id: str,
 ) -> dict[str, Any]:
     spec = EXPORT_LAYOUTS[layout]
     return {
         "source": "PixelLab MCP tileset simulator",
         "tool": tool,
-        "tileset_id": tileset_id,
-        "background_job_id": background_job_id,
-        "base_tile_ids": base_tile_ids,
+        "sim_run_id": sim_run_id,
         "renderer": "deterministic",
         "limits": [
             "This simulates PixelLab MCP request shape and compact tileset layout locally.",
+            "It writes local PNG layout previews and does not attempt to reproduce PixelLab MCP create/get JSON.",
             "The deterministic renderer uses simple keyword/semantic colors and does not predict PixelLab's model taste.",
             "expected_pattern_4x4 is derived from corners; observed PixelLab metadata often disagrees across surfaces.",
             "Boundary preview is per-tile schematic and does not model cross-tile seam continuity.",
             "Template alpha masks count any opaque pixel as occupied, including upper/detail pixels.",
             "When template_sheet is used, fill masks are copied from that observed PixelLab output.",
+            "Expanded top-down sheets are not simulated.",
         ],
         "warnings": warnings,
-        "ignored_fields": ignored_fields,
         "request": request,
         "mcp_defaults_used_for_omitted_fields": {
             key: value
@@ -824,7 +735,8 @@ def build_report(
             "bit_weights": {corner: weight for corner, weight in PIXELLAB_BIT_ORDER},
             "note": "bit_weights describe the tile key; filled_bit controls which key value maps to lower terrain.",
         },
-        "tiles": tile_records(tile_width, tile_height, tiles),
+        "native_tiles": tile_records(tile_width, tile_height, tiles),
+        "export_cells": export_cell_records(layout, tile_width, tile_height, tiles),
     }
 
 
@@ -848,14 +760,15 @@ def self_check() -> None:
 def main() -> None:
     self_check()
     args = parse_args()
+    if args.scale < 1:
+        raise SystemExit("--scale must be at least 1.")
     request = load_request(args.request_json)
     tile_width, tile_height = tile_size_from_request(args.tool, request)
-    warnings, ignored_fields = validate_request(
+    warnings = validate_request(
         args.tool,
         request,
         tile_width,
         tile_height,
-        args.allow_compact_expanded,
     )
     tiles = make_tiles()
 
@@ -864,8 +777,6 @@ def main() -> None:
     output_files = {
         "corner_preview": output_dir / "corner-key-preview.png",
         "tileset": output_dir / "tileset.png",
-        "create_response": output_dir / "create-response.json",
-        "get_response": output_dir / "get-response.json",
         "sim_report": output_dir / "sim-report.json",
     }
 
@@ -883,30 +794,28 @@ def main() -> None:
     save_scaled(corner, output_files["corner_preview"], args.scale)
     save_scaled(tileset, output_files["tileset"], args.scale)
 
-    create_response, get_response, sim_report = build_mcp_outputs(
+    sim_run_id = stable_id(
+        "run",
+        {"tool": args.tool, "request": request, "layout": args.layout, "output": str(output_dir)},
+    )
+    sim_report = build_report(
         args.tool,
         request,
         warnings,
-        ignored_fields,
         tile_width,
         tile_height,
         args.layout,
         tiles,
         output_files,
+        sim_run_id,
     )
     if args.template_sheet:
         sim_report["template_sheet"] = str(args.template_sheet)
-    with output_files["create_response"].open("w", encoding="utf-8") as handle:
-        json.dump(create_response, handle, indent=2)
-    with output_files["get_response"].open("w", encoding="utf-8") as handle:
-        json.dump(get_response, handle, indent=2)
     with output_files["sim_report"].open("w", encoding="utf-8") as handle:
         json.dump(sim_report, handle, indent=2)
 
     print(f"Wrote {output_files['corner_preview']}")
     print(f"Wrote {output_files['tileset']}")
-    print(f"Wrote {output_files['create_response']}")
-    print(f"Wrote {output_files['get_response']}")
     print(f"Wrote {output_files['sim_report']}")
 
 
