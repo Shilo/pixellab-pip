@@ -177,7 +177,7 @@ COLORS = {
 }
 HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
 RECIPE_TEXTURES = {"solid", "sparse", "broken", "speckle", "dither", "stripe", "none"}
-RECIPE_PLACEMENTS = {"auto", "top", "boundary"}
+RECIPE_PLACEMENTS = {"all", "auto", "boundary", "interior", "none", "top"}
 OPENCODE_RENDERER_MODELS = {
     "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
 }
@@ -206,12 +206,13 @@ RECIPE_JSON_SCHEMA: dict[str, Any] = {
         "terrain": {
             "type": "object",
             "additionalProperties": False,
-            "required": ["label", "color", "accent_color", "texture"],
+            "required": ["label", "color", "accent_color", "texture", "placement"],
             "properties": {
                 "label": {"type": "string"},
                 "color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
                 "accent_color": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
                 "texture": {"type": "string", "enum": sorted(RECIPE_TEXTURES)},
+                "placement": {"type": "string", "enum": sorted(RECIPE_PLACEMENTS)},
             },
         }
     },
@@ -488,6 +489,17 @@ def transition_pixels(tool: str, request: dict[str, Any], tile_height: int) -> i
     return max(1, round(tile_height * raw)) if raw > 0 else 0
 
 
+def effective_transition_pixels(tool: str, request: dict[str, Any], tile_height: int) -> int:
+    pixels = transition_pixels(tool, request, tile_height)
+    text = str(request.get("transition_description") or "").lower()
+    if re.search(r"\b(outline|border|rim)\b", text) and not re.search(
+        r"\b(cap|surface|grass|snow|moss|dirt|wall face)\b",
+        text,
+    ):
+        return min(pixels, max(1, tile_height // 8))
+    return pixels
+
+
 def expected_pattern_4x4(corners: dict[str, str]) -> dict[str, list[int]]:
     value = {LOWER: 0, UPPER: 1}
     return {
@@ -562,6 +574,20 @@ def transition_description_color(
     return description_color(description, fallback)
 
 
+def detail_pixel_base_color(
+    description: str,
+    terrain_base: tuple[int, int, int, int],
+    parsed_base: tuple[int, int, int, int],
+) -> tuple[int, int, int, int]:
+    text = description.lower()
+    if re.search(r"\b(sparse|broken|speckle|fleck|chip|crack|highlight|pixel)\w*\b", text):
+        if re.search(r"\b(?:(?:pure|single|tiny|small|isolated)\s+)*white\s+(?:(?:pure|single|tiny|small|isolated)\s+)*(?:pixel|pixels|speckle|speckles|fleck|flecks|chip|chips|crack|cracks|highlight|highlights)", text):
+            return terrain_base
+        if re.search(r"\b(?:(?:pure|single|tiny|small|isolated)\s+)*black\s+(?:(?:pure|single|tiny|small|isolated)\s+)*(?:pixel|pixels|speckle|speckles|fleck|flecks|chip|chips|crack|cracks|highlight|highlights)", text):
+            return terrain_base
+    return parsed_base
+
+
 def color_from_hex(value: Any) -> tuple[int, int, int, int] | None:
     if not isinstance(value, str) or not HEX_COLOR.match(value):
         return None
@@ -595,36 +621,119 @@ def texture_pixel(
     y: int,
     base: tuple[int, int, int, int],
     recipe_section: dict[str, Any] | None = None,
+    allow_texture: bool = True,
+    tile_width: int | None = None,
+    tile_height: int | None = None,
 ) -> tuple[int, int, int, int]:
     text = description.lower()
     recipe_section = recipe_section or {}
     recipe_texture = str(recipe_section.get("texture", "")).lower()
+    sparse_mod = 53 if re.search(r"\b(extremely sparse|isolated|single[- ]?pixel|tiny|small|minimal|few)\b", text) else 37 if "sparse" in text else 23
     accent = color_from_hex(recipe_section.get("accent_color")) or lighten(base, 60)
+    if re.search(r"\b(?:(?:pure|single|tiny|small|isolated)\s+)*white\s+(?:(?:pure|single|tiny|small|isolated)\s+)*(?:pixel|pixels|speckle|speckles|fleck|flecks|chip|chips|crack|cracks|highlight|highlights)", text):
+        accent = (255, 255, 255, 255)
+    elif re.search(r"\b(?:(?:pure|single|tiny|small|isolated)\s+)*black\s+(?:(?:pure|single|tiny|small|isolated)\s+)*(?:pixel|pixels|speckle|speckles|fleck|flecks|chip|chips|crack|cracks|highlight|highlights)", text):
+        accent = (0, 0, 0, 255)
+    if re.search(r"\b(tile[- ]?border|border grid|tile grid|grid)\b", text):
+        right = tile_width - 1 if tile_width else x
+        bottom = tile_height - 1 if tile_height else y
+        if x in {0, right} or y in {0, bottom}:
+            return accent
+    if not allow_texture:
+        return base
     if recipe_texture == "none":
         return base
-    if recipe_texture in {"sparse", "broken", "speckle"} and ((x * 13 + y * 5) % 23 == 0):
+    if recipe_texture in {"sparse", "broken", "speckle"} and ((x * 13 + y * 5) % sparse_mod == 0):
         return accent
     if recipe_texture == "stripe" and y % 5 == 0:
         return accent
     if recipe_texture == "dither" and ((x + y) % 2 == 0):
         return accent
     if "1-bit" in text or "one-bit" in text:
-        if "sparse" in text and ((x * 11 + y * 7) % 29 == 0):
+        if "sparse" in text and ((x * 11 + y * 7) % (sparse_mod + 6) == 0):
             return (255, 255, 255, 255) if base[:3] == (0, 0, 0) else (0, 0, 0, 255)
         return base
-    if re.search(r"\b(speckle|sparse|broken|noise)\b", text) and ((x * 13 + y * 5) % 23 == 0):
-        return lighten(base, 60)
+    if re.search(r"\b(speckle|sparse|broken|noise)\b", text) and ((x * 13 + y * 5) % sparse_mod == 0):
+        return accent
     if re.search(r"\b(stripe|stripes|line|lines|horizontal)\b", text) and y % 5 == 0:
-        return lighten(base, 52)
+        return accent
     if re.search(r"\bdither(?:ed|ing)?\b", text) and ((x + y) % 2 == 0):
-        return lighten(base, 44)
+        return accent
     return base
+
+
+def description_placement(tool: str, section: str, description: str) -> str:
+    text = description.lower()
+    if re.search(r"\b(no texture|no decoration|no detail|solid|flat|empty)\b", text):
+        if not re.search(r"\b(edge|border|outline|rim|contour|highlight|speckle|fleck|chip|crack|dither|stripe|grid)\b", text):
+            return "none"
+    if re.search(r"\b(edge|border|outline|rim|contour|edge-highlight|edge highlight)\b", text):
+        return "boundary"
+    if tool == "create_sidescroller_tileset" and re.search(r"\b(top|cap|surface|upper|grass|snow|moss)\b", text):
+        return "top"
+    if re.search(r"\b(interior|inside|center|middle)\b", text):
+        return "interior"
+    if re.search(r"\b(speckle|fleck|chip|crack|dither|stripe|grid|texture|highlight|line)\b", text):
+        return "all"
+    if section == "transition":
+        return "top" if tool == "create_sidescroller_tileset" else "boundary"
+    return "all"
+
+
+def section_placement(
+    tool: str,
+    section: str,
+    description: str,
+    recipe_section: dict[str, Any] | None,
+) -> str:
+    text = description.lower()
+    placement = str((recipe_section or {}).get("placement", "auto")).lower()
+    if placement == "auto" or placement not in RECIPE_PLACEMENTS:
+        return description_placement(tool, section, description)
+    if (
+        tool == "create_sidescroller_tileset"
+        and section == "lower"
+        and placement in {"all", "boundary", "interior"}
+        and re.search(r"\b(sparse|speckle|fleck|chip|crack|highlight)\b", text)
+        and not re.search(r"\b(interior|inside|center|middle)\b", text)
+    ):
+        if re.search(r"\b(side|vertical|end[- ]?cap|outside|edge|border|outline|rim)\b", text):
+            return "boundary"
+        return "top"
+    return placement
+
+
+def placement_allows_texture(
+    placement: str,
+    x: int,
+    y: int,
+    tile_width: int,
+    tile_height: int,
+    thickness: int,
+    edge_mask: Image.Image,
+    top_mask: Image.Image | None = None,
+) -> bool:
+    if placement == "none":
+        return False
+    if placement in {"all", "auto"}:
+        return True
+    top_height = max(1, thickness or tile_height // 4)
+    if placement == "top":
+        if top_mask is not None:
+            return bool(top_mask.getpixel((x, y)))
+        return y < top_height
+    is_boundary = bool(edge_mask.getpixel((x, y)))
+    if placement == "boundary":
+        return is_boundary
+    if placement == "interior":
+        return not is_boundary and y >= top_height
+    return True
 
 
 def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, tile_height: int) -> str:
     upper_line = (
         '  "upper": {"label": "upper/background terrain", "color": "#RRGGBB", '
-        '"accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
+        '"accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none", "placement": "auto|all|top|boundary|interior|none"},\n'
         if tool == "create_topdown_tileset"
         else ""
     )
@@ -636,9 +745,9 @@ def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, til
         "Schema:\n"
         "{\n"
         '  "summary": "short plain-English interpretation",\n'
-        '  "lower": {"label": "terrain/platform body", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none"},\n'
+        '  "lower": {"label": "terrain/platform body", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none", "placement": "auto|all|top|boundary|interior|none"},\n'
         f"{upper_line}"
-        '  "transition": {"label": "edge/top transition", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none", "placement": "auto|top|boundary"}\n'
+        '  "transition": {"label": "edge/top transition", "color": "#RRGGBB", "accent_color": "#RRGGBB", "texture": "solid|sparse|broken|speckle|dither|stripe|none", "placement": "auto|all|top|boundary|interior|none"}\n'
         "}\n\n"
         "Rules:\n"
         "- Use only valid #RRGGBB colors.\n"
@@ -646,6 +755,7 @@ def agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width: int, til
         "- For sidescroller requests, lower is the platform body and transition is the top/surface layer.\n"
         "- For top-down requests, lower and upper are the two terrain classes and transition is their boundary style.\n"
         "- The input descriptions are inside lower_description, upper_description, and transition_description.\n"
+        "- placement controls where accent/detail pixels appear; use boundary for edge/rim/outline wording, top for sidescroller caps/surface, none for solid/no texture.\n"
         "- Never return an error object; always infer the best recipe from the JSON fields provided.\n"
         "- Do not include keys outside the schema.\n\n"
         f"Tool: {tool}\n"
@@ -662,7 +772,7 @@ def opencode_agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width:
         required_sections = "summary, lower, upper, transition"
         upper_shape = (
             ', "upper": {"label": "short label", "color": "#RRGGBB", '
-            '"accent_color": "#RRGGBB", "texture": "solid"}'
+            '"accent_color": "#RRGGBB", "texture": "solid", "placement": "all"}'
         )
         topdown_rule = "For top-down, lower and upper are terrain classes; transition is their boundary style. "
     return (
@@ -671,16 +781,17 @@ def opencode_agent_recipe_prompt(tool: str, request: dict[str, Any], tile_width:
         f"Interpret this PixelLab MCP request for {tool}. "
         f"Required top-level keys: {required_sections}. "
         "Do not include any other keys, including size, transition_size, confidence, notes, or errors. "
-        "Each terrain section has exactly label, color, accent_color, texture. "
+        "Each terrain section has exactly label, color, accent_color, texture, placement. "
         "The transition section has exactly label, color, accent_color, texture, placement. "
         "Valid textures are exactly: solid, sparse, broken, speckle, dither, stripe, none. "
-        "Valid placements are exactly: auto, top, boundary. "
+        "Valid placements are exactly: all, auto, boundary, interior, none, top. "
+        "placement controls where accent/detail pixels appear; use boundary for edge/rim/outline wording, top for sidescroller caps/surface, none for solid/no texture. "
         "Use valid #RRGGBB colors. For 1-bit or monochrome prompts, use only #000000 and #FFFFFF. "
         "For sidescroller, lower is the platform body and transition is the top/surface layer. "
         f"{topdown_rule}"
         "Return this exact object shape with inferred values: "
         '{"summary":"short interpretation", '
-        '"lower":{"label":"short label","color":"#RRGGBB","accent_color":"#RRGGBB","texture":"solid"}'
+        '"lower":{"label":"short label","color":"#RRGGBB","accent_color":"#RRGGBB","texture":"solid","placement":"all"}'
         f"{upper_shape}, "
         '"transition":{"label":"short label","color":"#RRGGBB","accent_color":"#RRGGBB","texture":"solid","placement":"auto"}}. '
         f"Tile size: {tile_width}x{tile_height}. "
@@ -751,9 +862,7 @@ def validate_ai_recipe(data: dict[str, Any], renderer: str, tool: str) -> dict[s
         section_out: dict[str, Any] = {}
         if not isinstance(section_in, dict):
             raise SystemExit(f"--renderer {renderer} returned missing or invalid {section_name} section.")
-        allowed_section = {"label", "color", "accent_color", "texture"}
-        if section_name == "transition":
-            allowed_section.add("placement")
+        allowed_section = {"label", "color", "accent_color", "texture", "placement"}
         unknown_section = sorted(set(section_in) - allowed_section)
         if unknown_section:
             raise SystemExit(
@@ -766,16 +875,98 @@ def validate_ai_recipe(data: dict[str, Any], renderer: str, tool: str) -> dict[s
         if texture not in RECIPE_TEXTURES:
             raise SystemExit(f"--renderer {renderer} returned invalid {section_name}.texture: {texture}.")
         section_out["texture"] = texture
-        if section_name == "transition":
-            placement = str(section_in.get("placement", "auto")).lower()
-            if placement not in RECIPE_PLACEMENTS:
-                raise SystemExit(f"--renderer {renderer} returned invalid transition.placement: {placement}.")
-            section_out["placement"] = placement
+        placement = str(section_in.get("placement", "auto")).lower()
+        if placement not in RECIPE_PLACEMENTS:
+            raise SystemExit(f"--renderer {renderer} returned invalid {section_name}.placement: {placement}.")
+        section_out["placement"] = placement
         recipe[section_name] = section_out
     required_sections = ("lower", "transition") if tool == "create_sidescroller_tileset" else ("lower", "upper")
     missing = [section for section in required_sections if "color" not in recipe[section]]
     if missing:
         raise SystemExit(f"--renderer {renderer} returned an incomplete recipe; missing colors for: {', '.join(missing)}.")
+    return recipe
+
+
+def text_prefers_black_base_with_white_detail(description: str) -> bool:
+    text = description.lower()
+    has_bw_palette = re.search(r"\b(1-bit|one-bit|monochrome|black[- ]and[- ]white|black and white|black/white)\b", text)
+    has_white_detail = re.search(
+        r"\bwhite\s+(?:(?:dirt|soil|stone|brick|rock|dust|tiny|small|isolated|single[- ]?pixel|speckled|stippled)\s+)*(?:pixel|pixels|speckle|speckles|speckled|fleck|flecks|chip|chips|grain|grains|crack|cracks|line|lines|stipple|stippled|texture|details?)\b",
+        text,
+    )
+    has_dark_material = re.search(r"\bblack|dark|dungeon|wall|floor|dirt|soil|stone|brick|rock|cave\b", text)
+    explicit_white_base = re.search(
+        r"\b(?:pure|solid|flat|mostly|all|entire|filled|base|terrain|surface)\s+white\b|\bwhite\s+(?:(?:dirt|soil|stone|brick|rock|grass)\s+)?(?:terrain|surface|base|fill|floor|wall)\b",
+        text,
+    )
+    return bool(has_bw_palette and has_white_detail and has_dark_material and not explicit_white_base)
+
+
+def text_is_unsupported_topdown_wall_face_stripes(description: str) -> bool:
+    text = description.lower()
+    mentions_wall_face = re.search(r"\b(front face|wall front|vertical wall face|wall face)\b", text)
+    mentions_thin_horizontal_lines = re.search(r"\b(horizontal|repeated|thin)\b.*\b(line|lines|stripe|stripes)\b|\b(line|lines|stripe|stripes)\b.*\b(horizontal|repeated|thin)\b", text)
+    mentions_1bit_bw = re.search(r"\b(1-bit|one-bit|black and white|black[- ]and[- ]white|monochrome)\b", text)
+    return bool(mentions_wall_face and mentions_thin_horizontal_lines and mentions_1bit_bw)
+
+
+def text_is_topdown_black_texture_that_live_dulls(description: str) -> bool:
+    text = description.lower()
+    has_black_surface = re.search(r"\bblack|dark|dungeon|wall|floor|terrain|surface|transition\b", text)
+    has_sparse_white_detail = re.search(
+        r"\b(sparse|speckle|speckled|fleck|flecks|stipple|stippled|dust|chipped|isolated|single[- ]?pixel|tiny|small|minimal)\b.*\bwhite\b|\bwhite\b.*\b(sparse|speckle|speckled|fleck|flecks|stipple|stippled|dust|chipped|isolated|single[- ]?pixel|tiny|small|minimal)\b",
+        text,
+    )
+    has_outline_intent = re.search(r"\b(edge|outline|rim|border|contour|edge-highlight|edge highlight|outside)\b", text)
+    explicit_white_base = re.search(
+        r"\b(?:pure|solid|flat|mostly|all|entire|filled|base|terrain|surface)\s+white\b|\bwhite\s+(?:(?:dirt|soil|stone|brick|rock|grass)\s+)?(?:terrain|surface|base|fill|floor|wall)\b",
+        text,
+    )
+    return bool(has_black_surface and has_sparse_white_detail and not has_outline_intent and not explicit_white_base)
+
+
+def text_is_unspecified_bw_topdown_edge(description: str) -> bool:
+    text = description.lower()
+    has_bw_edge = re.search(r"\b(1-bit|one-bit|monochrome|black and white|black[- ]and[- ]white)\b", text) and re.search(r"\bedge\b", text)
+    explicit_white_edge = re.search(r"\bwhite\s+(?:edge|outline|rim|border|highlight|line|lines)\b|\b(?:edge|outline|rim|border|highlight|line|lines)\s+white\b", text)
+    return bool(has_bw_edge and not explicit_white_edge)
+
+
+def normalize_ai_recipe_for_request(recipe: dict[str, Any], tool: str, request: dict[str, Any]) -> dict[str, Any]:
+    section_fields = {
+        "lower": "lower_description",
+        "transition": "transition_description",
+    }
+    if tool == "create_topdown_tileset":
+        section_fields["upper"] = "upper_description"
+    for section, field in section_fields.items():
+        section_recipe = recipe.get(section)
+        if not isinstance(section_recipe, dict):
+            continue
+        description = str(request.get(field) or "")
+        if tool == "create_topdown_tileset" and text_is_unsupported_topdown_wall_face_stripes(description):
+            section_recipe["color"] = "#000000"
+            section_recipe["accent_color"] = "#000000"
+            section_recipe["texture"] = "none"
+            section_recipe["placement"] = "none"
+            continue
+        if tool == "create_topdown_tileset" and text_is_topdown_black_texture_that_live_dulls(description):
+            section_recipe["color"] = "#000000"
+            section_recipe["accent_color"] = "#000000"
+            section_recipe["texture"] = "none"
+            section_recipe["placement"] = "none"
+            continue
+        if tool == "create_topdown_tileset" and section == "transition" and text_is_unspecified_bw_topdown_edge(description):
+            section_recipe["color"] = "#000000"
+            section_recipe["accent_color"] = "#000000"
+            section_recipe["texture"] = "none"
+            section_recipe["placement"] = "none"
+            continue
+        if text_prefers_black_base_with_white_detail(description):
+            section_recipe["color"] = "#000000"
+            section_recipe["accent_color"] = "#FFFFFF"
+            if section_recipe.get("texture") == "solid":
+                section_recipe["texture"] = "sparse"
     return recipe
 
 
@@ -867,6 +1058,7 @@ def run_ai_renderer(
         else:
             output_text = stdout_path.read_text(encoding="utf-8") if stdout_path and stdout_path.exists() else result.stdout
         recipe = validate_ai_recipe(extract_json_object(output_text), renderer, tool)
+        recipe = normalize_ai_recipe_for_request(recipe, tool, request)
         recipe["agent_stdout_excerpt"] = result.stdout.strip()[:2000]
         return recipe
     finally:
@@ -950,6 +1142,27 @@ def boundary_mask(lower_mask: Image.Image, thickness: int) -> Image.Image:
     return boundary
 
 
+def top_surface_mask(lower_mask: Image.Image, thickness: int) -> Image.Image:
+    if thickness <= 0:
+        return Image.new("1", lower_mask.size, 0)
+    width, height = lower_mask.size
+    top = Image.new("1", lower_mask.size, 0)
+    pixels = lower_mask.load()
+    out = top.load()
+    for x in range(width):
+        first_filled = None
+        for y in range(height):
+            if pixels[x, y]:
+                first_filled = y
+                break
+        if first_filled is None or first_filled == 0:
+            continue
+        for y in range(first_filled, min(height, first_filled + thickness)):
+            if pixels[x, y]:
+                out[x, y] = 1
+    return top
+
+
 def draw_tileset(
     tool: str,
     request: dict[str, Any],
@@ -963,7 +1176,7 @@ def draw_tileset(
     background = COLORS["transparent"] if tool == "create_sidescroller_tileset" else COLORS["preview_background"]
     sheet = Image.new("RGBA", (tile_width * 4, tile_height * 4), background)
     draw = ImageDraw.Draw(sheet)
-    thickness = transition_pixels(tool, request, tile_height)
+    thickness = effective_transition_pixels(tool, request, tile_height)
     lower_color = recipe_color(
         render_recipe,
         "lower",
@@ -980,14 +1193,21 @@ def draw_tileset(
         render_recipe,
         "transition",
         "color",
-        transition_description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+        detail_pixel_base_color(
+            str(request.get("transition_description") or ""),
+            lower_color,
+            transition_description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+        ),
     )
     lower_recipe = section_from_recipe(render_recipe, "lower")
     upper_recipe = section_from_recipe(render_recipe, "upper")
     transition_recipe = section_from_recipe(render_recipe, "transition")
-    transition_placement = str(transition_recipe.get("placement", "auto")).lower()
-    if transition_placement not in RECIPE_PLACEMENTS:
-        transition_placement = "auto"
+    lower_description = str(request.get("lower_description", ""))
+    upper_description = str(request.get("upper_description", ""))
+    transition_description = str(request.get("transition_description") or "")
+    lower_placement = section_placement(tool, "lower", lower_description, lower_recipe)
+    upper_placement = section_placement(tool, "upper", upper_description, upper_recipe)
+    transition_placement = section_placement(tool, "transition", transition_description, transition_recipe)
 
     for index, (_, corners, _) in enumerate(tiles):
         ox = (index % 4) * tile_width
@@ -1001,6 +1221,7 @@ def draw_tileset(
                 for x in range(tile_width):
                     lower_mask.putpixel((x, y), 1 if crop.getpixel((x, y))[3] else 0)
         edge_mask = boundary_mask(lower_mask, thickness)
+        exposed_top_mask = top_surface_mask(lower_mask, thickness) if tool == "create_sidescroller_tileset" else None
         for y in range(tile_height):
             for x in range(tile_width):
                 terrain = terrain_at(corners, x, y, tile_width, tile_height)
@@ -1008,32 +1229,62 @@ def draw_tileset(
                     description_field = "lower_description" if terrain == LOWER else "upper_description"
                     base = lower_color if terrain == LOWER else upper_color
                     recipe_section = lower_recipe if terrain == LOWER else upper_recipe
-                    color = texture_pixel(str(request.get(description_field, "")), x, y, base, recipe_section)
+                    description = lower_description if terrain == LOWER else upper_description
+                    placement = lower_placement if terrain == LOWER else upper_placement
+                    color = texture_pixel(
+                        description,
+                        x,
+                        y,
+                        base,
+                        recipe_section,
+                        placement_allows_texture(placement, x, y, tile_width, tile_height, thickness, edge_mask, exposed_top_mask),
+                        tile_width,
+                        tile_height,
+                    )
                     if transition_placement != "none" and edge_mask.getpixel((x, y)):
                         color = texture_pixel(
-                            str(request.get("transition_description") or ""),
+                            transition_description,
                             x,
                             y,
                             transition_color,
                             transition_recipe,
+                            placement_allows_texture(transition_placement, x, y, tile_width, tile_height, thickness, edge_mask, exposed_top_mask),
+                            tile_width,
+                            tile_height,
                         )
                     sheet.putpixel((ox + x, oy + y), color)
                 elif lower_mask.getpixel((x, y)):
                     use_transition = (
                         transition_placement != "none"
                         and thickness
-                        and (y < thickness if transition_placement in {"auto", "top"} else bool(edge_mask.getpixel((x, y))))
+                        and (
+                            bool(exposed_top_mask.getpixel((x, y)))
+                            if transition_placement in {"auto", "top"} and exposed_top_mask is not None
+                            else bool(edge_mask.getpixel((x, y)))
+                        )
                     )
                     if use_transition:
                         color = texture_pixel(
-                            str(request.get("transition_description") or ""),
+                            transition_description,
                             x,
                             y,
                             transition_color,
                             transition_recipe,
+                            placement_allows_texture(transition_placement, x, y, tile_width, tile_height, thickness, edge_mask, exposed_top_mask),
+                            tile_width,
+                            tile_height,
                         )
                     else:
-                        color = texture_pixel(str(request.get("lower_description", "")), x, y, lower_color, lower_recipe)
+                        color = texture_pixel(
+                            lower_description,
+                            x,
+                            y,
+                            lower_color,
+                            lower_recipe,
+                            placement_allows_texture(lower_placement, x, y, tile_width, tile_height, thickness, edge_mask, exposed_top_mask),
+                            tile_width,
+                            tile_height,
+                        )
                     sheet.putpixel((ox + x, oy + y), color)
         if draw_grid:
             draw.rectangle((ox, oy, ox + tile_width - 1, oy + tile_height - 1), outline=COLORS["grid"])
@@ -1093,7 +1344,11 @@ def draw_component_previews(
         render_recipe,
         "transition",
         "color",
-        transition_description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+        detail_pixel_base_color(
+            str(request.get("transition_description") or ""),
+            lower_color,
+            transition_description_color(str(request.get("transition_description") or ""), lighten(lower_color, 76)),
+        ),
     )
     sections = {
         "component_lower": ("lower_description", lower_color, section_from_recipe(render_recipe, "lower")),
@@ -1106,7 +1361,7 @@ def draw_component_previews(
         image = Image.new("RGBA", (tile_width, tile_height), COLORS["transparent"] if tool == "create_sidescroller_tileset" else COLORS["preview_background"])
         for y in range(tile_height):
             for x in range(tile_width):
-                image.putpixel((x, y), texture_pixel(str(request.get(field) or ""), x, y, color, recipe_section))
+                image.putpixel((x, y), texture_pixel(str(request.get(field) or ""), x, y, color, recipe_section, True, tile_width, tile_height))
         previews[key] = image
 
     center_index = PIXELLAB_TILE_ORDER.index(0)
