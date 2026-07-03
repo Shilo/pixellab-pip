@@ -126,7 +126,6 @@ The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and low
 - `--scale N`: set the nearest-neighbor preview scale. Default is `8`.
 - `--renderer deterministic`: use local keyword/semantic rendering. This is the default.
 - `--renderer codex`: call `codex exec` with a JSON output schema to convert descriptions into a constrained semantic render recipe, then render locally.
-- `--renderer claude`: call `claude -p` with a JSON output schema to convert descriptions into a constrained semantic render recipe, then render locally.
 - `--renderer deepseek-v4-pro`: call OpenCode with `deepseek/deepseek-v4-pro`, extract its JSON text response, validate it as the same constrained semantic render recipe, then render locally.
 - `--agent-timeout N`: timeout in seconds for AI renderers. Default is `180`.
 - `--layout NAME`: choose `15-tileset`, `wang`, or `godot-3x3`.
@@ -147,7 +146,7 @@ Top-down `mode: "pro"` is also conservative: observed PixelLab Pro corpus output
 
 AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. The recipe schema is tool-shaped: sidescroller uses lower plus transition, while top-down uses lower, upper, and transition. `transition_size` remains the simulator's geometry control; the AI cannot disable a requested transition. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
 
-`codex` and `claude` use their CLI JSON-schema output controls. `deepseek-v4-pro` requires an installed, authenticated OpenCode CLI and uses OpenCode's JSON event stream plus the simulator's strict recipe validator because the observed OpenCode CLI has model selection and JSON event output, but no JSON-schema flag.
+`codex` uses its CLI JSON-schema output controls. `deepseek-v4-pro` requires an installed, authenticated OpenCode CLI and uses OpenCode's JSON event stream plus the simulator's strict recipe validator because the observed OpenCode CLI has model selection and JSON event output, but no JSON-schema flag.
 
 `expected_pattern_4x4` in the JSON report is derived from tile corners. Do not assume downloaded PixelLab `pattern_4x4` fields are authoritative; local fixtures show they can disagree with `wang_N`, corners, and visual sheet position.
 

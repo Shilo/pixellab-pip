@@ -97,7 +97,6 @@ Renderer modes:
 
 - `--renderer deterministic` - local keyword/semantic rendering; fastest and default.
 - `--renderer codex` - asks Codex for a constrained semantic recipe, then renders locally.
-- `--renderer claude` - asks Claude for a constrained semantic recipe, then renders locally.
 - `--renderer deepseek-v4-pro` - asks OpenCode's `deepseek/deepseek-v4-pro` model for the same constrained semantic recipe, then renders locally.
 
 The simulator is intentionally not PixelLab. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce PixelLab model taste. Use it to inspect request shape, output layout, and broad terrain/transition semantics before deciding whether a live generation is worth running.

@@ -108,6 +108,11 @@ class HelperCliSmokeTests(unittest.TestCase):
         output = self.run_help(REPO_ROOT / "dev-tools/pixellab_mcp_tileset_sim.py")
         self.assertIn("usage:", output.lower())
         self.assertIn("create_topdown_tileset", output)
+        self.assertNotIn("claude", output.lower())
+
+    def test_prompt_limits_include_font_name(self) -> None:
+        text = (REPO_ROOT / "skills/pixellab-pip/references/prompt-limits.md").read_text(encoding="utf-8")
+        self.assertIn("| `POST /generate-font-pro` | `font_name` | 200 |", text)
 
 
 if __name__ == "__main__":

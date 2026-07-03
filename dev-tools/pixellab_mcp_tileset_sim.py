@@ -275,7 +275,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--renderer",
-        choices=["deterministic", "codex", "claude", *sorted(OPENCODE_RENDERER_MODELS)],
+        choices=["deterministic", "codex", *sorted(OPENCODE_RENDERER_MODELS)],
         default="deterministic",
         help="Renderer backend. AI renderers create a constrained semantic recipe before local rendering.",
     )
@@ -789,8 +789,6 @@ def run_ai_renderer(
 ) -> dict[str, Any] | None:
     if renderer == "deterministic":
         return None
-    if renderer == "claude":
-        raise SystemExit("--renderer claude is temporarily disabled.")
     if timeout < 1:
         raise SystemExit("--agent-timeout must be at least 1 second.")
 
@@ -804,22 +802,7 @@ def run_ai_renderer(
         if renderer in OPENCODE_RENDERER_MODELS
         else agent_recipe_prompt(tool, request, tile_width, tile_height)
     )
-    if renderer == "claude":
-        command = [
-            executable,
-            "-p",
-            "--safe-mode",
-            "--no-session-persistence",
-            "--permission-mode",
-            "dontAsk",
-            "--tools=",
-            "--json-schema",
-            json.dumps(recipe_json_schema(tool)),
-            prompt,
-        ]
-        stdout_path = None
-        stdin_text = None
-    elif renderer == "codex":
+    if renderer == "codex":
         temp_dir = tempfile.TemporaryDirectory(prefix="pixellab-sim-codex-")
         schema_path = Path(temp_dir.name) / "recipe-schema.json"
         stdout_path = Path(temp_dir.name) / "last-message.json"
