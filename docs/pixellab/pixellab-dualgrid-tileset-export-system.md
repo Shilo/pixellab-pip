@@ -79,7 +79,7 @@ Observed compact PixelLab tilesets usually include:
 - `pattern_system.terrain_encoding.upper: 1`
 - `pattern_system.terrain_encoding.wildcard: 255`
 
-Top-down exports are not always compact. Current public schema distinguishes the normal 16-tile result from larger transition outputs, and local live findings include expanded `tileset15_4x8` outputs with more populated tiles. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
+Top-down exports are not always compact across every PixelLab surface. Current MCP docs expose compact-oriented transition values `0`, `0.25`, and `0.5`; REST schema and local live findings also include expanded `tileset15_4x8` behavior for `transition_size: 1.0`. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
 
 Each returned tile may include:
 
@@ -164,7 +164,7 @@ The current simulator covers the compact 16-tile layout for MCP-style `create_si
 - Deterministic semantic rendering from description text
 - Template-mask previews from observed PixelLab sheets
 
-It writes `tileset.png`, `corner-key-preview.png`, and `sim-report.json`. The report contains simulator-only evidence such as the exact request JSON, omitted MCP defaults used for simulation, output paths, native 15-tileset source cells, exported cell placements, and computed corner patterns. It does not attempt to reproduce PixelLab MCP create/get JSON responses.
+It writes `tileset.png`, `native-tileset.png`, component previews, `corner-key-preview.png`, and `sim-report.json`. The report contains simulator-only evidence such as the exact request JSON, omitted MCP defaults used for simulation, output paths, native 15-tileset source cells, exported cell placements, computed corner patterns, and optional AI render recipes. It does not attempt to reproduce PixelLab MCP create/get JSON responses.
 
 It validates the MCP-facing route fields used by local simulation. REST-only fields such as reference images and `color_image` are intentionally outside this MCP simulator. It rejects top-down cases that may export as expanded sheets, because it does not yet simulate expanded top-down transition sheets.
 

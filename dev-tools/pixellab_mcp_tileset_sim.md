@@ -11,13 +11,13 @@ python -m pip install pillow
 Fastest sidescroller smoke test:
 
 ```powershell
-'{"lower_description":"stone brick","transition_description":"moss"}' | python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --draw-grid
+'{"lower_description":"stone brick","transition_description":"moss","transition_size":0.25}' | python dev-tools/pixellab_mcp_tileset_sim.py create_sidescroller_tileset --draw-grid
 ```
 
 Fastest top-down smoke test:
 
 ```powershell
-'{"lower_description":"ocean water","upper_description":"sandy beach"}' | python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --draw-grid
+'{"lower_description":"ocean water","upper_description":"sandy beach","transition_description":"sea foam","transition_size":0.25}' | python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --draw-grid
 ```
 
 The simulator accepts the same MCP create-tool JSON object an agent would pass to PixelLab MCP and writes local PNGs. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
@@ -84,7 +84,7 @@ Generated files:
 - `native-tileset.png`
 - `native-tileset-x8.png`
 - `component-lower.png`
-- `component-upper.png`
+- `component-upper.png` for top-down only
 - `component-transition.png`
 - `component-center-tile.png`
 - `tileset.png`
@@ -120,8 +120,8 @@ The native 15-tileset uses PixelLab bit weights `NW=8, NE=4, SW=2, SE=1` and low
 - `--draw-grid`: draw magenta tile boundaries in preview PNGs.
 - `--scale N`: set the nearest-neighbor preview scale. Default is `8`.
 - `--renderer deterministic`: use local keyword/semantic rendering. This is the default.
-- `--renderer codex`: call `codex exec` to convert descriptions into a constrained semantic render recipe, then render locally.
-- `--renderer claude`: call `claude -p` to convert descriptions into a constrained semantic render recipe, then render locally.
+- `--renderer codex`: call `codex exec` with a JSON output schema to convert descriptions into a constrained semantic render recipe, then render locally.
+- `--renderer claude`: call `claude -p` with a JSON output schema to convert descriptions into a constrained semantic render recipe, then render locally.
 - `--agent-timeout N`: timeout in seconds for `codex` or `claude` renderers. Default is `180`.
 - `--layout NAME`: choose `15-tileset`, `wang`, or `godot-3x3`.
 - `--output NAME`: write under `.local/mcp-tileset-sim-output/NAME`.
@@ -133,9 +133,9 @@ This is an MCP-shape simulator, not PixelLab. The deterministic renderer uses si
 
 The simulator validates only the MCP-facing request shape that matters for local simulation. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce expanded top-down transition sheets.
 
-Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and Pro top-down `transition_size >= 0.5`. Those can be valid MCP request shapes, but they may export expanded sheets this compact simulator does not render.
+Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and Pro top-down `transition_size >= 0.5`. Current MCP docs expose top-down `transition_size` values `0`, `0.25`, and `0.5`; `1.0` is REST/observed expanded-output research, not accepted by this MCP simulator.
 
-AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
+AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. `transition_size` remains the simulator's geometry control; the AI cannot disable a requested transition. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
 
 `expected_pattern_4x4` in the JSON report is derived from tile corners. Do not assume downloaded PixelLab `pattern_4x4` fields are authoritative; local fixtures show they can disagree with `wang_N`, corners, and visual sheet position.
 

@@ -148,7 +148,7 @@ MCP_TOOLS = {
             "raggedness": 0.0,
         },
         "tile_sizes": {(16, 16), (32, 32), (64, 64)},
-        "transition_sizes": {0.0, 0.25, 0.5, 1.0},
+        "transition_sizes": {0.0, 0.25, 0.5},
     },
 }
 
@@ -411,12 +411,6 @@ def validate_request(
     if raw_transition not in config["transition_sizes"]:
         values = ", ".join(str(value) for value in sorted(config["transition_sizes"]))
         raise SystemExit(f"{tool} transition_size must be one of {values}.")
-    if tool == "create_topdown_tileset" and raw_transition == 1.0:
-        raise SystemExit(
-            "This is a valid MCP request shape, but top-down transition_size 1.0 "
-            "can export an expanded sheet that this compact simulator does not render."
-        )
-
     if tool == "create_topdown_tileset":
         mode = request_value(tool, request, "mode")
         if mode not in {"standard", "pro"}:
@@ -447,8 +441,8 @@ def validate_request(
     }:
         raise SystemExit("shading is not a recognized PixelLab MCP shading value.")
     outline = request_value(tool, request, "outline")
-    if outline is not None and outline not in {"single color outline", "selective outline", "lineless"}:
-        raise SystemExit("outline must be single color outline, selective outline, or lineless.")
+    if outline is not None and outline not in {"single color black outline", "single color outline", "selective outline", "lineless"}:
+        raise SystemExit("outline must be single color black outline, single color outline, selective outline, or lineless.")
     return warnings
 
 
@@ -969,9 +963,10 @@ def draw_component_previews(
     )
     sections = {
         "component_lower": ("lower_description", lower_color, section_from_recipe(render_recipe, "lower")),
-        "component_upper": ("upper_description", upper_color, section_from_recipe(render_recipe, "upper")),
         "component_transition": ("transition_description", transition_color, section_from_recipe(render_recipe, "transition")),
     }
+    if tool == "create_topdown_tileset":
+        sections["component_upper"] = ("upper_description", upper_color, section_from_recipe(render_recipe, "upper"))
     previews: dict[str, Image.Image] = {}
     for key, (field, color, recipe_section) in sections.items():
         image = Image.new("RGBA", (tile_width, tile_height), COLORS["transparent"] if tool == "create_sidescroller_tileset" else COLORS["preview_background"])
@@ -1179,7 +1174,12 @@ def main() -> None:
 
     template_sheet = None
     if args.template_sheet:
-        template_sheet = Image.open(args.template_sheet).convert("RGBA")
+        if args.tool != "create_sidescroller_tileset":
+            raise SystemExit("--template-sheet is only supported for create_sidescroller_tileset.")
+        try:
+            template_sheet = Image.open(args.template_sheet).convert("RGBA")
+        except OSError as exc:
+            raise SystemExit(f"Could not read template sheet image: {args.template_sheet}") from exc
         expected_size = (tile_width * 4, tile_height * 4)
         if template_sheet.size != expected_size:
             raise SystemExit(f"Template sheet must be {expected_size[0]}x{expected_size[1]}, got {template_sheet.size}.")
