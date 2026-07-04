@@ -26,6 +26,10 @@ background_removal = load_module(
     REPO_ROOT / "skills/pixellab-pip/assets/background_removal.py",
 )
 bark = load_module("bark", REPO_ROOT / "skills/pixellab-pip/assets/bark.py")
+tileset_sim = load_module(
+    "pixellab_mcp_tileset_sim",
+    REPO_ROOT / "dev-tools/pixellab_mcp_tileset_sim.py",
+)
 
 
 class BackgroundRemovalTests(unittest.TestCase):
@@ -108,7 +112,65 @@ class HelperCliSmokeTests(unittest.TestCase):
         output = self.run_help(REPO_ROOT / "dev-tools/pixellab_mcp_tileset_sim.py")
         self.assertIn("usage:", output.lower())
         self.assertIn("create_topdown_tileset", output)
-        self.assertNotIn("claude", output.lower())
+        self.assertIn("claude", output.lower())
+
+    def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
+        captured: dict[str, object] = {}
+        original_which = tileset_sim.shutil.which
+        original_run = tileset_sim.subprocess.run
+        try:
+            tileset_sim.shutil.which = lambda name: "claude" if name == "claude" else None
+
+            def fake_run(command, **kwargs):
+                captured["command"] = command
+                captured["kwargs"] = kwargs
+                return subprocess.CompletedProcess(
+                    command,
+                    0,
+                    stdout=json.dumps(
+                        {
+                            "summary": "stone with moss",
+                            "lower": {
+                                "label": "stone",
+                                "color": "#777777",
+                                "accent_color": "#999999",
+                                "texture": "solid",
+                                "placement": "all",
+                            },
+                            "transition": {
+                                "label": "moss",
+                                "color": "#227733",
+                                "accent_color": "#55AA66",
+                                "texture": "sparse",
+                                "placement": "top",
+                            },
+                        }
+                    ),
+                    stderr="",
+                )
+
+            tileset_sim.subprocess.run = fake_run
+            recipe = tileset_sim.run_ai_renderer(
+                "claude",
+                "create_sidescroller_tileset",
+                {"lower_description": "stone", "transition_description": "moss"},
+                16,
+                16,
+                1,
+            )
+        finally:
+            tileset_sim.shutil.which = original_which
+            tileset_sim.subprocess.run = original_run
+
+        command = captured["command"]
+        self.assertEqual(recipe["renderer"], "claude")
+        self.assertIn("-p", command)
+        self.assertIn("--safe-mode", command)
+        self.assertIn("--no-session-persistence", command)
+        self.assertIn("--permission-mode", command)
+        self.assertIn("dontAsk", command)
+        self.assertIn("--tools=", command)
+        self.assertIn("--json-schema", command)
 
     def test_prompt_limits_include_font_name(self) -> None:
         text = (REPO_ROOT / "skills/pixellab-pip/references/prompt-limits.md").read_text(encoding="utf-8")

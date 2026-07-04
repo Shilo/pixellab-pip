@@ -23,6 +23,12 @@ The gate validates tracked JSON, version consistency, Python compilation, local 
 
 Local helper scripts target Python 3.10 or newer.
 
+Install the local QA dependencies first on a fresh checkout:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
 ## Codex Local Plugin Testing
 
 Codex installs both remote and local plugins into its plugin cache. Editing files in this repository, such as `skills/pixellab-pip/SKILL.md`, does not live-update the active Codex skill. Refresh the local development install after repo edits, then open a fresh Codex thread so the new cached snapshot is loaded.
@@ -98,6 +104,7 @@ Renderer modes:
 
 - `--renderer deterministic` - local keyword/semantic rendering; fastest and default.
 - `--renderer codex` - asks Codex for a constrained semantic recipe, then renders locally.
+- `--renderer claude` - asks Claude Code for a constrained semantic recipe, then renders locally.
 - `--renderer deepseek-v4-pro` - asks OpenCode's `deepseek/deepseek-v4-pro` model for the same constrained semantic recipe, then renders locally.
 
 The simulator is intentionally not PixelLab. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce PixelLab model taste. Use it to inspect request shape, output layout, and broad terrain/transition semantics before deciding whether a live generation is worth running.

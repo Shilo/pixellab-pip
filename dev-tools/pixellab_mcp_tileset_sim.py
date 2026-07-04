@@ -999,8 +999,6 @@ def run_ai_renderer(
 ) -> dict[str, Any] | None:
     if renderer == "deterministic":
         return None
-    if renderer == "claude":
-        raise SystemExit("--renderer claude is temporarily disabled.")
     if timeout < 1:
         raise SystemExit("--agent-timeout must be at least 1 second.")
 
@@ -1037,6 +1035,21 @@ def run_ai_renderer(
             "-",
         ]
         stdin_text = prompt
+    elif renderer == "claude":
+        command = [
+            executable,
+            "-p",
+            "--safe-mode",
+            "--no-session-persistence",
+            "--permission-mode",
+            "dontAsk",
+            "--tools=",
+            "--json-schema",
+            json.dumps(recipe_json_schema(tool)),
+            prompt,
+        ]
+        stdout_path = None
+        stdin_text = None
     elif renderer in OPENCODE_RENDERER_MODELS:
         command = [
             executable,
