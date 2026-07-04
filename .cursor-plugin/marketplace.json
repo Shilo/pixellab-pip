@@ -9,9 +9,33 @@
   "plugins": [
     {
       "name": "pixellab-pip",
+      "version": "0.4.0",
       "source": "./",
       "license": "MIT",
-      "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1."
+      "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1.",
+      "keywords": [
+        "pixellab",
+        "pixellab-pip",
+        "pixel-art",
+        "pixel-art-generator",
+        "game-assets",
+        "game-development",
+        "ai-agents",
+        "agent-skills",
+        "agent-plugin",
+        "codex-plugin",
+        "claude-code",
+        "cursor-plugin",
+        "github-copilot",
+        "gemini-cli",
+        "mcp",
+        "rest-api",
+        "sprites",
+        "pixelorama",
+        "aseprite",
+        "tilesets",
+        "api"
+      ]
     }
   ]
 }

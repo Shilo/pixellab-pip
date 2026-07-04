@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-06-26.
+Last reviewed: 2026-07-04.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -15,6 +15,7 @@ Primary sources:
 - Public REST/MCP auth uses the PixelLab bearer token.
 - PixelLab account balance can include subscription generations and USD credits.
 - Hosted MCP help reports that billing uses subscription generations first, then USD credits.
+- Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
 
 ## Image Generation
@@ -27,6 +28,7 @@ Primary sources:
 | Create S-XL image (Pro) | `POST /v2/generate-image-v2` | Pro image generation | Multiple candidates, reference images, style image, higher-cost candidate selection | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
 | Generate with style (Pro) | `POST /v2/generate-with-style-v2` | Pro style generation | Matching a reference style across new images | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
 | Create UI elements (Pro) | `POST /v2/generate-ui-v2` | Pro UI generation | Buttons, health bars, slots, menus | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
+| Create UI asset (Pro) | `POST /v2/create-ui-asset` | Structured UI asset generation | Saved UI panels with `pieces`, `elements`, style image, project assignment, and polling | current public pricing page has no USD row; local cost docs treat this as Pro / `20-40` generations |
 
 ## Image Operations
 
@@ -68,6 +70,7 @@ Primary sources:
 | Create character with 8 directions | `POST /v2/create-character-with-8-directions` | 8-direction character | `48x48 $0.0133`; `64x64 $0.0173` |
 | Create character (Pro) | `POST /v2/create-character-pro` | Pro 8-direction character | up to `85x85 $0.095`; up to `113x113 $0.125`; up to `168x168 $0.185` |
 | Create character v3 | `POST /v2/create-character-v3` | v3 8-direction character | `64x64 $0.041`; `128x128 $0.042`; `168x168 $0.045` |
+| Portrait to character / character to portrait (Pro) | `POST /v2/portrait-character-pro` | Pro portrait-character conversion | Convert a portrait image to a full-body character or the reverse | current public pricing page has no USD row; verify current usage before cost-sensitive calls |
 | Animate character | `POST /v2/animate-character` | Character animation, per direction | template `64x64 $0.0323`, `128x128 $0.0956`; v3 4 frames `64x64 $0.0129`, `128x128 $0.0145`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create character state | `POST /v2/create-character-state` | Character state/variant | up to `84x84 $0.095`; up to `112x112 $0.125`; up to `168x168 $0.185` |
 | Create single direction objects | `POST /v2/create-1-direction-object` | Style-consistent object candidates | up to `168x168 $0.095` |
@@ -75,14 +78,15 @@ Primary sources:
 | Animate object | `POST /v2/objects/{object_id}/animations` | Object animation, per direction | v3 4 frames `64x64 $0.0129`, `128x128 $0.0144`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create object state | `POST /v2/objects/{object_id}/states` | Object variant/state | single-direction up to `168x168 $0.095`; 8-direction up to `84x84 $0.095`, up to `112x112 $0.125`, up to `168x168 $0.185` |
 | Create tiles (Pro) | `POST /v2/create-tiles-pro` | Multiple tile variations | tile up to `42x42 $0.095`; up to `56x56 $0.125`; up to `85x85 $0.185` |
+| Generate pixel font (Pro) | `POST /v2/generate-font-pro` | Pro bitmap font generation | Generate a font atlas / pixel font from description and font controls | current public pricing page has no USD row; verify current usage before cost-sensitive calls |
 
 ## Prompt Enhancement
 
 | Tool label | Endpoint | Useful for | Estimated price |
 |---|---|---|---|
-| Enhance Pixen prompt | `POST /v2/enhance-pixen-prompt` | Expand a Pixen image prompt | per call `$0.002` |
-| Enhance character v3 prompt | `POST /v2/enhance-character-v3-prompt` | Expand a v3 character prompt | per call `$0.002` |
-| Enhance animation v3 prompt | `POST /v2/enhance-animation-v3-prompt` | Expand an action for `animate-with-text-v3` using frames as context | per call `$0.002` |
+| Enhance Pixen prompt | `POST /v2/enhance-pixen-prompt` | Expand a Pixen image prompt | official estimate per call `$0.002`; live check observed `usage.generations: 0.05` |
+| Enhance character v3 prompt | `POST /v2/enhance-character-v3-prompt` | Expand a v3 character prompt | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
+| Enhance animation v3 prompt | `POST /v2/enhance-animation-v3-prompt` | Expand an action for `animate-with-text-v3` using frames as context | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
 
 ## Practical Routing Notes
 

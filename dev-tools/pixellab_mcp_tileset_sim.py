@@ -889,106 +889,6 @@ def validate_ai_recipe(data: dict[str, Any], renderer: str, tool: str) -> dict[s
     return recipe
 
 
-def text_prefers_black_base_with_white_detail(description: str) -> bool:
-    text = description.lower()
-    has_bw_palette = re.search(r"\b(1-bit|one-bit|monochrome|black[- ]and[- ]white|black and white|black/white)\b", text)
-    has_white_detail = re.search(
-        r"\bwhite\s+(?:(?:dirt|soil|stone|brick|rock|dust|tiny|small|isolated|single[- ]?pixel|speckled|stippled)\s+)*(?:pixel|pixels|speckle|speckles|speckled|fleck|flecks|chip|chips|grain|grains|crack|cracks|line|lines|stipple|stippled|texture|details?)\b",
-        text,
-    )
-    has_dark_material = re.search(r"\bblack|dark|dungeon|wall|floor|dirt|soil|stone|brick|rock|cave\b", text)
-    explicit_white_base = re.search(
-        r"\b(?:pure|solid|flat|mostly|all|entire|filled|base|terrain|surface)\s+white\b|\bwhite\s+(?:(?:dirt|soil|stone|brick|rock|grass)\s+)?(?:terrain|surface|base|fill|floor|wall)\b",
-        text,
-    )
-    return bool(has_bw_palette and has_white_detail and has_dark_material and not explicit_white_base)
-
-
-def text_is_unsupported_topdown_wall_face_stripes(description: str) -> bool:
-    text = description.lower()
-    mentions_wall_face = re.search(r"\b(front face|wall front|vertical wall face|wall face)\b", text)
-    mentions_thin_horizontal_lines = re.search(r"\b(horizontal|repeated|thin)\b.*\b(line|lines|stripe|stripes)\b|\b(line|lines|stripe|stripes)\b.*\b(horizontal|repeated|thin)\b", text)
-    mentions_1bit_bw = re.search(r"\b(1-bit|one-bit|black and white|black[- ]and[- ]white|monochrome)\b", text)
-    return bool(mentions_wall_face and mentions_thin_horizontal_lines and mentions_1bit_bw)
-
-
-def text_is_topdown_black_texture_that_live_dulls(description: str) -> bool:
-    text = description.lower()
-    if re.search(r"\b(crack|cracks|scratch|scratches|highlight|highlights)\b", text):
-        return False
-    has_black_surface = re.search(r"\bblack|dark|dungeon|wall|floor|terrain|surface|transition\b", text)
-    has_sparse_white_detail = re.search(
-        r"\b(sparse|speckle|speckled|fleck|flecks|stipple|stippled|dust|chipped|isolated|single[- ]?pixel|tiny|small|minimal)\b.*\bwhite\b|\bwhite\b.*\b(sparse|speckle|speckled|fleck|flecks|stipple|stippled|dust|chipped|isolated|single[- ]?pixel|tiny|small|minimal)\b",
-        text,
-    )
-    has_outline_intent = re.search(r"\b(edge|outline|rim|border|contour|edge-highlight|edge highlight|outside)\b", text)
-    explicit_white_base = re.search(
-        r"\b(?:pure|solid|flat|mostly|all|entire|filled|base|terrain|surface)\s+white\b|\bwhite\s+(?:(?:dirt|soil|stone|brick|rock|grass)\s+)?(?:terrain|surface|base|fill|floor|wall)\b",
-        text,
-    )
-    return bool(has_black_surface and has_sparse_white_detail and not has_outline_intent and not explicit_white_base)
-
-
-def text_is_unspecified_bw_topdown_edge(description: str) -> bool:
-    text = description.lower()
-    has_bw_edge = re.search(r"\b(1-bit|one-bit|monochrome|black and white|black[- ]and[- ]white)\b", text) and re.search(r"\bedge\b", text)
-    return bool(has_bw_edge and not text_has_explicit_white_edge(description))
-
-
-def text_has_explicit_white_edge(description: str) -> bool:
-    text = description.lower()
-    return bool(
-        re.search(
-            r"\bwhite\s+(?:(?:pixel|pixels|sparse|clean|crisp)\s+)*(?:edge|outline|rim|border|highlight|highlights|line|lines)\b|\b(?:edge|outline|rim|border|highlight|highlights|line|lines)\s+white\b",
-            text,
-        )
-    )
-
-
-def normalize_ai_recipe_for_request(recipe: dict[str, Any], tool: str, request: dict[str, Any]) -> dict[str, Any]:
-    section_fields = {
-        "lower": "lower_description",
-        "transition": "transition_description",
-    }
-    if tool == "create_topdown_tileset":
-        section_fields["upper"] = "upper_description"
-    for section, field in section_fields.items():
-        section_recipe = recipe.get(section)
-        if not isinstance(section_recipe, dict):
-            continue
-        description = str(request.get(field) or "")
-        if tool == "create_topdown_tileset" and text_is_unsupported_topdown_wall_face_stripes(description):
-            section_recipe["color"] = "#000000"
-            section_recipe["accent_color"] = "#000000"
-            section_recipe["texture"] = "none"
-            section_recipe["placement"] = "none"
-            continue
-        if tool == "create_topdown_tileset" and section == "transition" and text_has_explicit_white_edge(description):
-            section_recipe["color"] = "#FFFFFF"
-            section_recipe["accent_color"] = "#FFFFFF"
-            section_recipe["texture"] = "solid"
-            section_recipe["placement"] = "boundary"
-            continue
-        if tool == "create_topdown_tileset" and text_is_topdown_black_texture_that_live_dulls(description):
-            section_recipe["color"] = "#000000"
-            section_recipe["accent_color"] = "#000000"
-            section_recipe["texture"] = "none"
-            section_recipe["placement"] = "none"
-            continue
-        if tool == "create_topdown_tileset" and section == "transition" and text_is_unspecified_bw_topdown_edge(description):
-            section_recipe["color"] = "#000000"
-            section_recipe["accent_color"] = "#000000"
-            section_recipe["texture"] = "none"
-            section_recipe["placement"] = "none"
-            continue
-        if text_prefers_black_base_with_white_detail(description):
-            section_recipe["color"] = "#000000"
-            section_recipe["accent_color"] = "#FFFFFF"
-            if section_recipe.get("texture") == "solid":
-                section_recipe["texture"] = "sparse"
-    return recipe
-
-
 def run_ai_renderer(
     renderer: str,
     tool: str,
@@ -1090,7 +990,6 @@ def run_ai_renderer(
         else:
             output_text = stdout_path.read_text(encoding="utf-8") if stdout_path and stdout_path.exists() else result.stdout
         recipe = validate_ai_recipe(extract_json_object(output_text), renderer, tool)
-        recipe = normalize_ai_recipe_for_request(recipe, tool, request)
         recipe["agent_stdout_excerpt"] = result.stdout.strip()[:2000]
         return recipe
     finally:

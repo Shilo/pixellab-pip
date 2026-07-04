@@ -19,13 +19,35 @@ MD_LINK = re.compile(r"(!?)\[[^\]]*\]\(([^)]+)\)")
 HTML_SRC = re.compile(r"""<img\b[^>]*\bsrc=["']([^"']+)["']""", re.IGNORECASE)
 PLACEHOLDER_TARGETS = {"path-or-url", "url", "path"}
 VERSION_PATHS = (
+    (".agents/plugins/marketplace.json", ("plugins", 0, "version")),
     (".claude-plugin/marketplace.json", ("plugins", 0, "version")),
     (".claude-plugin/plugin.json", ("version",)),
     (".codex-plugin/plugin.json", ("version",)),
+    (".cursor-plugin/marketplace.json", ("plugins", 0, "version")),
     (".cursor-plugin/plugin.json", ("version",)),
     (".github/plugin/marketplace.json", ("plugins", 0, "version")),
     ("gemini-extension.json", ("version",)),
     ("plugin.json", ("version",)),
+)
+DESCRIPTION_PATHS = (
+    (".agents/plugins/marketplace.json", ("plugins", 0, "description")),
+    (".claude-plugin/marketplace.json", ("plugins", 0, "description")),
+    (".claude-plugin/plugin.json", ("description",)),
+    (".codex-plugin/plugin.json", ("description",)),
+    (".cursor-plugin/marketplace.json", ("plugins", 0, "description")),
+    (".cursor-plugin/plugin.json", ("description",)),
+    (".github/plugin/marketplace.json", ("plugins", 0, "description")),
+    ("gemini-extension.json", ("description",)),
+    ("plugin.json", ("description",)),
+)
+KEYWORDS_PATHS = (
+    (".agents/plugins/marketplace.json", ("plugins", 0, "keywords")),
+    (".claude-plugin/marketplace.json", ("plugins", 0, "keywords")),
+    (".claude-plugin/plugin.json", ("keywords",)),
+    (".codex-plugin/plugin.json", ("keywords",)),
+    (".cursor-plugin/marketplace.json", ("plugins", 0, "keywords")),
+    (".cursor-plugin/plugin.json", ("keywords",)),
+    ("plugin.json", ("keywords",)),
 )
 
 
@@ -46,22 +68,43 @@ def check_json_files() -> None:
         json.loads(path.read_text(encoding="utf-8"))
 
 
-def read_version_path(path: str, parts: tuple[object, ...]) -> str:
+def read_json_path(path: str, parts: tuple[object, ...]) -> object:
     value: object = json.loads((REPO_ROOT / path).read_text(encoding="utf-8"))
     for part in parts:
         if isinstance(part, int):
             value = value[part]  # type: ignore[index]
         else:
             value = value[part]  # type: ignore[index]
-    if not isinstance(value, str):
-        raise AssertionError(f"{path} version value is not a string")
     return value
 
 
-def check_versions() -> None:
-    versions = {read_version_path(path, parts) for path, parts in VERSION_PATHS}
+def read_string_path(path: str, parts: tuple[object, ...], label: str) -> str:
+    value = read_json_path(path, parts)
+    if not isinstance(value, str):
+        raise AssertionError(f"{path} {label} value is not a string")
+    return value
+
+
+def check_manifest_metadata() -> None:
+    versions = {read_string_path(path, parts, "version") for path, parts in VERSION_PATHS}
     if len(versions) != 1:
         raise AssertionError(f"version mismatch: {sorted(versions)}")
+
+    canonical = json.loads((REPO_ROOT / "plugin.json").read_text(encoding="utf-8"))
+    canonical_description = canonical["description"]
+    canonical_keywords = canonical["keywords"]
+
+    description_mismatches = [
+        path for path, parts in DESCRIPTION_PATHS if read_string_path(path, parts, "description") != canonical_description
+    ]
+    if description_mismatches:
+        raise AssertionError("description mismatch: " + ", ".join(description_mismatches))
+
+    keyword_mismatches = [
+        path for path, parts in KEYWORDS_PATHS if read_json_path(path, parts) != canonical_keywords
+    ]
+    if keyword_mismatches:
+        raise AssertionError("keywords mismatch: " + ", ".join(keyword_mismatches))
 
 
 def check_python_compiles() -> None:
@@ -160,7 +203,7 @@ def run_unit_tests() -> None:
 
 CHECKS = [
     ("JSON manifests parse", check_json_files),
-    ("manifest versions match", check_versions),
+    ("manifest metadata matches", check_manifest_metadata),
     ("Python files compile", check_python_compiles),
     ("workflows declare required runtimes", check_workflows),
     ("no generated cache artifacts are tracked", check_no_tracked_generated_artifacts),

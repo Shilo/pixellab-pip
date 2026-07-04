@@ -62,6 +62,10 @@ def normalize_bark(value: Any) -> bool:
     return True
 
 
+def has_valid_bark_value(data: dict[str, Any]) -> bool:
+    return "bark" not in data or isinstance(data["bark"], bool)
+
+
 def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
     invalid_source: Path | None = None
     user_config = safe_user_config_path()
@@ -72,7 +76,7 @@ def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
     for path in paths:
         if path.exists():
             data = read_json(path)
-            if isinstance(data, dict):
+            if isinstance(data, dict) and has_valid_bark_value(data):
                 return data, path, invalid_source
             if invalid_source is None:
                 invalid_source = path
@@ -86,23 +90,23 @@ def bark_enabled() -> bool:
 
 def write_text_atomic(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(
-        "w",
-        encoding="utf-8",
-        dir=str(path.parent),
-        delete=False,
-        prefix=f".{path.name}.",
-        suffix=".tmp",
-    ) as handle:
-        temp_path = Path(handle.name)
-        handle.write(content)
+    temp_path: Path | None = None
     try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            dir=str(path.parent),
+            delete=False,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+        ) as handle:
+            temp_path = Path(handle.name)
+            handle.write(content)
         temp_path.replace(path)
-    except Exception:
-        try:
+        temp_path = None
+    finally:
+        if temp_path is not None:
             temp_path.unlink(missing_ok=True)
-        finally:
-            raise
 
 
 def write_config(enabled: bool) -> Path:

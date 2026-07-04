@@ -42,7 +42,7 @@ Public REST v2 docs list `enhance-pixen-prompt`, `enhance-character-v3-prompt`, 
 
 ## MCP vs REST Image Editing Boundary
 
-As of the current MCP guide, PixelLab MCP documents managed asset tools for characters, character states, character animations, top-down tilesets, sidescroller tilesets, isometric tiles, tile variants, objects, map objects, projects, chat/sandbox helpers, and balance checks. It does not document raw image-editing tools equivalent to REST v2 `edit-image`, `edit-images-v2`, `inpaint`, `inpaint-v3`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, or `remove-background`.
+As of the current MCP guide, PixelLab MCP documents managed asset tools for characters, portrait-character conversion, fonts, character states, character animations, top-down tilesets, sidescroller tilesets, isometric tiles, tile variants, UI assets, objects, map objects, projects, chat/sandbox helpers, and balance checks. It does not document raw image-editing tools equivalent to REST v2 `edit-image`, `edit-images-v2`, `inpaint`, `inpaint-v3`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, or `remove-background`.
 
 MCP `create_map_object` may expose map-object-specific `background_image` or `inpainting` parameters. Treat those as map-object generation controls, not as generic replacements for REST v2 `inpaint` or `inpaint-v3`.
 

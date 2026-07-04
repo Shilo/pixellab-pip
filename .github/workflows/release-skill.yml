@@ -62,9 +62,11 @@ jobs:
           const skillName = "pixellab-pip";
           const skillDir = path.join(root, "skills", skillName);
           const manifests = [
+            { file: ".agents/plugins/marketplace.json", versionPaths: [["plugins", 0, "version"]] },
             { file: ".claude-plugin/marketplace.json", versionPaths: [["plugins", 0, "version"]] },
             { file: ".claude-plugin/plugin.json", versionPaths: [["version"]] },
             { file: ".codex-plugin/plugin.json", versionPaths: [["version"]] },
+            { file: ".cursor-plugin/marketplace.json", versionPaths: [["plugins", 0, "version"]] },
             { file: ".cursor-plugin/plugin.json", versionPaths: [["version"]] },
             { file: ".github/plugin/marketplace.json", versionPaths: [["plugins", 0, "version"]] },
             { file: "gemini-extension.json", versionPaths: [["version"]] },

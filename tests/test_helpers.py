@@ -90,6 +90,30 @@ class BarkConfigTests(unittest.TestCase):
             finally:
                 bark.SKILL_CONFIG = original_skill_config
 
+    def test_non_bool_skill_config_falls_back_to_valid_user_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            original_skill_config = bark.SKILL_CONFIG
+            original_user_config_path = bark.user_config_path
+            try:
+                root = Path(tmp)
+                bark.SKILL_CONFIG = root / "skill" / "pixellab-pip.json"
+                user_config = root / "user" / "pixellab-pip.json"
+                bark.SKILL_CONFIG.parent.mkdir()
+                user_config.parent.mkdir()
+                bark.SKILL_CONFIG.write_text('{"bark": "false"}\n', encoding="utf-8")
+                user_config.write_text('{"bark": false}\n', encoding="utf-8")
+                bark.user_config_path = lambda: user_config
+
+                data, source, invalid_source = bark.read_config()
+
+                self.assertEqual(data["bark"], False)
+                self.assertEqual(source, user_config)
+                self.assertEqual(invalid_source, bark.SKILL_CONFIG)
+                self.assertFalse(bark.bark_enabled())
+            finally:
+                bark.SKILL_CONFIG = original_skill_config
+                bark.user_config_path = original_user_config_path
+
 
 class HelperCliSmokeTests(unittest.TestCase):
     def run_help(self, script: Path) -> str:
@@ -171,6 +195,66 @@ class HelperCliSmokeTests(unittest.TestCase):
         self.assertIn("dontAsk", command)
         self.assertIn("--tools=", command)
         self.assertIn("--json-schema", command)
+
+    def test_ai_renderer_preserves_valid_topdown_recipe_without_text_overrides(self) -> None:
+        original_which = tileset_sim.shutil.which
+        original_run = tileset_sim.subprocess.run
+        try:
+            tileset_sim.shutil.which = lambda name: "claude" if name == "claude" else None
+
+            def fake_run(command, **kwargs):
+                return subprocess.CompletedProcess(
+                    command,
+                    0,
+                    stdout=json.dumps(
+                        {
+                            "summary": "light flooring with white speckles",
+                            "lower": {
+                                "label": "light flooring",
+                                "color": "#EEEEEE",
+                                "accent_color": "#FFFFFF",
+                                "texture": "speckle",
+                                "placement": "all",
+                            },
+                            "upper": {
+                                "label": "pale grass",
+                                "color": "#AADD88",
+                                "accent_color": "#CCEEAA",
+                                "texture": "solid",
+                                "placement": "all",
+                            },
+                            "transition": {
+                                "label": "soft edge",
+                                "color": "#DDEECC",
+                                "accent_color": "#FFFFFF",
+                                "texture": "sparse",
+                                "placement": "boundary",
+                            },
+                        }
+                    ),
+                    stderr="",
+                )
+
+            tileset_sim.subprocess.run = fake_run
+            recipe = tileset_sim.run_ai_renderer(
+                "claude",
+                "create_topdown_tileset",
+                {
+                    "lower_description": "1-bit white speckles on light flooring",
+                    "upper_description": "pale grass",
+                    "transition_description": "soft edge",
+                },
+                16,
+                16,
+                1,
+            )
+        finally:
+            tileset_sim.shutil.which = original_which
+            tileset_sim.subprocess.run = original_run
+
+        self.assertEqual(recipe["lower"]["color"], "#EEEEEE")
+        self.assertEqual(recipe["lower"]["accent_color"], "#FFFFFF")
+        self.assertEqual(recipe["lower"]["texture"], "speckle")
 
     def test_prompt_limits_include_font_name(self) -> None:
         text = (REPO_ROOT / "skills/pixellab-pip/references/prompt-limits.md").read_text(encoding="utf-8")
