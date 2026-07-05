@@ -23,7 +23,8 @@ Exact field fidelity (hard rule): every key and value maps verbatim to the real 
 body for that route — the exact field names and value shapes the tool/endpoint accepts.
 Never rename, abbreviate, merge, or simplify a field: `style_image` stays `style_image`,
 never `image` or `style`; `first_frame` is never `frame`. The value must be sendable as the
-request body with no key translation.
+recorded route's request body with no key translation. (Cross-surface fallback is a separate,
+explicit adaptation — see Recreating.)
 
 Image fields are ordinary request fields under their true names. Each image value may be a
 relative path (default), an absolute path, or base64 — only the value representation varies,
@@ -52,11 +53,9 @@ Bundle (ordered; a later step reads an earlier step's output by relative path):
 
 ## Writing a blueprint
 
-After a successful generation, write the blueprint beside the outputs. If the generation
-used a user-supplied source/reference/style/mask/frame image, copy that file into the
-generation folder — a filesystem copy; do not read the image and re-write it — and reference
-it by relative path. This keeps the blueprint reproducible even if the original input later
-moves or is deleted.
+The blueprint is written after a successful generation, and input images are copied into the
+folder, per SKILL.md Asset Integrity. Reference each copied image by relative path, so the
+blueprint stays reproducible if the original later moves or is deleted.
 
 ## Recreating from a blueprint
 
@@ -64,15 +63,18 @@ When the user `@link`s a blueprint or asks to remake a past generation whose blu
 exists:
 
 1. Read it (object or array).
-2. Map each route to an available surface; if the recorded surface is unavailable, fall back
-   MCP↔REST per SKILL.md Surface Rules.
+2. Map each route to an available surface. On the recorded surface, send fields verbatim. If
+   that surface is unavailable, fall back MCP↔REST using SKILL.md's Intent Router pairing and
+   adapt field names to the fallback schema (inspect it per Workflow step 5); if a recorded
+   field has no counterpart there, prefer the recorded surface rather than dropping or guessing.
 3. Resolve image values (relative path from the blueprint's folder, absolute path, or
    base64) to what the endpoint requires.
 4. Apply the user's natural-language overrides to any value — e.g. keep the seed but change
    `description`, or use every value with a random seed. Overrides are temporary; never
    rewrite the source blueprint.
 5. Generate, report per `usage-reporting.md`, and write a new blueprint + manifest for the
-   new run.
+   new run; copy any input image the new blueprint references into the new folder so it stays
+   self-contained.
 
 For a bundle, run steps in order, and save each produced image to the exact relative
 filename a later step references (e.g. `01-well.png`) so the next step consumes it. A bundle
