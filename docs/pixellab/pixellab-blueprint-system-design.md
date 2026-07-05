@@ -58,11 +58,17 @@ Shape: the route is the key, the request body is the value.
   the surface; no separate "REST" word, no wrapper keys.)
 - **Value** = the literal request body for that route. Include only the fields you want;
   any field left out uses the API's own default. So a one-field blueprint is valid.
-- **Image fields** stay inside the request body under their real API field name
-  (`image`, `first_frame`, `style_image`, `mask_image`, …); the field name already encodes
-  the role. Each may hold a **relative path** (default), an **absolute path** (opt-in), or
-  **base64** (opt-in) — all three are distinguishable on read and resolved to whatever the
-  endpoint needs at replay time.
+- **Exact field fidelity (hard rule).** Every key and value must map verbatim to the real
+  request body for that route — the exact field names and value shapes the MCP tool or REST
+  endpoint accepts. Never rename, abbreviate, merge, or "simplify" a field: `style_image`
+  is always `style_image`, never `image` or `style`; `first_frame` is never `frame`. A
+  blueprint must be replayable by sending its value as the request body with no key
+  translation. Image fields are just normal request fields under their true names; the field
+  name already encodes the role, so no separate role wrapper is needed.
+- **Image field values** may hold a **relative path** (default), an **absolute path**
+  (opt-in), or **base64** (opt-in) — all three are distinguishable on read and resolved to
+  whatever the endpoint needs at replay time. Only the *value representation* varies; the
+  *field name* never does.
 - **No** `blueprint_version`, `assets` wrapper, `images` wrapper, `route`/`input` keys, or
   `notes`.
 
@@ -127,8 +133,8 @@ If a generation used a **user-supplied source/reference/style/mask/frame image**
 **copies that file** into the generation folder (a filesystem copy — it must not read the
 image and re-write it) and references it by **relative path** inside the request body. This
 guarantees the blueprint is reproducible and forensically complete even if the user's
-original input is later moved or deleted, and it makes zip-sharing work with relative paths
-intact.
+original input is later moved or deleted, and it keeps relative-path sharing working (send
+the JSON and the copied image together).
 
 ## Relationship to the manifest
 
@@ -157,12 +163,17 @@ path (produced images never need re-supplying or base64).
 
 ## Sharing
 
-- **Zip (primary):** the blueprint plus its relative-path images, zipped together. Portable,
-  no base64 bloat, and the agent pays no token cost for images unless it actually needs them.
-- **Base64 embed (escape hatch):** only on an explicit request for a single self-contained
-  file, and only sensible for small images. Base64 is never written automatically — every
-  read of a base64 blueprint pays the full image token cost, which is prohibitive across a
-  folder of auto-saved blueprints.
+- **The single `.blueprint.json` file (primary).** Most blueprints have no source image
+  (text-only generations), so the JSON *is* the shareable unit — send the one file. When
+  there is a source image, sending the JSON plus the image as two files also works: the
+  recipient drops both together and the relative path resolves.
+- **Base64 embed (self-contained single file):** on explicit request, embed the image as
+  base64 so one JSON file carries everything. Only sensible for small images. Never written
+  automatically — every read of a base64 blueprint pays the full image token cost, which is
+  prohibitive across a folder of auto-saved blueprints.
+- **Zip (optional, only if wanted):** blueprint + relative-path images zipped together.
+  Tidy for multi-image bundles, but overkill for the common case — it adds pack/unpack work
+  on both ends, so it is not the default.
 
 ## Caveats to state honestly (in the reference and in reports)
 
