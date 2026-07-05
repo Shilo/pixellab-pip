@@ -37,6 +37,7 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 |---|---|
 | Easy PixelLab workflow | Ask for assets in plain language without knowing PixelLab tool names, endpoint names, modes, or editor differences. |
 | Smart tool selection | Choose between MCP, REST v2, website/editor flows, Aseprite, Pixelorama, and legacy v1 based on the task. |
+| Reusable Blueprints | Save a generation as a small, shareable blueprint file recording the exact tool/route and inputs, then recreate it anytime — your own or one someone sent you — overriding any value in plain language (new prompt, same seed, random seed). Run bundled presets by name, e.g. "create the knight blueprint". Full guide: [docs/blueprint.md](docs/blueprint.md). |
 | Guided PixelLab setup | Set up MCP/API access, diagnose missing auth, and configure only what you approve without reading or printing the secret value. |
 | Answer PixelLab questions | Explain setup, auth, docs, SDKs, troubleshooting, and confusing feature names. |
 | Auto-enhance prompts and descriptions | Turn rough wording, visible inputs, styles, palettes, and constraints into concise PixelLab-ready descriptions by default, with opt-out support. |

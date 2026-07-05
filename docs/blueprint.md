@@ -1,0 +1,81 @@
+# Blueprints
+
+A **blueprint** is a small JSON file that records exactly how one PixelLab asset was made —
+the tool/route used and the inputs sent — so you (or anyone you send it to) can recreate that
+asset later, with or without changes. Think of it as a recipe card for a generation.
+
+It is deliberately minimal and human-readable: just the route and the request values, no
+account or cost metadata. That makes a blueprint safe and easy to share.
+
+## What's inside
+
+The file is named `<name>.blueprint.json`. The single key is the route; its value is the exact
+request that produced the asset:
+
+```json
+{
+  "MCP create_character": {
+    "description": "a knight in shining armor holding a sword and shield"
+  }
+}
+```
+
+Only the fields that matter are included — anything left out uses PixelLab's default, so a
+one-line blueprint is perfectly valid. Image inputs (a source, reference, style, or mask
+image) are referenced by a relative filename kept next to the blueprint.
+
+A blueprint can also be a JSON **array** of these objects — a multi-step "bundle" that runs in
+order, where a later step can build on an earlier step's output.
+
+## Creating a blueprint
+
+You don't have to do anything special: after a successful generation, the assistant writes the
+blueprint next to the asset's output files (under your project's `pixellab-pip-generations/`
+folder). If the generation used an image you supplied, a copy of that image is saved alongside
+so the blueprint stays reproducible even if your original moves.
+
+## Recreating from a blueprint
+
+Two ways to trigger it:
+
+- **Point at the file:** `@`-link or mention the `.blueprint.json` and ask to run it.
+- **Just describe it:** if the blueprint lives in the bundled presets (below), name it — e.g.
+  *"create the knight blueprint"* — and the assistant finds and runs it.
+
+**Overrides.** You can change any value in plain language when recreating; the original file is
+never modified. For example:
+
+- *"Recreate that knight blueprint but make the armor red."*
+- *"Same blueprint, keep the seed but change the description to a dark wizard."*
+- *"Run it again with a random seed."*
+
+> **Note:** reusing the same seed reproduces the same *inputs*, but PixelLab does not guarantee
+> pixel-identical art from a repeated seed. A blueprint reliably reproduces the recipe, not an
+> exact copy of the pixels.
+
+## Presets (blueprints you can run by name)
+
+Ready-made example blueprints ship in the skill's `blueprints/` folder — currently a minimal
+`knight.blueprint.json`. Name one without a path and, if it matches, the assistant loads and
+runs it. For your own blueprints, point at the file (see Recreating, above) — the skill's
+`blueprints/` folder holds bundled examples and may be overwritten when the plugin updates.
+
+## Sharing
+
+A blueprint is meant to be shared:
+
+- **No image:** just send the single `.blueprint.json` file. This is the common case.
+- **With an image input:** send the JSON and its image together; the relative path resolves
+  when they sit side by side.
+- **One self-contained file:** on request, an image can be embedded directly in the JSON as
+  base64 (larger file, but nothing else to send).
+
+Whoever receives it can recreate the asset the same way — point their assistant at the file, or
+drop it into their `blueprints/` folder to run it by name.
+
+## MCP vs REST
+
+Blueprints record whichever surface produced the asset — an `MCP <tool>` route or a
+`POST /v2/<endpoint>` route. On recreation the assistant maps it to whatever you have available,
+falling back between MCP and REST when needed. MCP routes are handy for sharing because they run
+through your assistant's existing PixelLab connection without a separate API key.
