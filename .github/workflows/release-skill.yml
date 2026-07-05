@@ -212,9 +212,55 @@ jobs:
           ! zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^skills/'
 
       - name: Attest build provenance
+        id: attest
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+
+      - name: VirusTotal scan release asset
+        id: virustotal
+        if: env.VIRUSTOTAL_API_KEY != ''
+        continue-on-error: true # runs before the version-bump commit so the badge link points at this release's report; failure must not red the job
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
+          files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+
+      - name: Point security badges at this release
+        continue-on-error: true # cosmetic badge links; must never fail a release
+        env:
+          PROV_URL: ${{ steps.attest.outputs.attestation-url }}
+          VT_ANALYSIS: ${{ steps.virustotal.outputs.analysis }} # <file>=<url>, empty when VirusTotal is skipped
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re, pathlib
+          readme = pathlib.Path("README.md")
+          text = readme.read_text(encoding="utf-8")
+          prov = os.environ.get("PROV_URL", "").strip()
+          vt = os.environ.get("VT_ANALYSIS", "").strip()
+          if "=" in vt:
+              vt = vt.split("=", 1)[1]  # step output is "<filename>=<url>"
+          changed = False
+          if prov:
+              text, n = re.subn(
+                  r'(\]\(https://img\.shields\.io/badge/Build_Provenance-[^)]*\)\]\()[^)]*(\))',
+                  lambda m: m.group(1) + prov + m.group(2), text)
+              changed = changed or bool(n)
+          if vt:
+              text, n = re.subn(
+                  r'(label=VirusTotal[^)]*\)\]\()[^)]*(\))',
+                  lambda m: m.group(1) + vt + m.group(2), text)
+              changed = changed or bool(n)
+          if changed:
+              readme.write_text(text, encoding="utf-8")
+              uf = pathlib.Path("dist/updated-files.txt")
+              lines = uf.read_text().splitlines() if uf.exists() else []
+              if "README.md" not in lines:
+                  lines.append("README.md")
+                  uf.write_text("\n".join(lines) + "\n")
+          print(f"badge links updated: prov={bool(prov)} vt={bool(vt)} changed={changed}")
+          PY
 
       - name: Commit version bump
         shell: bash
@@ -242,15 +288,6 @@ jobs:
             --title "PixelLab Pip Skill ${{ steps.bump.outputs.tag }}" \
             "${notes_args[@]}" \
             --verify-tag
-
-      - name: VirusTotal scan release asset
-        id: virustotal
-        if: env.VIRUSTOTAL_API_KEY != ''
-        continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
-        uses: crazy-max/ghaction-virustotal@v5
-        with:
-          vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
-          files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
 
       - name: Append security summary to release notes
         continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
