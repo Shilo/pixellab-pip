@@ -513,7 +513,7 @@ Recommendation:
 
 ## Item Icon Guidance
 
-Inventory item, equipment, loot, pickup, or transparent RPG item-icon requests route through `skills/pixellab-pip/references/item-icons.md`.
+Inventory item, equipment, loot, pickup, or transparent RPG item-icon requests route through `skills/pixellab-pip/references/icons.md`.
 
 Dedicated item-icon testing found that MCP `create_1_direction_object` is a poor default for icons: it produced noisy/downscaled-looking 32px results, incomplete or inconsistent contours, and weak readability. Keep object generation for standalone props and managed objects that are not icon sheets or inventory UI artwork.
 
@@ -524,7 +524,7 @@ For item-icon sheets, default to REST `generate-image-v2`, with `no_background: 
 `SKILL.md` distinguishes:
 
 - `skill icon`, `ability icon`, `spell icon`, `action-bar icon`, `hotbar icon`: finished UI icon art, default to REST `generate-image-v2` for complete sheets.
-- `item icon`, `inventory icon`, `equipment icon`, `loot icon`, `pickup icon`, or transparent RPG item sheet: inventory icon art, read `references/item-icons.md` and prefer REST `generate-image-v2`.
+- `item icon`, `inventory icon`, `equipment icon`, `loot icon`, `pickup icon`, or transparent RPG item sheet: inventory icon art, read `references/icons.md` and prefer REST `generate-image-v2`.
 - standalone prop/object requests that are not icons or icon sheets: use object routes.
 
 Runtime routing rule:
