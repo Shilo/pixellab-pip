@@ -12,19 +12,17 @@ under `pixellab-pip-generations/`.
 
 - Root is either one object (single asset) or an array of such objects (a bundle, run in
   order).
-- Each object has exactly one key: the route. Its value is the request body (for an MCP
-  route, the tool's arguments).
+- Each object has exactly one key — the route — and its value is the literal request body
+  (for an MCP route, the tool's arguments). Include only the fields that matter; any omitted
+  field takes the API default, so a one-field blueprint is valid.
 - Route = `MCP <tool>` or `POST /v2/<endpoint>`. The prefix names the surface; no `REST`
   word, no wrapper keys.
-- Value = the literal request body. Include only the fields that matter; any omitted field
-  takes the API default, so a one-field blueprint is valid.
 
 Exact field fidelity (hard rule): every key and value maps verbatim to the real request
 body for that route — the exact field names and value shapes the tool/endpoint accepts.
 Never rename, abbreviate, merge, or simplify a field: `style_image` stays `style_image`,
-never `image` or `style`; `first_frame` is never `frame`. The value must be sendable as the
-recorded route's request body with no key translation. (Cross-surface fallback is a separate,
-explicit adaptation — see Recreating.)
+never `image` or `style`; `first_frame` is never `frame`. (Cross-surface fallback is a
+separate, explicit adaptation — see Recreating.)
 
 Image fields are ordinary request fields under their true names. Each image value may be a
 relative path (default), an absolute path, or base64 — only the value representation varies,
@@ -32,11 +30,11 @@ never the field name. Relative paths resolve against the blueprint file's folder
 
 Do not add `blueprint_version`, wrapper keys, `route`/`input` keys, role tags, or notes.
 
-Shape (schematic — `<route>` is `MCP <tool>` or `POST /v2/<endpoint>`):
+Shape (schematic):
 
 ```
 { "<route>": { …request body… } }                 # one asset
-[ { "<route>": { … } }, { "<route>": { … } } ]    # a bundle, run in order
+[ { "<route>": { … } }, { "<route>": { … } } ]    # a bundle
 ```
 
 Single asset (an MCP call here, minimal — only the fields you want, the rest default):
@@ -60,9 +58,8 @@ Bundle (ordered; a later step reads an earlier step's output by relative path):
 
 ## Writing a blueprint
 
-The blueprint is written after a successful generation, and input images are copied into the
-folder, per SKILL.md Asset Integrity. Reference each copied image by relative path, so the
-blueprint stays reproducible if the original later moves or is deleted.
+Reference each copied-in input image (SKILL.md Asset Integrity copies them into the folder)
+by relative path, so the blueprint still resolves if the original moves.
 
 ## Recreating from a blueprint
 
@@ -74,8 +71,7 @@ exists:
    that surface is unavailable, fall back MCP↔REST using SKILL.md's Intent Router pairing and
    adapt field names to the fallback schema (inspect it per Workflow step 5); if a recorded
    field has no counterpart there, prefer the recorded surface rather than dropping or guessing.
-3. Resolve image values (relative path from the blueprint's folder, absolute path, or
-   base64) to what the endpoint requires.
+3. Resolve each image value to what the endpoint requires.
 4. Apply the user's natural-language overrides to any value — e.g. keep the seed but change
    `description`, or use every value with a random seed. Overrides are temporary; never
    rewrite the source blueprint.
@@ -92,13 +88,11 @@ blueprint reproduces inputs, not exact art. Say so when reusing a seed.
 
 ## Sharing
 
-The single `*.blueprint.json` file is the shareable unit; most have no image, so send the one
-file. With an image, send the JSON and the image together — the relative path resolves when
-they sit side by side. A blueprint carrying an absolute image path is machine-local — copy
-the image in and switch to a relative path before sharing. For a self-contained single file
-on explicit request, embed the image
-as base64; never do this automatically, because every read of a base64 blueprint pays the
-image's full token cost. Zip is optional, only for tidy multi-image bundles.
+The `*.blueprint.json` file is the shareable unit — with no image, send just the file. With
+images, send the JSON and images side by side so relative paths resolve; an absolute path is
+machine-local, so copy the image in and switch to relative before sharing. Embed an image as
+base64 only on explicit request, never automatically — every read of a base64 blueprint pays
+the image's full token cost. Zip is optional, for tidy multi-image bundles.
 
 ## Presets
 
