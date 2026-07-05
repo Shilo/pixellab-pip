@@ -37,7 +37,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab MCP Docs vs Pip Skill (Session Context)](tools/pixellab-mcp-docs-vs-pip-skill.md) - decision guide for choosing session context: the official mcp/docs link vs installing the Agent Skill.
 - [PixelLab Aseprite Extension Coverage Audit](tools/aseprite-extension-coverage-audit.md) - comparison of official Aseprite editor workflows with Pip's MCP/REST/editor routing.
 - [Aseprite CLI Integration Testing](tools/aseprite-cli-integration-testing.md) - maintainer QA policy for local Aseprite CLI workflow tests.
-- [PixelLab AI Skill Comparison](tools/pixellab-ai-skill-comparison.md) - feature comparison between Pip and the unofficial PixelLab AI Skill.
+- [PixelLab AI Skill vs Pip Skill](tools/pixellab-ai-skill-vs-pip-skill.md) - feature comparison between Pip and the unofficial PixelLab AI Skill.
 
 ## Official PixelLab
 

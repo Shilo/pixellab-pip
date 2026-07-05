@@ -1,0 +1,226 @@
+# PixelLab AI Skill vs Pip Skill
+
+Last reviewed: 2026-07-04, against PixelLab AI Skill v1.5.5 (published 2026-06-25, still the latest ClawHub release) and the current PixelLab Pip repository.
+
+This compares PixelLab Pip with the unofficial [PixelLab AI Skill](https://clawhub.ai/uncmatteth/skills/pixellab-ai) by uncmatteth on ClawHub. The goal is to understand adjacent tooling and find real feature gaps, without copying its implementation or ranking the projects.
+
+Sources reviewed:
+
+- [ClawHub PixelLab AI Skill page](https://clawhub.ai/uncmatteth/skills/pixellab-ai) and [package](https://clawhub.ai/api/v1/packages/pixellab-ai) / [version](https://clawhub.ai/api/v1/packages/pixellab-ai/versions) metadata.
+- A full download of the v1.5.5 package (all 60 files), unpacked for side-by-side reference at the sibling folder `pixellab-ai-skill/` next to this repository (not part of this repo).
+- Live checks of `https://api.pixellab.ai/v2/openapi.json` (68 paths) and `https://api.pixellab.ai/v1/openapi.json` (8 paths) on 2026-07-04.
+- The full current Pip repository: `skills/pixellab-pip/SKILL.md`, all 22 runtime references, bundled `assets/` helpers, `dev-tools/`, `tests/`, and `docs/`.
+
+## Summary
+
+PixelLab AI Skill is a production-pipeline skill: it bundles Python helper scripts, recipe JSON, dry-run manifests, budget/balance preflights, contact sheets, candidate approval folders, and sprite validation commands so an agent can plan and run multi-asset PixelLab packs through REST.
+
+PixelLab Pip is an agent-agnostic routing and execution contract: it teaches an agent to pick the right PixelLab surface (hosted MCP, REST v2, website/editor, Aseprite, Pixelorama, legacy v1), prepare prompts and image roles correctly, control cost, respect auth and integrity boundaries, and report honestly — using whatever tools the host agent already has.
+
+Use PixelLab AI Skill when you want its packaged recipe/manifest/approval pipeline (see [When To Use PixelLab AI Skill Instead](#when-to-use-pixellab-ai-skill-instead)). Use Pip when you want broad-surface route selection, deeper per-asset operational knowledge, and portable behavior across agent apps.
+
+## Feature Inventory
+
+Every observable feature of either project, grouped by area. Categories and rows are ordered by importance to a user choosing between the projects.
+
+Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-shaped equivalent · ❌ absent.
+
+### PixelLab Surface Coverage
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| REST v2 endpoint routing | ✅ — 63-path coverage matrix (refreshed 2026-06-21) plus routing rules | ✅ — intent router plus per-asset references |
+| Hosted MCP tools | 🟡 — optional path naming seven tools; REST helper preferred for bulk | ✅ — MCP-first for managed assets, prefix/suffix tool matching, no-silent-fallback rules |
+| Newer v2 routes: `create-ui-asset`, `generate-font-pro`, `portrait-character-pro` | ❌ — absent from its matrix and routing (they post-date its refresh) | ✅ — routed with MCP equivalents (`create_ui_asset`, `create_font`, `create_portrait_character`) |
+| Website/editor (Pixelorama) assistance with permission boundaries | ❌ | ✅ |
+| Aseprite plugin boundary, CLI/Lua workspace integration | ❌ | ✅ — `references/aseprite-cli.md`, `references/aseprite-mcp.md` |
+| Editor-only utilities mapping (Canny/Pose/Depth, reduce colors, unzoom, pixel correction, reshape, Try on) | ❌ | ✅ — `references/editor-only-utilities.md` |
+| Undocumented/internal endpoint prohibition | 🟡 — "do not invent an API path if the route is not present in current docs" | ✅ — named prohibitions: website root routes, Aseprite extension internals, session tokens |
+| Account asset management (list/get/tags/ZIP) | ✅ — DELETE excluded by policy | ✅ — delete helpers allowed behind approval gates |
+| MCP platform tools (projects, sandbox, chat, deployed agents, help/feedback) | ❌ | ✅ — `references/mcp-platform-tools.md` with approval boundaries |
+| `ui-assets` list/get/delete management routes | ❌ | 🟡 — create side routed; management via matching-getter guidance rather than named routes |
+| Legacy v1 boundary (legacy-only use) | ✅ | ✅ |
+| Balance check | ✅ | ✅ |
+
+### Execution And Production Tooling
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Bundled REST client (submit, bounded retries, polling, downloads, base64 decode, size/alpha checks) | ✅ — `scripts/pixellab_client.py` | ❌ — the host agent's own tools make calls per route guidance |
+| Manifest system (plan, lint, repair placeholders, budget, run, resume, retry manifest, skip-existing) | ✅ — `scripts/pixellab_workflow.py` | ❌ — one-candidate-first contract plus per-call approval |
+| Per-route cost knowledge | 🟡 — coarse local budget units | ✅ — documented generation costs per route family, checked 2026-07-04 (`references/cost-routing.md`) |
+| Cheap-route selection and paid-retry gating | ❌ | ✅ — cost-sensitive intent changes routes and requires per-attempt approval |
+| Balance preflight | ✅ — dedicated command | ✅ — balance snapshot before nontrivial paid calls, delta reporting |
+| Async job lifecycle detail (423/404 early lookups, review state, expiring URLs, 8-hour map-object expiry, backoff) | 🟡 — `--poll`, timeout files, resume | ✅ — `references/job-lifecycle.md` |
+| Resume pending jobs without resubmitting paid work | ✅ — `poll-result-file`, saved job IDs | ✅ — keep IDs, poll the matching getter, never resubmit |
+| Bundled pack recipes (platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) | ✅ | ❌ |
+| Contact sheets, galleries, candidate/approved folder promotion | ✅ | ❌ — candidates reported for user selection; local assembly limited to previews and labeled inspection aids |
+| HTTP error-code guidance | ✅ — 401/402/422/429/529/5xx | ✅ — 400/401/402/403/409/422/423/429/529 |
+| Worker-subagent workflow for live calls | ✅ — subagent briefs and context-isolation rules | ❌ — deliberately portable to agents without delegation |
+| Runtime package self-check (`doctor`) | ✅ | ❌ — repo-side QA/CI instead (`dev-tools/qa.py`, pytest, GitHub Actions) |
+| JSONL progress/event logs | ✅ | ❌ |
+
+### Prompting And Input Handling
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Prompt preparation from rough ideas | ✅ — plain-English visual-brief gate plus labeled prompt blocks | ✅ — Text Preparation contract: opt-out enhancement, visual-content-only prompts, no structured-parameter repetition |
+| Consistency gate before spending credits | ✅ — visual brief, seed candidates, approved anchor before bulk | ✅ — identity/style/palette/view/reference anchor summary, at most three blocking questions, one candidate first |
+| Image input role classification | 🟡 — general init/reference/style guidance | ✅ — endpoint-specific goal router across 13 roles (`references/image-input-roles.md`) |
+| Enhance endpoints and inline `enhance_prompt` | 🟡 — routes the three enhance endpoints | ✅ — inline-flag constraints per route, ~0.05-generation cost, one-enhancement-path-per-call rule |
+| Localization for non-English or mixed-language requests | ❌ | ✅ — `references/localization.md` |
+| Preset/template/skeleton animation catalog (template IDs, species families, view/direction traps) | ❌ — routes to endpoints only | ✅ — `references/preset-skeleton-template-animations.md` |
+| Tileset depth (MCP field schemas, human-label-to-field mapping, transition sizing, reference-image controls, strict 1-bit workflows, dual-grid sheet assembly order) | 🟡 — tileset prompt terms and size notes | ✅ — `references/tilesets.md` |
+| Icon and icon-sheet engineering (validated prompts, cell math, background defaults, failure anchors) | ❌ | ✅ — `references/icons.md` |
+| Idle-loop and near-identical `last_frame` artifact risk | ❌ | ✅ — `references/animation.md` |
+| Exact-grid/packed-sheet recipes for below-32px cells | ❌ | ✅ — `references/create-image-pro.md` |
+| Prompt character limits (OpenAPI-verified) | ❌ | ✅ — `references/prompt-limits.md` |
+| Community-derived workflow recipes (Discord/YouTube tuning values, e.g. style guidance and init-strength ranges) | ✅ — three community references plus two video indexes | ❌ — official docs and locally verified research only, by policy |
+| Endpoint example payloads | ✅ — 38 JSON files | ❌ — refreshes OpenAPI when exact schemas matter |
+| Seed-reuse technique guidance (reuse for near-variants, vary for fresh candidates, keep seed across frame batches) | ✅ | 🟡 — seed recording and vary-across-retries rules; no near-variant reuse tip |
+
+### Layered Sprites And Paperdolling
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Modular outfit pipeline (transfer-outfit, then edit-animation body removal) | ✅ — recipe plus reference workflow | ✅ — documented as composite routes with drift and labeling warnings |
+| Isolated layer extraction with acceptance checklist | ❌ — validates layer files, does not produce them | ✅ — diff-based extraction, editor changes-only mode, per-layer verification (`references/paperdolling.md`) |
+| Frame-grid contract (canvas, frame count/order, pivot, transparency) | ✅ | ✅ — paperdoll preservation list |
+| Honest layer-vs-composite labeling (no semantic layer extraction claimed) | 🟡 | ✅ |
+| Sprite layer validation tooling | ✅ — `validate-sprites` command (layers, frame glob, expected size) | ❌ — manual checklist |
+
+### Output Handling And Reporting
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Usage reporting shape | ✅ — endpoint, result files, downloads, costs, errors | ✅ — files, route, exact final inputs, seeds, cost, verification checklist (`references/usage-reporting.md`) |
+| Verification-before-final contract | ✅ — inspect/validate commands before calling assets game-ready | ✅ — per-route verification sections; failed verification reported plainly |
+| Asset integrity rules (all pixels from PixelLab or the user, no local drawing, no baked backgrounds, no silent repair) | ❌ | ✅ — SKILL.md Asset Integrity |
+| Background-removal recovery after failed `no_background` | 🟡 — routes to `/remove-background` | ✅ — bundled conservative helper plus PixelLab fallback contract (`assets/background_removal.py`, `references/background-removal.md`) |
+| Seed/ID recording for reproduction | ✅ — recipe seed offsets, saved job IDs | ✅ — per-call seed rules and ID capture in manifests |
+| GIF/spritesheet assembly with disposal-method verification | ❌ | ✅ — `references/local-asset-assembly.md` |
+| Standard output folders | ✅ — payloads/results/seed-candidates/candidates/approved/downloads/reports/logs | ✅ — single `pixellab-pip-generations/` tree |
+| Completion sound toggle | ❌ | ✅ — `references/bark.md`, `assets/bark.py` |
+
+### Credentials And Security
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Named secret env var | ✅ — `PIXELLAB_API_KEY` | ✅ — `PIXELLAB_SECRET` |
+| Never print/commit/paste-into-chat token rules | ✅ | ✅ |
+| Guided setup wizard (mode choice, token-free previews, write approval, no-credit verification) | ❌ — install instructions only | ✅ — `references/setup.md` |
+| Browser/session-token prohibition | ❌ — not addressed | ✅ |
+| Broad secret-scan prohibition | 🟡 — helper does not auto-discover secret files | ✅ — explicit no-scan rules for home/config/history/keychain/project trees |
+| MCP auth reuse guidance | 🟡 — Codex `--bearer-token-env-var` example | ✅ — `references/credentials.md` lookup order and literal-token boundaries |
+| `.env` file loading | ✅ — explicit `--env-file` flag only (auto-discovery removed in v1.5.4) | 🟡 — discouraged default; allowed only with a named loader and explicit user approval |
+| Custom API base | ✅ — `--allow-custom-base` for trusted test endpoints | ❌ — official base only, by policy |
+
+### Trust And Disclosure
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Third-party registry security scan with public result | ✅ — ClawHub/SkillSpector "Security audit: Pass" badge on the skill page | 🟡 — CI SkillSpector audit published to public Code Scanning (weekly re-run, risk-score gate) plus Sigstore build-provenance attestations on release zips; no registry-side third-party audit yet |
+| Declared permissions manifest (env vars, network hosts, filesystem scope, commands) in SKILL.md frontmatter | ✅ | ❌ — frontmatter carries name and description only |
+| Machine-readable `requires_api_key` metadata | ✅ | ❌ — stated in prose (README, setup reference) |
+| Skill card (use case, known risks and mitigations, license, output types) | ✅ — `skill-card.md` | ❌ — equivalent facts spread across README and docs |
+| Security-scan disclosure section (explains expected scanner findings) | ✅ | ❌ — not yet applicable; no bundled network helper |
+| Permissive license | ✅ — MIT-0 | ✅ — MIT |
+
+### Distribution And Invocation
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Multi-agent install manifests (Claude Code, Codex, Cursor, Copilot, VS Code, Gemini) | 🟡 — Codex/OpenClaw focus plus generic copy-paste instructions | ✅ — per-app plugin/marketplace manifests plus manual paths |
+| ClawHub-packaged install (`npx clawhub install`) | ✅ | ❌ — agent marketplaces/plugins or manual skill copy |
+| Copy-paste agent install prompt | ✅ — "Easy Install" block | ✅ — README Agent-Assisted Install |
+| Release artifact (skill zip) | ✅ — ClawHub package | ✅ — GitHub release zip via CI |
+| OpenClaw skill metadata and config examples | ✅ | ❌ |
+| Explicit invocation gating (PixelLab named or clearly intended) | ✅ | ✅ |
+| Post-trigger commands (`setup`, `bark`) | ❌ | ✅ |
+
+### Documentation And Maintenance
+
+| Feature | PixelLab AI Skill | PixelLab Pip |
+|---|---|---|
+| Official docs refresh path | 🟡 — `refresh-api-metadata` command, `/llms.txt` | ✅ — annotated URL table, refresh triggers, authoritative MCP inventory (`references/official-pixellab-documentation.md`) |
+| Model/mode label semantics (Pro, v3, Pixen/PixFlux/BitForge, size labels) | ❌ | ✅ — SKILL.md Model And Mode Terms |
+| SDK-parity warnings | ❌ | ✅ |
+| Repo QA/CI (link checks, manifest sync, tests) | 🟡 — runtime `doctor` self-check | ✅ — CI-enforced `dev-tools/qa.py` and pytest |
+| Official YouTube corpus index (156 items with transcript status) | ✅ | ❌ |
+
+## When To Use PixelLab AI Skill Instead
+
+The complete list of features PixelLab AI Skill has that Pip does not, in one place:
+
+1. Bundled REST client script — submit, bounded retries, polling, downloads, base64 decoding, size/alpha validation flags, timeout resume (`pixellab_client.py`).
+2. Manifest pipeline commands — `plan`, `lint-manifest`, `repair-placeholders`, `budget`, `run --yes` with skip-existing/resume, `retry-manifest`, `cost-summary` (`pixellab_workflow.py`).
+3. Five bundled pack recipes (NES platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) with templated payloads, dependencies, and seed offsets.
+4. Candidate review tooling — numbered `contact-sheet` PNGs with index JSON, `gallery`, `approve-candidate` promotion into `approved/`, seed-candidate naming convention.
+5. Asset inspection commands — `inspect-assets`, `validate-sprites` (layer set, frame glob, expected size).
+6. `balance-preflight` and `refresh-api-metadata` as ready-made commands.
+7. Worker-subagent briefs (`subagent-brief`) and context-isolation rules for live runs.
+8. JSONL progress/event logs and a runtime `doctor` package self-check.
+9. ClawHub distribution: one-command install, registry versioning, and the ClawHub/SkillSpector security-scan badge.
+10. OpenClaw skill metadata and config examples.
+11. Declared permissions frontmatter and machine-readable `requires_api_key` metadata.
+12. `skill-card.md` risk/mitigation disclosure and a security-scan-notes section.
+13. Distilled community knowledge — Discord workflow/tutorial references and two official-YouTube indexes with tuning starting points.
+14. 38 offline endpoint example payload JSON files.
+15. Explicit `--env-file` loading and a `--allow-custom-base` escape hatch for test endpoints.
+
+Choose PixelLab AI Skill over Pip when you want that shape of work: an OpenClaw/ClawHub environment, recipe-driven bulk pack production through its bundled scripts without MCP, a folder-contract approval pipeline, or community-lore tuning values as starting points. Choose Pip when you want the widest PixelLab surface coverage (MCP, fonts, portraits, structured UI, website/editor, Aseprite), per-asset operational depth, cost control, localization, and portable behavior in any skill-capable agent.
+
+## Coverage Freshness
+
+PixelLab AI Skill's coverage matrix says v2 exposes 63 paths (refreshed 2026-06-21). The live OpenAPI on 2026-07-04 exposes 68. The five additions — `create-ui-asset`, `generate-font-pro`, `portrait-character-pro`, `ui-assets`, and `ui-assets/{ui_asset_id}` — are absent from its matrix and routing rules. Pip routes structured UI assets, fonts, and portrait-character conversion on both REST and MCP; UI-asset list/get/delete management is handled through Pip's matching-getter guidance rather than named routes. Its v1 count (8 legacy paths) still matches.
+
+## Secret Setup Tradeoff
+
+PixelLab AI Skill is more operational out of the box because its helper scripts perform live REST calls once `PIXELLAB_API_KEY` is set. Since v1.5.4 the helper no longer auto-discovers `.env.local`; it reads the key from the process environment and loads a file only when the user passes an explicit `--env-file PATH`. It also allows a non-default API base behind an explicit `--allow-custom-base` flag.
+
+Pip intentionally ships no REST helper and no `.env` loading path. Its setup flow uses `PIXELLAB_SECRET` through app secret settings, a secret store, or user-scoped environment configuration, previews every write token-free, and inspects `.env*` files only when the user names an exact file and approves inspection. This is less automatic, but safer in mixed projects where `.env.local` may hold unrelated private secrets, and it avoids teaching agents that a custom API base is ever a normal option.
+
+## PixelLab AI Skill Package Inventory
+
+The reviewed v1.5.5 package contains 60 files:
+
+- `_meta.json`, `SKILL.md`, `skill-card.md`, `agents/openai.yaml`, and two OpenClaw config examples.
+- Two Python helper scripts: `scripts/pixellab_client.py` (884 lines) and `scripts/pixellab_workflow.py` (2121 lines).
+- Five recipe JSON files.
+- Thirty-eight endpoint example JSON files.
+- Nine reference Markdown files: `api-coverage-matrix.md`, `endpoint-mapping.md`, `prompt-cheatsheet.md`, `sprite-animation-layering.md`, `youtube-workflow-playbook.md`, `community-discord-workflows.md`, `community-discord-tutorials.md`, `install-and-secrets.md`, `official-youtube-index.md`.
+
+Notable `pixellab_workflow.py` commands: `list-recipes`, `plan`, `run`, `budget`, `retry-manifest`, `repair-placeholders`, `gallery`, `inspect-assets`, `validate-sprites`, `lint-manifest`, `contact-sheet`, `cost-summary`, `approve-candidate`, `balance-preflight`, `refresh-api-metadata`, `doctor`, and `subagent-brief`.
+
+## Useful Ideas Already Covered In Pip
+
+- Opt-out prompt preparation: SKILL.md Text Preparation.
+- English PixelLab-facing parameters with user-language replies: `references/localization.md`.
+- Consistency anchors before spending credits: SKILL.md workflow step 6.
+- Route/parameter/ID/output/cost reporting after live calls: `references/usage-reporting.md`.
+- MCP treated as configured-or-not, never pretended: SKILL.md workflow step 4.
+- Frame-grid preservation and composite-vs-layer honesty: `references/paperdolling.md`, `references/animation.md`.
+- Balance preflight and job resume without paid resubmission: SKILL.md Auth And Execution, `references/job-lifecycle.md`.
+- Context hygiene for live runs (no raw base64/full JSON in chat): SKILL.md Auth And Execution.
+- Error-code guidance: `references/job-lifecycle.md`.
+
+## Gaps In Pip And Verdicts
+
+Every feature from [When To Use PixelLab AI Skill Instead](#when-to-use-pixellab-ai-skill-instead), with an adopt/defer/skip judgment under Pip's KISS/YAGNI rules:
+
+- **Adopt: batch plan preview.** The one genuinely transferable behavior from the manifest pipeline: before an approved multi-asset batch, present a short per-item plan (route plus cost category) and record it in the run manifest. Pip already asks before batches and records IDs/seeds; a written plan is one contract line, not tooling.
+- **Adopt: trust and disclosure metadata.** Partially done 2026-07-04: CI SkillSpector scanning with public Code Scanning results, release build-provenance attestations, optional VirusTotal release scanning, OpenSSF Scorecard, and a README Security section with expected-findings disclosure. Still open as cheap follow-ups: declared permissions frontmatter, machine-readable `requires_api_key`, and a skill-card-style risk/mitigation summary.
+- **Adopt (distribution decision): ClawHub publishing.** Widens install reach and is currently the only way to get ClawHub's independent security-scan badge. Requires maintaining a package variant; no runtime behavior change.
+- **Adopt (micro): seed-reuse-for-near-variants clause.** One sentence in the seed rules: reuse the recorded seed when the user wants a near-variant of an approved result; vary it for fresh candidates. Complements the existing vary-across-retries rule.
+- **Defer: sprite-layer validator tool.** The paperdolling checklist covers the same checks manually, and `AGENTS.md` already names "a dedicated local asset validator" as the trigger. Add it when layered-pack work recurs.
+- **Defer: community technique corpus.** Do not import unverified Discord/YouTube tuning values (standing policy). Individually promising techniques (held-equipment sketch-and-inpaint, non-human humanoid baseline, pose libraries) can be tested locally and promoted through `docs/pixellab/` findings, as the icon and tileset research was.
+- **Skip: bundled REST client, manifest runner, recipes, approval-folder pipeline.** A different product shape — a self-contained batch pipeline. Pip's contract is that the host agent's own tools execute the selected route; every target agent already has shell/HTTP tooling, and Pip's references carry the exact schemas. Revisit only if real use shows agents failing to execute routes without a helper.
+- **Skip: contact sheets and approved-folder promotion.** Pip already reports candidates for user selection, and SKILL.md's inspection-aid rule permits a clearly labeled review sheet assembled from PixelLab pixels when a host needs one.
+- **Skip: worker-subagent briefs.** Pip must stay useful in agents without delegation; hosts with subagents can use them without a Pip contract.
+- **Skip: runtime `doctor`, JSONL event logs, offline payload examples, `refresh-api-metadata` command.** Pip's QA runs repo-side in CI, reporting is per-run in chat/manifests, and OpenAPI is refreshed on demand — runtime self-diagnostics serve a bundled-script pipeline Pip does not have.
+- **Reject: custom API base flag.** Official base only; a base override is an attack surface with no Pip use case.
+- **Reject: `.env` loader.** Pip's credential policy deliberately keeps secrets in app settings/secret stores; a bundled loader would legitimize the riskier pattern.
+
+## Runtime Reference Decision
+
+No new `skills/pixellab-pip/references/*.md` file is needed to match PixelLab AI Skill's reference count. Pip's 22 runtime references already cover its scope more deeply in every shared area (routing, prompting, cost, jobs, layering, reporting, localization, credentials). Add a new runtime reference or bundled tool only when Pip gains a repeated workflow that cannot fit the existing files — the standing examples are a real manifest runner, a validated showcase recipe format, or a dedicated local asset validator.
