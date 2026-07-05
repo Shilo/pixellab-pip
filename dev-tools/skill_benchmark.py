@@ -619,7 +619,7 @@ def write_markdown(out_dir: Path, static: dict, summary: dict, variants: list[st
                     values = [per_variant.get(v, {}).get(metric) for v in variants]
                     if all(value is None for value in values):
                         continue
-                    cells = " | ".join("" if value is None else str(value) for value in values)
+                    cells = " | ".join("" if value is None else (_fmt_pct(value) if metric == "checks_rate" else str(value)) for value in values)
                     lines.append(f"| {scenario_id} | {agent} | {metric.replace('median_', '')} | {cells} | {delta(values[0], values[-1])} |")
     if errors:
         lines += ["", "## Errors", ""] + [f"- `{e['cell']}`: {e['error']}" for e in errors]
@@ -635,8 +635,8 @@ def _fmt_int(x) -> str:
     return "" if not isinstance(x, (int, float)) else f"{int(round(x)):,}"
 
 
-def _fmt_rate(x) -> str:
-    return "" if not isinstance(x, (int, float)) else f"{x:g}"
+def _fmt_pct(x) -> str:  # checks_rate is a 0..1 fraction of checks passed; show it as a human percent
+    return "" if not isinstance(x, (int, float)) else f"{round(x * 100)}%"
 
 
 def render_report_block(static: dict, summary: dict, variants: list[str], agents: list[str], reps: int, stamp: str) -> str:
@@ -669,7 +669,7 @@ def render_report_block(static: dict, summary: dict, variants: list[str], agents
             for agent, per_variant in per_agent.items():
                 cr = [per_variant.get(v, {}).get("checks_rate") for v in variants]
                 inp = [per_variant.get(v, {}).get("median_total_input_tokens") for v in variants]
-                lines.append(f"| {sid} | {agent} | routing correct | " + " | ".join(_fmt_rate(x) for x in cr) + " |")
+                lines.append(f"| {sid} | {agent} | routing correct | " + " | ".join(_fmt_pct(x) for x in cr) + " |")
                 lines.append(f"| {sid} | {agent} | input tokens | " + " | ".join(_fmt_int(x) for x in inp) + " |")
     return "\n".join(lines)
 
