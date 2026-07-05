@@ -20,6 +20,7 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Usage](#usage)
 - [Setup MCP / API](#setup-mcp--api)
 - [Security](#security)
+- [Benchmark](#benchmark)
 - [Showcase ↗](docs/showcase/README.md)
 - [Developer ↗](docs/developer.md)
 - [Resources ↗](docs/resources.md)
@@ -272,3 +273,15 @@ Independent, verifiable checks — not self-attestation:
 What the skill uses: your PixelLab token — only as an auth header for PixelLab requests. Your MCP client passes it (or REST fallback references `PIXELLAB_SECRET` by name); Pip is designed never to read the token's value into the conversation, print it, log it, or store it. The skill also uses the `python` command for two small bundled helpers (completion sound and a background-removal check, which make no network calls of their own) and writes only to your project's `pixellab-pip-generations/` output folder and the skill's own config file. It never scans your other secrets, `.env` files, shell history, or browser sessions — and it works for guidance, setup, and routing with no token at all.
 
 Expected scan disclosures: Pip legitimately documents PixelLab bearer-token handling, official `api.pixellab.ai` documentation URLs, and a local sound-playback helper, so instruction scanners report those as informational findings — that is the disclosed design, reviewable line-by-line on the Code Scanning tab. No scanner can prove an instruction file safe; these are layered, independently verifiable checks, not a guarantee.
+
+## Benchmark
+
+Reproducible measurement of what the skill costs an agent and how well it routes, versus the alternatives. Produced by [`dev-tools/skill_benchmark.py`](dev-tools/skill_benchmark.py) — it measures the agent session (context tokens, output, cost, routing correctness), never PixelLab credits.
+
+| Method | Correct-routing rate | Typical session context |
+|---|---|---|
+| **PixelLab Pip skill** | **100%** | ~13.9k tokens |
+| Official `mcp/docs` injected | ~79% | ~15.3k tokens |
+| No skill (agent knowledge only) | ~31% | ~3.0k tokens |
+
+The skill routed every sampled task correctly, at about the same session context as injecting PixelLab's official docs and cheaper than its own pre-refactor version. Routing is scored by deterministic checks, not a model. Full tables, methodology, and how to reproduce it yourself: [Benchmark ↗](docs/pixellab-pip-benchmark.md).

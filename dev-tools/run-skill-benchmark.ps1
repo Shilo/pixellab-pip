@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("static", "dry-claude", "dry-all", "live-balance", "live-image", "list", "cancel")]
+    [ValidateSet("full", "static", "dry-claude", "dry-all", "live-balance", "live-image", "list", "cancel")]
     [string]$Preset,
     [int]$Reps = 3
 )
@@ -21,6 +21,7 @@ $interactive = -not ([Console]::IsInputRedirected -or [Console]::IsOutputRedirec
 
 # preset -> { Args, NeedCli (agent exes that must be on PATH), NeedSecret, Paid }
 $presets = [ordered]@{
+    "full"         = @{ Label = "full        - COMPLETE suite: all agents, all 4 variants, live + PAID ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,vanilla,mcp-docs", "--live", "--allow-paid", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $true; Paid = $true }
     "static"       = @{ Label = "static      - free context-size comparison, no CLI calls, no secret"; Args = @("--static"); NeedCli = @(); NeedSecret = $false; Paid = $false }
     "dry-claude"   = @{ Label = "dry-claude  - claude only, dry scenarios ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude"); NeedSecret = $false; Paid = $false }
     "dry-all"      = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro, dry scenarios ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $false; Paid = $false }
@@ -65,6 +66,10 @@ if ($config.NeedSecret -and [string]::IsNullOrWhiteSpace($env:PIXELLAB_SECRET)) 
     exit 1
 }
 if ($config.Paid) {
+    if (-not $interactive) {
+        Write-Error "Refusing to run a paid preset non-interactively (cannot confirm credit spend). Run it in an interactive terminal."
+        exit 1
+    }
     $confirm = Read-Host "This preset SPENDS PixelLab credits. Type YES to continue"
     if ($confirm -ne "YES") { Write-Host "Cancelled."; exit 0 }
 }
