@@ -268,4 +268,6 @@ Independent, verifiable checks — not self-attestation:
 - **Malware reputation**: when configured, releases also get a public [VirusTotal](https://www.virustotal.com/) permalink appended to the release notes.
 - **Repo hygiene**: the [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) badge above tracks branch protection, pinned dependencies, and workflow permissions.
 
+What the skill can access: your PixelLab secret (used only as a bearer token for PixelLab requests — never printed, committed, or shown in chat), the `python` command for small bundled helpers (completion sound and a background-removal check, which make no network calls of their own), and your project's `pixellab-pip-generations/` output folder plus the skill's own config file. It never scans your other secrets, `.env` files, shell history, or browser sessions.
+
 Expected scan disclosures: Pip legitimately documents PixelLab bearer-token handling, official `api.pixellab.ai` documentation URLs, and a local sound-playback helper, so instruction scanners report those as informational findings — that is the disclosed design, reviewable line-by-line on the Code Scanning tab. No scanner can prove an instruction file safe; these are layered, independently verifiable checks, not a guarantee.

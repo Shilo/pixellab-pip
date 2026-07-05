@@ -1,6 +1,15 @@
 ---
 name: pixellab-pip
 description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation, editing, animation, skeleton/template/preset animations, docs/troubleshooting, bark completion sounds, and explicit PixelLab cost/budget/credit questions across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger only when PixelLab context is present, including PixelLab setup, MCP/API setup, PIXELLAB_SECRET, bearer-token auth, PixelLab sprites, sprite sheets, characters, portrait characters, fonts, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, skeletons, template animations, preset animations, endpoint choice, SDK integration, troubleshooting, or PixelLab credits/cost/budget. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
+license: MIT
+metadata:
+  requires_api_key: true
+  api_key_env: PIXELLAB_SECRET
+permissions:
+  env:
+    - PIXELLAB_SECRET
+  commands:
+    - python
 ---
 
 # PixelLab Pip
@@ -179,7 +188,7 @@ If no bearer token is configured, stop before generation and offer the setup wiz
 
 For questions, answer with: recommended surface/endpoint, why it fits, warnings for unsupported alternatives, and a verification note only when the answer depends on an unverified current fact.
 
-For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Ask before ambiguous credit-spending batches or destructive deletes. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
+For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Before a multi-asset batch, list each planned item with its route and cost category so the user approves the full scope and rough total first. Ask before ambiguous credit-spending batches or destructive deletes. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
 
 Capture a balance snapshot before a nontrivial paid call when available. After live PixelLab work, read `references/usage-reporting.md` and use its report layout; verify the output against the user's explicit constraints before calling it final, and say plainly when verification failed instead of silently salvaging. Do not paste secrets, raw base64, full response JSON, or internal IDs unless needed for pending status, follow-up, or debugging. Between request and final report, keep progress messages to blockers, necessary questions, or meaningful completed steps — no play-by-play narration.
 
