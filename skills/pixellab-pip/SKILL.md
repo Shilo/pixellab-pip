@@ -155,7 +155,7 @@ Use one enhancement path per call. Inline `enhance_prompt` flags exist on `creat
 - No local code or editor automation to create or alter requested visual content: no PIL/Pillow drawing, canvas/SVG drawing, ImageMagick draw, Aseprite Lua drawing, ASCII-to-image, or procedural pixel placement. Local code may copy, mask, composite, and verify pixels that came from PixelLab or the user.
 - No undocumented internal endpoints used by first-party surfaces: root website routes, unversioned `https://api.pixellab.ai/` paths like `/tilesets/create`, or Aseprite extension operation URLs. Treat them as unsupported unless they appear in public REST v2 docs/OpenAPI or MCP docs.
 - Never ask users to paste the PixelLab bearer token into chat; direct them to the setup wizard, local `PIXELLAB_SECRET`, or app secret settings.
-- Website session tokens are not API bearer tokens; never use one for the other.
+- Never scrape browser session tokens or cookies. Website session tokens are not API bearer tokens; never use one for the other.
 - Do not confuse website Create Tileset Pro with public `create_tiles_pro` / `create-tiles-pro`; different flows.
 - Do not default to v1 or old SDK README examples for new work, and do not assume an installed SDK covers every current v2 endpoint — confirm the installed package or call REST v2 directly.
 

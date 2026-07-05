@@ -51,7 +51,7 @@ For cost, prefer per-call `usage` totals for the whole flow. If only balance is 
 When a manifest is written for a live generation flow, record per call or per result item (not just top-level):
 
 - `job_id` / `background_job_id`, `asset_id`, and route-specific result/child IDs when present — enough to resume, inspect, or reproduce later.
-- `seed`: the exact integer sent, or the resolved seed PixelLab returned. PixelLab does not reliably expose seeds later, so when the endpoint has a `seed` input and the user gave none, choose a non-zero integer before the first paid call and send it; note the seed's origin (user, agent, PixelLab-returned, not supported, or not exposed). If a random/omitted-seed run later exposes a resolved seed in the job/status response, update the manifest with it.
+- `seed`: the exact integer sent, or the resolved seed PixelLab returned. PixelLab does not reliably expose seeds later, so when the endpoint has a `seed` input and the user gave none, choose a non-zero integer before the first paid call and send it — unless the user explicitly wants PixelLab-random output or the endpoint only documents random behavior; then record that the seed was not exposed. Vary the seed across candidates/retries; a recorded seed enables reproduction, it does not mean reusing one seed everywhere. If a random/omitted-seed run later exposes a resolved seed in the job/status response, update the manifest with it.
 
 ## Pending Jobs
 
