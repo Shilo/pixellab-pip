@@ -6,8 +6,8 @@
 
 [![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
 [![Build provenance attested](https://img.shields.io/badge/build_provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations)
-[![ClawHub security audit](https://img.shields.io/badge/ClawHub-security_audit-2b7fff)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
-[![VirusTotal scan report](https://img.shields.io/badge/VirusTotal-scan_report-394eff?logo=virustotal&logoColor=white)](https://github.com/Shilo/pixellab-pip/releases/latest)
+[![VirusTotal](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F0.6.0&query=%24.version.security.scanners.vt.normalizedStatus&label=VirusTotal&color=2ea44f&logo=virustotal&logoColor=white&cacheSeconds=3600)](https://github.com/Shilo/pixellab-pip/releases/latest)
+[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F0.6.0&query=%24.version.security.status&label=ClawHub%20audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
 
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
 

@@ -172,6 +172,18 @@ jobs:
             updatedFiles.push(item.file);
           }
 
+          // Keep the live ClawHub/VirusTotal security badges pointed at the released version.
+          const readmePath = path.join(root, "README.md");
+          if (fs.existsSync(readmePath)) {
+            const readmeBefore = fs.readFileSync(readmePath, "utf8");
+            const needle = `skills%2F${skillName}%2Fversions%2F${oldVersion}`;
+            const readmeAfter = readmeBefore.split(needle).join(`skills%2F${skillName}%2Fversions%2F${newVersion}`);
+            if (readmeAfter !== readmeBefore) {
+              fs.writeFileSync(readmePath, readmeAfter);
+              updatedFiles.push("README.md");
+            }
+          }
+
           if (updatedFiles.length === 0) {
             throw new Error("No JSON version fields were updated.");
           }
