@@ -115,6 +115,19 @@ For prompt optimization, agents should inspect `sim-report.json` and the `compon
 
 The execution-oriented runbook for agents lives in [PixelLab MCP Tileset Simulator](../dev-tools/pixellab_mcp_tileset_sim.md).
 
+## Skill Token Benchmark
+
+Use [dev-tools/skill_benchmark.py](../dev-tools/skill_benchmark.py) to measure the skill's agent-side token/context cost and routing efficiency across skill versions and agent CLIs (`claude`, `codex`, `deepseek-v4-pro` via OpenCode). It compares git variants of `skills/pixellab-pip/` — by default the `pre-kiss-yagni-refactor` tag (commit `6fdae41`) against the working tree — by injecting each variant's SKILL.md into an isolated session, letting the agent progressively read `references/*.md` with a read-only tool, and capturing each CLI's native usage JSON (input/output/cache tokens, cost where exposed, turns, duration) plus deterministic routing-correctness regex checks. It measures the agent session only, never PixelLab credits.
+
+```powershell
+python dev-tools/skill_benchmark.py --list                 # scenarios
+python dev-tools/skill_benchmark.py --static               # free context-size comparison, no CLI calls
+python dev-tools/skill_benchmark.py --agents claude --reps 3
+python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --reps 4
+```
+
+Results land under `.local/bench/<stamp>/` (`SUMMARY.md`, `results.json`, `static.json`, per-cell responses); `--rescore <dir>` recomputes checks/summary offline. Workspaces are materialized outside the repo so CLAUDE.md/AGENTS.md cannot contaminate arms; reps interleave variants so provider caching hits both alike; medians are reported. Dry scenarios forbid network use and run with read-only tools. `--live` adds a free `GET /balance` scenario (requires `PIXELLAB_SECRET`); credit-spending scenarios additionally require `--allow-paid`.
+
 ## Tileset Research Notes
 
 Live PixelLab tileset experiments that are useful for future routing and simulator work should be saved under `pixellab-pip-generations/` with a short `REPORT.md`, exact requests, raw responses, PixelLab originals, assembled sheets, and any clearly labeled QA derivatives.

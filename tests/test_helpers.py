@@ -30,6 +30,10 @@ tileset_sim = load_module(
     "pixellab_mcp_tileset_sim",
     REPO_ROOT / "dev-tools/pixellab_mcp_tileset_sim.py",
 )
+skill_benchmark = load_module(
+    "skill_benchmark",
+    REPO_ROOT / "dev-tools/skill_benchmark.py",
+)
 
 
 class BackgroundRemovalTests(unittest.TestCase):
@@ -137,6 +141,130 @@ class HelperCliSmokeTests(unittest.TestCase):
         self.assertIn("usage:", output.lower())
         self.assertIn("create_topdown_tileset", output)
         self.assertIn("claude", output.lower())
+
+    def test_skill_benchmark_help(self) -> None:
+        output = self.run_help(REPO_ROOT / "dev-tools/skill_benchmark.py")
+        self.assertIn("usage:", output.lower())
+        self.assertIn("--static", output)
+        self.assertIn("--live", output)
+
+    def test_skill_benchmark_cells_run_in_workspace_with_valid_commands(self) -> None:
+        import argparse
+
+        scenario = skill_benchmark.SCENARIOS[0]  # route-hex-tiles; check expects create_tiles_pro
+        fake_stdout = {
+            "claude": json.dumps(
+                {
+                    "result": "Use create_tiles_pro.\nREFERENCES_READ: none",
+                    "usage": {
+                        "input_tokens": 100,
+                        "output_tokens": 10,
+                        "cache_read_input_tokens": 5,
+                        "cache_creation_input_tokens": 2,
+                    },
+                    "total_cost_usd": 0.01,
+                    "num_turns": 1,
+                    "modelUsage": {"claude-test": {}},
+                }
+            ),
+            "codex": "\n".join(
+                [
+                    json.dumps({"type": "item.completed", "item": {"type": "agent_message", "text": "create_tiles_pro"}}),
+                    json.dumps(
+                        {
+                            "type": "turn.completed",
+                            "usage": {
+                                "input_tokens": 100,
+                                "cached_input_tokens": 50,
+                                "output_tokens": 10,
+                                "reasoning_output_tokens": 0,
+                            },
+                        }
+                    ),
+                ]
+            ),
+            "deepseek-v4-pro": "\n".join(
+                [
+                    json.dumps({"type": "text", "part": {"text": "create_tiles_pro"}}),
+                    json.dumps(
+                        {
+                            "type": "step_finish",
+                            "part": {
+                                "type": "step-finish",
+                                "tokens": {"input": 100, "output": 10, "reasoning": 0, "cache": {"read": 1, "write": 2}},
+                                "cost": 0.001,
+                            },
+                        }
+                    ),
+                ]
+            ),
+        }
+        captured: dict[str, dict] = {}
+
+        def fake_run_cli(command, stdin_text, timeout, cell_dir, cwd):
+            agent = captured["current"]
+            captured[agent] = {"command": command, "cwd": Path(cwd)}
+            return 0, fake_stdout[agent], "", 7
+
+        args = argparse.Namespace(dry_run=False, timeout=5, model_claude=None, model_codex=None)
+        original_which = skill_benchmark.shutil.which
+        original_run_cli = skill_benchmark.run_cli
+        try:
+            skill_benchmark.shutil.which = lambda name: f"C:/fake/{name}.cmd"
+            skill_benchmark.run_cli = fake_run_cli
+            with tempfile.TemporaryDirectory() as tmp:
+                skill_dir = Path(tmp) / "skill"
+                skill_dir.mkdir()
+                (skill_dir / "SKILL.md").write_text("skill body", encoding="utf-8")
+                cells_dir = Path(tmp) / "cells"
+                cells: dict[str, dict] = {}
+                for agent in ("claude", "codex", "deepseek-v4-pro"):
+                    captured["current"] = agent
+                    cells[agent] = skill_benchmark.run_cell(agent, scenario, "worktree", skill_dir, 1, args, cells_dir)
+                    self.assertNotIn("error", cells[agent], msg=str(cells[agent]))
+                    self.assertEqual(cells[agent]["checks_passed"], cells[agent]["checks_total"])
+                # regression: codex 0.142.5 rejects --ask-for-approval
+                self.assertNotIn("--ask-for-approval", captured["codex"]["command"])
+                # regression: every agent must run inside the variant workspace to read references/*.md
+                for agent in ("claude", "codex", "deepseek-v4-pro"):
+                    self.assertEqual(captured[agent]["cwd"], skill_dir)
+                # regression: opencode per-cell files must not leak into later cells
+                self.assertFalse((skill_dir / "PROMPT.txt").exists())
+                self.assertFalse((skill_dir / "opencode.json").exists())
+                # token accounting: claude adds cache tokens; codex cached is a subset of input_tokens
+                self.assertEqual(cells["claude"]["total_input_tokens"], 107)
+                self.assertEqual(cells["codex"]["total_input_tokens"], 100)
+                self.assertEqual(cells["deepseek-v4-pro"]["total_input_tokens"], 103)
+                self.assertTrue((cells_dir / "route-hex-tiles__claude__worktree__r1" / "response.txt").is_file())
+        finally:
+            skill_benchmark.shutil.which = original_which
+            skill_benchmark.run_cli = original_run_cli
+
+    def test_skill_benchmark_static_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as out_base:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(REPO_ROOT / "dev-tools/skill_benchmark.py"),
+                    "--static",
+                    "--variants",
+                    "worktree",
+                    "--out",
+                    out_base,
+                ],
+                cwd=REPO_ROOT,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=True,
+            )
+            run_dirs = list(Path(out_base).iterdir())
+            self.assertEqual(len(run_dirs), 1)
+            summary = (run_dirs[0] / "SUMMARY.md").read_text(encoding="utf-8")
+            self.assertIn("SKILL.md (always loaded)", summary)
+            static = json.loads((run_dirs[0] / "static.json").read_text(encoding="utf-8"))
+            self.assertGreater(static["variants"]["worktree"]["skill_md_est_tokens"], 0)
+            self.assertIn("Results:", completed.stdout)
 
     def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
         captured: dict[str, object] = {}
