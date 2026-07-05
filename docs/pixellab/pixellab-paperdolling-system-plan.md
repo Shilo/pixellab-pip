@@ -560,6 +560,19 @@ Update `skills/pixellab-pip/references/paperdolling.md` only after Phase 1 or Ph
 - Prefer one PixelLab edit plus extraction over a second remove-character edit when layer extraction passes.
 - Keep two-edit remove-character as an explicit fallback, not the default.
 
+## Prior Art: PixelLab AI Skill
+
+Reviewed 2026-07-05 (v1.5.5). See the research spike's "PixelLab AI Skill Paperdolling Approach (Reference)" section for the full inventory. Mapping their shipped artifacts onto this plan's phases:
+
+| Their artifact | Maps to this plan | Notes |
+|---|---|---|
+| `validate-sprites` file-checker (frame set/order match vs reference layer, per-frame PNG-header size) | A subset of Gate 1 (Input contract), runnable in Phase 1 / Phase 2 QA and manifest checks | Validates already-separated layer files by filename and header size only. Does not read pixels, so it is not Gate 2-4 and does not replace extraction. |
+| `transfer-outfit-v2` → `edit-animation-v2` "remove the body" pipeline | Route Planner "composite routes" and the AI Workflow Planner two-pass add/remove fallback | A second generative pass, not the reusable-layer extraction route. Keep it labeled fallback, not default. |
+| `modular-rpg-character` recipe `sprite_contract` / `qa` fields | Phase 2 manifest shape (`paperdoll.json`) and Gate 1 input contract | A compact machine-readable contract worth mirroring; their `qa` entries are prose, not executable gates. |
+| `estimate-skeleton` / `animate-with-skeleton` example payloads | Phase 5 skeleton/hardpoint inputs | Example payloads only; no hardpoint derivation or manifest on their side. |
+
+Smallest safe first borrow: a `validate-sprites`-style checker. It is a few lines of deterministic file/header checks, maps directly onto Phase 1's exit criteria (dimension-mismatch and frame-order tests over local PNGs), and needs no PixelLab calls. It validates already-separated layer files, so it complements — it does not replace — the Phase 1 extraction core, the drift/temporal/round-trip QA (Gates 2-5), or the reusable-vs-composite labeling. Adopting it early gives a shipped, testable QA surface while the extraction algorithm is still being proven.
+
 ## Main Risks
 
 - PixelLab edits may redraw the base body too often for reliable extraction without masks.

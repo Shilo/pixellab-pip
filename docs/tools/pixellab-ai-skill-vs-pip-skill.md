@@ -83,11 +83,14 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 
 | Feature | PixelLab AI Skill | PixelLab Pip |
 |---|---|---|
-| Modular outfit pipeline (transfer-outfit, then edit-animation body removal) | ✅ — recipe plus reference workflow | ✅ — documented as composite routes with drift and labeling warnings |
-| Isolated layer extraction with acceptance checklist | ❌ — validates layer files, does not produce them | ✅ — diff-based extraction, editor changes-only mode, per-layer verification (`references/paperdolling.md`) |
-| Frame-grid contract (canvas, frame count/order, pivot, transparency) | ✅ | ✅ — paperdoll preservation list |
-| Honest layer-vs-composite labeling (no semantic layer extraction claimed) | 🟡 | ✅ |
-| Sprite layer validation tooling | ✅ — `validate-sprites` command (layers, frame glob, expected size) | ❌ — manual checklist |
+| Outfit-transfer → edit-animation body-removal composite pipeline | ✅ — recipe plus reference workflow (second generative pass removes the body) | ✅ — documented as composite routes / two-pass fallback with drift and labeling warnings |
+| Frame-grid contract (canvas, frame count/order, pivot, transparency) | ✅ — reference plus recipe `sprite_contract` | ✅ — paperdoll preservation list |
+| State-first animation (pose a state before animating) | ✅ — `sprite-animation-layering.md` | ✅ — state / custom start-frame routes (`references/animation.md`) |
+| Local pixel-diff isolated-layer extraction with QA gates | ❌ — no local extraction; relies on the edit-animation body-removal composite | ✅ — alpha-aware diff-extraction contract (`references/paperdolling.md`); drift/temporal/round-trip QA in `docs/pixellab/` plan |
+| `validate-sprites` file-checker (already-separated layer files) | ✅ — command checks frame set/order vs the reference layer and PNG-header size; no pixel/transparency check | ❌ — equivalent checks are a manual paperdoll checklist, no tool |
+| Honest layer-vs-composite labeling (no semantic layer extraction claimed) | 🟡 — recipe QA notes only | ✅ — reusable-vs-composite output labels enforced |
+| Skeleton / hardpoint anchoring | 🟡 — `estimate-skeleton` / `animate-with-skeleton` example payloads only, no paperdoll wiring or hardpoint manifest | 🟡 — skeleton endpoints routed (`references/animation.md`); hardpoint manifest planned in `docs/pixellab/`, not shipped |
+| Engine-export packaging (paperdoll manifest plus engine adapters) | ❌ — PNG-frames/atlas export is prose guidance only | 🟡 — manifest plus Godot/Unity/Phaser/Pixi exporters planned in `docs/pixellab/`, not shipped |
 
 ### Output Handling And Reporting
 

@@ -416,6 +416,35 @@ The Python prototype should intentionally stop short of being a full editor. Its
    - Generate the same weapon with and without a mask.
    - Measure unrelated base redraw rate, extraction success, and temporal stability.
 
+## PixelLab AI Skill Paperdolling Approach (Reference)
+
+Reviewed 2026-07-05 against the unofficial PixelLab AI Skill v1.5.5 (full download at the sibling `pixellab-ai-skill/` folder). This is prior art, recorded to map their choices onto this spike's model. It neither endorses nor ranks the projects.
+
+### How their skill approaches layered characters
+
+Their layering surface is mostly Markdown guidance plus one bundled recipe and one file-checker command. It does not do local pixel extraction.
+
+- Modular outfit pipeline (`references/sprite-animation-layering.md`, `references/prompt-cheatsheet.md` "Layered Sprite Animation"): generate a neutral base body, build the base animation first, then `transfer-outfit-v2` a reference outfit onto the exact base frames to get a merged dressed animation, then `edit-animation-v2` with a prompt to "remove the character body and skin pixels, leave only the outfit layer." The outfit-only result is a second generative output, checked by compositing the same frame index back over the base body. This is exactly the two-pass add/remove path this spike flags under "Candidate Approaches" and "PixelLab-Specific User Workflow Today" as higher-risk: an extra paid edit that must reconstruct a hidden semantic layer and can delete or hallucinate pixels.
+- Frame-grid contract: they write down the same-canvas/frame-count/frame-order/pivot/transparent-background contract before generating layers, plus stable frame names (`hero/base/walk_south_00.png`, `hero/weapons/sword/...`). This matches this spike's "Traditional Paperdolling Patterns" base-animation contract.
+- State-first animation: pose a `create-character-state` first, then animate from that state so motion starts from a useful pose; small inpaint cleanups for face/hands/weapon jitter.
+- Equipment/held weapons: sketch-and-inpaint only — duplicate the best base frame, sketch the item at the target size/position/color, mask the item plus the gripping hand/arm, then inpaint or edit-animation to propagate. This is Markdown guidance (`references/community-discord-workflows.md` "Weapons And Held Equipment"), not a tool. They advise separate layers only when gameplay needs runtime swaps/tinting/VFX, and baking the item into the outfit otherwise.
+- `modular-rpg-character` recipe (`recipes/modular-rpg-character.json`): a dry-run manifest template with a `sprite_contract` (canvas, pivot, direction order, frames-per-direction, layer list, background), a `qa` note list ("base body is the timing source", "every layer preserves frame count/order/canvas/pivot", "outfit-only layers must not include body or skin pixels", "composite at least one base frame plus each layer"), and four chained assets with `depends_on` and `seed_offset` values: `create-character-v3` base → `animate-with-text-v3` walk → `transfer-outfit-v2` guard outfit → `edit-animation-v2` outfit-only cleanup. Payloads carry `REPLACE_WITH_BASE64_*` placeholders resolved by their manifest runner.
+- `validate-sprites` checker (`scripts/pixellab_workflow.py`, `validate_sprite_layers`): a file-level validator over already-exported layer folders. Given `--root`, `--layers` (comma-separated, reference layer first), `--frame-glob`, and optional `--expected-size`, it globs each layer folder for frames, and reports: layers with no matching frames; per-frame PNG size mismatches; and — using the first layer as the reference set — missing frames, extra frames, and frame-order differences per other layer. It returns `ok`, per-layer `frame_counts`, and an `issues` list. Size is read from the 24-byte PNG IHDR header only; it does not read pixels, so it cannot confirm body/skin was actually removed or that a layer is non-blank/transparent (their separate `inspect-assets --require-nonblank` checks blankness). It validates layer files; it does not produce them.
+- Skeleton: they bundle `examples/estimate-skeleton.json` (just an image) and `examples/animate-with-skeleton.json` (keypoint list, `view: side`/`direction: east` defaults) as endpoint example payloads. There is no paperdoll wiring, hardpoint derivation, or hardpoint manifest around them.
+
+### Map onto this spike's model
+
+- Already covered here: the frame-grid contract (see "Traditional Paperdolling Patterns"), `transfer-outfit-v2` / `edit-animation-v2` as composite routes (see "Current PixelLab Capability Boundary" and "Candidate Approaches"), state-first animation, and the honest split between baked composites and reusable layers (see "AI-Assisted Paperdolling Patterns"). Their "remove the body" second edit is this spike's "Two-pass add/remove" candidate, already labeled high-QA-risk and recommended only as a fallback.
+- Genuinely useful concrete artifacts to consider adopting: (1) the `validate-sprites` file-level checker is a small, deterministic subset of the QA in "QA And Rejection Criteria" — specifically the input-contract checks (same frame set, same order, same size across layers), runnable on already-separated PNGs; and (2) the recipe's explicit `sprite_contract` and `qa` fields are a compact, machine-readable shape for the manifest sketched in "Recommended System Shape."
+- Where this spike goes further: local alpha-aware diff extraction from a single same-canvas edit (see "Extraction Algorithm"), drift detection before extraction, temporal QA for animation, round-trip verification (`base + layer` matches the composite), skeleton-derived hardpoints as metadata (see "Skeleton And Hardpoint Role"), and engine exporters. None of these exist in their skill.
+
+### What their skill does not do
+
+- No local pixel diff-extraction of a changed-part layer from an unchanged base; the isolated layer, when produced, comes from a second PixelLab generative edit.
+- No drift detection, no temporal QA, and no round-trip `base + layer` verification.
+- No reusable-vs-composite honesty labels beyond the recipe's prose `qa` notes.
+- No skeleton hardpoint manifest or hardpoint-bounded extraction.
+
 ## Source Notes
 
 Official PixelLab:
