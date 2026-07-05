@@ -187,8 +187,7 @@ def play_sound() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="PixelLab Pip bark helper")
-    parser.add_argument("command", choices=["status", "bark", "toggle", "on", "off", "play"])
-    parser.add_argument("--json", action="store_true", help="deprecated; output is always JSON")
+    parser.add_argument("command", choices=["status", "bark", "on", "off", "play"])
     args = parser.parse_args()
 
     result: dict[str, Any] = {
@@ -200,7 +199,7 @@ def main() -> int:
     }
 
     try:
-        if args.command in {"bark", "toggle"}:
+        if args.command == "bark":
             result["bark"] = not bark_enabled()
             result["config"] = str(write_config(bool(result["bark"])))
             if result["bark"]:

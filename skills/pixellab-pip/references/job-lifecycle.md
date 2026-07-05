@@ -6,9 +6,11 @@ Read this for live PixelLab calls that return a job, asset ID, managed MCP asset
 
 REST v2 async jobs use `GET /background-jobs/{job_id}` when the create response returns a background job ID. MCP managed assets use the matching `get_*` tool, not REST background-job polling.
 
-For REST `POST /v2/tilesets`, the create response can contain both `background_job_id` and `tileset_id` while the status is still `processing`. Poll `GET /background-jobs/{background_job_id}` first. `GET /tilesets/{tileset_id}` may return `423` while the tileset is still being generated, or `404` until the background job has completed and the tileset object has been persisted; treat those as early lifecycle lookups when the background job is still processing, not as reasons to resubmit the paid generation.
+For REST `POST /v2/tilesets`, the create response can contain both `background_job_id` and `tileset_id` while the status is still `processing`. Poll `GET /background-jobs/{background_job_id}` first. `GET /tilesets/{tileset_id}` may return `423` while the tileset is still being generated, or `404` until the background job has completed and the tileset object has been persisted; treat those as early lifecycle lookups while the background job is still processing.
 
-Poll gently. Start with a short delay, then back off instead of tight loops. Stop polling in the current turn when the job is still pending after a reasonable wait, report the job or asset ID, and tell the user which status route or getter can resume the check. Do not resubmit a paid job just because polling timed out.
+Poll gently. Start with a short delay, then back off instead of tight loops. Stop polling in the current turn when the job is still pending after a reasonable wait, report the job or asset ID, and tell the user which status route or getter can resume the check.
+
+Do not resubmit a paid job because a poll timed out or a `423`/`404`/`review`/stale-URL lookup came back — poll again or re-fetch with the matching getter instead.
 
 Handle statuses as:
 
@@ -43,11 +45,10 @@ When an object is in review:
 - Show or summarize candidate frame URLs/indices when available.
 - Use `select_object_frames` or REST `POST /objects/{object_id}/select-frames` only after the user chooses candidates or the request clearly authorized automatic selection.
 - Use `dismiss_review` only when the user approves discarding the candidates.
-- Do not resubmit generation merely because the status is `review`.
 
 ## Expiring And Sensitive Outputs
 
-MCP download URLs may be unauthenticated and should be treated as shareable but sensitive. If a URL is stale, call the matching getter again for a fresh result instead of resubmitting paid generation.
+MCP download URLs may be unauthenticated and should be treated as shareable but sensitive. If a URL is stale, call the matching getter again for a fresh result.
 
 MCP map objects auto-delete after 8 hours. After a successful map-object result, download or persist needed files promptly and warn the user about the expiry.
 

@@ -4,11 +4,7 @@ Read this only when creating local preview files from generated PixelLab frames,
 
 For Aseprite-specific opening, import/export, layers, frames, tags, `.aseprite` workspace creation, or Aseprite CLI/Lua behavior, read `aseprite-cli.md` instead.
 
-Local assembly is not art generation or editing. Use it only to assemble, preview, format-convert, or verify PixelLab-generated or user-supplied files; do not create or alter requested visual content locally.
-
-Preserve animation frame order by default. Do not create ping-pong, reversed, duplicated, trimmed, interpolated, or otherwise reordered playback variants unless the user explicitly asks for that style. If the direct sequence does not loop cleanly, report that verification result instead of silently packaging a repaired-looking derivative as the final animation.
-
-Write local previews, spritesheets, manifests, ZIPs, and verification scratch files under the same project/workspace `pixellab-pip-generations/` output tree as the source PixelLab generation unless the user explicitly states or approves another directory. For PixelLab generation manifests, follow `usage-reporting.md` and store the route's job IDs, asset IDs, child/result IDs, seeds, and seed provenance when those fields exist. Do not scatter derived files into the repository root, generic `outputs/`, or temp folders except for short-lived tool scratch that is not reported as a final output.
+Local assembly only assembles, previews, format-converts, or verifies existing PixelLab-generated or user-supplied pixels — it never creates or alters requested art. Preserve frame order, write outputs to the run's `pixellab-pip-generations/` tree, and record manifest fields per `usage-reporting.md` (SKILL.md holds the asset-integrity, frame-order, and output-folder rules).
 
 ## Transparent GIF Previews
 

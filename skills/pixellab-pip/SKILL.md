@@ -5,228 +5,199 @@ description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation
 
 # PixelLab Pip
 
-Classify the user's asset, API, or question intent first, then choose the supported PixelLab surface. Answer questions directly when the request is a question.
+Classify the request, choose the supported PixelLab surface, then act. Answer questions directly when the request is a question.
 
 ## Workflow
 
-1. Classify the primary request plus any modifiers; values are not mutually exclusive, such as `animate + cost_sensitive`:
+1. Classify intent; values combine, such as `animate + cost_sensitive`:
    `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration`.
-   Treat a standalone `setup` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip setup`, as setup intent. If an app exposes structured arguments, use them only as another way to read the same natural-language intent.
-   Treat a standalone `bark` word after an explicit skill invocation, with optional `on` or `off`, as bark intent. For bark intent, read `references/bark.md` and apply the persistent toggle contract.
-2. Classify the target asset or surface:
+   A standalone `setup` or `bark` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent. For setup, read `references/setup.md` and run the wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval. For bark, read `references/bark.md` and apply the persistent toggle contract.
+2. Classify the target:
    `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
-   Treat fitted visual additions to an existing character image, such as hair, facial features, wearables, accessories, held gear, or other body-part details, as `existing_image` edit/paperdoll requests rather than standalone `object` requests unless the user explicitly asks for a separate unattached prop sprite.
-3. Choose the surface:
-   use PixelLab MCP for managed coding-agent assets, REST v2 for direct API/code/batch primitives, website/Aseprite/Pixelorama only as human/editor surfaces, and REST v1 only for legacy compatibility. For template, preset, or skeleton animation wording, read `references/preset-skeleton-template-animations.md`.
-   When the user explicitly asks for Aseprite handling, route to `references/aseprite-cli.md`; use PixelLab MCP/REST for generation and documented Aseprite CLI/Lua only for local workspace, existing-file import/export, packaging, or launch behavior.
-   For setup intent, read `references/setup.md` and run the setup wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval.
-4. Use MCP only if PixelLab MCP tools are visible as callable tools in the current agent runtime, either bare or prefixed. If the user explicitly asked to use MCP, do not silently fall back; report that MCP tools are unavailable and offer setup or an approved REST v2 fallback. For generic PixelLab asset requests, if MCP is unavailable, route to the matching REST v2 endpoint when one is documented. If MCP and REST v2 are both unavailable or fail, explain why before using any non-PixelLab fallback.
-   If tools are prefixed, such as `mcp__pixellab__create_character`, match by suffix.
-   PixelLab asset rule: every pixel of the requested art must originate from PixelLab or the user. Local tools may read, download, assemble, package, import/export, preview, verify, mask, pad, crop, resize, and format-convert those files. Locally authored helper inputs such as masks, palette swatches/`color_image`, reference guides, and shape templates are allowed when they are generation controls rather than final art pixels; report them as inputs. Do not draw, repaint, or synthesize requested content locally unless the user explicitly requests or approves a labeled non-PixelLab fallback. Do not bake a colored, checkerboard, white, black, green-screen, matte, or other background into transparent PixelLab/user frames for final outputs, final GIFs, spritesheets, thumbnails, or report images unless the user explicitly asks for that background. Checkerboard previews are allowed only as clearly labeled inspection/QA aids, separate from final deliverables, and must not be presented as the final asset.
-   Do not post-process original PixelLab outputs into a claimed final asset unless the user explicitly asks or approves. Local crop/split/format work for inspection, packaging, or separate files is allowed when it preserves original pixels and is reported honestly; resizing, reassembling, unapproved compositing, repainting, or otherwise fixing failed outputs locally must not be called final without user approval.
-   Exception: when a PixelLab request used `no_background: true` but the output still has a background, read `references/background-removal.md` and attempt safe background removal when verification shows the background is removable without changing the requested art.
-   Save downloaded PixelLab generations, derived previews, manifests, packages, and generated workspace files under a project/workspace `pixellab-pip-generations/` folder by default. Use another output directory only when the user explicitly states one or approves it. Generate only the output formats the user requested or the minimal standard artifacts needed for the route, such as original frames and a spritesheet for animation. Do not create APNG, alternate animated formats, extra preview formats, or viewer-convenience derivatives unless the user explicitly asks for them.
-5. Refresh current facts when a needed tool/endpoint/field is missing or unclear, or when auth, SDK support, pricing, model/mode availability, or latest MCP tools matter. Before repeated paid prompt-only attempts, inspect the chosen tool or endpoint schema for generation controls such as guidance, adherence/strength, seed, reference images, palette images, style options, or other `generation_parameters`; use those controls when they target the failure mode.
+   Fitted visual additions to an existing character image, such as hair, facial features, wearables, accessories, or held gear, are `existing_image` paperdoll edits, not standalone `object` requests, unless the user explicitly wants a separate unattached prop.
+3. Choose the surface with Surface Rules, then the route with the Intent Router. When the user explicitly asks for Aseprite handling, read `references/aseprite-cli.md`; PixelLab MCP/REST generates, documented Aseprite CLI/Lua handles local workspace, import/export, packaging, and launch only.
+4. Use MCP only if PixelLab MCP tools are visible as callable tools, bare or prefixed such as `mcp__pixellab__create_character` (match by suffix). If the user explicitly asked for MCP, do not silently fall back; report that MCP is unavailable and offer setup or an approved REST v2 fallback. Otherwise, when MCP is unavailable, use the matching documented REST v2 endpoint. If both are unavailable or fail, explain why before any non-PixelLab fallback.
+5. Before repeated paid prompt-only retries, inspect the chosen tool or endpoint schema for generation controls such as guidance, adherence/strength, seed, reference images, palette images, or style options, and use the ones that target the failure mode. Refresh official docs only when a needed tool, endpoint, field, auth, SDK, pricing, or model/mode fact is missing or unclear (see Current Docs Refresh).
 6. For consistency-sensitive work, summarize the user's identity, style, palette, view, and reference anchors. Ask up to three blocking questions before a credit-spending call.
-7. For PixelLab natural-language request parameters such as `description`, `action`, `*_description`, `item_descriptions`, `text`, or `color_palette`, improve vague user wording into endpoint-ready English parameter values unless the user opts out. Use a matching PixelLab prompt-enhancement endpoint when it fits the chosen route; otherwise enhance directly from the request and visible inputs. For non-English or mixed-language requests, read `references/localization.md`.
-8. For animation routes, preserve the user's requested frame count when provided; otherwise use the endpoint or template default. Exception: for preset/template character animations, do not pass `frame_count`; choose a matching template id such as humanoid `walking-4-frames`, `walking-6-frames`, or `walking-8-frames`, or clarify/fallback to v3 custom mode if no matching template exists. Preserve PixelLab's returned frame order in previews and spritesheets; do not create ping-pong, reversed, duplicated, trimmed, or otherwise reordered outputs unless the user explicitly asks for that playback style.
-   For transparent animation frames, final previews and spritesheets must preserve transparency. Do not add green-screen or any other matte/background to make transparency visible in a final deliverable. If visual QA needs contrast, a checkerboard inspection preview is acceptable only when clearly labeled as inspection-only and kept separate from the final transparent frames/GIF/spritesheet.
-9. If the user asks for cheap, affordable, low-cost, budget, fewer credits, cheapest, or minimizing generations, read `references/cost-routing.md` before choosing a paid route. Prefer documented low-cost routes such as standard, `new`, v3, Pixen, PixFlux, or other non-Pro routes when they satisfy the request, but do not route by label alone because labels are surface-specific. Avoid Pro and Pro Tools routes unless no low-cost route fits or the user approves the cost/quality tradeoff after you name it. In cost-sensitive mode, ask before any extra paid iteration, retry, regeneration, comparison candidate, or batch expansion unless the user already approved a concrete budget, candidate count, or attempt count; include cost so far when asking.
-10. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat.
+7. Prepare natural-language parameters per Text Preparation. For non-English or mixed-language requests, read `references/localization.md`.
+8. For animation, preserve the user's requested frame count; otherwise use the endpoint or template default. Exception: preset/template character animations take no `frame_count`; pick a matching template id such as `walking-8-frames` (catalog in `references/preset-skeleton-template-animations.md`) or fall back to v3 custom mode. Preserve PixelLab's returned frame order; no ping-pong, reversed, duplicated, or trimmed outputs unless the user asks for that playback style.
+9. If the user says cheap, budget, low-cost, fewer credits, or similar, read `references/cost-routing.md` before choosing a paid route, and ask before each extra paid attempt unless a concrete budget or attempt count was approved.
+10. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat (see Auth And Execution).
 11. Act or answer. Ask a short clarification only for known collisions.
+
+## Asset Integrity
+
+- Every pixel of requested art must originate from PixelLab or the user. Local tools may read, download, assemble, package, import/export, preview, verify, mask, pad, crop, resize, and format-convert those pixels. Locally authored generation controls such as masks, palette swatches/`color_image`, reference guides, and shape templates are allowed as inputs; report them as inputs. Do not draw, repaint, or synthesize requested content locally unless the user explicitly approves a labeled non-PixelLab fallback.
+- Do not bake a colored, checkerboard, white, black, green-screen, or matte background into transparent frames, final GIFs, spritesheets, previews, or report images unless the user explicitly asks for it. A checkerboard is allowed only as a clearly labeled inspection aid kept separate from final deliverables.
+- Do not post-process PixelLab output into a claimed final asset without explicit approval. Local crop/split/format work that preserves original pixels is allowed when reported honestly; resizing, reassembling, compositing, or repairing failed outputs locally must not be called final without approval. Exception: when a request used `no_background: true` but the output kept a background, read `references/background-removal.md` and attempt safe removal when verification shows the background is removable without changing the art.
+- Save downloaded generations, derived previews, manifests, and packages under a project `pixellab-pip-generations/` folder unless the user names another location. Produce only the requested output formats or the route's minimal standard artifacts, such as original frames plus a spritesheet for animation; no APNG or extra preview/viewer formats unless asked.
 
 ## Surface Rules
 
 | Surface | Use for | Avoid |
 |---|---|---|
-| Hosted MCP | Workflows that need managed PixelLab assets with IDs, polling, downloads, list/get/delete helpers, and project/sandbox/agent helpers, including MCP `create_ui_asset`, `create_font`, or `create_portrait_character` when visible. | Raw image/edit primitives that MCP does not expose, REST-only UI controls such as `style_image` or `project_id`, or any MCP call when PixelLab MCP tools are unavailable. |
-| REST v2 | Scripts, batch jobs, server integrations, exact endpoint control, generic images, backgrounds, UI, inpaint/edit, prompt enhancement, raw animation, rotate, resize, remove background, and API parity checks. | Guessing SDK methods without checking the installed SDK or current docs. |
-| Website / Map Workshop | Human product surface, full-map manual work, rich libraries, visible browser assistance, and website-only flows. | Programmatic use of copied browser session tokens or undocumented internal endpoints used by first-party surfaces. |
-| Aseprite | Local in-editor plugin workflows when the user is actively working inside Aseprite. | Treating private first-party editor integration endpoints as public REST/MCP contracts. |
-| Aseprite CLI integration | Explicit Aseprite handling such as opening output in Aseprite, creating or updating `.aseprite` workspaces, importing generated frames as layers/frames/tags, and exporting through documented Aseprite CLI/Lua after PixelLab MCP/REST has produced files. | Mouse/OCR UI automation, hidden control of the PixelLab Aseprite extension, or claiming extension-private operations are public APIs. |
-| Pixelorama / editor | Visible browser assistance for website editor workflows, including existing assets, save-back flows, and website-only manual flows after explicit permission. | Hidden automation, undocumented endpoint calls, public API assumptions, or any generation/save/download/edit/delete action without a second confirmation. |
+| Hosted MCP | Managed PixelLab assets with IDs, polling, downloads, list/get/delete helpers, and project/sandbox/agent helpers, including `create_ui_asset`, `create_font`, or `create_portrait_character` when visible. | Raw image/edit primitives MCP does not expose, REST-only controls such as `style_image` or `project_id`, or any MCP call when PixelLab MCP tools are not visible. |
+| REST v2 | Scripts, batch jobs, server integrations, exact endpoint control, generic images, backgrounds, UI, inpaint/edit, prompt enhancement, raw animation, rotate, resize, remove background. | Guessing SDK methods without checking the installed SDK or current docs. |
+| Website / Map Workshop | Human product surface, full-map manual work, rich libraries, visible browser assistance. | Programmatic use of copied browser session tokens or undocumented internal endpoints used by first-party surfaces. |
+| Aseprite plugin | In-editor workflows when the user is actively working inside Aseprite. | Treating private first-party extension endpoints as public REST/MCP contracts. |
+| Aseprite CLI | Explicit Aseprite handling after PixelLab produced files: `.aseprite` workspaces, importing frames as layers/frames/tags, palette work, export/open via documented CLI/Lua. | Mouse/OCR UI automation or hidden control of the PixelLab Aseprite extension. |
+| Pixelorama / website editor | The PixelLab website editor is Pixelorama-powered; assist it only as visible browser automation after explicit permission, and ask again before login/session actions, spending credits, generations, downloads, edits, or deletes. | Hidden automation, undocumented endpoint calls, or any destructive action without a second confirmation. |
 | REST v1 | Existing legacy code and old SDK compatibility. | New work unless the user explicitly needs v1. |
 
-Hosted MCP tool names are not REST endpoints. Do not curl MCP tool names as `/v2/...` paths.
+Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2/...` paths.
 
 ## Intent Router
 
-| User intent | Default route after Surface Rules | REST v2 route when coding/exact control is needed |
+| User intent | Default route | REST v2 route for code/exact control |
 |---|---|---|
-| Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers, and `delete_animation` when explicitly requested. For a follow-up animation on an existing multi-direction character, default to `south` (down-facing) for the first candidate when the user does not specify direction; ask or get confirmation before animating all directions. | Character endpoints such as `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state, animation, tags, ZIP/list/get/delete endpoints. |
-| Portrait to character or character to portrait conversion | MCP `create_portrait_character` plus `get_portrait_character` when visible. | REST v2 `portrait-character-pro`; this is a Pro image conversion workflow, not the default text-to-managed-character route. For supplied-image role details, read `references/image-input-roles.md`. |
-| Pixel font, bitmap font, font atlas, or generated game font | MCP `create_font` plus `get_font` when visible. | REST v2 `generate-font-pro`; this is Pro font generation, not generic image/icon generation. For exact current fields, read `references/official-pixellab-documentation.md` or refresh OpenAPI. |
-| Inventory item icon, item icon sheet, equipment icon, loot icon, pickup icon, or transparent RPG inventory set | Read `references/item-icons.md` before choosing an endpoint or generating. | Use the reference for REST v2 route choice, transparent-background handling, sheet sizing, prompt wording, anti-patterns, and verification. |
-| Standalone object, prop, pickup, weapon, furniture that is not an icon or icon sheet | MCP `create_1_direction_object`, `create_8_direction_object`, `create_map_object`, object state/animation/review tools. | Object endpoints such as `create-1-direction-object`, `create-8-direction-object`, `map-objects`, object state/animation/tags/list/get/delete endpoints. |
-| Top-down terrain tileset, Wang/autotile/RPG tileset | Read `references/tilesets.md`, then use MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`; use the tilesets reference for route-specific MCP/REST field mapping, palette caveats, and verification. |
-| Sidescroller/platformer tileset | Read `references/tilesets.md`, then use MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`, sidescroller tileset endpoints; use the tilesets reference for route-specific MCP/REST field mapping, palette caveats, and verification. |
-| Isometric tile/block/floor | MCP `create_isometric_tile`; map floor/platform/block wording to `tile_shape` (`thin`, `thick`, or `block`) when the user specifies thickness. | `create-isometric-tile`; map thickness to REST `isometric_tile_shape` (`thin tile`, `thick tile`, or `block`). |
-| Tile variants / tiles pro | MCP `create_tiles_pro` for individual tile variants such as hex, octagon, square top-down, and isometric tiles. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
-| Skill icon, ability icon, spell icon, action-bar icon, hotbar icon, or icon set for a skill tree/ability tree | Read `references/skill-icons.md` before choosing an endpoint or generating. | Use the reference for REST v2 route choice, background handling, sheet sizing, prompt wording, anti-patterns, and verification. |
-| General image, sprite, icon-like standalone asset that is not a skill/ability/spell/action-bar/hotbar/inventory-item icon | REST v2. For explicit Create Image Pro, `generate-image-v2`, exact grid/sheet, or below-32px cell requests, read `references/create-image-pro.md` before generating. | `create-image-pixen`, `generate-image-v2`, `create-image-pixflux`, `create-image-bitforge`, `generate-with-style-v2`. |
-| Background, scene, environment, backdrop | REST v2 image generation; no direct hosted MCP background tool was documented. | Use the documented `create-image-pixflux-background` endpoint for background-image generation when REST v2 is the selected surface; verify current size and field support from official docs before writing exact code. |
-| UI, HUD, button, panel, health bar, menu | Prefer REST v2 `/create-ui-asset` for structured/saved UI assets, panels, windows, HUD pieces, shape `pieces`, named `elements`, `style_image`, `project_id`, or exact schema control. Use MCP `create_ui_asset` when the user is in an MCP-first workflow and the visible tool has the needed fields. Use REST `/generate-ui-v2` for loose/raw UI images such as a standalone button, slot, bar, or dialogue-box image, especially when `concept_image` should guide the design. | `create-ui-asset` for structured UI assets; `generate-ui-v2` for loose UI images. Do not route shape-piece/layout requests to `generate-ui-v2`. Website UI libraries are human/editor surfaces unless public lifecycle endpoints exist. |
-| Image edit, inpaint, mask, convert, resize, remove background | REST v2. | `inpaint`, `inpaint-v3`, `edit-image`, `edit-images-v2`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, `remove-background`. |
-| Fitted paperdoll addition on an existing character image | Treat as an `existing_image` edit anchored on the base character frame, then read `references/paperdolling.md` before choosing layer/composite outputs. At this level, keep fitted additions character-anchored, distinguish editor-native layers from separate transparent image layer files, and prompt with character identity, direction, target body region, placement, rotation/facing, occlusion, and preservation rules. | Do not use `create_map_object` or standalone object generation for fitted paperdoll layers unless the user explicitly asks for an unattached prop. Public REST/MCP image edits are not editor layer workflows; only call a result a layer after the paperdoll reference's verification rules pass. |
-| Style reference or consistent-style image creation | REST v2. | Use `generate-with-style-v2`, `generate-image-v2` style/reference fields, or documented image-model style fields as appropriate after checking current docs. |
-| Editor-only utilities such as Canny/Pose/Depth, PixelLab extension reduce colors, unzoom, pixel correction, and reshape | Use visible website/editor/Aseprite/Pixelorama workflow when the user wants exact PixelLab editor behavior. For direct file-level palette quantization, color reduction, bit-depth conversion, indexed conversion, strict palette clamps, or palette replacement, read `references/aseprite-cli.md` even when the user did not explicitly say Aseprite. Otherwise use the closest documented REST route or a labeled local fallback only after explaining the difference. Read `references/editor-only-utilities.md` before giving exact route advice. | No public REST v2/MCP route was documented for the exact editor-only utility behaviors. Do not invent `/v2/...` routes or automate first-party internal endpoints. |
-| Try on garment/accessory on character | Website Try on for single-image experimental output; REST `transfer-outfit-v2` only for animation-frame outfit transfer. | Try on returns a composited image, not isolated paperdoll layers. |
-| Multi image combine references or edit multiple source images | REST v2 for documented multi-image edit; website/editor for visual experimental flows. | Use `edit-images-v2` when the task is an image edit with multiple source/reference images. Aseprite's observed `generate-multi-edit` operation is an undocumented internal endpoint, not a public REST route. |
-| Prompt enhancement, improve generation prompt | REST v2 matching enhance endpoint; agent-side fallback. | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, or `enhance-animation-v3-prompt`. Do not use a mismatched enhancer as a generic optimizer unless the user explicitly asks. |
-| Preset/template/built-in character animation, named managed motion, or custom skeleton/keypoints | Read `references/preset-skeleton-template-animations.md`; it chooses MCP managed-template animation vs REST raw-skeleton routes. | Follow the reference. Do not call website root `/generate-animation/background` or Aseprite extension `generate-animation` internals. |
-| Auto-rig, estimate skeleton, export skeleton keypoints, or animate with skeleton data | Read `references/preset-skeleton-template-animations.md`; use REST v2 raw-skeleton routes unless a visible MCP tool explicitly accepts skeleton keypoints. | `estimate-skeleton` for image-to-keypoints, then `animate-with-skeleton` for keypoint-sequence animation. Aseprite may author/export keypoints as a visible editor workflow only. |
-| Raw non-skeleton animation, interpolation, outfit transfer, rotate | REST v2 unless animating a managed MCP character/object. Read `references/animation.md` for frame anchors, idle-loop risk, preview verification, and outfit/frame constraints. For skeleton/keypoint wording, use the skeleton/template rows above first. | `animate-with-text*`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`. For skeleton routes, read `references/preset-skeleton-template-animations.md`. For 4 rotations, use current documented rotate/8-rotation routes or editor workflow; no public REST v2 4-rotation route was documented. |
-| Map image, generated level image, visual map concept | REST v2 image/background route; website or Aseprite for map extension/texture workflows. | No full public REST/MCP map CRUD, map extension, or map texture surface was documented. Do not treat undocumented internal endpoints used by first-party surfaces as public REST. |
-| Map object | MCP `create_map_object` plus `get_map_object` by default; download or persist MCP map-object results promptly because they auto-delete after 8 hours. | `POST /map-objects`; verify current REST result and polling behavior from OpenAPI before writing code. |
-| Whole map, Map Workshop, map CRUD/export | Website manually, or generate components with MCP/REST. | No full public REST/MCP map CRUD surface was documented in the research. |
-| Static effect or VFX sprite | REST v2 image/edit route. When a target sprite/image is supplied and the user asks to add, draw, overlay, or apply an effect/trail/aura/impact, treat the supplied image as the edit target and use REST image edit. Use object/image generation only when the user asks for a separate reusable effect asset/layer or no target image is supplied. | No standalone public VFX endpoint was documented. PixelLab edit routes return a whole edited image, not an isolated effect layer. |
-| Animated effect or VFX | REST v2 raw animation or MCP object animation if it should become a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; treat VFX as a description, not a separate endpoint. |
+| Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers. For a follow-up animation on a multi-direction character, animate `south` first; ask before animating all directions. | `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state/animation/tags/ZIP/list/get/delete endpoints. |
+| Portrait-to-character or character-to-portrait | MCP `create_portrait_character` + `get_portrait_character` when visible. | `portrait-character-pro` (Pro image conversion). Supplied-image roles: `references/image-input-roles.md`. |
+| Pixel/bitmap font, font atlas | MCP `create_font` + `get_font` when visible. | `generate-font-pro` (Pro). |
+| Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, or icon sheet | Read `references/icons.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
+| Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/review tools. Object creation is Pro Tools (20-40 generations). | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
+| Top-down terrain/Wang/autotile tileset | Read `references/tilesets.md`, then MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
+| Sidescroller/platformer tileset | Read `references/tilesets.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
+| Isometric tile/block/floor | MCP `create_isometric_tile`; map thickness wording to `tile_shape` (`thin`, `thick`, `block`). | `create-isometric-tile` with `isometric_tile_shape` (`thin tile`, `thick tile`, `block`). |
+| Tile variants (hex, octagon, square, isometric singles) | MCP `create_tiles_pro`. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
+| General image, sprite, standalone asset that is not a skill/item icon | REST v2. For explicit Create Image Pro, `generate-image-v2`, exact grids/sheets, or below-32px cells, read `references/create-image-pro.md` first. | `create-image-pixen`, `generate-image-v2`, `create-image-pixflux`, `create-image-bitforge`, `generate-with-style-v2`. |
+| Background, scene, backdrop | REST v2 image generation; no hosted MCP background tool is documented. | `create-image-pixflux-background`; verify current size/field support before exact code. |
+| UI, HUD, button, panel, health bar, menu | REST v2 `create-ui-asset` (Pro) for structured/saved UI assets, `pieces`, named `elements`, `style_image`, or `project_id`; MCP `create_ui_asset` when MCP-first and its visible schema has the needed fields; `generate-ui-v2` for loose/raw UI images, especially with a `concept_image`. | Do not route shape-piece/layout requests to `generate-ui-v2`. |
+| Image edit, inpaint, mask, convert, resize, remove background | REST v2. | `inpaint`, `inpaint-v3` (Pro), `edit-image`, `edit-images-v2`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, `remove-background`. |
+| Fitted paperdoll addition on an existing character image | Treat as an `existing_image` edit anchored on the base frame; read `references/paperdolling.md` before choosing layer/composite outputs. | Do not use object generation for fitted layers unless the user explicitly wants an unattached prop. |
+| Style-reference or consistent-style generation | REST v2. | `generate-with-style-v2` or `generate-image-v2` style/reference fields after checking current docs. |
+| Editor-only utilities (Canny/Pose/Depth, reduce colors, unzoom, pixel correction, reshape) | Read `references/editor-only-utilities.md`. For file-level palette quantization/reduction/replacement, read `references/aseprite-cli.md` even without explicit Aseprite wording. | No public REST/MCP route exists for these; do not invent `/v2/...` routes. |
+| Try on garment/accessory | Website Try on (single composited image); REST `transfer-outfit-v2` only for animation-frame outfit transfer. | Try on does not return isolated paperdoll layers. |
+| Multi-image combine/edit | REST v2 `edit-images-v2` for documented multi-source edits; website/editor for visual experimental flows. | Aseprite's `generate-multi-edit` is an internal endpoint, not public REST. |
+| Prompt enhancement | Matching enhance endpoint or inline `enhance_prompt` per Text Preparation. | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt`. |
+| Preset/template/built-in animation, named motion, or custom skeleton/keypoints | Read `references/preset-skeleton-template-animations.md`; it splits MCP managed-template vs REST raw-skeleton routes. | Do not call website root `/generate-animation/background` or Aseprite extension internals. |
+| Auto-rig, estimate skeleton, animate from keypoints | Read `references/preset-skeleton-template-animations.md`. | `estimate-skeleton`, then `animate-with-skeleton`. |
+| Raw non-skeleton animation, interpolation, outfit transfer, rotate | REST v2 unless animating a managed MCP character/object. Read `references/animation.md` for frame anchors, idle-loop risk, and verification. | `animate-with-text-v3`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`. No public 4-rotation route. |
+| Map image / visual level concept | REST v2 image/background route; website or Aseprite for map extension workflows. | No public map CRUD/extension/texture surface is documented. |
+| Map object | MCP `create_map_object` + `get_map_object`; download promptly — MCP map objects auto-delete after 8 hours. | `POST /map-objects` (POST-only; verify polling shape from OpenAPI). |
+| Whole map, Map Workshop, map CRUD/export | Website manually, or generate components via MCP/REST. | No public map CRUD surface is documented. |
+| Static effect/VFX sprite | If a target image is supplied and the user asks to add an effect to it, REST image edit on that target; otherwise object/image generation for a separate reusable asset. | Edit routes return a whole edited image, not an isolated effect layer; no standalone VFX endpoint exists. |
+| Animated effect/VFX | REST v2 raw animation, or MCP object animation for a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; VFX is a description, not an endpoint. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
-| REST async job status | REST v2. | `GET /background-jobs/{job_id}`. MCP managed assets use resource-specific `get_*` tools instead. |
-| PixelLab projects, sandbox, deployed agent workflows, chat, MCP help/feedback | Read `references/mcp-platform-tools.md` before using MCP `list_projects`, `sandbox_*`, `chat_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, or `agent_talk` tools. | No public REST v2 equivalent was documented. |
+| REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
+| PixelLab projects, sandbox, chat, deployed agents, MCP help/feedback | Read `references/mcp-platform-tools.md` before using `list_projects`, `sandbox_*`, `chat_*`, or `agent_*` tools. | No public REST v2 equivalent is documented. |
 
 ## Clarify Only For Collisions
 
-- "Tiles": ask whether the user wants a terrain/autotile tileset, platformer/sidescroller tileset, or individual tile variants.
-- "Create Image Pro" with exact cells below `32px`, packed tile sheets, no-margin texture grids, or Minecraft-style `16x16` sheets: read `references/create-image-pro.md`.
-- "Map": ask whether they want a whole map, map object, map image, tileset, isometric tile, or tile variants.
-- "Object/character": infer character for people, NPCs, creatures, body templates, or identity/state animation; infer object for standalone props, pickups, furniture, or weapons. Ask only if unclear.
-- "Character animation direction": if the user asks to add an animation to an existing multi-direction character and does not name a direction, default to `south` (down-facing) for one preview candidate. Do not animate north-west, diagonal, or all directions by default. Ask which direction only when `south` is unavailable, the asset's directions are unknown, or the user needs a different gameplay-facing direction. Animate all directions only when the user explicitly asks for all/8 directions, a complete direction set, or approves the larger batch.
-- "Effect": ask static sprite or animated effect when not obvious. If a target sprite/image is supplied and the user asks to add an effect to it, infer a one-off image edit. Ask reusable object/layer vs one-off sprite only when there is no clear edit target or the user asks for a separate asset.
-- "Isometric tileset": ask whether they need one isometric tile or a full tileset, because public docs expose a single isometric tile route.
-- "Paperdoll": gather base image/frame, desired layers, fitted visual additions, target body regions, directions, animations, and whether the user wants separate transparent layer images, editor layers, composited previews, or both; see `references/paperdolling.md`.
-- "Skeleton/template animation": read `references/preset-skeleton-template-animations.md`; ask only when preset-template vs custom-keypoint intent changes the endpoint.
-- Supplied images are optional unless the chosen route requires image fields. When images are supplied, infer each file's low-risk endpoint-specific role from explicit wording. Before credit-spending calls, ask when role uncertainty would change the endpoint, field, or output semantics, such as identity vs style vs concept vs edit target vs mask vs palette vs first/last frame.
-- If prompt enhancement adds material inferred details from images or user shorthand, show the proposed description and get confirmation before a credit-spending generation or edit.
+- "Tiles": terrain/autotile tileset, platformer tileset, or individual tile variants?
+- "Map": whole map, map object, map image, tileset, isometric tile, or tile variants?
+- "Isometric tileset": one isometric tile or a full set? Public docs expose a single-tile route.
+- "Object/character": infer character for people, NPCs, creatures, or identity/state animation; object for standalone props, pickups, furniture, weapons. Ask only if unclear.
+- Animation direction on a multi-direction character: default to `south` for one preview candidate; ask only when `south` is unavailable, directions are unknown, or the user needs another gameplay-facing direction. Animate all directions only on explicit request or approval.
+- "Effect": static or animated? If a target image is supplied, infer a one-off edit; ask reusable-asset vs one-off only without a clear edit target.
+- "Paperdoll": gather base image, desired layers, target regions, directions, and whether the user wants separate transparent layer files, editor layers, composited previews, or both; see `references/paperdolling.md`.
+- Supplied images: infer each file's low-risk endpoint-specific role from wording. Before credit-spending calls, ask when role uncertainty (identity vs style vs concept vs edit target vs mask vs palette vs first/last frame) would change the endpoint or output; see `references/image-input-roles.md`.
+- If prompt enhancement adds material inferred details, show the proposed description and confirm before a credit-spending call.
+
+## References
 
 Read only the relevant reference:
 
-- Bearer-token setup, PixelLab UI naming, and MCP auth reuse: `references/credentials.md`.
-- Natural-language setup for MCP, documented REST v2 fallback, and auth after install: `references/setup.md`.
-- Browser fallback and website automation boundaries: `references/browser-fallback.md`.
+- Bearer-token setup, PixelLab UI naming, MCP auth reuse: `references/credentials.md`.
+- Setup wizard for MCP, REST v2 fallback, auth after install: `references/setup.md`.
 - Persistent completion sound toggle: `references/bark.md`.
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
-- Skill/ability/spell/action-bar/hotbar icon sheet prompt, sizing, and verification details: `references/skill-icons.md`.
-- Inventory item/equipment/loot icon sheet prompt, transparent-background routing, and verification details: `references/item-icons.md`.
-- Create Image Pro / `generate-image-v2`, exact grid or sheet requests, and below-32px cell-size caveats: `references/create-image-pro.md`.
-- Cheap, affordable, low-cost, budget, credit-minimizing, and cost-driven Pro-vs-v3/new route selection: `references/cost-routing.md`.
-- Paperdolling and layered character workflows: `references/paperdolling.md`.
-- Tileset and tile-variant details: `references/tilesets.md`.
-- Attachments, file paths, supplied image roles, endpoint fields, or fixed-size image-to-pixel-art: `references/image-input-roles.md`.
-- Non-English or mixed-language user requests and response-language handling: `references/localization.md`.
-- Official PixelLab documentation, MCP documentation, REST documentation, and web-refresh routing: `references/official-pixellab-documentation.md`.
-- Generation output reports and manifests after PixelLab calls: `references/usage-reporting.md`.
-- Async job lifecycle, MCP object review state, rate limits, and download expiry: `references/job-lifecycle.md`.
-- Skeleton/template/preset character animations and raw skeleton route boundaries: `references/preset-skeleton-template-animations.md`.
-- Raw animation, interpolation, outfit transfer, frame anchors, and idle-loop artifact risk: `references/animation.md`.
-- Editor-only utilities and unsupported public route caveats: `references/editor-only-utilities.md`.
-- PixelLab project, sandbox, chat, deployed-agent, MCP help, and feedback tools: `references/mcp-platform-tools.md`.
-- REST v2 natural-language field character limits or prompt-length rejections: `references/prompt-limits.md`.
-- Explicit Aseprite handling, `.aseprite` workspace creation/update, generated-frame import, Aseprite layers/frames/tags, Aseprite palette quantization/color reduction/indexed conversion/palette replacement, or Aseprite CLI/Lua export/open behavior: `references/aseprite-cli.md`.
-- Explicit Aseprite MCP server/tooling requests: `references/aseprite-mcp.md`.
-- Local animation preview GIFs, spritesheets, or ImageMagick/`magick` assembly from generated frames: `references/local-asset-assembly.md`.
+- Skill/ability and inventory item icon sheets: `references/icons.md`.
+- Create Image Pro, exact grids, below-32px cells: `references/create-image-pro.md`.
+- Cheap/budget/credit-minimizing route selection: `references/cost-routing.md`.
+- Paperdolling and layered characters: `references/paperdolling.md`.
+- Tilesets and tile variants: `references/tilesets.md`.
+- Supplied image roles, endpoint image fields, fixed-size image-to-pixelart: `references/image-input-roles.md`.
+- Non-English or mixed-language requests: `references/localization.md`.
+- Official PixelLab doc URLs and boundaries: `references/official-pixellab-documentation.md`.
+- Generation reports and manifests after PixelLab calls: `references/usage-reporting.md`.
+- Async jobs, MCP review state, rate limits, download expiry: `references/job-lifecycle.md`.
+- Preset/template/skeleton character animations: `references/preset-skeleton-template-animations.md`.
+- Raw animation, interpolation, outfit transfer, idle-loop risk: `references/animation.md`.
+- Editor-only utilities without public routes: `references/editor-only-utilities.md`.
+- PixelLab project/sandbox/chat/agent MCP tools: `references/mcp-platform-tools.md`.
+- REST v2 prompt/field character limits: `references/prompt-limits.md`.
+- Explicit Aseprite handling, `.aseprite` workspaces, palette quantization, CLI/Lua export: `references/aseprite-cli.md`.
+- Third-party Aseprite MCP servers: `references/aseprite-mcp.md`.
+- Local preview GIFs, spritesheets, ImageMagick assembly: `references/local-asset-assembly.md`.
 
-Optional broader docs: in full plugin/repo installs, these paths resolve relative to this `SKILL.md`; raw skill installs may omit them. If runtime `references/` are not enough, read at most one matching file if it exists. If absent, continue with `references/official-pixellab-documentation.md` and current official PixelLab documentation; do not search or load the set.
+Optional broader docs: in full plugin/repo installs these resolve relative to this `SKILL.md`; raw skill installs may omit them. Read at most one matching file if runtime references are not enough; if absent, continue with `references/official-pixellab-documentation.md` and current official docs.
 
 - Surface boundaries and service selection: `../../docs/pixellab/pixellab-surfaces-and-services.md`.
 - Plain-language asset routing: `../../docs/pixellab/pixellab-asset-routing.md`.
 - Product/model/mode terminology: `../../docs/pixellab/pixellab-terminology.md`.
 - SDK-vs-REST compatibility: `../../docs/pixellab/pixellab-sdk-compatibility.md`.
 - Bearer-token, session, and security boundaries: `../../docs/pixellab/pixellab-auth-and-security.md`.
-- UI generation, UI asset, shape-piece, and MCP-vs-REST UI routing details: `../../docs/pixellab/pixellab-ui-generation-surfaces-research.md`.
+- UI generation and MCP-vs-REST UI routing research: `../../docs/pixellab/pixellab-ui-generation-surfaces-research.md`.
 
 ## Model And Mode Terms
 
-Treat PixelLab model/provider language as product labels unless official docs disclose more.
+Treat PixelLab model/provider language as product labels unless official docs disclose more. Do not invent provider internals where docs are silent.
 
-- `Pixen`, `PixFlux`, `BitForge`: public product/workflow labels, not guaranteed provider names.
-- `PixPatch`: website-surface label; no public v2 `PixPatch` image endpoint was documented.
-- `Pro`: quality/tier/mode label across many unrelated tools, not one endpoint or model. Treat Pro and Pro Tools routes as expensive unless current docs prove otherwise.
-- `v3` and `new`: workflow/version labels scoped to a selected operation, not universal model selectors. Treat them as cheap-family hints when the route fits, but check the selected endpoint because exceptions exist, such as REST `inpaint-v3` being documented as Pro.
+- `Pixen`, `PixFlux`, `BitForge`: product/workflow labels, not guaranteed provider names.
+- `PixPatch`: website-surface label; no public v2 `PixPatch` endpoint exists.
+- `Pro`: a quality/tier label across many unrelated tools, not one endpoint or model. Treat Pro and Pro Tools routes as expensive unless current docs prove otherwise.
+- `v3` and `new`: workflow/version labels scoped to a selected operation. Cheap-family hints, but check the endpoint — REST `inpaint-v3` is documented as Pro.
 - `S-XL`, `M-XL`, `S-M`, `M-L`: size/product labels, not asset intents.
-- `Gemini`: stale/low-confidence older website Create Tileset Pro wording; do not mention it as current unless refreshed official website docs reintroduce it.
-
-Do not invent provider internals where PixelLab docs are silent.
+- `Gemini`: stale older website Create Tileset Pro wording; do not present it as current.
 
 ## Text Preparation
 
-Prompt enhancement is opt-out. For natural-language request parameters such as `description`, `style_description`, `negative_description`, `lower_description`, `upper_description`, `transition_description`, `edit_description`, `action`, `action_description`, `animation_description`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the user's request and any visible inputs before calling a tool.
+Prompt enhancement is opt-out. For natural-language parameters such as `description`, `style_description`, `negative_description`, `*_description`, `action`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the user's request and visible inputs before calling a tool.
 
-Prompt strings should describe the visual content or, for animation fields, the depicted motion/behavior. Avoid describing the tool operation, output metadata, or report status. Prefer a single concise content-focused description. Include only details that materially change the requested output. Avoid boilerplate such as `create this image`, `the final image should`, or redundant clauses already carried by structured tool parameters, such as canvas dimensions when `image_size` is set or transparent background when `no_background` is set. Do not restate PixelLab defaults such as `pixel`, `pixel art`, or `game-ready` unless the distinction matters for the selected endpoint or user request. Do not add unnecessary `\n` paragraph formatting. If prompt enhancement adds redundant operation, canvas, transparency, or PixelLab-default wording, trim it before generation and report the adjustment when material.
+Prompts describe the visual content or, for action fields, the depicted motion — never the tool operation, output metadata, or report status. Include only details that materially change the output. Omit boilerplate such as `create this image`, canvas dimensions when `image_size` is set, transparency when `no_background` is set, and PixelLab defaults such as `pixel art` or `game-ready` unless the distinction matters. If enhancement adds redundant wording, trim it before generation.
 
-Respect documented character limits for natural-language fields. Do not assume every prompt is capped at 500 characters: many REST v2 descriptions are 2000 characters, while `animate-with-text-v3.action`, `animate-with-text-v2.action`, `enhance-animation-v3-prompt.action`, `interpolation-v2.action`, `edit-image.description`, and several style/reference fields are 500. If PixelLab rejects a prompt for length, trim the field without changing intent, report that adjustment, then retry. For exact current REST v2 limits, read `references/prompt-limits.md` or refresh OpenAPI.
+Respect documented character limits: many REST v2 description fields allow 2000 characters, but several action/edit/style fields cap at 500. On a length rejection, trim without changing intent, note the adjustment, and retry. Exact limits: `references/prompt-limits.md` or OpenAPI.
 
-Use one enhancement path. Use REST `enhance-pixen-prompt` for standalone Pixen image prompts and `enhance-animation-v3-prompt` for standalone animation v3 actions with `first_frame` and optional `last_frame`. Current OpenAPI also exposes inline `enhance_prompt` flags on `create-image-pixen`, `animate-with-text-v3`, `create-character-v3`, `animate-character`, `characters/animations`, and `objects/{object_id}/animations`; docs currently price those enhancement uses at `0.05` generations or equivalent credits. When the selected generation route has an inline `enhance_prompt`, prefer that over a separate enhancer call. For `animate-character` / `characters/animations`, use inline `enhance_prompt` only when `mode="v3"`; never set it for `mode="template"` or `mode="pro"`. Use `enhance-character-v3-prompt` only for standalone character-v3 prompt enhancement. For other tools, enhance directly as the agent; do not force a nonmatching enhance endpoint.
+Use one enhancement path per call. Inline `enhance_prompt` flags exist on `create-image-pixen`, `animate-with-text-v3`, `create-character-v3`, `animate-character`/`characters/animations`, and object animations, cost about 0.05 generations, and are preferred over a separate enhancer call when the route has one. Constraints: for character/object animation, `enhance_prompt` is valid only with `mode="v3"`; for `create-character-v3` it is valid only for from-scratch generation. Standalone enhancers: `enhance-pixen-prompt` for Pixen image prompts, `enhance-animation-v3-prompt` for animation v3 actions, `enhance-character-v3-prompt` for character-v3 prompts. Otherwise enhance directly as the agent; do not force a mismatched enhancer.
 
 ## Do Not Use
 
-- Do not use local code or editor automation to create or alter requested visual content for PixelLab asset requests. Examples: PIL/Pillow drawing, canvas/SVG drawing, ImageMagick draw commands, Aseprite Lua drawing, ASCII-to-image, and procedural pixel placement. Local code may still copy, mask, composite, and verify pixels that already came from PixelLab or the user.
-- Do not add colored/matte backgrounds to transparent generated assets, final GIFs, final previews, spritesheets, or report images unless explicitly requested. Green backgrounds are not a harmless preview default; they are an unwanted derivative that can be mistaken for asset content. Checkerboard backgrounds may be used for separate, clearly labeled inspection previews only, never baked into final deliverables.
-- Do not create APNGs or other extra preview/export formats unless explicitly requested. Prefer the original PixelLab frames and only the requested or route-standard packaging artifacts.
-- Do not automate undocumented internal endpoints used by first-party surfaces such as root website routes, unversioned `https://api.pixellab.ai/` paths like `/tilesets/create`, or Aseprite extension operation URLs. Treat them as unsupported for automation unless they appear in PixelLab's public REST v2 docs/OpenAPI or MCP docs as supported programmatic endpoints/tools.
-- Do not ask users to paste the PixelLab bearer token into chat. Direct them to the setup wizard, local `PIXELLAB_SECRET`, or app secret settings instead.
-- Do not treat `https://api.pixellab.ai/` redirecting to v1 docs as proof that root website routes map to `/v1`.
-- Do not confuse website Create Tileset Pro with public `create_tiles_pro` / `create-tiles-pro`; they are different flows.
-- Do not refer to website session tokens as API tokens or PixelLab bearer tokens. Public REST/MCP bearer tokens and website session tokens are different auth contexts.
-- Do not default to v1 or old SDK README examples for new work.
-- Do not assume an installed SDK exposes every current v2 endpoint or parameter. Live `llms.txt` links official Python and JavaScript/TypeScript SDKs, but for exact v2 coverage confirm the installed package/docs or call REST v2 directly.
-- Do not claim public SDK coverage without checking the installed package, current docs, or official repo state.
+- No local code or editor automation to create or alter requested visual content: no PIL/Pillow drawing, canvas/SVG drawing, ImageMagick draw, Aseprite Lua drawing, ASCII-to-image, or procedural pixel placement. Local code may copy, mask, composite, and verify pixels that came from PixelLab or the user.
+- No undocumented internal endpoints used by first-party surfaces: root website routes, unversioned `https://api.pixellab.ai/` paths like `/tilesets/create`, or Aseprite extension operation URLs. Treat them as unsupported unless they appear in public REST v2 docs/OpenAPI or MCP docs.
+- Never ask users to paste the PixelLab bearer token into chat; direct them to the setup wizard, local `PIXELLAB_SECRET`, or app secret settings.
+- Website session tokens are not API bearer tokens; never use one for the other.
+- Do not confuse website Create Tileset Pro with public `create_tiles_pro` / `create-tiles-pro`; different flows.
+- Do not default to v1 or old SDK README examples for new work, and do not assume an installed SDK covers every current v2 endpoint — confirm the installed package or call REST v2 directly.
 
 ## Current Docs Refresh
 
-Use local routing rules for stable route choice. Refresh official docs only when the local skill/reference does not contain the needed tool, endpoint, field, schema, SDK detail, auth setup, pricing/limit, model/mode claim, or latest MCP tool behavior.
+Route from this skill first. Refresh official docs only when a needed tool, endpoint, field, schema, SDK detail, auth step, price/limit, or model/mode claim is missing or unclear. Start lightweight; fetch `openapi.json` only for exact schemas.
 
-Start with lightweight official docs. Fetch `openapi.json` only when exact request/response schema, enum values, required fields, or polling/result shapes are needed.
+- `https://api.pixellab.ai/v2/llms.txt` — REST v2 endpoint index and auth summary
+- `https://api.pixellab.ai/v2/docs` — interactive REST v2 parameters
+- `https://api.pixellab.ai/v2/openapi.json` — exact schema checks only
+- `https://api.pixellab.ai/mcp/docs` — MCP tool behavior
+- `https://www.pixellab.ai/mcp` — MCP setup
+- `https://github.com/pixellab-code` — official SDK/MCP repo state only
+- `https://api.pixellab.ai/v1/openapi.json` — legacy checks only
 
-- `https://api.pixellab.ai/v2/llms.txt` for REST v2 endpoint index and auth summary
-- `https://api.pixellab.ai/v2/docs` for interactive REST v2 endpoint parameters
-- `https://api.pixellab.ai/v2/openapi.json` only for exact REST v2 schema checks
-- `https://api.pixellab.ai/mcp/docs` for MCP tool behavior
-- `https://www.pixellab.ai/mcp` for MCP setup
-- `https://github.com/pixellab-code` only for official SDK/MCP repo state
-- `https://api.pixellab.ai/v1/openapi.json` only for legacy checks
+If web access is unavailable, answer from this skill and say which current claim could not be freshly verified.
 
-If web access is unavailable, answer from this skill and say only which necessary current claim could not be freshly verified.
+## Auth And Execution
 
-## Answer Shape
+If no bearer token is configured, stop before generation and offer the setup wizard: the user opens `https://www.pixellab.ai/account` after signing in, copies the value labeled `Secret`, and stores it locally as `PIXELLAB_SECRET` or in app secret settings — never pasted into chat. For Manual setup, link `https://www.pixellab.ai/mcp` and stop. PixelLab UI/docs may call this value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token.
 
-For questions, answer with:
+For questions, answer with: recommended surface/endpoint, why it fits, warnings for unsupported alternatives, and a verification note only when the answer depends on an unverified current fact.
 
-1. Recommended surface or endpoint/tool.
-2. Why that route fits.
-3. Warnings for unsupported or confusing alternatives.
-4. Verification note only when the answer depends on a current fact that was missing, unclear, or not freshly verified.
+For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Ask before ambiguous credit-spending batches or destructive deletes. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
 
-For tasks, execute PixelLab generation/editing only when the user clearly requested it and both the bearer token and tooling are configured. For nontrivial live generation, prefer one candidate first, report enough route details to review it, then continue only if the user asks for more. Ask before ambiguous credit-spending batch work or destructive deletes. Refuse unsupported automation, then route to the closest documented MCP/REST option or a visible manual website flow. Create locally authored non-PixelLab visual content only when the user explicitly asks for a local fallback or approves one after both MCP and documented REST v2 are unavailable or fail; label the result as a non-PixelLab fallback. Otherwise provide the exact route and minimal code or call shape the user needs.
+Capture a balance snapshot before a nontrivial paid call when available. After live PixelLab work, read `references/usage-reporting.md` and use its report layout; verify the output against the user's explicit constraints before calling it final, and say plainly when verification failed instead of silently salvaging. Do not paste secrets, raw base64, full response JSON, or internal IDs unless needed for pending status, follow-up, or debugging. Between request and final report, keep progress messages to blockers, necessary questions, or meaningful completed steps — no play-by-play narration.
 
-If no PixelLab bearer token is configured, stop before PixelLab generation and offer the setup wizard. Tell the user to open `https://www.pixellab.ai/account` after signing in and copy the value labeled `Secret`, then store it locally as `PIXELLAB_SECRET` or in app secret settings; never ask them to paste it into chat. If the user chooses Manual setup, open or link `https://www.pixellab.ai/mcp`, tell them to pick their app there, and stop. PixelLab UI/docs may call the same value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token.
-
-Before a nontrivial paid call, capture a balance snapshot when available. After a live PixelLab call, or when preparing generation output details, a user-facing report, or a manifest, read `references/usage-reporting.md` and use its concise Markdown layout. Verify the original PixelLab output against the user's explicit constraints before calling it final. If the original output fails and any local derivative is only an inspection, crop, split, format conversion, or proposed repair, say so plainly instead of silently salvaging. For safe background removal after `no_background: true`, report the final as PixelLab output with background-removal post-processing and include the method, source image, cost when a PixelLab call was used, and alpha/preservation checks. Do not paste secrets, raw files/base64, full response JSON, or internal IDs unless needed for pending status, follow-up, or debugging exact schemas.
-
-When a live PixelLab generation, edit, transform, conversion, background-removal, or animation job finishes successfully, read `references/bark.md` and apply the bark completion-sound contract after final success verification.
-
-Use browser automation only for visible website/editor/Pixelorama assistance after explicit user permission. Ask again before login/session actions, spending credits, submitting generations, downloads, edits, or deletes. Never scrape session tokens or call undocumented internal endpoints used by first-party surfaces such as the website or Aseprite extension.
+When a live generation, edit, transform, conversion, background-removal, or animation job finishes successfully and passes verification, read `references/bark.md` and apply the completion-sound contract.
 
 ## Examples
 
 | Request | Route |
 |---|---|
-| "Setup PixelLab." | Setup mode; diagnose MCP and REST v2 fallback intent, credential readiness, and ask before config writes. |
-| "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`; if direction is unspecified, animate `south` (down-facing) first and ask before expanding to every direction. |
-| "Turn this portrait into a full-body sprite." | MCP `create_portrait_character` with `direction="portrait_to_character"` when visible; REST v2 `portrait-character-pro` for code/exact control. |
-| "Generate a chunky arcade font." | MCP `create_font` when visible; REST v2 `generate-font-pro` for code/exact control. |
-| "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; use MCP `create_sidescroller_tileset` if working in an MCP-enabled agent. |
-| "Create a title screen background." | REST v2 `create-image-pixflux-background`; verify current fields and size support from docs. |
-| "Make HUD buttons and a health bar." | REST v2 `create-ui-asset` when the user wants a saved/structured UI asset or layout; REST v2 `generate-ui-v2` when they want a loose raw UI image. |
-| "Make a 512x256 UI panel with a portrait circle and three buttons." | REST v2 `create-ui-asset` with `pieces`/`elements`; MCP `create_ui_asset` only when MCP-first and its visible schema has the needed fields. |
+| "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`; `south` first, ask before all directions. |
+| "Use the humanoid Walk (8 frames) template animation." | `references/preset-skeleton-template-animations.md`; MCP `animate_character` with `template_animation_id="walking-8-frames"`, REST `/characters/animations` fallback. |
+| "Auto-rig this sprite and animate from the skeleton." | `references/preset-skeleton-template-animations.md`; REST `estimate-skeleton`, then `animate-with-skeleton`. |
+| "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; MCP `create_sidescroller_tileset` in an MCP-enabled agent. |
+| "Make hex terrain tiles." | MCP `create_tiles_pro`, not a top-down Wang tileset. |
+| "Make a 512x256 UI panel with a portrait circle and three buttons." | REST v2 `create-ui-asset` with `pieces`/`elements`; MCP `create_ui_asset` only when MCP-first and its schema has the fields. |
 | "Convert this image to pixel art and remove the background." | REST v2 `image-to-pixelart-pro`, then `remove-background`. |
-| "Inpaint this masked area." | REST v2 `inpaint` or `inpaint-v3` after checking current docs and inputs. |
-| "Add a wind dash effect to this runner sprite." | REST v2 `edit-image`; preserve the runner as the target image and add the effect to the same canvas. |
-| "Add a walking animation." after creating an 8-direction character | MCP `animate_character` for `south` (down-facing) first unless the user asks for all directions. |
-| "Use the humanoid Walk (8 frames) template animation." | Read `preset-skeleton-template-animations.md`; MCP `animate_character` with `template_animation_id="walking-8-frames"` and explicit directions, REST `/characters/animations` fallback. |
-| "Auto-rig this humanoid sprite and animate from the skeleton." | Read `preset-skeleton-template-animations.md`; REST `estimate-skeleton`, save/export keypoints, then REST `animate-with-skeleton` when a keypoint sequence is available. |
-| "Animate this character with a custom skeleton JSON." | Read `preset-skeleton-template-animations.md` and `animation.md`; use REST `animate-with-skeleton` / `estimate-skeleton` after clarifying image and keypoint roles. |
-| "Make an 8-direction treasure chest object." | MCP `create_8_direction_object`; REST v2 `create-8-direction-object` for code. |
-| "Make hex terrain tiles." | MCP `create_tiles_pro`, not top-down Wang tileset. |
-| "Use `/tilesets/create` with my browser token." | Do not use it; route to public MCP/REST tileset tools or manual website use. |
-| "What does Pro use?" | Explain only documented/product-level facts; do not infer provider internals. Refresh official docs if current model/mode details matter. |
+| "Add a wind dash effect to this runner sprite." | REST v2 `edit-image`; the runner is the edit target, effect on the same canvas. |
+| "Give my character a leather helmet as a separate layer." | Paperdoll edit per `references/paperdolling.md`, not object generation. |
+| "Use `/tilesets/create` with my browser token." | Refuse; route to public MCP/REST tileset tools or manual website use. |
+| "What does Pro use?" | Product-level facts only; refresh official docs if current model details matter. |
+| "Cheapest way to get a few item icons?" | `references/cost-routing.md` + `references/icons.md`; prefer a non-Pro route and name the tradeoff. |

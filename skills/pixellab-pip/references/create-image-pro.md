@@ -1,14 +1,14 @@
 # Create Image Pro
 
-Read this for explicit Create Image Pro wording, REST `generate-image-v2`, exact grid or sheet requests, and small cell-size requests that are not already covered by `skill-icons.md` or `item-icons.md`.
+Read this for explicit Create Image Pro wording, REST `generate-image-v2`, exact grid or sheet requests, and small cell-size requests that are not already covered by `icons.md`.
 
 Create Image Pro / REST `generate-image-v2` is a general image-generation route. It can make attractive sprite sheets and texture sheets, but exact cell layout is prompt-guided rather than structurally guaranteed. A correct output canvas size is not proof that the image contains the requested cell grid.
 
 ## Sub-32px Cell Requests
 
-For exact grid, sheet, tile, icon, or sprite requests where the requested per-cell size is below `32px`, treat Create Image Pro as prompt-sensitive rather than structurally guaranteed. Do not avoid Create Image Pro by default when the user asks for it; use prompt wording that makes the intended cell math, independence, and no-margin packing explicit, then verify the raw output honestly.
+For exact grid/sheet/tile/icon/sprite requests with per-cell size below `32px`, treat Create Image Pro as prompt-sensitive rather than structurally guaranteed. Do not avoid it when the user asks for it; use prompt wording that makes the cell math, independence, and no-margin packing explicit, then verify the raw output honestly.
 
-When the user explicitly asks for Create Image Pro and a below-32px cell size, do not ask them to switch tools solely because the cells are below `32px`. Recommend a different route only when their actual goal is a tile-specific asset such as Wang/autotile terrain, isometric tiles, or individual tile variants, or when they require structural guarantees that prompt-guided Create Image Pro cannot provide. For packed sheet requests, proceed with the best prompt pattern below and verify the result before calling it valid.
+When the user explicitly asks for Create Image Pro with below-32px cells, do not push them to switch tools for that reason alone. Recommend a different route only when their real goal is a tile-specific asset (Wang/autotile terrain, isometric tiles, individual tile variants) or they need structural guarantees prompt-guided Create Image Pro cannot provide.
 
 Use these alternatives only when they better match the user's actual intent:
 
@@ -19,17 +19,9 @@ Use these alternatives only when they better match the user's actual intent:
 
 Do not call a Create Image Pro result a valid exact tile/icon/sprite grid based only on `image_size`. The output must pass visual cell-layout verification.
 
-## 16px Minecraft Sheet Prompt Lessons
+## Packed Sheet Prompt Recipe
 
-A request for a `256x256` Create Image Pro sheet with a `16 by 16` grid of `16x16` Minecraft-style tiles can produce an attractive texture sheet, but not a true 16px tile grid. The PNG may be `256x256`, so it can be mechanically sliced into 16px cells, while the visible content still spans cells. In one observed failure, visual seams appeared around `25-26px` intervals despite the correct canvas size.
-
-The failure came from confusing canvas math with content layout. `image_size: { "width": 256, "height": 256 }` controlled only the final image dimensions; the prompt asked for 16px cells, but `generate-image-v2` did not enforce cell boundaries.
-
-Observed prompt failures:
-
-- `grid`, `atlas`, `texture sheet`, and generic material lists can produce continuous rows, long planks, terrain bands, or multi-cell textures.
-- `contact sheet` and `separate thumbnails` can improve cell independence, but may introduce visible gutters, borders, or spacing.
-- Asking PixelLab to draw guide lines or a visible grid bakes those lines into the generated asset. Do not do this for final tiles.
+Seams appear below roughly `26px` cells: one `256x256` request for a `16x16` grid of `16x16` cells showed visible seams around `25-26px` intervals despite the correct canvas size. Canvas math is not content layout — `image_size` sets only final dimensions, and `generate-image-v2` does not enforce cell boundaries. `grid`, `atlas`, `texture sheet`, and material lists tend to bleed continuous rows or multi-cell textures across cells; `contact sheet`/`separate thumbnails` improve independence but add gutters; asking PixelLab to draw guide lines bakes them into the asset.
 
 Best observed prompt pattern for no-margin packed sheets:
 

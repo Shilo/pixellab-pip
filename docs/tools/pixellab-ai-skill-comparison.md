@@ -111,6 +111,6 @@ No new `skills/pixellab-pip/references/*.md` file is needed just because PixelLa
 - `paperdolling.md` for layered character and equipment workflows.
 - `usage-reporting.md` for live-call reporting and final-output checks.
 - `official-pixellab-documentation.md` for current PixelLab documentation refresh.
-- `tilesets.md`, `credentials.md`, and `browser-fallback.md` for focused edge cases.
+- `tilesets.md` and `credentials.md` for focused edge cases.
 
 Add a new runtime reference only when Pip gains a repeated workflow that cannot fit concisely in the existing files, such as a real manifest runner, a validated showcase recipe format, or a dedicated local asset validator.

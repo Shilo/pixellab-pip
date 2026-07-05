@@ -123,8 +123,7 @@ Current 1-bit tileset findings live in:
 
 - [PixelLab 1-Bit Tileset Prompt Testing](pixellab/pixellab-1bit-tileset-prompt-testing.md)
 - [PixelLab 1-Bit Tileset Optimization Workflow](pixellab/pixellab-1bit-tileset-optimization-workflow.md)
-- [REST 1-Bit Control Validation Report](../pixellab-pip-generations/rest-1bit-control-validation-20260703/REPORT.md)
-- [1-Bit Palette Clamp Study](../pixellab-pip-generations/1bit-palette-clamp-study-20260703/REPORT.md)
+- Local (gitignored, maintainer machine only): `pixellab-pip-generations/rest-1bit-control-validation-20260703/REPORT.md` and `pixellab-pip-generations/1bit-palette-clamp-study-20260703/REPORT.md`.
 
 The key maintainer lesson from the 2026-07-03 REST validation is that `color_image` is not a safe automatic fix for strict black/white tilesets with white transition pixels. In both top-down and sidescroller checks, black/white `color_image` could erase the requested white transition and collapse the result toward black. Preserve this as a routing caution in `skills/pixellab-pip/references/tilesets.md`: optimize PixelLab-generated shape and transition placement first, then use palette controls only as a separately verified follow-up or report palette-clamped derivatives as local processing.
 
@@ -162,27 +161,7 @@ The root plugin files are thin wrappers for each agent app. The only runtime ski
 
 Runtime files:
 
-- `skills/pixellab-pip/SKILL.md` - the canonical skill file.
+- `skills/pixellab-pip/SKILL.md` - the canonical skill file (router and contract).
 - `skills/pixellab-pip/pixellab-pip.json` - optional user-local bark preference file, created only when bark is toggled.
-- `skills/pixellab-pip/assets/bark.py` - best-effort local helper for deterministic bark config and sound playback.
-- `skills/pixellab-pip/assets/bark.wav` - bundled bark sound.
-- `skills/pixellab-pip/references/credentials.md` - PixelLab bearer-token setup, UI naming, and MCP auth-source reuse.
-- `skills/pixellab-pip/references/setup.md` - natural-language setup for MCP, documented REST v2 fallback, and auth after install.
-- `skills/pixellab-pip/references/bark.md` - persistent completion sound toggle and generation-finish rules.
-- `skills/pixellab-pip/references/browser-fallback.md` - permission rules for visible website/editor fallback.
-- `skills/pixellab-pip/references/skill-icons.md` - skill, ability, spell, action-bar, and hotbar icon routing details.
-- `skills/pixellab-pip/references/item-icons.md` - inventory item, equipment, loot, and pickup icon routing details.
-- `skills/pixellab-pip/references/cost-routing.md` - cheap, budget, and Pro-vs-v3/new route selection.
-- `skills/pixellab-pip/references/paperdolling.md` - layered character and outfit workflow contract.
-- `skills/pixellab-pip/references/tilesets.md` - terrain/platformer/tile-variant routing details.
-- `skills/pixellab-pip/references/image-input-roles.md` - image input roles for attachments, file paths, and endpoint fields.
-- `skills/pixellab-pip/references/localization.md` - non-English request translation and response-language handling.
-- `skills/pixellab-pip/references/usage-reporting.md` - usage, balance, job, and result reporting.
-- `skills/pixellab-pip/references/job-lifecycle.md` - async status, MCP review state, rate limits, and expiring downloads.
-- `skills/pixellab-pip/references/animation.md` - raw animation, interpolation, outfit transfer, and frame-anchor workflow details.
-- `skills/pixellab-pip/references/editor-only-utilities.md` - editor-only utility routing and unsupported public-route caveats.
-- `skills/pixellab-pip/references/prompt-limits.md` - REST v2 natural-language field limits and prompt-length retry handling.
-- `skills/pixellab-pip/references/aseprite-cli.md` - Aseprite CLI/Lua workspace, import, export, and packaging workflows.
-- `skills/pixellab-pip/references/aseprite-mcp.md` - explicit Aseprite MCP server/tooling routing.
-- `skills/pixellab-pip/references/local-asset-assembly.md` - local GIF, spritesheet, and ImageMagick assembly after generation.
-- `skills/pixellab-pip/references/official-pixellab-documentation.md` - when and how to refresh official PixelLab documentation.
+- `skills/pixellab-pip/assets/` - `bark.py` + `bark.wav` (completion sound) and `background_removal.py` (conservative local background removal).
+- `skills/pixellab-pip/references/*.md` - progressive-discovery references; SKILL.md's "References" section is the authoritative index of what each file covers. Notable merges: `icons.md` covers both skill/ability and inventory item icons.

@@ -1,6 +1,6 @@
 # Tilesets
 
-Read this for terrain tilesets, platformer tilesets, isometric tiles, tile variants, or website Create Tileset Pro ambiguity.
+Read this for terrain tilesets, platformer tilesets, isometric tiles, tile variants, or website Create Tileset Pro ambiguity. SKILL.md holds the model/mode label semantics this file does not restate (including that website Create Tileset Pro is not the public `create-tiles-pro` flow, and that Gemini wording is stale).
 
 "Tiles" is ambiguous. If unclear, ask whether the user wants:
 
@@ -52,70 +52,47 @@ Isometric MCP `create_isometric_tile` route:
 
 ## Human Label To API Mapping
 
-Website, Aseprite extension, and MCP/REST labels sometimes differ. Map only non-obvious human-facing wording to the route's actual structured parameters before generating; do not duplicate schema fields whose names are already symmetric or directly inferable.
+Website, Aseprite, and MCP/REST labels sometimes differ. Map only non-obvious human-facing wording to the route's structured parameters before generating; do not duplicate fields whose names are already symmetric or directly inferable.
 
 These labels are not symmetric with the MCP parameter names:
 
 | Human UI wording | Applies to | MCP parameter | Notes |
 |---|---|---|---|
-| `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. It is not the same as `transition_size`. |
+| `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. Not the same as `transition_size`. |
 | `Center tile description`, `Center Tile`, `platform center` | `create_sidescroller_tileset` | `lower_description` | Sidescroller MCP calls this the platform material/body. |
 | `thin floor`, `floor slab`, `flat tile` | `create_isometric_tile` | `tile_shape: "thin"` | REST uses `isometric_tile_shape: "thin tile"`. |
 | `thick platform`, `raised platform` | `create_isometric_tile` | `tile_shape: "thick"` | REST uses `isometric_tile_shape: "thick tile"`. |
 | `block`, `cube`, `full-height tile` | `create_isometric_tile` | `tile_shape: "block"` | Same value on REST `isometric_tile_shape`. |
-| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed by the chosen route, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
+| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
-No extra top-down human-label mapping is currently needed for schema-like labels such as lower, upper, or transition. Route top-down terrain wording to `create_topdown_tileset`; do not reuse sidescroller top/center label mapping unless the user explicitly asks for side-view/platformer tiles.
+Route top-down terrain/autotile wording to `create_topdown_tileset` unless the user explicitly asks for platformer/sidescroller/side-view tiles. Phrases such as `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, `Wang`, `autotile`, or `terrain pair` describe top-down structure absent side-view intent; do not reinterpret them as sidescroller center/top layers just because the words include floor or wall. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as a Wang/autotile tileset just because the user says tiles.
 
-For an explicit Create Image Pro packed texture sheet or exact small-cell image grid, route to `create-image-pro.md`; do not reinterpret it as a Wang/autotile tileset just because the user says tiles.
+## Generation Controls
 
-Route top-down terrain/autotile wording to top-down tileset generation unless the user explicitly asks for platformer, sidescroller, side-view, or platform tiles. Phrases such as `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, `Wang`, `autotile`, or `terrain pair` describe top-down tileset structure when no side-view/platformer intent is present; do not reinterpret them as sidescroller center/top layers just because the words include floor or wall.
+Treat structured API fields as controls, not prompt text. Change a control only when the user asked for it, the route requires it, a documented default must be supplied, or a verified failure mode calls for it; do not infer control values from descriptive words that can live safely in `lower_description`, `upper_description`, or `transition_description`. When the user asks for maximum/100%/forced text guidance, map that to the maximum valid `text_guidance_scale`; do not also change `transition_size`, `tile_strength`, `tileset_adherence`, or `tileset_adherence_freedom` unless requested or the failure mode calls for it.
 
-Before spending repeated generations on prompt wording, check the visible MCP schema or current REST schema for controllable generation parameters. For top-down and sidescroller tilesets, relevant controls may include:
+Treat `outline`, `shading`, and `detail` as weak style controls, not deterministic placement controls: PixelLab docs say each "Weakly" controls its aspect, affecting taste, texture, color variation, and contour strength without guaranteeing exact edges, palette, or texture density. For placement or material changes, adjust terrain/transition descriptions and `transition_size` first.
 
-- `text_guidance_scale`: increases or decreases text-description adherence.
-- `tile_strength`: changes tile-pattern adherence.
-- `tileset_adherence`: controls reference/texture image and tileset-structure adherence.
-- `tileset_adherence_freedom`: controls structural flexibility; higher means more flexibility.
-- `seed`: makes a promising setup reproducible when exposed.
-- `lower_reference_image`, `upper_reference_image`, and `transition_reference_image`: REST controls for anchoring terrain or transition style.
-- `color_image`: REST control for palette anchoring.
-- Pro-only shape controls such as `spread_x`, `slope_size`, and `raggedness`.
+For any MCP or REST route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar wording.
 
-Treat structured API fields as controls, not prompt text. Set or change controls only when the user explicitly requested that control, the route requires it, a documented default must be supplied by a helper, or a verified failure mode specifically calls for that control. Do not infer control values from descriptive words when those words can live safely in `lower_description`, `upper_description`, or `transition_description`.
+For REST top-down tilesets, `lower_reference_image`, `upper_reference_image`, and `transition_reference_image` are stronger composition/style controls than `color_image`. Do not add them just because the user names a material, texture, wall, or floor; use them when the user supplies a reference, asks for one, or approves a retry after a miss. Treat `transition_reference_image` as a style reference, not a mask or stamp; keep `text_guidance_scale` at default unless the text matters more than the reference (high text guidance competes with it and worsens palette drift). Author a local reference in single-tile context at the requested `tile_size` — a 16x16 tileset uses a 16x16 reference, and at `transition_size: 0.5` place the pattern in the 8-pixel band, not scaled to the full 4x4 sheet.
 
-When the user asks for maximum, 100%, or forced text guidance, map that request to the maximum valid `text_guidance_scale` exposed by the chosen tool or schema. Do not also change `transition_size`, `tile_strength`, `tileset_adherence`, or `tileset_adherence_freedom` unless the user requested those controls or the failure mode specifically calls for them.
+`color_image` constrains the palette, not where colors or texture appear inside each Wang tile; put texture placement in the terrain's description, not only the transition description. When `color_image` is requested or approved for top-down REST tilesets, prepare it as 64x64 unless current behavior proves another size works: the validator may accept a smaller PNG but the background job can fail later with an internal `Expected image of size 64x64` error. On that failure with a smaller/unknown palette image, retry once with a 64x64 `color_image` when budget allows, and report it as a PixelLab validation/background-job caveat. This 64x64 rule applies to `color_image`, not terrain/transition reference images.
 
-For any MCP or REST tileset route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar prompt wording.
+## Strict 1-bit / Exact Palette Work
 
-For strict 1-bit top-down wall/floor prompt tests, prefer standard mode before Pro. Local corpus checks showed observed Pro outputs can expand at `transition_size: 0.5`, while standard mode is the safer compact 16-tile path for simulator-to-live comparisons.
+Tileset generators do not reliably enforce strict 1-bit black-and-white output from text alone, even at high `text_guidance_scale`. Treat `1-bit`, `black-and-white only`, `no gray`, and named exact palettes as palette requirements unless the user explicitly accepts approximation.
 
-Tileset generators do not reliably enforce strict 1-bit black-and-white output from text alone, even with high `text_guidance_scale`. Treat `1-bit`, `black-and-white only`, `no gray`, and named exact palettes as palette requirements unless the user explicitly accepts approximation. If the chosen route exposes a palette/control image parameter, use or ask for that route-specific control. If the chosen route does not expose palette control, state that limitation before generation, or deliver an honestly labeled palette-clamped derivative after saving the untouched PixelLab original.
+- Prioritize PixelLab-generated shape over raw palette: palette clamping can make a good shape exact black/white but cannot fix a wrong silhouette, exposed edge, center-tile seam, or misplaced transition without locally altering the art.
+- Prefer standard mode over Pro for strict 1-bit top-down wall/floor tests: Pro outputs can expand at `transition_size: 0.5`, while standard mode is the safer compact 16-tile path.
+- When a 1-bit tileset is requested and the route exposes style controls, default any unspecified ones to `detail: low detail`, `shading: flat shading`, and `outline: lineless`; preserve explicit user-supplied values.
+- If the route exposes a palette/control image field, use or ask for it. Otherwise state the limitation before generating, or deliver an honestly labeled palette-clamped derivative via `aseprite-cli.md` after saving the untouched original; report the original separately and do not imply the derivative is the raw PixelLab result.
+- Do not treat a black/white `color_image` as the default 1-bit fix: it can erase white transitions on black terrain. Verify raw PixelLab shape first, then palette-clamp for exact black/white derivatives.
+- Top-down terrain transitions are more reliable than sidescroller generation for full connected-shape white outlines. Do not burn repeated sidescroller prompt-only attempts on that outline goal without a new control route or user-approved post-process.
+- For exact niche constraints (strict palettes, monochrome, single-pixel rims, whole-shape sidescroller outlines), run a small proof test before batching. On a miss, suggest post-processing, reference/control routes, another PixelLab image route, or human-authored assets.
 
-For strict 1-bit tilesets, prioritize PixelLab-generated shape over raw palette. Palette clamping can make a good PixelLab shape exact black/white, but it cannot fix a wrong silhouette, wrong exposed edge, bad center-tile seam, or misplaced transition without locally altering the art.
+## Fetching Results (top-down REST)
 
-Current evidence: top-down terrain transitions are much more reliable than sidescroller generation for full connected-shape white outlines. Do not spend repeated sidescroller prompt-only attempts on that exact outline goal without a new control route or user-approved post-process.
+After generation completes, fetch both result surfaces: poll `GET /background-jobs/{background_job_id}` for preview fields, then use `GET /tilesets/{tileset_id}` for the actual tile set, metadata, and generation parameters. The final user-facing tileset for a 16-tile result is the dual-grid 15-tileset 4x4 sheet assembled from `tileset.tiles[].image` in the exact order returned by `GET /tilesets/{tileset_id}`; name it plainly, such as `tileset.png` or `tileset-4x4.png`. Do not sort the tiles by `wang_N`, `original_position`, corner pattern, or any other inferred index, because those layouts can scramble the usable 16-tile sheet. Decode the returned tile PNGs in memory for this sheet; do not save separate per-tile PNG files unless the user asks for individual tiles or a package.
 
-When the user requests a 1-bit tileset and the chosen tileset route exposes style controls, default any unspecified style controls to `detail: low detail`, `shading: flat shading`, and `outline: lineless`. Preserve explicit user-supplied values for those controls.
-
-For exact niche constraints such as strict palettes, monochrome output, single-pixel rims, or whole-shape sidescroller outlines, prefer a small proof test before batching. If prompt-only tilesets miss, suggest post-processing, reference/control routes, another PixelLab image route, or human-authored assets.
-
-Treat `outline`, `shading`, and `detail` as weak style controls, not deterministic placement controls. PixelLab option docs say each "Weakly" controls its style aspect, and live matrices showed that these controls affect taste, texture, color variation, and contour strength without guaranteeing exact edges, palette, or texture density. For placement or material changes, adjust terrain descriptions, transition descriptions, and `transition_size` first.
-
-For REST top-down tilesets, treat `lower_reference_image`, `upper_reference_image`, and `transition_reference_image` as stronger composition/style controls than `color_image`. Do not author or add terrain/transition reference images just because the user asks for a material, texture, dither, wall, or floor. Use reference-image fields when the user supplies a reference, explicitly asks for a reference/control image, or approves a retry after the previous attempt misses the desired placement or material read. When using `transition_reference_image`, treat it as a style reference rather than an exact mask or stamp. Keep `text_guidance_scale` at the default unless the user's text description is more important than matching the reference image; high text guidance can make text/model priors compete with the reference and may worsen palette drift.
-
-When authoring a local terrain or transition reference image for a top-down tileset, keep it in single-tile context: use the requested `tile_size` unless the user supplied a different reference size. For example, a 16x16 tileset should use a 16x16 transition reference; with `transition_size: 0.5`, place the transition pattern in the relevant 8-pixel band inside that 16x16 context. Do not scale terrain/transition references to the full 4x4 output sheet size. The 64x64 sizing caveat below applies to `color_image`, not to terrain or transition reference images.
-
-When `color_image` is explicitly requested or approved for top-down REST tilesets, prepare it as a 64x64 palette reference unless current route behavior proves another size works. The request validator may accept a smaller PNG but the background job can fail later with an internal `Expected image of size 64x64` error. If a tileset job fails with that size expectation and the palette image was smaller or unknown, retry once with a 64x64 `color_image` when the user's budget/attempt count allows; report the mismatch as a PixelLab validation/background-job caveat.
-
-`color_image` constrains the palette, not where colors or texture appear inside each Wang tile. If the user needs texture on a pure terrain tile, put the texture placement in that terrain's description, not only in the transition description. Reference images can force placement more strongly, but use them only under the reference-image conditions above.
-
-For strict 1-bit edge work, do not treat black/white `color_image` as the default fix; live checks showed it can erase white transitions on black terrain. Verify raw PixelLab shape first, then use the `aseprite-cli.md` palette-clamp route for exact black/white derivatives when needed.
-
-For REST top-down tilesets, fetch both result surfaces after generation completes: poll `GET /background-jobs/{background_job_id}` for preview fields, then use `GET /tilesets/{tileset_id}` for the actual tile set, metadata, and generation parameters. The final user-facing tileset for a 16-tile result is the dual-grid 15-tileset 4x4 sheet assembled from `tileset.tiles[].image` in the exact order returned by `GET /tilesets/{tileset_id}`; name it plainly, such as `tileset.png` or `tileset-4x4.png`. Do not sort the tiles by `wang_N`, `original_position`, corner pattern, or any other inferred index because those layouts can scramble the usable 16-tile sheet. Decode the returned tile PNGs in memory for this sheet, but do not save separate per-tile PNG files unless the user asks for individual tiles or a package.
-
-The background job `last_response` may include full-sheet fields such as `image` and `quantized_image`; treat these as previews/showcase images, not the final tileset sheet. Save and show `image` as the primary preview when present, because it is more likely to visually match the final tile images. Save `quantized_image` as a secondary preview when present. These background-job fields may be base64 raw RGBA buffers rather than PNG payloads, so decode and convert them before writing PNG files. Current public REST docs do not expose a tileset ZIP/export endpoint for website formats such as Wang, dual-grid 15-tileset, or 3x3; use the returned tile PNGs for local packaging only when the user asks for that format.
-
-If PixelLab produces a useful tileset whose colors still need exact indexed-palette cleanup, read `aseprite-cli.md` for the palette-clamp route. Report the untouched PixelLab original separately from any Aseprite/local palette-clamped derivative, and do not imply the derivative is the raw PixelLab result.
-
-Do not equate website Create Tileset Pro with public `create-tiles-pro`. Treat older Gemini wording as stale/low-confidence unless current official website docs reintroduce it.
+The background job `last_response` may include full-sheet `image` and `quantized_image` fields; treat these as previews, not the final sheet. Save/show `image` as the primary preview (more likely to match the final tiles) and `quantized_image` as secondary. These fields may be base64 raw RGBA buffers rather than PNG, so decode and convert before writing PNGs. Public REST docs expose no tileset ZIP/export endpoint for Wang, dual-grid 15-tileset, or 3x3 formats; use the returned tile PNGs for local packaging only when the user asks.

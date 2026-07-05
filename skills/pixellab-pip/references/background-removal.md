@@ -14,7 +14,7 @@ python assets/background_removal.py input.png output.png --report report.json
 
 Run it on the original failed generation. The helper removes only edge-connected background, then analyzes enclosed background-colored components as uncertainty signals. Use the output only when its JSON report says `local_result_status: passed_conservative_checks` and visual verification confirms it preserved the requested art. If the report says `needs_pixellab_fallback`, continue to PixelLab `/remove-background` with the original failed generation.
 
-For non-default flat backgrounds, pass `--bg-color R,G,B` instead of auto-sampling. Use `--tolerance` only for near-flat compression or anti-alias variation, and keep it conservative so art pixels sharing the background color are not erased. Run `python assets/background_removal.py --help` for the full tuning surface before changing thresholds such as enclosed-component or outline checks.
+For non-default flat backgrounds, pass `--bg-color R,G,B` instead of auto-sampling. Use `--tolerance` only for near-flat compression or anti-alias variation, kept conservative so art pixels sharing the background color survive. Run `--help` for the full tuning surface before changing enclosed-component or outline thresholds.
 
 If the helper cannot execute, such as missing Python, missing Pillow, a file error, or an ambiguous background-sampling error, skip further local guessing and use PixelLab `POST /remove-background` with the original failed generation as the image input. If local removal leaves enclosed background inside holes, loops, handles, straps, or similar negative spaces, do not globally remove the color when it may also appear in the art; use PixelLab fallback unless the user explicitly approves a different source or repair path.
 
@@ -26,24 +26,17 @@ If safe background removal cannot be achieved, report the output as a failed can
 
 Background removal is usually safe when the unwanted background is:
 
-- A flat or near-flat exterior fill.
-- Connected whitespace or simple canvas color around the subject.
-- A simple sheet background that does not share important colors with the art.
+- A flat or near-flat exterior fill or connected canvas color around the subject that does not share important colors with the art.
 - Clearly outside item, character, object, icon, effect, or UI pixels.
 
-Prefer a conservative connected-background removal from image edges for flat backgrounds. Avoid global color removal when that color may appear inside the art.
+Prefer a conservative connected-background removal from the image edges. Avoid global color removal when that color may also appear inside the art.
 
 ## Unsafe Cases
 
 Do not use background removal to fix:
 
-- Wrong layout, size, scale, framing, direction, or cell math.
-- Borders, UI slots, dividers, text, labels, glyphs, watermarks, or checkerboards baked into the art.
-- Merged objects, cropped subjects, missing subjects, or low readability.
-- Noisy, smeared, downscaled-looking, or semantically wrong output.
-- Backgrounds intertwined with glow, shadow, hair, fur, cloth, glass, particles, or other important art pixels.
-
-If removal would erase outlines, interior colors, shadows needed for readability, or effect pixels, treat it as unsafe.
+- Content problems it cannot repair: wrong layout, size, scale, framing, direction, cell math, merged/cropped/missing subjects, or noisy, smeared, downscaled-looking, or low-readability output.
+- Backgrounds intertwined with important art pixels (glow, shadow, hair, fur, cloth, glass, particles), or borders, UI slots, dividers, text, labels, glyphs, watermarks, or checkerboards baked into the art.
 
 ## Verification
 
@@ -58,6 +51,4 @@ Before calling the post-processed asset final:
 - Confirm subject silhouettes, outlines, interior colors, shadows/effects, and readability are preserved.
 - Confirm local crops or packages are derived from the post-processed transparent file.
 - When using PixelLab `/remove-background`, include the call cost in the final report.
-- Report the result as PixelLab output with background-removal post-processing.
-
-Include the method, source image, and a concise preservation check in the final report, such as `connected edge background removal from original generation; preserved non-background pixels` or `PixelLab /remove-background with background_removal_task=remove_simple_background on original generation; preserved readable item pixels`.
+- Report the result as PixelLab output with background-removal post-processing, and include the method, source image, and a concise preservation check.
