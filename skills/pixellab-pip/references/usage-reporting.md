@@ -53,7 +53,7 @@ When a manifest is written for a live generation flow, record per call or per re
 - `job_id` / `background_job_id`, `asset_id`, and route-specific result/child IDs when present — enough to resume, inspect, or reproduce later.
 - `seed`: the exact integer sent, or the resolved seed PixelLab returned. PixelLab does not reliably expose seeds later, so when the endpoint has a `seed` input and the user gave none, choose a non-zero integer before the first paid call and send it — unless the user explicitly wants PixelLab-random output or the endpoint only documents random behavior; then record that the seed was not exposed. Vary the seed across candidates/retries; a recorded seed enables reproduction, it does not mean reusing one seed everywhere. Reuse a recorded seed when the user wants a near-variant of an approved result; vary it for fresh candidates. If a random/omitted-seed run later exposes a resolved seed in the job/status response, update the manifest with it.
 
-Also write the generation's blueprint (route + exact request body, per `blueprint.md`); the manifest may reference that blueprint file instead of duplicating the full inputs.
+The manifest may reference the run's blueprint file (per `blueprint.md`) instead of duplicating the full inputs.
 
 ## Pending Jobs
 

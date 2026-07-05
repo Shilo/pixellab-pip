@@ -12,7 +12,8 @@ under `pixellab-pip-generations/`.
 
 - Root is either one object (single asset) or an array of such objects (a bundle, run in
   order).
-- Each object has exactly one key: the route. Its value is the request body.
+- Each object has exactly one key: the route. Its value is the request body (for an MCP
+  route, the tool's arguments).
 - Route = `MCP <tool>` or `POST /v2/<endpoint>`. The prefix names the surface; no `REST`
   word, no wrapper keys.
 - Value = the literal request body. Include only the fields that matter; any omitted field
@@ -73,8 +74,9 @@ exists:
 5. Generate, report per `usage-reporting.md`, and write a new blueprint + manifest for the
    new run.
 
-For a bundle, run steps in order; a later step consumes an earlier step's output by relative
-path.
+For a bundle, run steps in order, and save each produced image to the exact relative
+filename a later step references (e.g. `01-well.png`) so the next step consumes it. A bundle
+replay spends credits per step — apply SKILL.md's multi-asset batch approval first.
 
 Same seed does not guarantee identical pixels (`official-pixellab-documentation.md`); a
 blueprint reproduces inputs, not exact art. Say so when reusing a seed.
@@ -83,7 +85,9 @@ blueprint reproduces inputs, not exact art. Say so when reusing a seed.
 
 The single `.blueprint.json` is the shareable unit; most have no image, so send the one
 file. With an image, send the JSON and the image together — the relative path resolves when
-they sit side by side. For a self-contained single file on explicit request, embed the image
+they sit side by side. A blueprint carrying an absolute image path is machine-local — copy
+the image in and switch to a relative path before sharing. For a self-contained single file
+on explicit request, embed the image
 as base64; never do this automatically, because every read of a base64 blueprint pays the
 image's full token cost. Zip is optional, only for tidy multi-image bundles.
 
