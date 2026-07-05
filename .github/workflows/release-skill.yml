@@ -1,7 +1,13 @@
-name: Release Skill
+name: Release New Version
+run-name: ${{ inputs.version && format('Release Version {0}', inputs.version) || 'Release New Version (auto-bump)' }}
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact version to release, e.g. 1.6.0. Leave blank to auto-bump the minor version."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -58,6 +64,8 @@ jobs:
       - name: Bump JSON versions
         id: bump
         shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
           node <<'NODE'
           const fs = require("fs");
@@ -138,7 +146,14 @@ jobs:
           }
 
           const oldVersion = versions[0];
-          const newVersion = bumpVersion(oldVersion);
+          const inputVersion = (process.env.INPUT_VERSION || "").trim();
+          if (inputVersion && !/^\d+\.\d+\.\d+$/.test(inputVersion)) {
+            throw new Error(`Requested version must be MAJOR.MINOR.PATCH, found: ${inputVersion}`);
+          }
+          if (inputVersion && inputVersion === oldVersion) {
+            throw new Error(`Requested version ${inputVersion} is already the current version.`);
+          }
+          const newVersion = inputVersion || bumpVersion(oldVersion);
           const updatedFiles = [];
 
           for (const item of files) {

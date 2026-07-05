@@ -165,6 +165,10 @@ def check_markdown_local_links() -> None:
                 continue
             if target.startswith("/"):
                 continue
+            # Links into the gitignored local-only research/output folder are
+            # intentionally absent from the repo (see docs/developer.md); skip them.
+            if "pixellab-pip-generations/" in target:
+                continue
             if not (path.parent / target).resolve().exists():
                 rel = path.relative_to(REPO_ROOT)
                 missing.append(f"{rel}: {raw_target}")
