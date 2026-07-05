@@ -13,7 +13,8 @@ jobs:
     name: Bump version and release skill
     runs-on: ubuntu-latest
     env:
-      VT_API_KEY: ${{ secrets.VT_API_KEY }} # optional; VirusTotal steps skip when unset
+      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }} # optional; VirusTotal steps skip when unset
+      CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }} # optional; ClawHub publish skips when unset
 
     steps:
       - name: Checkout
@@ -210,14 +211,14 @@ jobs:
 
       - name: VirusTotal scan release asset
         id: virustotal
-        if: env.VT_API_KEY != ''
+        if: env.VIRUSTOTAL_API_KEY != ''
         uses: crazy-max/ghaction-virustotal@v5
         with:
-          vt_api_key: ${{ env.VT_API_KEY }}
+          vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
           files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
 
       - name: Append VirusTotal permalink to release notes
-        if: env.VT_API_KEY != '' && steps.virustotal.outputs.analysis != ''
+        if: env.VIRUSTOTAL_API_KEY != '' && steps.virustotal.outputs.analysis != ''
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -228,3 +229,27 @@ jobs:
           gh release view "${{ steps.bump.outputs.tag }}" --json body --jq .body > notes.md
           printf '\n**VirusTotal:** %s\n' "$url" >> notes.md
           gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md
+
+      - name: Publish to ClawHub for its independent security audit
+        if: env.CLAWHUB_TOKEN != ''
+        env:
+          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
+        shell: bash
+        # One-time setup: create a ClawHub account, generate an API token, add it as the CLAWHUB_TOKEN repo secret
+        # (optionally set a CLAWHUB_OWNER repo variable). Publishing auto-triggers ClawHub's scan/badge; the skill
+        # folder stays agent-agnostic — no OpenClaw-specific files are added to it.
+        run: |
+          npx --yes clawhub@latest --no-input login --token "$CLAWHUB_TOKEN"
+          owner_args=()
+          if [ -n "$CLAWHUB_OWNER" ]; then owner_args=(--owner "$CLAWHUB_OWNER"); fi
+          npx --yes clawhub@latest --no-input skill publish "skills/${{ steps.bump.outputs.skill_name }}" \
+            --slug "${{ steps.bump.outputs.skill_name }}" \
+            --name "PixelLab Pip" \
+            --version "${{ steps.bump.outputs.new_version }}" \
+            --changelog "Release ${{ steps.bump.outputs.tag }}" \
+            --tags latest \
+            --source-repo "${{ github.repository }}" \
+            --source-commit "$(git rev-parse HEAD)" \
+            --source-ref "${{ steps.bump.outputs.tag }}" \
+            --source-path "skills/${{ steps.bump.outputs.skill_name }}" \
+            "${owner_args[@]}"

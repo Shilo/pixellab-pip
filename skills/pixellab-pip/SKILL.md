@@ -3,8 +3,9 @@ name: pixellab-pip
 description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation, editing, animation, skeleton/template/preset animations, docs/troubleshooting, bark completion sounds, and explicit PixelLab cost/budget/credit questions across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger only when PixelLab context is present, including PixelLab setup, MCP/API setup, PIXELLAB_SECRET, bearer-token auth, PixelLab sprites, sprite sheets, characters, portrait characters, fonts, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, skeletons, template animations, preset animations, endpoint choice, SDK integration, troubleshooting, or PixelLab credits/cost/budget. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
 license: MIT
 metadata:
-  requires_api_key: true
+  requires_api_key: false
   api_key_env: PIXELLAB_SECRET
+  api_key_note: "Optional. Guidance, setup, routing, and docs need no key. Live PixelLab generation needs a bearer token, configured in the MCP client or as PIXELLAB_SECRET for REST v2 fallback; the skill uses it only as an auth header and never reads, prints, or stores its value."
 permissions:
   env:
     - PIXELLAB_SECRET
