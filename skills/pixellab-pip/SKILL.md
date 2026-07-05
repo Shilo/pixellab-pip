@@ -20,7 +20,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 ## Workflow
 
 1. Classify intent; values combine, such as `animate + cost_sensitive`:
-   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration`.
+   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | recreate/replay`.
    A standalone `setup` or `bark` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent. For setup, read `references/setup.md` and run the wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval. For bark, read `references/bark.md` and apply the persistent toggle contract.
 2. Classify the target:
    `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
@@ -41,6 +41,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 - Do not bake a colored, checkerboard, white, black, green-screen, or matte background into transparent frames, final GIFs, spritesheets, previews, or report images unless the user explicitly asks for it. A checkerboard is allowed only as a clearly labeled inspection aid kept separate from final deliverables.
 - Do not post-process PixelLab output into a claimed final asset without explicit approval. Local crop/split/format work that preserves original pixels is allowed when reported honestly; resizing, reassembling, compositing, or repairing failed outputs locally must not be called final without approval. Exception: when a request used `no_background: true` but the output kept a background, read `references/background-removal.md` and attempt safe removal when verification shows the background is removable without changing the art.
 - Save downloaded generations, derived previews, manifests, and packages under a project `pixellab-pip-generations/` folder unless the user names another location. Produce only the requested output formats or the route's minimal standard artifacts, such as original frames plus a spritesheet for animation; no APNG or extra preview/viewer formats unless asked.
+- After a successful generation, write a `<name>.blueprint.json` (the route plus the exact request body, replayable and shareable) beside the outputs per `references/blueprint.md`. When the generation used a user-supplied source/reference image, copy that file into the folder by copying the file, not by reading and re-writing it.
 
 ## Surface Rules
 
@@ -90,6 +91,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
 | PixelLab projects, sandbox, chat, deployed agents, MCP help/feedback | Read `references/mcp-platform-tools.md` before using `list_projects`, `sandbox_*`, `chat_*`, or `agent_*` tools. | No public REST v2 equivalent is documented. |
+| Recreate/replay a past generation, or a supplied `.blueprint.json` | Read `references/blueprint.md`; map the blueprint's recorded route to an available surface, apply any user overrides, and never rewrite the source. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
 
 ## Clarify Only For Collisions
 
@@ -120,6 +122,7 @@ Read only the relevant reference:
 - Non-English or mixed-language requests: `references/localization.md`.
 - Official PixelLab doc URLs and boundaries: `references/official-pixellab-documentation.md`.
 - Generation reports and manifests after PixelLab calls: `references/usage-reporting.md`.
+- Per-generation blueprint (replayable route + request body), recreation, and sharing: `references/blueprint.md`.
 - Async jobs, MCP review state, rate limits, download expiry: `references/job-lifecycle.md`.
 - Preset/template/skeleton character animations: `references/preset-skeleton-template-animations.md`.
 - Raw animation, interpolation, outfit transfer, idle-loop risk: `references/animation.md`.
