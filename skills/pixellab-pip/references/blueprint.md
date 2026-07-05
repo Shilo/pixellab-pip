@@ -1,7 +1,7 @@
 # Blueprint
 
 Read when writing a blueprint after a generation, or when recreating a generation from one
-(the user `@link`s a `.blueprint.json` or asks to remake a past generation). A blueprint is
+(the user `@link`s a `*.blueprint.json` or asks to remake a past generation). A blueprint is
 the minimal, shareable record of how to make an asset: the route plus the exact request
 body. It is not the manifest — the manifest is a private audit/resume record (`usage-reporting.md`).
 
@@ -83,7 +83,7 @@ blueprint reproduces inputs, not exact art. Say so when reusing a seed.
 
 ## Sharing
 
-The single `.blueprint.json` is the shareable unit; most have no image, so send the one
+The single `*.blueprint.json` file is the shareable unit; most have no image, so send the one
 file. With an image, send the JSON and the image together — the relative path resolves when
 they sit side by side. A blueprint carrying an absolute image path is machine-local — copy
 the image in and switch to a relative path before sharing. For a self-contained single file

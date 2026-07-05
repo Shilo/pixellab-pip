@@ -1,6 +1,6 @@
 ---
 name: pixellab-pip
-description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation, editing, animation, skeleton/template/preset animations, docs/troubleshooting, bark completion sounds, and explicit PixelLab cost/budget/credit questions across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger only when PixelLab context is present, including PixelLab setup, MCP/API setup, PIXELLAB_SECRET, bearer-token auth, PixelLab sprites, sprite sheets, characters, portrait characters, fonts, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, skeletons, template animations, preset animations, endpoint choice, SDK integration, blueprints, recreating or replaying a `.blueprint.json` generation, troubleshooting, or PixelLab credits/cost/budget. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
+description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation, editing, animation, skeleton/template/preset animations, docs/troubleshooting, bark completion sounds, and explicit PixelLab cost/budget/credit questions across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger only when PixelLab context is present, including PixelLab setup, MCP/API setup, PIXELLAB_SECRET, bearer-token auth, PixelLab sprites, sprite sheets, characters, portrait characters, fonts, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, skeletons, template animations, preset animations, endpoint choice, SDK integration, blueprints, recreating/replaying `*.blueprint.json` generations, troubleshooting, or PixelLab credits/cost/budget. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
 license: MIT
 metadata:
   requires_api_key: false
@@ -91,7 +91,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
 | PixelLab projects, sandbox, chat, deployed agents, MCP help/feedback | Read `references/mcp-platform-tools.md` before using `list_projects`, `sandbox_*`, `chat_*`, or `agent_*` tools. | No public REST v2 equivalent is documented. |
-| Recreate/replay a past generation, or a supplied `.blueprint.json` | Read `references/blueprint.md`; map the blueprint's recorded route to an available surface, apply any user overrides, and never rewrite the source. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
+| Recreate/replay a past generation, or a supplied `*.blueprint.json` | Read `references/blueprint.md`; map the blueprint's recorded route to an available surface, apply any user overrides, and never rewrite the source. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
 
 ## Clarify Only For Collisions
 
