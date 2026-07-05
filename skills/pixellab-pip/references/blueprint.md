@@ -32,12 +32,19 @@ never the field name. Relative paths resolve against the blueprint file's folder
 
 Do not add `blueprint_version`, wrapper keys, `route`/`input` keys, role tags, or notes.
 
-Single asset:
+Shape (schematic — `<route>` is `MCP <tool>` or `POST /v2/<endpoint>`):
+
+```
+{ "<route>": { …request body… } }                 # one asset
+[ { "<route>": { … } }, { "<route>": { … } } ]    # a bundle, run in order
+```
+
+Single asset (an MCP call here, minimal — only the fields you want, the rest default):
 
 ```json
 {
-  "POST /v2/create-image-pixflux": {
-    "description": "a small mossy stone well, top-down"
+  "MCP create_character": {
+    "description": "a cheerful wizard in a long blue robe and pointed hat"
   }
 }
 ```
