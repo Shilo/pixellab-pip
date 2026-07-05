@@ -278,10 +278,10 @@ Expected scan disclosures: Pip legitimately documents PixelLab bearer-token hand
 
 Reproducible measurement of what the skill costs an agent and how well it routes, versus the alternatives. Produced by [`dev-tools/skill_benchmark.py`](dev-tools/skill_benchmark.py) — it measures the agent session (context tokens, output, cost, routing correctness), never PixelLab credits.
 
-| Method | Correct-routing rate | Typical session context |
+| Method | Benchmark routing checks passed | Typical session context |
 |---|---|---|
 | **PixelLab Pip skill** | **100%** | ~13.9k tokens |
 | Official `mcp/docs` injected | ~79% | ~15.3k tokens |
-| No skill (agent knowledge only) | ~31% | ~3.0k tokens |
+| No skill (agent knowledge only) | ~19% | ~3.0k tokens |
 
-The skill routed every sampled task correctly, at about the same session context as injecting PixelLab's official docs and cheaper than its own pre-refactor version. Routing is scored by deterministic checks, not a model. Full tables, methodology, and how to reproduce it yourself: [Benchmark ↗](docs/pixellab-pip-benchmark.md).
+The skill passed 100% of the benchmark's routing checks — at about the same session context as injecting PixelLab's official docs, and cheaper than its own pre-refactor version. Routing is scored by deterministic checks, not a model, and "100%" means every check in the benchmark suite. Full tables, methodology, and how to reproduce it yourself: [Benchmark ↗](docs/pixellab-pip-benchmark.md).

@@ -275,6 +275,36 @@ class HelperCliSmokeTests(unittest.TestCase):
             self.assertGreater(static["variants"]["current"]["context_est_tokens"], 0)
             self.assertIn("Results:", completed.stdout)
 
+    def test_skill_benchmark_report_splice(self) -> None:
+        static = {
+            "variants": {"current": {"context_est_tokens": 7000}, "vanilla": {"context_est_tokens": 0}},
+            "scenarios": {"route-hex-tiles": {"current": {"context_est_tokens": 7000}, "vanilla": {"context_est_tokens": 0}}},
+        }
+        summary = {"route-hex-tiles": {"claude": {
+            "current": {"checks_rate": 1.0, "median_total_input_tokens": 13000},
+            "vanilla": {"checks_rate": 0.0, "median_total_input_tokens": 3000},
+        }}}
+        block = skill_benchmark.render_report_block(static, summary, ["current", "vanilla"], ["claude"], 2, "20260705T010203Z")
+        self.assertIn("`current`", block)
+        self.assertIn("routing correct", block)
+        self.assertIn("13,000", block)  # input tokens formatted with commas
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "report.md"
+            report.write_text(
+                f"intro prose\n{skill_benchmark.REPORT_MARK_START}\nOLD\n{skill_benchmark.REPORT_MARK_END}\noutro prose\n",
+                encoding="utf-8",
+            )
+            skill_benchmark.write_report_doc(report, block)
+            text = report.read_text(encoding="utf-8")
+            self.assertIn("intro prose", text)   # prose outside markers preserved
+            self.assertIn("outro prose", text)
+            self.assertNotIn("OLD", text)         # marked block replaced
+            self.assertIn("routing correct", text)
+            bad = Path(tmp) / "bad.md"
+            bad.write_text("no markers here", encoding="utf-8")
+            with self.assertRaises(SystemExit):  # refuse to write a report lacking markers
+                skill_benchmark.write_report_doc(bad, block)
+
     def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
         captured: dict[str, object] = {}
         original_which = tileset_sim.shutil.which

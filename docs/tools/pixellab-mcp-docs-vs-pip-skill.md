@@ -29,7 +29,7 @@ Sources reviewed:
 | Auth / secret handling | Partial — bearer header setup | Yes — `PIXELLAB_SECRET`, no-paste guardrails |
 | Output verification / reporting | No | Yes — `references/usage-reporting.md` contract |
 | Setup | Partial — per-client config snippets | Yes — interactive setup wizard |
-| Token footprint | ~48k chars (~12k est tokens), one flat all-or-nothing document | `SKILL.md` ~28.3k chars (~7.1k est tokens) always, + `references/` ~158k chars (~39.6k est tokens) loaded on demand |
+| Token footprint | ~31k chars (~7.8k est tokens), one flat all-or-nothing document | `SKILL.md` ~28.9k chars (~7.2k est tokens) always, + `references/` ~158k chars (~39.6k est tokens) loaded on demand |
 
 Token counts are estimated as chars/4. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the one or two references a task needs, so a typical Pip session sits below the full-reference total.
 

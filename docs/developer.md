@@ -141,7 +141,12 @@ On Windows, [dev-tools/run-skill-benchmark.ps1](../dev-tools/run-skill-benchmark
 .\dev-tools\run-skill-benchmark.ps1 -Preset dry-all -Reps 4
 .\dev-tools\run-skill-benchmark.ps1 -Preset live-balance  # free GET /balance
 .\dev-tools\run-skill-benchmark.ps1 -Preset live-image    # spends credits (confirms first)
+.\dev-tools\run-skill-benchmark.ps1 -Preset full          # all agents + variants, live + paid, refreshes the report
 ```
+
+The published report at [docs/pixellab-pip-benchmark.md](pixellab-pip-benchmark.md) contains a `<!-- BENCHMARK:GENERATED -->` block that `--report FILE` rewrites from a run (the surrounding prose is preserved). The `full` preset passes `--report docs/pixellab-pip-benchmark.md` automatically, so a full run refreshes the committed report. `--rescore <dir> --report FILE` regenerates the block from an existing results dir without re-calling any CLI. Each run also prints its own approximate agent token/cost total at the end.
+
+The `full` preset is deliberately exhaustive and spends real money: at `-Reps 3` it runs 3 agents x 4 variants x 10 scenarios x 3 reps = 360 agent calls, of which 36 are credit-spending PixelLab generations (the one paid scenario across every agent/variant/rep) plus 36 free balance checks. Expect on the order of a few million agent input tokens per proprietary-model agent and ~36 PixelLab credits; deepseek-v4-pro via OpenCode is far cheaper per token. Lower `-Reps`, or scope with `--scenarios`, to cut spend.
 
 ## Tileset Research Notes
 

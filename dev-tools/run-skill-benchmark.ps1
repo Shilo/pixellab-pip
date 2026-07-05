@@ -21,7 +21,7 @@ $interactive = -not ([Console]::IsInputRedirected -or [Console]::IsOutputRedirec
 
 # preset -> { Args, NeedCli (agent exes that must be on PATH), NeedSecret, Paid }
 $presets = [ordered]@{
-    "full"         = @{ Label = "full        - COMPLETE suite: all agents, all 4 variants, live + PAID ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,vanilla,mcp-docs", "--live", "--allow-paid", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $true; Paid = $true }
+    "full"         = @{ Label = "full        - COMPLETE suite: all agents, all 4 variants, live + PAID, refreshes the report ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--live", "--allow-paid", "--reps", "$Reps", "--report", "docs/pixellab-pip-benchmark.md"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $true; Paid = $true }
     "static"       = @{ Label = "static      - free context-size comparison, no CLI calls, no secret"; Args = @("--static"); NeedCli = @(); NeedSecret = $false; Paid = $false }
     "dry-claude"   = @{ Label = "dry-claude  - claude only, dry scenarios ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude"); NeedSecret = $false; Paid = $false }
     "dry-all"      = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro, dry scenarios ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $false; Paid = $false }
