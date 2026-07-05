@@ -57,4 +57,4 @@ The skill is installed and the agent refreshes mcp/docs on demand — Pip's own 
 
 ## Measuring the Choice
 
-`dev-tools/skill_benchmark.py` can measure both context strategies directly. It defines two special variants alongside the git/worktree skill variants: `vanilla` (agent knowledge only) and `mcp-docs` (the pixellab.ai/mcp pro-tip docs injected, no skill). Running the skill variant against `mcp-docs` compares the two context strategies described here on the same tasks. See [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py).
+`dev-tools/skill_benchmark.py` can measure both context strategies directly. Alongside the current skill (always benchmarked) and git-ref skill variants, it defines two context-strategy arms: `vanilla` (agent knowledge only) and `mcp-docs` (the pixellab.ai/mcp pro-tip docs injected, no skill). Running the current skill against `mcp-docs` compares the two context strategies described here on the same tasks. See [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py).

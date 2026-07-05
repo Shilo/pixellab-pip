@@ -119,17 +119,29 @@ The execution-oriented runbook for agents lives in [PixelLab MCP Tileset Simulat
 
 Use [dev-tools/skill_benchmark.py](../dev-tools/skill_benchmark.py) to measure the skill's agent-side token/context cost and routing efficiency across skill versions and agent CLIs (`claude`, `codex`, `deepseek-v4-pro` via OpenCode). It compares git variants of `skills/pixellab-pip/` — by default the `pre-kiss-yagni-refactor` tag (commit `6fdae41`) against the working tree — by injecting each variant's SKILL.md into an isolated session, letting the agent progressively read `references/*.md` with a read-only tool, and capturing each CLI's native usage JSON (input/output/cache tokens, cost where exposed, turns, duration) plus deterministic routing-correctness regex checks. It measures the agent session only, never PixelLab credits.
 
-Besides git refs and `worktree`, two context-strategy arms measure the skill against not using it at all: `vanilla` (no injected context — the agent's own knowledge) and `mcp-docs` (no skill, but the official `https://api.pixellab.ai/mcp/docs` text injected, matching the pixellab.ai/mcp "include this link in your prompts" tip; fetched live and saved to the results dir for audit). See [Official MCP Docs vs Pip Skill](tools/pixellab-mcp-docs-vs-pip-skill.md) for when each context strategy fits.
+The current working-tree skill is always the first column, so `--variants` only lists what to compare it against: git refs (e.g. the `pre-kiss-yagni-refactor` tag) plus two context-strategy arms that measure the skill against not using it at all — `vanilla` (no injected context — the agent's own knowledge) and `mcp-docs` (no skill, but the official `https://api.pixellab.ai/mcp/docs` text injected, matching the pixellab.ai/mcp "include this link in your prompts" tip; fetched live and saved to the results dir for audit). See [Official MCP Docs vs Pip Skill](tools/pixellab-mcp-docs-vs-pip-skill.md) for when each context strategy fits.
 
 ```powershell
 python dev-tools/skill_benchmark.py --list                 # scenarios
 python dev-tools/skill_benchmark.py --static               # free context-size comparison, no CLI calls
 python dev-tools/skill_benchmark.py --agents claude --reps 3
 python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --reps 4
-python dev-tools/skill_benchmark.py --agents claude --variants "worktree,vanilla,mcp-docs" --reps 3
+python dev-tools/skill_benchmark.py --agents claude --variants vanilla,mcp-docs --reps 3   # current skill vs no-skill vs official docs
 ```
 
-Results land under `.local/bench/<stamp>/` (`SUMMARY.md`, `results.json`, `static.json`, per-cell responses); `--rescore <dir>` recomputes checks/summary offline. Workspaces are materialized outside the repo so CLAUDE.md/AGENTS.md cannot contaminate arms; reps interleave variants so provider caching hits both alike; medians are reported. Dry scenarios forbid network use and run with read-only tools. `--live` adds a free `GET /balance` scenario (requires `PIXELLAB_SECRET`); credit-spending scenarios additionally require `--allow-paid`.
+Results land under `.local/bench/<stamp>/` (`SUMMARY.md`, `results.json`, `static.json`, per-cell responses); `--rescore <dir>` recomputes checks/summary offline. `.local/` is gitignored, so reports stay on the machine that ran them and are never committed. Workspaces are materialized outside the repo so CLAUDE.md/AGENTS.md cannot contaminate arms; reps interleave variants so provider caching hits both alike; medians are reported. Dry scenarios forbid network use and run with read-only tools.
+
+Only two scenarios call PixelLab, and both are opt-in. `--live` adds the free read-only `GET /balance` scenario (requires `PIXELLAB_SECRET`); the one credit-spending scenario (a single cheap generation) additionally requires `--allow-paid`. Every other scenario is dry and makes no PixelLab call. Note that non-`--static` scenarios still call the agent CLIs themselves (`claude`/`codex`/`opencode`), which consume that provider's tokens — that is the cost being measured. `--static` calls nothing.
+
+On Windows, [dev-tools/run-skill-benchmark.ps1](../dev-tools/run-skill-benchmark.ps1) wraps the common presets so you do not have to remember flags. It preflights for `python`, the required agent CLIs, and `PIXELLAB_SECRET`, confirms before any paid run, and prints the report path when done. Run it with no argument for a menu, or pass a preset:
+
+```powershell
+.\dev-tools\run-skill-benchmark.ps1 -Preset static        # free, no CLI, no secret
+.\dev-tools\run-skill-benchmark.ps1 -Preset dry-claude -Reps 3
+.\dev-tools\run-skill-benchmark.ps1 -Preset dry-all -Reps 4
+.\dev-tools\run-skill-benchmark.ps1 -Preset live-balance  # free GET /balance
+.\dev-tools\run-skill-benchmark.ps1 -Preset live-image    # spends credits (confirms first)
+```
 
 ## Tileset Research Notes
 

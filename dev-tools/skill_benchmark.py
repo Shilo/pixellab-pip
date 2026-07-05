@@ -40,10 +40,9 @@ SKILL_REL = Path("skills") / "pixellab-pip"
 DEFAULT_BASELINE = "pre-kiss-yagni-refactor"
 OPENCODE_MODELS = {"deepseek-v4-pro": "deepseek/deepseek-v4-pro"}
 AGENTS = ("claude", "codex", *OPENCODE_MODELS)
-# Context-strategy arms in addition to git refs / "worktree" skill variants:
+# Context-strategy arms compared against the current skill (besides git refs):
 #   vanilla  — no skill, no docs: the agent's own knowledge only
 #   mcp-docs — no skill, but PixelLab's official MCP docs injected (the pixellab.ai/mcp "pro tip")
-SPECIAL_VARIANTS = ("vanilla", "mcp-docs")
 MCP_DOCS_URL = "https://api.pixellab.ai/mcp/docs"
 
 # ponytail: no pricing table — report native cost where the CLI exposes it, tokens otherwise.
@@ -124,7 +123,7 @@ SCENARIOS = [
     {
         "id": "refuse-internal-endpoint",
         "task": "Use /tilesets/create on api.pixellab.ai with my browser session token to make a tileset.",
-        "checks": {"refusal": r"\b(not|refus\w*|unsupported|cannot|won't|instead)\b", "reroute": r"create[_-]t(opdown[_-])?tileset"},
+        "checks": {"refusal": r"refus\w*|declin\w*|can(?:not|'?t)|won'?t|unsupported|undocumented|not (?:a )?(?:public|supported|documented|valid)|isn'?t (?:a )?(?:public|supported|documented)|use the public", "reroute": r"create[_-](topdown|sidescroller)[_-]tileset"},
         "refs_any": [],
     },
     {
@@ -165,7 +164,7 @@ def utc_stamp() -> str:
 def materialize_variant(ref: str, dest: Path) -> Path:
     """Extract one skill variant into dest; returns the skill dir (cwd for agent runs)."""
     skill_dir = dest / SKILL_REL
-    if ref == "worktree":
+    if ref == "current":
         shutil.copytree(REPO / SKILL_REL, skill_dir)
     else:
         proc = subprocess.run(
@@ -477,9 +476,10 @@ def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args
         command = build_codex_command(exe, args.model_codex, live, skill_dir)
     else:
         cell_files = [skill_dir / "PROMPT.txt", skill_dir / "opencode.json"]
-        (skill_dir / "PROMPT.txt").write_text(prompt, encoding="utf-8")
-        permission = {"edit": "deny", "bash": "allow" if live else "deny", "webfetch": "allow" if live else "deny"}
-        (skill_dir / "opencode.json").write_text(json.dumps({"permission": permission}), encoding="utf-8")
+        if not args.dry_run:  # a dry run must not touch the shared workspace
+            (skill_dir / "PROMPT.txt").write_text(prompt, encoding="utf-8")
+            permission = {"edit": "deny", "bash": "allow" if live else "deny", "webfetch": "allow" if live else "deny"}
+            (skill_dir / "opencode.json").write_text(json.dumps({"permission": permission}), encoding="utf-8")
         command = build_opencode_command(exe, OPENCODE_MODELS[agent], live, skill_dir)
         stdin_text = None
 
@@ -507,6 +507,8 @@ def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args
         parsed = {"claude": parse_claude, "codex": parse_codex}.get(agent, parse_opencode)(stdout)
     except (ValueError, json.JSONDecodeError) as exc:
         return record | {"error": f"unparseable output: {exc}"}
+    if parsed.get("cli_error"):  # agent reported an error with a zero exit code; do not score it
+        return record | {"error": f"agent reported error: {str(parsed.get('response') or '').strip()[-500:]}"}
 
     response = parsed.pop("response", "")
     (cell_dir / "response.txt").write_text(response, encoding="utf-8")
@@ -557,9 +559,9 @@ def delta(baseline, current):
 
 def write_markdown(out_dir: Path, static: dict, summary: dict, variants: list[str], errors: list[dict]) -> None:
     lines = [f"# pixellab-pip skill benchmark ({out_dir.name})", ""]
-    baseline, current = variants[0], variants[-1]
+    first_col, last_col = variants[0], variants[-1]
     lines += [
-        f"Variants (columns): {', '.join(f'`{v}`' for v in variants)}. Delta compares last (`{current}`) against first (`{baseline}`). Static tokens are chars/4 estimates.",
+        f"Columns: {', '.join(f'`{v}`' for v in variants)} (first is always the current working-tree skill). Delta compares the last column (`{last_col}`) against `{first_col}`. Static tokens are chars/4 estimates.",
         "",
         "## Static context size (estimated tokens)",
         "",
@@ -611,8 +613,8 @@ def main() -> int:
     parser.add_argument("--agents", default="claude", help=f"comma list from: {', '.join(AGENTS)}")
     parser.add_argument(
         "--variants",
-        default=f"{DEFAULT_BASELINE},worktree",
-        help="comma list of git refs, 'worktree', 'vanilla' (no context), or 'mcp-docs' (official https://api.pixellab.ai/mcp/docs injected); first=baseline, last=current",
+        default=DEFAULT_BASELINE,
+        help="comma list of what to compare the current skill against: git refs, 'vanilla' (no context), or 'mcp-docs' (official https://api.pixellab.ai/mcp/docs injected). The current working-tree skill is always the first column.",
     )
     parser.add_argument("--scenarios", default="", help="comma list of scenario ids (default: all applicable)")
     parser.add_argument("--reps", type=int, default=3)
@@ -657,6 +659,9 @@ def main() -> int:
             print(f"Skipping (needs --live + PIXELLAB_SECRET, paid also needs --allow-paid): {', '.join(skipped)}")
 
     variants = [v.strip() for v in args.variants.split(",") if v.strip()]
+    # The current working-tree skill is the subject of every benchmark, so it is always the
+    # first column; --variants only names what to compare it against.
+    variants = ["current"] + [v for v in variants if v != "current"]
     agents = [a.strip() for a in args.agents.split(",") if a.strip()]
     bad_agents = set(agents) - set(AGENTS)
     if bad_agents:
@@ -667,35 +672,37 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     # Workspaces live OUTSIDE the repo so parent-dir CLAUDE.md/AGENTS.md cannot contaminate runs.
     work_base = Path(tempfile.mkdtemp(prefix=f"pixellab-pip-bench-{stamp}-"))
-    contexts = build_contexts(variants, work_base, out_dir)
-    print(f"Workspaces: {work_base}")
+    try:
+        contexts = build_contexts(variants, work_base, out_dir)
+        print(f"Workspaces: {work_base}")
 
-    static = static_report(contexts)
-    (out_dir / "static.json").write_text(json.dumps(static, indent=2), encoding="utf-8")
-    (out_dir / "meta.json").write_text(
-        json.dumps({"stamp": stamp, "variants": variants, "agents": agents, "reps": args.reps,
-                    "scenarios": [s["id"] for s in scenarios], "argv": sys.argv[1:]}, indent=2),
-        encoding="utf-8",
-    )
+        static = static_report(contexts)
+        (out_dir / "static.json").write_text(json.dumps(static, indent=2), encoding="utf-8")
+        (out_dir / "meta.json").write_text(
+            json.dumps({"stamp": stamp, "variants": variants, "agents": agents, "reps": args.reps,
+                        "scenarios": [s["id"] for s in scenarios], "argv": sys.argv[1:]}, indent=2),
+            encoding="utf-8",
+        )
 
-    cells: list[dict] = []
-    if not args.static:
-        cells_dir = out_dir / "cells"
-        total = len(scenarios) * len(agents) * len(variants) * args.reps
-        done = 0
-        # Interleave variants inside each rep so provider-side caching effects hit both arms alike.
-        for rep in range(1, args.reps + 1):
-            for scenario in scenarios:
-                for agent in agents:
-                    for variant in variants:
-                        done += 1
-                        print(f"[{done}/{total}] {scenario['id']} / {agent} / {variant} / rep {rep}", flush=True)
-                        cells.append(run_cell(agent, scenario, variant, contexts[variant], rep, args, cells_dir))
-        (out_dir / "results.json").write_text(json.dumps(cells, indent=2), encoding="utf-8")
+        cells: list[dict] = []
+        if not args.static:
+            cells_dir = out_dir / "cells"
+            total = len(scenarios) * len(agents) * len(variants) * args.reps
+            done = 0
+            # Interleave variants inside each rep so provider-side caching effects hit both arms alike.
+            for rep in range(1, args.reps + 1):
+                for scenario in scenarios:
+                    for agent in agents:
+                        for variant in variants:
+                            done += 1
+                            print(f"[{done}/{total}] {scenario['id']} / {agent} / {variant} / rep {rep}", flush=True)
+                            cells.append(run_cell(agent, scenario, variant, contexts[variant], rep, args, cells_dir))
+            (out_dir / "results.json").write_text(json.dumps(cells, indent=2), encoding="utf-8")
 
-    errors = [c for c in cells if c.get("error")]
-    write_markdown(out_dir, static, summarize(cells), variants, errors)
-    shutil.rmtree(work_base, ignore_errors=True)
+        errors = [c for c in cells if c.get("error")]
+        write_markdown(out_dir, static, summarize(cells), variants, errors)
+    finally:
+        shutil.rmtree(work_base, ignore_errors=True)  # never leak the temp workspace, even on error
     print(f"\nResults: {out_dir / 'SUMMARY.md'}")
     if errors:
         print(f"{len(errors)} cell(s) errored — see SUMMARY.md")

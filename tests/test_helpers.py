@@ -221,7 +221,7 @@ class HelperCliSmokeTests(unittest.TestCase):
                 cells: dict[str, dict] = {}
                 for agent in ("claude", "codex", "deepseek-v4-pro"):
                     captured["current"] = agent
-                    cells[agent] = skill_benchmark.run_cell(agent, scenario, "worktree", ctx, 1, args, cells_dir)
+                    cells[agent] = skill_benchmark.run_cell(agent, scenario, "current", ctx, 1, args, cells_dir)
                     self.assertNotIn("error", cells[agent], msg=str(cells[agent]))
                     self.assertEqual(cells[agent]["checks_passed"], cells[agent]["checks_total"])
                 self.assertIn("skill body", captured["claude"]["stdin"])
@@ -244,12 +244,12 @@ class HelperCliSmokeTests(unittest.TestCase):
                 self.assertEqual(cells["claude"]["total_input_tokens"], 107)
                 self.assertEqual(cells["codex"]["total_input_tokens"], 100)
                 self.assertEqual(cells["deepseek-v4-pro"]["total_input_tokens"], 103)
-                self.assertTrue((cells_dir / "route-hex-tiles__claude__worktree__r1" / "response.txt").is_file())
+                self.assertTrue((cells_dir / "route-hex-tiles__claude__current__r1" / "response.txt").is_file())
         finally:
             skill_benchmark.shutil.which = original_which
             skill_benchmark.run_cli = original_run_cli
 
-    def test_skill_benchmark_static_worktree(self) -> None:
+    def test_skill_benchmark_static_current(self) -> None:
         with tempfile.TemporaryDirectory() as out_base:
             completed = subprocess.run(
                 [
@@ -257,7 +257,7 @@ class HelperCliSmokeTests(unittest.TestCase):
                     str(REPO_ROOT / "dev-tools/skill_benchmark.py"),
                     "--static",
                     "--variants",
-                    "worktree",
+                    "current",
                     "--out",
                     out_base,
                 ],
@@ -272,7 +272,7 @@ class HelperCliSmokeTests(unittest.TestCase):
             summary = (run_dirs[0] / "SUMMARY.md").read_text(encoding="utf-8")
             self.assertIn("Injected context", summary)
             static = json.loads((run_dirs[0] / "static.json").read_text(encoding="utf-8"))
-            self.assertGreater(static["variants"]["worktree"]["context_est_tokens"], 0)
+            self.assertGreater(static["variants"]["current"]["context_est_tokens"], 0)
             self.assertIn("Results:", completed.stdout)
 
     def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
