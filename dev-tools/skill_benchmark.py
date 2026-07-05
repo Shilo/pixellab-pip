@@ -172,6 +172,64 @@ SCENARIOS = [
         "checks": {"removal": r"remove[_-]simple[_-]background|background remov", "local": r"local|verify|safe"},
         "refs_any": ["background-removal.md"],
     },
+    {
+        # Objects are Pro Tools — a standalone prop routes to the object tools, not general image gen.
+        "id": "route-object-prop",
+        "task": "With PixelLab, I want a standalone treasure chest prop for my dungeon.",
+        "checks": {"object": r"create[_-][18][_-]direction[_-]object|create[_-]object"},
+        "refs_any": [],
+    },
+    {
+        # REST-only route: no hosted MCP background tool is documented, so mcp-docs has no answer here.
+        "id": "route-background-scene",
+        "task": "Using PixelLab, make a forest clearing background for my game's title screen.",
+        "checks": {"background": r"create[_-]image[_-]pixflux[_-]background|pixflux[- ]?background"},
+        "refs_any": [],
+    },
+    {
+        "id": "route-font",
+        "task": "With PixelLab, I need a pixel bitmap font for my game's UI.",
+        "checks": {"font": r"create[_-]font|generate[_-]font"},
+        "refs_any": [],
+    },
+    {
+        # Isometric single tile/block routes to create_isometric_tile (the "isometric tileset" collision).
+        "id": "route-isometric-tile",
+        "task": "In PixelLab, make an isometric stone floor block for my dungeon.",
+        "checks": {"iso": r"create[_-]isometric[_-]tile"},
+        "refs_any": [],
+    },
+    {
+        # Showcase-family: a platformer/side-scroller tileset routes to the sidescroller tool — the
+        # other side of the topdown-vs-sidescroller split that route-1bit-tileset-palette guards.
+        "id": "route-sidescroller-tileset",
+        "task": "Generate a mossy platformer tileset in PixelLab for my side-scrolling level.",
+        "checks": {"tileset": r"create[_-]sidescroller[_-]tileset|create-tileset-sidescroller"},
+        "refs_any": ["tilesets.md"],
+    },
+    {
+        "id": "check-balance",
+        "task": "How many PixelLab credits do I have left?",
+        "checks": {"balance": r"get[_-]balance|/balance"},
+        "refs_any": [],
+    },
+    {
+        # NEW blueprint feature: recreating a named saved preset loads blueprints/knight.blueprint.json
+        # (recorded route MCP create_character) and replays it — a preset system only the skill has.
+        # The route (knight -> create_character) is guessable; the preset-file replay is the discriminator.
+        "id": "replay-blueprint",
+        "task": "Using PixelLab, recreate my saved knight blueprint.",
+        "checks": {"blueprint": r"\.blueprint\.json|blueprints?[\\/]|recorded (?:route|body|request)|saved (?:blueprint|preset|generation)|preset (?:blueprint|file)", "route": r"create[_-]character"},
+        "refs_any": ["blueprint.md"],
+    },
+    {
+        # Routing trap: a fitted addition to an existing character is an EDIT on the base frame
+        # (paperdolling.md), not standalone object generation — the mistake generic agents make.
+        "id": "route-paperdoll-layer",
+        "task": "In PixelLab, give my existing knight sprite a leather helmet as a separate layer.",
+        "checks": {"edit": r"edit[_-]image|edit[_-]images[_-]v2|inpaint|paperdoll|image[- ]edit|existing[_-]image|edit.{0,20}(?:base|existing|character)"},
+        "refs_any": ["paperdolling.md"],
+    },
 ]
 
 
