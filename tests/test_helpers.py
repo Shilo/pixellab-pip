@@ -285,7 +285,9 @@ class HelperCliSmokeTests(unittest.TestCase):
             "vanilla": {"checks_rate": 0.0, "median_total_input_tokens": 3000},
         }}}
         block = skill_benchmark.render_report_block(static, summary, ["current", "vanilla"], ["claude"], 2, "20260705T010203Z")
-        self.assertIn("`current`", block)
+        self.assertIn("Pip", block)      # 'current' rendered with its display label
+        self.assertIn("Vanilla", block)  # 'vanilla' rendered with its display label
+        self.assertNotIn("`current`", block)
         self.assertIn("routing correct", block)
         self.assertIn("100%", block)     # checks_rate 1.0 rendered as a percent
         self.assertIn("13,000", block)  # input tokens formatted with commas
