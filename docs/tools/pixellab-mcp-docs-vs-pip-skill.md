@@ -29,9 +29,12 @@ Sources reviewed:
 | Auth / secret handling | Partial — bearer header setup | Yes — `PIXELLAB_SECRET`, no-paste guardrails |
 | Output verification / reporting | No | Yes — `references/usage-reporting.md` contract |
 | Setup | Partial — per-client config snippets | Yes — interactive setup wizard |
+| Image-role classification | No — lists image params only | Yes — edit / identity / style / mask / palette / frame roles |
+| Localization (non-English requests) | No | Yes — normalize to English, reply in the user's language |
+| Output integrity | No | Yes — "every pixel from PixelLab"; local processing labeled, not passed off as generated |
 | Token footprint | ~31k chars (~7.8k est tokens), one flat all-or-nothing document | `SKILL.md` ~28.9k chars (~7.2k est tokens) always, + `references/` ~158k chars (~39.6k est tokens) loaded on demand |
 
-Token counts are estimated as chars/4. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the one or two references a task needs, so a typical Pip session sits below the full-reference total.
+Token counts are estimated as chars/4. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor (~7.2k) is comparable to mcp/docs (~7.8k); a task that opens a reference can exceed the flat mcp/docs injection — that extra load is the cost of the more specific, correct routing.
 
 ## Use the Official MCP Docs When
 
@@ -57,4 +60,6 @@ The skill is installed and the agent refreshes mcp/docs on demand — Pip's own 
 
 ## Measuring the Choice
 
-`dev-tools/skill_benchmark.py` can measure both context strategies directly. Alongside the current skill (always benchmarked) and git-ref skill variants, it defines two context-strategy arms: `vanilla` (agent knowledge only) and `mcp-docs` (the pixellab.ai/mcp pro-tip docs injected, no skill). Running the current skill against `mcp-docs` compares the two context strategies described here on the same tasks. See [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py).
+`dev-tools/skill_benchmark.py` can measure both context strategies directly. Alongside the current skill (always benchmarked) and git-ref skill variants, it defines two context-strategy arms: `vanilla` (agent knowledge only) and `mcp-docs` (the pixellab.ai/mcp pro-tip docs injected, no skill). Running the current skill against `mcp-docs` compares the two context strategies described here on the same tasks.
+
+A recent dry, credit-free 13-scenario snapshot (`claude`) found the skill routed every deterministic check correctly, while the injected docs and no-skill each passed roughly half: the docs alone missed REST-only routes, local post-processing, and the skill's setup and background-removal fallback policies. Numbers vary per run; see [PixelLab Pip Skill Benchmark](../pixellab-pip-benchmark.md) for the current tables and [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py) to reproduce.
