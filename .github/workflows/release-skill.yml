@@ -5,11 +5,15 @@ on:
 
 permissions:
   contents: write
+  id-token: write # sign the build-provenance attestation via Sigstore
+  attestations: write
 
 jobs:
   release:
     name: Bump version and release skill
     runs-on: ubuntu-latest
+    env:
+      VT_API_KEY: ${{ secrets.VT_API_KEY }} # optional; VirusTotal steps skip when unset
 
     steps:
       - name: Checkout
@@ -172,6 +176,11 @@ jobs:
           zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^${{ steps.bump.outputs.skill_name }}/SKILL.md$'
           ! zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^skills/'
 
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+
       - name: Commit version bump
         shell: bash
         run: |
@@ -198,3 +207,24 @@ jobs:
             --title "${{ steps.bump.outputs.skill_name }} ${{ steps.bump.outputs.tag }}" \
             "${notes_args[@]}" \
             --verify-tag
+
+      - name: VirusTotal scan release asset
+        id: virustotal
+        if: env.VT_API_KEY != ''
+        uses: crazy-max/ghaction-virustotal@v5
+        with:
+          vt_api_key: ${{ env.VT_API_KEY }}
+          files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+
+      - name: Append VirusTotal permalink to release notes
+        if: env.VT_API_KEY != '' && steps.virustotal.outputs.analysis != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          # analysis output format: <filename>=<analysis URL>
+          url="${{ steps.virustotal.outputs.analysis }}"
+          url="${url#*=}"
+          gh release view "${{ steps.bump.outputs.tag }}" --json body --jq .body > notes.md
+          printf '\n**VirusTotal:** %s\n' "$url" >> notes.md
+          gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md

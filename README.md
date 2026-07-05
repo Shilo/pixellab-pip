@@ -4,6 +4,9 @@
 
 # PixelLab Pip
 
+[![Security Scan](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Shilo/pixellab-pip/badge)](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip)
+
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
 
 For [PixelLab.ai](https://www.pixellab.ai/).
@@ -16,6 +19,7 @@ For [PixelLab.ai](https://www.pixellab.ai/).
 - [Install](#install)
 - [Usage](#usage)
 - [Setup MCP / API](#setup-mcp--api)
+- [Security](#security)
 - [Showcase ↗](docs/showcase/README.md)
 - [Developer ↗](docs/developer.md)
 - [Resources ↗](docs/resources.md)
@@ -249,3 +253,19 @@ PIXELLAB_SECRET
 ```
 
 Never paste the Secret into chat, commit it, print it in logs, copy browser session tokens, or ask an agent to scan `.env*`, shell history, home directories, or environment dumps. For deeper setup, auth, and service-boundary details, see [More Documentation ↗](docs/README.md) and [PixelLab Auth And Security ↗](docs/pixellab/pixellab-auth-and-security.md).
+
+## Security
+
+Independent, verifiable checks — not self-attestation:
+
+- **Skill instruction audit**: every push, pull request, and a weekly schedule run [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) (the same engine ClawHub's registry audits use) over the skill. Full results are public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning), the build fails above SkillSpector's risk threshold, and anyone can re-run the pinned workflow on any commit and reproduce the result.
+- **Release provenance**: release zips carry a GitHub build-provenance attestation signed via Sigstore's public transparency log, cryptographically proving the zip was built by this repository's public workflow, unmodified. Verify a downloaded zip yourself:
+
+  ```bash
+  gh attestation verify pixellab-pip-<version>.zip --repo Shilo/pixellab-pip
+  ```
+
+- **Malware reputation**: when configured, releases also get a public [VirusTotal](https://www.virustotal.com/) permalink appended to the release notes.
+- **Repo hygiene**: the [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) badge above tracks branch protection, pinned dependencies, and workflow permissions.
+
+Expected scan disclosures: Pip legitimately documents PixelLab bearer-token handling, official `api.pixellab.ai` documentation URLs, and a local sound-playback helper, so instruction scanners report those as informational findings — that is the disclosed design, reviewable line-by-line on the Code Scanning tab. No scanner can prove an instruction file safe; these are layered, independently verifiable checks, not a guarantee.
