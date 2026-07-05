@@ -282,8 +282,8 @@ Reproducible measurement of what the skill costs an agent and how well it routes
 
 | Method | Benchmark routing checks passed | Context injected up front |
 |---|---|---|
-| **PixelLab Pip skill** | **~100%** | ~7.2k tokens (+ references on demand) |
-| Official `mcp/docs` injected | ~54% | ~7.7k tokens (all, always) |
-| No skill (agent knowledge only) | ~51% | 0 |
+| **PixelLab Pip skill** | **~99%** | ~7.2k tokens (+ references on demand) |
+| Official `mcp/docs` injected | ~73% | ~7.7k tokens (all, always) |
+| No skill (agent knowledge only) | ~71% | 0 |
 
-Across 13 routing scenarios — several drawn from the [showcase](docs/showcase/README.md) — the skill routed every check correctly, versus roughly half for injecting PixelLab's official docs or using no skill: the docs alone miss REST-only routes, local post-processing, and cost/ordering detail. The skill injects about the same up-front context as those docs (~7.2k vs ~7.7k) and reads a reference only when a task needs it. Routing is scored by deterministic checks, not a model; these are a dated `claude` snapshot (nondeterministic). See the full tables, per-scenario results, and reproduce steps in the **[full benchmark report ↗](docs/pixellab-pip-benchmark.md)**.
+Across 15 scenarios on 3 agents (claude, codex, deepseek-v4-pro; 1 rep) — several drawn from the [showcase](docs/showcase/README.md) — the skill routed nearly every check correctly, versus ~73% for injecting PixelLab's official docs and ~71% for no skill: the docs alone miss REST-only routes, local post-processing, and cost/ordering detail. The gap is widest on pure dry routing; the two live API-call scenarios and the stronger models route PixelLab decently on their own, which narrows the aggregate. The skill injects about the same up-front context as those docs (~7.2k vs ~7.7k) and reads a reference only when a task needs it. Routing is scored by deterministic checks, not a model; these are a dated, nondeterministic snapshot. See the full per-agent, per-scenario tables and reproduce steps in the **[full benchmark report ↗](docs/pixellab-pip-benchmark.md)**.
