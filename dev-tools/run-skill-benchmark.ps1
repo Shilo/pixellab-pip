@@ -1,7 +1,8 @@
 param(
     [ValidateSet("full", "static", "dry-claude", "dry-all", "live-balance", "live-image", "list", "cancel")]
     [string]$Preset,
-    [int]$Reps = 1  # 1 rep keeps the full preset at ~180 cells / 12 paid generations; pass -Reps 3 for tighter medians
+    [int]$Reps = 1,  # 1 rep keeps the full preset at ~180 cells / 12 paid generations; pass -Reps 3 for tighter medians
+    [string]$Resume  # path to a prior .local/bench/<stamp> dir to continue instead of starting fresh (reuses completed cells)
 )
 
 # Convenience launcher for dev-tools/skill_benchmark.py. It only assembles the
@@ -52,6 +53,10 @@ if ($Preset -eq "cancel") { Write-Host "Cancelled."; exit 0 }
 
 $config = $presets[$Preset]
 
+# Build run arguments; -Resume continues a prior run dir, reusing its already-completed cells.
+$runArgs = @($config.Args)
+if ($Resume) { $runArgs += @("--resume", $Resume) }
+
 # Preflight: python, required agent CLIs, and secret for live presets.
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     Write-Error "python was not found on PATH."
@@ -70,17 +75,17 @@ if ($config.Paid) {
         Write-Error "Refusing to run a paid preset non-interactively (cannot confirm credit spend). Run it in an interactive terminal."
         exit 1
     }
-    # Ask the benchmark exactly how many credit-spending generations this run will do.
-    $plan = (& python $benchmark @($config.Args) --print-plan 2>$null | Out-String)
+    # Ask the benchmark exactly how many credit-spending generations this run will do (resume-aware).
+    $plan = (& python $benchmark @($runArgs) --print-plan 2>$null | Out-String)
     $gens = if ($plan -match 'paid_generations=(\d+)') { $Matches[1] } else { "an unknown number of" }
     $confirm = Read-Host "This preset will spend up to $gens PixelLab generation(s), plus agent tokens. Type YES to continue"
     if ($confirm -ne "YES") { Write-Host "Cancelled."; exit 0 }
 }
 
-Write-Host "Running: python dev-tools/skill_benchmark.py $($config.Args -join ' ')"
+Write-Host "Running: python dev-tools/skill_benchmark.py $($runArgs -join ' ')"
 Push-Location $repoRoot
 try {
-    & python $benchmark @($config.Args)
+    & python $benchmark @($runArgs)
     $code = $LASTEXITCODE
 }
 finally {

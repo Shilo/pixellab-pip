@@ -211,6 +211,19 @@ def utc_stamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
+def cell_id_for(scenario_id: str, agent: str, variant: str, rep: int) -> str:
+    return f"{scenario_id}__{agent}__{variant.replace('/', '-')}__r{rep}"
+
+
+def load_completed(out_dir: Path) -> dict[str, dict]:
+    """cell_id -> record for successfully-finished cells in a prior run (used by --resume)."""
+    path = out_dir / "results.json"
+    if not path.is_file():
+        return {}
+    return {c["cell"]: c for c in json.loads(path.read_text(encoding="utf-8"))
+            if c.get("cell") and not c.get("error") and not c.get("dry_run")}
+
+
 def materialize_variant(ref: str, dest: Path) -> Path:
     """Extract one skill variant into dest; returns the skill dir (cwd for agent runs)."""
     skill_dir = dest / SKILL_REL
@@ -506,7 +519,7 @@ def build_prompt(ctx: dict, scenario: dict) -> str:
 
 
 def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args, cells_dir: Path) -> dict:
-    cell_id = f"{scenario['id']}__{agent}__{variant.replace('/', '-')}__r{rep}"
+    cell_id = cell_id_for(scenario["id"], agent, variant, rep)
     cell_dir = cells_dir / cell_id
     cell_dir.mkdir(parents=True, exist_ok=True)
     live = bool(scenario.get("live"))
@@ -744,6 +757,7 @@ def main() -> int:
     parser.add_argument("--print-plan", action="store_true", help="print planned cell and paid-generation counts, then exit")
     parser.add_argument("--list", action="store_true", help="list scenarios and exit")
     parser.add_argument("--rescore", metavar="DIR", help="recompute checks/summary for a previous results dir")
+    parser.add_argument("--resume", metavar="DIR", help="continue a prior run dir: reuse its successful cells, re-run errored/missing ones")
     parser.add_argument("--report", metavar="FILE", help="rewrite the data tables in a published report markdown (between its BENCHMARK:GENERATED markers)")
     parser.add_argument("--out", default=str(REPO / ".local" / "bench"), help="results base dir")
     parser.add_argument("--model-claude", default=None, help="pin claude model id")
@@ -788,14 +802,27 @@ def main() -> int:
         raise SystemExit(f"unknown agents: {', '.join(sorted(bad_agents))}")
 
     if args.print_plan:
-        paid = sum(1 for s in scenarios if s.get("paid"))
-        runs = len(variants) * len(agents) * args.reps
-        print(f"cells={len(scenarios) * runs} paid_generations={paid * runs}")
+        # Count only cells that still need running (resume reuses already-successful ones).
+        completed = load_completed(Path(args.resume)) if args.resume else {}
+        paid_ids = {s["id"] for s in scenarios if s.get("paid")}
+        planned = [(s["id"], a, v, r) for r in range(1, args.reps + 1)
+                   for s in scenarios for a in agents for v in variants]
+        remaining = [p for p in planned if cell_id_for(*p) not in completed]
+        remaining_paid = sum(1 for (sid, _a, _v, _r) in remaining if sid in paid_ids)
+        print(f"cells={len(remaining)} paid_generations={remaining_paid}")
         return 0
 
     stamp = utc_stamp()
-    out_dir = Path(args.out) / stamp
+    if args.resume:
+        out_dir = Path(args.resume)
+        if not (out_dir / "results.json").is_file():
+            raise SystemExit(f"--resume dir has no results.json to continue from: {out_dir}")
+    else:
+        out_dir = Path(args.out) / stamp
     out_dir.mkdir(parents=True, exist_ok=True)
+    completed = load_completed(out_dir) if args.resume else {}
+    if args.resume:
+        print(f"Resuming {out_dir}: reusing {len(completed)} completed cell(s), re-running errored/missing ones.")
     # Workspaces live OUTSIDE the repo so parent-dir CLAUDE.md/AGENTS.md cannot contaminate runs.
     work_base = Path(tempfile.mkdtemp(prefix=f"pixellab-pip-bench-{stamp}-"))
     try:
@@ -821,9 +848,12 @@ def main() -> int:
                     for agent in agents:
                         for variant in variants:
                             done += 1
-                            print(f"[{done}/{total}] {scenario['id']} / {agent} / {variant} / rep {rep}", flush=True)
-                            cells.append(run_cell(agent, scenario, variant, contexts[variant], rep, args, cells_dir))
-                            # Checkpoint after every cell so an interrupt/crash keeps completed work for --rescore.
+                            reused = completed.get(cell_id_for(scenario["id"], agent, variant, rep))
+                            print(f"[{done}/{total}] {scenario['id']} / {agent} / {variant} / rep {rep}"
+                                  + (" (cached)" if reused else ""), flush=True)
+                            cells.append(reused if reused is not None
+                                         else run_cell(agent, scenario, variant, contexts[variant], rep, args, cells_dir))
+                            # Checkpoint after every cell so an interrupt/crash keeps completed work for --rescore/--resume.
                             (out_dir / "results.json").write_text(json.dumps(cells, indent=2), encoding="utf-8")
 
         errors = [c for c in cells if c.get("error")]

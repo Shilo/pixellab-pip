@@ -314,6 +314,22 @@ class HelperCliSmokeTests(unittest.TestCase):
             with self.assertRaises(SystemExit):  # nonexistent report file
                 skill_benchmark.write_report_doc(Path(tmp) / "missing.md", block)
 
+    def test_skill_benchmark_resume_helpers(self) -> None:
+        self.assertEqual(
+            skill_benchmark.cell_id_for("route-hex-tiles", "claude", "current", 1),
+            "route-hex-tiles__claude__current__r1",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            d = Path(tmp)
+            (d / "results.json").write_text(json.dumps([
+                {"cell": "a__claude__current__r1", "checks_passed": 1},   # success -> reused
+                {"cell": "b__claude__current__r1", "error": "exit 1"},    # errored -> re-run
+                {"cell": "c__claude__current__r1", "dry_run": True},      # dry-run -> not a real result
+            ]), encoding="utf-8")
+            done = skill_benchmark.load_completed(d)
+            self.assertEqual(set(done), {"a__claude__current__r1"})
+            self.assertEqual(skill_benchmark.load_completed(d / "nope"), {})  # missing dir -> empty
+
     def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
         captured: dict[str, object] = {}
         original_which = tileset_sim.shutil.which
