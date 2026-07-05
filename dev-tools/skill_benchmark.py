@@ -40,6 +40,11 @@ SKILL_REL = Path("skills") / "pixellab-pip"
 DEFAULT_BASELINE = "pre-kiss-yagni-refactor"
 OPENCODE_MODELS = {"deepseek-v4-pro": "deepseek/deepseek-v4-pro"}
 AGENTS = ("claude", "codex", *OPENCODE_MODELS)
+# Context-strategy arms in addition to git refs / "worktree" skill variants:
+#   vanilla  — no skill, no docs: the agent's own knowledge only
+#   mcp-docs — no skill, but PixelLab's official MCP docs injected (the pixellab.ai/mcp "pro tip")
+SPECIAL_VARIANTS = ("vanilla", "mcp-docs")
+MCP_DOCS_URL = "https://api.pixellab.ai/mcp/docs"
 
 # ponytail: no pricing table — report native cost where the CLI exposes it, tokens otherwise.
 
@@ -51,6 +56,18 @@ REFERENCES_READ: <comma-separated references/*.md paths you actually read, or no
 --- SKILL.md ---
 {skill}
 --- END SKILL.md ---
+
+User request: {task}"""
+
+VANILLA_PREAMBLE = """You are a coding agent helping a user with PixelLab, the pixel-art generation service at api.pixellab.ai. {network_rule}
+
+User request: {task}"""
+
+MCP_DOCS_PREAMBLE = """You are a coding agent helping a user with PixelLab, the pixel-art generation service. The official PixelLab MCP documentation from {url} is included below. {network_rule}
+
+--- PIXELLAB MCP DOCS ---
+{docs}
+--- END DOCS ---
 
 User request: {task}"""
 
@@ -172,27 +189,62 @@ def variant_files(skill_dir: Path) -> dict[str, str]:
     return files
 
 
+def fetch_mcp_docs(out_dir: Path) -> str:
+    import urllib.request
+
+    request = urllib.request.Request(MCP_DOCS_URL, headers={"User-Agent": "pixellab-pip-skill-benchmark"})
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            text = response.read().decode("utf-8", "replace")
+    except OSError as exc:
+        raise SystemExit(f"could not fetch {MCP_DOCS_URL} for the mcp-docs variant: {exc}")
+    (out_dir / "mcp-docs.md").write_text(text, encoding="utf-8")  # audit copy of what was injected
+    return text
+
+
+def build_contexts(variants: list[str], work_base: Path, out_dir: Path) -> dict[str, dict]:
+    """Resolve each variant name to {kind, dir, context_text, files}."""
+    contexts: dict[str, dict] = {}
+    for variant in variants:
+        safe = re.sub(r"[^\w.-]", "-", variant)
+        if variant == "vanilla":
+            var_dir = work_base / safe
+            var_dir.mkdir(parents=True, exist_ok=True)
+            contexts[variant] = {"kind": "vanilla", "dir": var_dir, "context_text": "", "files": {}}
+        elif variant == "mcp-docs":
+            var_dir = work_base / safe
+            var_dir.mkdir(parents=True, exist_ok=True)
+            docs = fetch_mcp_docs(out_dir)
+            contexts[variant] = {"kind": "mcp-docs", "dir": var_dir, "context_text": docs, "files": {}}
+        else:
+            skill_dir = materialize_variant(variant, work_base / safe)
+            files = variant_files(skill_dir)
+            contexts[variant] = {"kind": "skill", "dir": skill_dir, "context_text": files["SKILL.md"], "files": files}
+    return contexts
+
+
 def scenario_refs(scenario: dict, files: dict[str, str]) -> list[str]:
     return [path for path in files if any(sub in path for sub in scenario.get("refs_any", []))]
 
 
-def static_report(variants: dict[str, Path]) -> dict:
+def static_report(contexts: dict[str, dict]) -> dict:
     """Deterministic context-size comparison; tokens are chars/4 ESTIMATES."""
     out: dict = {"note": "token counts are estimated as chars/4", "variants": {}, "scenarios": {}}
-    per_variant_files = {name: variant_files(path) for name, path in variants.items()}
-    for name, files in per_variant_files.items():
+    for name, ctx in contexts.items():
+        files = ctx["files"]
         out["variants"][name] = {
+            "kind": ctx["kind"],
             "files": {p: {"chars": len(t), "words": len(t.split()), "est_tokens": est_tokens(t)} for p, t in files.items()},
-            "total_est_tokens": sum(est_tokens(t) for t in files.values()),
-            "skill_md_est_tokens": est_tokens(files["SKILL.md"]),
+            "context_est_tokens": est_tokens(ctx["context_text"]),
+            "total_est_tokens": (sum(est_tokens(t) for t in files.values()) if files else est_tokens(ctx["context_text"])),
         }
     for scenario in SCENARIOS:
         row = {}
-        for name, files in per_variant_files.items():
-            refs = scenario_refs(scenario, files)
+        for name, ctx in contexts.items():
+            refs = scenario_refs(scenario, ctx["files"])
             row[name] = {
                 "refs": refs,
-                "context_est_tokens": est_tokens(files["SKILL.md"]) + sum(est_tokens(files[r]) for r in refs),
+                "context_est_tokens": est_tokens(ctx["context_text"]) + sum(est_tokens(ctx["files"][r]) for r in refs),
             }
         out["scenarios"][scenario["id"]] = row
     return out
@@ -395,13 +447,22 @@ def parse_self_reported_refs(response: str) -> list[str]:
     return [chunk.strip() for chunk in match.group(1).split(",") if ".md" in chunk]
 
 
-def run_cell(agent: str, scenario: dict, variant: str, skill_dir: Path, rep: int, args, cells_dir: Path) -> dict:
+def build_prompt(ctx: dict, scenario: dict) -> str:
+    network_rule = LIVE_RULE if scenario.get("live") else DRY_RULE
+    if ctx["kind"] == "skill":
+        return PREAMBLE.format(network_rule=network_rule, skill=ctx["context_text"], task=scenario["task"])
+    if ctx["kind"] == "mcp-docs":
+        return MCP_DOCS_PREAMBLE.format(url=MCP_DOCS_URL, network_rule=network_rule, docs=ctx["context_text"], task=scenario["task"])
+    return VANILLA_PREAMBLE.format(network_rule=network_rule, task=scenario["task"])
+
+
+def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args, cells_dir: Path) -> dict:
     cell_id = f"{scenario['id']}__{agent}__{variant.replace('/', '-')}__r{rep}"
     cell_dir = cells_dir / cell_id
     cell_dir.mkdir(parents=True, exist_ok=True)
     live = bool(scenario.get("live"))
-    skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
-    prompt = PREAMBLE.format(network_rule=LIVE_RULE if live else DRY_RULE, skill=skill_text, task=scenario["task"])
+    skill_dir = ctx["dir"]
+    prompt = build_prompt(ctx, scenario)
 
     exe_name = "opencode" if agent in OPENCODE_MODELS else agent
     exe = shutil.which(exe_name) or (exe_name if args.dry_run else None)
@@ -497,26 +558,32 @@ def delta(baseline, current):
 def write_markdown(out_dir: Path, static: dict, summary: dict, variants: list[str], errors: list[dict]) -> None:
     lines = [f"# pixellab-pip skill benchmark ({out_dir.name})", ""]
     baseline, current = variants[0], variants[-1]
-    lines += [f"Variants: baseline `{baseline}` vs current `{current}`. Static tokens are chars/4 estimates.", ""]
-    lines += ["## Static context size (estimated tokens)", "", "| Scope | " + " | ".join(variants) + " | delta |", "|---|" + "---|" * (len(variants) + 1)]
-    skill_row = [str(static["variants"][v]["skill_md_est_tokens"]) for v in variants]
-    lines.append("| SKILL.md (always loaded) | " + " | ".join(skill_row) + f" | {delta(static['variants'][baseline]['skill_md_est_tokens'], static['variants'][current]['skill_md_est_tokens'])} |")
-    total_row = [str(static["variants"][v]["total_est_tokens"]) for v in variants]
-    lines.append("| SKILL.md + all references | " + " | ".join(total_row) + f" | {delta(static['variants'][baseline]['total_est_tokens'], static['variants'][current]['total_est_tokens'])} |")
+    lines += [
+        f"Variants (columns): {', '.join(f'`{v}`' for v in variants)}. Delta compares last (`{current}`) against first (`{baseline}`). Static tokens are chars/4 estimates.",
+        "",
+        "## Static context size (estimated tokens)",
+        "",
+        "| Scope | " + " | ".join(variants) + " | delta |",
+        "|---|" + "---|" * (len(variants) + 1),
+    ]
+    context_row = [static["variants"][v]["context_est_tokens"] for v in variants]
+    lines.append("| Injected context (SKILL.md / MCP docs / none) | " + " | ".join(map(str, context_row)) + f" | {delta(context_row[0], context_row[-1])} |")
+    total_row = [static["variants"][v]["total_est_tokens"] for v in variants]
+    lines.append("| Context + all skill references | " + " | ".join(map(str, total_row)) + f" | {delta(total_row[0], total_row[-1])} |")
     for scenario_id, row in static["scenarios"].items():
         values = [row[v]["context_est_tokens"] for v in variants]
-        lines.append(f"| scenario {scenario_id} (SKILL + expected refs) | " + " | ".join(map(str, values)) + f" | {delta(values[0], values[-1])} |")
+        lines.append(f"| scenario {scenario_id} (context + expected refs) | " + " | ".join(map(str, values)) + f" | {delta(values[0], values[-1])} |")
     if summary:
         lines += ["", "## Agent sessions (medians)", ""]
-        lines += ["| Scenario | Agent | Metric | " + f"{baseline} | {current} | delta |", "|---|---|---|---|---|---|"]
+        lines += ["| Scenario | Agent | Metric | " + " | ".join(variants) + " | delta |", "|---|---|---|" + "---|" * (len(variants) + 1)]
         for scenario_id, agents in summary.items():
             for agent, per_variant in agents.items():
-                base, cur = per_variant.get(baseline, {}), per_variant.get(current, {})
                 for metric in ("median_total_input_tokens", "median_output_tokens", "median_cost_usd", "median_duration_ms", "checks_rate"):
-                    b, c = base.get(metric), cur.get(metric)
-                    if b is None and c is None:
+                    values = [per_variant.get(v, {}).get(metric) for v in variants]
+                    if all(value is None for value in values):
                         continue
-                    lines.append(f"| {scenario_id} | {agent} | {metric.replace('median_', '')} | {b} | {c} | {delta(b, c)} |")
+                    cells = " | ".join("" if value is None else str(value) for value in values)
+                    lines.append(f"| {scenario_id} | {agent} | {metric.replace('median_', '')} | {cells} | {delta(values[0], values[-1])} |")
     if errors:
         lines += ["", "## Errors", ""] + [f"- `{e['cell']}`: {e['error']}" for e in errors]
     (out_dir / "SUMMARY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -542,7 +609,11 @@ def rescore(out_dir: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--agents", default="claude", help=f"comma list from: {', '.join(AGENTS)}")
-    parser.add_argument("--variants", default=f"{DEFAULT_BASELINE},worktree", help="comma list of git refs or 'worktree'; first=baseline, last=current")
+    parser.add_argument(
+        "--variants",
+        default=f"{DEFAULT_BASELINE},worktree",
+        help="comma list of git refs, 'worktree', 'vanilla' (no context), or 'mcp-docs' (official https://api.pixellab.ai/mcp/docs injected); first=baseline, last=current",
+    )
     parser.add_argument("--scenarios", default="", help="comma list of scenario ids (default: all applicable)")
     parser.add_argument("--reps", type=int, default=3)
     parser.add_argument("--timeout", type=int, default=300, help="seconds per agent run")
@@ -596,10 +667,10 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     # Workspaces live OUTSIDE the repo so parent-dir CLAUDE.md/AGENTS.md cannot contaminate runs.
     work_base = Path(tempfile.mkdtemp(prefix=f"pixellab-pip-bench-{stamp}-"))
-    skill_dirs = {v: materialize_variant(v, work_base / re.sub(r"[^\w.-]", "-", v)) for v in variants}
+    contexts = build_contexts(variants, work_base, out_dir)
     print(f"Workspaces: {work_base}")
 
-    static = static_report(skill_dirs)
+    static = static_report(contexts)
     (out_dir / "static.json").write_text(json.dumps(static, indent=2), encoding="utf-8")
     (out_dir / "meta.json").write_text(
         json.dumps({"stamp": stamp, "variants": variants, "agents": agents, "reps": args.reps,
@@ -619,7 +690,7 @@ def main() -> int:
                     for variant in variants:
                         done += 1
                         print(f"[{done}/{total}] {scenario['id']} / {agent} / {variant} / rep {rep}", flush=True)
-                        cells.append(run_cell(agent, scenario, variant, skill_dirs[variant], rep, args, cells_dir))
+                        cells.append(run_cell(agent, scenario, variant, contexts[variant], rep, args, cells_dir))
         (out_dir / "results.json").write_text(json.dumps(cells, indent=2), encoding="utf-8")
 
     errors = [c for c in cells if c.get("error")]

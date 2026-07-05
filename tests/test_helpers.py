@@ -203,7 +203,7 @@ class HelperCliSmokeTests(unittest.TestCase):
 
         def fake_run_cli(command, stdin_text, timeout, cell_dir, cwd):
             agent = captured["current"]
-            captured[agent] = {"command": command, "cwd": Path(cwd)}
+            captured[agent] = {"command": command, "cwd": Path(cwd), "stdin": stdin_text}
             return 0, fake_stdout[agent], "", 7
 
         args = argparse.Namespace(dry_run=False, timeout=5, model_claude=None, model_codex=None)
@@ -216,13 +216,22 @@ class HelperCliSmokeTests(unittest.TestCase):
                 skill_dir = Path(tmp) / "skill"
                 skill_dir.mkdir()
                 (skill_dir / "SKILL.md").write_text("skill body", encoding="utf-8")
+                ctx = {"kind": "skill", "dir": skill_dir, "context_text": "skill body", "files": {}}
                 cells_dir = Path(tmp) / "cells"
                 cells: dict[str, dict] = {}
                 for agent in ("claude", "codex", "deepseek-v4-pro"):
                     captured["current"] = agent
-                    cells[agent] = skill_benchmark.run_cell(agent, scenario, "worktree", skill_dir, 1, args, cells_dir)
+                    cells[agent] = skill_benchmark.run_cell(agent, scenario, "worktree", ctx, 1, args, cells_dir)
                     self.assertNotIn("error", cells[agent], msg=str(cells[agent]))
                     self.assertEqual(cells[agent]["checks_passed"], cells[agent]["checks_total"])
+                self.assertIn("skill body", captured["claude"]["stdin"])
+                # vanilla arm: no skill text injected
+                captured["current"] = "claude"
+                vanilla_ctx = {"kind": "vanilla", "dir": skill_dir, "context_text": "", "files": {}}
+                vanilla_cell = skill_benchmark.run_cell("claude", scenario, "vanilla", vanilla_ctx, 1, args, cells_dir)
+                self.assertNotIn("error", vanilla_cell, msg=str(vanilla_cell))
+                self.assertNotIn("skill body", captured["claude"]["stdin"])
+                self.assertNotIn("SKILL.md", captured["claude"]["stdin"])
                 # regression: codex 0.142.5 rejects --ask-for-approval
                 self.assertNotIn("--ask-for-approval", captured["codex"]["command"])
                 # regression: every agent must run inside the variant workspace to read references/*.md
@@ -261,9 +270,9 @@ class HelperCliSmokeTests(unittest.TestCase):
             run_dirs = list(Path(out_base).iterdir())
             self.assertEqual(len(run_dirs), 1)
             summary = (run_dirs[0] / "SUMMARY.md").read_text(encoding="utf-8")
-            self.assertIn("SKILL.md (always loaded)", summary)
+            self.assertIn("Injected context", summary)
             static = json.loads((run_dirs[0] / "static.json").read_text(encoding="utf-8"))
-            self.assertGreater(static["variants"]["worktree"]["skill_md_est_tokens"], 0)
+            self.assertGreater(static["variants"]["worktree"]["context_est_tokens"], 0)
             self.assertIn("Results:", completed.stdout)
 
     def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
