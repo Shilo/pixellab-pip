@@ -5,6 +5,9 @@
 # PixelLab Pip
 
 [![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
+[![Build provenance attested](https://img.shields.io/badge/build_provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations)
+[![ClawHub security audit](https://img.shields.io/badge/ClawHub-security_audit-2b7fff)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
+[![VirusTotal scan report](https://img.shields.io/badge/VirusTotal-scan_report-394eff?logo=virustotal&logoColor=white)](https://github.com/Shilo/pixellab-pip/releases/latest)
 
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
 
@@ -271,7 +274,7 @@ Never paste the Secret into chat, commit it, print it in logs, copy browser sess
 
 What the skill uses: your PixelLab token — only as an auth header for PixelLab requests. Your MCP client passes it (or REST fallback references `PIXELLAB_SECRET` by name); Pip is designed never to read the token's value into the conversation, print it, log it, or store it. The skill also uses the `python` command for two small bundled helpers (completion sound and a background-removal check, which make no network calls of their own) and writes only to your project's `pixellab-pip-generations/` output folder and the skill's own config file. It never scans your other secrets, `.env` files, shell history, or browser sessions — and it works for guidance, setup, and routing with no token at all.
 
-Expected scan disclosures: Pip legitimately documents PixelLab bearer-token handling, official `api.pixellab.ai` documentation URLs, and a local sound-playback helper, so instruction scanners report those as informational findings — that is the disclosed design, reviewable line-by-line on the Code Scanning tab. No scanner can prove an instruction file safe; these are layered, independently verifiable checks, not a guarantee.
+Expected scan disclosures: Pip legitimately documents PixelLab bearer-token handling, official `api.pixellab.ai` documentation URLs, and a local sound-playback helper, so instruction scanners flag those as by-design findings. Each is dismissed on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning?query=is%3Aclosed) with a public, per-finding rationale you can read. No scanner can prove an instruction file safe; these are layered, independently verifiable checks, not a guarantee.
 
 ## Benchmark
 
