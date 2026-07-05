@@ -96,5 +96,8 @@ the image's full token cost. Zip is optional, for tidy multi-image bundles.
 
 ## Presets
 
-A hand-authored blueprint is a preset. Do not bundle preset packs until each is
-showcase-validated (standing policy against unverified tuning values).
+A hand-authored blueprint is a preset. Bundled example presets live in the skill's
+`blueprints/` folder. When the user names one without a path (e.g. "create the simple-image
+blueprint") and it semantically matches a file there, load and run it like an `@link`ed
+blueprint, applying any overrides. Ship only minimal format examples here — no packs of tuned
+prompts until each is showcase-validated (standing policy against unverified tuning values).

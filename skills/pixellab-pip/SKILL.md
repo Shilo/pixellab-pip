@@ -91,7 +91,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
 | PixelLab projects, sandbox, chat, deployed agents, MCP help/feedback | Read `references/mcp-platform-tools.md` before using `list_projects`, `sandbox_*`, `chat_*`, or `agent_*` tools. | No public REST v2 equivalent is documented. |
-| Recreate/replay a past generation, or a supplied `*.blueprint.json` | Read `references/blueprint.md`; map the blueprint's recorded route to an available surface, apply any user overrides, and never rewrite the source. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
+| Recreate/replay a past generation, a named preset, or a supplied `*.blueprint.json` | Read `references/blueprint.md`; for a named preset with no path, look in the skill's `blueprints/` folder for a semantic match. Map the recorded route to an available surface, apply any user overrides, never rewrite the source. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
 
 ## Clarify Only For Collisions
 

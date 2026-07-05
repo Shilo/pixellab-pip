@@ -1,0 +1,5 @@
+{
+  "POST /v2/create-image-pixen": {
+    "description": "a red apple"
+  }
+}
