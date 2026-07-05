@@ -9,8 +9,10 @@ account or cost metadata. That makes a blueprint safe and easy to share.
 
 ## What's inside
 
-The file is named `<name>.blueprint.json`. The single key is the route; its value is the exact
-request that produced the asset:
+A blueprint file is named `<name>.blueprint.json` and comes in two shapes.
+
+**One generation** — a single object whose only key is the route, with the exact request as its
+value:
 
 ```json
 {
@@ -21,11 +23,22 @@ request that produced the asset:
 ```
 
 Only the fields that matter are included — anything left out uses PixelLab's default, so a
-one-line blueprint is perfectly valid. Image inputs (a source, reference, style, or mask
-image) are referenced by a relative filename kept next to the blueprint.
+one-line blueprint is perfectly valid. Image inputs (a source, reference, style, or mask image)
+are referenced by a relative filename kept next to the blueprint.
 
-A blueprint can also be a JSON **array** of these objects — a multi-step "bundle" that runs in
-order, where a later step can build on an earlier step's output.
+**Multiple generations** — a JSON **array** of those objects, run top to bottom. A later step
+can use an earlier step's output by referencing its filename, so you can chain steps — for
+example, "make an image, then edit it":
+
+```json
+[
+  { "POST /v2/create-image-pixen": { "description": "a small mossy stone well, top-down", "seed": 123 } },
+  { "POST /v2/edit-image": { "image": "01-well.png", "description": "add a soft magical glow", "seed": 123 } }
+]
+```
+
+Here the second step edits the well the first step produced (saved as `01-well.png`). Each step
+spends credits, so the assistant confirms the plan before running a multi-step bundle.
 
 ## Creating a blueprint
 
