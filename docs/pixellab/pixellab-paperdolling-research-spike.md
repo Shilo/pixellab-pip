@@ -1,0 +1,474 @@
+# PixelLab Paperdolling Research Spike
+
+Generated: 2026-07-04.
+
+Scope: research a complete paperdolling system layered on top of PixelLab for RPG-style equipment, especially weapons that animate with a character and can be layered in a game engine. This is human/developer-facing research, not the canonical agent contract. Durable routing rules should be promoted into `skills/pixellab-pip/references/paperdolling.md` only after the wrapper design is implemented or proven.
+
+## Executive Summary
+
+PixelLab can generate the base character, animate the character, edit a character image, inpaint selected regions, edit short animation frame sets, transfer outfits to animation frames, estimate skeleton keypoints, and animate from skeleton keypoints. Current public REST/MCP surfaces do not expose semantic paperdoll layers, editor-native layer objects, isolated changed-part outputs, or a first-class "equipment layer" endpoint.
+
+That makes paperdolling a wrapper system rather than a single PixelLab call:
+
+```text
+base character frames
+  -> PixelLab same-canvas equipment composite
+  -> local layer extraction and QA
+  -> manifest + transparent equipment layer frames
+  -> composited previews + engine import package
+```
+
+The most promising near-term route is a Python-assisted "client-extracted layer" workflow. PixelLab creates a same-canvas composite by adding a weapon, armor, clothing, hair, or accessory to the base character. The wrapper then compares the composite against the unchanged base frame(s), extracts changed pixels into transparent layer images, verifies that the base body did not drift, and produces a package with previews, manifests, and failure diagnostics.
+
+The common two-PixelLab-call workflow of "add equipment, then ask AI to remove the character" can work as a manual fallback, but it spends an extra Pro edit, introduces another generative failure point, and can hallucinate missing or occluded equipment pixels. The wrapper should prefer one edit plus local extraction when QA passes; fall back to a second edit, a mask/inpaint route, or editor cleanup only when extraction fails.
+
+Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` returns keypoints, and `animate-with-skeleton` can generate frames from a keypoint sequence. Neither returns equipment-only layers. For paperdolling, skeleton data is best treated as anchoring metadata, hardpoint validation, and future authoring support, not as the primary layer extraction mechanism.
+
+## Spike Questions
+
+| Question | Finding | Verdict |
+|---|---|---|
+| Can PixelLab public APIs create native reusable equipment layers? | No public REST/MCP field currently returns semantic layers or isolated changed pixels. Editor surfaces can have layer-oriented output methods, but those are not REST/MCP contracts. | Not available as a native API feature |
+| Can a wrapper reduce the two-edit workflow to one edit? | Yes, for same-canvas opaque or mostly opaque equipment when the base pixels are preserved enough for alpha-aware differencing. | Promising |
+| Can this scale to animated weapons? | Yes, if every base/composite frame shares the same canvas, frame order, pivot, and direction, and if temporal QA rejects jitter/drift. | Promising but high risk |
+| Can skeleton data anchor equipment to hand bones? | Partially. Skeleton/keypoint data can define hardpoints and validate expected regions, but PixelLab does not expose a deterministic weapon attachment renderer. | Useful metadata, not complete solution |
+| Should this become a standalone app later? | Likely, if visual QA, masks, layer ordering, and manual correction become central to the workflow. A Python prototype can de-risk the deterministic parts first. | Future direction |
+
+## Current PixelLab Capability Boundary
+
+| Capability | Public surface | Output | Paperdoll implication |
+|---|---|---|---|
+| Managed base character | MCP `create_character`; REST `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro` | Managed character rotations and downloadable assets | Good source for standardized base frames. |
+| Managed dressed state | MCP `create_character_state`; REST `create-character-state` | New managed character variant across rotations | Useful for dressed previews, not reusable isolated layers. |
+| Managed character animation | MCP `animate_character`; REST `characters/animations` / `animate-character` | Managed animation frames by direction | Good for base animation; template output may still introduce style drift. |
+| Single image edit | REST `edit-image` | One edited composite image | Best low-complexity base for single-frame layer extraction. |
+| Pro/multi image edit | REST `edit-images-v2` | One or more edited composite images | Useful for small batches or consistent edits, still composite-only. |
+| Inpaint | REST `inpaint` / `inpaint-v3`; website/editor Inpaint | Edited/inpainted composite image | Better when a mask can restrict the weapon/body region. |
+| Edit animation | REST `edit-animation-v2` | Edited/composited frames | Useful for adding equipment to 2-16 frames, then extracting per-frame layers. |
+| Transfer outfit | REST `transfer-outfit-v2` | Outfit-transferred/composited frames | Good for clothing/armor reskins, but not equipment layers. |
+| Estimate skeleton | REST `estimate-skeleton` | Keypoints with labels and z-index-like data | Useful to infer hardpoints and body regions. |
+| Animate with skeleton | REST `animate-with-skeleton` | Generated animation frames | Useful for raw skeleton generation, not layer isolation. |
+| Aseprite extension changes-only layer | Visible editor/private extension workflow | Editor layer when verified | Useful manual/editor workflow and design reference, not a public REST/MCP contract. |
+
+Important official-doc nuance:
+
+- `edit-image`, `edit-images-v2`, `inpaint-v3`, `edit-animation-v2`, and `transfer-outfit-v2` are documented as returning edited images or frames, not native layer files.
+- MCP docs currently list managed character/state/animation tools, object/tile/UI helpers, and related utilities, but not generic image-edit or inpaint equivalents.
+- `animate-with-skeleton` defaults are side/east in the public schema; RPG paperdoll workflows should set `view` and `direction` explicitly.
+
+## Aseprite Changes-Only Layer Findings
+
+PixelLab's Aseprite extension is the closest existing product behavior to the desired paperdoll workflow. The public docs describe an output method named `New layer with changes`, and the installed extension exposes the same option alongside `New layer`, `Modify current layer, only changes`, `Modify current layer`, and `New frame`.
+
+The important finding is that the extension does not look like a simple local image-diff script. As inspected in the locally installed extension on 2026-07-04:
+
+- The editor dialog exposes `output_method` as a user-selectable field.
+- The edit-image flow keeps `output_method` in request state, captures the edit image from the current sprite/frame/selection, encodes it as RGBA bytes, and sends the request to an extension/private operation path.
+- The request builder copies request data and encodes images; it does not appear to strip `output_method`.
+- The generation-preparation path treats both `New layer with changes` and `New layer` as requests to target a dedicated PixelLab generation layer instead of only a new frame.
+- The placement path creates or replaces Aseprite cels from returned image bytes. It handles selection placement and full-canvas placement, but no local per-pixel subtraction of base-vs-result was found there.
+- The websocket/result path receives returned image bytes and places them into cels. It special-cases discard behavior for `New layer with changes`, but no local changes-only extraction was found in the placement path.
+
+That suggests a split responsibility:
+
+```text
+Aseprite UI/Lua
+  captures source image and output_method
+  prepares target frame/layer/cel
+  sends request to extension/private backend
+  places returned image bytes into a dedicated PixelLab generation layer
+
+PixelLab extension/private backend
+  likely interprets output_method
+  likely decides whether result bytes are full output or changes-only output
+```
+
+This is an inference from the installed Lua code plus the public option docs, not an official public API guarantee. The public REST v2 OpenAPI schemas inspected for `edit-image`, `edit-images-v2`, `edit-animation-v2`, and `inpaint-v3` do not expose `output_method`. The portable wrapper should therefore not send `output_method` to public REST and should not call the Aseprite extension's private operation URLs.
+
+### Can This Work Outside Aseprite?
+
+Yes, but not by directly asking public REST for `New layer with changes`.
+
+The portable equivalent is:
+
+```text
+base PNG(s)
+  -> public PixelLab edit/inpaint/edit-animation route
+  -> returned composite PNG(s)
+  -> local Aseprite-parity changes-only extractor
+  -> transparent equipment layer PNG(s)
+  -> optional .aseprite workspace assembly
+```
+
+Aseprite itself can still be useful outside the visible extension workflow. Its documented Lua API can open/save sprites, create layers/cels, draw images, clear image regions, iterate pixels, and package the result into an `.aseprite` workspace. That means a future tool can create an Aseprite verification file with:
+
+- locked or clearly named base layer,
+- PixelLab composite layer,
+- extracted `weapon_front` / `weapon_back` candidate layers,
+- mask/diff heatmap QA layers,
+- frame tags matching the manifest.
+
+That workspace assembly should use Aseprite's documented CLI/Lua API, not the PixelLab extension internals.
+
+### Aseprite-Inspired Routes
+
+| Route | How it works | Public/portable? | Paperdoll role |
+|---|---|---:|---|
+| Aseprite extension `New layer with changes` | Artist runs PixelLab in Aseprite; extension/private backend returns pixels that the extension places in a dedicated generation layer. | No, visible/editor workflow only | Best manual/editor reference behavior. |
+| Public REST plus local extraction | Agent calls documented PixelLab edit route, then Python compares base and composite and copies changed pixels into a transparent PNG. | Yes | Default portable paperdoll route. |
+| Public REST plus Aseprite CLI assembly | Same as local extraction, then a Lua script builds a layered `.aseprite` file for artist QA. | Yes, if using documented Aseprite APIs | Good bridge between agent automation and artist editing. |
+| Extension-private operation replay | Send `output_method` to the extension operation URL outside Aseprite. | No | Do not build the skill or wrapper around this. |
+| `Modify current layer, only changes` | Extension writes changes into the selected layer. | Editor-only and destructive | Avoid as an automated default; useful only when an artist intentionally works in-place. |
+
+### Implementation Consequences
+
+The system plan should use the Aseprite extension as a behavioral benchmark, not a dependency:
+
+- Recreate the output artifact, not the private protocol.
+- Treat exact pixel equality as a fast path, then use tolerant alpha-aware extraction for small PixelLab redraw artifacts.
+- Add drift detection before extraction so body redraws do not turn into false equipment pixels.
+- Export a transparent layer PNG and a visual preview first; add `.aseprite` workspace assembly as an optional packaging step.
+- Once the extractor is proven, promote only the durable route into `skills/pixellab-pip/references/paperdolling.md`: "Aseprite-parity client-extracted layer" from public composites.
+
+## Traditional Paperdolling Patterns
+
+Classic sprite paperdolling is a deterministic asset alignment problem.
+
+The robust pattern is:
+
+```text
+one base animation contract
+  same canvas/cell size
+  same frame count
+  same frame order
+  same origin/pivot
+  same direction names/order
+  one or more transparent equipment layers
+  manifest that defines slots, draw order, hardpoints, and compatibility
+```
+
+Useful design lessons:
+
+- Frame-aligned equipment sheets are the baseline for pixel-art RPGs. Each item layer must match the character's animation grid exactly.
+- Layer order is not just "equipment over body." Real systems need slots such as `weapon_back`, `shield_back`, `body`, `clothes`, `arms`, `weapon_front`, `shield_front`, `hair_front`, `hat`, and `vfx`.
+- Top-down characters need front/back or direction-specific occlusion. A sword may be behind the torso in one frame and in front of the hand in another.
+- Held weapons benefit from per-frame hardpoints: `hand_r`, `hand_l`, `weapon_tip`, `muzzle`, `shield_center`, plus optional angle and scale.
+- Runtime systems should drive all layers from one animation clock. Independent sprite timers drift.
+- Engine sorting must treat the whole character as one world object, while child layer order handles the body/equipment stack.
+- Atlas trimming can introduce jitter unless pivots and source rectangles are preserved or explicitly declared.
+
+Engine implications:
+
+- Godot can use a root `Node2D` with synchronized layered `AnimatedSprite2D`/`Sprite2D` children. `Skeleton2D`/`Bone2D` helps with cutout rigs and IK, but is heavier than frame-aligned sprite layers.
+- Unity's Sprite Library/Sprite Resolver workflow is a native route for swapping categorized sprites. For multi-part characters, Sorting Groups keep the character sorting as a unit while child renderers handle internal order.
+- Phaser/Pixi workflows commonly use containers/layers and one animation state that advances every child layer together.
+- Spine-style systems formalize the bone/slot/attachment/skin/draw-order model. This is conceptually useful even when Pip outputs simple PNG layers and manifests.
+
+## AI-Assisted Paperdolling Patterns
+
+AI paperdolling does not yet have one stable industry-standard workflow. The emerging pattern is a stack of partial controls: a base/reference image for identity, masks for edit locality, pose or video guidance for motion, style/reference controls for consistency, and manual or automated QA to catch drift. Most AI sprite workflows produce composited spritesheets, not reusable layer sheets.
+
+Recurring AI workflows:
+
+| Workflow | Shape | Strengths | Weaknesses | Paperdoll label |
+|---|---|---|---|---|
+| Reference-image to spritesheet | Upload or generate one character reference, then generate a full spritesheet or animation from it. | Fast route from concept to animation; many current tools expose this flow. | Output is a full character animation, not separate equipment/body layers; frame consistency still needs QA. | Composite animation |
+| First-frame video to spritesheet | Generate a video from a character frame, extract key poses, then arrange frames into a sheet. | Good for motion exploration and hard-to-prompt actions. | Video frames can drift, blur, change scale, and lose pixel precision; layers are baked. | Composite animation source |
+| Masked inpaint/edit | Draw or compute a mask around the hand/head/torso, then ask AI to add or modify only that region. | Better base preservation than unconstrained text edits; natural fit for weapons/hats/outfits. | Returns edited composites unless the editor has a verified changes-only layer mode. | Composite, extractable if QA passes |
+| Asset combiner / bake-in | Place a generated weapon/item on one frame, send that combined frame into an animation/spritesheet model. | Practical way to make a sword/shield move with the character. | Bakes the item into every generated frame; not reusable across bodies without extraction or redrawing. | Baked equipment animation |
+| Two-pass add/remove | AI adds the equipment to the character, then AI removes the character from the result. | Common workaround when no layer output exists; can be easy for helmets or simple props. | Extra cost and second hallucination step; may delete item pixels or leave body fragments. | AI-extracted layer candidate, high QA risk |
+| Pose/control guided diffusion | Use pose, edge, depth, lineart, or skeleton controls plus a reference/style image. | Stronger spatial consistency than prompt-only generation; useful for multi-pose sheets. | Requires control inputs and model/tooling support; still produces composites unless paired with masks/layers. | Composite or generation control |
+| Image-prompt/style adapter | Use a reference image or adapter to preserve identity/style across generated frames. | Helps maintain character/equipment identity when varying pose. | Identity/style preservation is soft, not a layer guarantee. | Consistency control |
+| Custom model / style training | Train or tune on a game's sprites, body types, or equipment set. | Strong project-level consistency when enough data exists. | Heavy setup and still needs frame/layer contracts; may overfit. | Consistency control |
+| Per-frame regenerate and cleanup | Regenerate only bad frames; erase or fix frame-level artifacts in an editor. | Matches how current AI sprite tools expose practical QA. | Human/editor loop; can break layer reuse unless changes are tracked. | QA/remediation workflow |
+
+AI production guidance:
+
+- Treat AI as an accelerant for drawing fitted composites, not as proof that a reusable layer exists.
+- Prefer mask-first edits for paperdolling because uncontrolled image edits often redraw body pixels.
+- Prefer one source base frame/animation contract and make every AI edit target that unchanged base, not the previous edited result.
+- Use explicit reference controls when the tool supports them: base image, style image, pose/skeleton/keypoint image, palette/color image, seed, and frame count.
+- Keep "baked equipment animation" and "reusable equipment layer" as separate product outputs. Both are useful, but they solve different user needs.
+- Expect AI workflows to need curation: candidate selection, per-frame rejection, in-engine preview, and provenance tracking.
+
+## PixelLab-Specific User Workflow Today
+
+The user-described workflow is consistent with general AI pixel-art practice:
+
+1. Create and animate the base character.
+2. Edit the base image/frame to add the equipment.
+3. Edit again to remove the character.
+4. Save the remaining equipment image.
+5. Layer that equipment in the game engine.
+
+Public discussion around AI sprite sheets shows the same workaround: generate the character with equipment, then use a second prompt to remove the character and keep the fitted item. PixelLab's own Inpaint docs present adding a weapon to a character and changing outfits as intended edit use cases, but the public docs describe edited images, not reusable layer outputs.
+
+The second "remove character" edit has three problems:
+
+- It costs another generation/edit call.
+- It asks the model to reconstruct a hidden semantic layer rather than merely preserve a known composite.
+- It can delete legitimate equipment pixels, hallucinate occluded equipment, or leave body fragments.
+
+The proposed wrapper should keep that workflow as a fallback, but the primary route should be:
+
+```text
+base frame + edit prompt -> equipment composite -> alpha-aware difference extraction -> QA -> transparent layer
+```
+
+The broader AI ecosystem also suggests two important additions to the PixelLab wrapper:
+
+- A "baked animation" route should be offered honestly when the user only needs a character holding a weapon in a finished spritesheet.
+- A "reusable paperdoll layer" route should remain stricter: same-canvas edit, extraction, manifest, and QA before layer claims.
+
+## Candidate Approaches
+
+| Approach | How it works | Strengths | Weaknesses | Best use |
+|---|---|---|---|---|
+| Reference-to-spritesheet AI | Use a base/reference character image and generate a new animation or sheet with the equipment described. | Fast and common across current AI sprite tools. | Produces baked composites, not equipment layers; consistency varies. | Prototyping dressed/armed characters quickly. |
+| Video/key-pose workflow | Generate first-frame-guided video, extract key animation poses, then build a spritesheet. | Good for motion discovery and attack/gesture animation. | Poor layer reuse; pixel drift/blur risk; requires keyframe curation. | Motion ideation, not layer assets. |
+| Asset combiner bake-in | Generate or import an item, visually place it on a character frame, then animate the combined image. | Practical for weapons/shields that must move with the body. | Reusable layer is lost unless later extracted; occlusion is baked. | Composite equipment animations. |
+| Two-edit remove-character | PixelLab adds equipment, then PixelLab removes the character from the composite. | Simple mental model; can recover hidden item areas sometimes. | Extra cost; second generative failure; not deterministic; can leave fragments. | Manual fallback when diff extraction cannot isolate the item. |
+| Same-canvas diff extraction | PixelLab adds one equipment item to the unchanged base, then local code copies changed pixels into a transparent layer. | One paid edit; deterministic extraction; easy QA; preserves PixelLab/user pixels only. | Fails if the body is redrawn, shifted, recolored, or if equipment color matches body too closely. | Default API layer-image workflow. |
+| Masked inpaint plus diff | User/agent supplies a mask around the hand/head/torso, PixelLab edits only that area, then local extraction runs inside/near the mask. | Reduces unrelated redraws; better for tight placement. | Requires mask authoring and mask QA; output is still a composite. | High-value weapons, helmets, shields, and body-region edits. |
+| Pose/reference-controlled edit | Use pose, skeleton, edge, style, or image-reference controls when the chosen AI route supports them. | Better placement and identity consistency than prompt-only edits. | Control quality depends on the model/tool; still composite-only without extraction. | Advanced retry strategy and future hardpoint workflows. |
+| Edit-animation plus diff | PixelLab edits 2-16 animation frames consistently, then extraction runs frame-by-frame with temporal QA. | One route can handle a short animation segment. | Composite-only; frame drift and temporal jitter are high risk. | Animated weapon/outfit layer prototypes. |
+| Transfer outfit plus diff | PixelLab applies a reference outfit to frames; extraction isolates changed pixels. | Good for clothing/armor style transfer over animation. | Less suited to held weapons; still composite-only. | Outfit/armor variants, not weapon-specific first choice. |
+| Managed state/animation diff | Create a dressed managed character/state and compare to base managed character frames. | Can cover rotations and managed character flows. | Managed variants may not align pixel-perfectly; diff may capture whole body drift. | Dressed previews, maybe future batch experiments. |
+| Skeleton/hardpoint anchoring | Estimate skeleton/keypoints and derive per-frame hand/attachment anchors for placement and QA. | Adds data needed by engines; can validate region and expected movement. | Does not generate equipment-only layers; needs keypoint sequence for animation. | Future hardpoint manifest and engine exporters. |
+| Aseprite changes-only layer | Visible editor workflow writes only changed pixels to a layer, then agent verifies/export packages it. | Closest to native editor paperdolling. | Not headless; not stable REST/MCP; requires visible editor participation. | Artists already working in Aseprite. |
+
+## Recommended System Shape
+
+Name the output a "paperdoll package" rather than just a layer.
+
+Minimum package:
+
+```text
+paperdoll-pack/
+  base/
+    idle/south/frame-000.png
+  layers/
+    weapon_iron_sword/front/idle/south/frame-000.png
+    weapon_iron_sword/back/idle/south/frame-000.png
+  composites/
+    idle/south/frame-000.png
+  previews/
+    contact-sheet.png
+    blink.gif
+    mask-overlay.png
+  qa/
+    diff-heatmap.png
+    report.json
+  paperdoll.json
+```
+
+The manifest is the real contract. It should carry:
+
+- Character identity and source route.
+- Canvas size, frame size, origin, pivot, FPS, directions, animations, and frame order.
+- Layer names, slot names, layer order, and whether a layer is front/back split.
+- Equipment prompt and PixelLab route used.
+- Input images/job IDs/asset IDs where safe and useful.
+- Extraction thresholds and QA verdicts.
+- Per-frame hardpoints when available.
+- Engine export hints.
+
+## Extraction Algorithm
+
+Use local code to copy pixels from PixelLab/user outputs only. Do not draw, repaint, synthesize, or "fix" art locally unless explicitly labeled as non-PixelLab fallback.
+
+Recommended stack:
+
+- Pillow + NumPy for RGBA IO, alpha compositing, transparent PNGs, and simple previews.
+- OpenCV for absolute difference, thresholding, morphology, connected components, and optional drift checks.
+- scikit-image for SSIM, phase correlation, region properties, morphology helpers, and optional perceptual color difference.
+- imageio for frame sequence IO if Pillow alone becomes awkward.
+
+Algorithm:
+
+1. Normalize inputs.
+   - Load base `B_i` and composite `C_i` as same-size RGBA arrays.
+   - Require same canvas, frame count, frame order, origin, and transparency mode.
+   - Ignore transparent RGB for comparison, but preserve original alpha.
+2. Detect drift before extraction.
+   - Compare alpha masks and premultiplied luma.
+   - Accept no shift, or integer translation only when it is clearly import/padding drift and can be corrected without resampling.
+   - Fail on subpixel shift, rotation, scale, moved limbs, or inconsistent body silhouette.
+3. Compute alpha-aware difference.
+   - Premultiply RGB by alpha before differencing.
+   - Seed the mask from high-confidence RGB/alpha differences.
+   - Grow into lower-confidence neighboring differences so outlines do not break.
+4. Apply conservative cleanup.
+   - Use a small 3x3 close/open only to bridge cracks or remove isolated specks.
+   - Label connected components.
+   - Keep components that overlap the expected body/equipment region and have plausible area.
+   - Allow multiple components for boots, gloves, eyes, or split weapon glints.
+5. Construct the layer by copying pixels from the PixelLab composite.
+   - `layer[mask] = composite[mask]`
+   - Everywhere else remains transparent.
+6. Verify round trip.
+   - Composite `base + layer`.
+   - Ensure outside-mask pixels still match the base.
+   - Ensure the recomposed image matches the PixelLab composite within configured tolerance.
+7. For animation, run temporal QA.
+   - Check layer area, bounding box, centroid, component count, palette, and adjacent-frame mask overlap.
+   - Fail on jitter, popping, one-frame disappearances, body drift, or unexplained palette shifts.
+8. Generate previews.
+   - Transparent layer files.
+   - Final composites.
+   - Contact sheet.
+   - Blink/toggle GIF.
+   - Diff heatmap and mask overlay for inspection.
+   - Checkerboard previews only as clearly labeled QA artifacts, never final assets.
+
+Default thresholds should be conservative and tunable per project. A useful starting point for pixel art is high-confidence max-channel RGB delta around 18, alpha delta around 16, low-confidence grow threshold around 6, and component filters based on expected region/area rather than global magic numbers.
+
+## QA And Rejection Criteria
+
+Reject or require manual/editor cleanup when:
+
+- Canvas size, frame count, frame order, direction, or origin differs.
+- The base body, face, hands, or limbs are moved or redrawn.
+- The whole sprite changes palette or shading.
+- Changed area is too large for the requested equipment.
+- The extracted component includes duplicated body parts, full-body silhouettes, loose unregistered items, background, or edge artifacts.
+- Equipment pixels are hidden behind the body and cannot be reconstructed from the visible composite.
+- Equipment color is too close to base body/clothing colors to isolate safely.
+- Semi-transparent VFX need physically correct alpha reconstruction from only a flattened composite. This is underdetermined; use editor layers, masks, or composite-only labeling.
+- Animation layers flicker, jump, disappear, or change component count unexpectedly.
+
+Successful extraction must prove:
+
+- Same dimensions and transparent RGBA output.
+- Layer alpha is zero outside accepted changed pixels.
+- Nontransparent bounds overlap the intended body region or hardpoint.
+- Base plus layer visually reads as one coherent character.
+- Base plus layer matches the PixelLab composite enough for QA.
+- No local drawing or repainting was used.
+
+## Skeleton And Hardpoint Role
+
+Skeleton routes should be a second-stage enhancement:
+
+```text
+base frame(s)
+  -> estimate-skeleton
+  -> normalize keypoints
+  -> infer hand/head/torso/weapon hardpoints
+  -> use hardpoints for prompt wording, region masks, QA bounds, and game-engine manifest
+```
+
+Use skeletons for:
+
+- Hand/weapon anchor suggestions.
+- Direction-specific prompt text.
+- Expected body-region bounding boxes for extraction.
+- Per-frame hardpoints exported to the game engine.
+- Future keypoint authoring workflows.
+
+Do not treat skeletons as:
+
+- A deterministic equipment compositor.
+- A way to recover occluded weapon pixels.
+- A replacement for layer extraction QA.
+- A complete animation source from one estimated pose. `estimate-skeleton` estimates one pose; real skeleton animation needs a keypoint sequence.
+
+## Future Application Direction
+
+A complete product likely wants an app because paperdolling is visual:
+
+- Side-by-side base/composite/layer preview.
+- Blink comparison.
+- Per-frame timeline.
+- Mask editor.
+- Component accept/reject UI.
+- Layer order and front/back split editor.
+- Hardpoint editor.
+- Engine export presets.
+- Retry prompt builder with failed-QA diagnostics.
+
+The Python prototype should intentionally stop short of being a full editor. Its job is to prove the deterministic extraction, manifest, preview, and QA contracts.
+
+## Recommended Next Experiments
+
+1. Single-frame sword extraction.
+   - Base: one transparent south-facing RPG character frame.
+   - PixelLab route: `edit-image` or `edit-images-v2` adding a sword to the hand.
+   - Verify: extracted layer, round-trip composite, failure report if body changed.
+2. Masked weapon extraction.
+   - Add a hand/weapon region mask and compare against unmasked edit.
+   - Verify lower unrelated redraw rate.
+3. Eight-frame walk weapon extraction.
+   - Base: PixelLab-managed walk animation frames.
+   - PixelLab route: `edit-animation-v2` with "add the same sword to the right hand".
+   - Verify temporal bbox/centroid stability and frame order.
+4. Skeleton-assisted hardpoints.
+   - Run `estimate-skeleton` on base frames.
+   - Derive `hand_r`/`hand_l` anchors.
+   - Use anchors to validate expected weapon region and export manifest hardpoints.
+5. Front/back weapon split.
+   - Test whether extracted weapon pixels can be split into `weapon_back` and `weapon_front` by overlap against body alpha and/or manual masks.
+   - Determine whether automatic split is safe or needs editor confirmation.
+6. AI baked-animation comparison.
+   - Compare reference-to-spritesheet, first-frame video-to-sheet, and asset-combiner routes against the reusable-layer route.
+   - Verify which outputs are useful composites and which, if any, survive extraction into reusable layers.
+7. Mask-first versus prompt-only AI edit.
+   - Generate the same weapon with and without a mask.
+   - Measure unrelated base redraw rate, extraction success, and temporal stability.
+
+## Source Notes
+
+Official PixelLab:
+
+- [REST `llms.txt`](https://api.pixellab.ai/v2/llms.txt)
+- [REST OpenAPI](https://api.pixellab.ai/v2/openapi.json)
+- [Interactive REST docs](https://api.pixellab.ai/v2/docs)
+- [MCP docs](https://api.pixellab.ai/mcp/docs)
+- [General output method docs](https://www.pixellab.ai/docs/options/general)
+- [Edit image (Pro) docs](https://www.pixellab.ai/docs/tools/edit-image-pro)
+- [PixelLab Inpaint docs](https://www.pixellab.ai/docs/tools/inpaint)
+- [PixelLab home page editing/rotation claims](https://www.pixellab.ai/)
+
+Aseprite/editor findings:
+
+- [Aseprite scripting API](https://www.aseprite.org/api/)
+- [Aseprite Sprite API](https://www.aseprite.org/api/sprite)
+- [Aseprite Image API](https://www.aseprite.org/api/image)
+- [Aseprite layers docs](https://www.aseprite.org/docs/layers/)
+- Local PixelLab Aseprite extension inspected on 2026-07-04. Findings are summarized without local machine paths, line references, source snippets, or extension filename citations.
+
+AI sprite and diffusion workflow references:
+
+- [Scenario spritesheet workflow](https://help.scenario.com/articles/9088582240-create-spritesheets-with-scenario)
+- [Spritesheets.ai advanced editor and asset combiner](https://www.spritesheets.ai/tutorial/advanced-edits-and-playground)
+- [Sprite Sheet Diffusion paper](https://arxiv.org/html/2412.03685v2)
+- [ComfyUI inpainting workflow](https://docs.comfy.org/tutorials/basic/inpaint)
+- [Hugging Face Diffusers inpainting guide](https://huggingface.co/docs/diffusers/en/using-diffusers/inpaint)
+- [ControlNet paper](https://arxiv.org/abs/2302.05543)
+- [IP-Adapter paper](https://arxiv.org/abs/2308.06721)
+
+Traditional paperdoll and engine references:
+
+- [Universal LPC Sprite Sheet Character Generator](https://github.com/liberatedpixelcup/Universal-LPC-Spritesheet-Character-Generator)
+- [Liberated Pixel Cup style guide](https://lpc.opengameart.org/static/LPC-Style-Guide/build/styleguide.html)
+- [Spine runtimes](https://en.esotericsoftware.com/spine-using-runtimes/)
+- [Godot 2D skeletons](https://docs.godotengine.org/en/stable/tutorials/animation/2d_skeletons.html)
+- [Godot `RemoteTransform2D`](https://docs.godotengine.org/en/stable/classes/class_remotetransform2d.html)
+- [Unity Sprite Swap examples](https://docs.unity3d.com/Packages/com.unity.2d.animation%407.0/manual/ex-sprite-swap.html)
+- [Phaser animations](https://docs.phaser.io/phaser/concepts/animations)
+- [PixiJS containers](https://pixijs.com/8.x/guides/components/scene-objects/container)
+- [PixiJS spritesheets](https://pixijs.com/7.x/guides/components/sprite-sheets)
+- [Ascension paperdoll tutorial](https://www.ascensiongamedev.com/topic/1041-paperdoll-tutorial/)
+- [RPG Maker visual equipment discussion](https://forums.rpgmakerweb.com/threads/trying-to-implement-a-paper-doll-composite-sprite-visual-equipment-system.182351/)
+- [GameDev.net paperdoll discussion](https://gamedev.net/forums/topic/622607-2d-action-game-sprites-paper-doll-equipment-or-custom-characters-with-unchanging-appearance/)
+- [AI sprite-sheet equipment discussion](https://www.reddit.com/r/aigamedev/comments/1t2r1nn/armor_and_weapon_generation_for_2d_pixel_sprite/)
+
+Image-processing references:
+
+- [Pillow ImageChops](https://pillow.readthedocs.io/en/latest/reference/ImageChops.html)
+- [OpenCV array operations](https://docs.opencv.org/4.x/d2/de8/group__core__array.html)
+- [OpenCV thresholding](https://docs.opencv.org/4.x/d7/d1b/group__imgproc__misc.html)
+- [OpenCV connected components](https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html)
+- [OpenCV morphology](https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html)
+- [scikit-image structural similarity](https://scikit-image.org/docs/0.25.x/api/skimage.metrics.html)
+- [scikit-image registration](https://scikit-image.org/docs/stable/api/skimage.registration.html)
