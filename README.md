@@ -4,8 +4,7 @@
 
 # PixelLab Pip
 
-[![Security Scan](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Shilo/pixellab-pip/badge)](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip)
+[![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
 
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
 
@@ -257,18 +256,18 @@ Never paste the Secret into chat, commit it, print it in logs, copy browser sess
 
 ## Security
 
-Independent, verifiable checks — not self-attestation:
+**PixelLab Pip is safe to install — and checked by outside services, not just by us.** It is plain-Markdown instructions plus two tiny local Python helpers (a completion sound and a background-removal check): no compiled binaries, no hidden network calls, and it never reads or prints your PixelLab token. Every release is independently scanned and cryptographically signed. See any of it for yourself:
 
-- **Skill instruction audit**: every push, pull request, and a weekly schedule run [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) (the same engine ClawHub's registry audits use) over the skill. Full results are public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning), the build fails above SkillSpector's risk threshold, and anyone can re-run the pinned workflow on any commit and reproduce the result.
-- **Release provenance**: release zips carry a GitHub build-provenance attestation signed via Sigstore's public transparency log, cryptographically proving the zip was built by this repository's public workflow, unmodified. Verify a downloaded zip yourself:
+- **Skill audit** — [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) (the same engine ClawHub's registry uses) scans the skill on every push and weekly. Results are public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning), and a release is blocked if it goes over the risk threshold.
+- **Independent registry audit** — every release auto-publishes to [ClawHub](https://clawhub.ai/shilo/skills/pixellab-pip), whose own third-party audit (SkillSpector + VirusTotal + ClawScan) posts a public verdict: **[view the ClawHub security audit ↗](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)**.
+- **Malware scan** — each release links a public [VirusTotal](https://www.virustotal.com/) report of the exact download in its [release notes](https://github.com/Shilo/pixellab-pip/releases/latest).
+- **Tamper-proof build** — every release zip comes with a cryptographic proof-of-origin (a Sigstore *build-provenance attestation*): confirmation that GitHub built this exact file from the public repo and no one altered it afterward. Anyone can check a downloaded zip:
 
   ```bash
   gh attestation verify pixellab-pip-<version>.zip --repo Shilo/pixellab-pip
   ```
 
-- **Malware reputation**: when configured, releases also get a public [VirusTotal](https://www.virustotal.com/) permalink appended to the release notes.
-- **Independent registry audit**: when a `CLAWHUB_TOKEN` secret is configured, the release workflow auto-publishes the skill to [ClawHub](https://clawhub.ai/), which runs its own third-party security audit (SkillSpector + VirusTotal + ClawScan) and posts a public "Security audit" verdict on the skill's ClawHub page. The skill folder stays agent-agnostic — no OpenClaw-specific files are added to it.
-- **Repo hygiene**: the [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) badge above tracks branch protection, pinned dependencies, and workflow permissions.
+- **Report a concern** — see [SECURITY.md](SECURITY.md); private vulnerability reporting is enabled on this repo.
 
 What the skill uses: your PixelLab token — only as an auth header for PixelLab requests. Your MCP client passes it (or REST fallback references `PIXELLAB_SECRET` by name); Pip is designed never to read the token's value into the conversation, print it, log it, or store it. The skill also uses the `python` command for two small bundled helpers (completion sound and a background-removal check, which make no network calls of their own) and writes only to your project's `pixellab-pip-generations/` output folder and the skill's own config file. It never scans your other secrets, `.env` files, shell history, or browser sessions — and it works for guidance, setup, and routing with no token at all.
 

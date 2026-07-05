@@ -6,11 +6,11 @@ metadata:
   requires_api_key: false
   api_key_env: PIXELLAB_SECRET
   api_key_note: "Optional. Guidance, setup, routing, and docs need no key. Live PixelLab generation needs a bearer token, configured in the MCP client or as PIXELLAB_SECRET for REST v2 fallback; the skill uses it only as an auth header and never reads, prints, or stores its value."
-permissions:
-  env:
-    - PIXELLAB_SECRET
-  commands:
-    - python
+permissions: # declared least-privilege capabilities: reads env var PIXELLAB_SECRET, runs the python command, reads/writes its own output and config files
+  - env
+  - shell
+  - file_read
+  - file_write
 ---
 
 # PixelLab Pip

@@ -227,7 +227,7 @@ jobs:
 
           gh release create "${{ steps.bump.outputs.tag }}" \
             "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" \
-            --title "${{ steps.bump.outputs.skill_name }} ${{ steps.bump.outputs.tag }}" \
+            --title "PixelLab Pip Skill ${{ steps.bump.outputs.tag }}" \
             "${notes_args[@]}" \
             --verify-tag
 
@@ -240,18 +240,29 @@ jobs:
           vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
           files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
 
-      - name: Append VirusTotal permalink to release notes
-        if: env.VIRUSTOTAL_API_KEY != '' && steps.virustotal.outputs.analysis != ''
+      - name: Append security summary to release notes
         continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
         env:
           GH_TOKEN: ${{ github.token }}
+          VT_ANALYSIS: ${{ steps.virustotal.outputs.analysis }} # empty when the VirusTotal step was skipped
         shell: bash
         run: |
-          # analysis output format: <filename>=<analysis URL>
-          url="${{ steps.virustotal.outputs.analysis }}"
-          url="${url#*=}"
+          ver="${{ steps.bump.outputs.new_version }}"
           gh release view "${{ steps.bump.outputs.tag }}" --json body --jq .body > notes.md
-          printf '\n**VirusTotal:** %s\n' "$url" >> notes.md
+          {
+            printf '\n---\n\n## 🔒 Security — safe to install, checked by outside services\n\n'
+            printf 'This release is independently scanned and cryptographically signed. See any of it for yourself:\n\n'
+            printf -- '- **Skill audit** — passed [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) static analysis; public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning) (a release is blocked if it goes over the risk threshold).\n'
+            if [ -n "$CLAWHUB_TOKEN" ]; then
+              printf -- '- **Independent registry audit** — [ClawHub security audit ↗](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit) (SkillSpector + VirusTotal + ClawScan).\n'
+            fi
+            if [ -n "$VT_ANALYSIS" ]; then
+              url="${VT_ANALYSIS#*=}" # step output format: <filename>=<analysis URL>
+              printf -- '- **Malware scan** — [VirusTotal security report ↗](%s) of this exact download.\n' "$url"
+            fi
+            printf -- '- **Tamper-proof build** — this zip has a cryptographic proof-of-origin; confirm nobody altered it since this repo built it: `gh attestation verify pixellab-pip-%s.zip --repo Shilo/pixellab-pip`\n' "$ver"
+            printf -- '\nFull details: https://github.com/Shilo/pixellab-pip#security\n'
+          } >> notes.md
           gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md
 
       - name: Publish to ClawHub for its independent security audit

@@ -5,6 +5,7 @@ Last reviewed: 2026-07-03.
 ## Table of Contents
 
 - [Quality Assurance](#quality-assurance)
+- [Security Checks](#security-checks)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
@@ -28,6 +29,14 @@ Install the local QA dependencies first on a fresh checkout:
 ```powershell
 python -m pip install -r requirements-dev.txt
 ```
+
+## Security Checks
+
+The user-facing security story lives in the [README](../README.md#security): the SkillSpector skill audit (Code Scanning tab), the ClawHub independent registry audit, the VirusTotal malware scan, and the Sigstore build-provenance attestation. `SECURITY.md` holds the vulnerability-reporting policy.
+
+### OpenSSF Scorecard (maintainer-only)
+
+[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) runs weekly for repo-hygiene tracking, but is intentionally kept off the README and out of the Code Scanning tab. The score reads low and largely **cannot** be raised on a solo project: Scorecard measures supply-chain maturity for widely-depended-upon libraries, and its heaviest checks — `Code-Review` (requires a second developer to approve pull requests) and `Maintained` (penalizes repos under 90 days old) — are structurally unreachable for a one-person, mostly-Markdown skill, so they sit near zero no matter the effort. Read it as a rough hygiene signal (branch protection, workflow permissions, pinned dependencies), not a safety verdict — the SkillSpector skill audit is the check that actually matters here.
 
 ## Codex Local Plugin Testing
 
