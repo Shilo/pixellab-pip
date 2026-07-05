@@ -1,7 +1,7 @@
 param(
     [ValidateSet("full", "static", "dry-claude", "dry-all", "live-balance", "live-image", "list", "cancel")]
     [string]$Preset,
-    [int]$Reps = 3
+    [int]$Reps = 1  # 1 rep keeps the full preset at ~180 cells / 12 paid generations; pass -Reps 3 for tighter medians
 )
 
 # Convenience launcher for dev-tools/skill_benchmark.py. It only assembles the
