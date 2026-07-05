@@ -1,14 +1,16 @@
 # Developer
 
-Last reviewed: 2026-07-03.
+Last reviewed: 2026-07-05.
 
 ## Table of Contents
 
 - [Quality Assurance](#quality-assurance)
 - [Security Checks](#security-checks)
+  - [OpenSSF Scorecard (maintainer-only)](#openssf-scorecard-maintainer-only)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
+- [Skill Token Benchmark](#skill-token-benchmark)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
 
