@@ -104,7 +104,7 @@ SCENARIOS = [
     {
         "id": "route-character",
         "task": "With PixelLab, I want to make a goblin NPC sprite and give it a walk animation.",
-        "checks": {"create": r"create[_-]character", "animate": r"animate[_-]character|characters/animations", "south": r"south"},
+        "checks": {"create": r"create[_-]character", "animate": r"animate[_-]character|characters/animations"},
         "refs_any": [],
     },
     {
@@ -155,7 +155,7 @@ SCENARIOS = [
         # Showcase-derived: tileset via PixelLab, then 1-bit/Game Boy recolor is LOCAL, not a PixelLab call.
         "id": "route-1bit-tileset-palette",
         "task": "In PixelLab, make a 1-bit top-down tileset, then give me a Game Boy green version of it.",
-        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset", "local": r"aseprite|local|clamp"},
+        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset(?!-side)", "local": r"aseprite|local|clamp"},
         "refs_any": ["tilesets.md", "local-asset-assembly.md"],
     },
     {

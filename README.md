@@ -283,8 +283,8 @@ Reproducible measurement of what the skill costs an agent and how well it routes
 
 | Method | Routes to the exact PixelLab tool | Context injected up front |
 |---|---|---|
-| **PixelLab Pip skill** | **~100%** | ~7.2k tokens (+ references on demand) |
-| Official `mcp/docs` injected | ~50% | ~7.7k tokens (all, always) |
-| No skill (agent knowledge only) | ~30% | 0 |
+| **PixelLab Pip skill** | **~100%** | ~7.5k tokens (+ references on demand) |
+| Official `mcp/docs` injected | ~53% | ~7.7k tokens (all, always) |
+| No skill (agent knowledge only) | ~26% | 0 |
 
-Across 12 scenarios phrased as **plain human requests** (`claude`, 1 rep) — no tool names or "which endpoint" hints, so the only difference between arms is what that user would actually have: the skill, the docs link's content, or nothing — each agent *plans* the route and is scored only when it names the **exact** correct PixelLab tool (no partial credit for a plausible-sounding plan). The skill routed **every** scenario correctly; the official docs got about half (they carry the MCP inventory but not REST-only routes, local post-processing, or setup guidance); no skill was mostly lost. The skill injects about the same up-front context as the docs (~7.2k vs ~7.7k) and reads a reference only when a task needs it. The benchmark is **dry — it spends no PixelLab credits**. A dated, nondeterministic snapshot; see the full per-scenario tables and reproduce steps in the **[full benchmark report ↗](docs/pixellab-pip-benchmark.md)**.
+Across 12 scenarios phrased as **plain human requests** (`claude`, 1 rep) — no tool names or "which endpoint" hints, so the only difference between arms is what that user would actually have: the skill, the docs link's content, or nothing — each agent *plans* the route and is scored only when it identifies the correct PixelLab route (no partial credit for a plausible-sounding plan that names the wrong tool). The skill routed **every** scenario correctly; the official docs got about half (they carry the MCP inventory but not REST-only routes, local post-processing, or setup guidance); no skill was mostly lost. The skill injects about the same up-front context as the docs (~7.5k vs ~7.7k) and reads a reference only when a task needs it. The benchmark is **dry — it spends no PixelLab credits**. A dated, nondeterministic snapshot; see the full per-scenario tables and reproduce steps in the **[full benchmark report ↗](docs/pixellab-pip-benchmark.md)**.
