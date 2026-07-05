@@ -278,10 +278,10 @@ Expected scan disclosures: Pip legitimately documents PixelLab bearer-token hand
 
 Reproducible measurement of what the skill costs an agent and how well it routes, versus the alternatives. Produced by [`dev-tools/skill_benchmark.py`](dev-tools/skill_benchmark.py) — it measures the agent session (context tokens, output, cost, routing correctness), never PixelLab credits.
 
-| Method | Benchmark routing checks passed | Typical session context |
+| Method | Benchmark routing checks passed | Context injected up front |
 |---|---|---|
-| **PixelLab Pip skill** | **100%** | ~13.9k tokens |
-| Official `mcp/docs` injected | ~79% | ~15.3k tokens |
-| No skill (agent knowledge only) | ~19% | ~3.0k tokens |
+| **PixelLab Pip skill** | **~100%** | ~7.2k tokens (+ references on demand) |
+| Official `mcp/docs` injected | ~54% | ~7.7k tokens (all, always) |
+| No skill (agent knowledge only) | ~51% | 0 |
 
-The skill passed every routing check the benchmark scored, at about the same session context as injecting PixelLab's official docs and cheaper than its own pre-refactor version. Routing is scored by deterministic checks, not a model. These figures are a dated snapshot (`claude`, latest run) and routing runs are nondeterministic; the [full report](docs/pixellab-pip-benchmark.md) has the exact scenarios, all four arms, and reproducible context numbers.
+Across 13 routing scenarios — several drawn from the [showcase](docs/showcase/README.md) — the skill routed every check correctly, versus roughly half for injecting PixelLab's official docs or using no skill: the docs alone miss REST-only routes, local post-processing, and cost/ordering detail. The skill injects about the same up-front context as those docs (~7.2k vs ~7.7k) and reads a reference only when a task needs it. Routing is scored by deterministic checks, not a model; these are a dated `claude` snapshot (nondeterministic). Full tables and reproduce steps: [Benchmark ↗](docs/pixellab-pip-benchmark.md).

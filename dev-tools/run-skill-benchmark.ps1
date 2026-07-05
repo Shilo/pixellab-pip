@@ -70,7 +70,10 @@ if ($config.Paid) {
         Write-Error "Refusing to run a paid preset non-interactively (cannot confirm credit spend). Run it in an interactive terminal."
         exit 1
     }
-    $confirm = Read-Host "This preset SPENDS PixelLab credits. Type YES to continue"
+    # Ask the benchmark exactly how many credit-spending generations this run will do.
+    $plan = (& python $benchmark @($config.Args) --print-plan 2>$null | Out-String)
+    $gens = if ($plan -match 'paid_generations=(\d+)') { $Matches[1] } else { "an unknown number of" }
+    $confirm = Read-Host "This preset will spend up to $gens PixelLab generation(s), plus agent tokens. Type YES to continue"
     if ($confirm -ne "YES") { Write-Host "Cancelled."; exit 0 }
 }
 

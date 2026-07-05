@@ -133,6 +133,41 @@ SCENARIOS = [
         "refs_any": ["preset-skeleton-template-animations.md"],
     },
     {
+        # Showcase-derived: skill-icon SHEETS route to REST Create Image Pro, NOT the MCP UI tool.
+        "id": "route-skill-icons",
+        "task": "Plan the exact PixelLab route for a complete 8x8 sheet of 32px fantasy skill icons with rich illustrated (non-transparent) backgrounds. Name the tool/endpoint and key params. Plan only; call nothing.",
+        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro", "canvas": r"256", "opaque": r"no_background|opaque|illustrated"},
+        "refs_any": ["icons.md", "create-image-pro.md"],
+    },
+    {
+        # Showcase-derived: a texture-tile GRID is Create Image Pro, not an autotile tileset tool.
+        "id": "route-tiles-vs-tileset",
+        "task": "I want a grid of 16x16 unique textured minecraft-style tiles as a texture atlas — NOT a connected autotile tileset. Which PixelLab route, and why not a tileset tool? Brief; call nothing.",
+        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro", "atlas": r"atlas|texture"},
+        "refs_any": ["tilesets.md", "create-image-pro.md"],
+    },
+    {
+        # Showcase-derived: tileset via PixelLab, then 1-bit/Game Boy recolor is LOCAL, not a PixelLab call.
+        "id": "route-1bit-tileset-palette",
+        "task": "Create a 1-bit top-down tileset (black terrain, white transition stripes), then make a Game Boy green copy. Plan the route and say exactly how the recolor is produced. Brief; call nothing.",
+        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset", "local": r"aseprite|local|clamp"},
+        "refs_any": ["tilesets.md", "local-asset-assembly.md"],
+    },
+    {
+        # Showcase-derived: modular / 9-slice GUI kits route to the MCP UI-asset tool.
+        "id": "route-gui-modular",
+        "task": "Create a modular, 9-slice-compatible fantasy MMORPG GUI kit of reusable rectangular components. Which PixelLab tool fits modular UI pieces? Brief; call nothing.",
+        "checks": {"route": r"create[_-]ui[_-]asset", "modular": r"9[- ]?slice|modular"},
+        "refs_any": [],
+    },
+    {
+        # Skill-specific: transparent-came-back-with-background triggers verify-local-then-PixelLab-removal.
+        "id": "route-bg-removal-fallback",
+        "task": "I asked PixelLab for a transparent icon but it came back with a background. What does the skill do about it? Brief.",
+        "checks": {"removal": r"remove[_-]simple[_-]background|background remov", "local": r"local|verify|safe"},
+        "refs_any": ["background-removal.md"],
+    },
+    {
         "id": "live-balance",
         "task": "Check my PixelLab account balance using the REST API and report it per the skill.",
         "checks": {"balance": r"balance|credits", "number": r"\d"},
@@ -686,6 +721,7 @@ def main() -> int:
     parser.add_argument("--live", action="store_true", help="include live PixelLab scenarios (requires PIXELLAB_SECRET)")
     parser.add_argument("--allow-paid", action="store_true", help="also run credit-spending live scenarios")
     parser.add_argument("--dry-run", action="store_true", help="print planned CLI commands without executing")
+    parser.add_argument("--print-plan", action="store_true", help="print planned cell and paid-generation counts, then exit")
     parser.add_argument("--list", action="store_true", help="list scenarios and exit")
     parser.add_argument("--rescore", metavar="DIR", help="recompute checks/summary for a previous results dir")
     parser.add_argument("--report", metavar="FILE", help="rewrite the data tables in a published report markdown (between its BENCHMARK:GENERATED markers)")
@@ -730,6 +766,12 @@ def main() -> int:
     bad_agents = set(agents) - set(AGENTS)
     if bad_agents:
         raise SystemExit(f"unknown agents: {', '.join(sorted(bad_agents))}")
+
+    if args.print_plan:
+        paid = sum(1 for s in scenarios if s.get("paid"))
+        runs = len(variants) * len(agents) * args.reps
+        print(f"cells={len(scenarios) * runs} paid_generations={paid * runs}")
+        return 0
 
     stamp = utc_stamp()
     out_dir = Path(args.out) / stamp
