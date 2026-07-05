@@ -49,6 +49,13 @@ jobs:
         shell: bash
         run: python dev-tools/qa.py
 
+      - name: Run skill security scan
+        shell: bash
+        # Same pinned SkillSpector as security-scan.yml; blocks the release if the risk score exceeds its threshold.
+        run: |
+          python -m pip install "skillspector @ git+https://github.com/NVIDIA/skillspector.git@dde36f258729b5aec7c835295a9556e64a2def0c"
+          skillspector scan skills/pixellab-pip --no-llm
+
       - name: Find previous tag
         id: previous_tag
         shell: bash
