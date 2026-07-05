@@ -1,5 +1,5 @@
 {
-  "MCP create_character": {
+  "POST /v2/create-image-pixen": {
     "description": "a knight in shining armor holding a sword and shield"
   }
 }

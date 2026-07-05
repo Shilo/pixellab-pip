@@ -61,10 +61,15 @@ def variant_label(v: str) -> str:
 
 # ponytail: no pricing table — report native cost where the CLI exposes it, tokens otherwise.
 
-PREAMBLE = """You are a coding agent with the "pixellab-pip" Agent Skill loaded. Its SKILL.md is included below. The skill's reference files exist under references/*.md in your current working directory; read a reference file with your file-read tool only when SKILL.md's routing requires it for this request. {network_rule}
+# One neutral frame for every variant so the only difference is what the user would actually have on hand
+# (the skill / the docs link / nothing). PixelLab context comes from the user's own request, not the frame.
+FRAME = (
+    "You are a coding agent. Outline how you would fulfill the user's request below — the approach and "
+    "the specific tools or endpoints you would use — but do not run any commands or make any network, "
+    "API, or MCP calls; this is a planning exercise only."
+)
 
-Follow the skill exactly. End your reply with one final line:
-REFERENCES_READ: <comma-separated references/*.md paths you actually read, or none>
+PREAMBLE = FRAME + """ You have the "pixellab-pip" Agent Skill installed. Its SKILL.md is below, and its reference files live under references/*.md in your working directory; read one only if SKILL.md's routing calls for it.
 
 --- SKILL.md ---
 {skill}
@@ -72,11 +77,7 @@ REFERENCES_READ: <comma-separated references/*.md paths you actually read, or no
 
 User request: {task}"""
 
-VANILLA_PREAMBLE = """You are a coding agent helping a user with PixelLab, the pixel-art generation service at api.pixellab.ai. {network_rule}
-
-User request: {task}"""
-
-MCP_DOCS_PREAMBLE = """You are a coding agent helping a user with PixelLab, the pixel-art generation service. The official PixelLab MCP documentation from {url} is included below. {network_rule}
+MCP_DOCS_PREAMBLE = FRAME + """ The user included PixelLab's official MCP tool reference ({url}):
 
 --- PIXELLAB MCP DOCS ---
 {docs}
@@ -84,7 +85,9 @@ MCP_DOCS_PREAMBLE = """You are a coding agent helping a user with PixelLab, the 
 
 User request: {task}"""
 
-DRY_RULE = "Do not make any network, PixelLab API, or MCP calls; this is an answer/planning exercise only."
+VANILLA_PREAMBLE = FRAME + """
+
+User request: {task}"""
 
 # Every scenario is dry (no network, no PixelLab credits): the agent plans the route and we score the
 # response with regexes. Each scenario scores only on the DECISIVE routing signal(s) — the exact
@@ -94,78 +97,78 @@ DRY_RULE = "Do not make any network, PixelLab API, or MCP calls; this is an answ
 SCENARIOS = [
     {
         "id": "route-hex-tiles",
-        "task": "Which PixelLab tool should generate hex terrain tile variants? Answer briefly with the exact tool/endpoint.",
+        "task": "I'm using PixelLab and need a set of hex terrain tile variants for my game map.",
         "checks": {"tiles-pro": r"create[_-]tiles[_-]pro"},
         "refs_any": [],
     },
     {
         "id": "route-character",
-        "task": "I want an NPC goblin sprite with a walk animation via PixelLab. Which tools/endpoints, in what order? Brief plan only; call nothing.",
+        "task": "With PixelLab, I want to make a goblin NPC sprite and give it a walk animation.",
         "checks": {"create": r"create[_-]character", "animate": r"animate[_-]character|characters/animations", "south": r"south"},
         "refs_any": [],
     },
     {
         "id": "plan-item-icon-sheet",
-        "task": "Plan the exact PixelLab REST request (endpoint plus JSON body) for a transparent 8x8 sheet of 64 RPG inventory item icons at 32px per icon. Plan only; call nothing.",
+        "task": "Using PixelLab, make me one sheet of 64 RPG inventory item icons with transparent backgrounds.",
         "checks": {"endpoint": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
         "refs_any": ["icons.md", "item-icons.md"],
     },
     {
         "id": "cheap-animation",
-        "task": "What is the cheapest way to add a walk animation to my existing managed PixelLab character? Brief answer naming the mode and its documented cost.",
+        "task": "I already have a character in PixelLab. What's the cheapest way to give it a walk animation?",
         "checks": {"template": r"template", "cost": r"1\s*(generation|gen)"},
         "refs_any": ["cost-routing.md"],
     },
     {
         "id": "setup-codex",
-        "task": "How do I set up PixelLab MCP for the Codex CLI without exposing my token? Instructions only; change nothing.",
+        "task": "How do I connect PixelLab MCP to my Codex CLI without putting my token in a config file?",
         "checks": {"envvar": r"PIXELLAB_SECRET", "tokenfree": r"bearer-token-env-var|token[- ]free|secret setting"},
         "refs_any": ["setup.md", "credentials.md"],
     },
     {
         "id": "refuse-internal-endpoint",
-        "task": "Use /tilesets/create on api.pixellab.ai with my browser session token to make a tileset.",
+        "task": "Call PixelLab's /tilesets/create endpoint with my browser session token to make a tileset for me.",
         "checks": {"refusal": r"refus\w*|declin\w*|can(?:not|'?t)|won'?t|unsupported|undocumented|not (?:a )?(?:public|supported|documented|valid)|isn'?t (?:a )?(?:public|supported|documented)|use the public", "reroute": r"create[_-](topdown|sidescroller)[_-]tileset"},
         "refs_any": [],
     },
     {
         "id": "skeleton-pipeline",
-        "task": "Auto-rig my sprite and animate it from the skeleton via the PixelLab API. Which endpoints, in what order? Brief.",
+        "task": "In PixelLab, I want to auto-rig my sprite and then animate it from its skeleton.",
         "checks": {"estimate": r"estimate-skeleton", "animate": r"animate-with-skeleton"},
         "refs_any": ["preset-skeleton-template-animations.md"],
     },
     {
         # Showcase-derived: skill-icon SHEETS route to REST Create Image Pro, NOT the MCP UI tool.
         "id": "route-skill-icons",
-        "task": "Plan the exact PixelLab route for a complete 8x8 sheet of 32px fantasy skill icons with rich illustrated (non-transparent) backgrounds. Name the tool/endpoint and key params. Plan only; call nothing.",
+        "task": "Using PixelLab, make a sheet of 32px fantasy skill icons with rich illustrated backgrounds.",
         "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
         "refs_any": ["icons.md", "create-image-pro.md"],
     },
     {
         # Showcase-derived: a texture-tile GRID is Create Image Pro, not an autotile tileset tool.
         "id": "route-tiles-vs-tileset",
-        "task": "I want a grid of 16x16 unique textured minecraft-style tiles as a texture atlas — NOT a connected autotile tileset. Which PixelLab route, and why not a tileset tool? Brief; call nothing.",
+        "task": "With PixelLab, I want a grid of unique textured minecraft-style tiles — just a plain texture atlas, not a connected autotile tileset.",
         "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
         "refs_any": ["tilesets.md", "create-image-pro.md"],
     },
     {
         # Showcase-derived: tileset via PixelLab, then 1-bit/Game Boy recolor is LOCAL, not a PixelLab call.
         "id": "route-1bit-tileset-palette",
-        "task": "Create a 1-bit top-down tileset (black terrain, white transition stripes), then make a Game Boy green copy. Plan the route and say exactly how the recolor is produced. Brief; call nothing.",
+        "task": "In PixelLab, make a 1-bit top-down tileset, then give me a Game Boy green version of it.",
         "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset", "local": r"aseprite|local|clamp"},
         "refs_any": ["tilesets.md", "local-asset-assembly.md"],
     },
     {
         # Showcase-derived: modular / 9-slice GUI kits route to the MCP UI-asset tool.
         "id": "route-gui-modular",
-        "task": "Create a modular, 9-slice-compatible fantasy MMORPG GUI kit of reusable rectangular components. Which PixelLab tool fits modular UI pieces? Brief; call nothing.",
+        "task": "Using PixelLab, I need a modular, 9-slice-friendly fantasy MMORPG GUI kit.",
         "checks": {"route": r"create[_-]ui[_-]asset"},
         "refs_any": [],
     },
     {
         # Skill-specific: transparent-came-back-with-background triggers verify-local-then-PixelLab-removal.
         "id": "route-bg-removal-fallback",
-        "task": "I asked PixelLab for a transparent icon but it came back with a background. What does the skill do about it? Brief.",
+        "task": "I asked PixelLab for a transparent icon but it came back with a background. What should I do?",
         "checks": {"removal": r"remove[_-]simple[_-]background|background remov", "local": r"local|verify|safe"},
         "refs_any": ["background-removal.md"],
     },
@@ -477,10 +480,10 @@ def parse_self_reported_refs(response: str) -> list[str]:
 
 def build_prompt(ctx: dict, scenario: dict) -> str:
     if ctx["kind"] == "skill":
-        return PREAMBLE.format(network_rule=DRY_RULE, skill=ctx["context_text"], task=scenario["task"])
+        return PREAMBLE.format(skill=ctx["context_text"], task=scenario["task"])
     if ctx["kind"] == "mcp-docs":
-        return MCP_DOCS_PREAMBLE.format(url=MCP_DOCS_URL, network_rule=DRY_RULE, docs=ctx["context_text"], task=scenario["task"])
-    return VANILLA_PREAMBLE.format(network_rule=DRY_RULE, task=scenario["task"])
+        return MCP_DOCS_PREAMBLE.format(url=MCP_DOCS_URL, docs=ctx["context_text"], task=scenario["task"])
+    return VANILLA_PREAMBLE.format(task=scenario["task"])
 
 
 def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args, cells_dir: Path) -> dict:
