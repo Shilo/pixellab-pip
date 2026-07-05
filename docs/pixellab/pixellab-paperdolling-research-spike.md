@@ -445,6 +445,27 @@ Their layering surface is mostly Markdown guidance plus one bundled recipe and o
 - No reusable-vs-composite honesty labels beyond the recipe's prose `qa` notes.
 - No skeleton hardpoint manifest or hardpoint-bounded extraction.
 
+## External Paperdolling Survey Cross-Check (ChatGPT Deep Research)
+
+Reviewed 2026-07-05 against an external "Deep Research" survey of sprite-frame paperdolling for pixel-art RPGs (Aseprite, TexturePacker, Tiled, Spine/Spriter, atlas packing, palette discipline, diffusion-based AI methods, and AI copyright/licensing). It is a general, engine-agnostic survey of the whole problem space, not a PixelLab-specific design. Recorded here to separate what independently validates this spike from what is genuinely new and what does not apply to a hosted-PixelLab wrapper.
+
+Independent validation (already covered here): the base-animation frame contract (same canvas, frame count, frame order, pivot, direction), the semantic slot and z-order stack (`weapon_back … body … weapon_front … hair_front … fx`), front/back occlusion splits, per-frame hardpoints (`hand_r`, `weapon_tip`), one animation clock driving all layers, treating the character as one engine world object with child layer order, pivot/source-rectangle preservation to avoid trim jitter, and the split between baked composites and reusable layers. The survey reaches the same conclusions from the general-tooling side. Useful corroboration; it adds no new routing rule.
+
+Genuinely additive and accurate (worth carrying into the plan):
+
+- Atlas packaging discipline, with concrete starting points: trim transparent borders only if source-size metadata is preserved so the runtime can reconstruct untrimmed placement; 1-2 px border padding to stop neighbor bleed; 1 px extrude to stop edge flicker; atlas rotation off unless the loader supports rotated regions; conservative atlas max size (2048, raise to 4096 only when the target is validated); duplicate-frame detection to save area. The jitter concept was already here; the parameters are new and belong in the Engine Export phase.
+- Provenance and licensing is a real shipped-art concern this spike did not cover. The 2025 U.S. Copyright Office copyrightability report holds that AI output is protectable only where a human author contributes sufficient expression, not from prompts alone; Steam requires creators to disclose pre-generated and live-generated AI content; tool/model licenses (for example Adobe Firefly commercial terms, the Stability AI Community License revenue thresholds) attach their own conditions. For Pip the operative license is PixelLab's own terms of service, not these; the actionable rule is to keep a provenance log (route, prompt, seed, model, usage) and never assert copyright or licensing guarantees on the user's behalf.
+- Standard atlas manifest field names (`sourceSize`, `spriteSourceSize`, pivot stored in untrimmed frame space) are worth mirroring in the export manifest for drop-in interop with Pixi/Phaser/TexturePacker-style loaders.
+- Palette-class recolor (`skin`, `cloth_primary`, `metal`, `fx` as swappable classes) is a cheap variation axis in general paperdolling, but it manufactures new pixels locally and so is in tension with this system's pixel-provenance contract. Out of core scope unless recolor variants become an explicit product goal, and then only as a labeled user-approved transform.
+
+Challenged / not adopted (poor fit for a hosted-PixelLab wrapper, or already positioned):
+
+- The survey's AI depth assumes direct control of a raw diffusion pipeline: Diffusers img2img/inpaint, ControlNet conditioning, IP-Adapter, and LoRA/DreamBooth training. PixelLab is a hosted API that abstracts those controls behind its own routes; the wrapper cannot inject a ControlNet map or a project LoRA into a PixelLab call. This spike's AI-patterns table already captures what PixelLab-style tools actually expose, so the extra diffusion detail is background, not an actionable route.
+- Skeletal authoring (Spine/Spriter runtime skins, AnimationState mix durations of ~0.1-0.6 s, cross-rig retargeting) is an engine-runtime/animation concern downstream of layer production, not the extraction wrapper's job. Already positioned as engine-side here.
+- Post-generation pixelization/quantization (SD-πXL, cell-aware pixelization) is largely unnecessary because PixelLab output is already palette-native pixel art. The wrapper's palette job is drift detection across base and composite, not re-pixelizing a non-pixel model's output.
+- GPU texture compression (KTX 2.0 / Basis Universal, ASTC/ETC2/BC) is a per-target engine concern downstream of the exporter; keep it out of the Python extraction/QA core and revisit only if a specific export target requires it.
+- The survey does not address PixelLab's public-surface boundary, the same-canvas diff-extraction core, drift/temporal/round-trip QA, or the one-edit-plus-extraction versus two-pass remove-character cost tradeoff. This spike remains the authority on those; the survey complements it on downstream storage, packaging, and legal, it does not replace it.
+
 ## Source Notes
 
 Official PixelLab:
@@ -501,3 +522,11 @@ Image-processing references:
 - [OpenCV morphology](https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html)
 - [scikit-image structural similarity](https://scikit-image.org/docs/0.25.x/api/skimage.metrics.html)
 - [scikit-image registration](https://scikit-image.org/docs/stable/api/skimage.registration.html)
+
+External survey cross-check (added 2026-07-05; org-root references for the packaging and legal points carried into this spike):
+
+- [U.S. Copyright Office AI initiative and copyrightability report](https://www.copyright.gov/ai/)
+- [Stability AI Community License](https://stability.ai/community-license-agreement)
+- [Adobe Firefly](https://www.adobe.com/products/firefly.html)
+- [TexturePacker documentation](https://www.codeandweb.com/texturepacker/documentation)
+- [Khronos KTX / Basis Universal](https://www.khronos.org/ktx/)

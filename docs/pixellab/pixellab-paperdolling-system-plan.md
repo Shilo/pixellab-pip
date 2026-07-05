@@ -415,6 +415,14 @@ Generic export first:
 - `paperdoll.json`.
 - Contact sheets and QA report.
 
+Atlas packing discipline (when the exporter packs frames into a sheet):
+
+- Trim transparent borders only if `source_size` and `sprite_source_size` are stored so the runtime can reconstruct untrimmed placement; store pivots in untrimmed frame space.
+- Add 1-2 px border padding and 1 px extrude to stop neighbor bleed and edge flicker.
+- Leave atlas rotation off unless the target loader supports rotated regions.
+- Keep atlas max size conservative (2048; 4096 only when the target is validated); use duplicate-frame detection to save area.
+- These are starting points; a project overrides them once its target platform, texture budget, and loader are known. GPU texture compression (KTX2/Basis, ASTC/ETC2/BC) is a per-target concern left to the specific adapter, not the generic export.
+
 Then add engine adapters:
 
 - Godot: JSON manifest plus folder layout for layered `AnimatedSprite2D`/`Sprite2D` children; optional GDScript sample that drives all layers from one animation state.
@@ -572,6 +580,17 @@ Reviewed 2026-07-05 (v1.5.5). See the research spike's "PixelLab AI Skill Paperd
 | `estimate-skeleton` / `animate-with-skeleton` example payloads | Phase 5 skeleton/hardpoint inputs | Example payloads only; no hardpoint derivation or manifest on their side. |
 
 Smallest safe first borrow: a `validate-sprites`-style checker. It is a few lines of deterministic file/header checks, maps directly onto Phase 1's exit criteria (dimension-mismatch and frame-order tests over local PNGs), and needs no PixelLab calls. It validates already-separated layer files, so it complements — it does not replace — the Phase 1 extraction core, the drift/temporal/round-trip QA (Gates 2-5), or the reusable-vs-composite labeling. Adopting it early gives a shipped, testable QA surface while the extraction algorithm is still being proven.
+
+## Provenance And Licensing
+
+Shipped AI-generated art carries provenance and licensing weight this plan should surface, not resolve:
+
+- The operative license for Pip output is PixelLab's own terms of service. The wrapper must not assert copyright ownership or licensing guarantees on the user's behalf.
+- Keep a provenance log per item: route, prompt, seed, model/mode, job/asset IDs, and usage. The manifest already records `source_route`; Phase 3 already saves prompt/seed/usage, so extend the item entry with those when available.
+- If the user ships to a platform with AI-content rules (for example Steam's pre-generated and live-generated AI disclosure), that disclosure is the user's responsibility; the tool can note it but does not file it.
+- General AI-copyright guidance (e.g., the 2025 U.S. Copyright Office position that AI output is protectable only with sufficient human authorship, not from prompts alone) is context for users, not a gate the wrapper enforces.
+
+Keep this as user-facing context and provenance hygiene, not a compliance engine.
 
 ## Main Risks
 
