@@ -1,6 +1,13 @@
 PixelLab Pip is an unofficial, agent-agnostic PixelLab workflow router implemented as a portable Agent Skill. It teaches coding agents how to choose between documented PixelLab MCP tools, REST v2 endpoints, website/editor fallback, Aseprite, Pixelorama, and local asset assembly workflows with differing capabilities. The repository is mostly Markdown because the product is the routing contract itself: task detection, progressive reference loading, prompt normalization, image-role classification, credential handling, usage reporting, localization, and specialty workflows for sprites, tilesets, layered characters, edits, animation, and completion sounds.
 
-Design goal: Treat YAGNI and KISS as requirements. Keep the routing contract no larger than today's need; reuse existing structure before adding new text, while preserving safety, correctness, clarity, and verification.
+Design goal — refactor rules:
+
+- Priority order: functionality, correctness, and efficiency first; KISS second; YAGNI third. Shorter is not automatically better — challenge every cut and every addition before applying it.
+- Never remove rules protecting routing accuracy, public-vs-private PixelLab endpoint boundaries, secret/auth safety, paid-credit control, output integrity, or user trust. Deduplicate instead: each rule stated once — in SKILL.md if global, in one reference if route-specific.
+- KISS: one clear rule over overlapping restatements. References must not restate SKILL.md globals (it is always co-loaded); use a short pointer.
+- YAGNI: no speculative future-proofing, unused outputs/formats, redundant examples, or wording that does not change agent behavior.
+- Human-facing updates are rare and useful — blockers, necessary questions, meaningful milestones, final results per references/usage-reporting.md. PixelLab-facing prompts describe the visual result concisely and never repeat structured parameters (per SKILL.md Text Preparation).
+- Validate edits with `python dev-tools/qa.py` and `python -m pytest tests/test_helpers.py` (link/reference-existence checks and one exact prompt-limits table row are CI-enforced).
 
 Keep skills/pixellab-pip/SKILL.md limited to the core routing contract: common triggers, guardrails, surface selection rules, and pointers to deeper references. Move uncommon workflows, procedures, tool-specific edge cases, and specialty QA checklists into topic files under skills/pixellab-pip/references/. Common requests should resolve from SKILL.md alone; specialized requests should route predictably to the relevant topic reference.
 
