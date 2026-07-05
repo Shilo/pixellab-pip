@@ -284,4 +284,4 @@ Reproducible measurement of what the skill costs an agent and how well it routes
 | Official `mcp/docs` injected | ~79% | ~15.3k tokens |
 | No skill (agent knowledge only) | ~19% | ~3.0k tokens |
 
-The skill passed 100% of the benchmark's routing checks — at about the same session context as injecting PixelLab's official docs, and cheaper than its own pre-refactor version. Routing is scored by deterministic checks, not a model, and "100%" means every check in the benchmark suite. Full tables, methodology, and how to reproduce it yourself: [Benchmark ↗](docs/pixellab-pip-benchmark.md).
+The skill passed every routing check the benchmark scored, at about the same session context as injecting PixelLab's official docs and cheaper than its own pre-refactor version. Routing is scored by deterministic checks, not a model. These figures are a dated snapshot (`claude`, latest run) and routing runs are nondeterministic; the [full report](docs/pixellab-pip-benchmark.md) has the exact scenarios, all four arms, and reproducible context numbers.

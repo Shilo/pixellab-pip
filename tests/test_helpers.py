@@ -304,6 +304,12 @@ class HelperCliSmokeTests(unittest.TestCase):
             bad.write_text("no markers here", encoding="utf-8")
             with self.assertRaises(SystemExit):  # refuse to write a report lacking markers
                 skill_benchmark.write_report_doc(bad, block)
+            rev = Path(tmp) / "rev.md"
+            rev.write_text(f"{skill_benchmark.REPORT_MARK_END}\nx\n{skill_benchmark.REPORT_MARK_START}", encoding="utf-8")
+            with self.assertRaises(SystemExit):  # markers present but out of order
+                skill_benchmark.write_report_doc(rev, block)
+            with self.assertRaises(SystemExit):  # nonexistent report file
+                skill_benchmark.write_report_doc(Path(tmp) / "missing.md", block)
 
     def test_claude_renderer_uses_safe_no_tools_print_mode(self) -> None:
         captured: dict[str, object] = {}

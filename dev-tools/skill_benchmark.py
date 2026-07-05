@@ -7,7 +7,7 @@ pre-KISS/YAGNI tag vs the current working tree, across claude / codex / opencode
 (deepseek-v4-pro) CLIs. It measures the agent session only — never PixelLab credits.
 
 Modes:
-  --static            deterministic context-size comparison, no CLI calls (free)
+  --static            context-size comparison, no agent CLI calls (the mcp-docs arm still fetches the live doc)
   (default)           live agent runs; dry scenarios make no network/PixelLab calls
   --live              adds scenarios that call the PixelLab REST API (needs PIXELLAB_SECRET;
                       only the free GET /balance scenario unless --allow-paid)
@@ -640,9 +640,11 @@ def render_report_block(static: dict, summary: dict, variants: list[str], agents
 
 
 def write_report_doc(report_path: Path, block: str) -> None:
+    if not report_path.is_file():
+        raise SystemExit(f"--report file not found: {report_path}")
     text = report_path.read_text(encoding="utf-8")
-    if REPORT_MARK_START not in text or REPORT_MARK_END not in text:
-        raise SystemExit(f"{report_path} is missing the {REPORT_MARK_START} / {REPORT_MARK_END} markers")
+    if text.count(REPORT_MARK_START) != 1 or text.count(REPORT_MARK_END) != 1 or text.index(REPORT_MARK_START) > text.index(REPORT_MARK_END):
+        raise SystemExit(f"{report_path} needs exactly one {REPORT_MARK_START} before one {REPORT_MARK_END}")
     pre = text.split(REPORT_MARK_START, 1)[0]
     post = text.split(REPORT_MARK_END, 1)[1]
     report_path.write_text(f"{pre}{REPORT_MARK_START}\n{block}\n{REPORT_MARK_END}{post}", encoding="utf-8")
