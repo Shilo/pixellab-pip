@@ -234,6 +234,7 @@ jobs:
       - name: VirusTotal scan release asset
         id: virustotal
         if: env.VIRUSTOTAL_API_KEY != ''
+        continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
         uses: crazy-max/ghaction-virustotal@v5
         with:
           vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
@@ -241,6 +242,7 @@ jobs:
 
       - name: Append VirusTotal permalink to release notes
         if: env.VIRUSTOTAL_API_KEY != '' && steps.virustotal.outputs.analysis != ''
+        continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -254,6 +256,7 @@ jobs:
 
       - name: Publish to ClawHub for its independent security audit
         if: env.CLAWHUB_TOKEN != ''
+        continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
         env:
           CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
         shell: bash
