@@ -8,15 +8,14 @@ pre-KISS/YAGNI tag vs the current working tree, across claude / codex / opencode
 
 Modes:
   --static            context-size comparison, no agent CLI calls (the mcp-docs arm still fetches the live doc)
-  (default)           live agent runs; dry scenarios make no network/PixelLab calls
-  --live              adds scenarios that call the PixelLab REST API (needs PIXELLAB_SECRET;
-                      only the free GET /balance scenario unless --allow-paid)
+  (default)           dry agent runs — each agent plans the route and makes no network/PixelLab calls (no credits)
   --rescore DIR       recompute checks/summary from a previous run without CLI calls
+  --resume DIR        continue a prior run, reusing its already-successful cells
 
 Examples:
   python dev-tools/skill_benchmark.py --static
   python dev-tools/skill_benchmark.py --agents claude --reps 3
-  python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --scenarios route-hex-tiles,report-format
+  python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --scenarios route-hex-tiles,route-character
 """
 
 from __future__ import annotations
@@ -86,12 +85,11 @@ MCP_DOCS_PREAMBLE = """You are a coding agent helping a user with PixelLab, the 
 User request: {task}"""
 
 DRY_RULE = "Do not make any network, PixelLab API, or MCP calls; this is an answer/planning exercise only."
-LIVE_RULE = (
-    "You may call the public PixelLab REST v2 API with the bearer token in the PIXELLAB_SECRET "
-    "environment variable. Never print or echo the token."
-)
 
-# checks are case-insensitive regexes that must match the response (routing correctness gate).
+# Every scenario is dry (no network, no PixelLab credits): the agent plans the route and we score the
+# response with regexes. Each scenario scores only on the DECISIVE routing signal(s) — the exact
+# PixelLab tool/endpoint — so a plausible-but-wrong answer scores 0, not partial credit for guessable
+# parameters (image sizes, no_background, generic words).
 # refs_any lists filename substrings acceptable across BOTH skill variants (old and new names).
 SCENARIOS = [
     {
@@ -109,7 +107,7 @@ SCENARIOS = [
     {
         "id": "plan-item-icon-sheet",
         "task": "Plan the exact PixelLab REST request (endpoint plus JSON body) for a transparent 8x8 sheet of 64 RPG inventory item icons at 32px per icon. Plan only; call nothing.",
-        "checks": {"endpoint": r"generate-image-v2", "canvas": r"256", "alpha": r"no_background"},
+        "checks": {"endpoint": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
         "refs_any": ["icons.md", "item-icons.md"],
     },
     {
@@ -117,17 +115,6 @@ SCENARIOS = [
         "task": "What is the cheapest way to add a walk animation to my existing managed PixelLab character? Brief answer naming the mode and its documented cost.",
         "checks": {"template": r"template", "cost": r"1\s*(generation|gen)"},
         "refs_any": ["cost-routing.md"],
-    },
-    {
-        "id": "report-format",
-        "task": (
-            "A live PixelLab job just finished; produce the final user report exactly as the skill specifies. "
-            "Data: route REST POST /v2/generate-image-v2; description sent 'fantasy sword icon, clear silhouette'; "
-            "seed 774421; image_size 64x64; no_background true; file pixellab-pip-generations/sword/icon.png; "
-            "balance before 102.40 after 102.15; verification: dimensions 64x64 OK, transparent background OK."
-        ),
-        "checks": {"prompt": r"fantasy sword icon", "seed": r"774421", "cost": r"102\.15|0\.25", "route": r"generate-image-v2"},
-        "refs_any": ["usage-reporting.md"],
     },
     {
         "id": "setup-codex",
@@ -151,14 +138,14 @@ SCENARIOS = [
         # Showcase-derived: skill-icon SHEETS route to REST Create Image Pro, NOT the MCP UI tool.
         "id": "route-skill-icons",
         "task": "Plan the exact PixelLab route for a complete 8x8 sheet of 32px fantasy skill icons with rich illustrated (non-transparent) backgrounds. Name the tool/endpoint and key params. Plan only; call nothing.",
-        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro", "canvas": r"256", "opaque": r"no_background|opaque|illustrated"},
+        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
         "refs_any": ["icons.md", "create-image-pro.md"],
     },
     {
         # Showcase-derived: a texture-tile GRID is Create Image Pro, not an autotile tileset tool.
         "id": "route-tiles-vs-tileset",
         "task": "I want a grid of 16x16 unique textured minecraft-style tiles as a texture atlas — NOT a connected autotile tileset. Which PixelLab route, and why not a tileset tool? Brief; call nothing.",
-        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro", "atlas": r"atlas|texture"},
+        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
         "refs_any": ["tilesets.md", "create-image-pro.md"],
     },
     {
@@ -172,7 +159,7 @@ SCENARIOS = [
         # Showcase-derived: modular / 9-slice GUI kits route to the MCP UI-asset tool.
         "id": "route-gui-modular",
         "task": "Create a modular, 9-slice-compatible fantasy MMORPG GUI kit of reusable rectangular components. Which PixelLab tool fits modular UI pieces? Brief; call nothing.",
-        "checks": {"route": r"create[_-]ui[_-]asset", "modular": r"9[- ]?slice|modular"},
+        "checks": {"route": r"create[_-]ui[_-]asset"},
         "refs_any": [],
     },
     {
@@ -181,24 +168,6 @@ SCENARIOS = [
         "task": "I asked PixelLab for a transparent icon but it came back with a background. What does the skill do about it? Brief.",
         "checks": {"removal": r"remove[_-]simple[_-]background|background remov", "local": r"local|verify|safe"},
         "refs_any": ["background-removal.md"],
-    },
-    {
-        "id": "live-balance",
-        "task": "Check my PixelLab account balance using the REST API and report it per the skill.",
-        "checks": {"balance": r"balance|credits", "number": r"\d"},
-        "refs_any": ["usage-reporting.md"],
-        "live": True,
-    },
-    {
-        "id": "live-cheap-image",
-        "task": (
-            "Generate one 32x32 pixel-art red potion icon using the cheapest suitable PixelLab REST route, "
-            "then report route, prompt, and cost per the skill. Do not save files."
-        ),
-        "checks": {"route": r"pixen|pixflux", "report": r"cost|usage|balance"},
-        "refs_any": ["cost-routing.md", "usage-reporting.md"],
-        "live": True,
-        "paid": True,
     },
 ]
 
@@ -353,11 +322,10 @@ def first_json_object(text: str) -> dict:
     return obj
 
 
-def build_claude_command(exe: str, model: str | None, live: bool) -> list[str]:
-    tools = "Read,Bash" if live else "Read"
+def build_claude_command(exe: str, model: str | None) -> list[str]:
     command = [
         exe, "-p", "--safe-mode", "--no-session-persistence",
-        "--permission-mode", "dontAsk", "--tools", tools, "--allowedTools", tools,
+        "--permission-mode", "dontAsk", "--tools", "Read", "--allowedTools", "Read",
         "--output-format", "json",
     ]
     if model:
@@ -382,10 +350,10 @@ def parse_claude(stdout: str) -> dict:
     }
 
 
-def build_codex_command(exe: str, model: str | None, live: bool, workdir: Path) -> list[str]:
+def build_codex_command(exe: str, model: str | None, workdir: Path) -> list[str]:
     command = [
         exe, "exec", "--json", "--cd", str(workdir),
-        "--sandbox", "danger-full-access" if live else "read-only",
+        "--sandbox", "read-only",
         "--ephemeral", "--ignore-rules",
         "--skip-git-repo-check", "--color", "never",
         "-c", "project_doc_max_bytes=0",
@@ -429,10 +397,8 @@ def parse_codex(stdout: str) -> dict:
     }
 
 
-def build_opencode_command(exe: str, model: str, live: bool, workdir: Path) -> list[str]:
-    command = [exe, "run", "--pure", "--model", model, "--format", "json", "--dir", str(workdir)]
-    if not live:
-        command += ["--agent", "plan"]
+def build_opencode_command(exe: str, model: str, workdir: Path) -> list[str]:
+    command = [exe, "run", "--pure", "--model", model, "--format", "json", "--dir", str(workdir), "--agent", "plan"]
     # Windows CreateProcess caps command lines at ~32k chars, so the prompt goes in PROMPT.txt.
     return command + ["Follow the instructions in PROMPT.txt exactly and completely."]
 
@@ -510,19 +476,17 @@ def parse_self_reported_refs(response: str) -> list[str]:
 
 
 def build_prompt(ctx: dict, scenario: dict) -> str:
-    network_rule = LIVE_RULE if scenario.get("live") else DRY_RULE
     if ctx["kind"] == "skill":
-        return PREAMBLE.format(network_rule=network_rule, skill=ctx["context_text"], task=scenario["task"])
+        return PREAMBLE.format(network_rule=DRY_RULE, skill=ctx["context_text"], task=scenario["task"])
     if ctx["kind"] == "mcp-docs":
-        return MCP_DOCS_PREAMBLE.format(url=MCP_DOCS_URL, network_rule=network_rule, docs=ctx["context_text"], task=scenario["task"])
-    return VANILLA_PREAMBLE.format(network_rule=network_rule, task=scenario["task"])
+        return MCP_DOCS_PREAMBLE.format(url=MCP_DOCS_URL, network_rule=DRY_RULE, docs=ctx["context_text"], task=scenario["task"])
+    return VANILLA_PREAMBLE.format(network_rule=DRY_RULE, task=scenario["task"])
 
 
 def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args, cells_dir: Path) -> dict:
     cell_id = cell_id_for(scenario["id"], agent, variant, rep)
     cell_dir = cells_dir / cell_id
     cell_dir.mkdir(parents=True, exist_ok=True)
-    live = bool(scenario.get("live"))
     skill_dir = ctx["dir"]
     prompt = build_prompt(ctx, scenario)
 
@@ -534,16 +498,16 @@ def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args
     stdin_text: str | None = prompt
     cell_files: list[Path] = []  # written into the shared workspace; removed after the run so cells stay isolated
     if agent == "claude":
-        command = build_claude_command(exe, args.model_claude, live)
+        command = build_claude_command(exe, args.model_claude)
     elif agent == "codex":
-        command = build_codex_command(exe, args.model_codex, live, skill_dir)
+        command = build_codex_command(exe, args.model_codex, skill_dir)
     else:
         cell_files = [skill_dir / "PROMPT.txt", skill_dir / "opencode.json"]
         if not args.dry_run:  # a dry run must not touch the shared workspace
             (skill_dir / "PROMPT.txt").write_text(prompt, encoding="utf-8")
-            permission = {"edit": "deny", "bash": "allow" if live else "deny", "webfetch": "allow" if live else "deny"}
+            permission = {"edit": "deny", "bash": "deny", "webfetch": "deny"}
             (skill_dir / "opencode.json").write_text(json.dumps({"permission": permission}), encoding="utf-8")
-        command = build_opencode_command(exe, OPENCODE_MODELS[agent], live, skill_dir)
+        command = build_opencode_command(exe, OPENCODE_MODELS[agent], skill_dir)
         stdin_text = None
 
     record = {
@@ -552,7 +516,6 @@ def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args
         "agent": agent,
         "variant": variant,
         "rep": rep,
-        "live": live,
         "command": command,
     }
     if args.dry_run:
@@ -751,10 +714,7 @@ def main() -> int:
     parser.add_argument("--reps", type=int, default=3)
     parser.add_argument("--timeout", type=int, default=300, help="seconds per agent run")
     parser.add_argument("--static", action="store_true", help="static context comparison only; no CLI calls")
-    parser.add_argument("--live", action="store_true", help="include live PixelLab scenarios (requires PIXELLAB_SECRET)")
-    parser.add_argument("--allow-paid", action="store_true", help="also run credit-spending live scenarios")
     parser.add_argument("--dry-run", action="store_true", help="print planned CLI commands without executing")
-    parser.add_argument("--print-plan", action="store_true", help="print planned cell and paid-generation counts, then exit")
     parser.add_argument("--list", action="store_true", help="list scenarios and exit")
     parser.add_argument("--rescore", metavar="DIR", help="recompute checks/summary for a previous results dir")
     parser.add_argument("--resume", metavar="DIR", help="continue a prior run dir: reuse its successful cells, re-run errored/missing ones")
@@ -766,31 +726,17 @@ def main() -> int:
 
     if args.list:
         for scenario in SCENARIOS:
-            flags = " [live]" if scenario.get("live") else ""
-            flags += " [paid]" if scenario.get("paid") else ""
-            print(f"{scenario['id']}{flags}: {scenario['task'][:100]}")
+            print(f"{scenario['id']}: {scenario['task'][:100]}")
         return 0
     if args.rescore:
         rescore(Path(args.rescore), args.report)
         return 0
-
-    import os
 
     wanted = [s.strip() for s in args.scenarios.split(",") if s.strip()]
     scenarios = [s for s in SCENARIOS if not wanted or s["id"] in wanted]
     unknown = set(wanted) - {s["id"] for s in scenarios}
     if unknown:
         raise SystemExit(f"unknown scenarios: {', '.join(sorted(unknown))}")
-    if not args.static:
-        skipped = []
-        if not args.live or not os.environ.get("PIXELLAB_SECRET"):
-            skipped += [s["id"] for s in scenarios if s.get("live")]
-            scenarios = [s for s in scenarios if not s.get("live")]
-        elif not args.allow_paid:
-            skipped += [s["id"] for s in scenarios if s.get("paid")]
-            scenarios = [s for s in scenarios if not s.get("paid")]
-        if skipped:
-            print(f"Skipping (needs --live + PIXELLAB_SECRET, paid also needs --allow-paid): {', '.join(skipped)}")
 
     variants = [v.strip() for v in args.variants.split(",") if v.strip()]
     # The current working-tree skill is the subject of every benchmark, so it is always the
@@ -800,17 +746,6 @@ def main() -> int:
     bad_agents = set(agents) - set(AGENTS)
     if bad_agents:
         raise SystemExit(f"unknown agents: {', '.join(sorted(bad_agents))}")
-
-    if args.print_plan:
-        # Count only cells that still need running (resume reuses already-successful ones).
-        completed = load_completed(Path(args.resume)) if args.resume else {}
-        paid_ids = {s["id"] for s in scenarios if s.get("paid")}
-        planned = [(s["id"], a, v, r) for r in range(1, args.reps + 1)
-                   for s in scenarios for a in agents for v in variants]
-        remaining = [p for p in planned if cell_id_for(*p) not in completed]
-        remaining_paid = sum(1 for (sid, _a, _v, _r) in remaining if sid in paid_ids)
-        print(f"cells={len(remaining)} paid_generations={remaining_paid}")
-        return 0
 
     stamp = utc_stamp()
     if args.resume:

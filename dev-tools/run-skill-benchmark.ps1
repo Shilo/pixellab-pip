@@ -1,14 +1,14 @@
 param(
-    [ValidateSet("full", "static", "dry-claude", "dry-all", "live-balance", "live-image", "list", "cancel")]
+    [ValidateSet("full", "static", "dry-claude", "dry-all", "list", "cancel")]
     [string]$Preset,
-    [int]$Reps = 1,  # 1 rep keeps the full preset at ~180 cells / 12 paid generations; pass -Reps 3 for tighter medians
+    [int]$Reps = 1,  # 1 rep keeps the full preset at ~144 cells; pass -Reps 3 for tighter medians. The benchmark is dry — no PixelLab credits.
     [string]$Resume  # path to a prior .local/bench/<stamp> dir to continue instead of starting fresh (reuses completed cells)
 )
 
 # Convenience launcher for dev-tools/skill_benchmark.py. It only assembles the
-# documented flags for the common presets, runs preflight checks so a missing
-# CLI or secret fails with a clear message, and points at the report folder.
-# The benchmark itself lives in skill_benchmark.py; this adds no measurement logic.
+# documented flags for the common presets, preflights that the required CLIs are
+# present, and points at the report folder. The benchmark is dry (no PixelLab
+# credits); the measurement logic lives in skill_benchmark.py.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -20,15 +20,13 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $benchmark = Join-Path $repoRoot "dev-tools/skill_benchmark.py"
 $interactive = -not ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected)
 
-# preset -> { Args, NeedCli (agent exes that must be on PATH), NeedSecret, Paid }
+# preset -> { Label, Args, NeedCli (agent exes that must be on PATH) }. Every preset is dry (no credits).
 $presets = [ordered]@{
-    "full"         = @{ Label = "full        - COMPLETE suite: all agents, all 4 variants, live + PAID, refreshes the report ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--live", "--allow-paid", "--reps", "$Reps", "--report", "docs/pixellab-pip-benchmark.md"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $true; Paid = $true }
-    "static"       = @{ Label = "static      - free context-size comparison, no CLI calls, no secret"; Args = @("--static"); NeedCli = @(); NeedSecret = $false; Paid = $false }
-    "dry-claude"   = @{ Label = "dry-claude  - claude only, dry scenarios ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude"); NeedSecret = $false; Paid = $false }
-    "dry-all"      = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro, dry scenarios ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode"); NeedSecret = $false; Paid = $false }
-    "live-balance" = @{ Label = "live-balance- claude + free GET /balance (needs PIXELLAB_SECRET)"; Args = @("--agents", "claude", "--live"); NeedCli = @("claude"); NeedSecret = $true; Paid = $false }
-    "live-image"   = @{ Label = "live-image  - claude + PAID cheap generation (spends credits)"; Args = @("--agents", "claude", "--live", "--allow-paid"); NeedCli = @("claude"); NeedSecret = $true; Paid = $true }
-    "list"         = @{ Label = "list        - print scenarios and exit"; Args = @("--list"); NeedCli = @(); NeedSecret = $false; Paid = $false }
+    "full"       = @{ Label = "full        - COMPLETE suite: all agents, all 4 variants, refreshes the report ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--reps", "$Reps", "--report", "docs/pixellab-pip-benchmark.md"); NeedCli = @("claude", "codex", "opencode") }
+    "static"     = @{ Label = "static      - free context-size comparison, no CLI calls"; Args = @("--static"); NeedCli = @() }
+    "dry-claude" = @{ Label = "dry-claude  - claude only ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude") }
+    "dry-all"    = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }
+    "list"       = @{ Label = "list        - print scenarios and exit"; Args = @("--list"); NeedCli = @() }
 }
 
 if (-not $Preset) {
@@ -57,7 +55,7 @@ $config = $presets[$Preset]
 $runArgs = @($config.Args)
 if ($Resume) { $runArgs += @("--resume", $Resume) }
 
-# Preflight: python, required agent CLIs, and secret for live presets.
+# Preflight: python and the required agent CLIs.
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     Write-Error "python was not found on PATH."
     exit 1
@@ -65,21 +63,6 @@ if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
 $missing = @($config.NeedCli | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) })
 if ($missing.Count -gt 0) {
     Write-Warning "Missing agent CLI(s): $($missing -join ', '). The benchmark will skip cells it cannot run."
-}
-if ($config.NeedSecret -and [string]::IsNullOrWhiteSpace($env:PIXELLAB_SECRET)) {
-    Write-Error "PIXELLAB_SECRET is not set; this preset needs it for live PixelLab calls."
-    exit 1
-}
-if ($config.Paid) {
-    if (-not $interactive) {
-        Write-Error "Refusing to run a paid preset non-interactively (cannot confirm credit spend). Run it in an interactive terminal."
-        exit 1
-    }
-    # Ask the benchmark exactly how many credit-spending generations this run will do (resume-aware).
-    $plan = (& python $benchmark @($runArgs) --print-plan 2>$null | Out-String)
-    $gens = if ($plan -match 'paid_generations=(\d+)') { $Matches[1] } else { "an unknown number of" }
-    $confirm = Read-Host "This preset will spend up to $gens PixelLab generation(s), plus agent tokens. Type YES to continue"
-    if ($confirm -ne "YES") { Write-Host "Cancelled."; exit 0 }
 }
 
 Write-Host "Running: python dev-tools/skill_benchmark.py $($runArgs -join ' ')"

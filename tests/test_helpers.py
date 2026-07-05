@@ -146,7 +146,7 @@ class HelperCliSmokeTests(unittest.TestCase):
         output = self.run_help(REPO_ROOT / "dev-tools/skill_benchmark.py")
         self.assertIn("usage:", output.lower())
         self.assertIn("--static", output)
-        self.assertIn("--live", output)
+        self.assertIn("--resume", output)
 
     def test_skill_benchmark_cells_run_in_workspace_with_valid_commands(self) -> None:
         import argparse
