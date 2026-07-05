@@ -719,9 +719,11 @@ def rescore(out_dir: Path, report: str | None = None) -> None:
     summary = summarize(cells)
     write_markdown(out_dir, static, summary, meta["variants"], [c for c in cells if c.get("error")])
     print(f"Rescored {out_dir / 'SUMMARY.md'}")
-    if report:
+    if report and summary:
         write_report_doc(Path(report), render_report_block(static, summary, meta["variants"], meta.get("agents", []), meta.get("reps", 1), meta["stamp"]))
         print(f"Report updated: {report}")
+    elif report:
+        print(f"Not updating {report}: the run has no successful agent cells (report left unchanged).")
 
 
 def main() -> int:
@@ -821,18 +823,23 @@ def main() -> int:
                             done += 1
                             print(f"[{done}/{total}] {scenario['id']} / {agent} / {variant} / rep {rep}", flush=True)
                             cells.append(run_cell(agent, scenario, variant, contexts[variant], rep, args, cells_dir))
-            (out_dir / "results.json").write_text(json.dumps(cells, indent=2), encoding="utf-8")
+                            # Checkpoint after every cell so an interrupt/crash keeps completed work for --rescore.
+                            (out_dir / "results.json").write_text(json.dumps(cells, indent=2), encoding="utf-8")
 
         errors = [c for c in cells if c.get("error")]
         summary = summarize(cells)
         write_markdown(out_dir, static, summary, variants, errors)
-        if args.report:
+        # Only rewrite the published report when there is real routing data; never clobber it with an
+        # empty/context-only block (e.g. every cell errored, or a --static run).
+        if args.report and summary:
             write_report_doc(Path(args.report), render_report_block(static, summary, variants, agents, args.reps, stamp))
     finally:
         shutil.rmtree(work_base, ignore_errors=True)  # never leak the temp workspace, even on error
     print(f"\nResults: {out_dir / 'SUMMARY.md'}")
-    if args.report:
+    if args.report and summary:
         print(f"Report updated: {args.report}")
+    elif args.report:
+        print(f"Not updating {args.report}: no successful agent cells this run (report left unchanged).")
     used = [c for c in cells if not c.get("error") and not c.get("dry_run")]
     if used:
         tin = sum(c.get("total_input_tokens") or 0 for c in used)

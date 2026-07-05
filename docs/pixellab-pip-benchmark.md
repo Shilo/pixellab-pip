@@ -87,13 +87,14 @@ No agent CLIs or secret needed (the PixelLab MCP Docs arm still does one live fe
 python dev-tools/skill_benchmark.py --static --variants pre-kiss-yagni-refactor,mcp-docs,vanilla
 ```
 
-Live routing (needs an agent CLI; numbers vary run to run). Add `--report` to rewrite the generated block in this page from the run:
+Live routing (needs an agent CLI; numbers vary run to run). This writes results to `.local/bench/<stamp>/` — read its `SUMMARY.md`:
 
 ```powershell
 python dev-tools/skill_benchmark.py --agents claude --variants pre-kiss-yagni-refactor,mcp-docs,vanilla `
-  --scenarios route-hex-tiles,route-character,cheap-animation,refuse-internal-endpoint --reps 2 `
-  --report docs/pixellab-pip-benchmark.md
+  --scenarios route-hex-tiles,route-character,cheap-animation,refuse-internal-endpoint --reps 2
 ```
+
+To refresh the tables in *this* report, run the **full** scenario set (no `--scenarios` filter) with `--report docs/pixellab-pip-benchmark.md`, or use the `full` preset below — a partial `--scenarios` run with `--report` would shrink the published routing table to only those rows.
 
 On Windows, [`dev-tools/run-skill-benchmark.ps1`](../dev-tools/run-skill-benchmark.ps1) wraps the common runs. Its **`full`** preset runs every agent and every variant, live + paid, and refreshes this report automatically. Full methodology, arms, and flags are in [Developer → Skill Token Benchmark](developer.md#skill-token-benchmark).
 
