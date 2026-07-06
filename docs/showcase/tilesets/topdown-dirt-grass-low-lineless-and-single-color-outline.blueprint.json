@@ -1,36 +1,33 @@
-{
-  "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition. The showcased image compares low-detail lineless and low-detail single-color-outline outputs.",
-  "_comment": "PixelLab generated both source tilesets. The showcased PNG is a local native-size side-by-side composition: lineless on the left, single color outline on the right. The MCP tool rejected seed for this top-down matrix run, so no seed is recorded.",
-  "bundle": [
-    {
-      "label": "left: low detail lineless",
-      "MCP create_topdown_tileset": {
-        "lower_description": "dirt",
-        "upper_description": "grass",
-        "transition_description": "grass to dirt",
-        "transition_size": 0.25,
-        "detail": "low detail",
-        "outline": "lineless",
-        "tile_size": {
-          "width": 16,
-          "height": 16
-        }
-      }
-    },
-    {
-      "label": "right: low detail single color outline",
-      "MCP create_topdown_tileset": {
-        "lower_description": "dirt",
-        "upper_description": "grass",
-        "transition_description": "grass to dirt",
-        "transition_size": 0.25,
-        "detail": "low detail",
-        "outline": "single color outline",
-        "tile_size": {
-          "width": 16,
-          "height": 16
-        }
+[
+  {
+    "_comment": "PixelLab generated both source tilesets. The showcased PNG is a local native-size side-by-side composition: lineless on the left, single color outline on the right. The MCP tool rejected seed for this top-down matrix run, so no seed is recorded.",
+    "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition. The showcased image compares low-detail lineless and low-detail single-color-outline outputs.",
+    "MCP create_topdown_tileset": {
+      "lower_description": "dirt",
+      "upper_description": "grass",
+      "transition_description": "grass to dirt",
+      "transition_size": 0.25,
+      "detail": "low detail",
+      "outline": "lineless",
+      "tile_size": {
+        "width": 16,
+        "height": 16
       }
     }
-  ]
-}
+  },
+  {
+    "_comment": "Second source tileset for the right half of the local comparison image.",
+    "MCP create_topdown_tileset": {
+      "lower_description": "dirt",
+      "upper_description": "grass",
+      "transition_description": "grass to dirt",
+      "transition_size": 0.25,
+      "detail": "low detail",
+      "outline": "single color outline",
+      "tile_size": {
+        "width": 16,
+        "height": 16
+      }
+    }
+  }
+]
