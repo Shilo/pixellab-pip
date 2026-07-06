@@ -42,7 +42,7 @@ PixelLab object generation can return `review` status when multiple candidate fr
 When an object is in review:
 
 - Report that it needs selection, not that it is stuck.
-- Show or summarize candidate frame URLs/indices when available.
+- For candidate display and user choice parsing, read `reviewable-candidates.md`.
 - Use `select_object_frames` or REST `POST /objects/{object_id}/select-frames` only after the user chooses candidates or the request clearly authorized automatic selection.
 - Use `dismiss_review` only when the user approves discarding the candidates.
 
