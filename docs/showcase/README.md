@@ -72,6 +72,7 @@ Each individual showcase page should include:
 - Source inputs or brief summaries.
 - Final prompts or natural-language parameters sent to PixelLab.
 - Route, PixelLab surface, tool, endpoint, and key controls.
+- The generation's replayable `*.blueprint.json` (the exact route plus request body, per [../blueprint.md](../blueprint.md)): save the file in the page's asset folder, show its contents inline in a fenced code block, and add a hyperlink to the saved file, so a reader can read it in place or download it to recreate the result. Use a bundle array when the showcase took more than one PixelLab step, such as a generation followed by a recolor pass.
 - Reproducibility controls that were intentionally set, such as image size, transparency, palette, direction, frame count, and seed. Do not imply every PixelLab endpoint always returns a seed; record a seed when the request explicitly sent one.
 - Stable showcase asset locations. Do not point showcase pages at temporary local run folders; copy the selected asset into `docs/showcase/...` first.
 - Local processing notes for cropping, spritesheets, GIFs, or other assembled files.
