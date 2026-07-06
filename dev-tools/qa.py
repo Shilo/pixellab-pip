@@ -65,7 +65,7 @@ def run_git_ls_files(*patterns: str) -> list[Path]:
 
 
 def check_json_files() -> None:
-    for path in run_git_ls_files("*.json", "*/*.json", "*/*/*.json", "*/*/*/*.json"):
+    for path in run_git_ls_files("*.json"):
         json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -109,7 +109,7 @@ def check_manifest_metadata() -> None:
 
 
 def check_blueprint_shapes() -> None:
-    for path in run_git_ls_files("*.blueprint.json", "*/*.blueprint.json", "*/*/*.blueprint.json", "*/*/*/*.blueprint.json"):
+    for path in run_git_ls_files("*.blueprint.json"):
         data = json.loads(path.read_text(encoding="utf-8"))
         for step in data if isinstance(data, list) else [data]:
             routes = [key for key in step if not key.startswith("_comment")]
@@ -119,7 +119,7 @@ def check_blueprint_shapes() -> None:
 
 
 def check_python_compiles() -> None:
-    for path in run_git_ls_files("*.py", "*/*.py", "*/*/*.py"):
+    for path in run_git_ls_files("*.py"):
         source = path.read_text(encoding="utf-8")
         compile(source, str(path), "exec")
 
@@ -148,10 +148,7 @@ def check_no_tracked_generated_artifacts() -> None:
     generated = run_git_ls_files(
         ".local/*",
         "pixellab-pip-generations/*",
-        "__pycache__/*",
-        "*/__pycache__/*",
-        "*/*/__pycache__/*",
-        "*/*/*/__pycache__/*",
+        "*__pycache__/*",
     )
     if generated:
         rels = [str(path.relative_to(REPO_ROOT)) for path in generated]
@@ -167,7 +164,7 @@ def strip_link_target(target: str) -> str:
 
 def check_markdown_local_links() -> None:
     missing: list[str] = []
-    for path in run_git_ls_files("*.md", "*/*.md", "*/*/*.md", "*/*/*/*.md"):
+    for path in run_git_ls_files("*.md"):
         text = path.read_text(encoding="utf-8")
         targets = [match.group(2) for match in MD_LINK.finditer(text)]
         targets.extend(match.group(1) for match in HTML_SRC.finditer(text))
@@ -201,13 +198,13 @@ def check_skill_reference_files() -> None:
 
 
 def check_media_files() -> None:
-    for path in run_git_ls_files("*.png", "*/*.png", "*/*/*.png", "*/*/*/*.png"):
+    for path in run_git_ls_files("*.png"):
         if path.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
             raise AssertionError(f"invalid PNG signature: {path.relative_to(REPO_ROOT)}")
-    for path in run_git_ls_files("*.gif", "*/*.gif", "*/*/*.gif", "*/*/*/*.gif"):
+    for path in run_git_ls_files("*.gif"):
         if path.read_bytes()[:6] not in {b"GIF87a", b"GIF89a"}:
             raise AssertionError(f"invalid GIF signature: {path.relative_to(REPO_ROOT)}")
-    for path in run_git_ls_files("*.wav", "*/*.wav", "*/*/*.wav", "*/*/*/*.wav"):
+    for path in run_git_ls_files("*.wav"):
         with wave.open(str(path), "rb") as handle:
             if handle.getnframes() <= 0:
                 raise AssertionError(f"empty WAV: {path.relative_to(REPO_ROOT)}")
