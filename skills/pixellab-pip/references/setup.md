@@ -23,12 +23,8 @@ Infer intent from wording: MCP signals ("assistant", "editor", "app", "agent", "
 
 **The account step** (the canonical credential instruction, reused wherever the Secret is needed): open `https://www.pixellab.ai/account`, sign in, copy the value labeled `Secret`, and store it locally as `PIXELLAB_SECRET` — preferably in app secret settings, an app secret store, or a user-level environment setting — without pasting it into chat. PixelLab uses this one account-level bearer token for both public REST v2 and PixelLab MCP. Full credential policy: `credentials.md`.
 
-In setup mode:
+In setup mode, apply `credentials.md`'s token-safety rules (safest-default ordering of secret UIs/stores over literal-token commands; never a literal Secret in an agent-run command; `setx`/`export`/`$env:` external-terminal caveats; `.env*` only via a named loader) — do not restate a weaker copy here. One setup-specific rule:
 
-- Prefer app/editor secret settings, secret stores, user-scoped OS environment settings, or hidden prompts over literal-token commands; never present a literal-token command as the safest default.
-- `setx`, `export`, PowerShell `$env:`, and `ENV=value command` are acceptable only in a normal external terminal when the user accepts the shell-history/process-history tradeoff of a literal Secret in command text; use placeholders. They are not inherently unsafe or forbidden — the risk is the literal token being stored or exposed.
-- Never put the Secret in an agent-run or assistant-shell command, including Claude Code or Codex CLI shell escapes. A user-run external-terminal command with a literal Secret is an explicit manual fallback only, shown with placeholders after warning the token may be stored in local config or shell history; never run it for the user and never ask the user to paste the real Secret into chat.
-- Project-local `.env*` files work only when a named loader or wrapper reads them; they are not MCP-ready or Pip-ready by themselves.
 - An MCP-only literal token configures MCP auth but does not make `PIXELLAB_SECRET` available for Pip's REST v2 fallback. In `both` mode reuse the same `PIXELLAB_SECRET` source across MCP and API; if MCP-only used a hardcoded token, do not read or copy it — API fallback still needs `PIXELLAB_SECRET` set separately.
 
 ## 3. Per-app MCP setup
