@@ -58,8 +58,8 @@ people reading the file — the assistant ignores them when it runs the blueprin
 }
 ```
 
-`_comment` — the summary — always comes first, like a doc-comment; any number of other
-`_comment*` notes may follow, then the route. `_comment_prompt` records your originating prompt
+`_comment` — the summary — always comes first; any number of other `_comment*` notes may
+follow, then the route. `_comment_prompt` records your originating prompt
 (in a bundle, on the first step); a `_comment` is added only for something non-obvious worth
 sharing — an issue, discovery, or important detail found during creation, or what the blueprint
 is for.

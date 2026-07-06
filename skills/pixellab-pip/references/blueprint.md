@@ -68,8 +68,8 @@ siblings of the route so the request body stays untouched (tolerated anywhere, b
 placement is the norm). They are metadata, not fields: drop every `_comment*` key before
 sending a request, and never treat one as an input.
 
-Order like a doc-comment: `_comment` (the summary) always first, then any number of other
-`_comment*` keys, then the route key.
+`_comment` (the summary) always comes first, then any number of other `_comment*` keys, then
+the route key.
 
 - `_comment` (or any `_comment*` key) — add when there is useful, non-obvious information
   worth sharing with the blueprint: an issue, discovery, finding, or critical detail from
