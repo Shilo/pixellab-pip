@@ -1,6 +1,6 @@
 ---
 name: pixellab-pip
-description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation, editing, animation, skeleton/template/preset animations, docs/troubleshooting, bark completion sounds, and explicit PixelLab cost/budget/credit questions across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger only when PixelLab context is present, including PixelLab setup, MCP/API setup, PIXELLAB_SECRET, bearer-token auth, PixelLab sprites, sprite sheets, characters, portrait characters, fonts, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, skeletons, template animations, preset animations, endpoint choice, SDK integration, blueprints, recreating/replaying `*.blueprint.json` generations, troubleshooting, or PixelLab credits/cost/budget. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
+description: Use for PixelLab/Pip setup, auth, MCP/API routing, asset generation, editing, animation, skeleton/template/preset animations, docs/troubleshooting, bark completion sounds, and explicit PixelLab cost/budget/credit questions across MCP, REST v2/API, website/editor Pixelorama, Aseprite, and legacy v1. Trigger only when PixelLab context is present, including PixelLab setup, MCP/API setup, PIXELLAB_SECRET, bearer-token auth, PixelLab sprites, sprite sheets, characters, portrait characters, fonts, objects, tiles, tilesets, tilemaps, maps, UI, icons, backgrounds, palettes, image edits, animations, skeletons, template animations, preset animations, endpoint choice, SDK integration, blueprints/recipes, recreating/replaying `*.blueprint.json` generations, troubleshooting, or PixelLab credits/cost/budget. Do not trigger for unrelated Python pip/package-manager requests or generic image/pixel-art requests with no PixelLab intent.
 license: MIT
 metadata:
   requires_api_key: false
@@ -20,7 +20,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 ## Workflow
 
 1. Classify intent; values combine, such as `animate + cost_sensitive`:
-   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | recreate/replay`.
+   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | blueprint/recipe`.
    A standalone `setup` or `bark` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent. For setup, read `references/setup.md` and run the wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval. For bark, read `references/bark.md` and apply the persistent toggle contract.
 2. Classify the target:
    `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
@@ -92,7 +92,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
 | PixelLab projects, sandbox, chat, deployed agents, MCP help/feedback | Read `references/mcp-platform-tools.md` before using `list_projects`, `sandbox_*`, `chat_*`, or `agent_*` tools. | No public REST v2 equivalent is documented. |
-| Recreate/replay a past generation, a named preset, or a supplied `*.blueprint.json` | Read `references/blueprint.md`; for a named preset with no path, look in the skill's `blueprints/` folder for a semantic match. Map the recorded route to an available surface, apply any user overrides, never rewrite the source. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
+| Recreate/replay a past generation, use a named blueprint or recipe, or run a supplied `*.blueprint.json` | Read `references/blueprint.md`; for a named blueprint/recipe with no path, look in the skill's `blueprints/` folder for a semantic match. Map the recorded route to an available surface, apply any user overrides, never rewrite the source. Only match a saved blueprint when the user names one or `@`-links a `*.blueprint.json`; a blueprint name that contains an asset word (e.g. "knight") is still a replay. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
 
 ## Clarify Only For Collisions
 
