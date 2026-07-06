@@ -111,7 +111,7 @@ SCENARIOS = [
         "id": "plan-item-icon-sheet",
         "task": "Using PixelLab, make me one sheet of 64 RPG inventory item icons with transparent backgrounds.",
         "checks": {"endpoint": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
-        "refs_any": ["icons.md", "item-icons.md"],
+        "refs_any": ["icon.md", "item-icons.md"],
     },
     {
         "id": "cheap-animation",
@@ -135,28 +135,28 @@ SCENARIOS = [
         "id": "skeleton-pipeline",
         "task": "In PixelLab, I want to auto-rig my sprite and then animate it from its skeleton.",
         "checks": {"estimate": r"estimate-skeleton", "animate": r"animate-with-skeleton"},
-        "refs_any": ["preset-skeleton-template-animations.md"],
+        "refs_any": ["preset-skeleton-template-animation.md"],
     },
     {
         # Showcase-derived: skill-icon SHEETS route to REST Create Image Pro, NOT the MCP UI tool.
         "id": "route-skill-icons",
         "task": "Using PixelLab, make a sheet of 32px fantasy skill icons with rich illustrated backgrounds.",
         "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
-        "refs_any": ["icons.md", "create-image-pro.md"],
+        "refs_any": ["icon.md", "create-image-pro.md"],
     },
     {
         # Showcase-derived: a texture-tile GRID is Create Image Pro, not an autotile tileset tool.
         "id": "route-tiles-vs-tileset",
         "task": "With PixelLab, I want a grid of separate minecraft-style tile textures in one image — not a seamless connecting tileset.",
         "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
-        "refs_any": ["tilesets.md", "create-image-pro.md"],
+        "refs_any": ["tileset.md", "create-image-pro.md"],
     },
     {
         # Showcase-derived: tileset via PixelLab, then 1-bit/Game Boy recolor is LOCAL, not a PixelLab call.
         "id": "route-1bit-tileset-palette",
         "task": "In PixelLab, make a 1-bit top-down tileset, then give me a Game Boy green version of it.",
         "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset(?!-side)", "local": r"aseprite|local|clamp"},
-        "refs_any": ["tilesets.md", "local-asset-assembly.md"],
+        "refs_any": ["tileset.md", "local-asset-assembly.md"],
     },
     {
         # Showcase-derived: modular / 9-slice GUI kits route to the MCP UI-asset tool.
@@ -207,7 +207,7 @@ SCENARIOS = [
         "id": "route-sidescroller-tileset",
         "task": "Generate a mossy platformer tileset in PixelLab for my side-scrolling level.",
         "checks": {"tileset": r"create[_-]sidescroller[_-]tileset|create-tileset-sidescroller"},
-        "refs_any": ["tilesets.md"],
+        "refs_any": ["tileset.md"],
     },
     {
         "id": "check-balance",

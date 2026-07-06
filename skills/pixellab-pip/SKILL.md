@@ -30,7 +30,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 5. Before repeated paid prompt-only retries, inspect the chosen tool or endpoint schema for generation controls such as guidance, adherence/strength, seed, reference images, palette images, or style options, and use the ones that target the failure mode. Refresh official docs only when a needed tool, endpoint, field, auth, SDK, pricing, or model/mode fact is missing or unclear (see Current Docs Refresh).
 6. For consistency-sensitive work, summarize the user's identity, style, palette, view, and reference anchors. Ask up to three blocking questions before a credit-spending call.
 7. Prepare natural-language parameters per Text Preparation. For non-English or mixed-language requests, read `references/localization.md`.
-8. For animation, preserve the user's requested frame count; otherwise use the endpoint or template default. Exception: preset/template character animations take no `frame_count`; pick a matching template id such as `walking-8-frames` (catalog in `references/preset-skeleton-template-animations.md`) or fall back to v3 custom mode. Preserve PixelLab's returned frame order; no ping-pong, reversed, duplicated, or trimmed outputs unless the user asks for that playback style.
+8. For animation, preserve the user's requested frame count; otherwise use the endpoint or template default. Exception: preset/template character animations take no `frame_count`; pick a matching template id such as `walking-8-frames` (catalog in `references/preset-skeleton-template-animation.md`) or fall back to v3 custom mode. Preserve PixelLab's returned frame order; no ping-pong, reversed, duplicated, or trimmed outputs unless the user asks for that playback style.
 9. If the user says cheap, budget, low-cost, fewer credits, or similar, read `references/cost-routing.md` before choosing a paid route, and ask before each extra paid attempt unless a concrete budget or attempt count was approved.
 10. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat (see Auth And Execution).
 11. Act or answer. Ask a short clarification only for known collisions.
@@ -64,10 +64,10 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Character, player, NPC, enemy, creature | MCP `create_character`, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers. For a follow-up animation on a multi-direction character, animate `south` first; ask before animating all directions. | `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state/animation/tags/ZIP/list/get/delete endpoints. |
 | Portrait-to-character or character-to-portrait | MCP `create_portrait_character` + `get_portrait_character` when visible. | `portrait-character-pro` (Pro image conversion). Supplied-image roles: `references/image-input-roles.md`. |
 | Pixel/bitmap font, font atlas | MCP `create_font` + `get_font` when visible. | `generate-font-pro` (Pro). |
-| Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, or icon sheet | Read `references/icons.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
+| Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, or icon sheet | Read `references/icon.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
 | Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/review tools. Object creation is Pro Tools (20-40 generations). | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
-| Top-down terrain/Wang/autotile tileset | Read `references/tilesets.md`, then MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
-| Sidescroller/platformer tileset | Read `references/tilesets.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
+| Top-down terrain/Wang/autotile tileset | Read `references/tileset.md`, then MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
+| Sidescroller/platformer tileset | Read `references/tileset.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
 | Isometric tile/block/floor | MCP `create_isometric_tile`; map thickness wording to `tile_shape` (`thin`, `thick`, `block`). | `create-isometric-tile` with `isometric_tile_shape` (`thin tile`, `thick tile`, `block`). |
 | Tile variants (hex, octagon, square, isometric singles) | MCP `create_tiles_pro`. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
 | General image, sprite, standalone asset that is not a skill/item icon | REST v2. For explicit Create Image Pro, `generate-image-v2`, exact grids/sheets, or below-32px cells, read `references/create-image-pro.md` first. | `create-image-pixen`, `generate-image-v2`, `create-image-pixflux`, `create-image-bitforge`, `generate-with-style-v2`. |
@@ -80,8 +80,8 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Try on garment/accessory | Website Try on (single composited image); REST `transfer-outfit-v2` only for animation-frame outfit transfer. | Try on does not return isolated paperdoll layers. |
 | Multi-image combine/edit | REST v2 `edit-images-v2` for documented multi-source edits; website/editor for visual experimental flows. | Aseprite's `generate-multi-edit` is an internal endpoint, not public REST. |
 | Prompt enhancement | Matching enhance endpoint or inline `enhance_prompt` per Text Preparation. | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt`. |
-| Preset/template/built-in animation, named motion, or custom skeleton/keypoints | Read `references/preset-skeleton-template-animations.md`; it splits MCP managed-template vs REST raw-skeleton routes. | Do not call website root `/generate-animation/background` or Aseprite extension internals. |
-| Auto-rig, estimate skeleton, animate from keypoints | Read `references/preset-skeleton-template-animations.md`. | `estimate-skeleton`, then `animate-with-skeleton`. |
+| Preset/template/built-in animation, named motion, or custom skeleton/keypoints | Read `references/preset-skeleton-template-animation.md`; it splits MCP managed-template vs REST raw-skeleton routes. | Do not call website root `/generate-animation/background` or Aseprite extension internals. |
+| Auto-rig, estimate skeleton, animate from keypoints | Read `references/preset-skeleton-template-animation.md`. | `estimate-skeleton`, then `animate-with-skeleton`. |
 | Raw non-skeleton animation, interpolation, outfit transfer, rotate | REST v2 unless animating a managed MCP character/object. Read `references/animation.md` for frame anchors, idle-loop risk, and verification. | `animate-with-text-v3`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`. No public 4-rotation route. |
 | Map image / visual level concept | REST v2 image/background route; website or Aseprite for map extension workflows. | No public map CRUD/extension/texture surface is documented. |
 | Map object | MCP `create_map_object` + `get_map_object`; download promptly — MCP map objects auto-delete after 8 hours. | `POST /map-objects` (POST-only; verify polling shape from OpenAPI). |
@@ -113,18 +113,18 @@ Read only the relevant reference:
 - Setup wizard for MCP, REST v2 fallback, auth after install: `references/setup.md`.
 - Persistent completion sound toggle: `references/bark.md`.
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
-- Skill/ability and inventory item icon sheets: `references/icons.md`.
+- Skill/ability and inventory item icon sheets: `references/icon.md`.
 - Create Image Pro, exact grids, below-32px cells: `references/create-image-pro.md`.
 - Cheap/budget/credit-minimizing route selection: `references/cost-routing.md`.
 - Paperdolling and layered characters: `references/paperdolling.md`.
-- Tilesets and tile variants: `references/tilesets.md`.
+- Tilesets and tile variants: `references/tileset.md`.
 - Supplied image roles, endpoint image fields, fixed-size image-to-pixelart: `references/image-input-roles.md`.
 - Non-English or mixed-language requests: `references/localization.md`.
 - Official PixelLab doc URLs and boundaries: `references/official-pixellab-documentation.md`.
 - Generation reports and manifests after PixelLab calls: `references/usage-reporting.md`.
 - Per-generation blueprint (replayable route + request body), recreation, and sharing: `references/blueprint.md`.
 - Async jobs, MCP review state, rate limits, download expiry: `references/job-lifecycle.md`.
-- Preset/template/skeleton character animations: `references/preset-skeleton-template-animations.md`.
+- Preset/template/skeleton character animations: `references/preset-skeleton-template-animation.md`.
 - Raw animation, interpolation, outfit transfer, idle-loop risk: `references/animation.md`.
 - Editor-only utilities without public routes: `references/editor-only-utilities.md`.
 - PixelLab project/sandbox/chat/agent MCP tools: `references/mcp-platform-tools.md`.
@@ -203,8 +203,8 @@ When a live generation, edit, transform, conversion, background-removal, or anim
 | Request | Route |
 |---|---|
 | "Make a wizard with idle and walk animations." | MCP `create_character`, then `animate_character`; `south` first, ask before all directions. |
-| "Use the humanoid Walk (8 frames) template animation." | `references/preset-skeleton-template-animations.md`; MCP `animate_character` with `template_animation_id="walking-8-frames"`, REST `/characters/animations` fallback. |
-| "Auto-rig this sprite and animate from the skeleton." | `references/preset-skeleton-template-animations.md`; REST `estimate-skeleton`, then `animate-with-skeleton`. |
+| "Use the humanoid Walk (8 frames) template animation." | `references/preset-skeleton-template-animation.md`; MCP `animate_character` with `template_animation_id="walking-8-frames"`, REST `/characters/animations` fallback. |
+| "Auto-rig this sprite and animate from the skeleton." | `references/preset-skeleton-template-animation.md`; REST `estimate-skeleton`, then `animate-with-skeleton`. |
 | "Generate a mossy platformer tileset from code." | REST v2 `create-tileset-sidescroller`; MCP `create_sidescroller_tileset` in an MCP-enabled agent. |
 | "Make hex terrain tiles." | MCP `create_tiles_pro`, not a top-down Wang tileset. |
 | "Make a 512x256 UI panel with a portrait circle and three buttons." | REST v2 `create-ui-asset` with `pieces`/`elements`; MCP `create_ui_asset` only when MCP-first and its schema has the fields. |
@@ -213,4 +213,4 @@ When a live generation, edit, transform, conversion, background-removal, or anim
 | "Give my character a leather helmet as a separate layer." | Paperdoll edit per `references/paperdolling.md`, not object generation. |
 | "Use `/tilesets/create` with my browser token." | Refuse; route to public MCP/REST tileset tools or manual website use. |
 | "What does Pro use?" | Product-level facts only; refresh official docs if current model details matter. |
-| "Cheapest way to get a few item icons?" | `references/cost-routing.md` + `references/icons.md`; prefer a non-Pro route and name the tradeoff. |
+| "Cheapest way to get a few item icons?" | `references/cost-routing.md` + `references/icon.md`; prefer a non-Pro route and name the tradeoff. |

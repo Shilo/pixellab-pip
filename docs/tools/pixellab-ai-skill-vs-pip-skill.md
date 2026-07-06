@@ -70,9 +70,9 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 | Image input role classification | 🟡 — general init/reference/style guidance | ✅ — endpoint-specific goal router across 13 roles (`references/image-input-roles.md`) |
 | Enhance endpoints and inline `enhance_prompt` | 🟡 — routes the three enhance endpoints | ✅ — inline-flag constraints per route, ~0.05-generation cost, one-enhancement-path-per-call rule |
 | Localization for non-English or mixed-language requests | ❌ | ✅ — `references/localization.md` |
-| Preset/template/skeleton animation catalog (template IDs, species families, view/direction traps) | ❌ — routes to endpoints only | ✅ — `references/preset-skeleton-template-animations.md` |
-| Tileset depth (MCP field schemas, human-label-to-field mapping, transition sizing, reference-image controls, strict 1-bit workflows, dual-grid sheet assembly order) | 🟡 — tileset prompt terms and size notes | ✅ — `references/tilesets.md` |
-| Icon and icon-sheet engineering (validated prompts, cell math, background defaults, failure anchors) | ❌ | ✅ — `references/icons.md` |
+| Preset/template/skeleton animation catalog (template IDs, species families, view/direction traps) | ❌ — routes to endpoints only | ✅ — `references/preset-skeleton-template-animation.md` |
+| Tileset depth (MCP field schemas, human-label-to-field mapping, transition sizing, reference-image controls, strict 1-bit workflows, dual-grid sheet assembly order) | 🟡 — tileset prompt terms and size notes | ✅ — `references/tileset.md` |
+| Icon and icon-sheet engineering (validated prompts, cell math, background defaults, failure anchors) | ❌ | ✅ — `references/icon.md` |
 | Idle-loop and near-identical `last_frame` artifact risk | ❌ | ✅ — `references/animation.md` |
 | Exact-grid/packed-sheet recipes for below-32px cells | ❌ | ✅ — `references/create-image-pro.md` |
 | Prompt character limits (OpenAPI-verified) | ❌ | ✅ — `references/prompt-limits.md` |

@@ -43,7 +43,7 @@ Updated `skills/pixellab-pip/references/prompt-limits.md`:
 - Bumped the OpenAPI check date to 2026-07-01.
 - Added `generate-font-pro.description` at 2000 characters.
 
-Updated `skills/pixellab-pip/references/animation.md` and `preset-skeleton-template-animations.md`:
+Updated `skills/pixellab-pip/references/animation.md` and `preset-skeleton-template-animation.md`:
 
 - Documented v3-only `custom_start_frame` and `end_frame` for managed character animation.
 - Noted their one-direction requirement and incompatibility with template/pro modes.

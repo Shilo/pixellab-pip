@@ -170,7 +170,7 @@ Current 1-bit tileset findings live in:
 - [PixelLab 1-Bit Tileset Optimization Workflow](pixellab/pixellab-1bit-tileset-optimization-workflow.md)
 - Local (gitignored, maintainer machine only): `pixellab-pip-generations/rest-1bit-control-validation-20260703/REPORT.md` and `pixellab-pip-generations/1bit-palette-clamp-study-20260703/REPORT.md`.
 
-The key maintainer lesson from the 2026-07-03 REST validation is that `color_image` is not a safe automatic fix for strict black/white tilesets with white transition pixels. In both top-down and sidescroller checks, black/white `color_image` could erase the requested white transition and collapse the result toward black. Preserve this as a routing caution in `skills/pixellab-pip/references/tilesets.md`: optimize PixelLab-generated shape and transition placement first, then use palette controls only as a separately verified follow-up or report palette-clamped derivatives as local processing.
+The key maintainer lesson from the 2026-07-03 REST validation is that `color_image` is not a safe automatic fix for strict black/white tilesets with white transition pixels. In both top-down and sidescroller checks, black/white `color_image` could erase the requested white transition and collapse the result toward black. Preserve this as a routing caution in `skills/pixellab-pip/references/tileset.md`: optimize PixelLab-generated shape and transition placement first, then use palette controls only as a separately verified follow-up or report palette-clamped derivatives as local processing.
 
 The palette-clamp study shows that top-down and sidescroller are at different maturity levels. Top-down REST reference-only output can clamp cleanly because the raw result already contains high-luminance contour pixels. Sidescroller still needs prompt discovery because REST reference-only outputs put the top layer in dark colors that do not survive a clean threshold without adding body noise.
 
@@ -210,4 +210,4 @@ Runtime files:
 - `skills/pixellab-pip/SKILL.md` - the canonical skill file (router and contract).
 - `skills/pixellab-pip/pixellab-pip.json` - optional user-local bark preference file, created only when bark is toggled.
 - `skills/pixellab-pip/assets/` - `bark.py` + `bark.wav` (completion sound) and `background_removal.py` (conservative local background removal).
-- `skills/pixellab-pip/references/*.md` - progressive-discovery references; SKILL.md's "References" section is the authoritative index of what each file covers. Notable merges: `icons.md` covers both skill/ability and inventory item icons.
+- `skills/pixellab-pip/references/*.md` - progressive-discovery references; SKILL.md's "References" section is the authoritative index of what each file covers. Notable merges: `icon.md` covers both skill/ability and inventory item icons.

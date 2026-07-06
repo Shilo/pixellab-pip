@@ -13,7 +13,7 @@ For prompt optimization, treat the simulator as a placement-class and request-sh
 - Official REST v2 OpenAPI: `https://api.pixellab.ai/v2/openapi.json`
 - Official MCP docs: `https://api.pixellab.ai/mcp/docs`
 - Official Create Tileset docs: `https://www.pixellab.ai/docs/tools/create-tileset`
-- Local PixelLab Pip routing references: `skills/pixellab-pip/SKILL.md`, `skills/pixellab-pip/references/tilesets.md`, and `skills/pixellab-pip/references/aseprite-cli.md`
+- Local PixelLab Pip routing references: `skills/pixellab-pip/SKILL.md`, `skills/pixellab-pip/references/tileset.md`, and `skills/pixellab-pip/references/aseprite-cli.md`
 - Local PixelLab research docs for public API, website endpoint, Aseprite extension, and endpoint-crosswalk behavior
 - Observed PixelLab top-down and sidescroller tileset metadata from local generation outputs
 - DualGrid background references: Lexaloffle DualGrid post, KaffeMedBulla DualGrid tileset notes, and `pablogila/TileMapDual`

@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-07-03.
 
-These notes summarize local simulator and live MCP checks for strict black-and-white top-down and sidescroller tilesets. They are maintainer notes for designing future tests; the agent-facing routing contract remains in `skills/pixellab-pip/references/tilesets.md`.
+These notes summarize local simulator and live MCP checks for strict black-and-white top-down and sidescroller tilesets. They are maintainer notes for designing future tests; the agent-facing routing contract remains in `skills/pixellab-pip/references/tileset.md`.
 
 ## Goal
 
