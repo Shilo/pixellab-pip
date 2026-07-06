@@ -12,9 +12,10 @@ under `pixellab-pip-generations/`.
 
 - Root is either one object (single asset) or an array of such objects (a bundle, run in
   order).
-- Each object has exactly one key — the route — and its value is the literal request body
-  (for an MCP route, the tool's arguments). Include only the fields that matter; any omitted
-  field takes the API default, so a one-field blueprint is valid.
+- Each object has one route key — plus any optional `_comment*` metadata keys (see Comments)
+  — and the route's value is the literal request body (for an MCP route, the tool's
+  arguments). Include only the fields that matter; any omitted field takes the API default,
+  so a one-field blueprint is valid.
 - Route = `MCP <tool>` or `POST /v2/<endpoint>`. The prefix names the surface; no `REST`
   word, no wrapper keys.
 
@@ -28,7 +29,7 @@ Image fields are ordinary request fields under their true names. Each image valu
 relative path (default), an absolute path, or base64 — only the value representation varies,
 never the field name. Relative paths resolve against the blueprint file's folder.
 
-Do not add `blueprint_version`, wrapper keys, `route`/`input` keys, role tags, or notes.
+Do not add `blueprint_version`, wrapper keys, `route`/`input` keys, or role tags. (Human notes go in `_comment*` keys — see Comments.)
 
 Shape (schematic):
 
@@ -54,6 +55,30 @@ Bundle (ordered; a later step reads an earlier step's output by relative path):
   { "POST /v2/create-image-pixflux": { "description": "mossy stone well, top-down", "seed": 123 } },
   { "POST /v2/edit-image": { "image": "01-well.png", "description": "add a soft glow", "seed": 123 } }
 ]
+```
+
+## Comments
+
+Blueprints may carry human notes as keys prefixed `_comment` (free-form strings), placed as
+siblings of the route so the request body stays untouched (tolerated anywhere, but sibling
+placement is the norm). They are metadata, not fields: drop every `_comment*` key before
+sending a request, and never treat one as an input.
+
+- `_comment_prompt` — the user request that initiated this blueprint.
+- `_comment` — what this blueprint (or bundle step) is for.
+- `_comment_<field>` — a note about a sibling field, e.g. `_comment_seed`.
+
+Always write `_comment_prompt`. Add other `_comment*` keys only for useful, non-obvious
+context — an issue or discovery during creation, or the blueprint's purpose; never restate
+the obvious. In a bundle, put step notes in each step's object and any overall note on the
+first step.
+
+```json
+{
+  "_comment_prompt": "create a knight character",
+  "_comment": "base sprite for the RPG prototype",
+  "MCP create_character": { "description": "a knight in shining armor" }
+}
 ```
 
 ## Writing a blueprint

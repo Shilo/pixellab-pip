@@ -40,6 +40,23 @@ example, "make an image, then edit it":
 Here the second step edits the well the first step produced (saved as `01-well.png`). Each step
 spends credits, so the assistant confirms the plan before running a multi-step bundle.
 
+## Comments
+
+A blueprint can carry short human notes as keys starting with `_comment`. They are only for
+people reading the file — the assistant ignores them when it runs the blueprint.
+
+```json
+{
+  "_comment_prompt": "create a knight character",
+  "_comment": "base sprite for the RPG prototype",
+  "MCP create_character": { "description": "a knight in shining armor" }
+}
+```
+
+Every blueprint records the request that created it in `_comment_prompt`. Extra `_comment`
+notes (or `_comment_<field>` for a specific value) are added only when there's something
+non-obvious worth sharing — a gotcha found during creation, or what the blueprint is for.
+
 ## Creating a blueprint
 
 You don't have to do anything special: after a successful generation, the assistant writes the
