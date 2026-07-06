@@ -21,9 +21,11 @@ Primary sources:
 
 ## Concurrency and Priority Slots
 
-The `pixellab-api` page lists **Concurrent jobs** and **priority slots** per account. Confirmed: **sustained, consistent API usage automatically raises an account's concurrency** — how many generation jobs it can run in parallel (stated by PixelLab, 2026).
+The account view shows **Concurrent jobs** (labeled with your subscription **tier**) and **priority slots** — concurrent jobs that skip added queue time.
 
-Unconfirmed — do not state as fact: the exact concurrency limit for any account, whether a paid membership tier raises it, and how priority slots are earned or applied. If an exact limit matters, verify on the live page or with PixelLab support rather than quoting a number.
+Confirmed mechanism (PixelLab account UI, 2026): priority slots are **earned by sustained parallel usage** — your **average concurrency over the trailing 30 minutes becomes your priority-slot count**, so a steady parallel load raises the ceiling and idle time lets it decay.
+
+Observed datapoint: a **Tier 2** account shows a priority-slot **limit of 10**. Unconfirmed: whether that limit differs for Free, Tier 1, or Tier 3. Do not quote a per-tier number you have not verified for that tier; if an exact limit matters, check the live account view or ask PixelLab support.
 
 Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md](../../skills/pixellab-pip/references/job-lifecycle.md).
 
