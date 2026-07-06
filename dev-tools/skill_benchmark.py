@@ -116,7 +116,7 @@ SCENARIOS = [
     {
         "id": "cheap-animation",
         "task": "I already have a character in PixelLab. What's the cheapest way to give it a walk animation?",
-        "checks": {"template": r"template", "cost": r"1\s*(generation|gen)"},
+        "checks": {"template": r"template", "cost": r"(?:1|one)\s*(generation|gen)"},
         "refs_any": ["cost-routing.md"],
     },
     {
@@ -176,7 +176,9 @@ SCENARIOS = [
         # Objects are Pro Tools — a standalone prop routes to the object tools, not general image gen.
         "id": "route-object-prop",
         "task": "With PixelLab, I want a standalone treasure chest prop for my dungeon.",
-        "checks": {"object": r"create[_-][18][_-]direction[_-]object|create[_-]object"},
+        # \b keeps create_object_state (an edit variant) from matching; create_map_object is
+        # deliberately not rewarded — map objects auto-delete after 8 hours, wrong for a kept prop.
+        "checks": {"object": r"create[_-][18][_-]direction[_-]object|create[_-]object\b"},
         "refs_any": [],
     },
     {
@@ -219,7 +221,9 @@ SCENARIOS = [
         # The route (knight -> create_character) is guessable; the preset-file replay is the discriminator.
         "id": "replay-blueprint",
         "task": "Using PixelLab, recreate my saved knight blueprint.",
-        "checks": {"blueprint": r"\.blueprint\.json|blueprints?[\\/]|recorded (?:route|body|request)|saved (?:blueprint|preset|generation)|preset (?:blueprint|file)", "route": r"create[_-]character"},
+        # Only file-level evidence counts: "saved blueprint/preset" wording is a paraphrase of the
+        # task itself and scored arms that merely echoed it (verified in the 20260705 run).
+        "checks": {"blueprint": r"\.blueprint\.json|blueprints?[\\/]|recorded (?:route|body|request)", "route": r"create[_-]character"},
         "refs_any": ["blueprint.md"],
     },
     {
@@ -284,6 +288,9 @@ def variant_files(skill_dir: Path) -> dict[str, str]:
 def fetch_mcp_docs(out_dir: Path) -> str:
     import urllib.request
 
+    cached = out_dir / "mcp-docs.md"
+    if cached.is_file():  # resumed run: reuse the archived doc so every cell scores against the same content
+        return cached.read_text(encoding="utf-8")
     request = urllib.request.Request(MCP_DOCS_URL, headers={"User-Agent": "pixellab-pip-skill-benchmark"})
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
@@ -805,6 +812,7 @@ def main() -> int:
         out_dir = Path(args.resume)
         if not (out_dir / "results.json").is_file():
             raise SystemExit(f"--resume dir has no results.json to continue from: {out_dir}")
+        stamp = out_dir.name  # keep the original run's stamp; argv already records the resume
     else:
         out_dir = Path(args.out) / stamp
     out_dir.mkdir(parents=True, exist_ok=True)
