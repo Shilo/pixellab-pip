@@ -63,22 +63,15 @@ Bundle (ordered; a later step reads an earlier step's output by relative path):
 
 ## Comments
 
-Blueprints may carry human notes as keys prefixed `_comment` (free-form strings), placed as
-siblings of the route so the request body stays untouched (tolerated anywhere, but sibling
-placement is the norm). They are metadata, not fields: drop every `_comment*` key before
-sending a request, and never treat one as an input.
+`_comment*` keys hold free-form human notes — metadata, not fields: drop every `_comment*` key
+before sending the request. Accept them in any position; write all `_comment*` keys before the
+route, `_comment` first. A note lives in its route's object; a bundle's overall notes go on the
+first step.
 
-When writing, put `_comment` (the summary) first, then any number of other `_comment*` keys,
-then the route key.
-
-- `_comment` (or any `_comment*` key) — add when there is useful, non-obvious information
-  worth sharing with the blueprint: an issue, discovery, finding, or critical detail from
-  creation, or what the blueprint is for. Never restate the obvious.
-- `_comment_prompt` — the exact text of the user request that triggered this generation,
-  copied unchanged (no summarizing, translating, or normalizing). Include it only when a user
-  prompt initiated the work — on the single object, or on the first step of a bundle.
-
-In a bundle, put step notes in each step's object and any overall note on the first step.
+- `_comment` (or any custom `_comment*`) — a non-obvious detail worth keeping: a gotcha or
+  discovery during creation, or what the blueprint is for. Skip the obvious.
+- `_comment_prompt` — the user's exact triggering request, copied verbatim, only when a prompt
+  initiated the generation.
 
 ```json
 {
