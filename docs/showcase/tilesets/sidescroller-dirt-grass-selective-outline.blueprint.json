@@ -1,0 +1,16 @@
+{
+  "_comment_prompt": "Controlled sidescroller outline test using monochromatic dirt and monochromatic grass. Only outline changed across the test.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "monochromatic dirt",
+    "transition_description": "monochromatic grass",
+    "transition_size": 0.25,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "selective outline",
+    "seed": 730731,
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    }
+  }
+}

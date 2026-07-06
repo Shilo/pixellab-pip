@@ -1,0 +1,17 @@
+{
+  "_comment_prompt": "/pixellab-pip create 1-bit 32x32 sidescroller tileset: black-filled platform center with sparse short white scuff marks and tiny single-pixel nicks inside the center body, very low density, thin white eroded platform top edge, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
+  "_comment": "PixelLab generated the showcased raw tileset. Aseprite outline and palette-clamp derivatives were produced later but are not part of this showcased image.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "black-filled platform center body; sparse short white scuff marks and tiny single-pixel white nicks embedded inside the black center material; very low density; hard 1-bit silhouette feel; transparent outside the platform",
+    "transition_description": "thin white eroded platform top edge; narrow chipped white pixel rim along the top surface; sparse tiny breaks and nicks; no thick grass or decorative layer",
+    "transition_size": 0.25,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "lineless",
+    "text_guidance_scale": 12,
+    "tile_size": {
+      "width": 32,
+      "height": 32
+    }
+  }
+}

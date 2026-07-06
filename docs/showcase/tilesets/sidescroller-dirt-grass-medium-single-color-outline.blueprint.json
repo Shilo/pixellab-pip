@@ -1,0 +1,15 @@
+{
+  "_comment_prompt": "Generic sidescroller terrain matrix request for dirt lower terrain and grass transition.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "dirt",
+    "transition_description": "grass",
+    "transition_size": 0.25,
+    "detail": "medium detail",
+    "outline": "single color outline",
+    "seed": 731311,
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    }
+  }
+}

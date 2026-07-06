@@ -1,23 +1,45 @@
 # Tilesets
 
-Last reviewed: 2026-07-02.
+Last reviewed: 2026-07-06.
 
 <table>
+  <tr>
+    <th colspan="2">Top-down terrain</th>
+  </tr>
+  <tr>
+    <td><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
+    <td><img src="tilesets/topdown-dirt-grass-low-single-color-outline.png" alt="top-down low detail dirt and grass tileset with single color outline"></td>
+  </tr>
   <tr>
     <td colspan="2" align="center"><img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example"></td>
   </tr>
   <tr>
-    <td><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
+    <th colspan="2">Sidescroller terrain</th>
+  </tr>
+  <tr>
     <td><img src="tilesets/one-bit-black-gameboy-green-sidescroller-tileset.png" alt="1-bit black and Game Boy green sidescroller tileset showcase"></td>
+    <td><img src="tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.png" alt="1-bit icy cap sidescroller tileset with black-and-white and Game Boy green copies"></td>
+  </tr>
+  <tr>
+    <td><img src="tilesets/one-bit-sidescroller-scuffs-nicks-original.png" alt="raw PixelLab 1-bit inspired sidescroller platform with sparse scuffs and nicks"></td>
+    <td><img src="tilesets/sidescroller-dirt-grass-selective-outline.png" alt="sidescroller dirt and grass tileset using selective outline"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="tilesets/sidescroller-dirt-grass-medium-single-color-outline.png" alt="sidescroller medium detail dirt and grass tileset using single color outline"></td>
   </tr>
 </table>
 
-PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer requests through PixelLab's managed tileset tooling, then preserve accepted PixelLab structure while documenting any local palette work separately. The showcased top-down asset pairs the accepted strict black-and-white copy with the requested gameplay-green copy in one side-by-side composition. The showcased sidescroller pair demonstrates the same preservation-and-palette-clamp workflow for a compact platformer tileset.
+PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer requests through PixelLab's managed tileset tooling, then preserve accepted PixelLab structure while documenting any local palette work separately. These examples are ordered by category: top-down terrain first, then sidescroller terrain. Some examples are raw PixelLab outputs, while the strict 1-bit examples document palette-clamped derivatives separately.
 
 ## Contents
 
 - [Primary Example: 1-Bit Black And Green Top-Down Tileset](#primary-example-1-bit-black-and-green-top-down-tileset)
+- [Top-Down Example: Low Detail Dirt Grass Single Color Outline](#top-down-example-low-detail-dirt-grass-single-color-outline)
 - [Sidescroller Example: 1-Bit Black And Game Boy Green Platform Tileset](#sidescroller-example-1-bit-black-and-game-boy-green-platform-tileset)
+- [Sidescroller Example: Icy Cap Black-And-White And Game Boy Green](#sidescroller-example-icy-cap-black-and-white-and-game-boy-green)
+- [Sidescroller Example: Sparse Scuffs And Nicks](#sidescroller-example-sparse-scuffs-and-nicks)
+- [Sidescroller Example: Organic Dirt Grass Selective Outline](#sidescroller-example-organic-dirt-grass-selective-outline)
+- [Sidescroller Example: Medium Dirt Grass Single Color Outline](#sidescroller-example-medium-dirt-grass-single-color-outline)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -91,6 +113,61 @@ Findings:
 - The gameplay-green copy is a recolor of the accepted black-and-white copy, not a separate PixelLab generation.
 - A later REST tileset attempt with a palette reference produced stricter black output but lost the visible stripe detail, so it was not selected for the showcase.
 
+## Top-Down Example: Low Detail Dirt Grass Single Color Outline
+
+![top-down low detail dirt and grass tileset with single color outline](tilesets/topdown-dirt-grass-low-single-color-outline.png)
+
+The raw PixelLab output shows a common top-down dirt/grass transition request rather than a strict 1-bit niche request. The selected matrix candidate is readable at `16x16`, keeps the terrain categories clear, and shows the stronger graphic separation produced by `single color outline`.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab MCP `create_topdown_tileset`.
+
+Local processing: none for the showcased image. The PNG is copied from the raw PixelLab generation output.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Output structure | Top-down Wang/autotile tileset |
+| Source sheet size | `64x64` |
+| Tile size | `16x16` |
+| Lower description | `dirt` |
+| Upper description | `grass` |
+| Transition description | `grass to dirt` |
+| Detail | `low detail` |
+| Shading | Omitted |
+| Outline | `single color outline` |
+| Transition size | `0.25` |
+| Seed | Requested, but MCP rejected `seed`; omitted for this top-down matrix |
+
+Blueprint — replayable route and request body ([`topdown-dirt-grass-low-single-color-outline.blueprint.json`](tilesets/topdown-dirt-grass-low-single-color-outline.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition.",
+  "_comment": "PixelLab generated the showcased raw tileset. The MCP tool rejected seed for this top-down matrix run, so no seed is recorded.",
+  "MCP create_topdown_tileset": {
+    "lower_description": "dirt",
+    "upper_description": "grass",
+    "transition_description": "grass to dirt",
+    "transition_size": 0.25,
+    "detail": "low detail",
+    "outline": "single color outline",
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    }
+  }
+}
+```
+
+Findings:
+
+- The selected output is a better showcase for normal terrain/material generation than for strict palette work.
+- `single color outline` made the dirt/grass boundary more graphic and readable.
+- Because the top-down matrix did not accept `seed`, this image should be treated as a visual example, not a seed-stable control result.
+
 ## Sidescroller Example: 1-Bit Black And Game Boy Green Platform Tileset
 
 ![1-bit black and Game Boy green sidescroller tileset showcase](tilesets/one-bit-black-gameboy-green-sidescroller-tileset.png)
@@ -157,6 +234,253 @@ Findings:
 - The Game Boy green copy is a recolor of the accepted black-and-white copy, not a separate PixelLab generation.
 - This is a good example for documenting strict-palette verification because the raw art looked close but contained 13 visible colors.
 
+## Sidescroller Example: Icy Cap Black-And-White And Game Boy Green
+
+![1-bit icy cap sidescroller tileset with black-and-white and Game Boy green copies](tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.png)
+
+Original prompt:
+
+```text
+/pixellab-pip create 1-bit sidescroller tileset: pure black platform center, jagged white icy top cap, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.
+```
+
+The icy cap sidescroller example demonstrates a themed 32px platform prompt where the accepted showcase is a derived side-by-side composition: black-and-white on the left, Game Boy green on the right. The raw PixelLab output is not shown in the showcase image.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab MCP `create_sidescroller_tileset`.
+
+Prompt preparation: agent-optimized from the user's prompt into separate lower/platform and transition/top-cap descriptions.
+
+Local processing: Aseprite FX Outline equivalent was applied with `place=inside`, four-side matrix `170`, color `#FFFFFF`, and transparent background; the outlined result was palette-clamped to `#000000`/`#FFFFFF`; the Game Boy copy was remapped from the black-and-white derivative to `#0F380F`/`#9BBC0F`; the showcase image was locally assembled by placing those two derivatives side by side at native size. No local shape edits or scaling were made.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Output structure | Sidescroller/platformer tileset |
+| Source sheet | PixelLab MCP generated tileset |
+| Source sheet size | `128x128` |
+| Tile size | `32x32` |
+| Tile count | `16` |
+| Final showcase image | `256x128`, native-size side-by-side composition |
+| Lower description | `pure solid black platform center, clean 1-bit silhouette, opaque black platform body, no texture, no gray, transparent outside the platform` |
+| Transition description | `jagged icy top cap, sharp irregular white ice teeth and snow crust along only the upper edge, clean 1-bit white, no gray, transparent outside the platform` |
+| Detail | `low detail` |
+| Shading | `flat shading` |
+| Outline | `lineless` |
+| Transition size | `0.5` |
+| Text guidance scale | `10` |
+| Tile strength | `0.8` |
+| Tileset adherence | `0.8` |
+| Tileset adherence freedom | `0.2` |
+| Seed | Not exposed |
+| Usage reported | Not recorded in the saved manifest |
+
+Blueprint — replayable route and request body ([`one-bit-sidescroller-icy-cap-bw-gameboy.blueprint.json`](tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "/pixellab-pip create 1-bit sidescroller tileset: pure black platform center, jagged white icy top cap, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
+  "_comment": "PixelLab generated the raw tileset. The showcased image is a local side-by-side composition of the black/white Aseprite derivative on the left and the Game Boy green derivative on the right. Local post-processing and side-by-side assembly are documented in the showcase page, not replayed as PixelLab blueprint steps.",
+  "MCP create_sidescroller_tileset": {
+    "tile_size": {
+      "width": 32,
+      "height": 32
+    },
+    "lower_description": "pure solid black platform center, clean 1-bit silhouette, opaque black platform body, no texture, no gray, transparent outside the platform",
+    "transition_description": "jagged icy top cap, sharp irregular white ice teeth and snow crust along only the upper edge, clean 1-bit white, no gray, transparent outside the platform",
+    "transition_size": 0.5,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "lineless",
+    "text_guidance_scale": 10,
+    "tile_strength": 0.8,
+    "tileset_adherence": 0.8,
+    "tileset_adherence_freedom": 0.2
+  }
+}
+```
+
+Findings:
+
+- The jagged icy cap is one of the stronger themed 1-bit sidescroller variants from the chooser set.
+- The strict black-and-white and Game Boy green copies are local derivatives, not untouched PixelLab outputs.
+- Transparency was preserved, and both visible palettes validated as exact two-color outputs.
+
+## Sidescroller Example: Sparse Scuffs And Nicks
+
+![raw PixelLab 1-bit inspired sidescroller platform with sparse scuffs and nicks](tilesets/one-bit-sidescroller-scuffs-nicks-original.png)
+
+Original prompt:
+
+```text
+/pixellab-pip create 1-bit 32x32 sidescroller tileset: black-filled platform center with sparse short white scuff marks and tiny single-pixel nicks inside the center body, very low density, thin white eroded platform top edge, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.
+```
+
+The raw PixelLab output was selected from attempt 29 in the 30-attempt 1-bit sidescroller chooser. The useful part of the earlier "bone chips" direction was sparse, low-density light marks inside a mostly dark platform body. The showcase intentionally uses only the original PixelLab output, not the Aseprite outlined, black-and-white clamped, or Game Boy green derivatives.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab MCP `create_sidescroller_tileset`.
+
+Prompt preparation: agent-optimized from the user's prompt into separate lower/platform and transition/top-edge descriptions. The saved chooser summary used shorter descriptions, but the generation manifest recorded the fuller MCP input shown below.
+
+Local processing: none for the showcased image. The PNG is copied from the raw PixelLab generation output. Aseprite outline and palette-clamp derivatives exist for this attempt, but they are not shown here.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Output structure | Sidescroller/platformer tileset |
+| Source sheet | PixelLab MCP generated tileset |
+| Source sheet size | `128x128` |
+| Tile size | `32x32` |
+| Tile count | `16` |
+| Final showcase image | `128x128`, raw PixelLab output |
+| Lower description | `black-filled platform center body; sparse short white scuff marks and tiny single-pixel white nicks embedded inside the black center material; very low density; hard 1-bit silhouette feel; transparent outside the platform` |
+| Transition description | `thin white eroded platform top edge; narrow chipped white pixel rim along the top surface; sparse tiny breaks and nicks; no thick grass or decorative layer` |
+| Detail | `low detail` |
+| Shading | `flat shading` |
+| Outline | `lineless` |
+| Transition size | `0.25` |
+| Text guidance scale | `12` |
+| Seed | Not exposed |
+| Usage observed | `15` subscription generations; credits unchanged in the saved manifest |
+
+Blueprint — replayable route and request body ([`one-bit-sidescroller-scuffs-nicks-original.blueprint.json`](tilesets/one-bit-sidescroller-scuffs-nicks-original.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "/pixellab-pip create 1-bit 32x32 sidescroller tileset: black-filled platform center with sparse short white scuff marks and tiny single-pixel nicks inside the center body, very low density, thin white eroded platform top edge, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
+  "_comment": "PixelLab generated the showcased raw tileset. Aseprite outline and palette-clamp derivatives were produced later but are not part of this showcased image.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "black-filled platform center body; sparse short white scuff marks and tiny single-pixel white nicks embedded inside the black center material; very low density; hard 1-bit silhouette feel; transparent outside the platform",
+    "transition_description": "thin white eroded platform top edge; narrow chipped white pixel rim along the top surface; sparse tiny breaks and nicks; no thick grass or decorative layer",
+    "transition_size": 0.25,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "lineless",
+    "text_guidance_scale": 12,
+    "tile_size": {
+      "width": 32,
+      "height": 32
+    }
+  }
+}
+```
+
+Findings:
+
+- Sparse scuffs and nicks are a useful prompt direction for platform-body detail without making the center pure flat black.
+- The result is 1-bit inspired, but the raw PixelLab output is not strict black-and-white.
+- For strict palette output, use an explicit post-process path and keep the raw PixelLab output documented separately.
+
+## Sidescroller Example: Organic Dirt Grass Selective Outline
+
+![sidescroller dirt and grass tileset using selective outline](tilesets/sidescroller-dirt-grass-selective-outline.png)
+
+The raw PixelLab output was selected from a controlled sidescroller outline test. The input was generic `monochromatic dirt` plus `monochromatic grass`, and only the `outline` value changed across the test. The `selective outline` candidate reads as a smoother, more organic dirt mass than the blockier single-color-outline version.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab MCP `create_sidescroller_tileset`.
+
+Local processing: none for the showcased image. The PNG is copied from the raw PixelLab generation output.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Output structure | Sidescroller/platformer tileset |
+| Source sheet size | `64x64` |
+| Tile size | `16x16` |
+| Lower description | `monochromatic dirt` |
+| Transition description | `monochromatic grass` |
+| Detail | `low detail` |
+| Shading | `flat shading` |
+| Outline | `selective outline` |
+| Transition size | `0.25` |
+| Seed | `730731` |
+
+Blueprint — replayable route and request body ([`sidescroller-dirt-grass-selective-outline.blueprint.json`](tilesets/sidescroller-dirt-grass-selective-outline.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "Controlled sidescroller outline test using monochromatic dirt and monochromatic grass. Only outline changed across the test.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "monochromatic dirt",
+    "transition_description": "monochromatic grass",
+    "transition_size": 0.25,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "selective outline",
+    "seed": 730731,
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    }
+  }
+}
+```
+
+Findings:
+
+- Selective outline is a useful example when the desired sidescroller platform should feel organic rather than brick-like.
+- The paired `flat shading` candidate from the later shading test was not added separately because it is visually redundant with this same dirt/grass style family.
+
+## Sidescroller Example: Medium Dirt Grass Single Color Outline
+
+![sidescroller medium detail dirt and grass tileset using single color outline](tilesets/sidescroller-dirt-grass-medium-single-color-outline.png)
+
+The raw PixelLab output was selected from the generic sidescroller dirt/grass detail-and-outline matrix. It shows the more aggressive, stylized look produced by `single color outline` with `medium detail` on a common terrain/material prompt.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab MCP `create_sidescroller_tileset`.
+
+Local processing: none for the showcased image. The PNG is copied from the raw PixelLab generation output.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Output structure | Sidescroller/platformer tileset |
+| Source sheet size | `64x64` |
+| Tile size | `16x16` |
+| Lower description | `dirt` |
+| Transition description | `grass` |
+| Detail | `medium detail` |
+| Shading | Omitted |
+| Outline | `single color outline` |
+| Transition size | `0.25` |
+| Seed | `731311` |
+
+Blueprint — replayable route and request body ([`sidescroller-dirt-grass-medium-single-color-outline.blueprint.json`](tilesets/sidescroller-dirt-grass-medium-single-color-outline.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "Generic sidescroller terrain matrix request for dirt lower terrain and grass transition.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "dirt",
+    "transition_description": "grass",
+    "transition_size": 0.25,
+    "detail": "medium detail",
+    "outline": "single color outline",
+    "seed": 731311,
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    }
+  }
+}
+```
+
+Findings:
+
+- The selected output is a good showcase for normal dirt/grass sidescroller prompts where stronger internal structure is acceptable.
+- It should not be interpreted as proof that `single color outline` deterministically places exact border pixels.
+
 ## Findings
 
 Top-down tileset generation is appropriate for terrain-transition requests that mention upper terrain, lower terrain, and transitions. For strict 1-bit palette requirements, current top-down generation should be verified against exact visible colors before being called final. Palette-constrained local derivatives should be documented separately from the raw PixelLab output.
@@ -186,7 +510,12 @@ Practical notes from follow-up trials:
 |---|---|
 | Black-and-white plus Game Boy green one-bit 16px top-down tilesets example | `docs/showcase/tilesets/one-bit-16px-top-down-tilesets.png` |
 | Black-and-white plus gameplay-green tileset composition | `docs/showcase/tilesets/one-bit-black-green-topdown-tileset.png` |
+| Top-down low detail dirt/grass single-color-outline raw PixelLab output | `docs/showcase/tilesets/topdown-dirt-grass-low-single-color-outline.png` |
 | Black-and-white plus Game Boy green sidescroller tileset composition | `docs/showcase/tilesets/one-bit-black-gameboy-green-sidescroller-tileset.png` |
+| Black-and-white plus Game Boy green icy-cap sidescroller composition | `docs/showcase/tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.png` |
+| Sidescroller sparse scuffs/nicks raw PixelLab output | `docs/showcase/tilesets/one-bit-sidescroller-scuffs-nicks-original.png` |
+| Sidescroller dirt/grass selective-outline raw PixelLab output | `docs/showcase/tilesets/sidescroller-dirt-grass-selective-outline.png` |
+| Sidescroller medium detail dirt/grass single-color-outline raw PixelLab output | `docs/showcase/tilesets/sidescroller-dirt-grass-medium-single-color-outline.png` |
 
 ## Validation Notes
 
@@ -204,3 +533,8 @@ Practical notes from follow-up trials:
 - The sidescroller black-and-white half uses only `#000000` and `#FFFFFF`.
 - The sidescroller Game Boy green half uses only `#0F380F` and `#9BBC0F`.
 - The sidescroller showcase composition preserves the accepted source copies at native `64x64` size.
+- The icy-cap sidescroller composition is exactly `256x128`, with the black-and-white derivative on the left and the Game Boy green derivative on the right.
+- The icy-cap sidescroller composition contains only `#000000`, `#FFFFFF`, `#0F380F`, and `#9BBC0F` as visible colors.
+- The raw scuffs/nicks sidescroller showcase image is exactly `128x128` and preserves the original PixelLab output.
+- The raw dirt/grass sidescroller showcase images are exactly `64x64` and preserve their original PixelLab outputs.
+- The raw dirt/grass top-down showcase image is exactly `64x64` and preserves the original PixelLab output.
