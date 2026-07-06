@@ -4,34 +4,26 @@ Last reviewed: 2026-07-06.
 
 <table>
   <tr>
-    <th colspan="2">Top-down terrain</th>
+    <th>32px sidescroller tilesets</th>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
+    <td align="center"><img src="tilesets/tileset-showcase-32px-sidescroller-atlas.png" alt="32px sidescroller tileset showcase atlas"></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="tilesets/topdown-dirt-grass-low-lineless-and-single-color-outline.png" alt="top-down low detail dirt and grass tileset comparison with lineless and single color outline"></td>
+    <th>16px top-down tilesets</th>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example"></td>
+    <td align="center"><img src="tilesets/tileset-showcase-16px-topdown-atlas.png" alt="16px top-down tileset showcase atlas"></td>
   </tr>
   <tr>
-    <th colspan="2">Sidescroller terrain</th>
+    <th>16px sidescroller tilesets</th>
   </tr>
   <tr>
-    <td><img src="tilesets/one-bit-black-gameboy-green-sidescroller-tileset.png" alt="1-bit black and Game Boy green sidescroller tileset showcase"></td>
-    <td><img src="tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.png" alt="1-bit icy cap sidescroller tileset with black-and-white and Game Boy green copies"></td>
-  </tr>
-  <tr>
-    <td><img src="tilesets/one-bit-sidescroller-scuffs-nicks-original.png" alt="raw PixelLab 1-bit inspired sidescroller platform with sparse scuffs and nicks"></td>
-    <td><img src="tilesets/sidescroller-dirt-grass-selective-outline.png" alt="sidescroller dirt and grass tileset using selective outline"></td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center"><img src="tilesets/sidescroller-dirt-grass-medium-single-color-outline.png" alt="sidescroller medium detail dirt and grass tileset using single color outline"></td>
+    <td align="center"><img src="tilesets/tileset-showcase-16px-sidescroller-atlas.png" alt="16px sidescroller tileset showcase atlas"></td>
   </tr>
 </table>
 
-PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer requests through PixelLab's managed tileset tooling, then preserve accepted PixelLab structure while documenting any local palette work separately. These examples are ordered by category: top-down terrain first, then sidescroller terrain. Some examples are raw PixelLab outputs, while the strict 1-bit examples document palette-clamped derivatives separately.
+PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer requests through PixelLab's managed tileset tooling, then preserve accepted PixelLab structure while documenting any local palette work separately. The overview atlases above are local native-size compositions of selected showcase assets: 32px sidescroller first, 16px top-down second, and 16px sidescroller last. Some examples are raw PixelLab outputs, while the strict 1-bit examples document palette-clamped derivatives separately.
 
 ## Contents
 
@@ -529,6 +521,9 @@ Practical notes from follow-up trials:
 
 | Output | Stable showcase file |
 |---|---|
+| 32px sidescroller overview atlas | `docs/showcase/tilesets/tileset-showcase-32px-sidescroller-atlas.png` |
+| 16px top-down overview atlas | `docs/showcase/tilesets/tileset-showcase-16px-topdown-atlas.png` |
+| 16px sidescroller overview atlas | `docs/showcase/tilesets/tileset-showcase-16px-sidescroller-atlas.png` |
 | Black-and-white plus Game Boy green one-bit 16px top-down tilesets example | `docs/showcase/tilesets/one-bit-16px-top-down-tilesets.png` |
 | Black-and-white plus gameplay-green tileset composition | `docs/showcase/tilesets/one-bit-black-green-topdown-tileset.png` |
 | Top-down low detail dirt/grass lineless and single-color-outline comparison | `docs/showcase/tilesets/topdown-dirt-grass-low-lineless-and-single-color-outline.png` |
@@ -540,6 +535,9 @@ Practical notes from follow-up trials:
 
 ## Validation Notes
 
+- The 32px sidescroller overview atlas is exactly `384x128` and preserves the source assets at native size.
+- The 16px top-down overview atlas is exactly `256x192` and preserves the source assets at native size.
+- The 16px sidescroller overview atlas is exactly `256x64` and preserves the source assets at native size.
 - The one-bit 16px top-down tilesets example is exactly `256x128`.
 - The one-bit 16px top-down tilesets example contains only `#000000`, `#FFFFFF`, `#0F380F`, and `#9BBC0F` as visible colors.
 - The one-bit 16px top-down tilesets example preserves the original black-and-white copy on the left and adds the Game Boy green copy on the right.
