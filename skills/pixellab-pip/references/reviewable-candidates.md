@@ -16,7 +16,7 @@ Do not use this for ordered outputs where every frame/member is part of the requ
 
 ## Display
 
-Show candidates in a compact indexed form. Prefer an indexed contact sheet, inline previews with labels, or links with labels. Temporary preview downloads/contact sheets are allowed when clearly treated as selection previews. Keep any local preview honest: it is for selection only, and final pixels still come from PixelLab or the user.
+Show candidates in a compact indexed form. Prefer an indexed contact sheet, inline previews with labels, or links with labels. Center each label horizontally with its candidate, and use a large readable label font when space allows. Temporary preview downloads/contact sheets are allowed when clearly treated as selection previews. Keep any local preview honest: it is for selection only, and final pixels still come from PixelLab or the user.
 
 Use stable labels from `1..N` in the same order the tool/API returned alternatives. Never expose route-native `0`-based positions as user-facing labels.
 
@@ -40,12 +40,6 @@ Pick the base before I continue.
 Reply with one index, like `3`.
 ```
 
-For PixelLab object review candidates, also say:
-
-```markdown
-To save/accept more varieties in PixelLab, open https://www.pixellab.ai/create-object.
-```
-
 ## Handling Replies
 
 - Single number: look up the mapped selector, then continue with that selected candidate.
@@ -59,3 +53,9 @@ If multiple candidates are kept but the next step needs exactly one base, keep t
 ## Continuing
 
 After selection, continue the user's original task if enough information is available. For example, create the requested state/edit/animation from the chosen base, or finalize/download the chosen static result. If there is no follow-up action, report the selected output paths or managed asset IDs.
+
+For PixelLab object review candidates, put this note at the end of the final response, not in the choice prompt:
+
+```markdown
+You can manage additional object varieties in PixelLab at [Create Object](https://www.pixellab.ai/create-object).
+```
