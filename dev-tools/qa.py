@@ -72,10 +72,7 @@ def check_json_files() -> None:
 def read_json_path(path: str, parts: tuple[object, ...]) -> object:
     value: object = json.loads((REPO_ROOT / path).read_text(encoding="utf-8"))
     for part in parts:
-        if isinstance(part, int):
-            value = value[part]  # type: ignore[index]
-        else:
-            value = value[part]  # type: ignore[index]
+        value = value[part]  # type: ignore[index]
     return value
 
 
