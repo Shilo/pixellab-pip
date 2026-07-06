@@ -1,7 +1,7 @@
 param(
     [ValidateSet("full", "static", "dry-claude", "dry-all", "list", "cancel")]
     [string]$Preset,
-    [int]$Reps = 1,  # 1 rep keeps the full preset at ~144 cells; pass -Reps 3 for tighter medians. The benchmark is dry — no PixelLab credits.
+    [int]$Reps = 1,  # 1 rep keeps the full preset at 240 cells (~2 hours); -Reps 2 for tighter medians. The benchmark is dry — no PixelLab credits.
     [string]$Resume  # path to a prior .local/bench/<stamp> dir to continue instead of starting fresh (reuses completed cells)
 )
 

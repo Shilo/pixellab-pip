@@ -135,9 +135,9 @@ The current working-tree skill is always the first column, so `--variants` only 
 ```powershell
 python dev-tools/skill_benchmark.py --list                 # scenarios
 python dev-tools/skill_benchmark.py --static               # free context-size comparison, no CLI calls
-python dev-tools/skill_benchmark.py --agents claude --reps 3
-python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --reps 4
-python dev-tools/skill_benchmark.py --agents claude --variants vanilla,mcp-docs --reps 3   # current skill vs no-skill vs official docs
+python dev-tools/skill_benchmark.py --agents claude --reps 2
+python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --reps 1
+python dev-tools/skill_benchmark.py --agents claude --variants vanilla,mcp-docs --reps 2   # current skill vs no-skill vs official docs
 ```
 
 Results land under `.local/bench/<stamp>/` (`SUMMARY.md`, `results.json`, `static.json`, per-cell responses); `results.json` is checkpointed after every cell, so an interrupted run is never lost. Continue one with `--resume <dir>` (reuses successful cells, re-runs errored/missing ones — e.g. after an agent runs out of tokens), or turn a partial run into a report offline with `--rescore <dir>`. The launcher takes `-Resume <dir>`. `.local/` is gitignored, so reports stay on the machine that ran them and are never committed. Workspaces are materialized outside the repo so CLAUDE.md/AGENTS.md cannot contaminate arms; reps interleave variants so provider caching hits both alike; medians are reported.
@@ -148,15 +148,15 @@ On Windows, [dev-tools/run-skill-benchmark.ps1](../dev-tools/run-skill-benchmark
 
 ```powershell
 .\dev-tools\run-skill-benchmark.ps1 -Preset static        # free, no CLI calls
-.\dev-tools\run-skill-benchmark.ps1 -Preset dry-claude -Reps 3
-.\dev-tools\run-skill-benchmark.ps1 -Preset dry-all -Reps 4
+.\dev-tools\run-skill-benchmark.ps1 -Preset dry-claude -Reps 2
+.\dev-tools\run-skill-benchmark.ps1 -Preset dry-all
 .\dev-tools\run-skill-benchmark.ps1 -Preset full          # all agents + variants, refreshes the report
 .\dev-tools\run-skill-benchmark.ps1 -Preset full -Resume .local/bench/<stamp>   # continue an interrupted run
 ```
 
 The published report at [docs/pixellab-pip-benchmark.md](pixellab-pip-benchmark.md) contains a `<!-- BENCHMARK:GENERATED -->` block that `--report FILE` rewrites from a run (the surrounding prose is preserved). The `full` preset passes `--report docs/pixellab-pip-benchmark.md` automatically, so a full run refreshes the committed report. `--rescore <dir> --report FILE` regenerates the block from an existing results dir without re-calling any CLI. Each run also prints its own approximate agent token/cost total at the end.
 
-The `full` preset is exhaustive but **spends no PixelLab credits** (every scenario is dry). At its default `-Reps 1` it runs 3 agents x 4 variants x 20 scenarios = 240 agent calls; `-Reps 3` triples that to 720. Its only cost is agent-provider tokens — on the order of a million-plus input tokens per proprietary-model agent per rep; deepseek-v4-pro via OpenCode is far cheaper. Raise `-Reps` for tighter medians, or scope with `--scenarios`. (The raw `skill_benchmark.py --reps` default is 3; the launcher passes 1.)
+The `full` preset is exhaustive but **spends no PixelLab credits** (every scenario is dry). At its default `-Reps 1` it runs 3 agents x 4 variants x 20 scenarios = 240 agent calls — cells run sequentially at ~30 s median, so budget **~2 hours per rep**; `-Reps 2` doubles that to 480 calls and ~4 hours, and more than 2 reps is rarely worth the wall-clock. Its only cost is agent-provider tokens — on the order of a million-plus input tokens per proprietary-model agent per rep; deepseek-v4-pro via OpenCode is far cheaper. Scope with `--scenarios` for quick checks. (Both the raw `skill_benchmark.py --reps` default and the launcher's `-Reps` default are 1.)
 
 All 20 scenarios are dry routing checks — the agent names the route it would take and deterministic regexes score only the **exact** correct tool. They span the full Intent Router surface: all 6 [showcase](showcase/README.md) results (icon/tile **sheets** routing to REST `generate-image-v2` where a pure-MCP agent tends to pick `create_ui_asset`/`create_tiles_pro`, the tiles-vs-tileset distinction, local 1-bit/palette recolor as Aseprite processing, the modular GUI kit, the animated character) plus the routes that separate the skill from the docs: standalone objects, REST-only backgrounds (no MCP tool exists — the sharpest docs blind spot), fonts, isometric tiles, sidescroller tilesets, balance checks, blueprint-preset replay, the skeleton pipeline, setup, cost routing, background-removal fallback, the refusal floor, and the paperdoll trap (a fitted addition is an edit on the base frame, not object generation).
 

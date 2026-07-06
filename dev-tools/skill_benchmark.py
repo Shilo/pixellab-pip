@@ -14,7 +14,7 @@ Modes:
 
 Examples:
   python dev-tools/skill_benchmark.py --static
-  python dev-tools/skill_benchmark.py --agents claude --reps 3
+  python dev-tools/skill_benchmark.py --agents claude --reps 2
   python dev-tools/skill_benchmark.py --agents claude,codex,deepseek-v4-pro --scenarios route-hex-tiles,route-character
 """
 
@@ -704,6 +704,30 @@ def render_report_block(static: dict, summary: dict, variants: list[str], agents
         f"| Scope | {cols} |",
         "|---|" + "---|" * len(variants),
     ]
+    if summary:
+        # Headline summary above the detail tables — the same aggregation the prose discloses:
+        # mean of per-scenario check rates across agents. Generated, so it can never drift.
+        rates: dict[str, list[float]] = {v: [] for v in variants}
+        for per_agent in summary.values():
+            for per_variant in per_agent.values():
+                for v in variants:
+                    rate = per_variant.get(v, {}).get("checks_rate")
+                    if rate is not None:
+                        rates[v].append(rate)
+        n_scenarios = max(1, len(static["scenarios"]))
+        summary_lines = [
+            "### Summary",
+            "",
+            "| Method | Routing correct (avg) | Up-front context (est. tokens) | Context incl. expected references (est. tokens, avg) |",
+            "|---|---|---|---|",
+        ]
+        for v in variants:
+            avg_rate = sum(rates[v]) / len(rates[v]) if rates[v] else None
+            avg_ctx = sum(static["scenarios"][sid][v]["context_est_tokens"] for sid in static["scenarios"]) / n_scenarios
+            summary_lines.append(
+                f"| {variant_label(v)} | {_fmt_pct(avg_rate)} | {_fmt_int(static['variants'][v]['context_est_tokens'])} | {_fmt_int(avg_ctx)} |"
+            )
+        lines[2:2] = summary_lines + [""]  # after the auto-generated note, before "### Context size"
     ctx = [static["variants"][v]["context_est_tokens"] for v in variants]
     lines.append("| Injected context (SKILL.md / MCP docs / none) | " + " | ".join(_fmt_int(c) for c in ctx) + " |")
     for sid, row in static["scenarios"].items():
@@ -771,7 +795,7 @@ def main() -> int:
         help="comma list of what to compare the current skill against: git refs, 'vanilla' (no context), or 'mcp-docs' (official https://api.pixellab.ai/mcp/docs injected). The current working-tree skill is always the first column.",
     )
     parser.add_argument("--scenarios", default="", help="comma list of scenario ids (default: all applicable)")
-    parser.add_argument("--reps", type=int, default=3)
+    parser.add_argument("--reps", type=int, default=1, help="repetitions per cell; a full 20-scenario/3-agent/4-variant rep is ~2 hours of sequential agent calls")
     parser.add_argument("--timeout", type=int, default=300, help="seconds per agent run")
     parser.add_argument("--static", action="store_true", help="static context comparison only; no CLI calls")
     parser.add_argument("--dry-run", action="store_true", help="print planned CLI commands without executing")
@@ -873,12 +897,12 @@ def main() -> int:
         tcost = sum(c.get("cost_usd") or 0 for c in used)
         cost_note = f", ~${tcost:.2f} where the CLI exposed cost" if tcost else ""
         print(f"Agent usage this run: ~{tin:,} input + ~{tout:,} output tokens across {len(used)} cell(s){cost_note}")
-    # The README benchmark table is hand-maintained; when a report was refreshed interactively,
-    # hand the user a ready-to-paste prompt so their agent can update it from the report.
+    # The README benchmark table and the report's prose are hand-maintained; when a report was
+    # refreshed interactively, hand the user a ready-to-paste prompt so their agent syncs both.
     if args.report and summary and sys.stdout.isatty():
-        print("\n--- Copy this to your coding agent to refresh the README benchmark table ---")
-        print(f"Refresh the README benchmark table (routing % and up-front context) from the latest {args.report}, and make sure the README Benchmark section links to that report.")
-        print("---------------------------------------------------------------------------")
+        print("\n--- Copy this to your coding agent to refresh the published prose ---")
+        print(f"Using the generated Summary table in the latest {args.report}: refresh the README benchmark table (routing % and context tokens), and update the hand-written numbers in {args.report}'s prose OUTSIDE the BENCHMARK:GENERATED markers so they match the regenerated tables. Keep the README Benchmark section linking to that report.")
+        print("---------------------------------------------------------------------")
     if errors:
         print(f"{len(errors)} cell(s) errored — see SUMMARY.md")
     return 0
