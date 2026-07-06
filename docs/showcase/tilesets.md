@@ -23,7 +23,7 @@ Last reviewed: 2026-07-06.
   </tr>
 </table>
 
-PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer requests through PixelLab's managed tileset tooling. The overview atlases above are local native-size compositions of the canonical examples documented below. The detailed examples are intentionally limited to four cases where the visible result best matches the request: top-down grass, sidescroller grass, top-down 1-bit, and sidescroller 1-bit.
+PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer requests through PixelLab's managed tileset tooling. The overview atlases above are local native-size compositions. The detailed examples below are intentionally limited to four canonical cases where the visible result best matches the request: top-down grass, sidescroller grass, top-down 1-bit, and sidescroller 1-bit.
 
 ## Contents
 
@@ -139,6 +139,7 @@ Blueprint - replayable route and request body ([`sidescroller-dirt-grass-medium-
 Findings:
 
 - The output reads as dirt body plus grass top, which matches the simple sidescroller terrain intent.
+- This example was kept over the `monochromatic dirt` / `monochromatic grass` candidate because that candidate was not visibly monochromatic.
 - The result is a normal raw PixelLab tileset example, not a strict palette or exact outline example.
 
 ## Top-Down 1-Bit Tileset
@@ -148,10 +149,10 @@ Findings:
 Original prompt:
 
 ```text
-/pixellab-pip create a top-down 1-bit black wall/floor tileset: solid black floor, solid black raised wall mass, sparse thin white wall-face texture lines, no gray. After done, create black-and-white and gameplay-green palette-clamped copies.
+/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.
 ```
 
-The top-down 1-bit example demonstrates a strict-palette wall/floor workflow. PixelLab generated the floor, wall, and transition structure, but the raw PixelLab output was not exact 1-bit. The accepted final assets were local palette-clamped copies made from that PixelLab output: one exact black-and-white version and one gameplay-green recolor.
+The top-down 1-bit example demonstrates a strict-palette workflow. PixelLab generated the terrain-transition structure, but the raw PixelLab output was not exact 1-bit. The accepted final assets were local palette-clamped copies made from that PixelLab output: one exact black-and-white version and one gameplay-green recolor.
 
 Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
 
@@ -168,40 +169,41 @@ Generation details:
 | Source sheet size | `64x64` |
 | Tile size | `16x16` |
 | Final showcase image | `128x64`, native-size side-by-side composition |
-| View | `low top-down` |
+| View | `high top-down` |
 | Detail | `low detail` |
 | Shading | `flat shading` |
 | Outline | `lineless` |
 | Transition size | `0.5` |
-| Text guidance scale | `8` |
+| Usage reported | Not exposed by MCP for the selected source generation |
 
 Blueprint - replayable route and request body ([`one-bit-black-green-topdown-tileset.blueprint.json`](tilesets/one-bit-black-green-topdown-tileset.blueprint.json)):
 
 ```json
 {
-  "_comment": "PixelLab generated the tileset structure. The strict black/white (#000000/#FFFFFF) and gameplay-green (#0F380F/#9BBC0F) copies were produced LOCALLY by palette-clamping, not by PixelLab, so they are not blueprint steps.",
-  "_comment_prompt": "/pixellab-pip create a top-down 1-bit black wall/floor tileset: solid black floor, solid black raised wall mass, sparse thin white wall-face texture lines, no gray. After done, create black-and-white and gameplay-green palette-clamped copies.",
+  "_comment_prompt": "/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.",
+  "_comment": "PixelLab generated the tileset structure. The strict black/white (#000000/#FFFFFF) and gameplay-green (#0F380F/#9BBC0F) copies were produced LOCALLY by Aseprite palette-clamping, not by PixelLab, so they are not blueprint steps.",
   "MCP create_topdown_tileset": {
-    "lower_description": "solid black stone floor, one-bit black silhouette terrain, no gray, no highlights, clean tileable flat floor",
-    "upper_description": "solid black raised wall block, one-bit black silhouette terrain, no gray, no highlights, clean tileable wall mass",
-    "transition_description": "black wall front face with sparse thin horizontal white texture lines, one-bit black and white only, crisp horizontal strokes, no gray",
+    "lower_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
+    "upper_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
+    "transition_description": "solid black transition bands with crisp horizontal pure white stripes, high contrast black and white only, no gray tones",
     "transition_size": 0.5,
     "detail": "low detail",
     "shading": "flat shading",
     "outline": "lineless",
+    "mode": "standard",
     "tile_size": {
       "width": 16,
       "height": 16
     },
-    "view": "low top-down",
-    "text_guidance_scale": 8
+    "view": "high top-down",
+    "text_guidance_scale": 12
   }
 }
 ```
 
 Findings:
 
-- The final documented image matches the black wall/floor and gameplay-green user intent because palette clamping was explicitly part of the workflow.
+- The final documented image matches the 1-bit and gameplay-green user intent because palette clamping was explicitly part of the workflow.
 - The raw PixelLab output did not natively pass strict 1-bit palette validation.
 - The gameplay-green copy is a recolor of the accepted black-and-white copy, not a separate PixelLab generation.
 
@@ -275,6 +277,7 @@ Findings:
 
 - The final documented image matches the black platform, jagged icy top, black-and-white derivative, and Game Boy green derivative requested by the workflow.
 - Strict palette and outline quality come from the documented Aseprite/local processing step, not from raw PixelLab output alone.
+- This example was kept over the older 16px black/green sidescroller because its visual result better matches its specific prompt.
 
 ## Findings
 
@@ -296,19 +299,11 @@ Strict 1-bit examples should be documented as workflows when local palette clamp
 | Top-down 1-bit tileset | `docs/showcase/tilesets/one-bit-black-green-topdown-tileset.png` |
 | Sidescroller 1-bit tileset | `docs/showcase/tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.png` |
 
-Overview atlas sources:
-
-| Overview atlas | Source examples |
-|---|---|
-| 32px sidescroller overview atlas | Sidescroller 1-bit tileset |
-| 16px top-down overview atlas | Top-down grass tileset; top-down 1-bit tileset |
-| 16px sidescroller overview atlas | Sidescroller grass tileset |
-
 ## Validation Notes
 
-- The 32px sidescroller overview atlas is exactly `256x128` and preserves its source asset at native size.
-- The 16px top-down overview atlas is exactly `192x64` and preserves its source assets at native size.
-- The 16px sidescroller overview atlas is exactly `64x64` and preserves its source asset at native size.
+- The 32px sidescroller overview atlas is exactly `384x128` and preserves its source assets at native size.
+- The 16px top-down overview atlas is exactly `256x192` and preserves its source assets at native size.
+- The 16px sidescroller overview atlas is exactly `256x64` and preserves its source assets at native size.
 - The top-down grass tileset is exactly `64x64` and preserves the raw PixelLab output.
 - The sidescroller grass tileset is exactly `64x64` and preserves the raw PixelLab output.
 - The top-down 1-bit showcase is exactly `128x64`, with the black-and-white derivative on the left and the gameplay-green derivative on the right.
