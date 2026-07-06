@@ -1,6 +1,6 @@
 # PixelLab AI Skill vs Pip Skill
 
-Last reviewed: 2026-07-04, against PixelLab AI Skill v1.5.5 (published 2026-06-25, still the latest ClawHub release) and the current PixelLab Pip repository.
+Last reviewed: 2026-07-06, against PixelLab AI Skill v1.5.5 (published 2026-06-25, still the latest ClawHub release — unchanged since the prior review) and the current PixelLab Pip repository (now with a blueprint system — see [Blueprints vs Recipes](#blueprints-vs-recipes)).
 
 This compares PixelLab Pip with the unofficial [PixelLab AI Skill](https://clawhub.ai/uncmatteth/skills/pixellab-ai) by uncmatteth on ClawHub. The goal is to understand adjacent tooling and find real feature gaps, without copying its implementation or ranking the projects.
 
@@ -53,7 +53,8 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 | Balance preflight | ✅ — dedicated command | ✅ — balance snapshot before nontrivial paid calls, delta reporting |
 | Async job lifecycle detail (423/404 early lookups, review state, expiring URLs, 8-hour map-object expiry, backoff) | 🟡 — `--poll`, timeout files, resume | ✅ — `references/job-lifecycle.md` |
 | Resume pending jobs without resubmitting paid work | ✅ — `poll-result-file`, saved job IDs | ✅ — keep IDs, poll the matching getter, never resubmit |
-| Bundled pack recipes (platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) | ✅ | ❌ |
+| Bundled pack recipes (platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) | ✅ — templated payloads with placeholder dependencies and seed offsets, run through the manifest pipeline | 🟡 — no templated multi-asset packs; blueprint bundles plus a `blueprints/` preset folder cover ordered, replayable recipes run by the host agent (`references/blueprint.md`) |
+| Replayable/shareable per-generation record (portable single file, plain-language overrides) | 🟡 — recipes and saved job IDs reproduce work inside its own pipeline; no portable single-file share format | ✅ — `*.blueprint.json` = route plus exact request body, auto-written after each run, replayed with overrides, shared as one file, `_comment*` human notes, example presets (`references/blueprint.md`) |
 | Contact sheets, galleries, candidate/approved folder promotion | ✅ | ❌ — candidates reported for user selection; local assembly limited to previews and labeled inspection aids |
 | HTTP error-code guidance | ✅ — 401/402/422/429/529/5xx | ✅ — 400/401/402/403/409/422/423/429/529 |
 | Worker-subagent workflow for live calls | ✅ — subagent briefs and context-isolation rules | ❌ — deliberately portable to agents without delegation |
@@ -157,7 +158,7 @@ The complete list of features PixelLab AI Skill has that Pip does not, in one pl
 
 1. Bundled REST client script — submit, bounded retries, polling, downloads, base64 decoding, size/alpha validation flags, timeout resume (`pixellab_client.py`).
 2. Manifest pipeline commands — `plan`, `lint-manifest`, `repair-placeholders`, `budget`, `run --yes` with skip-existing/resume, `retry-manifest`, `cost-summary` (`pixellab_workflow.py`).
-3. Five bundled pack recipes (NES platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) with templated payloads, dependencies, and seed offsets.
+3. Five bundled pack recipes (NES platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) with templated payloads, dependencies, and seed offsets. (Partially addressed — Pip's blueprint bundles and `blueprints/` preset folder cover ordered, replayable, shareable recipes; the templated multi-asset packs with placeholder dependencies and seed offsets remain a deliberate skip. See [Blueprints vs Recipes](#blueprints-vs-recipes).)
 4. Candidate review tooling — numbered `contact-sheet` PNGs with index JSON, `gallery`, `approve-candidate` promotion into `approved/`, seed-candidate naming convention.
 5. Asset inspection commands — `inspect-assets`, `validate-sprites` (layer set, frame glob, expected size).
 6. `balance-preflight` and `refresh-api-metadata` as ready-made commands.
@@ -176,6 +177,16 @@ Choose PixelLab AI Skill over Pip when you want that shape of work: an OpenClaw/
 ## Coverage Freshness
 
 PixelLab AI Skill's coverage matrix says v2 exposes 63 paths (refreshed 2026-06-21). The live OpenAPI on 2026-07-04 exposes 68. The five additions — `create-ui-asset`, `generate-font-pro`, `portrait-character-pro`, `ui-assets`, and `ui-assets/{ui_asset_id}` — are absent from its matrix and routing rules. Pip routes structured UI assets, fonts, and portrait-character conversion on both REST and MCP; UI-asset list/get/delete management is handled through Pip's matching-getter guidance rather than named routes. Its v1 count (8 legacy paths) still matches.
+
+## Blueprints vs Recipes
+
+Both projects can capture "how an asset was made" and replay it, but the shapes and use cases differ.
+
+A PixelLab AI Skill **recipe** is an author-time template for producing a whole multi-asset pack. Each of the five bundled recipes (NES platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) carries placeholder fields, inter-asset dependencies, seed offsets, and budget units, and is planned and executed through the manifest runner (`plan` → `run`). It is forward-looking and pipeline-bound: the recipe plus the bundled scripts produce the pack; reproduction lives inside its own output-folder contract and saved job IDs.
+
+A Pip **blueprint** (`references/blueprint.md`) is the minimal shareable record of one generation: a single `*.blueprint.json` holding the route (`MCP <tool>` or `POST /v2/...`) plus the exact request body, auto-written beside the outputs after each successful run. It is both backward-looking (captures what was made) and forward-looking (replay it, with plain-language overrides like "same seed, new prompt"), needs no bundled runner — the host agent executes it — and is portable: one file is the shareable unit, images travel alongside by relative path. A blueprint can be a bundle (an ordered array of steps where a later step reads an earlier step's output), and hand-authored blueprints in the skill's `blueprints/` folder act as named presets ("create the knight blueprint"). Human notes ride along in `_comment*` keys that are stripped before any request is sent.
+
+So the overlap is the replay/preset idea; the divergence is intent and packaging. Recipes optimize for **producing a parameterized pack through bundled tooling**; blueprints optimize for **reproducing and sharing an exact single generation (or ordered bundle) in any agent, with no tooling**. Pip deliberately does not ship the templated-pack-with-seed-offsets recipes or the runner (see verdicts); the blueprint format covers the portable, shareable, replayable slice of that idea.
 
 ## Secret Setup Tradeoff
 
@@ -217,7 +228,8 @@ Every feature from [When To Use PixelLab AI Skill Instead](#when-to-use-pixellab
 - **Adopt (micro): seed-reuse-for-near-variants clause.** One sentence in the seed rules: reuse the recorded seed when the user wants a near-variant of an approved result; vary it for fresh candidates. Complements the existing vary-across-retries rule.
 - **Defer: sprite-layer validator tool.** The paperdolling checklist covers the same checks manually, and `AGENTS.md` already names "a dedicated local asset validator" as the trigger. Add it when layered-pack work recurs.
 - **Defer: community technique corpus.** Do not import unverified Discord/YouTube tuning values (standing policy). Individually promising techniques (held-equipment sketch-and-inpaint, non-human humanoid baseline, pose libraries) can be tested locally and promoted through `docs/pixellab/` findings, as the icon and tileset research was.
-- **Skip: bundled REST client, manifest runner, recipes, approval-folder pipeline.** A different product shape — a self-contained batch pipeline. Pip's contract is that the host agent's own tools execute the selected route; every target agent already has shell/HTTP tooling, and Pip's references carry the exact schemas. Revisit only if real use shows agents failing to execute routes without a helper.
+- **Adopt (done): blueprint system.** Done 2026-07-06: `*.blueprint.json` records a generation's route plus exact request body, auto-written after each run, replayed with plain-language overrides, shared as one portable file, with `_comment*` notes and example presets in `blueprints/` (`references/blueprint.md`). This covers the portable/shareable/replayable slice of the recipe idea without a bundled runner; the templated multi-asset pack recipes (placeholder dependencies, seed offsets, budget) remain a deliberate skip below. See [Blueprints vs Recipes](#blueprints-vs-recipes).
+- **Skip: bundled REST client, manifest runner, pack-template recipes, approval-folder pipeline.** A different product shape — a self-contained batch pipeline. Pip's contract is that the host agent's own tools execute the selected route; every target agent already has shell/HTTP tooling, and Pip's references carry the exact schemas. Revisit only if real use shows agents failing to execute routes without a helper.
 - **Skip: contact sheets and approved-folder promotion.** Pip already reports candidates for user selection, and SKILL.md's inspection-aid rule permits a clearly labeled review sheet assembled from PixelLab pixels when a host needs one.
 - **Skip: worker-subagent briefs.** Pip must stay useful in agents without delegation; hosts with subagents can use them without a Pip contract.
 - **Skip: runtime `doctor`, JSONL event logs, offline payload examples, `refresh-api-metadata` command.** Pip's QA runs repo-side in CI, reporting is per-run in chat/manifests, and OpenAPI is refreshed on demand — runtime self-diagnostics serve a bundled-script pipeline Pip does not have.
