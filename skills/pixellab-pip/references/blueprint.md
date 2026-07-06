@@ -12,8 +12,8 @@ under `pixellab-pip-generations/`.
 
 - Root is either one object (single asset) or an array of such objects (a bundle, run in
   order).
-- Each object has one route key — plus any optional `_comment*` metadata keys (see Comments)
-  — and the route's value is the literal request body (for an MCP route, the tool's
+- Each object has one route key, optionally preceded by `_comment*` metadata keys (see
+  Comments), and the route's value is the literal request body (for an MCP route, the tool's
   arguments). Include only the fields that matter; any omitted field takes the API default,
   so a one-field blueprint is valid.
 - Route = `MCP <tool>` or `POST /v2/<endpoint>`. The prefix names the surface; no `REST`
@@ -68,19 +68,22 @@ siblings of the route so the request body stays untouched (tolerated anywhere, b
 placement is the norm). They are metadata, not fields: drop every `_comment*` key before
 sending a request, and never treat one as an input.
 
-- `_comment_prompt` — the exact text of the user request that triggered this generation,
-  copied unchanged (no summarizing, translating, normalizing, or command prefix). Include it
-  only when a user prompt initiated the work; in a bundle, on the first step.
+Order like a doc-comment: `_comment` first, then `_comment_prompt`, then any other
+`_comment*`, then the route key.
+
 - `_comment` (or any `_comment*` key) — add when there is useful, non-obvious information
   worth sharing with the blueprint: an issue, discovery, finding, or critical detail from
   creation, or what the blueprint is for. Never restate the obvious.
+- `_comment_prompt` — the exact text of the user request that triggered this generation,
+  copied unchanged (no summarizing, translating, normalizing, or command prefix). Include it
+  only when a user prompt initiated the work; in a bundle, on the first step.
 
 In a bundle, put step notes in each step's object and any overall note on the first step.
 
 ```json
 {
-  "_comment_prompt": "/pixellab create a knight character",
   "_comment": "base sprite for the RPG prototype",
+  "_comment_prompt": "/pixellab create a knight character",
   "MCP create_character": { "description": "a knight in shining armor" }
 }
 ```

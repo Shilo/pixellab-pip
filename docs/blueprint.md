@@ -52,16 +52,16 @@ people reading the file — the assistant ignores them when it runs the blueprin
 
 ```json
 {
-  "_comment_prompt": "/pixellab create a knight character",
   "_comment": "base sprite for the RPG prototype",
+  "_comment_prompt": "/pixellab create a knight character",
   "MCP create_character": { "description": "a knight in shining armor" }
 }
 ```
 
-Whenever your prompt drove the generation, it's recorded in `_comment_prompt` (in a bundle,
-on the first step). Extra `_comment` notes are added only when there's something non-obvious
-worth sharing — an issue, discovery, or important detail found during creation, or what the
-blueprint is for.
+When both are present, `_comment` (the summary) comes first, then `_comment_prompt` — like a
+doc-comment. `_comment_prompt` holds your originating prompt (in a bundle, on the first step);
+a `_comment` is added only for something non-obvious worth sharing — an issue, discovery, or
+important detail found during creation, or what the blueprint is for.
 
 ## Creating a blueprint
 
