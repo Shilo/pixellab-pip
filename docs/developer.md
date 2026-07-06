@@ -61,7 +61,7 @@ The menu offers:
 
 When no plugin is installed, the menu offers `Install development local`, `Install production remote`, `Uninstall pixellab-pip (not installed)`, and `Cancel`.
 
-For `development local`, the script temporarily writes a Codex cachebuster version to `.codex-plugin/plugin.json`, installs from this repository, then restores the manifest. This creates a fresh cache path such as `0.4.0+codex.dev-YYYYMMDDHHMMSS` without permanently changing the repo version.
+For `development local`, the script temporarily writes a Codex cachebuster version to `.codex-plugin/plugin.json`, installs from this repository, then restores the manifest. This creates a fresh cache path such as `<version>+codex.dev-YYYYMMDDHHMMSS` (the current manifest version plus a timestamp) without permanently changing the repo version.
 
 For `production remote`, the script installs from the GitHub marketplace source in `plugin.json`. Production updates run `codex plugin marketplace upgrade` before reinstalling because Codex does not currently provide a `codex plugin update` command.
 
@@ -197,6 +197,7 @@ skills/
     assets/
       bark.py
       bark.wav
+    blueprints/
     references/
 ```
 
