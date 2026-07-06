@@ -126,17 +126,20 @@ def check_python_compiles() -> None:
 def check_workflows() -> None:
     qa_workflow = (REPO_ROOT / ".github/workflows/qa.yml").read_text(encoding="utf-8")
     release_workflow = (REPO_ROOT / ".github/workflows/release-skill.yml").read_text(encoding="utf-8")
-    if "actions/setup-python@v6" not in qa_workflow:
+    # Assert the step is present regardless of the pinned major version, so a
+    # routine setup-python/@vN bump does not red QA on an otherwise correct
+    # workflow.
+    if "actions/setup-python@" not in qa_workflow:
         raise AssertionError("qa.yml must set up Python explicitly")
-    if "actions/setup-python@v6" not in release_workflow:
+    if "actions/setup-python@" not in release_workflow:
         raise AssertionError("release-skill.yml must set up Python explicitly before QA")
     if "python -m pip install -r requirements-dev.txt" not in qa_workflow:
         raise AssertionError("qa.yml must install requirements-dev.txt before QA")
     if "python -m pip install -r requirements-dev.txt" not in release_workflow:
         raise AssertionError("release-skill.yml must install requirements-dev.txt before QA")
-    if "actions/setup-node@v6" not in release_workflow:
+    if "actions/setup-node@" not in release_workflow:
         raise AssertionError("release-skill.yml must set up Node.js explicitly before version bump")
-    if release_workflow.find("actions/setup-node@v6") > release_workflow.find("node <<'NODE'"):
+    if release_workflow.find("actions/setup-node@") > release_workflow.find("node <<'NODE'"):
         raise AssertionError("release-skill.yml must set up Node.js before running node")
 
 
