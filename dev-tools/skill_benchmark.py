@@ -529,13 +529,6 @@ def apply_checks(scenario: dict, response: str) -> dict[str, bool]:
     return {name: bool(re.search(pattern, response, re.IGNORECASE)) for name, pattern in scenario["checks"].items()}
 
 
-def parse_self_reported_refs(response: str) -> list[str]:
-    match = re.search(r"REFERENCES_READ:\s*(.+)", response, re.IGNORECASE)
-    if not match or match.group(1).strip().lower().startswith("none"):
-        return []
-    return [chunk.strip() for chunk in match.group(1).split(",") if ".md" in chunk]
-
-
 def build_prompt(ctx: dict, scenario: dict) -> str:
     if ctx["kind"] == "skill":
         return PREAMBLE.format(skill=ctx["context_text"], task=scenario["task"])
@@ -609,7 +602,6 @@ def run_cell(agent: str, scenario: dict, variant: str, ctx: dict, rep: int, args
         "checks": checks,
         "checks_passed": sum(checks.values()),
         "checks_total": len(checks),
-        "refs_self_reported": parse_self_reported_refs(response),
     }
 
 
