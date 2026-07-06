@@ -38,7 +38,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 ## Asset Integrity
 
 - Every pixel of requested art must originate from PixelLab or the user. Local tools may read, download, assemble, package, import/export, preview, verify, mask, pad, crop, resize, and format-convert those pixels. Locally authored generation controls such as masks, palette swatches/`color_image`, reference guides, and shape templates are allowed as inputs; report them as inputs. Do not draw, repaint, or synthesize requested content locally unless the user explicitly approves a labeled non-PixelLab fallback.
-- Reviewable static candidates: when a static image-style request returns multiple frames, images, candidates, grid cells, or review results as alternatives, do not auto-select or continue from one unless the user explicitly delegated selection. Present indexed candidates with human-readable 1-based labels and stop for user selection before saving a subset, treating one as final, or using one as the base for an edit, state, animation, conversion, or follow-up generation. Convert 1-based user choices to any 0-based API indices before calling selection tools. This applies across MCP and REST routes, including small-image/object routes that return multiple candidates. It does not apply to animation frame sequences, directional rotations, tileset members, or other ordered outputs where the frames are the requested structure rather than alternatives.
+- Reviewable static candidates: when a static image-style MCP tool or REST endpoint returns multiple alternatives, label them from `1`, ask which result(s) to keep or use as the base, and stop before saving, selecting, or continuing unless the user explicitly delegated selection. All user-facing candidate labels are 1-based; after parsing the user's reply, convert selected labels to 0-based indices for subsequent tool/API calls. This does not apply to ordered outputs such as animation frames, directional rotations, or tileset members.
 - Do not bake a colored, checkerboard, white, black, green-screen, or matte background into transparent frames, final GIFs, spritesheets, previews, or report images unless the user explicitly asks for it. A checkerboard is allowed only as a clearly labeled inspection aid kept separate from final deliverables.
 - Do not post-process PixelLab output into a claimed final asset without explicit approval. Local crop/split/format work that preserves original pixels is allowed when reported honestly; resizing, reassembling, compositing, or repairing failed outputs locally must not be called final without approval. Exception: when a request used `no_background: true` but the output kept a background, read `references/background-removal.md` and attempt safe removal when verification shows the background is removable without changing the art.
 - Save downloaded generations, derived previews, manifests, and packages under a project `pixellab-pip-generations/` folder unless the user names another location. Produce only the requested output formats or the route's minimal standard artifacts, such as original frames plus a spritesheet for animation; no APNG or extra preview/viewer formats unless asked.
@@ -66,7 +66,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | Portrait-to-character or character-to-portrait | MCP `create_portrait_character` + `get_portrait_character` when visible. | `portrait-character-pro` (Pro image conversion). Supplied-image roles: `references/image-input-roles.md`. |
 | Pixel/bitmap font, font atlas | MCP `create_font` + `get_font` when visible. | `generate-font-pro` (Pro). |
 | Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, or icon sheet | Read `references/icon.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
-| Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/review tools. Object creation is Pro Tools (20-40 generations). If MCP returns `review` candidates, do not auto-select frames unless the user explicitly delegated selection; show candidates with 1-based labels and use the Object Review Choice prompt before converting choices to 0-based indices for `select_object_frames` or creating dependent states/animations. | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
+| Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/review tools. Object creation is Pro Tools (20-40 generations). For review candidates, follow the "Static candidate choice" prompt below; mention https://www.pixellab.ai/create-object for saving more varieties, and convert selected labels to 0-based indices for `select_object_frames`. | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
 | Top-down terrain/Wang/autotile tileset | Read `references/tileset.md`, then MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
 | Sidescroller/platformer tileset | Read `references/tileset.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
 | Isometric tile/block/floor | MCP `create_isometric_tile`; map thickness wording to `tile_shape` (`thin`, `thick`, `block`). | `create-isometric-tile` with `isometric_tile_shape` (`thin tile`, `thick tile`, `block`). |
@@ -100,7 +100,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 - "Map": whole map, map object, map image, tileset, isometric tile, or tile variants?
 - "Isometric tileset": one isometric tile or a full set? Public docs expose a single-tile route.
 - "Object/character": infer character for people, NPCs, creatures, or identity/state animation; object for standalone props, pickups, furniture, weapons. Ask only if unclear.
-- Static candidate choice: when any static image-style route returns multiple alternatives, present candidates with human-readable 1-based labels and stop for user selection before saving frames or using one as the base for a follow-up, unless the user explicitly said to choose for them. Convert 1-based user choices to 0-based API indices when the selection tool requires it. Keep the prompt concise and visually scannable:
+- Static candidate choice: after showing indexed candidates, ask with this format:
 
   ```markdown
   **Choose Results**
@@ -109,7 +109,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
   Reply with: `3`, `1, 3, 6`, `all`, or `dismiss`.
   ```
 
-  When a later step depends on exactly one base result, ask for that base explicitly:
+  If the next step needs one base, ask:
 
   ```markdown
   **Choose Base**
@@ -118,29 +118,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
   Reply with one index, like `3`.
   ```
 
-- Object review choice: when object generation returns `review` candidates, present candidates with human-readable 1-based labels and stop for user selection before saving frames or using one as the base for a state/animation, unless the user explicitly said to choose for them. Convert selected labels back to 0-based indices before calling `select_object_frames`. Keep the prompt concise and visually scannable:
-
-  ```markdown
-  **Choose Frames**
-  Which frame(s) do you want to keep?
-
-  Reply with: `15`, `1, 15, 23`, `all`, or `dismiss`.
-
-  To save/accept more varieties in PixelLab, open https://www.pixellab.ai/create-object.
-  ```
-
-  When a later step depends on exactly one base frame, ask for that base explicitly:
-
-  ```markdown
-  **Choose Base**
-  Pick the closed-state base before I create the open state.
-
-  Reply with one index, like `15`.
-
-  To save/accept more varieties in PixelLab, open https://www.pixellab.ai/create-object.
-  ```
-
-  If the user selects multiple frames but a dependent step needs one base, save the chosen frames and ask which saved frame to use as the base.
+  For object review candidates, also say: `To save/accept more varieties in PixelLab, open https://www.pixellab.ai/create-object.` If the user selects multiple results but the next step needs one base, save the selected results and ask which saved result to use.
 - Animation direction on a multi-direction character: default to `south` for one preview candidate; ask only when `south` is unavailable, directions are unknown, or the user needs another gameplay-facing direction. Animate all directions only on explicit request or approval.
 - "Effect": static or animated? If a target image is supplied, infer a one-off edit; ask reusable-asset vs one-off only without a clear edit target.
 - "Paperdoll": gather base image, desired layers, target regions, directions, and whether the user wants separate transparent layer files, editor layers, composited previews, or both; see `references/paperdolling.md`.
