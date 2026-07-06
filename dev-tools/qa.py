@@ -17,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 HTTPISH = re.compile(r"^(?:https?:|mailto:|tel:|data:|#)")
 MD_LINK = re.compile(r"(!?)\[[^\]]*\]\(([^)]+)\)")
 HTML_SRC = re.compile(r"""<img\b[^>]*\bsrc=["']([^"']+)["']""", re.IGNORECASE)
+HTML_HREF = re.compile(r"""<a\b[^>]*\bhref=["']([^"']+)["']""", re.IGNORECASE)
 PLACEHOLDER_TARGETS = {"path-or-url", "url", "path"}
 VERSION_PATHS = (
     (".agents/plugins/marketplace.json", ("plugins", 0, "version")),
@@ -170,6 +171,7 @@ def check_markdown_local_links() -> None:
         text = path.read_text(encoding="utf-8")
         targets = [match.group(2) for match in MD_LINK.finditer(text)]
         targets.extend(match.group(1) for match in HTML_SRC.finditer(text))
+        targets.extend(match.group(1) for match in HTML_HREF.finditer(text))
         for raw_target in targets:
             target = strip_link_target(raw_target)
             if not target or HTTPISH.match(target):
