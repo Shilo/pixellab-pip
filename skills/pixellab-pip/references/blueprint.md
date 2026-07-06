@@ -2,8 +2,8 @@
 
 Read when writing a blueprint after a generation, or when recreating a generation from one
 (the user `@link`s a `*.blueprint.json` or asks to remake a past generation). A blueprint is
-the minimal, shareable record of how to make an asset: the route plus the exact request
-body. It is not the manifest — the manifest is a private audit/resume record (`usage-reporting.md`).
+the minimal, shareable record of how to make an asset: the route, the exact request body,
+and brief `_comment*` notes. It is not the manifest — the manifest is a private audit/resume record (`usage-reporting.md`).
 
 ## Format
 
@@ -42,6 +42,7 @@ Single asset (an MCP call here, minimal — only the fields you want, the rest d
 
 ```json
 {
+  "_comment_prompt": "/pixellab create a cheerful wizard",
   "MCP create_character": {
     "description": "a cheerful wizard in a long blue robe and pointed hat"
   }
@@ -52,7 +53,10 @@ Bundle (ordered; a later step reads an earlier step's output by relative path):
 
 ```json
 [
-  { "POST /v2/create-image-pixflux": { "description": "mossy stone well, top-down", "seed": 123 } },
+  {
+    "_comment_prompt": "/pixellab make a mossy well, then add a glow",
+    "POST /v2/create-image-pixflux": { "description": "mossy stone well, top-down", "seed": 123 }
+  },
   { "POST /v2/edit-image": { "image": "01-well.png", "description": "add a soft glow", "seed": 123 } }
 ]
 ```
@@ -64,17 +68,17 @@ siblings of the route so the request body stays untouched (tolerated anywhere, b
 placement is the norm). They are metadata, not fields: drop every `_comment*` key before
 sending a request, and never treat one as an input.
 
-- `_comment_prompt` — the user request that initiated this blueprint.
+- `_comment_prompt` — the originating user request, as a `/pixellab …` command.
 - `_comment` — what this blueprint (or bundle step) is for.
 
-Always write `_comment_prompt`. Add other `_comment*` keys only for useful, non-obvious
+Always write `_comment_prompt` (in a bundle, on the first step). Add other `_comment*` keys only for useful, non-obvious
 context — an issue or discovery during creation, or the blueprint's purpose; never restate
 the obvious. In a bundle, put step notes in each step's object and any overall note on the
 first step.
 
 ```json
 {
-  "_comment_prompt": "create a knight character",
+  "_comment_prompt": "/pixellab create a knight character",
   "_comment": "base sprite for the RPG prototype",
   "MCP create_character": { "description": "a knight in shining armor" }
 }

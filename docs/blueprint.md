@@ -17,7 +17,7 @@ plus `_comment*` notes (see Comments below):
 
 ```json
 {
-  "_comment_prompt": "create a knight character",
+  "_comment_prompt": "/pixellab create a knight character",
   "MCP create_character": {
     "description": "a knight in shining armor holding a sword and shield"
   }
@@ -34,7 +34,10 @@ example, "make an image, then edit it":
 
 ```json
 [
-  { "POST /v2/create-image-pixen": { "description": "a small mossy stone well, top-down", "seed": 123 } },
+  {
+    "_comment_prompt": "/pixellab make a mossy stone well, then add a magical glow",
+    "POST /v2/create-image-pixen": { "description": "a small mossy stone well, top-down", "seed": 123 }
+  },
   { "POST /v2/edit-image": { "image": "01-well.png", "description": "add a soft magical glow", "seed": 123 } }
 ]
 ```
@@ -49,13 +52,14 @@ people reading the file — the assistant ignores them when it runs the blueprin
 
 ```json
 {
-  "_comment_prompt": "create a knight character",
+  "_comment_prompt": "/pixellab create a knight character",
   "_comment": "base sprite for the RPG prototype",
   "MCP create_character": { "description": "a knight in shining armor" }
 }
 ```
 
-Every blueprint records the request that created it in `_comment_prompt`. Extra `_comment`
+Every blueprint records the request that created it in `_comment_prompt` (in a bundle, on
+the first step). Extra `_comment`
 notes are added only when there's something non-obvious worth sharing — a gotcha found
 during creation, or what the blueprint is for.
 
