@@ -76,7 +76,7 @@ so the blueprint stays reproducible even if your original moves.
 Two ways to trigger it:
 
 - **Point at the file:** `@`-link or mention the `.blueprint.json` and ask to run it.
-- **Just describe it:** if the blueprint lives in the bundled presets (below), name it — e.g.
+- **Just describe it:** if the blueprint lives in the bundled recipes (below), name it — e.g.
   *"create the knight blueprint"* — and the assistant finds and runs it.
 
 **Overrides.** You can change any value in plain language when recreating; the original file is
@@ -90,7 +90,7 @@ never modified. For example:
 > pixel-identical art from a repeated seed. A blueprint reliably reproduces the recipe, not an
 > exact copy of the pixels.
 
-## Presets (blueprints you can run by name)
+## Recipes (blueprints you can run by name)
 
 Ready-made example blueprints ship in the skill's `blueprints/` folder — currently a minimal
 `knight.blueprint.json`. Name one without a path and, if it matches, the assistant loads and

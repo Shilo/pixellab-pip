@@ -119,9 +119,9 @@ machine-local, so copy the image in and switch to relative before sharing. Embed
 base64 only on explicit request, never automatically — every read of a base64 blueprint pays
 the image's full token cost. Zip is optional, for tidy multi-image bundles.
 
-## Presets
+## Recipes
 
-A hand-authored blueprint is a preset. Bundled example presets live in the skill's
-`blueprints/` folder. When the user names one without a path (e.g. "create the knight
-blueprint") and it semantically matches a file there, load and run it like an `@link`ed
-blueprint, applying any overrides.
+A hand-authored blueprint (recipe) is a saved, replayable request you keep and rerun. Bundled example recipes live in the skill's `blueprints/` folder. When the user
+names one without a path (e.g. "create the knight blueprint" or "run the knight recipe") and
+it semantically matches a file there, load and run it like an `@link`ed blueprint, applying
+any overrides.

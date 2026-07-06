@@ -216,12 +216,12 @@ SCENARIOS = [
         "refs_any": [],
     },
     {
-        # NEW blueprint feature: recreating a named saved preset loads blueprints/knight.blueprint.json
-        # (recorded route MCP create_character) and replays it — a preset system only the skill has.
-        # The route (knight -> create_character) is guessable; the preset-file replay is the discriminator.
+        # NEW blueprint feature: recreating a named saved blueprint loads blueprints/knight.blueprint.json
+        # (recorded route MCP create_character) and replays it — a blueprint system only the skill has.
+        # The route (knight -> create_character) is guessable; the blueprint-file replay is the discriminator.
         "id": "replay-blueprint",
         "task": "Using PixelLab, recreate my saved knight blueprint.",
-        # Only file-level evidence counts: "saved blueprint/preset" wording is a paraphrase of the
+        # Only file-level evidence counts: "saved blueprint/recipe" wording is a paraphrase of the
         # task itself and scored arms that merely echoed it (verified in the 20260705 run).
         "checks": {"blueprint": r"\.blueprint\.json|blueprints?[\\/]|recorded (?:route|body|request)", "route": r"create[_-]character"},
         "refs_any": ["blueprint.md"],

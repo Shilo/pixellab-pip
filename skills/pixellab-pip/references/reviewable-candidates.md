@@ -16,7 +16,7 @@ Do not use this for ordered outputs where every frame/member is part of the requ
 
 ## Display
 
-Show candidates in a compact indexed form. Prefer an indexed contact sheet, inline previews with labels, or links with labels. Center each label horizontally with its candidate, and use a large readable label font when space allows. Temporary preview downloads/contact sheets are allowed when clearly treated as selection previews. Keep any local preview honest: it is for selection only, and final pixels still come from PixelLab or the user.
+Show candidates in a compact indexed form. Prefer an indexed contact sheet, inline previews with labels, or links with labels. Center each label horizontally with its candidate. Temporary preview downloads/contact sheets are allowed when clearly treated as selection previews. Keep any local preview honest: it is for selection only, and final pixels still come from PixelLab or the user.
 
 Use stable labels from `1..N` in the same order the tool/API returned alternatives. Never expose route-native `0`-based positions as user-facing labels.
 

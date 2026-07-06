@@ -217,7 +217,7 @@ def run_unit_tests() -> None:
 
 CHECKS = [
     ("JSON manifests parse", check_json_files),
-    ("blueprint presets have exactly one route key", check_blueprint_shapes),
+    ("blueprints have exactly one route key", check_blueprint_shapes),
     ("manifest metadata matches", check_manifest_metadata),
     ("Python files compile", check_python_compiles),
     ("workflows declare required runtimes", check_workflows),

@@ -568,7 +568,6 @@ Update `skills/pixellab-pip/references/paperdolling.md` only after Phase 1 or Ph
 > not imply PixelLab returns native reusable layers. Revisit a paperdoll bundle only after the Phase 1
 > extraction core and its `client-extracted` / `baked composite` honesty labels are proven.
 
-
 - Name "client-extracted layer" as the output label for same-canvas diff workflows.
 - Name "baked equipment composite" as the output label for AI-generated armed/dressed spritesheets that are not reusable layers.
 - Require drift detection before layer extraction.
