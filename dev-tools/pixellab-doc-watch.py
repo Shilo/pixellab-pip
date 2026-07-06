@@ -219,7 +219,10 @@ def normalize_llms(raw: bytes, source: dict[str, str], fetched: dict[str, Any]) 
     text = raw.decode("utf-8", errors="replace")
     method_paths = sorted(set(re.findall(r"\b(GET|POST|PUT|PATCH|DELETE)\s+(/[A-Za-z0-9_./{}-]+)", text)))
     links = sorted(set(re.findall(r"https?://[^\s)>\]]+", text)))
-    endpoint_mentions = sorted(set(re.findall(r"(?<!https:)(/[A-Za-z0-9_./{}-]+)", text)))
+    # Strip full URLs first so their path segments (e.g. /v2/foo in
+    # https://api.pixellab.ai/v2/foo) do not leak into endpoint_mentions.
+    text_no_urls = re.sub(r"https?://[^\s)>\]]+", " ", text)
+    endpoint_mentions = sorted(set(re.findall(r"(/[A-Za-z0-9_./{}-]+)", text_no_urls)))
     return {
         "source_id": source["id"],
         "url": source["url"],
@@ -233,7 +236,8 @@ def normalize_llms(raw: bytes, source: dict[str, str], fetched: dict[str, Any]) 
 
 def normalize_mcp_docs(raw: bytes, source: dict[str, str], fetched: dict[str, Any]) -> dict[str, Any]:
     text = raw.decode("utf-8", errors="replace")
-    heading_tools = re.findall(r"^#{2,4}\s+`?([a-z][a-z0-9_]{2,})`?\s*$", text, flags=re.MULTILINE)
+    # Allow a trailing annotation after the identifier, e.g. `### create_character (beta)`.
+    heading_tools = re.findall(r"^#{2,4}\s+`?([a-z][a-z0-9_]{2,})`?(?:\s*\([^)]*\))?\s*$", text, flags=re.MULTILINE)
     code_identifiers = sorted(set(re.findall(r"`([a-z][a-z0-9_]{2,})`", text)))
     tools = sorted(set(heading_tools))
     return {
@@ -350,6 +354,10 @@ def source_delta(previous: Any, current: dict[str, Any]) -> dict[str, Any]:
     elif current["kind"] == "llms":
         delta["method_paths"] = list_delta(previous.get("method_paths", []), current.get("method_paths", []))
         delta["links"] = list_delta(previous.get("links", []), current.get("links", []))
+    elif current["kind"] == "html_text":
+        if previous.get("title") != current.get("title"):
+            delta["title"] = {"before": previous.get("title"), "after": current.get("title")}
+        delta["links"] = list_delta(previous.get("links", []), current.get("links", []))
     if previous.get("raw_sha256") != current.get("raw_sha256"):
         delta["raw_sha256"] = {"before": previous.get("raw_sha256"), "after": current.get("raw_sha256")}
     return delta
@@ -446,6 +454,10 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
             notes.append(f"MCP identifiers +{len(change['code_identifiers']['added'])}/-{len(change['code_identifiers']['removed'])}")
         if "method_paths" in change:
             notes.append(f"LLMS method paths +{len(change['method_paths']['added'])}/-{len(change['method_paths']['removed'])}")
+        if "links" in change:
+            notes.append(f"links +{len(change['links']['added'])}/-{len(change['links']['removed'])}")
+        if "title" in change:
+            notes.append("title changed")
         if change["status"] in ("fetch_failed", "parse_failed"):
             notes.append(change.get("error", change["status"]))
         if change["status"] == "initialized":
@@ -490,6 +502,11 @@ def render_report(run_stamp: str, generated_at: str, cache_dir: Path, changes: d
                     if len(items) > 100:
                         lines.append(f"- ... {len(items) - 100} more")
                     lines.append("")
+        if "title" in change:
+            lines.append("title changed:")
+            lines.append(f"- before: `{change['title']['before']}`")
+            lines.append(f"- after: `{change['title']['after']}`")
+            lines.append("")
         if "metadata" in change:
             lines.append("metadata changes:")
             for key, value in change["metadata"].items():
