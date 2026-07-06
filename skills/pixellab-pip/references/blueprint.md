@@ -76,7 +76,7 @@ then the route key.
   creation, or what the blueprint is for. Never restate the obvious.
 - `_comment_prompt` — the exact text of the user request that triggered this generation,
   copied unchanged (no summarizing, translating, or normalizing). Include it only when a user
-  prompt initiated the work; in a bundle, on the first step.
+  prompt initiated the work — on the single object, or on the first step of a bundle.
 
 In a bundle, put step notes in each step's object and any overall note on the first step.
 
