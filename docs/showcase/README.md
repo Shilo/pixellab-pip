@@ -37,10 +37,10 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <td width="50%" valign="top">
 <h3><a href="tilesets.md">Tilesets</a></h3>
 <details>
-<summary>Prompt</summary>
-<p><code>/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.</code></p>
+<summary>Examples</summary>
+<p>Top-down grass, sidescroller grass, top-down 1-bit, and sidescroller 1-bit tilesets.</p>
 </details>
-<img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example">
+<img src="tilesets/tileset-showcase-16px-topdown-atlas.png" alt="16px top-down tileset showcase atlas">
 </td>
 </tr>
 <tr>
