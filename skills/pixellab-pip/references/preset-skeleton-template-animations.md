@@ -57,7 +57,7 @@ create_character(
 animate_character(
     character_id="returned-character-id",
     template_animation_id="walk-8-frames",
-    directions=["south", "east", "north", "west"],
+    directions=["south"],
     mode="template",
 )
 ```
