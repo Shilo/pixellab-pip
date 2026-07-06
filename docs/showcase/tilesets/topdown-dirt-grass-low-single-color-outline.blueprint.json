@@ -1,6 +1,6 @@
 {
-  "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition.",
   "_comment": "PixelLab generated the showcased raw tileset. The MCP tool rejected seed for this top-down matrix run, so no seed is recorded.",
+  "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition.",
   "MCP create_topdown_tileset": {
     "lower_description": "dirt",
     "upper_description": "grass",

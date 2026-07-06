@@ -1,6 +1,6 @@
 {
-  "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
   "_comment": "64 native 32x32 tiles generated as separate images, then arranged locally into the 8x8 sheet.",
+  "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
   "POST /v2/generate-image-v2": {
     "description": "Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.",
     "image_size": {

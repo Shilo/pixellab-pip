@@ -1,7 +1,7 @@
 [
   {
-    "_comment_prompt": "pip create a 64px character based on .pip-mascot.md",
     "_comment": "Quadruped dog template; PixelLab returns 4 rotations on a 92x92 canvas for a size=64 character.",
+    "_comment_prompt": "pip create a 64px character based on .pip-mascot.md",
     "MCP create_character": {
       "description": "Adorable tiny corgi-inspired scout puppy mascot named Pip for a PixelLab workflow assistant. Rounded compact body, short little legs, oversized floppy ears, warm honey-tan fur with cream muzzle, chest, belly, and paws, big simple curious dark eyes, cheerful helpful expression. Bright cyan-blue collar with a tiny connected-node route tag or API graph tag. Clean game-ready pixel art, chunky readable shapes, crisp single-color outline, limited warm palette with cyan accent, transparent background. Friendly alert sitting pose with one paw raised where possible; puppy first, subtle tool-routing assistant second. No text, no logos, no gradients, no blur, no complex props.",
       "body_type": "quadruped",

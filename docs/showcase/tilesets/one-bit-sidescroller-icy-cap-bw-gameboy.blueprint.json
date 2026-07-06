@@ -1,6 +1,6 @@
 {
-  "_comment_prompt": "/pixellab-pip create 1-bit sidescroller tileset: pure black platform center, jagged white icy top cap, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
   "_comment": "PixelLab generated the raw tileset. The showcased image is a local side-by-side composition of the black/white Aseprite derivative on the left and the Game Boy green derivative on the right. Local post-processing and side-by-side assembly are documented in the showcase page, not replayed as PixelLab blueprint steps.",
+  "_comment_prompt": "/pixellab-pip create 1-bit sidescroller tileset: pure black platform center, jagged white icy top cap, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
   "MCP create_sidescroller_tileset": {
     "tile_size": {
       "width": 32,
