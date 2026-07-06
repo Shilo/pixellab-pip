@@ -15,7 +15,7 @@ Two families: managed preset/template animation on an existing character, and ra
 
 ## MCP vs REST v2 Field Coverage
 
-MCP `animate_character` handles normal managed-character template work when its visible schema exposes template mode, v3 custom mode, explicit `directions`, and `frame_count` (v3). When the visible schema exposes pro mode with cost confirmation, it can route pro animation. Inspect the visible schema before relying on `mode`, `frame_count`, `custom_start_frame`, `end_frame`, `pro`, `confirm_cost`, cost reporting, or any raw-skeleton support.
+MCP `animate_character` handles normal managed-character template work when its visible schema exposes template mode, v3 custom mode, explicit `directions`, and `frame_count` (v3). When the visible schema exposes pro mode with cost confirmation, it can route pro animation. Inspect the visible schema before relying on `mode`, `frame_count`, `custom_start_frame`, `end_frame`, `keep_first_frame`, `pro`, `confirm_cost`, cost reporting, or any raw-skeleton support.
 
 It is not field-for-field equivalent to REST `/characters/animations`. REST exposes extra exact-control fields: `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, v3-only `custom_start_frame`/`end_frame`, and inline `enhance_prompt` (v3 mode). Use REST when those fields matter, for integration code, or to validate exact API behavior.
 
@@ -103,6 +103,7 @@ Request shape:
 | `frame_count` | Only for `mode="v3"` custom text animation. Ignored by preset template mode; do not set it expecting it to override `walking-8-frames`. |
 | `custom_start_frame` | Optional v3-only starting pose. Requires exactly one direction, uses the character's stored direction frame when omitted, incompatible with template/pro mode. |
 | `end_frame` | Optional v3-only target pose for interpolation. Dimensions must match the start frame, requires exactly one direction, incompatible with template/pro mode. |
+| `keep_first_frame` | v3-only, default `true`. Controls whether the reference frame is stored as frame 0 (see Frame Count). Incompatible with template/pro mode. |
 | `action_description` | Required for custom v3/pro. Optional in template mode; use only for light customization. |
 | `enhance_prompt` | Only for v3 custom mode; do not set it for template/pro. |
 
@@ -441,7 +442,7 @@ If an animation exists for one template family but not another, say so and offer
 ## Frame Count
 
 - Preset template mode owns its frame count through the selected template id; do not set `frame_count` expecting it to override `walking-8-frames`.
-- V3 custom mode owns frame count through `frame_count` 4-16, even only, default 8.
+- V3 custom mode owns frame count through `frame_count` 4-16, even only, default 8. V3 also stores the reference frame as frame 0 (so `frame_count=8` stores 9 frames) unless `keep_first_frame=false`; details in `animation.md`.
 - Report the actual returned frame count if it differs from the id or expectation.
 
 ## Verification

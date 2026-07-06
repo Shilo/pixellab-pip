@@ -24,6 +24,8 @@ For clean idle loops, prefer one candidate first — first-frame-only generation
 
 For REST managed character animation, `/animate-character` and `/characters/animations` can accept v3-only `custom_start_frame` and `end_frame` fields. Treat them like frame anchors: they require exactly one direction, are not compatible with template or pro mode, and `end_frame` enables interpolation toward a target pose. Use them only when the user asks for a custom start pose, target pose, or managed-character interpolation; otherwise let the character's stored direction frame be the start.
 
+Managed v3 character and object animation (MCP `animate_character`/`animate_object` and the REST equivalents) stores the input reference frame as frame 0 by default, so `frame_count=8` stores and reports 9 frames. Set v3-only `keep_first_frame=false` (incompatible with template and pro modes) when the user needs exactly `frame_count` generated frames; otherwise expect and report the extra frame instead of treating it as a frame-count mismatch.
+
 When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16 with default 8; refresh the schema before choosing a non-default value when exact current behavior matters.
 
 ## Walk Loops From Idle Stances
