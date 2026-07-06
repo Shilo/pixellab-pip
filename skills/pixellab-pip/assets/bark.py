@@ -52,7 +52,10 @@ def safe_user_config_path() -> Path | None:
 def read_json(path: Path) -> dict[str, Any] | None:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, ValueError):
+        # ValueError covers json.JSONDecodeError and UnicodeDecodeError (a config
+        # re-saved as UTF-16/UTF-8-BOM), so a malformed file degrades to the
+        # graceful invalid-config path instead of an uncaught traceback.
         return None
 
 
