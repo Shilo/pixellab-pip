@@ -75,7 +75,7 @@ the first step.
 
 ```json
 {
-  "_comment": "base sprite for the RPG prototype",
+  "_comment": "Base sprite for the RPG prototype.",
   "_comment_prompt": "/pixellab create a knight character",
   "MCP create_character": { "description": "a knight in shining armor" }
 }
