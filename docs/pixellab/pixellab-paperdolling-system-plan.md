@@ -560,6 +560,15 @@ Golden fixtures:
 
 Update `skills/pixellab-pip/references/paperdolling.md` only after Phase 1 or Phase 3 proves the language. Candidate durable additions:
 
+> Possible concern (blueprint/package intersection, unresolved): the skill is separately gaining
+> job-package entry points and curated blueprint bundles in `skills/pixellab-pip/blueprints/` (for
+> example a `character-package` create→animate→export bundle). A `paperdoll-package` bundle is a
+> natural sibling, but it is intentionally **not** wired yet. It is still open whether paperdolling
+> leverages client-side diff extraction (this plan) or Aseprite editor layers, and any bundle must
+> not imply PixelLab returns native reusable layers. Revisit a paperdoll bundle only after the Phase 1
+> extraction core and its `client-extracted` / `baked composite` honesty labels are proven.
+
+
 - Name "client-extracted layer" as the output label for same-canvas diff workflows.
 - Name "baked equipment composite" as the output label for AI-generated armed/dressed spritesheets that are not reusable layers.
 - Require drift detection before layer extraction.
