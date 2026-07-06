@@ -12,7 +12,30 @@
       "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1.",
       "version": "0.6.0",
       "license": "MIT",
-      "source": "./"
+      "source": "./",
+      "keywords": [
+        "pixellab",
+        "pixellab-pip",
+        "pixel-art",
+        "pixel-art-generator",
+        "game-assets",
+        "game-development",
+        "ai-agents",
+        "agent-skills",
+        "agent-plugin",
+        "codex-plugin",
+        "claude-code",
+        "cursor-plugin",
+        "github-copilot",
+        "gemini-cli",
+        "mcp",
+        "rest-api",
+        "sprites",
+        "pixelorama",
+        "aseprite",
+        "tilesets",
+        "api"
+      ]
     }
   ]
 }

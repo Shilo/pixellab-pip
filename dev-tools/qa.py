@@ -48,6 +48,7 @@ KEYWORDS_PATHS = (
     (".codex-plugin/plugin.json", ("keywords",)),
     (".cursor-plugin/marketplace.json", ("plugins", 0, "keywords")),
     (".cursor-plugin/plugin.json", ("keywords",)),
+    (".github/plugin/marketplace.json", ("plugins", 0, "keywords")),
     ("plugin.json", ("keywords",)),
 )
 
