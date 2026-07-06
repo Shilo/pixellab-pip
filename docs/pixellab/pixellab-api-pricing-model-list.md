@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-07-04.
+Last reviewed: 2026-07-06.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -16,7 +16,16 @@ Primary sources:
 - PixelLab account balance can include subscription generations and USD credits.
 - Hosted MCP help reports that billing uses subscription generations first, then USD credits.
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
+- The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`) scale with output area — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md) for the formulas.
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
+
+## Concurrency and Priority Slots
+
+The `pixellab-api` page lists **Concurrent jobs** and **priority slots** per account. Confirmed: **sustained, consistent API usage automatically raises an account's concurrency** — how many generation jobs it can run in parallel (stated by PixelLab, 2026).
+
+Unconfirmed — do not state as fact: the exact concurrency limit for any account, whether a paid membership tier raises it, and how priority slots are earned or applied. If an exact limit matters, verify on the live page or with PixelLab support rather than quoting a number.
+
+Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md](../../skills/pixellab-pip/references/job-lifecycle.md).
 
 ## Image Generation
 

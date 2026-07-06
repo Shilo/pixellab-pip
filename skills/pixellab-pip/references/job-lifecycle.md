@@ -59,3 +59,4 @@ MCP map objects auto-delete after 8 hours. After a successful map-object result,
 - `400`/`422`: request validation problem. Summarize the field/error, fix the payload, and retry only if the corrected request preserves user intent.
 - `409`/`423`: conflict, duplicate, or locked/in-progress state. Inspect the job or asset status before retrying.
 - `429`/`529`: rate or overload response. Honor a `Retry-After` header when visible; otherwise wait/back off. Do not immediate-loop or fan out more paid calls.
+- Concurrency: an account has a limited number of concurrent generation jobs, and sustained usage raises that ceiling over time. Pace batch work at a steady rate instead of fanning out many paid jobs at once, which trips `429`/`529`. The exact limit is not published — do not assume a specific number.
