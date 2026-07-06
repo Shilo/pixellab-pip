@@ -65,8 +65,8 @@ Bundle (ordered; a later step reads an earlier step's output by relative path):
 
 `_comment*` keys hold free-form human notes — metadata, not fields: drop every `_comment*` key
 before sending the request. Accept them in any position; write all `_comment*` keys before the
-route, `_comment` first. A note lives in its route's object; a bundle's overall notes go on the
-first step.
+route, `_comment` first. A note sits in the same object as its route; a bundle's overall notes go on
+the first step.
 
 - `_comment` (or any custom `_comment*`) — a non-obvious detail worth keeping: a gotcha or
   discovery during creation, or what the blueprint is for. Skip the obvious.
