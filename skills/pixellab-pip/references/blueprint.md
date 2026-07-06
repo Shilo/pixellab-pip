@@ -68,8 +68,9 @@ siblings of the route so the request body stays untouched (tolerated anywhere, b
 placement is the norm). They are metadata, not fields: drop every `_comment*` key before
 sending a request, and never treat one as an input.
 
-- `_comment_prompt` — the user's originating prompt, verbatim (never transformed or
-  reformatted), when a user prompt drove the generation (in a bundle, on the first step).
+- `_comment_prompt` — the exact text of the user request that triggered this generation,
+  copied unchanged (no summarizing, translating, normalizing, or command prefix). Include it
+  only when a user prompt initiated the work; in a bundle, on the first step.
 - `_comment` (or any `_comment*` key) — add when there is useful, non-obvious information
   worth sharing with the blueprint: an issue, discovery, finding, or critical detail from
   creation, or what the blueprint is for. Never restate the obvious.
