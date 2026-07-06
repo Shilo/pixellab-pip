@@ -207,7 +207,11 @@ jobs:
         run: |
           mkdir -p dist
           cd skills
-          zip -r "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" "${{ steps.bump.outputs.skill_name }}"
+          # Exclude Python bytecode: the earlier QA step imports the asset modules
+          # (test_helpers load_module -> exec_module), which writes __pycache__/*.pyc
+          # into the skill tree. The repo forbids tracking those; the release must
+          # not ship them either.
+          zip -r "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" "${{ steps.bump.outputs.skill_name }}" -x '*/__pycache__/*'
           zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^${{ steps.bump.outputs.skill_name }}/SKILL.md$'
           ! zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^skills/'
 
