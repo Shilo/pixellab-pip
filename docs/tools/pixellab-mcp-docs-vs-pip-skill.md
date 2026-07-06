@@ -1,6 +1,6 @@
 # PixelLab MCP Docs vs Pip Skill (Session Context)
 
-Last reviewed: 2026-07-05.
+Last reviewed: 2026-07-06.
 
 This is a decision guide for one specific choice: what PixelLab context to give a coding agent for a session. The two options are PixelLab's official MCP documentation, injected as a prompt link, versus installing the PixelLab Pip Agent Skill. It is a session-context question, not a service question; for the execution-layer comparison (MCP service vs the skill) see [Official PixelLab MCP Service Comparison](official-pixellab-mcp-service-comparison.md).
 
@@ -62,4 +62,4 @@ The skill is installed and the agent refreshes mcp/docs on demand — Pip's own 
 
 `dev-tools/skill_benchmark.py` can measure both context strategies directly. Alongside the current skill (always benchmarked) and git-ref skill variants, it defines two context-strategy arms: `vanilla` (agent knowledge only) and `mcp-docs` (the pixellab.ai/mcp pro-tip docs injected, no skill). Running the current skill against `mcp-docs` compares the two context strategies described here on the same tasks.
 
-A recent dry, credit-free 13-scenario snapshot (`claude`) found the skill routed every deterministic check correctly, while the injected docs and no-skill each passed roughly half: the docs alone missed REST-only routes, local post-processing, and the skill's setup and background-removal fallback policies. Numbers vary per run; see [PixelLab Pip Skill Benchmark](../pixellab-pip-benchmark.md) for the current tables and [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py) to reproduce.
+A recent dry, credit-free 20-scenario snapshot across three agents (`claude`, `codex`, `deepseek-v4-pro`) found the skill routed ~98% of deterministic checks correctly, the injected docs ~58% — strong on pure MCP tool-selection, zero on REST-only routes and near-zero on setup — and no-skill ~26%. Numbers vary per run; see [PixelLab Pip Skill Benchmark](../pixellab-pip-benchmark.md) for the current tables and [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py) to reproduce.

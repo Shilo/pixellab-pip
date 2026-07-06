@@ -1,5 +1,5 @@
 {
-  "_comment": "Example preset — a basic knight character sprite.",
+  "_comment": "Example preset.",
   "_comment_prompt": "create a knight character",
   "MCP create_character": {
     "description": "a knight in shining armor holding a sword and shield"

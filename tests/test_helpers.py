@@ -452,6 +452,20 @@ class HelperCliSmokeTests(unittest.TestCase):
         text = (REPO_ROOT / "skills/pixellab-pip/references/prompt-limits.md").read_text(encoding="utf-8")
         self.assertIn("| `POST /generate-font-pro` | `font_name` | 200 |", text)
 
+    def test_readme_benchmark_headline_matches_generated_table(self) -> None:
+        # The README headline percentages are hand-copied from the generated
+        # routing table; this catches drift when the table is regenerated.
+        report = (REPO_ROOT / "docs/pixellab-pip-benchmark.md").read_text(encoding="utf-8")
+        rows = [line for line in report.splitlines() if "| routing correct |" in line]
+        self.assertTrue(rows)
+        # columns after the metric cell: Pip, Pip (Old v0.5.0), PixelLab MCP Docs, Vanilla
+        cells = [[int(c.strip().rstrip("%")) for c in line.split("|")[4:8]] for line in rows]
+        pip, _old, docs, vanilla = (round(sum(col) / len(col)) for col in zip(*cells))
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"| **PixelLab Pip skill** | **~{pip}%** |", readme)
+        self.assertIn(f"| Official `mcp/docs` injected | ~{docs}% |", readme)
+        self.assertIn(f"| No skill (agent knowledge only) | ~{vanilla}% |", readme)
+
 
 if __name__ == "__main__":
     unittest.main()

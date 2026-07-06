@@ -66,7 +66,6 @@ sending a request, and never treat one as an input.
 
 - `_comment_prompt` — the user request that initiated this blueprint.
 - `_comment` — what this blueprint (or bundle step) is for.
-- `_comment_<field>` — a note about a sibling field, e.g. `_comment_seed`.
 
 Always write `_comment_prompt`. Add other `_comment*` keys only for useful, non-obvious
 context — an issue or discovery during creation, or the blueprint's purpose; never restate

@@ -4,18 +4,20 @@ A **blueprint** is a small JSON file that records exactly how one PixelLab asset
 the tool/route used and the inputs sent — so you (or anyone you send it to) can recreate that
 asset later, with or without changes. Think of it as a recipe card for a generation.
 
-It is deliberately minimal and human-readable: just the route and the request values, no
-account or cost metadata. That makes a blueprint safe and easy to share.
+It is deliberately minimal and human-readable: just the route, the request values, and short
+human notes — no account or cost metadata. That makes a blueprint easy to share; the notes do
+carry the wording of the request that created it, so skim them first if that matters.
 
 ## What's inside
 
 A blueprint file is named `<name>.blueprint.json` and comes in two shapes.
 
-**One generation** — a single object whose only key is the route, with the exact request as its
-value:
+**One generation** — a single object with one route key holding the exact request as its value,
+plus `_comment*` notes (see Comments below):
 
 ```json
 {
+  "_comment_prompt": "create a knight character",
   "MCP create_character": {
     "description": "a knight in shining armor holding a sword and shield"
   }
@@ -54,8 +56,8 @@ people reading the file — the assistant ignores them when it runs the blueprin
 ```
 
 Every blueprint records the request that created it in `_comment_prompt`. Extra `_comment`
-notes (or `_comment_<field>` for a specific value) are added only when there's something
-non-obvious worth sharing — a gotcha found during creation, or what the blueprint is for.
+notes are added only when there's something non-obvious worth sharing — a gotcha found
+during creation, or what the blueprint is for.
 
 ## Creating a blueprint
 

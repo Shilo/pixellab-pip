@@ -107,6 +107,16 @@ def check_manifest_metadata() -> None:
         raise AssertionError("keywords mismatch: " + ", ".join(keyword_mismatches))
 
 
+def check_blueprint_shapes() -> None:
+    for path in run_git_ls_files("*.blueprint.json", "*/*.blueprint.json", "*/*/*.blueprint.json", "*/*/*/*.blueprint.json"):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for step in data if isinstance(data, list) else [data]:
+            routes = [key for key in step if not key.startswith("_comment")]
+            if len(routes) != 1 or not routes[0].startswith(("MCP ", "POST /v2/")):
+                rel = path.relative_to(REPO_ROOT)
+                raise AssertionError(f"{rel}: expected exactly one 'MCP ' or 'POST /v2/' route key, got {routes}")
+
+
 def check_python_compiles() -> None:
     for path in run_git_ls_files("*.py", "*/*.py", "*/*/*.py"):
         source = path.read_text(encoding="utf-8")
@@ -207,6 +217,7 @@ def run_unit_tests() -> None:
 
 CHECKS = [
     ("JSON manifests parse", check_json_files),
+    ("blueprint presets have exactly one route key", check_blueprint_shapes),
     ("manifest metadata matches", check_manifest_metadata),
     ("Python files compile", check_python_compiles),
     ("workflows declare required runtimes", check_workflows),
