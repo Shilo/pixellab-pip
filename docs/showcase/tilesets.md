@@ -7,8 +7,10 @@ Last reviewed: 2026-07-06.
     <th colspan="2">Top-down terrain</th>
   </tr>
   <tr>
-    <td><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
-    <td><img src="tilesets/topdown-dirt-grass-low-single-color-outline.png" alt="top-down low detail dirt and grass tileset with single color outline"></td>
+    <td colspan="2" align="center"><img src="tilesets/one-bit-black-green-topdown-tileset.png" alt="1-bit black and gameplay-green top-down tileset showcase"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="tilesets/topdown-dirt-grass-low-lineless-and-single-color-outline.png" alt="top-down low detail dirt and grass tileset comparison with lineless and single color outline"></td>
   </tr>
   <tr>
     <td colspan="2" align="center"><img src="tilesets/one-bit-16px-top-down-tilesets.png" alt="one-bit 16px top-down tilesets example"></td>
@@ -34,7 +36,7 @@ PixelLab Pip can route top-down terrain/autotile and sidescroller/platformer req
 ## Contents
 
 - [Primary Example: 1-Bit Black And Green Top-Down Tileset](#primary-example-1-bit-black-and-green-top-down-tileset)
-- [Top-Down Example: Low Detail Dirt Grass Single Color Outline](#top-down-example-low-detail-dirt-grass-single-color-outline)
+- [Top-Down Example: Low Detail Dirt Grass Lineless And Single Color Outline](#top-down-example-low-detail-dirt-grass-lineless-and-single-color-outline)
 - [Sidescroller Example: 1-Bit Black And Game Boy Green Platform Tileset](#sidescroller-example-1-bit-black-and-game-boy-green-platform-tileset)
 - [Sidescroller Example: Icy Cap Black-And-White And Game Boy Green](#sidescroller-example-icy-cap-black-and-white-and-game-boy-green)
 - [Sidescroller Example: Sparse Scuffs And Nicks](#sidescroller-example-sparse-scuffs-and-nicks)
@@ -113,60 +115,82 @@ Findings:
 - The gameplay-green copy is a recolor of the accepted black-and-white copy, not a separate PixelLab generation.
 - A later REST tileset attempt with a palette reference produced stricter black output but lost the visible stripe detail, so it was not selected for the showcase.
 
-## Top-Down Example: Low Detail Dirt Grass Single Color Outline
+## Top-Down Example: Low Detail Dirt Grass Lineless And Single Color Outline
 
-![top-down low detail dirt and grass tileset with single color outline](tilesets/topdown-dirt-grass-low-single-color-outline.png)
+![top-down low detail dirt and grass tileset comparison with lineless and single color outline](tilesets/topdown-dirt-grass-low-lineless-and-single-color-outline.png)
 
-The raw PixelLab output shows a common top-down dirt/grass transition request rather than a strict 1-bit niche request. The selected matrix candidate is readable at `16x16`, keeps the terrain categories clear, and shows the stronger graphic separation produced by `single color outline`.
+The top-down dirt/grass comparison shows two raw PixelLab outputs from the same generic terrain matrix request: `lineless` on the left and `single color outline` on the right. The paired image keeps the comparison local to one section because the useful lesson is the difference between style controls, not either image in isolation.
 
 Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
 
 Route: PixelLab MCP `create_topdown_tileset`.
 
-Local processing: none for the showcased image. The PNG is copied from the raw PixelLab generation output.
+Local processing: the two raw `64x64` PixelLab outputs were assembled side by side at native size. No pixels were repainted, scaled, palette-clamped, or otherwise changed.
 
 Generation details:
 
-| Field | Value |
-|---|---|
-| Output structure | Top-down Wang/autotile tileset |
-| Source sheet size | `64x64` |
-| Tile size | `16x16` |
-| Lower description | `dirt` |
-| Upper description | `grass` |
-| Transition description | `grass to dirt` |
-| Detail | `low detail` |
-| Shading | Omitted |
-| Outline | `single color outline` |
-| Transition size | `0.25` |
-| Seed | Requested, but MCP rejected `seed`; omitted for this top-down matrix |
+| Field | Left Value | Right Value |
+|---|---|---|
+| Output structure | Top-down Wang/autotile tileset | Top-down Wang/autotile tileset |
+| Source sheet size | `64x64` | `64x64` |
+| Final showcase image | `128x64`, native-size side-by-side composition | `128x64`, native-size side-by-side composition |
+| Tile size | `16x16` | `16x16` |
+| Lower description | `dirt` | `dirt` |
+| Upper description | `grass` | `grass` |
+| Transition description | `grass to dirt` | `grass to dirt` |
+| Detail | `low detail` | `low detail` |
+| Shading | Omitted | Omitted |
+| Outline | `lineless` | `single color outline` |
+| Transition size | `0.25` | `0.25` |
+| Seed | Requested, but MCP rejected `seed`; omitted for this top-down matrix | Requested, but MCP rejected `seed`; omitted for this top-down matrix |
 
-Blueprint — replayable route and request body ([`topdown-dirt-grass-low-single-color-outline.blueprint.json`](tilesets/topdown-dirt-grass-low-single-color-outline.blueprint.json)):
+Blueprint — replayable routes and request bodies ([`topdown-dirt-grass-low-lineless-and-single-color-outline.blueprint.json`](tilesets/topdown-dirt-grass-low-lineless-and-single-color-outline.blueprint.json)):
 
 ```json
 {
-  "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition.",
-  "_comment": "PixelLab generated the showcased raw tileset. The MCP tool rejected seed for this top-down matrix run, so no seed is recorded.",
-  "MCP create_topdown_tileset": {
-    "lower_description": "dirt",
-    "upper_description": "grass",
-    "transition_description": "grass to dirt",
-    "transition_size": 0.25,
-    "detail": "low detail",
-    "outline": "single color outline",
-    "tile_size": {
-      "width": 16,
-      "height": 16
+  "_comment_prompt": "Generic top-down terrain matrix request for dirt lower terrain, grass upper terrain, and a grass-to-dirt transition. The showcased image compares low-detail lineless and low-detail single-color-outline outputs.",
+  "_comment": "PixelLab generated both source tilesets. The showcased PNG is a local native-size side-by-side composition: lineless on the left, single color outline on the right. The MCP tool rejected seed for this top-down matrix run, so no seed is recorded.",
+  "bundle": [
+    {
+      "label": "left: low detail lineless",
+      "MCP create_topdown_tileset": {
+        "lower_description": "dirt",
+        "upper_description": "grass",
+        "transition_description": "grass to dirt",
+        "transition_size": 0.25,
+        "detail": "low detail",
+        "outline": "lineless",
+        "tile_size": {
+          "width": 16,
+          "height": 16
+        }
+      }
+    },
+    {
+      "label": "right: low detail single color outline",
+      "MCP create_topdown_tileset": {
+        "lower_description": "dirt",
+        "upper_description": "grass",
+        "transition_description": "grass to dirt",
+        "transition_size": 0.25,
+        "detail": "low detail",
+        "outline": "single color outline",
+        "tile_size": {
+          "width": 16,
+          "height": 16
+        }
+      }
     }
-  }
+  ]
 }
 ```
 
 Findings:
 
-- The selected output is a better showcase for normal terrain/material generation than for strict palette work.
-- `single color outline` made the dirt/grass boundary more graphic and readable.
-- Because the top-down matrix did not accept `seed`, this image should be treated as a visual example, not a seed-stable control result.
+- Both outputs are better examples for normal terrain/material generation than for strict palette work.
+- `lineless` still produces readable terrain boundaries because connected tilesets need visible transitions.
+- `single color outline` gives a stronger graphic boundary than the low-detail lineless candidate.
+- Because the top-down matrix did not accept `seed`, this comparison should be treated as a visual example, not a seed-stable control result.
 
 ## Sidescroller Example: 1-Bit Black And Game Boy Green Platform Tileset
 
@@ -510,7 +534,7 @@ Practical notes from follow-up trials:
 |---|---|
 | Black-and-white plus Game Boy green one-bit 16px top-down tilesets example | `docs/showcase/tilesets/one-bit-16px-top-down-tilesets.png` |
 | Black-and-white plus gameplay-green tileset composition | `docs/showcase/tilesets/one-bit-black-green-topdown-tileset.png` |
-| Top-down low detail dirt/grass single-color-outline raw PixelLab output | `docs/showcase/tilesets/topdown-dirt-grass-low-single-color-outline.png` |
+| Top-down low detail dirt/grass lineless and single-color-outline comparison | `docs/showcase/tilesets/topdown-dirt-grass-low-lineless-and-single-color-outline.png` |
 | Black-and-white plus Game Boy green sidescroller tileset composition | `docs/showcase/tilesets/one-bit-black-gameboy-green-sidescroller-tileset.png` |
 | Black-and-white plus Game Boy green icy-cap sidescroller composition | `docs/showcase/tilesets/one-bit-sidescroller-icy-cap-bw-gameboy.png` |
 | Sidescroller sparse scuffs/nicks raw PixelLab output | `docs/showcase/tilesets/one-bit-sidescroller-scuffs-nicks-original.png` |
@@ -537,4 +561,4 @@ Practical notes from follow-up trials:
 - The icy-cap sidescroller composition contains only `#000000`, `#FFFFFF`, `#0F380F`, and `#9BBC0F` as visible colors.
 - The raw scuffs/nicks sidescroller showcase image is exactly `128x128` and preserves the original PixelLab output.
 - The raw dirt/grass sidescroller showcase images are exactly `64x64` and preserve their original PixelLab outputs.
-- The raw dirt/grass top-down showcase image is exactly `64x64` and preserves the original PixelLab output.
+- The raw dirt/grass top-down comparison is exactly `128x64` and preserves two original `64x64` PixelLab outputs side by side.
