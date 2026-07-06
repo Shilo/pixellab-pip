@@ -1,0 +1,11 @@
+{
+  "_comment": "From a multi-task 'do the following simultaneously' batch; see skill-icons.md. This is the base 512x512 atlas request; the final showcase sheet was locally curated from atlas + separate-image cells.",
+  "POST /v2/generate-image-v2": {
+    "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG skill icons for game UI, 8 columns and 8 rows, each cell a readable 64x64 icon, perfectly aligned edge-to-edge with zero spacing, no overlap, no cropped icons, no dividers, no drawn grid. Rich full-bleed illustrated miniature backgrounds behind clear centered pictorial symbols, luminous pixel texture, depth, magical light, atmospheric color variation. Varied abilities across fire, ice, lightning, earth, wind, water, healing, shields, holy light, shadow strike, poison, blood magic, mana burst, rage, stealth, tracking, traps, lockpicking, alchemy, crafting, survival, leadership, taunt, cleanse, curse, summoning, portals, teleport, time, gravity, mind control, spirit, phoenix, dragon breath, nature thorns, roots, claws, arrows, daggers, hammers, banners, treasure sense, resurrection, aura buffs, debuffs, and movement. Pictorial symbols only. No text, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, runes, glyphs, alphabet-like shapes, terrain tiles, map tiles, inventory items, borders, frames, UI slots, rounded corners, watermark, black square-edge outlines, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+    "image_size": {
+      "width": 512,
+      "height": 512
+    },
+    "no_background": false
+  }
+}

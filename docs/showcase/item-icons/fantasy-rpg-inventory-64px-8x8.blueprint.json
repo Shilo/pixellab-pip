@@ -1,0 +1,11 @@
+{
+  "_comment": "From a multi-task 'do the following simultaneously' batch request; see item-icons.md. Single 512x512 atlas (Create Image Pro).",
+  "POST /v2/generate-image-v2": {
+    "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns and 8 rows, each cell a readable 64x64 item, perfectly aligned edge-to-edge with zero spacing, no overlap, no cropped items, no dividers, no drawn grid. Pixel art with clear centered object silhouettes, crisp hard edges, limited palette, consistent high-fantasy inventory style. Include varied categories: swords, axes, daggers, bows, arrows, shields, helmets, armor, boots, gloves, rings, amulets, potions, scrolls, spell books, maps, food, coins, gems, ores, ingots, wood, herbs, mushrooms, monster parts, bottles, lanterns, torches, lockpicks, tools, keys, chests, bags, bedrolls, bombs, elemental crystals, holy relics, cursed charms, crafting materials, fishing gear, traps, rope, compass, horn, and rare artifacts. No text, letters, words, numbers, labels, captions, handwriting, fake writing, runes, glyphs, UI slots, buttons, borders, frames, rounded corners, watermark, terrain tiles, map tiles, skill icons, or decorative grid lines.",
+    "image_size": {
+      "width": 512,
+      "height": 512
+    },
+    "no_background": true
+  }
+}

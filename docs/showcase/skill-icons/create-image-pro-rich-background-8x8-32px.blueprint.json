@@ -1,0 +1,13 @@
+{
+  "_comment_prompt": "/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.",
+  "_comment": "Showcase winner. Removes slot-triggering words (spritesheet, strict grid, cell) and adds background-quality guidance.",
+  "POST /v2/generate-image-v2": {
+    "description": "A complete 8 by 8 sheet of 64 unique fantasy RPG skill icons for game UI. Exact canvas 256x256 pixels. 8 columns and 8 rows, each icon exactly one 32x32 square, perfectly aligned, edge-to-edge, no spacing, no overlap, no cropped icons. Pixel art, cohesive high fantasy theme, readable at 32x32.\n\nEach icon is a finished opaque square with a rich full-bleed illustrated miniature background behind the skill symbol. Backgrounds should be high quality: luminous gradients, painterly pixel texture, depth, magical light, atmospheric color variation, not flat solid color. Background art touches all four edges and corners. Every pixel painted; no transparent pixels, no alpha, no blank corners, no padding.\n\nPictorial symbols only. Use clear centered pictures and silhouettes: flames, ice shards, lightning bolts, shields, hands, daggers, arrows, skulls, leaves, spirits, portals, stars, wings, claws, weapons, masks, potions, celestial beams, aura effects. Do not use runes or glyphs. No text-like marks, letters, words, numbers, labels, captions, handwriting, decorative script, fake writing, or alphabet-like shapes.\n\nUnique varied abilities: elemental magic, weapon attacks, healing, protection, stealth, curses, nature magic, summoning, movement, utility, crafting, survival, resurrection, treasure sense, mind, time, gravity, poison, holy, shadow, blood, mana, rage, tracking, alchemy, lockpicking, leadership, taunt, cleanse, traps, phoenix, dragon breath. No terrain tiles, map tiles, or inventory item sheet. No borders, frames, UI slots, rounded corners, dividers, watermark, black outlines around icon square edges, or separating lines. Palette: sapphire blue, ember orange, moonlit violet, emerald green, gold highlights.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": false,
+    "seed": 24062808
+  }
+}

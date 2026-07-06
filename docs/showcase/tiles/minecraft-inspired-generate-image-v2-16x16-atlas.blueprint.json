@@ -1,0 +1,11 @@
+{
+  "_comment_prompt": "/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.",
+  "POST /v2/generate-image-v2": {
+    "description": "A 256-file packed atlas of original voxel sandbox block-game terrain texture files, arranged as 16 columns by 16 rows. Each file occupies exactly one 16 by 16 pixel cell inside a 256 by 256 image. Cells touch edge-to-edge with zero pixels between cells. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, or drawn grid. Every cell is completely filled edge-to-edge including corner pixels. Each of the 256 cells is unique, highly textured, and readable as a small square block face: stone, dirt, grass top, grass side, sand, gravel, clay, snow, ice, moss, bark, planks, leaves, ores, bricks, cobble, mud, lava rock, nether-like stone, fantasy minerals, farmland, hay, glass, wool, metal, decorative tiles, and rare variants. No large strips, connected terrain rows, scenery, UI, labels, text, icons, characters, tools, shadows spanning cells, highlights spanning cells, ore veins crossing cells, planks crossing cells, or texture detail continuing into neighboring cells. Crunchy 16-bit pixel-art texture, crisp square pixels, high material variety, original designs inspired by block-building survival games.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": false
+  }
+}

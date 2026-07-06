@@ -1,0 +1,11 @@
+{
+  "_comment_prompt": "/pixellab-pip create complete 32px armor item set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.",
+  "POST /v2/generate-image-v2": {
+    "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG armor and defensive equipment inventory icons, 8 columns and 8 rows, each cell a readable 32x32 armor item, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with clear centered item silhouettes, crisp hard edges, low visual noise, limited palette, consistent high-fantasy inventory style using forged steel, bronze, dark iron, leather, chainmail, scale, cloth, fur, crystal, bone, and enchanted gems. Cover common RPG armor slots, materials, and tiers: cloth hoods, leather caps, mail coifs, plate helmets, horned helms, circlets, masks, chestplates, cuirasses, chain shirts, scale mail, leather armor, mage robes, ranger tunics, priest vestments, pauldrons, gauntlets, gloves, bracers, belts, sashes, greaves, leggings, boots, sabatons, cloaks, capes, bucklers, round shields, kite shields, tower shields, amulets, rings, fire, ice, lightning, poison, nature, holy, cursed, bone, crystal, royal, and legendary variants. Armor and defensive gear only. No weapons, potions, food, coins, terrain tiles, map tiles, text, letters, numbers, labels, captions, handwriting, fake writing, UI slots, buttons, borders, frames, rounded corners, watermark, checkerboard, decorative grid lines, or background art.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": true
+  }
+}

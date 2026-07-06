@@ -1,0 +1,11 @@
+{
+  "_comment_prompt": "/pixellab-pip create complete 32px weapon item set for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.",
+  "POST /v2/generate-image-v2": {
+    "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG weapon inventory icons, 8 columns and 8 rows, each cell a readable 32x32 weapon, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with clear centered weapon silhouettes, crisp hard edges, limited palette, consistent high-fantasy forged metal, wood, leather, crystal, bone, and enchanted-gem style. Cover common RPG weapon families and variants: daggers, short swords, longswords, greatswords, curved blades, rapiers, axes, battleaxes, greataxes, maces, flails, clubs, warhammers, mauls, spears, lances, halberds, glaives, tridents, scythes, bows, longbows, crossbows, slings, throwing knives, shuriken, chakrams, boomerangs, whips, claws, knuckles, staves, wands, scepters, rods, tomes-as-weapons, holy weapons, cursed weapons, fire, ice, lightning, poison, nature, bone, crystal, and legendary variants. Weapons only. No armor, shields, potions, food, coins, terrain tiles, map tiles, text, letters, numbers, labels, captions, handwriting, fake writing, UI slots, buttons, borders, frames, rounded corners, watermark, checkerboard, decorative grid lines, or background art.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": true
+  }
+}

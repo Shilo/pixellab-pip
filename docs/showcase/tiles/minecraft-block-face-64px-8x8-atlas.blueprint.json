@@ -1,0 +1,11 @@
+{
+  "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Final 512x512 sheet assembled locally from separate 64x64 outputs (full-atlas attempts bled across cells).",
+  "POST /v2/generate-image-v2": {
+    "description": "A 512x512 atlas of 64 unique Minecraft-inspired voxel sandbox block-face tile textures, arranged as 8 columns and 8 rows. Each tile occupies exactly one independent 64 by 64 pixel cell, cells touch edge-to-edge with zero pixels between cells. Every cell is filled completely edge-to-edge including edge and corner pixels. Include varied block materials: grass top, dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sand, clay, snow, ice, packed ice, water, lava, oak planks, birch planks, spruce planks, jungle planks, acacia planks, dark oak planks, stripped logs, bark, leaves, cactus, hay bale, wool colors, brick, nether brick, obsidian, quartz, copper, iron, gold, diamond ore, emerald ore, redstone ore, coal ore, lapis ore, amethyst, glowstone, netherrack, soul sand, mud, roots, moss, tilled soil, glass, bookshelves, furnace front, crafting table, barrel top, chest top, rails, path, gravel, concrete, terracotta, and decorative carved stone. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, drawn grid, labels, numbers, letters, watermark, connected terrain rows, wide textures, planks or veins continuing into neighboring cells, repeated duplicates, or copied vanilla game textures.",
+    "image_size": {
+      "width": 512,
+      "height": 512
+    },
+    "no_background": false
+  }
+}

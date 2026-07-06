@@ -1,0 +1,11 @@
+{
+  "_comment": "From a multi-task 'do the following simultaneously' batch; see skill-icons.md. no_background false 64x64 returns separate PNGs arranged locally.",
+  "POST /v2/generate-image-v2": {
+    "description": "Sixteen unique fantasy RPG skill icons as separate 64x64 generated images: Ember Lance, Glacier Guard, Storm Step, Vine Snare, Solar Mend, Void Mark, Iron Barrage, Mist Veil, Phoenix Rise, Serpent Venom, Arcane Lockpick, Gravity Well, Spirit Howl, Crystal Barrier, Blood Pact, and Time Shear. Each icon has a distinct centered pictorial symbol with a rich full-bleed miniature painted background, luminous effects, crisp pixel texture, readable game UI composition, and no duplicate ability concepts. No text, letters, words, numbers, labels, captions, fake writing, runes, glyphs, UI button frames, rounded corners, borders, separating lines, inventory items, terrain tiles, watermark, or black square-edge outlines.",
+    "image_size": {
+      "width": 64,
+      "height": 64
+    },
+    "no_background": false
+  }
+}

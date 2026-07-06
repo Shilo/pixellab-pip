@@ -1,0 +1,11 @@
+{
+  "_comment": "From a multi-task 'do the following simultaneously' batch request; see item-icons.md. no_background 64x64 returns separate PNGs, arranged locally into the showcase grid.",
+  "POST /v2/generate-image-v2": {
+    "description": "Sixteen unique fantasy RPG inventory item icons as separate 64x64 generated images: emberglass potion, moonsteel dagger, thornhide boots, sunmarked shield, frostberry ration, stormglass lantern, gravegold ring, wolfsalt charm, ironroot hatchet, starfall scroll, copperwing key, deepmoss herb bundle, bloodruby ore, seasilk cloak, ashbone horn, and clockwork bomb. Each image contains exactly one centered readable item silhouette with crisp hard pixel edges, limited palette, consistent high-fantasy inventory style, strong shape language, and no duplicate item concepts. No text, letters, numbers, labels, captions, fake writing, UI slots, borders, frames, terrain tiles, skill effects, watermark, or decorative grid.",
+    "image_size": {
+      "width": 64,
+      "height": 64
+    },
+    "no_background": true
+  }
+}

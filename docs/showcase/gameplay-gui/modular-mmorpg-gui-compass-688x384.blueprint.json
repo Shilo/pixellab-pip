@@ -1,0 +1,198 @@
+{
+  "_comment_prompt": "/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.",
+  "_comment": "High-value candidate; not the strict final because the minimap piece picked up tiny letters.",
+  "MCP create_ui_asset": {
+    "name": "high_fantasy_mmorpg_modular_gui_sheet",
+    "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. No text, no letters, no numbers, no readable runes, no labels. All components are separate, non-overlapping, fully unique, with transparent gutters between them. Make every rectangular component 9-slice compatible: clean continuous borders, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside each component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, subtle crystal highlights, carved filigree, fantasy RPG inventory and HUD aesthetic. Include a complete modular set: large window frame, compact dialogue/tooltip panel, quest plaque, primary button, secondary button, tab, toolbar strip, health bar, mana bar, experience bar, portrait frame, minimap frame, ornate icon button, hex spell slot, inventory slot, gem socket, slim scrollbar, and corner ornament. Each component must be visually distinct with different silhouette/ornamentation; no duplicate components, no overlapping components, no text.",
+    "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
+    "elements": [
+      "window",
+      "panel",
+      "button",
+      "icon_button",
+      "toolbar",
+      "tab",
+      "health_bar",
+      "avatar",
+      "hexagon"
+    ],
+    "pieces": [
+      {
+        "id": "large_window_frame",
+        "kind": "rounded_rect",
+        "label": "large ornate 9-slice window frame",
+        "x": 12,
+        "y": 10,
+        "w": 192,
+        "h": 104,
+        "radius": 10
+      },
+      {
+        "id": "dialog_tooltip_panel",
+        "kind": "rounded_rect",
+        "label": "compact 9-slice tooltip dialogue panel",
+        "x": 218,
+        "y": 10,
+        "w": 116,
+        "h": 58,
+        "radius": 8
+      },
+      {
+        "id": "quest_plaque_panel",
+        "kind": "rounded_rect",
+        "label": "asymmetric quest plaque 9-slice panel",
+        "x": 218,
+        "y": 78,
+        "w": 116,
+        "h": 46,
+        "radius": 6
+      },
+      {
+        "id": "portrait_frame",
+        "kind": "circle",
+        "label": "round hero portrait frame",
+        "x": 382,
+        "y": 62,
+        "r": 44
+      },
+      {
+        "id": "minimap_frame",
+        "kind": "circle",
+        "label": "distinct compass minimap frame",
+        "x": 468,
+        "y": 62,
+        "r": 34
+      },
+      {
+        "id": "primary_button",
+        "kind": "rounded_rect",
+        "label": "wide primary 9-slice command button",
+        "x": 12,
+        "y": 136,
+        "w": 112,
+        "h": 30,
+        "radius": 7
+      },
+      {
+        "id": "secondary_button",
+        "kind": "rounded_rect",
+        "label": "narrow secondary 9-slice command button",
+        "x": 136,
+        "y": 136,
+        "w": 92,
+        "h": 30,
+        "radius": 5
+      },
+      {
+        "id": "tab_component",
+        "kind": "rounded_rect",
+        "label": "single raised tab component",
+        "x": 240,
+        "y": 136,
+        "w": 70,
+        "h": 28,
+        "radius": 7
+      },
+      {
+        "id": "toolbar_strip",
+        "kind": "rounded_rect",
+        "label": "ornate modular toolbar strip",
+        "x": 322,
+        "y": 136,
+        "w": 174,
+        "h": 28,
+        "radius": 6
+      },
+      {
+        "id": "health_bar",
+        "kind": "rounded_rect",
+        "label": "crimson health bar frame and fill",
+        "x": 12,
+        "y": 178,
+        "w": 146,
+        "h": 20,
+        "radius": 4
+      },
+      {
+        "id": "mana_bar",
+        "kind": "rounded_rect",
+        "label": "sapphire mana bar frame and fill",
+        "x": 170,
+        "y": 178,
+        "w": 146,
+        "h": 20,
+        "radius": 4
+      },
+      {
+        "id": "experience_bar",
+        "kind": "rounded_rect",
+        "label": "thin emerald experience bar frame",
+        "x": 328,
+        "y": 178,
+        "w": 168,
+        "h": 16,
+        "radius": 3
+      },
+      {
+        "id": "inventory_slot",
+        "kind": "rounded_rect",
+        "label": "single square inventory slot with unique corner metalwork",
+        "x": 12,
+        "y": 216,
+        "w": 44,
+        "h": 44,
+        "radius": 5
+      },
+      {
+        "id": "gem_socket",
+        "kind": "circle",
+        "label": "round gem socket component",
+        "x": 88,
+        "y": 238,
+        "r": 22
+      },
+      {
+        "id": "ornate_icon_button",
+        "kind": "circle",
+        "label": "round ornate icon button with blank center",
+        "x": 148,
+        "y": 238,
+        "r": 22
+      },
+      {
+        "id": "hex_spell_slot",
+        "kind": "polygon",
+        "label": "hexagonal spell slot frame",
+        "x": 210,
+        "y": 238,
+        "r": 25,
+        "sides": 6,
+        "phase": 0.5236
+      },
+      {
+        "id": "slim_scrollbar",
+        "kind": "rounded_rect",
+        "label": "slim vertical scrollbar with fantasy cap ends",
+        "x": 266,
+        "y": 208,
+        "w": 22,
+        "h": 62,
+        "radius": 6
+      },
+      {
+        "id": "corner_ornament",
+        "kind": "polygon",
+        "label": "standalone triangular corner ornament for frames",
+        "x": 332,
+        "y": 238,
+        "r": 28,
+        "sides": 3,
+        "phase": 0.7854
+      }
+    ],
+    "width": 688,
+    "height": 384,
+    "no_background": true,
+    "seed": 421973
+  }
+}

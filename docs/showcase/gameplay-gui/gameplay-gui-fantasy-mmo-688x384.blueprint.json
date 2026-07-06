@@ -1,0 +1,14 @@
+{
+  "_comment_prompt": "pip create a complete world of warcraft gui",
+  "_comment": "Named game interpreted as a broad original high-fantasy MMORPG HUD via generate-ui-v2 (no copy of any existing UI).",
+  "POST /v2/generate-ui-v2": {
+    "description": "Complete original fantasy MMORPG pixel-art GUI kit, inspired by classic high-fantasy raid interfaces but not copying any existing game: ornate carved stone and dark iron frames with aged brass trim, glowing blue mana accents, red health accents, emerald quest accents, leather straps, small runic details, readable modular components arranged on one transparent sprite sheet. Include: player portrait frame, target portrait frame, health bar, mana bar, rage/energy resource bar, experience bar, action bar with twelve square spell slots, secondary action bar row, bag/inventory slot grid, minimap circular frame, quest tracker panel, parchment dialogue window, chat panel, tooltip frame, party member frames, raid-group compact frames, buff/debuff icon frames, menu buttons, checkboxes, sliders, tab headers, close buttons, gold/silver/copper currency icons, empty spell icon placeholders, decorative corners and separators. Clean game-ready UI assets, crisp 2D pixel art, consistent MMO HUD style, high contrast edges, no logos, no copyrighted symbols, no text labels, transparent background.",
+    "image_size": {
+      "width": 688,
+      "height": 384
+    },
+    "no_background": true,
+    "color_palette": "dark iron, weathered stone, aged brass, leather brown, parchment tan, crimson health red, arcane blue, emerald green highlights",
+    "seed": 250625
+  }
+}

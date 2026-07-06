@@ -1,0 +1,13 @@
+{
+  "_comment_prompt": "pip, create deep charcoal slate, framed by cool iron and ignited by sharp hits of heath-fire orange game UI at 344x192 resolution",
+  "_comment": "Bad example: mood-only prompt with no named components produced a small panel/frame/bar rather than a full kit.",
+  "POST /v2/generate-ui-v2": {
+    "description": "Pixel art game UI panel frame, 344x192 canvas, deep charcoal slate central panel, beveled cool iron border and corner brackets, sharp heath-fire orange glowing accents on rivets, notches, and thin trim lines, readable RPG HUD/menu frame, crisp hard pixel edges, high contrast, transparent outside the frame, no text, no characters, no background scene.",
+    "image_size": {
+      "width": 344,
+      "height": 192
+    },
+    "no_background": true,
+    "color_palette": "deep charcoal slate, cool iron gray, dark gunmetal, small sharp heath-fire orange glow accents"
+  }
+}

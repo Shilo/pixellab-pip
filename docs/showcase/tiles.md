@@ -56,16 +56,19 @@ Generation details:
 | Balance observation | `1448 -> 1428` generations |
 | Exact-unique cells | `251 / 256` |
 
-Request body:
+Blueprint — replayable route and request body ([`minecraft-inspired-generate-image-v2-16x16-atlas.blueprint.json`](tiles/minecraft-inspired-generate-image-v2-16x16-atlas.blueprint.json)):
 
 ```json
 {
-  "description": "A 256-file packed atlas of original voxel sandbox block-game terrain texture files, arranged as 16 columns by 16 rows. Each file occupies exactly one 16 by 16 pixel cell inside a 256 by 256 image. Cells touch edge-to-edge with zero pixels between cells. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, or drawn grid. Every cell is completely filled edge-to-edge including corner pixels. Each of the 256 cells is unique, highly textured, and readable as a small square block face: stone, dirt, grass top, grass side, sand, gravel, clay, snow, ice, moss, bark, planks, leaves, ores, bricks, cobble, mud, lava rock, nether-like stone, fantasy minerals, farmland, hay, glass, wool, metal, decorative tiles, and rare variants. No large strips, connected terrain rows, scenery, UI, labels, text, icons, characters, tools, shadows spanning cells, highlights spanning cells, ore veins crossing cells, planks crossing cells, or texture detail continuing into neighboring cells. Crunchy 16-bit pixel-art texture, crisp square pixels, high material variety, original designs inspired by block-building survival games.",
-  "image_size": {
-    "width": 256,
-    "height": 256
-  },
-  "no_background": false
+  "_comment_prompt": "/pixellab-pip create a grid of 16x16 minecraft-inspired tiles using image pro. every tile must be unique and textured.",
+  "POST /v2/generate-image-v2": {
+    "description": "A 256-file packed atlas of original voxel sandbox block-game terrain texture files, arranged as 16 columns by 16 rows. Each file occupies exactly one 16 by 16 pixel cell inside a 256 by 256 image. Cells touch edge-to-edge with zero pixels between cells. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, or drawn grid. Every cell is completely filled edge-to-edge including corner pixels. Each of the 256 cells is unique, highly textured, and readable as a small square block face: stone, dirt, grass top, grass side, sand, gravel, clay, snow, ice, moss, bark, planks, leaves, ores, bricks, cobble, mud, lava rock, nether-like stone, fantasy minerals, farmland, hay, glass, wool, metal, decorative tiles, and rare variants. No large strips, connected terrain rows, scenery, UI, labels, text, icons, characters, tools, shadows spanning cells, highlights spanning cells, ore veins crossing cells, planks crossing cells, or texture detail continuing into neighboring cells. Crunchy 16-bit pixel-art texture, crisp square pixels, high material variety, original designs inspired by block-building survival games.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": false
+  }
 }
 ```
 
@@ -114,16 +117,21 @@ Natural-language generation input:
 Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.
 ```
 
-Request settings:
+Blueprint — replayable route and request body ([`minecraft-mod-generate-image-v2-8x8-32px-sheet.blueprint.json`](tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.blueprint.json)):
 
 ```json
 {
-  "image_size": {
-    "width": 32,
-    "height": 32
-  },
-  "no_background": false,
-  "seed": 1323610680
+  "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
+  "_comment": "64 native 32x32 tiles generated as separate images, then arranged locally into the 8x8 sheet.",
+  "POST /v2/generate-image-v2": {
+    "description": "Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.",
+    "image_size": {
+      "width": 32,
+      "height": 32
+    },
+    "no_background": false,
+    "seed": 1323610680
+  }
 }
 ```
 
@@ -167,16 +175,19 @@ Generation details:
 | Batch usage reported | `20` generations per separate-image batch |
 | Retry note | One separate-image material batch failed and was rerun with the same input |
 
-Initial request body:
+Blueprint — replayable route and request body ([`minecraft-block-face-64px-8x8-atlas.blueprint.json`](tiles/minecraft-block-face-64px-8x8-atlas.blueprint.json)):
 
 ```json
 {
-  "description": "A 512x512 atlas of 64 unique Minecraft-inspired voxel sandbox block-face tile textures, arranged as 8 columns and 8 rows. Each tile occupies exactly one independent 64 by 64 pixel cell, cells touch edge-to-edge with zero pixels between cells. Every cell is filled completely edge-to-edge including edge and corner pixels. Include varied block materials: grass top, dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sand, clay, snow, ice, packed ice, water, lava, oak planks, birch planks, spruce planks, jungle planks, acacia planks, dark oak planks, stripped logs, bark, leaves, cactus, hay bale, wool colors, brick, nether brick, obsidian, quartz, copper, iron, gold, diamond ore, emerald ore, redstone ore, coal ore, lapis ore, amethyst, glowstone, netherrack, soul sand, mud, roots, moss, tilled soil, glass, bookshelves, furnace front, crafting table, barrel top, chest top, rails, path, gravel, concrete, terracotta, and decorative carved stone. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, drawn grid, labels, numbers, letters, watermark, connected terrain rows, wide textures, planks or veins continuing into neighboring cells, repeated duplicates, or copied vanilla game textures.",
-  "image_size": {
-    "width": 512,
-    "height": 512
-  },
-  "no_background": false
+  "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Final 512x512 sheet assembled locally from separate 64x64 outputs (full-atlas attempts bled across cells).",
+  "POST /v2/generate-image-v2": {
+    "description": "A 512x512 atlas of 64 unique Minecraft-inspired voxel sandbox block-face tile textures, arranged as 8 columns and 8 rows. Each tile occupies exactly one independent 64 by 64 pixel cell, cells touch edge-to-edge with zero pixels between cells. Every cell is filled completely edge-to-edge including edge and corner pixels. Include varied block materials: grass top, dirt, stone, cobblestone, mossy cobble, deepslate, granite, diorite, andesite, sandstone, red sand, clay, snow, ice, packed ice, water, lava, oak planks, birch planks, spruce planks, jungle planks, acacia planks, dark oak planks, stripped logs, bark, leaves, cactus, hay bale, wool colors, brick, nether brick, obsidian, quartz, copper, iron, gold, diamond ore, emerald ore, redstone ore, coal ore, lapis ore, amethyst, glowstone, netherrack, soul sand, mud, roots, moss, tilled soil, glass, bookshelves, furnace front, crafting table, barrel top, chest top, rails, path, gravel, concrete, terracotta, and decorative carved stone. No margins, gutters, padding, spacing, separator pixels, blank pixels, outlines, frames, guide lines, drawn grid, labels, numbers, letters, watermark, connected terrain rows, wide textures, planks or veins continuing into neighboring cells, repeated duplicates, or copied vanilla game textures.",
+    "image_size": {
+      "width": 512,
+      "height": 512
+    },
+    "no_background": false
+  }
 }
 ```
 
@@ -219,16 +230,19 @@ Generation details:
 | Usage reported | `20` generations |
 | Reported cost | `$0.095` |
 
-Request body:
+Blueprint — replayable route and request body ([`minecraft-block-face-64px-4x4.blueprint.json`](tiles/minecraft-block-face-64px-4x4.blueprint.json)):
 
 ```json
 {
-  "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
-  "image_size": {
-    "width": 64,
-    "height": 64
-  },
-  "no_background": false
+  "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Separate 64x64 textures arranged locally into the showcase grid.",
+  "POST /v2/generate-image-v2": {
+    "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
+    "image_size": {
+      "width": 64,
+      "height": 64
+    },
+    "no_background": false
+  }
 }
 ```
 

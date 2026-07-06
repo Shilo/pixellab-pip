@@ -97,48 +97,206 @@ Enhanced prompt sent as `description`:
 Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. STRICTLY TEXTLESS: no letters, no numbers, no readable runes, no glyphs, no compass letters, no N E S W marks, no labels, no symbols that look like writing anywhere. All components are separate, non-overlapping, fully unique, with clear transparent gutters between them. Every rectangular component must be 9-slice compatible: continuous border, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside the component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, sapphire blue, crimson red, amethyst crystal highlights, carved filigree, high fantasy MMORPG inventory and HUD aesthetic. Include a complete modular set: large blank window frame, compact blank dialogue panel, ornate blank plaque panel, primary command button, secondary command button, raised tab, toolbar strip, health bar, mana bar, experience bar, hero portrait frame, blank circular minimap frame without any compass marks, ornate icon button with blank center, hex spell slot, inventory slot, gem socket, slim scrollbar, and standalone corner ornament. Each component must have a unique silhouette and unique ornamentation; no duplicate components, no overlapping components, no text of any kind.
 ```
 
-Request body:
+Blueprint — replayable route and request body ([`modular-mmorpg-gui-textless-688x384.blueprint.json`](gameplay-gui/modular-mmorpg-gui-textless-688x384.blueprint.json)):
 
 ```json
 {
-  "name": "high_fantasy_mmorpg_modular_gui_sheet_textless_retry",
-  "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. STRICTLY TEXTLESS: no letters, no numbers, no readable runes, no glyphs, no compass letters, no N E S W marks, no labels, no symbols that look like writing anywhere. All components are separate, non-overlapping, fully unique, with clear transparent gutters between them. Every rectangular component must be 9-slice compatible: continuous border, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside the component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, sapphire blue, crimson red, amethyst crystal highlights, carved filigree, high fantasy MMORPG inventory and HUD aesthetic. Include a complete modular set: large blank window frame, compact blank dialogue panel, ornate blank plaque panel, primary command button, secondary command button, raised tab, toolbar strip, health bar, mana bar, experience bar, hero portrait frame, blank circular minimap frame without any compass marks, ornate icon button with blank center, hex spell slot, inventory slot, gem socket, slim scrollbar, and standalone corner ornament. Each component must have a unique silhouette and unique ornamentation; no duplicate components, no overlapping components, no text of any kind.",
-  "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
-  "elements": [
-    "window",
-    "panel",
-    "button",
-    "icon_button",
-    "toolbar",
-    "tab",
-    "health_bar",
-    "avatar",
-    "hexagon"
-  ],
-  "pieces": [
-    { "id": "large_window_frame", "kind": "rounded_rect", "label": "large blank ornate 9-slice window frame", "x": 12, "y": 10, "w": 192, "h": 104, "radius": 10 },
-    { "id": "dialog_tooltip_panel", "kind": "rounded_rect", "label": "compact blank 9-slice dialogue panel", "x": 218, "y": 10, "w": 116, "h": 58, "radius": 8 },
-    { "id": "plaque_panel", "kind": "rounded_rect", "label": "asymmetric blank plaque 9-slice panel", "x": 218, "y": 78, "w": 116, "h": 46, "radius": 6 },
-    { "id": "portrait_frame", "kind": "circle", "label": "round hero portrait frame with empty center", "x": 382, "y": 62, "r": 44 },
-    { "id": "blank_minimap_frame", "kind": "circle", "label": "round blank minimap frame with empty center and no compass markings", "x": 468, "y": 62, "r": 34 },
-    { "id": "primary_button", "kind": "rounded_rect", "label": "wide blank primary 9-slice command button", "x": 12, "y": 136, "w": 112, "h": 30, "radius": 7 },
-    { "id": "secondary_button", "kind": "rounded_rect", "label": "narrow blank secondary 9-slice command button", "x": 136, "y": 136, "w": 92, "h": 30, "radius": 5 },
-    { "id": "tab_component", "kind": "rounded_rect", "label": "single raised blank tab component", "x": 240, "y": 136, "w": 70, "h": 28, "radius": 7 },
-    { "id": "toolbar_strip", "kind": "rounded_rect", "label": "ornate modular blank toolbar strip", "x": 322, "y": 136, "w": 174, "h": 28, "radius": 6 },
-    { "id": "health_bar", "kind": "rounded_rect", "label": "crimson health bar frame and fill, no marks", "x": 12, "y": 178, "w": 146, "h": 20, "radius": 4 },
-    { "id": "mana_bar", "kind": "rounded_rect", "label": "sapphire mana bar frame and fill, no marks", "x": 170, "y": 178, "w": 146, "h": 20, "radius": 4 },
-    { "id": "experience_bar", "kind": "rounded_rect", "label": "thin emerald experience bar frame, no marks", "x": 328, "y": 178, "w": 168, "h": 16, "radius": 3 },
-    { "id": "inventory_slot", "kind": "rounded_rect", "label": "single square inventory slot with unique corner metalwork", "x": 12, "y": 216, "w": 44, "h": 44, "radius": 5 },
-    { "id": "gem_socket", "kind": "circle", "label": "round gem socket component with no glyphs", "x": 88, "y": 238, "r": 22 },
-    { "id": "ornate_icon_button", "kind": "circle", "label": "round ornate icon button with blank center and no symbol", "x": 148, "y": 238, "r": 22 },
-    { "id": "hex_spell_slot", "kind": "polygon", "label": "hexagonal spell slot frame with blank center", "x": 210, "y": 238, "r": 25, "sides": 6, "phase": 0.5236 },
-    { "id": "slim_scrollbar", "kind": "rounded_rect", "label": "slim vertical scrollbar with fantasy cap ends and no marks", "x": 266, "y": 208, "w": 22, "h": 62, "radius": 6 },
-    { "id": "corner_ornament", "kind": "polygon", "label": "standalone triangular corner ornament with abstract filigree only", "x": 332, "y": 238, "r": 28, "sides": 3, "phase": 0.7854 }
-  ],
-  "width": 688,
-  "height": 384,
-  "no_background": true,
-  "seed": 902317
+  "_comment_prompt": "/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.",
+  "_comment": "Showcase winner: strict textless, 9-slice-friendly modular pieces.",
+  "MCP create_ui_asset": {
+    "name": "high_fantasy_mmorpg_modular_gui_sheet_textless_retry",
+    "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. STRICTLY TEXTLESS: no letters, no numbers, no readable runes, no glyphs, no compass letters, no N E S W marks, no labels, no symbols that look like writing anywhere. All components are separate, non-overlapping, fully unique, with clear transparent gutters between them. Every rectangular component must be 9-slice compatible: continuous border, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside the component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, sapphire blue, crimson red, amethyst crystal highlights, carved filigree, high fantasy MMORPG inventory and HUD aesthetic. Include a complete modular set: large blank window frame, compact blank dialogue panel, ornate blank plaque panel, primary command button, secondary command button, raised tab, toolbar strip, health bar, mana bar, experience bar, hero portrait frame, blank circular minimap frame without any compass marks, ornate icon button with blank center, hex spell slot, inventory slot, gem socket, slim scrollbar, and standalone corner ornament. Each component must have a unique silhouette and unique ornamentation; no duplicate components, no overlapping components, no text of any kind.",
+    "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
+    "elements": [
+      "window",
+      "panel",
+      "button",
+      "icon_button",
+      "toolbar",
+      "tab",
+      "health_bar",
+      "avatar",
+      "hexagon"
+    ],
+    "pieces": [
+      {
+        "id": "large_window_frame",
+        "kind": "rounded_rect",
+        "label": "large blank ornate 9-slice window frame",
+        "x": 12,
+        "y": 10,
+        "w": 192,
+        "h": 104,
+        "radius": 10
+      },
+      {
+        "id": "dialog_tooltip_panel",
+        "kind": "rounded_rect",
+        "label": "compact blank 9-slice dialogue panel",
+        "x": 218,
+        "y": 10,
+        "w": 116,
+        "h": 58,
+        "radius": 8
+      },
+      {
+        "id": "plaque_panel",
+        "kind": "rounded_rect",
+        "label": "asymmetric blank plaque 9-slice panel",
+        "x": 218,
+        "y": 78,
+        "w": 116,
+        "h": 46,
+        "radius": 6
+      },
+      {
+        "id": "portrait_frame",
+        "kind": "circle",
+        "label": "round hero portrait frame with empty center",
+        "x": 382,
+        "y": 62,
+        "r": 44
+      },
+      {
+        "id": "blank_minimap_frame",
+        "kind": "circle",
+        "label": "round blank minimap frame with empty center and no compass markings",
+        "x": 468,
+        "y": 62,
+        "r": 34
+      },
+      {
+        "id": "primary_button",
+        "kind": "rounded_rect",
+        "label": "wide blank primary 9-slice command button",
+        "x": 12,
+        "y": 136,
+        "w": 112,
+        "h": 30,
+        "radius": 7
+      },
+      {
+        "id": "secondary_button",
+        "kind": "rounded_rect",
+        "label": "narrow blank secondary 9-slice command button",
+        "x": 136,
+        "y": 136,
+        "w": 92,
+        "h": 30,
+        "radius": 5
+      },
+      {
+        "id": "tab_component",
+        "kind": "rounded_rect",
+        "label": "single raised blank tab component",
+        "x": 240,
+        "y": 136,
+        "w": 70,
+        "h": 28,
+        "radius": 7
+      },
+      {
+        "id": "toolbar_strip",
+        "kind": "rounded_rect",
+        "label": "ornate modular blank toolbar strip",
+        "x": 322,
+        "y": 136,
+        "w": 174,
+        "h": 28,
+        "radius": 6
+      },
+      {
+        "id": "health_bar",
+        "kind": "rounded_rect",
+        "label": "crimson health bar frame and fill, no marks",
+        "x": 12,
+        "y": 178,
+        "w": 146,
+        "h": 20,
+        "radius": 4
+      },
+      {
+        "id": "mana_bar",
+        "kind": "rounded_rect",
+        "label": "sapphire mana bar frame and fill, no marks",
+        "x": 170,
+        "y": 178,
+        "w": 146,
+        "h": 20,
+        "radius": 4
+      },
+      {
+        "id": "experience_bar",
+        "kind": "rounded_rect",
+        "label": "thin emerald experience bar frame, no marks",
+        "x": 328,
+        "y": 178,
+        "w": 168,
+        "h": 16,
+        "radius": 3
+      },
+      {
+        "id": "inventory_slot",
+        "kind": "rounded_rect",
+        "label": "single square inventory slot with unique corner metalwork",
+        "x": 12,
+        "y": 216,
+        "w": 44,
+        "h": 44,
+        "radius": 5
+      },
+      {
+        "id": "gem_socket",
+        "kind": "circle",
+        "label": "round gem socket component with no glyphs",
+        "x": 88,
+        "y": 238,
+        "r": 22
+      },
+      {
+        "id": "ornate_icon_button",
+        "kind": "circle",
+        "label": "round ornate icon button with blank center and no symbol",
+        "x": 148,
+        "y": 238,
+        "r": 22
+      },
+      {
+        "id": "hex_spell_slot",
+        "kind": "polygon",
+        "label": "hexagonal spell slot frame with blank center",
+        "x": 210,
+        "y": 238,
+        "r": 25,
+        "sides": 6,
+        "phase": 0.5236
+      },
+      {
+        "id": "slim_scrollbar",
+        "kind": "rounded_rect",
+        "label": "slim vertical scrollbar with fantasy cap ends and no marks",
+        "x": 266,
+        "y": 208,
+        "w": 22,
+        "h": 62,
+        "radius": 6
+      },
+      {
+        "id": "corner_ornament",
+        "kind": "polygon",
+        "label": "standalone triangular corner ornament with abstract filigree only",
+        "x": 332,
+        "y": 238,
+        "r": 28,
+        "sides": 3,
+        "phase": 0.7854
+      }
+    ],
+    "width": 688,
+    "height": 384,
+    "no_background": true,
+    "seed": 902317
+  }
 }
 ```
 
@@ -175,48 +333,206 @@ Enhanced prompt sent as `description`:
 Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. No text, no letters, no numbers, no readable runes, no labels. All components are separate, non-overlapping, fully unique, with transparent gutters between them. Make every rectangular component 9-slice compatible: clean continuous borders, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside each component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, subtle crystal highlights, carved filigree, fantasy RPG inventory and HUD aesthetic. Include a complete modular set: large window frame, compact dialogue/tooltip panel, quest plaque, primary button, secondary button, tab, toolbar strip, health bar, mana bar, experience bar, portrait frame, minimap frame, ornate icon button, hex spell slot, inventory slot, gem socket, slim scrollbar, and corner ornament. Each component must be visually distinct with different silhouette/ornamentation; no duplicate components, no overlapping components, no text.
 ```
 
-Request body:
+Blueprint — replayable route and request body ([`modular-mmorpg-gui-compass-688x384.blueprint.json`](gameplay-gui/modular-mmorpg-gui-compass-688x384.blueprint.json)):
 
 ```json
 {
-  "name": "high_fantasy_mmorpg_modular_gui_sheet",
-  "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. No text, no letters, no numbers, no readable runes, no labels. All components are separate, non-overlapping, fully unique, with transparent gutters between them. Make every rectangular component 9-slice compatible: clean continuous borders, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside each component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, subtle crystal highlights, carved filigree, fantasy RPG inventory and HUD aesthetic. Include a complete modular set: large window frame, compact dialogue/tooltip panel, quest plaque, primary button, secondary button, tab, toolbar strip, health bar, mana bar, experience bar, portrait frame, minimap frame, ornate icon button, hex spell slot, inventory slot, gem socket, slim scrollbar, and corner ornament. Each component must be visually distinct with different silhouette/ornamentation; no duplicate components, no overlapping components, no text.",
-  "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
-  "elements": [
-    "window",
-    "panel",
-    "button",
-    "icon_button",
-    "toolbar",
-    "tab",
-    "health_bar",
-    "avatar",
-    "hexagon"
-  ],
-  "pieces": [
-    { "id": "large_window_frame", "kind": "rounded_rect", "label": "large ornate 9-slice window frame", "x": 12, "y": 10, "w": 192, "h": 104, "radius": 10 },
-    { "id": "dialog_tooltip_panel", "kind": "rounded_rect", "label": "compact 9-slice tooltip dialogue panel", "x": 218, "y": 10, "w": 116, "h": 58, "radius": 8 },
-    { "id": "quest_plaque_panel", "kind": "rounded_rect", "label": "asymmetric quest plaque 9-slice panel", "x": 218, "y": 78, "w": 116, "h": 46, "radius": 6 },
-    { "id": "portrait_frame", "kind": "circle", "label": "round hero portrait frame", "x": 382, "y": 62, "r": 44 },
-    { "id": "minimap_frame", "kind": "circle", "label": "distinct compass minimap frame", "x": 468, "y": 62, "r": 34 },
-    { "id": "primary_button", "kind": "rounded_rect", "label": "wide primary 9-slice command button", "x": 12, "y": 136, "w": 112, "h": 30, "radius": 7 },
-    { "id": "secondary_button", "kind": "rounded_rect", "label": "narrow secondary 9-slice command button", "x": 136, "y": 136, "w": 92, "h": 30, "radius": 5 },
-    { "id": "tab_component", "kind": "rounded_rect", "label": "single raised tab component", "x": 240, "y": 136, "w": 70, "h": 28, "radius": 7 },
-    { "id": "toolbar_strip", "kind": "rounded_rect", "label": "ornate modular toolbar strip", "x": 322, "y": 136, "w": 174, "h": 28, "radius": 6 },
-    { "id": "health_bar", "kind": "rounded_rect", "label": "crimson health bar frame and fill", "x": 12, "y": 178, "w": 146, "h": 20, "radius": 4 },
-    { "id": "mana_bar", "kind": "rounded_rect", "label": "sapphire mana bar frame and fill", "x": 170, "y": 178, "w": 146, "h": 20, "radius": 4 },
-    { "id": "experience_bar", "kind": "rounded_rect", "label": "thin emerald experience bar frame", "x": 328, "y": 178, "w": 168, "h": 16, "radius": 3 },
-    { "id": "inventory_slot", "kind": "rounded_rect", "label": "single square inventory slot with unique corner metalwork", "x": 12, "y": 216, "w": 44, "h": 44, "radius": 5 },
-    { "id": "gem_socket", "kind": "circle", "label": "round gem socket component", "x": 88, "y": 238, "r": 22 },
-    { "id": "ornate_icon_button", "kind": "circle", "label": "round ornate icon button with blank center", "x": 148, "y": 238, "r": 22 },
-    { "id": "hex_spell_slot", "kind": "polygon", "label": "hexagonal spell slot frame", "x": 210, "y": 238, "r": 25, "sides": 6, "phase": 0.5236 },
-    { "id": "slim_scrollbar", "kind": "rounded_rect", "label": "slim vertical scrollbar with fantasy cap ends", "x": 266, "y": 208, "w": 22, "h": 62, "radius": 6 },
-    { "id": "corner_ornament", "kind": "polygon", "label": "standalone triangular corner ornament for frames", "x": 332, "y": 238, "r": 28, "sides": 3, "phase": 0.7854 }
-  ],
-  "width": 688,
-  "height": 384,
-  "no_background": true,
-  "seed": 421973
+  "_comment_prompt": "/pixellab-pip create a complete mmorpg gui asset that has fully modular and resizable components. high fantasy, high quality, high detail, 9-slice compatible, no text, no overlapping components, each component must be unique, no duplicate components. ready to use in any game engine.",
+  "_comment": "High-value candidate; not the strict final because the minimap piece picked up tiny letters.",
+  "MCP create_ui_asset": {
+    "name": "high_fantasy_mmorpg_modular_gui_sheet",
+    "description": "Complete high fantasy MMORPG pixel-art GUI sprite sheet on transparent background, premium game-ready quality, high detail, ornate but readable. No text, no letters, no numbers, no readable runes, no labels. All components are separate, non-overlapping, fully unique, with transparent gutters between them. Make every rectangular component 9-slice compatible: clean continuous borders, reinforced corners, flat reusable center fill, consistent edge thickness, crisp pixel edges, no baked shadows crossing outside each component. Style: enchanted dark iron, aged silver, polished gold trim, deep emerald accents, subtle crystal highlights, carved filigree, fantasy RPG inventory and HUD aesthetic. Include a complete modular set: large window frame, compact dialogue/tooltip panel, quest plaque, primary button, secondary button, tab, toolbar strip, health bar, mana bar, experience bar, portrait frame, minimap frame, ornate icon button, hex spell slot, inventory slot, gem socket, slim scrollbar, and corner ornament. Each component must be visually distinct with different silhouette/ornamentation; no duplicate components, no overlapping components, no text.",
+    "color_palette": "dark iron, aged silver, polished gold, deep emerald, sapphire mana blue, crimson health red, amethyst crystal highlights",
+    "elements": [
+      "window",
+      "panel",
+      "button",
+      "icon_button",
+      "toolbar",
+      "tab",
+      "health_bar",
+      "avatar",
+      "hexagon"
+    ],
+    "pieces": [
+      {
+        "id": "large_window_frame",
+        "kind": "rounded_rect",
+        "label": "large ornate 9-slice window frame",
+        "x": 12,
+        "y": 10,
+        "w": 192,
+        "h": 104,
+        "radius": 10
+      },
+      {
+        "id": "dialog_tooltip_panel",
+        "kind": "rounded_rect",
+        "label": "compact 9-slice tooltip dialogue panel",
+        "x": 218,
+        "y": 10,
+        "w": 116,
+        "h": 58,
+        "radius": 8
+      },
+      {
+        "id": "quest_plaque_panel",
+        "kind": "rounded_rect",
+        "label": "asymmetric quest plaque 9-slice panel",
+        "x": 218,
+        "y": 78,
+        "w": 116,
+        "h": 46,
+        "radius": 6
+      },
+      {
+        "id": "portrait_frame",
+        "kind": "circle",
+        "label": "round hero portrait frame",
+        "x": 382,
+        "y": 62,
+        "r": 44
+      },
+      {
+        "id": "minimap_frame",
+        "kind": "circle",
+        "label": "distinct compass minimap frame",
+        "x": 468,
+        "y": 62,
+        "r": 34
+      },
+      {
+        "id": "primary_button",
+        "kind": "rounded_rect",
+        "label": "wide primary 9-slice command button",
+        "x": 12,
+        "y": 136,
+        "w": 112,
+        "h": 30,
+        "radius": 7
+      },
+      {
+        "id": "secondary_button",
+        "kind": "rounded_rect",
+        "label": "narrow secondary 9-slice command button",
+        "x": 136,
+        "y": 136,
+        "w": 92,
+        "h": 30,
+        "radius": 5
+      },
+      {
+        "id": "tab_component",
+        "kind": "rounded_rect",
+        "label": "single raised tab component",
+        "x": 240,
+        "y": 136,
+        "w": 70,
+        "h": 28,
+        "radius": 7
+      },
+      {
+        "id": "toolbar_strip",
+        "kind": "rounded_rect",
+        "label": "ornate modular toolbar strip",
+        "x": 322,
+        "y": 136,
+        "w": 174,
+        "h": 28,
+        "radius": 6
+      },
+      {
+        "id": "health_bar",
+        "kind": "rounded_rect",
+        "label": "crimson health bar frame and fill",
+        "x": 12,
+        "y": 178,
+        "w": 146,
+        "h": 20,
+        "radius": 4
+      },
+      {
+        "id": "mana_bar",
+        "kind": "rounded_rect",
+        "label": "sapphire mana bar frame and fill",
+        "x": 170,
+        "y": 178,
+        "w": 146,
+        "h": 20,
+        "radius": 4
+      },
+      {
+        "id": "experience_bar",
+        "kind": "rounded_rect",
+        "label": "thin emerald experience bar frame",
+        "x": 328,
+        "y": 178,
+        "w": 168,
+        "h": 16,
+        "radius": 3
+      },
+      {
+        "id": "inventory_slot",
+        "kind": "rounded_rect",
+        "label": "single square inventory slot with unique corner metalwork",
+        "x": 12,
+        "y": 216,
+        "w": 44,
+        "h": 44,
+        "radius": 5
+      },
+      {
+        "id": "gem_socket",
+        "kind": "circle",
+        "label": "round gem socket component",
+        "x": 88,
+        "y": 238,
+        "r": 22
+      },
+      {
+        "id": "ornate_icon_button",
+        "kind": "circle",
+        "label": "round ornate icon button with blank center",
+        "x": 148,
+        "y": 238,
+        "r": 22
+      },
+      {
+        "id": "hex_spell_slot",
+        "kind": "polygon",
+        "label": "hexagonal spell slot frame",
+        "x": 210,
+        "y": 238,
+        "r": 25,
+        "sides": 6,
+        "phase": 0.5236
+      },
+      {
+        "id": "slim_scrollbar",
+        "kind": "rounded_rect",
+        "label": "slim vertical scrollbar with fantasy cap ends",
+        "x": 266,
+        "y": 208,
+        "w": 22,
+        "h": 62,
+        "radius": 6
+      },
+      {
+        "id": "corner_ornament",
+        "kind": "polygon",
+        "label": "standalone triangular corner ornament for frames",
+        "x": 332,
+        "y": 238,
+        "r": 28,
+        "sides": 3,
+        "phase": 0.7854
+      }
+    ],
+    "width": 688,
+    "height": 384,
+    "no_background": true,
+    "seed": 421973
+  }
 }
 ```
 
@@ -244,18 +560,22 @@ Enhanced prompt sent as `description`:
 Complete original fantasy MMORPG pixel-art GUI kit, inspired by classic high-fantasy raid interfaces but not copying any existing game: ornate carved stone and dark iron frames with aged brass trim, glowing blue mana accents, red health accents, emerald quest accents, leather straps, small runic details, readable modular components arranged on one transparent sprite sheet. Include: player portrait frame, target portrait frame, health bar, mana bar, rage/energy resource bar, experience bar, action bar with twelve square spell slots, secondary action bar row, bag/inventory slot grid, minimap circular frame, quest tracker panel, parchment dialogue window, chat panel, tooltip frame, party member frames, raid-group compact frames, buff/debuff icon frames, menu buttons, checkboxes, sliders, tab headers, close buttons, gold/silver/copper currency icons, empty spell icon placeholders, decorative corners and separators. Clean game-ready UI assets, crisp 2D pixel art, consistent MMO HUD style, high contrast edges, no logos, no copyrighted symbols, no text labels, transparent background.
 ```
 
-Request body:
+Blueprint — replayable route and request body ([`gameplay-gui-fantasy-mmo-688x384.blueprint.json`](gameplay-gui/gameplay-gui-fantasy-mmo-688x384.blueprint.json)):
 
 ```json
 {
-  "description": "Complete original fantasy MMORPG pixel-art GUI kit, inspired by classic high-fantasy raid interfaces but not copying any existing game: ornate carved stone and dark iron frames with aged brass trim, glowing blue mana accents, red health accents, emerald quest accents, leather straps, small runic details, readable modular components arranged on one transparent sprite sheet. Include: player portrait frame, target portrait frame, health bar, mana bar, rage/energy resource bar, experience bar, action bar with twelve square spell slots, secondary action bar row, bag/inventory slot grid, minimap circular frame, quest tracker panel, parchment dialogue window, chat panel, tooltip frame, party member frames, raid-group compact frames, buff/debuff icon frames, menu buttons, checkboxes, sliders, tab headers, close buttons, gold/silver/copper currency icons, empty spell icon placeholders, decorative corners and separators. Clean game-ready UI assets, crisp 2D pixel art, consistent MMO HUD style, high contrast edges, no logos, no copyrighted symbols, no text labels, transparent background.",
-  "image_size": {
-    "width": 688,
-    "height": 384
-  },
-  "no_background": true,
-  "color_palette": "dark iron, weathered stone, aged brass, leather brown, parchment tan, crimson health red, arcane blue, emerald green highlights",
-  "seed": 250625
+  "_comment_prompt": "pip create a complete world of warcraft gui",
+  "_comment": "Named game interpreted as a broad original high-fantasy MMORPG HUD via generate-ui-v2 (no copy of any existing UI).",
+  "POST /v2/generate-ui-v2": {
+    "description": "Complete original fantasy MMORPG pixel-art GUI kit, inspired by classic high-fantasy raid interfaces but not copying any existing game: ornate carved stone and dark iron frames with aged brass trim, glowing blue mana accents, red health accents, emerald quest accents, leather straps, small runic details, readable modular components arranged on one transparent sprite sheet. Include: player portrait frame, target portrait frame, health bar, mana bar, rage/energy resource bar, experience bar, action bar with twelve square spell slots, secondary action bar row, bag/inventory slot grid, minimap circular frame, quest tracker panel, parchment dialogue window, chat panel, tooltip frame, party member frames, raid-group compact frames, buff/debuff icon frames, menu buttons, checkboxes, sliders, tab headers, close buttons, gold/silver/copper currency icons, empty spell icon placeholders, decorative corners and separators. Clean game-ready UI assets, crisp 2D pixel art, consistent MMO HUD style, high contrast edges, no logos, no copyrighted symbols, no text labels, transparent background.",
+    "image_size": {
+      "width": 688,
+      "height": 384
+    },
+    "no_background": true,
+    "color_palette": "dark iron, weathered stone, aged brass, leather brown, parchment tan, crimson health red, arcane blue, emerald green highlights",
+    "seed": 250625
+  }
 }
 ```
 
@@ -288,17 +608,21 @@ Enhanced prompt sent as `description`:
 Pixel art game UI panel frame, 344x192 canvas, deep charcoal slate central panel, beveled cool iron border and corner brackets, sharp heath-fire orange glowing accents on rivets, notches, and thin trim lines, readable RPG HUD/menu frame, crisp hard pixel edges, high contrast, transparent outside the frame, no text, no characters, no background scene.
 ```
 
-Request body:
+Blueprint — replayable route and request body ([`gameplay-gui-mood-only-344x192.blueprint.json`](gameplay-gui/gameplay-gui-mood-only-344x192.blueprint.json)):
 
 ```json
 {
-  "description": "Pixel art game UI panel frame, 344x192 canvas, deep charcoal slate central panel, beveled cool iron border and corner brackets, sharp heath-fire orange glowing accents on rivets, notches, and thin trim lines, readable RPG HUD/menu frame, crisp hard pixel edges, high contrast, transparent outside the frame, no text, no characters, no background scene.",
-  "image_size": {
-    "width": 344,
-    "height": 192
-  },
-  "no_background": true,
-  "color_palette": "deep charcoal slate, cool iron gray, dark gunmetal, small sharp heath-fire orange glow accents"
+  "_comment_prompt": "pip, create deep charcoal slate, framed by cool iron and ignited by sharp hits of heath-fire orange game UI at 344x192 resolution",
+  "_comment": "Bad example: mood-only prompt with no named components produced a small panel/frame/bar rather than a full kit.",
+  "POST /v2/generate-ui-v2": {
+    "description": "Pixel art game UI panel frame, 344x192 canvas, deep charcoal slate central panel, beveled cool iron border and corner brackets, sharp heath-fire orange glowing accents on rivets, notches, and thin trim lines, readable RPG HUD/menu frame, crisp hard pixel edges, high contrast, transparent outside the frame, no text, no characters, no background scene.",
+    "image_size": {
+      "width": 344,
+      "height": 192
+    },
+    "no_background": true,
+    "color_palette": "deep charcoal slate, cool iron gray, dark gunmetal, small sharp heath-fire orange glow accents"
+  }
 }
 ```
 
@@ -334,17 +658,20 @@ Enhanced prompt sent as `description`:
 Complete pixel art gameplay GUI kit sheet on a 688x384 canvas, deep charcoal slate and cool iron fantasy interface with sharp heath-fire orange accent lights. Include a square avatar portrait frame, horizontal health bar, mana or stamina bar, large ornate window/dialogue panel, inventory slot frame, minimap frame, quest/objective panel, several reusable buttons in different sizes, icon button frames, tabs, dividers, corner brackets, scroll arrows, and small useful HUD elements. Cohesive RPG action game UI, crisp hard pixel edges, beveled iron trim, dark slate surfaces, bright orange ember highlights, organized as separate usable elements on transparent background, no readable text, no characters, no scene background.
 ```
 
-Request body:
+Blueprint — replayable route and request body ([`gameplay-gui-component-specific-688x384.blueprint.json`](gameplay-gui/gameplay-gui-component-specific-688x384.blueprint.json)):
 
 ```json
 {
-  "description": "Complete pixel art gameplay GUI kit sheet on a 688x384 canvas, deep charcoal slate and cool iron fantasy interface with sharp heath-fire orange accent lights. Include a square avatar portrait frame, horizontal health bar, mana or stamina bar, large ornate window/dialogue panel, inventory slot frame, minimap frame, quest/objective panel, several reusable buttons in different sizes, icon button frames, tabs, dividers, corner brackets, scroll arrows, and small useful HUD elements. Cohesive RPG action game UI, crisp hard pixel edges, beveled iron trim, dark slate surfaces, bright orange ember highlights, organized as separate usable elements on transparent background, no readable text, no characters, no scene background.",
-  "image_size": {
-    "width": 688,
-    "height": 384
-  },
-  "no_background": true,
-  "color_palette": "deep charcoal slate, cool iron gray, dark gunmetal, blackened steel, sharp heath-fire orange ember accents"
+  "_comment_prompt": "create a new generation for full gameplay GUI:\n- avatar\n- health bar\n- window\n- various buttons\n- other useful elements",
+  "POST /v2/generate-ui-v2": {
+    "description": "Complete pixel art gameplay GUI kit sheet on a 688x384 canvas, deep charcoal slate and cool iron fantasy interface with sharp heath-fire orange accent lights. Include a square avatar portrait frame, horizontal health bar, mana or stamina bar, large ornate window/dialogue panel, inventory slot frame, minimap frame, quest/objective panel, several reusable buttons in different sizes, icon button frames, tabs, dividers, corner brackets, scroll arrows, and small useful HUD elements. Cohesive RPG action game UI, crisp hard pixel edges, beveled iron trim, dark slate surfaces, bright orange ember highlights, organized as separate usable elements on transparent background, no readable text, no characters, no scene background.",
+    "image_size": {
+      "width": 688,
+      "height": 384
+    },
+    "no_background": true,
+    "color_palette": "deep charcoal slate, cool iron gray, dark gunmetal, blackened steel, sharp heath-fire orange ember accents"
+  }
 }
 ```
 

@@ -1,0 +1,29 @@
+[
+  {
+    "_comment_prompt": "pip create a 64px character based on .pip-mascot.md",
+    "_comment": "Quadruped dog template; PixelLab returns 4 rotations on a 92x92 canvas for a size=64 character.",
+    "MCP create_character": {
+      "description": "Adorable tiny corgi-inspired scout puppy mascot named Pip for a PixelLab workflow assistant. Rounded compact body, short little legs, oversized floppy ears, warm honey-tan fur with cream muzzle, chest, belly, and paws, big simple curious dark eyes, cheerful helpful expression. Bright cyan-blue collar with a tiny connected-node route tag or API graph tag. Clean game-ready pixel art, chunky readable shapes, crisp single-color outline, limited warm palette with cyan accent, transparent background. Friendly alert sitting pose with one paw raised where possible; puppy first, subtle tool-routing assistant second. No text, no logos, no gradients, no blur, no complex props.",
+      "body_type": "quadruped",
+      "template": "dog",
+      "mode": "standard",
+      "n_directions": 4,
+      "size": 64,
+      "view": "side",
+      "detail": "medium detail",
+      "shading": "flat shading",
+      "outline": "single color black outline",
+      "text_guidance_scale": 8.5
+    }
+  },
+  {
+    "_comment": "Animates the character created in step 1: pass its character_id (runtime value from create_character, omitted here). Follow-up request: 'it should be happy and also loopable, ... must be a repeated smile or tongue out'.",
+    "MCP animate_character": {
+      "animation_name": "happy-pant-idle",
+      "action_description": "loopable happy idle: Pip stays sitting facing forward with a constant cheerful tongue-out smile, gently panting in place, soft subtle body bounce, floppy ears bobbing slightly, friendly happy expression held throughout the whole seamless loop",
+      "mode": "v3",
+      "directions": "south",
+      "frame_count": 8
+    }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "_comment_prompt": "create a new generation for full gameplay GUI:\n- avatar\n- health bar\n- window\n- various buttons\n- other useful elements",
+  "POST /v2/generate-ui-v2": {
+    "description": "Complete pixel art gameplay GUI kit sheet on a 688x384 canvas, deep charcoal slate and cool iron fantasy interface with sharp heath-fire orange accent lights. Include a square avatar portrait frame, horizontal health bar, mana or stamina bar, large ornate window/dialogue panel, inventory slot frame, minimap frame, quest/objective panel, several reusable buttons in different sizes, icon button frames, tabs, dividers, corner brackets, scroll arrows, and small useful HUD elements. Cohesive RPG action game UI, crisp hard pixel edges, beveled iron trim, dark slate surfaces, bright orange ember highlights, organized as separate usable elements on transparent background, no readable text, no characters, no scene background.",
+    "image_size": {
+      "width": 688,
+      "height": 384
+    },
+    "no_background": true,
+    "color_palette": "deep charcoal slate, cool iron gray, dark gunmetal, blackened steel, sharp heath-fire orange ember accents"
+  }
+}

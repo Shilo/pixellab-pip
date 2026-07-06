@@ -58,24 +58,28 @@ Generation details:
 | Transition size | `0.5` |
 | Usage reported | Not exposed by MCP for the selected source generation |
 
-MCP generation parameters:
+Blueprint — replayable route and request body ([`one-bit-black-green-topdown-tileset.blueprint.json`](tilesets/one-bit-black-green-topdown-tileset.blueprint.json)):
 
 ```json
 {
-  "lower_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
-  "upper_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
-  "transition_description": "solid black transition bands with crisp horizontal pure white stripes, high contrast black and white only, no gray tones",
-  "transition_size": 0.5,
-  "detail": "low detail",
-  "shading": "flat shading",
-  "outline": "lineless",
-  "mode": "standard",
-  "tile_size": {
-    "width": 16,
-    "height": 16
-  },
-  "view": "high top-down",
-  "text_guidance_scale": 12
+  "_comment_prompt": "/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.",
+  "_comment": "PixelLab generated the tileset structure. The strict black/white (#000000/#FFFFFF) and gameplay-green (#0F380F/#9BBC0F) copies were produced LOCALLY by Aseprite palette-clamping, not by PixelLab, so they are not blueprint steps.",
+  "MCP create_topdown_tileset": {
+    "lower_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
+    "upper_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
+    "transition_description": "solid black transition bands with crisp horizontal pure white stripes, high contrast black and white only, no gray tones",
+    "transition_size": 0.5,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "lineless",
+    "mode": "standard",
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    },
+    "view": "high top-down",
+    "text_guidance_scale": 12
+  }
 }
 ```
 
@@ -124,19 +128,23 @@ Generation details:
 | Transition size | `0.25` |
 | Usage observed | Balance moved from `440` to `437` generations remaining |
 
-MCP generation parameters:
+Blueprint — replayable route and request body ([`one-bit-black-gameboy-green-sidescroller-tileset.blueprint.json`](tilesets/one-bit-black-gameboy-green-sidescroller-tileset.blueprint.json)):
 
 ```json
 {
-  "lower_description": "strict 1-bit monochrome platform tile center: solid black terrain body, black fill in the middle, crisp white single-pixel outer outline, no gray, no anti-aliasing, simple high-contrast bitmap shapes",
-  "transition_description": "sparse white pixels only along the top surface, minimal broken white dust or snow-like speckles, mostly black underneath, no gray, no anti-aliasing",
-  "transition_size": 0.25,
-  "detail": "low detail",
-  "shading": "flat shading",
-  "outline": "single color outline",
-  "tile_size": {
-    "width": 16,
-    "height": 16
+  "_comment_prompt": "/pixellab-pip create 1-bit sidescroller tileset with black center with white outline, and sparse white top. after done, create a copy with gameboy 1 bit green colors.",
+  "_comment": "PixelLab generated the tileset structure. The strict black/white and Game Boy green (#0F380F/#9BBC0F) copies were produced LOCALLY by Aseprite palette-clamping, not by PixelLab.",
+  "MCP create_sidescroller_tileset": {
+    "lower_description": "strict 1-bit monochrome platform tile center: solid black terrain body, black fill in the middle, crisp white single-pixel outer outline, no gray, no anti-aliasing, simple high-contrast bitmap shapes",
+    "transition_description": "sparse white pixels only along the top surface, minimal broken white dust or snow-like speckles, mostly black underneath, no gray, no anti-aliasing",
+    "transition_size": 0.25,
+    "detail": "low detail",
+    "shading": "flat shading",
+    "outline": "single color outline",
+    "tile_size": {
+      "width": 16,
+      "height": 16
+    }
   }
 }
 ```
