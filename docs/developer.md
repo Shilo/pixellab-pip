@@ -10,7 +10,7 @@ Last reviewed: 2026-07-05.
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
-- [Skill Token Benchmark](#skill-token-benchmark)
+- [Skill Benchmark: Routing and Cost](#skill-benchmark-routing-and-cost)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
 
@@ -126,7 +126,7 @@ For prompt optimization, agents should inspect `sim-report.json` and the `compon
 
 The execution-oriented runbook for agents lives in [PixelLab MCP Tileset Simulator](../dev-tools/pixellab_mcp_tileset_sim.md).
 
-## Skill Token Benchmark
+## Skill Benchmark: Routing and Cost
 
 Use [dev-tools/skill_benchmark.py](../dev-tools/skill_benchmark.py) to measure the skill's agent-side token/context cost and routing efficiency across skill versions and agent CLIs (`claude`, `codex`, `deepseek-v4-pro` via OpenCode). It compares git variants of `skills/pixellab-pip/` — by default the `pre-kiss-yagni-refactor` tag (commit `6fdae41`) against the working tree — by injecting each variant's SKILL.md into an isolated session, letting the agent progressively read `references/*.md` with a read-only tool, and capturing each CLI's native usage JSON (input/output/cache tokens, cost where exposed, turns, duration) plus deterministic routing-correctness regex checks. It measures the agent session only, never PixelLab credits.
 
