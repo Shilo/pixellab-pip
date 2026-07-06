@@ -61,7 +61,7 @@ Generation details:
 | Shading | Omitted |
 | Outline | `single color outline` |
 | Transition size | `0.25` |
-| Seed | Requested during testing, but MCP rejected `seed`; omitted |
+| Seed | MCP rejected `seed` for this top-down matrix run; omitted |
 
 Blueprint - replayable route and request body ([`topdown-dirt-grass-low-single-color-outline.blueprint.json`](tilesets/topdown-dirt-grass-low-single-color-outline.blueprint.json)):
 
@@ -139,7 +139,6 @@ Blueprint - replayable route and request body ([`sidescroller-dirt-grass-medium-
 Findings:
 
 - The output reads as dirt body plus grass top, which matches the simple sidescroller terrain intent.
-- This example was kept over the `monochromatic dirt` / `monochromatic grass` candidate because that candidate was not visibly monochromatic.
 - The result is a normal raw PixelLab tileset example, not a strict palette or exact outline example.
 
 ## Top-Down 1-Bit Tileset
@@ -277,7 +276,6 @@ Findings:
 
 - The final documented image matches the black platform, jagged icy top, black-and-white derivative, and Game Boy green derivative requested by the workflow.
 - Strict palette and outline quality come from the documented Aseprite/local processing step, not from raw PixelLab output alone.
-- This example was kept over the older 16px black/green sidescroller because its visual result better matches its specific prompt.
 
 ## Findings
 
