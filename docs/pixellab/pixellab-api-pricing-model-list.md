@@ -23,9 +23,11 @@ Primary sources:
 
 The account view shows **Concurrent jobs** (labeled with your subscription **tier**) and **priority slots** — concurrent jobs that skip added queue time.
 
-Confirmed mechanism (PixelLab account UI, 2026): priority slots are **earned by sustained parallel usage** — your **average concurrency over the trailing 30 minutes becomes your priority-slot count**, so a steady parallel load raises the ceiling and idle time lets it decay.
+Confirmed mechanism (PixelLab account UI, 2026): priority slots are **earned by sustained parallel usage** on a rolling 30-minute utilization window. The account UI states the rule as: **sustain ≥ 80% utilization for 30 min → +1 slot; drop below 60% for 30 min → -1 slot.** PixelLab's owner confirmed this is a recent addition where "stable usage will increase your concurrency."
 
 Observed datapoint: a **Tier 2** account shows a priority-slot **limit of 10**. Unconfirmed: whether that limit differs for Free, Tier 1, or Tier 3. Do not quote a per-tier number you have not verified for that tier; if an exact limit matters, check the live account view or ask PixelLab support.
+
+No API query route: there is **no public REST v2 endpoint that reports your slot count, concurrency, utilization, or a list of active jobs** (verified against the live OpenAPI). Only per-job status (`GET /background-jobs/{job_id}`) and `GET /balance` (generations/credits, not slots) are exposed. The slot/utilization view is UI-only for now: the `pixellab-api` page populates it from internal first-party endpoints (`api-limit-status`, `get-account-data`, `get-subscription-status`) that are not versioned under `/v2/`, use website-session auth, and must not be called programmatically — see SKILL.md "Do Not Use".
 
 Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md](../../skills/pixellab-pip/references/job-lifecycle.md).
 
