@@ -232,19 +232,27 @@ Generation details:
 | Usage reported | `20` generations |
 | Reported cost | `$0.095` |
 
-Source summary:
-
-```text
-One complete 8 by 8 fantasy RPG consumables inventory sheet targeting 64 transparent 32px icons. The retained manifest names healing and mana potions, antidotes, revive and resistance vials, scrolls, repair supplies, bombs, ammunition, food, drink, light sources, magic dust, crystal shards, gem powder, monster fang, slime vial, dragon scale, and resurrection feather.
-```
-
 Findings:
 
 - Strong proof that exact named-item coverage can work when the category is narrow.
 - The manifest confirms all 64 cropped cells have visible pixels and unique RGBA hashes.
 - Some thin scroll and vial shapes touch the cell edge, but the sheet remains readable at 32px.
 
-No replayable blueprint: only a prose source summary was retained for this sheet, not the exact request body, so it cannot be reproduced field-for-field.
+Blueprint — replayable route and request body ([`fantasy-rpg-consumables-8x8-32px.blueprint.json`](item-icons/fantasy-rpg-consumables-8x8-32px.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "create complete 32px consumable inventory items for fantasy rpg. each item must be unique but consistent style. it must cover all the common items for an rpg game. no background, no border.",
+  "POST /v2/generate-image-v2": {
+    "description": "Complete 8 by 8 sheet of 64 unique fantasy RPG consumable inventory item icons, 8 columns and 8 rows, each cell a readable 32x32 item, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with centered single-object silhouettes, crisp hard edges, low visual noise, limited palette, consistent high-fantasy inventory style. Cover common RPG consumable categories: healing potions, mana potions, stamina tonics, antidotes, cure-disease vials, revive phials, holy water, poison vials, buff elixirs, elemental resistance draughts, invisibility potion, speed potion, strength potion, night-vision potion, scrolls of healing, teleport, town portal, identify, remove curse, fireball, frost, lightning, protection, repair kit, whetstone, weapon oil, armor polish, lockpick bundle, trap kit, smoke bomb, fire bomb, frost bomb, thunder bomb, throwing knives, arrow bundle, crossbow bolts, ration pack, bread, cheese, roasted meat, fish, apple, mushroom, herb bundle, root, berry pouch, tea leaves, spice pouch, honey jar, water flask, wine bottle, ale mug, campfire tinder, torch bundle, candle, incense, magic dust, crystal shard, gem powder, monster fang, slime vial, dragon scale, fairy bottle, lucky charm, curse charm, and resurrection feather. No text, letters, numbers, labels, captions, handwriting, runes, glyphs, UI slots, buttons, borders, frames, rounded corners, watermark, terrain tiles, map tiles, skill icons, decorative grid lines, background props, or checkerboard.",
+    "image_size": {
+      "width": 256,
+      "height": 256
+    },
+    "no_background": true
+  }
+}
+```
 
 ## Material Sheet
 
