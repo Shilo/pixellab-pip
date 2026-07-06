@@ -1,20 +1,19 @@
 {
-  "_comment": "PixelLab generated the tileset structure. The strict black/white (#000000/#FFFFFF) and gameplay-green (#0F380F/#9BBC0F) copies were produced LOCALLY by Aseprite palette-clamping, not by PixelLab, so they are not blueprint steps.",
-  "_comment_prompt": "/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.",
+  "_comment": "PixelLab generated the tileset structure. The strict black/white (#000000/#FFFFFF) and gameplay-green (#0F380F/#9BBC0F) copies were produced LOCALLY by palette-clamping, not by PixelLab, so they are not blueprint steps.",
+  "_comment_prompt": "/pixellab-pip create a top-down 1-bit black wall/floor tileset: solid black floor, solid black raised wall mass, sparse thin white wall-face texture lines, no gray. After done, create black-and-white and gameplay-green palette-clamped copies.",
   "MCP create_topdown_tileset": {
-    "lower_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
-    "upper_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
-    "transition_description": "solid black transition bands with crisp horizontal pure white stripes, high contrast black and white only, no gray tones",
+    "lower_description": "solid black stone floor, one-bit black silhouette terrain, no gray, no highlights, clean tileable flat floor",
+    "upper_description": "solid black raised wall block, one-bit black silhouette terrain, no gray, no highlights, clean tileable wall mass",
+    "transition_description": "black wall front face with sparse thin horizontal white texture lines, one-bit black and white only, crisp horizontal strokes, no gray",
     "transition_size": 0.5,
     "detail": "low detail",
     "shading": "flat shading",
     "outline": "lineless",
-    "mode": "standard",
     "tile_size": {
       "width": 16,
       "height": 16
     },
-    "view": "high top-down",
-    "text_guidance_scale": 12
+    "view": "low top-down",
+    "text_guidance_scale": 8
   }
 }
