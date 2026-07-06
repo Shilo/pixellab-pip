@@ -68,13 +68,13 @@ siblings of the route so the request body stays untouched (tolerated anywhere, b
 placement is the norm). They are metadata, not fields: drop every `_comment*` key before
 sending a request, and never treat one as an input.
 
-- `_comment_prompt` — the originating user request, as a `/pixellab …` command.
-- `_comment` — what this blueprint (or bundle step) is for.
+- `_comment_prompt` — the originating user request, as a `/pixellab …` command. Write it
+  whenever a user prompt drove the generation (in a bundle, on the first step).
+- `_comment` (or any `_comment*` key) — add when there is useful, non-obvious information
+  worth sharing with the blueprint: an issue, discovery, finding, or critical detail from
+  creation, or what the blueprint is for. Never restate the obvious.
 
-Always write `_comment_prompt` (in a bundle, on the first step). Add other `_comment*` keys only for useful, non-obvious
-context — an issue or discovery during creation, or the blueprint's purpose; never restate
-the obvious. In a bundle, put step notes in each step's object and any overall note on the
-first step.
+In a bundle, put step notes in each step's object and any overall note on the first step.
 
 ```json
 {

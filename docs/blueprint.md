@@ -58,10 +58,10 @@ people reading the file — the assistant ignores them when it runs the blueprin
 }
 ```
 
-Every blueprint records the request that created it in `_comment_prompt` (in a bundle, on
-the first step). Extra `_comment`
-notes are added only when there's something non-obvious worth sharing — a gotcha found
-during creation, or what the blueprint is for.
+Whenever your prompt drove the generation, it's recorded in `_comment_prompt` (in a bundle,
+on the first step). Extra `_comment` notes are added only when there's something non-obvious
+worth sharing — an issue, discovery, or important detail found during creation, or what the
+blueprint is for.
 
 ## Creating a blueprint
 
