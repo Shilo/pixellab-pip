@@ -221,7 +221,7 @@ jobs:
         id: virustotal
         if: env.VIRUSTOTAL_API_KEY != ''
         continue-on-error: true # runs before the version-bump commit so the badge link points at this release's report; failure must not red the job
-        uses: crazy-max/ghaction-virustotal@v5
+        uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
         with:
           vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
           files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
