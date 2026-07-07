@@ -157,7 +157,9 @@ Treat PixelLab model/provider language as product labels unless official docs di
 
 ## Text Preparation
 
-Prompt enhancement is opt-out. For natural-language parameters such as `description`, `style_description`, `negative_description`, `*_description`, `action`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the user's request and visible inputs before calling a tool.
+Exact labeled field text wins over prompt prep. If the user writes `prompt "..."`, `description "..."`, `action "..."`, `use exactly "..."`, or another explicit quoted field value, send that value unchanged and do not enhance it. If it is invalid, over limit, or unsafe, stop and ask for an approved replacement or trim before spending credits.
+
+Prompt enhancement is opt-out. Otherwise, for natural-language parameters such as `description`, `style_description`, `negative_description`, `*_description`, `action`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the request and visible inputs before calling a tool.
 
 Prompts describe the visual content or, for action fields, the depicted motion — never the tool operation, output metadata, or report status. Include only details that materially change the output. Omit boilerplate such as `create this image`, canvas dimensions when `image_size` is set, transparency when `no_background` is set, and PixelLab defaults such as `pixel art` or `game-ready` unless the distinction matters. If enhancement adds redundant wording, trim it before generation.
 

@@ -2,12 +2,12 @@
 
 Read this when the user writes in a non-English language, mixes languages, or asks for output in a specific language.
 
-PixelLab natural-language parameters must be English even when the conversation is not. Answer the user in their language unless they ask for another language.
+PixelLab natural-language parameters should be English unless SKILL.md preserves exact field text. Answer the user in their language unless they ask for another language.
 
 ## Before PixelLab Actions
 
 - Detect the user's response language from the current request and recent conversation. If response-language confidence is low but the asset/action is clear, proceed in the dominant or most recent user language instead of interrupting.
-- Before MCP, REST, website/editor, Aseprite, or Pixelorama actions, translate or rewrite every PixelLab-facing natural-language input into concise English — all natural-language request fields (`description`, `*_description`, `action`, `item_descriptions`, `text`, `color_palette`).
+- Translate PixelLab-facing natural-language fields (`description`, `*_description`, `action`, `item_descriptions`, `text`, `color_palette`) into concise English unless SKILL.md preserves exact field text.
 - Keep non-language values unchanged: file paths, URLs, IDs, endpoint names, tool names, enum values, dimensions, seeds, colors, code identifiers, and bearer-token variable names.
 - Preserve exact quoted names or requested on-image text only when the user explicitly wants that literal text rendered, and keep it inside an otherwise English parameter value. Otherwise translate descriptive wording into English.
 - For mixed-language requests, preserve technical terms, translate descriptive wording, and ask only when language mixing or culture-specific context creates multiple plausible asset meanings, response-language choices, or credit-spending actions.
