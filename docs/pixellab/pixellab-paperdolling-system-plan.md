@@ -4,6 +4,14 @@ Generated: 2026-07-04.
 
 Goal: build a high-level PixelLab paperdolling workflow that lets users create reusable RPG equipment layers, especially animated weapons, while staying honest about what PixelLab public APIs return today. The system should start as a Python-assisted wrapper and can later evolve into a visual application.
 
+## Implementation Branch
+
+Implement this feature in a new `paperdolling-rework` branch before merging any workflow or tooling changes into `main`.
+
+This paperdolling system is intentionally flexible, but parts of the proposed workflow are still unproven and may be too opinionated or overengineered. The branch should be treated as a proving ground: validate whether the extraction, QA, packaging, slot model, and preview workflow behave as expected with real PixelLab outputs before promoting the design into the mainline skill or tooling.
+
+Merging back to `main` should require evidence from practical tests that the workflow improves paperdoll asset creation without making common cases harder, and that any opinionated defaults can be overridden or safely ignored by users who need a simpler traditional layer-sheet workflow.
+
 ## Product Target
 
 Create a user-facing workflow that can answer requests like:
