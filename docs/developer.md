@@ -74,6 +74,39 @@ codex debug prompt-input '@pixellab-pip bark off'
 
 `development local` should show this repository as the source and a version containing `+codex.dev-`. `production remote` should show the GitHub marketplace source and the normal release version.
 
+## Claude Code Local Plugin Testing
+
+Claude Code copies each plugin into a per-version cache (`~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`), so editing files in this repository does not live-update the active skill. Refresh the local development install after repo edits, then restart Claude Code or run `/reload-plugins` so the new cached snapshot is loaded.
+
+Use the Claude-only helper:
+
+```powershell
+.\dev-tools\manage-claude-plugin.ps1
+```
+
+The script resolves the repository path from its own location, so it can be launched from another working directory or by double-clicking the `.ps1` file. It pauses before exit so the result stays visible.
+
+The menu offers:
+
+- `Install <opposite mode>` - switch between `development local` and `production remote`.
+- `Update <current mode>` - refresh the currently installed mode.
+- `Uninstall <current mode>` - remove the installed plugin and marketplace entry.
+- `Cancel` - exit without changes.
+
+When no plugin is installed, the menu offers `Install development local`, `Install production remote`, `Uninstall pixellab-pip (not installed)`, and `Cancel`.
+
+For `development local`, the script temporarily writes a cachebuster version to `.claude-plugin/plugin.json`, adds this repository as a local marketplace, installs the plugin, then restores the manifest. Because Claude Code keys its plugin cache and update detection on the resolved version (the plugin manifest version wins over the marketplace entry and the git SHA), the cachebuster (`<version>+claude.dev-YYYYMMDDHHMMSS`) forces a fresh copy of local edits without permanently changing the repo version.
+
+For `production remote`, the script installs from the GitHub marketplace source in `.claude-plugin/plugin.json`. Production updates run `claude plugin marketplace update` before `claude plugin update` so the newest release is pulled and re-cached.
+
+To verify which build Claude Code is using:
+
+```powershell
+claude plugin list --json
+```
+
+`development local` should show a version containing `+claude.dev-` and a `directory` marketplace source. `production remote` should show the GitHub marketplace source and the normal release version.
+
 ## PixelLab Docs Drift Checks
 
 PixelLab's public REST and MCP documentation can change independently of this repository. Before updating routing, endpoint, schema, prompt-limit, or MCP-tool claims, refresh the local-only documentation cache:
