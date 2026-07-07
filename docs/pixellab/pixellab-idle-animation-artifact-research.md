@@ -33,7 +33,7 @@ PixelLab walk-cycle options from a single idle frame:
 
 6. Skeleton/template animation
    Pros: Better loopability, pose consistency, and explicit limb cycling.
-   Cons: Stiff, robotic, uncanny motion; can add weird shading or hard shadows on limbs.
+   Cons: Stiff, robotic, uncanny motion; can add weird shading or hard shadows on limbs. Older model — PixelLab recommends animate-with-text (new/v3) over it unless you specifically need skeleton/template behavior.
 
 Conclusion
 No tool/endpoint option is currently proven reliable for a seamless walk loop from only an idle stance. Each option trades one failure mode for another.

@@ -15,6 +15,8 @@ PixelLab has two related but distinct animation concepts:
 
 The built-in website Add Animation buttons for a created character are managed template animations, not a public "download pre-generated walk sprites" feature. The selected template animation id is used as a motion guide, while the character's existing rotation image is used as the identity/style/first-frame anchor.
 
+PixelLab now recommends **Animate with text (new)** — REST `POST /v2/animate-with-text-v3` — over the skeleton-based routes, covering both the managed preset/template animations (`walking-8-frames`, `idle`, etc.) and raw skeleton keypoints. Per the PixelLab team, the skeleton model is an older model; text animation is simpler and generally produces better results. Reach for the template or raw-skeleton routes when you specifically want a named preset motion, need to own/export/edit keypoints, or have another specific reason.
+
 For the website example:
 
 ```text
