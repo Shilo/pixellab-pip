@@ -278,6 +278,7 @@ Useful references:
 - [Clip Studio chibi proportion guide](https://tips.clip-studio.com/en-us/articles/4829) - useful proportion reference: chibi can range up to about 3 heads tall, which supports testing `2.5 heads tall` and `3 heads tall` instead of generic `chibi`.
 - [What the UPA Style Actually Is](https://animationobsessive.substack.com/p/what-the-upa-style-actually-is) - useful terminology for flat, graphic shape language rather than anatomical realism.
 - [My Life as a Teenage Robot - Rob Renzetti](https://robrenzetti.com/my-life-as-a-teenage-robot/) - useful reference for stylized 1950s animation and "Future Deco" graphic design language, not a direct pixel-art game reference.
+- [Action Platformer Character Template by Ozzbit Games (itch.io)](https://ozzbit-games.itch.io/action-platformer-character-template) - lower priority than the CPACK reference. Not chibi, and a side-view 32px platformer sprite rather than a low-top-down base, so it is a limb-shape reference only. Per user review, its limbs flare outward toward the hands and feet in the target silhouette, making it a useful example of the desired flared-extremity read. License is tiered (free personal-use / PRO commercial); use as visual limb-shape study, not production input.
 
 Ragnarok Online remains the closest game reference found so far. Tree of Savior and La Tale are useful adjacent references for cute MMO avatars and clothing readability, but they do not appear to describe the exact base body problem as well as RO-like semi-chibi sprite construction.
 

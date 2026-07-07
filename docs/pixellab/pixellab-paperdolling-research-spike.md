@@ -566,6 +566,16 @@ Modular pixel-art layer-sheet asset systems:
 - [Mana Seed Official collection](https://itch.io/c/398089/mana-seed-official) and [Mana Seed Compatible (third-party layers)](https://itch.io/c/1072771/mana-seed-compatible) — the matching equipment-layer ecosystem.
 - [Memao Sprite Sheet Creator](https://sleeping-robot-games.itch.io/sprite-sheet-creator) — paper-doll customizer that exports sprite sheets.
 
+Minimal / low-resolution base-sprite templates (deliberately simplified and flat-shaded — a cleaner reference than LPC/Mana Seed for *showcasing* a basic paperdoll, and for designing your own tiny base: few frames = few layer sheets, 1-2 tone shading composites without seams, tiny slot list):
+
+- [ErisEsra — Character Templates Pack](https://erisesra.itch.io/character-templates-pack) — **free** (credit appreciated), flat minimalist pixel art, **16×16 and 16×32** (24×24 cells for jump/attack overshoot), **8 directions**, many animations (walk, run, idle, interact, jump, attack, mining, woodchopping, blocking, gardening, death), ships **PNG + Aseprite** source. Base template for customization rather than a prebuilt layer system — ideal starting skeleton for a homegrown minimal paperdoll base.
+- [Caz — Tiny Pixel Fantasy Character Generator](https://cazwolf.itch.io/tiny-pixel-fantasy-generator) — **16×16**, flat/minimal shading, modular body/hair/clothing layers, 4 directions in 3×4 frame blocks, live in-browser generator, name-your-price, no AI. Cleanest low-res paperdoll demo.
+- [Caz — Pixel Fantasy Character Generator](https://cazwolf.itch.io/pixel-charagen) — the slightly-larger sibling; useful for seeing how the same flat layering scales up one notch.
+- [OpenGameArt — Paperdoll Characters (template)](https://opengameart.org/content/paperdoll-characters-template) — **CC0** bare-bones male/female paperdoll template; a pure structural skeleton to fork.
+- [OpenGameArt — Pixel Art Character Templates](https://opengameart.org/content/pixel-art-character-templates) and [Modular character pack](https://opengameart.org/content/modular-character-pack) — free modular bases.
+- [GuidoSprite — Character Player 16×16](https://guidosprite.itch.io/character-player-16x16) — small 16×16 base to layer onto.
+- Browse: [itch.io "paperdoll" tag](https://itch.io/game-assets/tag-paperdoll), [16×16 + Characters](https://itch.io/game-assets/tag-16x16/tag-characters), [Characters + Modular](https://itch.io/game-assets/tag-characters/tag-modular).
+
 RPG Maker paperdoll / visual-equipment discussions:
 
 - [Implementing paper dolls (RPG Maker)](https://forums.rpgmakerweb.com/threads/implementing-paper-dolls.107148/)
