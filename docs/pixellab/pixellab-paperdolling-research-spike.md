@@ -559,8 +559,10 @@ LPC (open layered-sprite standard):
 
 Modular pixel-art layer-sheet asset systems:
 
-- [Mana Seed "Character Base" by Seliel the Shaper](https://seliel-the-shaper.itch.io/character-base) — gold-standard commercial modular paperdoll: base body plus frame-matched clothing/hair/tool layer sheets.
-- [Mana Seed "Farmer Sprite System" (free)](https://seliel-the-shaper.itch.io/farmer-base) — free full example with a layer customizer.
+**Quality exemplar — Seliel the Shaper's Mana Seed bases.** The reference standard for *both* halves of this problem: clean modular paperdoll layering **and** genuinely expressive character animation. SNES-inspired, 32px character centered in 64×64 cells, **100% hand-drawn (no AI)**, 150+ animations including expressive melee combat (overhand / forehand / backhand strikes), bow, evade, hit, and fall. Equipment is delivered as **frame-matched layer sheets** stacked over the base (technique #1 above) with shader-based color ramps — the fluidity comes from an animator hand-keying every frame, not from a rig or from AI. Treat these as the visual-quality benchmark that extracted/generated equipment layers should aim toward, not a technique this system can auto-reproduce.
+
+- [Mana Seed "Character Base" by Seliel the Shaper](https://seliel-the-shaper.itch.io/character-base) — combat/action-RPG-oriented modular base: base body plus frame-matched clothing/hair/armor/weapon layer sheets.
+- [Mana Seed "Farmer Sprite System" / Farmer Base (free sample; full ~$29.99)](https://seliel-the-shaper.itch.io/farmer-base) — the base behind the expressive attack animations in the willyxz paper-doll demo below; farming-sim body that also ships melee-strike and bow combat. Includes a layer customizer. Note Seliel's own caveat: it has combat animations but is not recommended as a dedicated action-RPG body.
 - [Mana Seed Official collection](https://itch.io/c/398089/mana-seed-official) and [Mana Seed Compatible (third-party layers)](https://itch.io/c/1072771/mana-seed-compatible) — the matching equipment-layer ecosystem.
 - [Memao Sprite Sheet Creator](https://sleeping-robot-games.itch.io/sprite-sheet-creator) — paper-doll customizer that exports sprite sheets.
 
