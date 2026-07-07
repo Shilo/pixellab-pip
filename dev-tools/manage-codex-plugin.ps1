@@ -9,9 +9,9 @@ if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyCo
     $PSNativeCommandUseErrorActionPreference = $false
 }
 
-# Get-NormalizedPath and Select-MenuItem live in common.ps1 (shared with
+# Get-NormalizedPath and Select-MenuItem live in lib/common.ps1 (shared with
 # manage-pixellab-doc-cache.ps1).
-. (Join-Path $PSScriptRoot 'common.ps1')
+. (Join-Path (Join-Path $PSScriptRoot 'lib') 'common.ps1')
 
 function Show-Usage {
     Write-Host "Usage: powershell -NoProfile -File dev-tools\manage-codex-plugin.ps1 [-Help]"

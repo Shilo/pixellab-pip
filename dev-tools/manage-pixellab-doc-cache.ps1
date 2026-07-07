@@ -9,9 +9,9 @@ if (Get-Variable PSNativeCommandUseErrorActionPreference -ErrorAction SilentlyCo
     $PSNativeCommandUseErrorActionPreference = $false
 }
 
-# Get-NormalizedPath and Select-MenuItem live in common.ps1 (shared with
+# Get-NormalizedPath and Select-MenuItem live in lib/common.ps1 (shared with
 # manage-codex-plugin.ps1).
-. (Join-Path $PSScriptRoot 'common.ps1')
+. (Join-Path (Join-Path $PSScriptRoot 'lib') 'common.ps1')
 
 function Pause-BeforeExit {
     if (-not [string]::IsNullOrWhiteSpace($script:Action)) {

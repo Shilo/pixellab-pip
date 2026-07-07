@@ -1,6 +1,7 @@
-# Shared helpers dot-sourced by the dev-tools management scripts
-# (manage-codex-plugin.ps1 and manage-pixellab-doc-cache.ps1). Keep only helpers
-# that are identical across both callers here so a fix lands in one place.
+# Shared helper library for the dev-tools scripts -- dot-sourced, not run directly.
+# Consumers: manage-codex-plugin.ps1, manage-claude-plugin.ps1,
+# manage-pixellab-doc-cache.ps1. Keep only helpers that are identical across
+# callers here so a fix lands in one place.
 
 function Get-NormalizedPath {
     param([AllowNull()][string]$Path)
