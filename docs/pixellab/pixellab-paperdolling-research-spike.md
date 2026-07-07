@@ -546,3 +546,33 @@ External survey cross-check (added 2026-07-05; org-root references for the packa
 - [Adobe Firefly](https://www.adobe.com/products/firefly.html)
 - [TexturePacker documentation](https://www.codeandweb.com/texturepacker/documentation)
 - [Khronos KTX / Basis Universal](https://www.khronos.org/ktx/)
+
+Paperdoll asset systems, generators, and tutorials (curated 2026-07-07; complements the "Traditional paperdoll and engine references" list above with modular layer-sheet assets and step-by-step walkthroughs):
+
+LPC (open layered-sprite standard):
+
+- [Universal LPC Spritesheet Character Generator — live app](https://liberatedpixelcup.github.io/Universal-LPC-Spritesheet-Character-Generator/) — stack body/clothing/armor/weapon layers and export the sheet; the clearest working demo of paperdoll layering.
+- [Universal LPC Spritesheet Character Generator — GitHub repo](https://github.com/liberatedpixelcup/Universal-LPC-Spritesheet-Character-Generator) — the actual CC-licensed layer PNGs plus z-index sheet definitions.
+- [BenCreating/LPC-Spritesheet-Generator](https://github.com/BenCreating/LPC-Spritesheet-Generator) — actively maintained generator variant.
+- [LPC Style Guide (frames, directions, timing)](https://lpc.opengameart.org/static/LPC-Style-Guide/build/styleguide.html) — the frame contract every LPC layer conforms to.
+- [LPC Character Bases (OpenGameArt)](https://opengameart.org/content/lpc-character-bases) and [LPC Revised Character Basics](https://opengameart.org/content/lpc-revised-character-basics) — base bodies to layer onto.
+
+Modular pixel-art layer-sheet asset systems:
+
+- [Mana Seed "Character Base" by Seliel the Shaper](https://seliel-the-shaper.itch.io/character-base) — gold-standard commercial modular paperdoll: base body plus frame-matched clothing/hair/tool layer sheets.
+- [Mana Seed "Farmer Sprite System" (free)](https://seliel-the-shaper.itch.io/farmer-base) — free full example with a layer customizer.
+- [Mana Seed Official collection](https://itch.io/c/398089/mana-seed-official) and [Mana Seed Compatible (third-party layers)](https://itch.io/c/1072771/mana-seed-compatible) — the matching equipment-layer ecosystem.
+- [Memao Sprite Sheet Creator](https://sleeping-robot-games.itch.io/sprite-sheet-creator) — paper-doll customizer that exports sprite sheets.
+
+RPG Maker paperdoll / visual-equipment discussions:
+
+- [Implementing paper dolls (RPG Maker)](https://forums.rpgmakerweb.com/threads/implementing-paper-dolls.107148/)
+- [Paperdolls… is it possible? (RPG Maker)](https://forums.rpgmakerweb.com/threads/paperdolls-is-it-possible.45622/)
+
+Runtime implementations and video walkthroughs:
+
+- [Paper Doll System for Unity (Mana Seed compatible)](https://willyxz.itch.io/paper-doll-for-farmer-base) and [Paper Doll for Unity by DirePixel](https://direpixel.itch.io/paper-doll-for-unity) — runtime layer-stacking implementations.
+- [Video — Paper Doll for Unity: How to Use](https://www.youtube.com/watch?v=SjRCLN0t0Ww)
+- [Video — Paper Doll Character Customizer (Unity, ScriptableObjects)](https://www.youtube.com/watch?v=B6gFcrBzhUE)
+- [Video — Godot 2D Cutout Animation Setup](https://www.youtube.com/watch?v=tCrsscmdv9M) — the skeletal-rig alternative (contrast to frame-matched sheets).
+- [Godot Forum — layering sprites / dress-up a character in 2D](https://forum.godotengine.org/t/how-to-layer-sprites-dress-up-a-character-in-2d/11898)
