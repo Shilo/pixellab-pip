@@ -445,6 +445,22 @@ Their layering surface is mostly Markdown guidance plus one bundled recipe and o
 - No reusable-vs-composite honesty labels beyond the recipe's prose `qa` notes.
 - No skeleton hardpoint manifest or hardpoint-bounded extraction.
 
+## Reference Implementation: lysle.net Skeleton Tool
+
+Reviewed 2026-07-07 against a working browser-based PixelLab skeleton editor ("Lysle.net Skeleton Tool", `https://lysle.net/satoshi/skeleton`), mirrored and source-audited locally. It is prior art for the skeleton/keypoint half of this system: it auto-rigs, hand-edits, and animates skeleton keypoints across a 4-direction grid of frames, calling PixelLab for generation. Recorded for the concrete keypoint evidence; it neither endorses nor ranks projects.
+
+Concrete, verifiable findings:
+
+- **Keypoint schema.** Each keypoint is `{ x, y, label, z_index }` — `x,y` normalized 0..1 within the frame (multiply by canvas size for pixels), `z_index` an integer draw-order/depth hint. `estimate-skeleton` responses are assigned straight into this model, so it is the shape the tool consumes from the API. This corroborates the Capability Boundary table's "keypoints with labels and z-index-like data": `z_index` is a real per-keypoint field, usable for front/back occlusion ordering (`weapon_back`/`weapon_front`) and for the plan's hardpoint metadata.
+- **Label vocabulary (18, COCO-style):** NOSE, LEFT/RIGHT EYE, LEFT/RIGHT EAR, NECK, LEFT/RIGHT SHOULDER, LEFT/RIGHT ELBOW, LEFT/RIGHT ARM, LEFT/RIGHT HIP, LEFT/RIGHT KNEE, LEFT/RIGHT LEG. Naming quirk to note: **"ARM" is the wrist/hand end** and **"LEG" is the ankle/foot end** (elbow/knee are the mid-joints). This turns the plan's abstract "map labels to hand/head/torso/feet anchors" (Phase 5) into a concrete mapping.
+- **Keypoint-anchored attachments as prior art.** The tool pins decorative sprites to named keypoints so they track that point across frames/directions — a working reference for the plan's "preview weapon alignment" / hardpoint-anchored placement idea. But those attachments are **cosmetic client-side SVG overlays, never baked into or returned by PixelLab.** So even a dedicated skeleton tool confirms PixelLab exposes no native equipment-layer output, reinforcing this spike's core boundary finding rather than challenging it.
+- **Client-side estimate→edit→animate authoring** runs entirely in the browser with keypoints as portable JSON — a concrete reference for the Phase 7 "visual app / keypoint authoring" direction.
+
+Caveats / what it does not prove:
+
+- Its **generation** calls are proxied through the author's own backend (`lysle.net/.../api/generate-from-skeleton` and `/generate-from-rotation`) with the API key in the request body, returning a normalized `{ success, image, retryable, message }` envelope. So the tool does **not** reveal PixelLab's real `animate-with-skeleton` request/response schema — that hop is server-side. Only `estimate-skeleton` and `balance` are called directly (`api.pixellab.ai/v1/...`, `Bearer`). Treat the observed generation payload as the wrapper's shape, not PixelLab's.
+- Observed against PixelLab **v1** (`/v1/estimate-skeleton`); confirm the label set and shape against the current v2 OpenAPI before hardcoding anchor logic.
+
 ## External Paperdolling Survey Cross-Check (ChatGPT Deep Research)
 
 Reviewed 2026-07-05 against an external "Deep Research" survey of sprite-frame paperdolling for pixel-art RPGs (Aseprite, TexturePacker, Tiled, Spine/Spriter, atlas packing, palette discipline, diffusion-based AI methods, and AI copyright/licensing). It is a general, engine-agnostic survey of the whole problem space, not a PixelLab-specific design. Recorded here to separate what independently validates this spike from what is genuinely new and what does not apply to a hosted-PixelLab wrapper.

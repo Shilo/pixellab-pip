@@ -390,8 +390,8 @@ Add skeleton support after the base extraction CLI works.
 Phase behavior:
 
 1. Run `estimate-skeleton` on base frames or representative frames.
-2. Normalize returned keypoints into manifest hardpoints.
-3. Map labels to practical anchors such as hands, head, torso, feet, and weapon direction.
+2. Normalize returned keypoints into manifest hardpoints. Keypoints arrive as `{ x, y, label, z_index }` with `x,y` normalized 0..1 (multiply by canvas size for pixel hardpoints); `z_index` is a per-keypoint depth hint usable to seed front/back layer ordering. See the research spike's "Reference Implementation: lysle.net Skeleton Tool" for the observed shape.
+3. Map labels to practical anchors. The observed v1 vocabulary (18 COCO-style labels) maps concretely: **hands** ← `LEFT ARM` / `RIGHT ARM` (these are the wrist/hand ends, giving `hand_l` / `hand_r`); **feet** ← `LEFT LEG` / `RIGHT LEG` (ankle/foot ends, for boots); **head/hat/hair** ← `NOSE` / `LEFT EYE` / `RIGHT EYE` / `LEFT EAR` / `RIGHT EAR` / `NECK`; **torso/outfit bounds** ← `LEFT`/`RIGHT SHOULDER` + `LEFT`/`RIGHT HIP`; **limb-bend / arm-leg armor** ← `LEFT`/`RIGHT ELBOW` and `LEFT`/`RIGHT KNEE`. Confirm the label set against the current v2 OpenAPI before hardcoding, since this was observed on v1.
 4. Use anchors to:
    - generate better prompts,
    - build expected-region masks,
