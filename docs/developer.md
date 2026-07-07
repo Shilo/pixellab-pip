@@ -8,6 +8,7 @@ Last reviewed: 2026-07-05.
 - [Security Checks](#security-checks)
   - [OpenSSF Scorecard (maintainer-only)](#openssf-scorecard-maintainer-only)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
+- [Claude Code Local Plugin Testing](#claude-code-local-plugin-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
 - [Skill Benchmark: Routing and Cost](#skill-benchmark-routing-and-cost)
@@ -76,9 +77,25 @@ codex debug prompt-input '@pixellab-pip bark off'
 
 ## Claude Code Local Plugin Testing
 
-Claude Code copies each plugin into a per-version cache (`~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`), so editing files in this repository does not live-update the active skill. Refresh the local development install after repo edits, then restart Claude Code or run `/reload-plugins` so the new cached snapshot is loaded.
+There are two ways to run this repo locally, for two different jobs.
 
-Use the Claude-only helper:
+### Iterate on the skill (recommended): `--plugin-dir`
+
+Unlike Codex, Claude Code can load a plugin **in place** from a directory — no copy, no per-version cache, no cachebuster — so edits to `skills/pixellab-pip/` go live after `/reload-plugins` (or a relaunch). Use the launcher:
+
+```powershell
+.\dev-tools\launch-claude-local-plugin.ps1
+```
+
+It resolves the repo root from its own location and runs `claude --plugin-dir <repo>`, forwarding any extra arguments (e.g. `.\dev-tools\launch-claude-local-plugin.ps1 -p "@pixellab-pip bark off"`). A `--plugin-dir` plugin wins over an installed copy of the same name for that session. For a persistent setup that needs no flag, symlink the skill instead:
+
+```powershell
+New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\pixellab-pip" -Target "$PWD\skills\pixellab-pip"
+```
+
+### Verify the real install flow / manage production: `manage-claude-plugin.ps1`
+
+A marketplace **install** copies the plugin into a per-version cache (`~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`), so repo edits do not live-update an installed copy — you refresh by reinstalling. This is the route real users get, so use it to sanity-check packaging and to install, update, or uninstall the cached plugin (including fixing a stale production install).
 
 ```powershell
 .\dev-tools\manage-claude-plugin.ps1
