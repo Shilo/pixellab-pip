@@ -86,10 +86,14 @@ function Get-RepositorySource {
 function Get-CachebusterVersion {
     param([Parameter(Mandatory = $true)][string]$Version)
 
-    # Claude Code copies each plugin into a per-version cache dir and keys update
-    # detection on the resolved version (plugin.json version wins over the
-    # marketplace entry and the git SHA), so a unique build-metadata suffix forces
-    # a fresh copy of local edits. Mirrors the Codex dev-install cachebuster.
+    # Claude Code resolves a directory-source plugin's version from
+    # .claude-plugin/plugin.json (it wins over the marketplace entry and the git
+    # SHA) and re-copies the source into a per-version cache dir on every `plugin
+    # install`. Edits are picked up by the uninstall+reinstall the menu already
+    # does, not by the version string; the +claude.dev-<stamp> suffix instead
+    # tags this as a script-managed development-local install (so Get-InstallState
+    # can tell it from a plain local install) with a cache version distinct from
+    # the production release. Mirrors the Codex dev-install cachebuster.
     $baseVersion = $Version.Split("+", 2)[0]
     $stamp = [DateTime]::UtcNow.ToString("yyyyMMddHHmmss")
     return "$baseVersion+claude.dev-$stamp"

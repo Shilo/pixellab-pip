@@ -95,7 +95,7 @@ The menu offers:
 
 When no plugin is installed, the menu offers `Install development local`, `Install production remote`, `Uninstall pixellab-pip (not installed)`, and `Cancel`.
 
-For `development local`, the script temporarily writes a cachebuster version to `.claude-plugin/plugin.json`, adds this repository as a local marketplace, installs the plugin, then restores the manifest. Because Claude Code keys its plugin cache and update detection on the resolved version (the plugin manifest version wins over the marketplace entry and the git SHA), the cachebuster (`<version>+claude.dev-YYYYMMDDHHMMSS`) forces a fresh copy of local edits without permanently changing the repo version.
+For `development local`, the script temporarily writes a cachebuster version to `.claude-plugin/plugin.json`, adds this repository as a local marketplace, installs the plugin, then restores the manifest. Because `claude plugin install` re-copies the source into its per-version cache on every run, the uninstall-and-reinstall the menu performs is what picks up your edits; the `<version>+claude.dev-YYYYMMDDHHMMSS` suffix instead tags the install as script-managed development-local (so the tool can tell it from a plain local install and give it a cache version distinct from the production release) without permanently changing the repo version.
 
 For `production remote`, the script installs from the GitHub marketplace source in `.claude-plugin/plugin.json`. Production updates run `claude plugin marketplace update` before `claude plugin update` so the newest release is pulled and re-cached.
 
