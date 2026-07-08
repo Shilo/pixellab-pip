@@ -6,7 +6,9 @@ Image input role is endpoint-specific. Do not map every supplied image to `refer
 
 When consistency matters, identify which input constrains identity, style, palette, source edit, or frames; if none is provided, note that results may vary across a batch.
 
-When images are visible, inspect them and write task-relevant facts (subject, direction/view, pose, palette, style, materials, edit target) into the chosen natural-language parameter (`description`, `edit_description`, `action`, `style_description`), keeping observed facts separate from requested output changes.
+When images are visible, inspect them and write task-relevant facts into the chosen natural-language parameter (`description`, `edit_description`, `action`, `style_description`), keeping observed facts separate from requested output changes.
+
+For style-reference generation, also read `style-reference.md`.
 
 ## Goal Router
 

@@ -76,7 +76,7 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 | UI, HUD, button, panel, health bar, menu | REST v2 `create-ui-asset` (Pro) for structured/saved UI assets, `pieces`, named `elements`, `style_image`, or `project_id`; MCP `create_ui_asset` when MCP-first and its visible schema has the needed fields; `generate-ui-v2` for loose/raw UI images, especially with a `concept_image`. | Do not route shape-piece/layout requests to `generate-ui-v2`. |
 | Image edit, inpaint, mask, convert, resize, remove background | REST v2. | `inpaint`, `inpaint-v3` (Pro), `edit-image`, `edit-images-v2`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, `remove-background`. |
 | Fitted paperdoll addition on an existing character image | Treat as an `existing_image` edit anchored on the base frame; read `references/paperdolling.md` before choosing layer/composite outputs. | Do not use object generation for fitted layers unless the user explicitly wants an unattached prop. |
-| Style-reference or consistent-style generation | REST v2. | `generate-with-style-v2` or `generate-image-v2` style/reference fields after checking current docs. |
+| Style-reference or consistent-style generation | Read `references/style-reference.md`, then REST v2. | `generate-with-style-v2` or `generate-image-v2` style/reference fields after checking current docs. |
 | Editor-only utilities (Canny/Pose/Depth, reduce colors, unzoom, pixel correction, reshape) | Read `references/editor-only-utilities.md`. For file-level palette quantization/reduction/replacement, read `references/aseprite-cli.md` even without explicit Aseprite wording. | No public REST/MCP route exists for these; do not invent `/v2/...` routes. |
 | Try on garment/accessory | Website Try on (single composited image); REST `transfer-outfit-v2` only for animation-frame outfit transfer. | Try on does not return isolated paperdoll layers. |
 | Multi-image combine/edit | REST v2 `edit-images-v2` for documented multi-source edits; website/editor for visual experimental flows. | Aseprite's `generate-multi-edit` is an internal endpoint, not public REST. |
@@ -120,6 +120,7 @@ Read only the relevant reference:
 - Paperdolling and layered characters: `references/paperdolling.md`.
 - Review/choice handling for static candidate alternatives: `references/reviewable-candidates.md`.
 - Tilesets and tile variants: `references/tileset.md`.
+- Style-reference generation, Aseprite-equivalent square padding, and output sizing: `references/style-reference.md`.
 - Supplied image roles, endpoint image fields, fixed-size image-to-pixelart: `references/image-input-roles.md`.
 - Non-English or mixed-language requests: `references/localization.md`.
 - Official PixelLab doc URLs and boundaries: `references/official-pixellab-documentation.md`.
