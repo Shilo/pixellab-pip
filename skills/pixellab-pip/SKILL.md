@@ -157,7 +157,7 @@ Treat PixelLab model/provider language as product labels unless official docs di
 
 ## Text Preparation
 
-Exact labeled field text wins over prompt prep. If the user writes `prompt "..."`, `description "..."`, `action "..."`, `use exactly "..."`, or another explicit quoted field value, send that value unchanged and do not enhance it. If it is invalid, over limit, or unsafe, stop and ask for an approved replacement or trim before spending credits.
+Exact field values win over prompt prep. If the user explicitly supplies a PixelLab-facing field value, such as `prompt: ...`, `description: ...`, `action: ...`, or `use exactly ...`, send that value unchanged and do not enhance it. If it is invalid, over limit, or unsafe, stop and ask for an approved replacement or trim before spending credits.
 
 Prompt enhancement is opt-out. Otherwise, for natural-language parameters such as `description`, `style_description`, `negative_description`, `*_description`, `action`, `item_descriptions`, `text`, and `color_palette`, produce the best concise PixelLab-ready English value from the request and visible inputs before calling a tool.
 
