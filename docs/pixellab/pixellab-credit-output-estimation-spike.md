@@ -2,9 +2,32 @@
 
 Last reviewed: 2026-07-08.
 
-Important prefix: this is an estimation and may not be accurate. PixelLab prices are documented as estimates, usage can vary with GPU processing time, and the practical value of 1 credit depends heavily on the workflow, endpoint, output size, frame count, grid behavior, retry count, and whether you count a sheet/tile/animation frame as one output or many outputs.
+> **Important prefix: this is an estimation and may not be accurate.**
+>
+> PixelLab prices are documented as estimates, usage can vary with GPU processing time, and the practical value of 1 credit depends heavily on the workflow, endpoint, output size, frame count, grid behavior, retry count, and whether you count a sheet/tile/animation frame as one output or many outputs.
 
 Purpose: estimate how many literal PixelLab outputs and generation-spend units a user might get when planning around 1 USD of PixelLab credit, while avoiding the false simplification that 1 credit equals 1 generation.
+
+## Summary
+
+Conversion:
+
+- `$1` credit =
+  - `~19-380` generation-units (`~25-380` without helper endpoints).
+  - `~5-674` normal image outputs.
+  - `~1,616-2,025` compact tile-cell outputs (`or up to ~3,165 observed expanded tile-cell outputs`).
+
+Value:
+
+- `Raw` credits = `100%` value (`benchmark at ~100 common simple-call generation-units per $1`).
+- Monthly subscription:
+  - `Tier 1` = `~167%` value (`$12/month`, `2,000` images/month).
+  - `Tier 2` = `~208%` value (`$24/month`, `5,000` images/month).
+  - `Tier 3` = `~200%` value (`$50/month`, `10,000` images/month).
+- Annual subscription (`if monthly allowance repeats for 12 months`):
+  - `Tier 1` = `~242%` value (`$99/year`, `24,000` images/year).
+  - `Tier 2` = `~273%` value (`$220/year`, `60,000` images/year).
+  - `Tier 3` = `~240%` value (`$500/year`, `120,000` images/year).
 
 ## Rough Estimate
 
@@ -16,9 +39,20 @@ For fast planning only, treating `1 credit` as `$1 USD` based on the observed pu
 
 These are workflow-dependent estimates, not guaranteed account balances, quotas, or endpoint promises.
 
+Subscription value, using the live subscription data and card logic observed on 2026-07-08:
+
+- Raw USD credits: baseline `100%` when normalized to the common simple-call benchmark of about `100` generation-units per `$1`; actual observed endpoint-derived range is about `19-380` generation-units per `$1`.
+- Tier 1 monthly (`$12`, `2,000` images/month): about `166.7` monthly image/generation allowance per `$1`, or about `167%` of the common raw-credit benchmark.
+- Tier 2 monthly (`$24`, `5,000` images/month): about `208.3` monthly image/generation allowance per `$1`, or about `208%` of the common raw-credit benchmark.
+- Tier 3 monthly (`$50`, `10,000` images/month): about `200` monthly image/generation allowance per `$1`, or about `200%` of the common raw-credit benchmark.
+
+Annual billing improves the allowance-per-dollar calculation: Tier 1 is about `242%`, Tier 2 about `273%`, and Tier 3 about `240%` of the same common raw-credit benchmark, assuming the monthly allowance repeats for 12 months.
+
 Primary sources checked:
 
 - [PixelLab API pricing/examples](https://www.pixellab.ai/pixellab-api)
+- [PixelLab homepage subscription tiers](https://www.pixellab.ai/)
+- [PixelLab public subscription data](https://api.pixellab.ai/get-subscriptions)
 - [REST v2 endpoint index](https://api.pixellab.ai/v2/llms.txt)
 - [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json)
 - [PixelLab FAQ](https://www.pixellab.ai/docs/faq)
@@ -34,7 +68,31 @@ Therefore:
 - For rough planning, `1 credit` was treated as `$1 USD` account balance based on the observed purchase UI.
 - `generation` or `generation-unit` is a spend/accounting unit used by PixelLab tools.
 - Literal outputs are the returned artifacts: images, candidate grid cells, frames, tiles, or generated asset entries, depending on workflow.
+- Subscription tiers expose an `Image generation limit` in the homepage card logic; this spike treats that as a monthly image/generation allowance for normalization, but not as raw USD credit.
 - There is no single stable conversion from USD credit to either generation-units or literal outputs across all tools.
+
+## Subscription Value Per Dollar
+
+This section normalizes each way of spending against a common raw-credit benchmark. The benchmark is not a universal billing rule: it uses the common simple image examples where `$0.01` maps to `1` generation-unit, or about `100` generation-units per `$1`.
+
+Using that benchmark:
+
+| Spend option | Observed price | Observed allowance | Allowance per `$1` | Value vs common raw-credit benchmark |
+|---|---:|---:|---:|---:|
+| Raw USD credits | `$1` | workflow-dependent | about `100` generation-units per `$1` for common simple calls | `100%` benchmark |
+| Tier 1 monthly, Pixel Apprentice | `$12/month` | `2,000` images/month | about `166.7` images/month per `$1` | about `167%` |
+| Tier 2 monthly, Pixel Artisan | `$24/month` | `5,000` images/month | about `208.3` images/month per `$1` | about `208%` |
+| Tier 3 monthly, Pixel Architect | `$50/month` | `10,000` images/month | `200` images/month per `$1` | `200%` |
+
+Annual billing, if the same monthly allowance is available for each month of the year:
+
+| Spend option | Observed annual price | Annualized allowance | Allowance per `$1` | Value vs common raw-credit benchmark |
+|---|---:|---:|---:|---:|
+| Tier 1 annual, Pixel Apprentice | `$99/year` | `24,000` images/year | about `242.4` images/year per `$1` | about `242%` |
+| Tier 2 annual, Pixel Artisan | `$220/year` | `60,000` images/year | about `272.7` images/year per `$1` | about `273%` |
+| Tier 3 annual, Pixel Architect | `$500/year` | `120,000` images/year | `240` images/year per `$1` | `240%` |
+
+Read this as rough value density, not pure substitutability. Raw credits are flexible USD balance and endpoint costs vary widely. Subscriptions add tier-specific benefits such as higher image-size caps, priority/concurrency, support level, and early access, but unused monthly allowance, billing-cycle behavior, feature access, and quality/retry patterns are outside this numeric percentage.
 
 ## Estimated Generation-Unit Range Per 1 Credit
 
