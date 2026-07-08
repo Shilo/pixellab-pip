@@ -70,8 +70,10 @@ the first step.
 
 - `_comment` (or any custom `_comment*`) — a non-obvious detail worth keeping: a gotcha or
   discovery during creation, or what the blueprint is for. Skip the obvious.
-- `_comment_prompt` — the user's exact triggering request, copied verbatim, only when a prompt
-  initiated the generation.
+- `_comment_prompt` — the user's original prompt as they intended it, only when a prompt
+  initiated the generation. Remove host-added wrappers such as connector Markdown, app URIs,
+  hidden local paths, or tool-call serialization; keep the visible command text. Example:
+  `[$pixellab-pip:pixellab-pip](...) make a knight` becomes `/pixellab-pip make a knight`.
 
 ```json
 {

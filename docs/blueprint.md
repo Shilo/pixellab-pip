@@ -59,10 +59,11 @@ people reading the file — the assistant ignores them when it runs the blueprin
 ```
 
 `_comment` — the summary — always comes first; any number of other `_comment*` notes may
-follow, then the route. `_comment_prompt` records your originating prompt
-(in a bundle, on the first step); a `_comment` is added only for something non-obvious worth
-sharing — an issue, discovery, or important detail found during creation, or what the blueprint
-is for.
+follow, then the route. `_comment_prompt` records your original prompt as you intended it
+(in a bundle, on the first step): assistant-added wrappers, connector links, and hidden paths
+are removed, while visible command text like `/pixellab-pip` is kept. A `_comment` is added
+only for something non-obvious worth sharing — an issue, discovery, or important detail found
+during creation, or what the blueprint is for.
 
 ## Creating a blueprint
 
