@@ -72,6 +72,7 @@ Internal pre-final checks (report only the constraints the user named, per `usag
 
 - Output dimensions match the requested sheet size and divide exactly into the requested cells; `32px icons` means 32px per cell.
 - Symbols/items fit the cell scale — no 64px-ish symbols, collapsed layouts, multi-object clusters in one cell, or gutters that change cell math.
+- For explicit cell-size sheet requests, check the first visible icon/item against its intended cell before trusting automated crops: the visible object must fit inside that cell's pixel bounds without crossing into adjacent cells. If the first item is already larger than the requested cell, the sheet fails even if the canvas size and crop hashes look plausible.
 - Alpha matches the request: fully opaque for backgrounded sheets, clean transparency for `no_background: true` (after `background-removal.md` verification if removal was applied).
 - No text-like marks, borders, frames, gutters, rounded corners, or slot styling unless requested. Metadata is not enough — a 1px opaque edge or a semantically unclear item passes structural checks while failing the art request; a human visual check is required for variety, readability at 32px, and recognizable semantics.
 - Item icons: crisp readable pixel art without mixels or smeared detail. Normal stair-stepped diagonals are fine; treat stepping as failure only when it harms 32px readability or shape clarity.

@@ -38,6 +38,7 @@ For exact grid outputs from Create Image Pro:
 
 - Verify the original PixelLab output against both canvas size and visual cell layout.
 - Check that visible boundaries, object centers, or tile extents actually follow the requested per-cell grid.
+- When the user names an explicit per-cell size, inspect the first visible asset before any bulk split/hash workflow: identify the intended cell that contains it, compare the visible object/tile extent to that cell's pixel bounds, and fail the candidate immediately if it spills into neighboring cells or clearly uses a larger cell scale.
 - Use local crop/split or boundary-measurement tools only for inspection or packaging, preserving original pixels. Do not add inspection grids to final assets, and do not ask PixelLab to draw inspection grids.
 - If the original output has the right canvas size but the visible content uses a different grid, report the mismatch and do not present crops as repaired final assets.
 - For sheets with cells below `32px`, use human visual review plus content-level measurement when possible.
