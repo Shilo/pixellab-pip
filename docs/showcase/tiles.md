@@ -53,7 +53,6 @@ Generation details:
 | Tile size | `16x16` |
 | Background | `no_background: false` |
 | Usage reported | `20` generations |
-| Balance observation | `1448 -> 1428` generations |
 | Exact-unique cells | `251 / 256` |
 
 Blueprint — replayable route and request body ([`minecraft-inspired-generate-image-v2-16x16-atlas.blueprint.json`](tiles/minecraft-inspired-generate-image-v2-16x16-atlas.blueprint.json)):
@@ -109,7 +108,6 @@ Generation details:
 | Background | `no_background: false` |
 | Seed | `1323610680` |
 | Usage reported | `20` generations |
-| Balance observation | `1564.25 -> 1544.25` generations |
 
 Natural-language generation input:
 

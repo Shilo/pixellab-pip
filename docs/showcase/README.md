@@ -78,6 +78,7 @@ Each individual showcase page should include:
 - Local processing notes for cropping, spritesheets, GIFs, or other assembled files.
 - Validation notes that are useful to readers, such as image size, transparency, frame count, and display caveats.
 - Do not mention PixelLab job IDs, UI asset IDs, managed asset IDs, result IDs, or other run-specific service identifiers. Showcase docs should be reproducible from prompts, request bodies, controls, and local output files without exposing transient service IDs.
+- Do not add "Balance observation" or any account credit-balance figures (e.g. `before -> after` generation totals).
 
 Prefer direct prose that names the subject of each paragraph. Avoid starting explanatory paragraphs with placeholders such as "This example", "This pass", or "This result" when a concrete subject would be clearer.
 
