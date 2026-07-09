@@ -18,6 +18,11 @@ HTTPISH = re.compile(r"^(?:https?:|mailto:|tel:|data:|#)")
 MD_LINK = re.compile(r"(!?)\[[^\]]*\]\(([^)]+)\)")
 HTML_SRC = re.compile(r"""<img\b[^>]*\bsrc=["']([^"']+)["']""", re.IGNORECASE)
 HTML_HREF = re.compile(r"""<a\b[^>]*\bhref=["']([^"']+)["']""", re.IGNORECASE)
+# Code fences and inline spans hold illustrative link *syntax*, not navigable
+# links (e.g. connector wrapper examples like `[label](...)`). Strip them before
+# scanning so doc examples don't read as real local links — real reference
+# pointers in backticks are covered by check_skill_reference_files instead.
+CODE_REGION = re.compile(r"(```|~~~).*?\1|`[^`\n]*`", re.DOTALL)
 PLACEHOLDER_TARGETS = {"path-or-url", "url", "path"}
 VERSION_PATHS = (
     (".agents/plugins/marketplace.json", ("plugins", 0, "version")),
@@ -163,7 +168,7 @@ def strip_link_target(target: str) -> str:
 def check_markdown_local_links() -> None:
     missing: list[str] = []
     for path in run_git_ls_files("*.md"):
-        text = path.read_text(encoding="utf-8")
+        text = CODE_REGION.sub("", path.read_text(encoding="utf-8"))
         targets = [match.group(2) for match in MD_LINK.finditer(text)]
         targets.extend(match.group(1) for match in HTML_SRC.finditer(text))
         targets.extend(match.group(1) for match in HTML_HREF.finditer(text))
