@@ -14,7 +14,7 @@ Use different expectations for tiles, `32x32` item icons, and strict `16x16` ite
 | Transparent `32x32` inventory item icons | Higher | Text-only `POST /v2/generate-image-v2` with centered single-object icon wording |
 | Transparent or contained `16x16` non-tile item sprites | Low | Treat as experimental; use style-reference/editor workflows only with strict copy checks, or generate at `32x32` and downscale with clear reporting |
 
-The main observed pattern is that PixelLab can produce useful `16x16` output when the requested asset is a full-cell tile texture. It has not yet been reliable for text-only prompts asking for many standalone `16x16` food or inventory items in one atlas. Those prompts tend to drift toward larger, more readable item-icon scale. Style-reference routes can anchor the grid more strongly, but they can also over-copy the supplied reference image.
+The main observed pattern is that PixelLab can produce useful `16x16` output when the requested asset is a full-cell tile texture. It has not yet been reliable for text-only prompts asking for many standalone `16x16` food or inventory items in one atlas. Those prompts tend to drift toward larger, more readable item-icon scale. Style-reference routes can anchor the grid more strongly, but they can also over-copy the supplied reference image. Reference-image routes may copy less than style-reference routes, but still need cell occupancy and copy checks.
 
 ## Evidence Summary
 
@@ -142,6 +142,39 @@ However, even Aseprite/editor style-reference output must be checked for copying
 A manual `256x256` Aseprite style-reference attempt with the style-copy options disabled appeared to improve novelty compared with the full-copy style-reference behavior. It randomized some items and created some unique-looking fruit/food sprites.
 
 The result was still mixed: some items remained near-copies of the input set. This supports the current recommendation that disabling style options is useful as an experiment, but not sufficient as an acceptance criterion. Outputs from this route still need per-item copy review, especially when the input style images contain finished items rather than neutral layout examples.
+
+## REST Reference-Image 256px Crop Test
+
+A corrected `POST /v2/generate-image-v2` test used the Aseprite-style "Reference" role rather than a style reference. The input image was the bottom-right `256x256` crop of the prepared `512x512` fruit atlas, not a scaled-down version of the whole atlas. The request used:
+
+```json
+{
+  "image_size": { "width": 256, "height": 256 },
+  "no_background": true,
+  "reference_images": [
+    {
+      "size": { "width": 256, "height": 256 },
+      "usage_description": "Use only as a reference for a 256 by 256 sheet layout: tiny centered transparent inventory items in 16 by 16 cells. Do not copy item identities, palette, silhouettes, row order, or patterns."
+    }
+  ]
+}
+```
+
+It did not use `style_image`, `style_images`, or `style_options`.
+
+Observed result:
+
+- Canvas size passed: `256x256`.
+- The intended grid had `256` cells.
+- `254` of `256` cells had alpha content, so the sheet was not complete.
+- The first occupied cell's alpha bounding box stayed inside the first intended `16x16` cell.
+- `0` of `256` cells were byte-identical to the reference crop.
+- `34.20%` of pixels were exactly identical to the reference crop. Much of this can come from shared transparent/background pixels, so it is not by itself proof of copying.
+- Only `3` of `256` cells had the same alpha bounding box as the corresponding reference cell.
+
+Visual review found that this route did not behave like the earlier style-reference reconstruction. It did not preserve row order or most cell silhouettes directly. However, it still inherited the source category distribution strongly and failed completeness by leaving two empty cells. This makes it a more promising experiment than full-atlas style reference, but not a validated solution.
+
+The key lesson is terminology-sensitive: Aseprite's "Reference" image role is not the same as a style-reference image. In REST terms, the closest public field is `reference_images`, not `style_image` or `style_images`. When testing this route, use a true `256x256` crop or source image at the intended output size; do not downscale a larger atlas, because downscaling changes the relationship between source cells and target cells.
 
 ## Fresh 256px Text-Only Atlas Test
 
@@ -339,6 +372,23 @@ Cons:
 
 Use this route only when copy review is part of the acceptance criteria. A style-reference output can pass size and cell checks while still being unusable because it reconstructs the reference image's item identities, silhouettes, row order, or distribution. In that case, reject it rather than treating it as a valid generated atlas.
 
+### Use Reference Images For Layout/Concept, Not Style
+
+REST `generate-image-v2` supports `reference_images`, which are closer to the Aseprite "Reference" role than `style_image` / `style_images`. This may be a better experimental route when the goal is to communicate atlas layout without asking PixelLab to copy palette, outline, shading, or detail level.
+
+Pros:
+
+- The corrected `256x256` crop test copied much less cell structure than the `512x512` style-reference tests.
+- It can communicate the idea of tiny centered transparent inventory items in a packed atlas.
+- It avoids the public `style_image` controls that explicitly copy style features.
+
+Cons:
+
+- It is still not a guarantee of novelty.
+- It may inherit category distribution or visual habits from the reference.
+- It may fail completeness, as one corrected `256x256` test produced `254` non-empty cells out of `256`.
+- Inputs should be cropped to the intended output size, not downscaled from a larger atlas.
+
 ### Use Aseprite Style Reference With Options Disabled
 
 The Aseprite plugin exposes style options such as copying palette, level of detail, outline style, and shading technique. When testing `16x16` non-tile item generation in Aseprite, disable these options if the goal is a new sheet rather than a close style clone.
@@ -390,7 +440,8 @@ For transparent item icons:
 For experimental `16px` non-tile items:
 
 - Do not assume text-only `generate-image-v2` will contain each object inside a `16x16` cell.
-- Try style reference or Aseprite editor workflows when strict bounds matter, but reject outputs that copy the reference content too closely.
+- Try reference-image, style-reference, or Aseprite editor workflows when strict bounds matter, but reject outputs that copy the reference content too closely.
+- Use reference images at the intended output size; crop a larger atlas to the relevant region rather than downscaling the whole atlas.
 - Keep concepts simple: one berry, one grape, one seed, one bread bite.
 - Avoid jars, bottles, pies, plates, clusters, and multi-part objects in the first test.
 - Verify object bounds on the first generated item before broad crop/hash checks.
@@ -421,7 +472,7 @@ For transparent item icons:
 3. Confirm each object is centered and contained.
 4. Check duplicate hashes and semantic duplicates.
 
-For style-reference or Aseprite outputs:
+For reference-image, style-reference, or Aseprite outputs:
 
 1. Compare the output to the supplied style/reference image, not just to the prompt.
 2. Count exact same pixels when possible.
@@ -436,14 +487,15 @@ For style-reference or Aseprite outputs:
 3. Repeat with all style-copy options disabled when the UI exposes them, including both `128x128` and `256x256` documents.
 4. Record whether the plugin prompts about padding to `16px`, whether output is generated as frames, layers, a sheet, or individual images, and whether any result is forced to `32x32`, `17x17`, or another size.
 5. Compare output against the input set for copied items, copied silhouettes, copied ordering, and copied row structure; separate genuinely new cells from near-copy cells.
-6. Run the closest available non-Aseprite style-reference route with the same `16x16` references and prompt to isolate whether Aseprite editor context is the key variable.
-7. Try text-only single-item `16x16` or `17x17` outputs for simple subjects such as blue berry, grape, raspberry, seed, bread bite, mushroom cap, cheese wedge, and candy.
-8. Try more text-only `256x256` atlases of `256` item cells before scaling back up to `512x512` / `1024` cells.
-9. Try a `256x256` atlas of 256 food surface textures, not object icons, using the tile prompt structure.
-10. Compare all routes with the same item list and the same verification checklist.
+6. Run REST `generate-image-v2` with `reference_images` using cropped `256x256` references, not downscaled full atlases, to isolate whether the Aseprite Reference role maps better to public REST reference images.
+7. Run the closest available non-Aseprite style-reference route with the same `16x16` references and prompt to isolate whether Aseprite editor context is the key variable.
+8. Try text-only single-item `16x16` or `17x17` outputs for simple subjects such as blue berry, grape, raspberry, seed, bread bite, mushroom cap, cheese wedge, and candy.
+9. Try more text-only `256x256` atlases of `256` item cells before scaling back up to `512x512` / `1024` cells.
+10. Try a `256x256` atlas of 256 food surface textures, not object icons, using the tile prompt structure.
+11. Compare all routes with the same item list and the same verification checklist.
 
 ## Bottom Line
 
 PixelLab appears capable of `16x16` pixel density, but subject type and surface context matter. Text-only `generate-image-v2` is promising for `16x16` full-cell tiles and reliable for `32x32` item-icon sheets. Strict `16x16` non-tile item sprites remain experimental.
 
-The best current path is not one universal route. For strict `16x16` non-tile items, use smaller text-only tests, Aseprite/editor style-reference workflows, or REST style-reference workflows only with explicit copy-detection. If the output copies the supplied style/reference items too closely, it should be rejected even if it passes canvas-size and cell-size checks.
+The best current path is not one universal route. For strict `16x16` non-tile items, use smaller text-only tests, Aseprite/editor workflows, REST `reference_images`, or REST style-reference workflows only with explicit copy-detection. If the output copies the supplied reference/style items too closely, it should be rejected even if it passes canvas-size and cell-size checks.
