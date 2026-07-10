@@ -25,8 +25,7 @@ At small `image_size` values, `generate-image-v2` may return many same-prompt im
 
 Prepare the description according to the requested set:
 
-- For a varied set, name several independent design axes such as primary silhouette, particle behavior, material, palette, energy core, and motion shape. Say which dominant compositions must not repeat; `unique` alone does not prevent near-identical motifs.
-- A narrow composition such as `violet ring around a cyan core` asks for variations of that composition. If broader variety is wanted, provide alternative silhouettes or split the work into disjoint thematic prompts.
+- One narrow composition such as `a health potion` yields variations of that composition, not variety—`unique` alone does not prevent near-identical motifs. For a varied set, name independent design axes such as silhouette, subject, material, palette, and detail, say which dominant compositions must not repeat, or split the work into disjoint thematic prompts.
 - Do not assume a long catalog maps one-to-one onto returned images. Prefer smaller disjoint concept batches when coverage matters. If a named list is necessary, put `Unlabeled pictorial assets only; the names are semantic guidance and must never appear as visible text` before the list, then retain an applicable no-text clause after it. Long named catalogs can trigger captions or label-like marks even when `no text` appears only at the end.
 - Make gameplay view explicit whenever it changes usability. For example, a top-down ground effect needs `top-down orthographic view looking straight down`, radial ground-plane debris, and negatives for horizon, side profile, ground baseline, or a vertical rising plume. Words such as `ground impact` or `plume rising` do not imply top-down view.
 
