@@ -1,5 +1,6 @@
 docs/.*
 .local/
 __pycache__/
+.impeccable/
 skills/pixellab-pip/pixellab-pip.json
 pixellab-pip-generations/

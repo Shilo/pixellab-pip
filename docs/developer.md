@@ -148,7 +148,7 @@ When no skill is installed, the menu offers `Install development local`, `Instal
 
 For `development local`, the script creates a directory **junction** (falling back to a symbolic link) from the global skills path to this repository's `skills\pixellab-pip`, so edits go live with no copy and no cachebuster — OpenCode reads the files directly. A junction is preferred because it needs no admin rights on Windows.
 
-For `production copy`, the script makes a full recursive **copy** of `skills\pixellab-pip` into the global skills path, simulating what a real user's manual/release install looks like (a plain directory, not a link). OpenCode has no GitHub-remote skill install, so there is no remote mode.
+For `production copy`, the script copies the **git-tracked** files under `skills\pixellab-pip` into the global skills path, simulating what a real user's manual/release install looks like (a plain directory, not a link). Tracked-only matches the released skill and keeps ignored local cruft out of the copy — e.g. `references\.impeccable\` session caches or `assets\__pycache__\` bytecode that sit in the working tree but never ship. OpenCode has no GitHub-remote skill install, so there is no remote mode.
 
 Uninstall removes **only** the entry it manages: a junction/symlink is deleted as a reparse point (never recursing into the repo source it points at), while a plain copy is removed recursively.
 

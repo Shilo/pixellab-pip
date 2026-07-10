@@ -115,16 +115,34 @@ function Install-DevelopmentLocal {
 function Install-ProductionCopy {
     param(
         [Parameter(Mandatory = $true)][string]$SkillPath,
-        [Parameter(Mandatory = $true)][string]$SkillSource
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$SkillRelative
     )
 
-    $parent = Split-Path -Parent $SkillPath
-    if (-not (Test-Path -LiteralPath $parent)) {
-        New-Item -ItemType Directory -Path $parent -Force | Out-Null
+    # Copy only git-tracked files so the copy matches the RELEASED skill. A blind
+    # recursive copy would drag in ignored local cruft that never ships -- e.g.
+    # references/.impeccable/ session caches (impeccable skill) or assets/
+    # __pycache__/ bytecode -- because they live in the working tree next to the
+    # real skill files.
+    $relPosix = ($SkillRelative -replace '\\', '/')
+    $tracked = @(& git -C $RepoRoot ls-files -- $relPosix)
+    if ($tracked.Count -eq 0) {
+        throw "git ls-files found no tracked files under $relPosix; cannot build a faithful production copy."
     }
 
-    Copy-Item -LiteralPath $SkillSource -Destination $SkillPath -Recurse -Force
-    Write-Host "  Copied: $SkillSource -> $SkillPath"
+    $prefix = "$relPosix/"
+    New-Item -ItemType Directory -Path $SkillPath -Force | Out-Null
+    foreach ($rel in $tracked) {
+        $relInSkill = $rel.Substring($prefix.Length)
+        $srcFile = Join-Path $RepoRoot ($rel -replace '/', '\')
+        $dstFile = Join-Path $SkillPath ($relInSkill -replace '/', '\')
+        $dstDir = Split-Path -Parent $dstFile
+        if (-not (Test-Path -LiteralPath $dstDir)) {
+            New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $srcFile -Destination $dstFile -Force
+    }
+    Write-Host "  Copied $($tracked.Count) tracked files -> $SkillPath"
 }
 
 function Remove-CurrentInstall {
@@ -289,7 +307,7 @@ function Invoke-Main {
         }
         "install-copy" {
             Remove-CurrentInstall -State $state
-            Install-ProductionCopy -SkillPath $skillPath -SkillSource $skillSource
+            Install-ProductionCopy -SkillPath $skillPath -RepoRoot $repoRoot -SkillRelative $SkillSourceRelative
             Write-Host ""
             Write-Host "Installed $SkillName as production copy." -ForegroundColor Green
         }
@@ -307,7 +325,7 @@ function Invoke-Main {
             }
             elseif ($state.IsProductionCopy) {
                 Remove-CurrentInstall -State $state
-                Install-ProductionCopy -SkillPath $skillPath -SkillSource $skillSource
+                Install-ProductionCopy -SkillPath $skillPath -RepoRoot $repoRoot -SkillRelative $SkillSourceRelative
                 Write-Host ""
                 Write-Host "Updated $SkillName as production copy." -ForegroundColor Green
             }
