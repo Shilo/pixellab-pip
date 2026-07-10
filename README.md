@@ -105,6 +105,14 @@ codex plugin remove pixellab-pip
 codex plugin add pixellab-pip@pixellab-pip
 ```
 
+#### Cursor
+
+Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.
+
+```text
+/pixellab-pip setup
+```
+
 #### Gemini CLI
 
 Install:
@@ -138,6 +146,14 @@ Update:
 copilot plugin update pixellab-pip
 ```
 
+#### VS Code Agent Plugins
+
+Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin marketplace flow.
+
+```text
+/pixellab-pip setup
+```
+
 #### OpenCode
 
 OpenCode discovers Agent Skills natively — there is no marketplace step (its `opencode plugin` command installs JavaScript code plugins, not skills). Install the skill (see [Manual Skill Install](#manual-skill-install)) into any path OpenCode reads: `.opencode/skills/`, `.agents/skills/`, or `.claude/skills/` (project, or their `~/.config/opencode`, `~/.agents`, `~/.claude` globals). OpenCode loads it on demand through its built-in `skill` tool.
@@ -150,7 +166,7 @@ Then ask OpenCode to set up PixelLab Pip.
 
 #### Deep Code (DeepSeek V4)
 
-Deep Code — the DeepSeek V4 terminal agent — discovers Agent Skills natively; there is no marketplace. Install the CLI, then drop the skill into a path it reads (`.agents/skills/` project or `~/.agents/skills/` global; legacy `.deepcode/skills/` also works):
+Deep Code — the DeepSeek V4 terminal agent — discovers Agent Skills natively; there is no marketplace. Install the CLI, then drop the skill into a path it reads — `~/.agents/skills/` for every project, or `.agents/skills/` or `.deepcode/skills/` inside one project:
 
 ```text
 npm install -g @vegamo/deepcode-cli
@@ -161,22 +177,6 @@ npm install -g @vegamo/deepcode-cli
 ```
 
 Open Deep Code's skill picker with `/` or type the skill name, then run PixelLab Pip setup.
-
-#### Cursor
-
-Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.
-
-```text
-/pixellab-pip setup
-```
-
-#### VS Code Agent Plugins
-
-Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin marketplace flow.
-
-```text
-/pixellab-pip setup
-```
 
 ### Manual Skill Install
 

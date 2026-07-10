@@ -1,7 +1,7 @@
 # Shared helper library for the dev-tools scripts -- dot-sourced, not run directly.
 # Consumers: manage-codex-plugin.ps1, manage-claude-plugin.ps1,
-# manage-pixellab-doc-cache.ps1. Keep only helpers that are identical across
-# callers here so a fix lands in one place.
+# manage-opencode-plugin.ps1, manage-pixellab-doc-cache.ps1. Keep only helpers
+# that are identical across callers here so a fix lands in one place.
 
 function Get-NormalizedPath {
     param([AllowNull()][string]$Path)
@@ -10,7 +10,10 @@ function Get-NormalizedPath {
         return $null
     }
 
-    $cleanPath = $Path -replace '^\\\\\?\\', ''
+    # Strip both the Win32 extended prefix (\\?\) and the NT-namespace prefix
+    # (\??\) that reparse-point targets can carry, so link targets compare equal
+    # to a plainly-resolved path.
+    $cleanPath = $Path -replace '^\\\\\?\\', '' -replace '^\\\?\?\\', ''
     try {
         return [System.IO.Path]::GetFullPath($cleanPath).TrimEnd('\', '/')
     }

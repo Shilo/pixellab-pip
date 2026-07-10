@@ -9,6 +9,7 @@ Last reviewed: 2026-07-05.
   - [OpenSSF Scorecard (maintainer-only)](#openssf-scorecard-maintainer-only)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [Claude Code Local Plugin Testing](#claude-code-local-plugin-testing)
+- [OpenCode Local Skill Testing](#opencode-local-skill-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
 - [Skill Benchmark: Routing and Cost](#skill-benchmark-routing-and-cost)
@@ -123,6 +124,41 @@ claude plugin list --json
 ```
 
 `development local` should show a version containing `+claude.dev-` and a `directory` marketplace source. `production remote` should show the GitHub marketplace source and the normal release version.
+
+## OpenCode Local Skill Testing
+
+OpenCode has **no skill marketplace or CLI** — its `opencode plugin` command installs JavaScript/TypeScript code plugins with event hooks, which is a different mechanism entirely. Skills are **directory-discovered**: OpenCode loads `SKILL.md` from folders it scans, including the global path `~/.config/opencode/skills/<name>/SKILL.md` ([OpenCode skills docs](https://opencode.ai/docs/skills)). So the local integration is a link-vs-copy of a filesystem entry, not a CLI wrapper.
+
+Use the OpenCode-only helper:
+
+```powershell
+.\dev-tools\manage-opencode-plugin.ps1
+```
+
+The script resolves the repository path from its own location, so it can be launched from another working directory or by double-clicking the `.ps1` file. It pauses before exit so the result stays visible. It manages `%USERPROFILE%\.config\opencode\skills\pixellab-pip` (or `%XDG_CONFIG_HOME%\opencode\skills\pixellab-pip` if you set that variable, which OpenCode honors on Windows too), mapped to the repo's `skills\pixellab-pip`.
+
+The menu offers:
+
+- `Install <opposite mode>` - switch between `development local` and `production copy`.
+- `Update <current mode>` - refresh the currently installed mode.
+- `Uninstall <current mode>` - remove the installed skill entry.
+- `Cancel` - exit without changes.
+
+When no skill is installed, the menu offers `Install development local`, `Install production copy`, `Uninstall pixellab-pip (not installed)`, and `Cancel`.
+
+For `development local`, the script creates a directory **junction** (falling back to a symbolic link) from the global skills path to this repository's `skills\pixellab-pip`, so edits go live with no copy and no cachebuster — OpenCode reads the files directly. A junction is preferred because it needs no admin rights on Windows.
+
+For `production copy`, the script makes a full recursive **copy** of `skills\pixellab-pip` into the global skills path, simulating what a real user's manual/release install looks like (a plain directory, not a link). OpenCode has no GitHub-remote skill install, so there is no remote mode.
+
+Uninstall removes **only** the entry it manages: a junction/symlink is deleted as a reparse point (never recursing into the repo source it points at), while a plain copy is removed recursively.
+
+To verify which build OpenCode is using, inspect the global skills path:
+
+```powershell
+Get-Item "$env:USERPROFILE\.config\opencode\skills\pixellab-pip" | Format-List Name, Attributes, Target
+```
+
+`development local` shows the `ReparsePoint` attribute and a `Target` pointing at this repository's `skills\pixellab-pip`. `production copy` shows a plain `Directory` with no target. In OpenCode, `pixellab-pip` then appears in the `skill` tool's available-skills list.
 
 ## PixelLab Docs Drift Checks
 
