@@ -60,6 +60,8 @@ Hosted MCP tool names are not REST endpoints; do not curl MCP tool names as `/v2
 
 ## Intent Router
 
+For any atlas or spritesheet request with known or requested cell dimensions, also read `references/local-asset-assembly.md` for the required grid inspection preview.
+
 | User intent | Default route | REST v2 route for code/exact control |
 |---|---|---|
 | Character, player, NPC, enemy, creature | MCP `create_character` with `mode="v3"` by default, then `create_character_state`, `animate_character`, `get_character`, list/delete helpers. For a follow-up animation on a multi-direction character, animate `south` first; ask before animating all directions. | `create-character-v3`, `create-character-with-4-directions`, `create-character-with-8-directions`, `create-character-pro`, state/animation/tags/ZIP/list/get/delete endpoints. |
@@ -134,7 +136,7 @@ Read only the relevant reference:
 - REST v2 prompt/field character limits: `references/prompt-limits.md`.
 - Explicit Aseprite handling, `.aseprite` workspaces, palette quantization, CLI/Lua export: `references/aseprite-cli.md`.
 - Third-party Aseprite MCP servers: `references/aseprite-mcp.md`.
-- Local preview GIFs, spritesheets, ImageMagick assembly: `references/local-asset-assembly.md`.
+- Atlas/spritesheet grid inspection previews, local assembly, preview GIFs, and ImageMagick: `references/local-asset-assembly.md`.
 
 Optional broader docs: in full plugin/repo installs these resolve relative to this `SKILL.md`; raw skill installs may omit them. Read at most one matching file if runtime references are not enough; if absent, continue with `references/official-pixellab-documentation.md` and current official docs.
 
