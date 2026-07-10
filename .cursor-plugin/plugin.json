@@ -24,6 +24,8 @@
     "cursor-plugin",
     "github-copilot",
     "gemini-cli",
+    "opencode",
+    "deepseek",
     "mcp",
     "rest-api",
     "sprites",

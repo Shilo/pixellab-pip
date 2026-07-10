@@ -138,6 +138,30 @@ Update:
 copilot plugin update pixellab-pip
 ```
 
+#### OpenCode
+
+OpenCode discovers Agent Skills natively — there is no marketplace step (its `opencode plugin` command installs JavaScript code plugins, not skills). Install the skill (see [Manual Skill Install](#manual-skill-install)) into any path OpenCode reads: `.opencode/skills/`, `.agents/skills/`, or `.claude/skills/` (project, or their `~/.config/opencode`, `~/.agents`, `~/.claude` globals). OpenCode loads it on demand through its built-in `skill` tool.
+
+```text
+.opencode/skills/pixellab-pip/SKILL.md
+```
+
+Then ask OpenCode to set up PixelLab Pip.
+
+#### Deep Code (DeepSeek V4)
+
+Deep Code — the DeepSeek V4 terminal agent — discovers Agent Skills natively; there is no marketplace. Install the CLI, then drop the skill into a path it reads (`.agents/skills/` project or `~/.agents/skills/` global; legacy `.deepcode/skills/` also works):
+
+```text
+npm install -g @vegamo/deepcode-cli
+```
+
+```text
+.agents/skills/pixellab-pip/SKILL.md
+```
+
+Open Deep Code's skill picker with `/` or type the skill name, then run PixelLab Pip setup.
+
 #### Cursor
 
 Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.
@@ -164,6 +188,7 @@ You can also download the skill zip from the [latest release](https://github.com
 .agents/skills/pixellab-pip/SKILL.md
 .claude/skills/pixellab-pip/SKILL.md
 .cursor/skills/pixellab-pip/SKILL.md
+.opencode/skills/pixellab-pip/SKILL.md
 ```
 
 PowerShell:
