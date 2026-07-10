@@ -23,7 +23,7 @@ For plural or complete sets, `32x32 icons` is the per-icon cell size, not the ca
 
 - `8x8` / 64 icons at 32px each → `image_size: { "width": 256, "height": 256 }`.
 - `4x4` / 16 icons at 32px each → `image_size: { "width": 128, "height": 128 }`.
-- A `32x32` `image_size` fits only a single icon. At small sizes `generate-image-v2` may return a multi-candidate batch; present candidates and select after visual review.
+- A `32x32` `image_size` fits only a single icon. At small sizes `generate-image-v2` may return a multi-candidate batch; read `create-image-pro.md` for native-size diversity, no-label, and view guidance, then present candidates and select after visual review.
 
 Generate the sheet first, then verify the original output against the requested cell size. If symbols come out 64px-ish, the layout collapses, or gutters break the cell math, report a failed candidate — do not resize or reassemble it into a claimed final.
 

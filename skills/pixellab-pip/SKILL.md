@@ -89,7 +89,7 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 | Map image / visual level concept | REST v2 image/background route; website or Aseprite for map extension workflows. | No public map CRUD/extension/texture surface is documented. |
 | Map object | MCP `create_map_object` + `get_map_object`; download promptly — MCP map objects auto-delete after 8 hours. | `POST /map-objects` (POST-only; verify polling shape from OpenAPI). |
 | Whole map, Map Workshop, map CRUD/export | Website manually, or generate components via MCP/REST. | No public map CRUD surface is documented. |
-| Static effect/VFX sprite | If a target image is supplied and the user asks to add an effect to it, REST image edit on that target; otherwise object/image generation for a separate reusable asset. | Edit routes return a whole edited image, not an isolated effect layer; no standalone VFX endpoint exists. |
+| Static effect/VFX sprite | If a target image is supplied and the user asks to add an effect to it, REST image edit on that target; otherwise object/image generation for a separate reusable asset. For native-size multi-output VFX batches, read `references/create-image-pro.md`. | Edit routes return a whole edited image, not an isolated effect layer; no standalone VFX endpoint exists. |
 | Animated effect/VFX | REST v2 raw animation, or MCP object animation for a managed object. | `animate-with-text-v3`, `animate-with-skeleton`, or object animation endpoints; VFX is a description, not an endpoint. |
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
@@ -117,7 +117,7 @@ Read only the relevant reference:
 - Persistent completion sound toggle: `references/bark.md`.
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
 - Skill/ability and inventory item icon sheets: `references/icon.md`.
-- Create Image Pro, exact grids, below-32px cells: `references/create-image-pro.md`.
+- Create Image Pro, native-size multi-output batches, exact grids, below-32px cells: `references/create-image-pro.md`.
 - Cheap/budget/credit-minimizing route selection: `references/cost-routing.md`.
 - Paperdolling and layered characters: `references/paperdolling.md`.
 - Review/choice handling for static candidate alternatives: `references/reviewable-candidates.md`.

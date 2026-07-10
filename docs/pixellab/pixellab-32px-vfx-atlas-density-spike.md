@@ -10,7 +10,7 @@ Text-only Create Image Pro did not produce a valid one-shot `16x16` atlas of `25
 
 The evidence does **not** support a general claim that non-tile or non-UI sheets cannot hold a proper grid. Existing showcases contain successful one-shot `8x8` sheets of transparent `32x32` item icons and opaque `32x32` skill icons. The unvalidated boundary is the much denser one-shot request: `256` recognizable transparent effects in one `512x512` image.
 
-For an exact `512x512` deliverable, the strongest next route is to generate native `32x32` PixelLab images and assemble accepted outputs locally without resizing or repainting. Four independently planned `8x8` sheets are the strongest whole-sheet alternative.
+For an exact `512x512` deliverable, native `32x32` PixelLab images solve cell dimensions, but a follow-up experiment showed that one prompt's 64 outputs can repeat one dominant composition or inherit caption-like text from a long named catalog. Native-size generation therefore needs semantic-diversity, no-label, and view verification before assembly. Four independently planned `8x8` sheets remain the strongest whole-sheet alternative.
 
 ## Related Evidence
 
@@ -231,13 +231,56 @@ For strict transparent VFX sheets:
 - Treat `32x32`, inner footprint sizes, grid counts, file wording, and game-engine terminology as prompt guidance—not structural guarantees.
 - Verify the first visible effect and observed grid before crop, hash, uniqueness, or packaging checks.
 
+## Native 32px Follow-Up
+
+Three approved `image_size: 32x32`, `no_background: true` calls each returned 64 separate images. All 192 source files had native dimensions and transparency, and all three locally assembled `8x8` atlases round-tripped every RGBA crop exactly. Geometry succeeded; content-set behavior exposed three different prompt risks.
+
+### Long Explicit Catalog
+
+One description requested 64 unique effects and supplied a semicolon-separated list of 64 named concepts, followed by a trailing no-text clause.
+
+Observed result:
+
+- Strong palette and subject-family variety.
+- 64 exact-unique files.
+- Caption-like text marks appeared beneath nearly every effect.
+- The output did not prove one-to-one coverage of the named concepts.
+
+The evidence does not show that native `32x32` sizing caused text. The two same-size single-concept prompts did not produce captions. The differentiating condition was the long named catalog, which likely activated a labeled icon-catalog prior; this remains a one-run hypothesis rather than a universal rule. A trailing `no text` clause was too weak to override it.
+
+For named multi-output lists, front-load the semantic boundary: `Unlabeled pictorial assets only; the following names are prompt guidance and must never appear as visible text.` Keep the final no-text clause as reinforcement, and prefer smaller disjoint concept batches when exact coverage matters.
+
+### Arcane Ring Variations
+
+The arcane description centered on `a luminous violet energy ring collapsing around a bright cyan center`. The 64 outputs retained palette and theme well but were overwhelmingly circle-and-core compositions.
+
+This is not evidence that small native images inherently lack variety. The prompt specified one dominant silhouette and did not request alternatives. PixelLab returned variations of that design. When broader variety is required, vary independent axes explicitly—ring, starburst, spiral, shard rupture, crescent, irregular tear, cross-flare, particle cloud—or run disjoint thematic prompts. `Unique` and different pixel hashes do not establish meaningful silhouette diversity.
+
+### Ground-Impact Variations
+
+The ground-impact description requested an `asymmetrical plume` with smoke `rising from a bright impact flash`. The 64 outputs consistently used a side-view profile, a visible ground baseline, and a diagonal or vertical plume. They also repeated the same fire-at-base plus smoke-column composition.
+
+Top-down was not specified, so the side-view result followed the wording more closely than the user's unstated assumption. For top-down gameplay effects, say `top-down orthographic view looking straight down at the ground plane`, request radial debris around the center, and forbid a horizon, side profile, visible baseline, or vertical rising plume. View is a functional input, not a style detail to infer from `ground impact`.
+
+### Revised Finding
+
+Native-size generation is structurally reliable for file dimensions, not for set planning. At small sizes, one `generate-image-v2` call returns many candidates responding to one description:
+
+- A narrow composition produces many close variations.
+- A broad named catalog can increase diversity but may trigger labels and cannot guarantee one output per name.
+- Exact hashes detect duplicate pixels, not duplicate composition or semantics.
+- View remains ambiguous unless the prompt states the gameplay plane.
+
+The efficient production pattern is to use several disjoint, moderately broad prompts with explicit silhouette axes, an early unlabeled-pictorial clause when names are listed, and an explicit view when orientation matters. Review all candidates for text, motif repetition, view, and semantics before keeping or assembling them.
+
 ## Recommended Production Direction
 
 For a strict all-unique `512x512` atlas of 256 transparent `32x32` explosion effects:
 
-1. Plan four disjoint 64-effect batches and show every input before spending credits.
-2. Prefer native `32x32` outputs when exact cell dimensions outrank one-shot cohesion.
-3. Use four `8x8` sheets when within-sheet cohesion is more important and accept that each sheet still needs visual grid verification.
-4. Create a separate expected-grid inspection preview for every atlas or spritesheet result; never bake that grid into the final asset.
-5. Review semantic duplicates visually; pixel hashes only detect exact duplication.
-
+1. Plan several disjoint, moderately broad prompts and show every input before spending credits; do not rely on one 64-name catalog to bind concepts to outputs.
+2. Front-load unlabeled-pictorial wording whenever concept names could be interpreted as captions.
+3. State the gameplay view when orientation changes usability, especially top-down versus side-view VFX.
+4. Prefer native `32x32` outputs when exact cell dimensions outrank one-shot cohesion.
+5. Use four `8x8` sheets when within-sheet cohesion is more important and accept that each sheet still needs visual grid verification.
+6. Create a separate expected-grid inspection preview for every atlas or spritesheet result; never bake that grid into the final asset.
+7. Review every candidate for readable or text-like marks, repeated dominant composition, requested view, and semantic duplication; pixel hashes only detect exact duplication.
