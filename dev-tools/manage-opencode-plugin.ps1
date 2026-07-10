@@ -48,6 +48,17 @@ function Get-OpenCodeSkillPath {
     return Join-Path $configBase "opencode\skills\$SkillName"
 }
 
+function Format-FolderLink {
+    # Emit an OSC 8 terminal hyperlink so the install folder is clickable in
+    # Windows Terminal / VS Code; the visible text stays the plain path, so
+    # terminals without OSC 8 support just show the readable location.
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $uri = 'file:///' + (($Path -replace '\\', '/') -replace ' ', '%20')
+    $esc = [char]27
+    return "$esc]8;;$uri$esc\$Path$esc]8;;$esc\"
+}
+
 function Test-ReparsePoint {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -185,12 +196,14 @@ function Write-InstallState {
 
     if ($State.Exists) {
         Write-Host "Current install:"
-        Write-Host "  Skill path:  $($State.Path)"
+        Write-Host "  Skill path:  $(Format-FolderLink $State.Path)"
         if ($State.IsLink) {
-            Write-Host "  Link target: $($State.LinkTarget)"
+            Write-Host "  Link target: $(Format-FolderLink $State.LinkTarget)"
         }
     }
     else {
+        # Not installed yet, so the folder does not exist -- show it plainly
+        # (no link to a folder that is not there) so you know where it will land.
         Write-Host "Current install: not installed"
         Write-Host "  Skill path:  $($State.Path)"
     }
@@ -307,6 +320,8 @@ function Invoke-Main {
         }
     }
 
+    Write-Host ""
+    Write-Host "Skill folder: $(Format-FolderLink $skillPath)"
     Write-Host "Restart OpenCode or open a fresh session before testing $SkillName."
 }
 
