@@ -21,7 +21,33 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 - **REST v2 endpoints** are HTTP paths under `https://api.pixellab.ai/v2`.
 - **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP exposes the managed-asset ones only. This is the single most important distinction in the whole map: MCP can animate a character/object it created, but it has no tool to animate an arbitrary supplied image.
 
-**Both-way summary:** **32** REST v2 asset/management endpoints have no MCP tool (raw image gen, edits, inpaint, raw animation/rotation, prompt enhancers, ZIP/tags); **17** MCP tools have no REST v2 endpoint (the projects/chat/sandbox/agent platform layer). Each direction is enumerated in full below.
+**Both-way summary:** **32** REST v2 asset/management endpoints have no MCP tool (raw image gen, edits, inpaint, raw animation/rotation, prompt enhancers, ZIP/tags); **17** MCP tools have no REST v2 endpoint at all (the projects/chat/sandbox/agent platform layer). A further 7 MCP `delete`/`list` helpers are absent only from the `llms.txt` index and almost certainly exist in OpenAPI, so they are not counted as true gaps. Each direction is enumerated in full below.
+
+## At a Glance
+
+Category-level overview of both gaps; full per-endpoint enumeration and rationale follow below.
+
+**Missing from MCP — REST v2 has it, no MCP tool (32 endpoints).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
+
+| Category | # | REST v2 endpoints |
+|---|---|---|
+| Raw image generation | 7 | `create-image-pixen`, `create-image-pixflux`, `create-image-pixflux-background`, `create-image-bitforge`, `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2` |
+| Image edit / convert / resize | 6 | `edit-image`, `edit-images-v2`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, `remove-background` |
+| Inpaint | 2 | `inpaint`, `inpaint-v3` |
+| Raw animation / rotation / skeleton | 11 | `animate-with-text`, `animate-with-text-v2`, `animate-with-text-v3`, `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `rotate` |
+| Prompt enhancement | 3 | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt` |
+| Managed-asset export & tagging | 3 | `characters/{id}/zip`, `characters/{id}/tags` (PATCH), `objects/{id}/tags` (PATCH) |
+
+**Missing from REST v2 — MCP has it, no REST endpoint (17 genuine + 7 likely `llms.txt` abbreviation).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
+
+| Category | # | MCP tools |
+|---|---|---|
+| Projects | 1 | `list_projects` |
+| Chat (game-building agent) | 3 | `chat_list_conversations`, `chat_get_messages`, `chat_send_message` |
+| Sandbox (code execution) | 8 | `sandbox_create_session`, `sandbox_destroy_session`, `sandbox_bash`, `sandbox_run`, `sandbox_read`, `sandbox_write`, `sandbox_edit`, `sandbox_sync` |
+| Deployed agents | 3 | `agent_list`, `agent_inspect`, `agent_talk` |
+| MCP meta | 2 | `agent_help`, `agent_feedback` |
+| Delete/list helpers — likely abbreviation, verify OpenAPI | 7 | `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro`, `delete_animation`, `list_sidescroller_tilesets`, `list_tiles_pro` |
 
 ## Coverage Matrix
 
@@ -131,7 +157,7 @@ MCP `animate_character` / `animate_object` require an MCP-managed asset id. Anim
 - `POST /generate-8-rotations-v3`
 - `POST /rotate`
 
-There is no public raw 4-rotation route; raw rotation is 8-direction only.
+There is no public raw *4-rotation batch* route: the batch rotation routes are 8-direction only, while `POST /rotate` is a single/arbitrary rotation utility.
 
 ### 5. Prompt enhancement (3) — no MCP prompt-helper tools
 
