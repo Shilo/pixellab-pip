@@ -21,8 +21,6 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 - **REST v2 endpoints** are HTTP paths under `https://api.pixellab.ai/v2`.
 - **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP exposes the managed-asset ones only. This is the single most important distinction in the whole map: MCP can animate a character/object it created, but it has no tool to animate an arbitrary supplied image.
 
-**Both-way summary:** **32** REST v2 asset/management endpoints have no MCP tool (raw image gen, edits, inpaint, raw animation/rotation, prompt enhancers, ZIP/tags); **17** MCP tools have no REST v2 endpoint at all (the projects/chat/sandbox/agent platform layer). A further 7 MCP `delete`/`list` helpers are absent only from the `llms.txt` index and almost certainly exist in OpenAPI, so they are not counted as true gaps. Each direction is enumerated in full below.
-
 ## At a Glance
 
 Category-level overview of both gaps; full per-endpoint enumeration and rationale follow below.
