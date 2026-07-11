@@ -40,6 +40,8 @@ Two rules that always apply:
 
 Use Markdown links with user-facing labels (`Spritesheet`, `ZIP package`) for every listed file. Files live under the project `pixellab-pip-generations/` folder per SKILL.md; copy temporary URLs or cache paths there before reporting them as local outputs.
 
+OpenCode does not render inline images in chat. Open the output folder.
+
 For REST routes, report the exact public path used, with the `/v2` prefix and without collapsing create and retrieval routes: `REST POST /v2/create-tileset`, `GET /v2/tilesets/{tileset_id}`.
 
 If local assembly produced a sheet/GIF/package, state that PixelLab produced the underlying images and that assembly preserved original pixels.
