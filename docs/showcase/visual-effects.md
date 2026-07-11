@@ -4,12 +4,12 @@ Last reviewed: 2026-07-10.
 
 <table>
   <tr>
-    <td align="center"><img src="visual-effects/fire-explosion.gif" alt="Top-down fiery explosion animation"></td>
-    <td align="center"><img src="visual-effects/toxic-explosion.gif" alt="Top-down toxic acid explosion animation"></td>
+    <td align="center"><img src="visual-effects/spark-explosion.gif" alt="Top-down spark flash explosion animation"></td>
+    <td align="center"><img src="visual-effects/void-implosion.gif" alt="Top-down void magic implosion animation"></td>
   </tr>
   <tr>
-    <td align="center"><img src="visual-effects/void-implosion.gif" alt="Top-down void magic implosion animation"></td>
-    <td align="center"><img src="visual-effects/spark-explosion.gif" alt="Top-down spark flash explosion animation"></td>
+    <td align="center"><img src="visual-effects/fire-explosion.gif" alt="Top-down fiery explosion animation"></td>
+    <td align="center"><img src="visual-effects/toxic-explosion.gif" alt="Top-down toxic acid explosion animation"></td>
   </tr>
 </table>
 
@@ -17,10 +17,10 @@ PixelLab Pip turned a single request for a variety of unique top-down explosions
 
 ## Contents
 
+- [Spark Explosion](#spark-explosion)
+- [Void Implosion](#void-implosion)
 - [Fire Explosion](#fire-explosion)
 - [Toxic Explosion](#toxic-explosion)
-- [Void Implosion](#void-implosion)
-- [Spark Explosion](#spark-explosion)
 - [Workflow](#workflow)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
@@ -32,9 +32,108 @@ PixelLab Pip turned a single request for a variety of unique top-down explosions
 /pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.
 ```
 
+## Spark Explosion
+
+<table>
+  <tr>
+    <td align="center"><img src="visual-effects/spark-explosion.gif" alt="Top-down spark flash explosion animation"></td>
+    <td align="center"><img src="visual-effects/spark-explosion.png" alt="Spark explosion source spritesheet"></td>
+  </tr>
+</table>
+
+Request intent: a small, bright yellow and white spark flash with a star-shaped glint, viewed straight down.
+
+Source inputs: text-only request for the source sprite. The animation step used the locally assembled 32px spritesheet as its reference frame.
+
+Route: REST v2 `generate-image-v2` (Create Image Pro) for the source sprite, then REST v2 `animate-with-text-v3` (Animate with Text (new)) for the animation.
+
+Prompt preparation: the description named a small radial burst of yellow and white sparks and a glinting star-shaped flash, keeping the top-down orthographic and radial ground-plane wording. The animation `action` pluralized the subject to `explosions`.
+
+Local processing: the 64 native-size candidates were tiled into an 8x8 spritesheet; the returned animation frames were assembled into a transparent GIF and the frame timing was polished by hand.
+
+Blueprint — replayable route and request body ([`spark-explosion.blueprint.json`](visual-effects/spark-explosion.blueprint.json)):
+
+```json
+[
+  {
+    "_comment": "One generate-image-v2 call at 32x32 returns 64 unique top-down candidate variations; they were tiled locally into an 8x8 spritesheet (spark-explosion.png) used as the animation reference frame.",
+    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
+    "POST /v2/generate-image-v2": {
+      "description": "bright spark flash pop explosion viewed top-down orthographic looking straight down, small radial burst of yellow and white sparks and glinting star-shaped flash on the ground plane, circular symmetrical blast",
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "no_background": true
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "spark-explosion.png",
+      "action": "bright spark flash pop explosions viewed top-down orthographic looking straight down, small radial burst of yellow and white sparks and glinting star-shaped flash on the ground plane, circular symmetrical blast",
+      "frame_count": 8,
+      "no_background": true
+    }
+  }
+]
+```
+
+## Void Implosion
+
+<table>
+  <tr>
+    <td align="center"><img src="visual-effects/void-implosion.gif" alt="Top-down void magic implosion animation"></td>
+    <td align="center"><img src="visual-effects/void-implosion.png" alt="Void implosion source spritesheet"></td>
+  </tr>
+</table>
+
+Request intent: a purple and violet arcane implosion with a black core and swirling shadow tendrils, viewed straight down.
+
+Source inputs: text-only request for the source sprite. The animation step used the locally assembled 32px spritesheet as its reference frame.
+
+Route: REST v2 `generate-image-v2` (Create Image Pro) for the source sprite, then REST v2 `animate-with-text-v3` (Animate with Text (new)) for the animation.
+
+Prompt preparation: the description named purple and violet arcane energy, a black core, and swirling shadow tendrils, keeping the top-down orthographic and radial ground-plane wording. The animation `action` pluralized the subject to `implosions`.
+
+Local processing: the 64 native-size candidates were tiled into an 8x8 spritesheet; the returned animation frames were assembled into a transparent GIF and the frame timing was polished by hand.
+
+Blueprint — replayable route and request body ([`void-implosion.blueprint.json`](visual-effects/void-implosion.blueprint.json)):
+
+```json
+[
+  {
+    "_comment": "One generate-image-v2 call at 32x32 returns 64 unique top-down candidate variations; they were tiled locally into an 8x8 spritesheet (void-implosion.png) used as the animation reference frame.",
+    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
+    "POST /v2/generate-image-v2": {
+      "description": "dark void magic implosion viewed top-down orthographic looking straight down, radial burst of purple and violet arcane energy with black core, swirling shadow tendrils and magic sparks on the ground plane, circular symmetrical blast",
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "no_background": true
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "void-implosion.png",
+      "action": "dark void magic implosions viewed top-down orthographic looking straight down, radial burst of purple and violet arcane energy with black core, swirling shadow tendrils and magic sparks on the ground plane, circular symmetrical blast",
+      "frame_count": 8,
+      "no_background": true
+    }
+  }
+]
+```
+
 ## Fire Explosion
 
-![Top-down fiery explosion animation](visual-effects/fire-explosion.gif)
+<table>
+  <tr>
+    <td align="center"><img src="visual-effects/fire-explosion.gif" alt="Top-down fiery explosion animation"></td>
+    <td align="center"><img src="visual-effects/fire-explosion.png" alt="Fire explosion source spritesheet"></td>
+  </tr>
+</table>
 
 Request intent: a fiery orange and red explosion with a bright yellow-white core, viewed straight down.
 
@@ -51,8 +150,8 @@ Blueprint — replayable route and request body ([`fire-explosion.blueprint.json
 ```json
 [
   {
-    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
     "_comment": "One generate-image-v2 call at 32x32 returns 64 unique top-down candidate variations; they were tiled locally into an 8x8 spritesheet (fire-explosion.png) used as the animation reference frame.",
+    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
     "POST /v2/generate-image-v2": {
       "description": "fiery explosion blast viewed top-down orthographic looking straight down, radial burst of orange and red flames with bright yellow-white core, smoke and ember debris spreading outward on the ground plane, circular symmetrical blast",
       "image_size": {
@@ -76,7 +175,12 @@ Blueprint — replayable route and request body ([`fire-explosion.blueprint.json
 
 ## Toxic Explosion
 
-![Top-down toxic acid explosion animation](visual-effects/toxic-explosion.gif)
+<table>
+  <tr>
+    <td align="center"><img src="visual-effects/toxic-explosion.gif" alt="Top-down toxic acid explosion animation"></td>
+    <td align="center"><img src="visual-effects/toxic-explosion.png" alt="Toxic explosion source spritesheet"></td>
+  </tr>
+</table>
 
 Request intent: a green and lime acid burst with bubbling ooze and corrosive vapor, viewed straight down.
 
@@ -93,8 +197,8 @@ Blueprint — replayable route and request body ([`toxic-explosion.blueprint.jso
 ```json
 [
   {
-    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
     "_comment": "One generate-image-v2 call at 32x32 returns 64 unique top-down candidate variations; they were tiled locally into an 8x8 spritesheet (toxic-explosion.png) used as the animation reference frame.",
+    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
     "POST /v2/generate-image-v2": {
       "description": "toxic acid explosion viewed top-down orthographic looking straight down, radial burst of green and lime slime splatter with bubbling ooze, corrosive droplets and vapor spreading outward on the ground plane, circular symmetrical blast",
       "image_size": {
@@ -109,90 +213,6 @@ Blueprint — replayable route and request body ([`toxic-explosion.blueprint.jso
     "POST /v2/animate-with-text-v3": {
       "first_frame": "toxic-explosion.png",
       "action": "toxic acid explosions viewed top-down orthographic looking straight down, radial burst of green and lime slime splatter with bubbling ooze, corrosive droplets and vapor spreading outward on the ground plane, circular symmetrical blast",
-      "frame_count": 8,
-      "no_background": true
-    }
-  }
-]
-```
-
-## Void Implosion
-
-![Top-down void magic implosion animation](visual-effects/void-implosion.gif)
-
-Request intent: a purple and violet arcane implosion with a black core and swirling shadow tendrils, viewed straight down.
-
-Source inputs: text-only request for the source sprite. The animation step used the locally assembled 32px spritesheet as its reference frame.
-
-Route: REST v2 `generate-image-v2` (Create Image Pro) for the source sprite, then REST v2 `animate-with-text-v3` (Animate with Text (new)) for the animation.
-
-Prompt preparation: the description named purple and violet arcane energy, a black core, and swirling shadow tendrils, keeping the top-down orthographic and radial ground-plane wording. The animation `action` pluralized the subject to `implosions`.
-
-Local processing: the 64 native-size candidates were tiled into an 8x8 spritesheet; the returned animation frames were assembled into a transparent GIF and the frame timing was polished by hand.
-
-Blueprint — replayable route and request body ([`void-implosion.blueprint.json`](visual-effects/void-implosion.blueprint.json)):
-
-```json
-[
-  {
-    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
-    "_comment": "One generate-image-v2 call at 32x32 returns 64 unique top-down candidate variations; they were tiled locally into an 8x8 spritesheet (void-implosion.png) used as the animation reference frame.",
-    "POST /v2/generate-image-v2": {
-      "description": "dark void magic implosion viewed top-down orthographic looking straight down, radial burst of purple and violet arcane energy with black core, swirling shadow tendrils and magic sparks on the ground plane, circular symmetrical blast",
-      "image_size": {
-        "width": 32,
-        "height": 32
-      },
-      "no_background": true
-    }
-  },
-  {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
-    "POST /v2/animate-with-text-v3": {
-      "first_frame": "void-implosion.png",
-      "action": "dark void magic implosions viewed top-down orthographic looking straight down, radial burst of purple and violet arcane energy with black core, swirling shadow tendrils and magic sparks on the ground plane, circular symmetrical blast",
-      "frame_count": 8,
-      "no_background": true
-    }
-  }
-]
-```
-
-## Spark Explosion
-
-![Top-down spark flash explosion animation](visual-effects/spark-explosion.gif)
-
-Request intent: a small, bright yellow and white spark flash with a star-shaped glint, viewed straight down.
-
-Source inputs: text-only request for the source sprite. The animation step used the locally assembled 32px spritesheet as its reference frame.
-
-Route: REST v2 `generate-image-v2` (Create Image Pro) for the source sprite, then REST v2 `animate-with-text-v3` (Animate with Text (new)) for the animation.
-
-Prompt preparation: the description named a small radial burst of yellow and white sparks and a glinting star-shaped flash, keeping the top-down orthographic and radial ground-plane wording. The animation `action` pluralized the subject to `explosions`.
-
-Local processing: the 64 native-size candidates were tiled into an 8x8 spritesheet; the returned animation frames were assembled into a transparent GIF and the frame timing was polished by hand.
-
-Blueprint — replayable route and request body ([`spark-explosion.blueprint.json`](visual-effects/spark-explosion.blueprint.json)):
-
-```json
-[
-  {
-    "_comment_prompt": "/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.",
-    "_comment": "One generate-image-v2 call at 32x32 returns 64 unique top-down candidate variations; they were tiled locally into an 8x8 spritesheet (spark-explosion.png) used as the animation reference frame.",
-    "POST /v2/generate-image-v2": {
-      "description": "bright spark flash pop explosion viewed top-down orthographic looking straight down, small radial burst of yellow and white sparks and glinting star-shaped flash on the ground plane, circular symmetrical blast",
-      "image_size": {
-        "width": 32,
-        "height": 32
-      },
-      "no_background": true
-    }
-  },
-  {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
-    "POST /v2/animate-with-text-v3": {
-      "first_frame": "spark-explosion.png",
-      "action": "bright spark flash pop explosions viewed top-down orthographic looking straight down, small radial burst of yellow and white sparks and glinting star-shaped flash on the ground plane, circular symmetrical blast",
       "frame_count": 8,
       "no_background": true
     }
@@ -220,21 +240,21 @@ The `first_frame` field is where the website's Animate with Text (new) reference
 
 | Output | Stable showcase file |
 |---|---|
+| Spark explosion animation | `docs/showcase/visual-effects/spark-explosion.gif` |
+| Spark explosion source spritesheet | `docs/showcase/visual-effects/spark-explosion.png` |
+| Void implosion animation | `docs/showcase/visual-effects/void-implosion.gif` |
+| Void implosion source spritesheet | `docs/showcase/visual-effects/void-implosion.png` |
 | Fire explosion animation | `docs/showcase/visual-effects/fire-explosion.gif` |
 | Fire explosion source spritesheet | `docs/showcase/visual-effects/fire-explosion.png` |
 | Toxic explosion animation | `docs/showcase/visual-effects/toxic-explosion.gif` |
 | Toxic explosion source spritesheet | `docs/showcase/visual-effects/toxic-explosion.png` |
-| Void implosion animation | `docs/showcase/visual-effects/void-implosion.gif` |
-| Void implosion source spritesheet | `docs/showcase/visual-effects/void-implosion.png` |
-| Spark explosion animation | `docs/showcase/visual-effects/spark-explosion.gif` |
-| Spark explosion source spritesheet | `docs/showcase/visual-effects/spark-explosion.png` |
 
 ## Validation Notes
 
 - All four animation GIFs are `256x256` with transparency.
+- Spark explosion GIF: `8` frames.
+- Void implosion GIF: `7` frames.
 - Fire explosion GIF: `9` frames.
 - Toxic explosion GIF: `10` frames.
-- Void implosion GIF: `7` frames.
-- Spark explosion GIF: `8` frames.
 - Frame counts differ from the requested `frame_count` of 8 because the GIF timing was polished locally after generation.
 - Each source spritesheet is `256x256`, an 8x8 grid of `32x32` candidate cells with transparency.
