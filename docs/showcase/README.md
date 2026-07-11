@@ -53,22 +53,22 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="256"></a>
 </td>
 <td width="50%" valign="top">
-<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
-<details>
-<summary>Prompt</summary>
-<p><code>pip create a 64px character based on .pip-mascot.md</code></p>
-</details>
-<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
 <h3><a href="visual-effects.md">Visual Effects</a></h3>
 <details>
 <summary>Prompt</summary>
 <p><code>/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.</code></p>
 </details>
 <a href="visual-effects.md"><img src="visual-effects/spark-explosion.gif" alt="Top-down spark flash explosion animation"></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>pip create a 64px character based on .pip-mascot.md</code></p>
+</details>
+<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
 </td>
 </tr>
 </table>
