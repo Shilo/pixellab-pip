@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-07-11.
 
-Purpose: a route-level comparison of PixelLab's hosted MCP tool surface against the public REST v2 API, and an explicit inventory of every REST v2 asset/management endpoint that has no MCP counterpart (two non-asset infrastructure routes are handled separately below). This is the parity map behind SKILL.md's rule "do not assume a REST endpoint has an MCP equivalent just because MCP is configured." It complements the *service*-level comparison in [Official PixelLab MCP Service Comparison](../tools/official-pixellab-mcp-service-comparison.md) and the *label*-level crosswalk in [User-Facing Term To Backend Mapping](pixellab-user-facing-term-backend-mapping.md); this file is the *endpoint*-level view.
+Purpose: a route-level comparison of PixelLab's hosted MCP tool surface against the public REST v2 API — the missing features both ways: every REST v2 asset/management endpoint with no MCP counterpart, and every MCP tool with no REST v2 counterpart. (Two non-asset REST infrastructure routes are handled separately below.) This is the parity map behind SKILL.md's rule "do not assume a REST endpoint has an MCP equivalent just because MCP is configured." It complements the *service*-level comparison in [Official PixelLab MCP Service Comparison](../tools/official-pixellab-mcp-service-comparison.md) and the *label*-level crosswalk in [User-Facing Term To Backend Mapping](pixellab-user-facing-term-backend-mapping.md); this file is the *endpoint*-level view.
 
 ## Snapshots Compared
 
@@ -20,6 +20,8 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 - **MCP tools** are called through an MCP client (bare or host-prefixed such as `mcp__pixellab__create_character`). They are not HTTP paths; do not curl a tool name as `/v2/...`.
 - **REST v2 endpoints** are HTTP paths under `https://api.pixellab.ai/v2`.
 - **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP exposes the managed-asset ones only. This is the single most important distinction in the whole map: MCP can animate a character/object it created, but it has no tool to animate an arbitrary supplied image.
+
+**Both-way summary:** **32** REST v2 asset/management endpoints have no MCP tool (raw image gen, edits, inpaint, raw animation/rotation, prompt enhancers, ZIP/tags); **17** MCP tools have no REST v2 endpoint (the projects/chat/sandbox/agent platform layer). Each direction is enumerated in full below.
 
 ## Coverage Matrix
 
@@ -77,7 +79,7 @@ Parity legend: **=** covered by a dedicated MCP tool or a documented tool parame
 | `GET /balance` | `get_balance` | = |
 | `GET /background-jobs/{job_id}` | per-resource `get_*` tools | different model |
 
-**Note on async retrieval and management rows.** Where a `=` row bundles MCP `get_*` / `list_*` helpers against a single REST `POST`, REST retrieval is via `GET /background-jobs/{job_id}` (the generic async poll) plus, where present, a dedicated GET such as `/tilesets/{id}`, `/isometric-tiles/{id}`, `/tiles-pro/{id}`, or `/characters/{id}`. So MCP `get_*` tools are never true gaps. `llms.txt`, however, lists no *list* route for sidescroller tilesets or tiles-pro, and no *delete* route for any tile/tileset family — even though MCP has tools for all of them. Those are almost certainly `llms.txt` abbreviations of routes that exist in OpenAPI (see [The Reverse](#the-reverse-mcp-surfaces-with-no-rest-v2-counterpart)), so `=` here means create-plus-retrieve parity, not that every MCP helper has a line in `llms.txt`.
+**Note on async retrieval and management rows.** Where a `=` row bundles MCP `get_*` / `list_*` helpers against a single REST `POST`, REST retrieval is via `GET /background-jobs/{job_id}` (the generic async poll) plus, where present, a dedicated GET such as `/tilesets/{id}`, `/isometric-tiles/{id}`, `/tiles-pro/{id}`, or `/characters/{id}`. So MCP `get_*` tools are never true gaps. `llms.txt`, however, lists no *list* route for sidescroller tilesets or tiles-pro, and no *delete* route for any tile/tileset family — even though MCP has tools for all of them. Those are almost certainly `llms.txt` abbreviations of routes that exist in OpenAPI (see [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart)), so `=` here means create-plus-retrieve parity, not that every MCP helper has a line in `llms.txt`.
 
 ## REST v2 Endpoints With No MCP Counterpart
 
@@ -154,13 +156,35 @@ MCP covers the asset lifecycle except ZIP export and tag mutation:
 
 **Total: 32 asset/management REST v2 endpoints with no MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 3 export/tags).
 
-## The Reverse: MCP Surfaces With No REST v2 Counterpart
+## MCP Tools With No REST v2 Counterpart
 
-For completeness (the request was REST→MCP gaps, but the reverse informs routing too):
+The mirror of the gap list above: MCP tools with no public REST v2 endpoint. Grouped by why the gap exists. Of the 60 MCP tools in the snapshot, 17 are genuinely REST-less and 7 are `delete`/`list` helpers `llms.txt` omits.
 
-- **Platform / agent tooling — genuinely MCP-only.** No public REST v2 art API covers these: `list_projects`, `chat_list_conversations`, `chat_get_messages`, `chat_send_message`, `sandbox_create_session`, `sandbox_destroy_session`, `sandbox_bash`, `sandbox_run`, `sandbox_read`, `sandbox_write`, `sandbox_edit`, `sandbox_sync`, `agent_list`, `agent_inspect`, `agent_talk`, `agent_help`, `agent_feedback`. Handle these per [`mcp-platform-tools.md`](../../skills/pixellab-pip/references/mcp-platform-tools.md) (most are account reads or state-changing actions needing approval).
-- **Managed `delete`/`list` helpers not surfaced in `llms.txt`.** MCP documents `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro`, `delete_animation`, plus `list_sidescroller_tilesets` and `list_tiles_pro`, while the current `llms.txt` index lists no matching REST *delete* route for any tile/tileset family and no *list* route for sidescroller tilesets or tiles-pro. Per-resource `get_*` tools are deliberately excluded here — they are not gaps, since async retrieval maps to REST `GET /background-jobs/{job_id}` plus dedicated GETs where present. The missing `delete`/`list` routes are most likely `llms.txt` abbreviation rather than a true REST gap — verify against OpenAPI before assuming a route is missing.
-- **`pixellab://docs/...` resources.** Godot/Unity/Python/Wang/sidescroller/isometric/overview integration guides are MCP resources with no REST equivalent (they are documentation, not an API).
+### 1. Platform, agent, sandbox, chat (17) — genuinely MCP-only
+
+No public REST v2 art API covers these; they exist only as MCP tools. Every platform tool except `get_balance` (which maps to `GET /balance`) is here. There is no REST fallback to offer — if these tools are not visible, the capability is unavailable.
+
+- **Projects:** `list_projects`
+- **Chat (game-building agent):** `chat_list_conversations`, `chat_get_messages`, `chat_send_message`
+- **Sandbox (code execution):** `sandbox_create_session`, `sandbox_destroy_session`, `sandbox_bash`, `sandbox_run`, `sandbox_read`, `sandbox_write`, `sandbox_edit`, `sandbox_sync`
+- **Deployed agents:** `agent_list`, `agent_inspect`, `agent_talk`
+- **MCP meta:** `agent_help` (docs Q&A knowledge agent), `agent_feedback`
+
+Handle these per [`mcp-platform-tools.md`](../../skills/pixellab-pip/references/mcp-platform-tools.md) — most are account reads or state-changing actions that need explicit approval.
+
+### 2. Management helpers not surfaced in `llms.txt` (7) — likely abbreviation, verify OpenAPI
+
+MCP documents these `delete` / `list` tools, but the current `llms.txt` index shows no matching REST route. Almost certainly `llms.txt` abbreviation of routes that exist in OpenAPI rather than true REST gaps — verify against OpenAPI before assuming a route is missing:
+
+- **Deletes** (no REST *delete* route for any tile/tileset family, nor a managed-animation delete, in `llms.txt`): `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro`, `delete_animation`
+- **Lists** (no REST *list* route in `llms.txt`): `list_sidescroller_tilesets`, `list_tiles_pro`
+
+### Not counted as MCP-only
+
+- Per-resource `get_*` tools without a dedicated REST GET (`get_font`, `get_map_object`, `get_portrait_character`, `get_sidescroller_tileset`) are not gaps: async retrieval maps to REST `GET /background-jobs/{job_id}` plus dedicated GETs where present.
+- `pixellab://docs/...` resources (Godot/Unity/Python/Wang/sidescroller/isometric/overview integration guides) are MCP-only, but they are documentation, not an API surface.
+
+**Total: 17 genuinely MCP-only tools** (the platform layer), plus 7 `delete`/`list` helpers that are probably `llms.txt` abbreviations rather than real REST gaps.
 
 ## Routing Implications
 
