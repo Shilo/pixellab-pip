@@ -61,6 +61,16 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
 </td>
 </tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="visual-effects.md">Visual Effects</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.</code></p>
+</details>
+<a href="visual-effects.md"><img src="visual-effects/fire-explosion.gif" alt="Top-down fiery explosion animation"></a>
+</td>
+</tr>
 </table>
 
 ## Showcase Format
