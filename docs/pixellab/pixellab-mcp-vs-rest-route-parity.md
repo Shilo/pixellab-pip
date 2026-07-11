@@ -19,13 +19,15 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 
 - **MCP tools** are called through an MCP client (bare or host-prefixed such as `mcp__pixellab__create_character`). They are not HTTP paths; do not curl a tool name as `/v2/...`.
 - **REST v2 endpoints** are HTTP paths under `https://api.pixellab.ai/v2`.
-- **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP exposes the managed-asset ones only. This is the single most important distinction in the whole map: MCP can animate a character/object it created, but it has no tool to animate an arbitrary supplied image.
+- **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP exposes the managed-asset ones only. This is the single most important distinction in the whole map: MCP has no *standalone* raw-animation tool — animation, interpolation, and rotation are bundled into the managed `animate_*` / `create_*` tools and need a managed-asset context, even though several accept supplied images as `*_base64` inputs.
 
 ## At a Glance
 
-Category-level overview of both gaps; full per-endpoint enumeration and rationale follow below.
+**Matching basis:** counterparts are judged by **functional capability, not tool name** — a REST endpoint counts as "covered" if any MCP tool or documented MCP parameter does the same job, even under a different name or bundled into a broader tool (and the reverse for MCP tools). A scoped or partial overlap (for example, an MCP capability that works only on a managed asset) is marked partial (◐), not dropped.
 
-**Missing from MCP — REST v2 has it, no MCP tool (32 endpoints).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
+**On both surfaces — full functional parity, so they live in the [Coverage Matrix](#coverage-matrix) below, not in the gap lists:** characters (4/8-direction, v3, pro, state, animate, list/get/delete), **portrait ↔ character conversion** (`portrait-character-pro` ↔ `create_portrait_character`), objects (1/8-direction, state, animate, review, list/get/delete), map objects, top-down / sidescroller / isometric / pro tilesets & tiles, structured UI assets, **pixel font Pro** (`generate-font-pro` ↔ `create_font`), and balance. There is no vocal / voice / lip-sync / audio animation capability on either surface as of these snapshots.
+
+**Missing from MCP — REST v2 has it, no dedicated MCP tool (32 endpoints; ◐ = partial overlap via a broader tool).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
 
 | Category | # | REST v2 endpoints |
 |---|---|---|
@@ -35,6 +37,8 @@ Category-level overview of both gaps; full per-endpoint enumeration and rational
 | Raw animation / rotation / skeleton | 11 | `animate-with-text`, `animate-with-text-v2`, `animate-with-text-v3`, `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `rotate` |
 | Prompt enhancement | 3 | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt` |
 | Managed-asset export & tagging | 3 | `characters/{id}/zip`, `characters/{id}/tags` (PATCH), `objects/{id}/tags` (PATCH) |
+
+◐ **Partial overlap** (still no *dedicated* MCP tool, but a broader MCP tool covers a scoped version): `generate-ui-v2` → `create_ui_asset` (structured UI panels); `interpolation-v2` → `animate_*` start/end-frame interpolation on a managed asset; `generate-8-rotations-v2`/`-v3` → `create_8_direction_object` / `create_character` 8-direction output; `characters/{id}/zip` → `get_character` download link. Per-endpoint notes are below.
 
 **Missing from REST v2 — MCP has it, no REST endpoint (17 genuine + 7 likely `llms.txt` abbreviation).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
 
@@ -49,7 +53,7 @@ Category-level overview of both gaps; full per-endpoint enumeration and rational
 
 ## Coverage Matrix
 
-Parity legend: **=** covered by a dedicated MCP tool or a documented tool parameter; **~** covered only via an inferred, undocumented parameter value on a broader MCP tool; **REST-only** no MCP tool documented. On multi-helper rows, `=` is capability-level (create + retrieve); see the note after the tables about `list`/`delete` routes that `llms.txt` omits.
+Parity legend (functional, not name-based): **=** covered by a dedicated MCP tool or a documented tool parameter; **~** covered only via an inferred, undocumented parameter value on a broader MCP tool; **◐** partial — a broader MCP tool covers a scoped version (e.g., managed-asset-only), but no dedicated MCP tool exists; **REST-only** no MCP tool documented. On multi-helper rows, `=` is capability-level (create + retrieve); see the note after the tables about `list`/`delete` routes that `llms.txt` omits.
 
 ### Characters
 
@@ -64,7 +68,7 @@ Parity legend: **=** covered by a dedicated MCP tool or a documented tool parame
 | `GET /characters` | `list_characters` | = |
 | `GET /characters/{id}` | `get_character` | = |
 | `DELETE /characters/{id}` | `delete_character` | = |
-| `GET /characters/{id}/zip` | — | **REST-only** |
+| `GET /characters/{id}/zip` | `get_character` download link (no full ZIP bundle) | ◐ |
 | `PATCH /characters/{id}/tags` | — | **REST-only** |
 | `POST /portrait-character-pro` | `create_portrait_character` + `get_portrait_character` | = |
 | (managed animation delete) | `delete_animation` | MCP-only in snapshot |
@@ -99,7 +103,7 @@ Parity legend: **=** covered by a dedicated MCP tool or a documented tool parame
 |---|---|---|
 | `POST /generate-font-pro` | `create_font` + `get_font` | = |
 | `POST /create-ui-asset`, `GET /ui-assets`, `GET /ui-assets/{id}`, `DELETE /ui-assets/{id}` | `create_ui_asset`, `list_ui_assets`, `get_ui_asset`, `delete_ui_asset` | = |
-| `POST /generate-ui-v2` | — | **REST-only** |
+| `POST /generate-ui-v2` | `create_ui_asset` (structured panels only) | ◐ |
 | `GET /balance` | `get_balance` | = |
 | `GET /background-jobs/{job_id}` | per-resource `get_*` tools | different model |
 
@@ -119,7 +123,7 @@ MCP only creates *managed asset types* (character, object, tileset, tile, font, 
 - `POST /create-image-bitforge`
 - `POST /generate-image-v2` (Pro)
 - `POST /generate-with-style-v2` (Pro, style reference)
-- `POST /generate-ui-v2` (loose/raw UI image — distinct from managed `create_ui_asset`)
+- `POST /generate-ui-v2` (loose/raw UI image) — ◐ partial: MCP `create_ui_asset` generates structured UI panels; only the loose raw-image variant is REST-only
 
 ### 2. Image edit / convert / resize (6) — MCP has no raw-image-editing tools
 
@@ -141,7 +145,7 @@ Note: MCP `create_map_object` may accept `background_image` / `inpainting` param
 
 ### 4. Raw animation, rotation, skeleton (11) — MCP animates managed assets only
 
-MCP `animate_character` / `animate_object` require an MCP-managed asset id. Animating a raw supplied sprite, rigging it, interpolating frames, transferring an outfit onto an animation, or rotating an arbitrary image are all REST-only:
+MCP `animate_character` / `animate_object` require an MCP-managed asset id, so raw operations on an arbitrary supplied sprite have no *dedicated* MCP tool. Standalone text/skeleton animation, rigging, animation editing, and outfit transfer are fully REST-only; frame interpolation and 8-direction rotation have partial, managed-asset-scoped overlap (◐):
 
 - `POST /animate-with-text`
 - `POST /animate-with-text-v2` (Pro)
@@ -149,13 +153,13 @@ MCP `animate_character` / `animate_object` require an MCP-managed asset id. Anim
 - `POST /animate-with-skeleton`
 - `POST /estimate-skeleton`
 - `POST /edit-animation-v2` (Pro)
-- `POST /interpolation-v2` (Pro)
+- `POST /interpolation-v2` (Pro) — ◐ partial: MCP `animate_character`/`animate_object` interpolate between `custom_start_frame_base64` and `end_frame_base64`, but only on a managed asset and emitted as a named animation, not standalone interpolated frames
 - `POST /transfer-outfit-v2` (Pro)
-- `POST /generate-8-rotations-v2` (Pro)
-- `POST /generate-8-rotations-v3`
+- `POST /generate-8-rotations-v2` (Pro) — ◐ partial: MCP `create_8_direction_object(reference_image_base64=…)` / `create_character(n_directions=8)` emit 8 directions, but regenerate the subject from a reference/description rather than rotating the exact input sprite
+- `POST /generate-8-rotations-v3` — ◐ partial: same managed-asset overlap as `-v2`
 - `POST /rotate`
 
-There is no public raw *4-rotation batch* route: the batch rotation routes are 8-direction only, while `POST /rotate` is a single/arbitrary rotation utility.
+There is no public raw *4-rotation batch* route: the batch rotation routes are 8-direction only, while `POST /rotate` (single/arbitrary rotation) has no MCP overlap.
 
 ### 5. Prompt enhancement (3) — no MCP prompt-helper tools
 
@@ -167,9 +171,9 @@ MCP exposes `agent_help` (a docs Q&A knowledge agent), which is not a prompt rew
 
 ### 6. Managed-asset export & tagging (3) — MCP has create/get/list/delete but not these
 
-MCP covers the asset lifecycle except ZIP export and tag mutation:
+MCP covers the asset lifecycle except a full-bundle ZIP export and tag mutation:
 
-- `GET /characters/{id}/zip` (ZIP export)
+- `GET /characters/{id}/zip` (full-bundle ZIP export) — ◐ partial: MCP `get_character` returns a download link, but no documented full-bundle ZIP export
 - `PATCH /characters/{id}/tags` (set tags; MCP `list_characters` can *filter* by tags but cannot set them)
 - `PATCH /objects/{id}/tags` (set tags)
 
@@ -178,7 +182,7 @@ MCP covers the asset lifecycle except ZIP export and tag mutation:
 - `GET /background-jobs/{job_id}` — REST's generic async poll. MCP deliberately uses per-resource `get_*` tools instead, so this is a different async model, not a missing capability.
 - `GET /llms.txt` — the docs index itself, not an asset operation.
 
-**Total: 32 asset/management REST v2 endpoints with no MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 3 export/tags).
+**Total: 32 asset/management REST v2 endpoints with no *dedicated* MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 3 export/tags). Of these, 5 have partial, managed-asset-scoped functional overlap via a broader MCP tool (◐): `generate-ui-v2`, `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `characters/{id}/zip`.
 
 ## MCP Tools With No REST v2 Counterpart
 
