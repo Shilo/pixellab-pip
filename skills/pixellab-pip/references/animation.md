@@ -14,7 +14,7 @@ Do not assume `animate-with-text-v3` with an identical or near-identical `last_f
 
 Use `last_frame` when the user needs interpolation between distinct poses, the action has clear internal body motion, or external motion marks are acceptable and will be inspected.
 
-For a strict tween between two distinct frames (a specific start and a specific end), use `animate-with-text-v3` with `first_frame` + `last_frame` and a short transition `action`: it holds both anchors and gives a controllable 4–16 in-between frames (within the pixel budget above). Use `interpolation-v2` (Pro; 128×128 cap; no frame-count control) only if the user explicitly asks for it.
+For a strict tween between two distinct frames (a specific start and a specific end), use `animate-with-text-v3` with `first_frame` + `last_frame` and a short transition `action`: it holds both anchors and gives a controllable 4–16 frames spanning start to end (within the pixel budget below). Use `interpolation-v2` (Pro; 128×128 cap; no frame-count control) only if the user explicitly asks for it.
 
 Treat `last_frame` as high-risk when:
 
@@ -28,7 +28,7 @@ For REST managed character animation, `/animate-character` and `/characters/anim
 
 Managed v3 character and object animation (MCP `animate_character`/`animate_object` and the REST equivalents) stores the input reference frame as frame 0 by default, so `frame_count=8` stores and reports 9 frames. Set v3-only `keep_first_frame=false` (incompatible with template and pro modes) when the user needs exactly `frame_count` generated frames; otherwise expect and report the extra frame instead of treating it as a frame-count mismatch.
 
-When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16, must be even, default 8, plus a **total pixel budget: `width × height × frame_count ≤ 524,288`**. Size and frame count are therefore coupled — a 256×256 canvas allows only 8 frames, and 16 frames need `width × height ≤ 32,768` (about 181×181, i.e. ≈128px). Exceeding the budget is rejected; refresh the schema before choosing a non-default value when exact current behavior matters.
+When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16, must be even, default 8, plus a **total pixel budget: `width × height × frame_count ≤ 524,288`**. Size and frame count are therefore coupled — a 256×256 canvas allows only 8 frames, and 16 frames need `width × height ≤ 32,768` (a square up to ~181×181; 128×128 is a safe common choice). Exceeding the budget is rejected; refresh the schema before choosing a non-default value when exact current behavior matters.
 
 Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is the supplied `first_frame` echoed back as frame 0 — its visible content is pixel-identical (a naive full-frame diff can read higher only because fully-transparent pixels carry arbitrary RGB), followed by the `frame_count` generated frames, so `frame_count=16` yields 17 images. Count and report accordingly; do not read the extra image as a frame-count mismatch. Because image 0 just repeats the frame you sent, a chained job's new content is images 1..N — drop image 0 as a duplicate of the handoff; the first frame that has actually moved is image 1. `first_frame` and `last_frame` are Base64Image objects (`{"type":"base64","base64":"…","format":"png"}`), not bare base64 strings.
 
@@ -46,7 +46,7 @@ If the user insists on animating a duplicate-filled atlas in place, `animate-wit
 
 Seamless walk loops generated from a single idle or neutral stance frame are high-risk:
 
-- First-frame-only attempts can produce motion but did not reliably close the loop; identical first/last idle anchors add loop pressure but became constrained or unpredictable (across prompt lengths, with/without negative prompting, at 4/8/16 frames), with palette shifts near the interpolation endpoint.
+- First-frame-only attempts can produce motion but did not reliably close the loop; identical first/last idle anchors add loop pressure but become constrained or unpredictable — varying prompt length, negative prompting, or frame count did not fix it — with palette shifts near the interpolation endpoint.
 - Prefer mid-walk start/end anchors over idle anchors — more reliable, but not a proven complete fix.
 - Skeleton/template routes improve loopability and pose consistency but looked stiff, robotic, and prone to hard limb shadows.
 - Common idle-derived failures: idle collapse, mouth/talking motion, exaggerated arms, weak foot contacts, and breathing/wind/smoke artifacts near the head (the model reads the request as idle-like motion).
