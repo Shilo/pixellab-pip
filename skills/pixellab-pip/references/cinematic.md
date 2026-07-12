@@ -1,4 +1,4 @@
-# Cinematics
+# Cinematic
 
 Read this for any animation longer than a single job or any seamless multi-shot loop: a multi-second or looping sequence built by chaining several `animate-with-text-v3` jobs, each continuing from the previous job's last frame. For one short clip (≤16 frames, ≤~1.6 s) use `animation.md` directly; this reference is the multi-job wrapper around it and does not restate its endpoint mechanics, idle-loop risk, or verification list — read `animation.md` for those.
 
@@ -8,7 +8,7 @@ Stay subject-agnostic. The scene is whatever the user describes; assume no theme
 
 Three things are required before any paid call:
 
-1. **Scene** — what happens, who/what is in it, and any hard rules (which things may appear, what must never appear, must it face the camera, must it stay happy, transparent vs solid background).
+1. **Scene** — what happens, who/what is in it, and any hard rules (which things may appear, what must never appear, whether it must face the camera, a required mood or expression, transparent vs solid background).
 2. **Duration** — target length, e.g. "30 seconds" or "1 minute."
 3. **Budget** — a spending cap in the user's currency or credits. Never start a cinematic without one; if the user did not give a budget, ask for it before spending.
 

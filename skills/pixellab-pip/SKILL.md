@@ -86,7 +86,7 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 | Preset/template/built-in animation, named motion, or custom skeleton/keypoints | Read `references/preset-skeleton-template-animation.md`; it splits MCP managed-template vs REST raw-skeleton routes. | Do not call website root `/generate-animation/background` or Aseprite extension internals. |
 | Auto-rig, estimate skeleton, animate from keypoints | Read `references/preset-skeleton-template-animation.md`. | `estimate-skeleton`, then `animate-with-skeleton`. |
 | Raw non-skeleton animation, interpolation, outfit transfer, rotate | REST v2 unless animating a managed MCP character/object. Read `references/animation.md` for frame anchors, idle-loop risk, and verification. | `animate-with-text-v3`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`. No public 4-rotation route. |
-| Multi-shot, multi-second, or seamless-loop cinematic (a scene longer than one clip) | Read `references/cinematics.md`; requires a user-specified budget, a documented per-job plan, and per-job validation. | Chained `animate-with-text-v3`, each job continuing from the previous job's handoff frame. |
+| Multi-shot, multi-second, or seamless-loop cinematic (a scene longer than one clip) | Read `references/cinematic.md`; requires a user-specified budget, a documented per-job plan, and per-job validation. | Chained `animate-with-text-v3`, each job continuing from the previous job's handoff frame. |
 | Map image / visual level concept | REST v2 image/background route; website or Aseprite for map extension workflows. | No public map CRUD/extension/texture surface is documented. |
 | Map object | MCP `create_map_object` + `get_map_object`; download promptly — MCP map objects auto-delete after 8 hours. | `POST /map-objects` (POST-only; verify polling shape from OpenAPI). |
 | Whole map, Map Workshop, map CRUD/export | Website manually, or generate components via MCP/REST. | No public map CRUD surface is documented. |
@@ -132,7 +132,7 @@ Read only the relevant reference:
 - Async jobs, MCP review state, rate limits, download expiry: `references/job-lifecycle.md`.
 - Preset/template/skeleton character animations: `references/preset-skeleton-template-animation.md`.
 - Raw animation, interpolation, outfit transfer, idle-loop risk: `references/animation.md`.
-- Multi-shot, multi-second, or seamless-loop cinematics from chained animations: `references/cinematics.md`.
+- Multi-shot, multi-second, or seamless-loop cinematics from chained animations: `references/cinematic.md`.
 - Editor-only utilities without public routes: `references/editor-only-utilities.md`.
 - PixelLab project/sandbox/chat/agent MCP tools: `references/mcp-platform-tools.md`.
 - REST v2 prompt/field character limits: `references/prompt-limits.md`.
@@ -148,7 +148,7 @@ Optional broader docs: in full plugin/repo installs these resolve relative to th
 - SDK-vs-REST compatibility: `../../docs/pixellab/pixellab-sdk-compatibility.md`.
 - Bearer-token, session, and security boundaries: `../../docs/pixellab/pixellab-auth-and-security.md`.
 - UI generation and MCP-vs-REST UI routing research: `../../docs/pixellab/pixellab-ui-generation-surfaces-research.md`.
-- Multi-shot cinematic technique research (chained-animation findings): `../../docs/pixellab/pixellab-cinematics-spike.md`.
+- Multi-shot cinematic technique research (chained-animation findings): `../../docs/pixellab/pixellab-cinematic-spike.md`.
 
 ## Model And Mode Terms
 
@@ -225,4 +225,4 @@ When a live generation, edit, transform, conversion, background-removal, or anim
 | "Use `/tilesets/create` with my browser token." | Refuse; route to public MCP/REST tileset tools or manual website use. |
 | "What does Pro use?" | Product-level facts only; refresh official docs if current model details matter. |
 | "Cheapest way to get a few item icons?" | `references/cost-routing.md` + `references/icon.md`; prefer a non-Pro route and name the tradeoff. |
-| "Make a 30-second looping scene from this frame." | `references/cinematics.md`; ask for a budget if none given, plan the beats, chain `animate-with-text-v3`, validate each job. |
+| "Make a 30-second looping scene from this frame." | `references/cinematic.md`; ask for a budget if none given, plan the beats, chain `animate-with-text-v3`, validate each job. |
