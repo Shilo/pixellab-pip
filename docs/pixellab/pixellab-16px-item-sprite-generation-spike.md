@@ -533,8 +533,53 @@ This matches the enclosed-background risk in [`background-removal.md`](../../ski
 
 Local run outputs (not committed showcase assets) are in the `pixellab-pip-generations/pixen-16x16-currency-set/` run folder: the ten icons, a native spritesheet, an inspection sheet, the with-background and edge-flood-repaired `gold coin` comparison, and a bundle blueprint. See [`pixellab-image-size-limits.md`](pixellab-image-size-limits.md) for the confirmed pixen `16x16` size floor.
 
+## Pro (generate-image-v2) vs Pixen at 16×16 (Live Test 2026-07-11)
+
+A follow-up compared the two image routes head-to-head at `16x16` for treasure items. The motivating puzzle: `generate-image-v2` (Pro) normally produces cleaner, higher-fidelity item art than pixen at `32px+`, yet an earlier `16x16` Pro attempt came out noisy with orphan pixels — the opposite of expectation.
+
+### Setup
+
+- **Pro:** one `POST /v2/generate-image-v2` job at `16x16`, `no_background: true`, seed, and an optimized single-centered-treasure prompt. Pro is **asynchronous** — it returns HTTP `202` + `background_job_id`; poll `GET /v2/background-jobs/{id}`. At `16x16` it returned a **native-size batch of 64 images** from the one prompt (usage `$0.095`, ≈`$0.0015`/image).
+- **Pixen:** nine `POST /v2/create-image-pixen` jobs, one treasure item each, `16x16`, the proven recipe (`detail: low detail` + `outline: single color black outline` + `view: side` + `no_background`, ≈`$0.0084`/image). Pixen is **synchronous**, one image per call.
+- Pro description (verbatim): `Fantasy RPG treasure loot icon, one centered treasure object per image, bold clean silhouette, highly readable at tiny size, crisp pixel art, limited palette, no orphan pixels, transparent background. Unlabeled pictorial assets only. Varied precious treasures across gold coins, gemstones, jeweled rings, crowns, goblets, chalices, pearls, amulets, treasure chests, golden idols, and relics. No text, letters, numbers, or labels.`
+- Pixen items: `gold coin`, `red ruby gemstone`, `golden crown`, `jeweled gold ring`, `treasure chest`, `white pearl`, `golden goblet`, `cut diamond`, `golden amulet`.
+
+### Root Cause: The Control Surface
+
+`generate-image-v2` exposes only `description`, `image_size`, `seed`, `no_background`, `reference_images`, `style_image`, `style_options` — **no `detail`, `outline`, or `view` controls**. `create-image-pixen` exposes `detail`, `outline`, and `view`. That single difference explains the `16x16` quality gap: pixen can be forced to a flat, low-detail, hard-outlined style that suits `16px`; Pro always renders at its native detail level, which is tuned for `32px+`.
+
+### Results
+
+| Signal | Pixen (9) | Pro (64) |
+|---|---:|---:|
+| boundary that is dark outline | **93%** | 56% |
+| avg orphan pixels | 0.00 | 0.20 |
+| distinct colors per image | 61 | 28 |
+| avg opaque | 35.6% | 44.4% |
+| anti-aliased (partial-alpha) pixels | 0 | 0 |
+| edges | hard single-color outline | soft, no enforced outline |
+| text/caption artifacts | none | 2 frames became `$` / `2` marks |
+| cost per image | `$0.0084` | `$0.0015` (batch of 64) |
+
+- **Pixen** produced clean, bold-outlined, instantly readable icons with zero orphan pixels and a consistent style — the better route for clean, specific `16x16` icons.
+- **Pro** produced far more variety and richer shading in one job, but at `16x16` the extra detail degraded into softer edges, muddier reads, some stray/orphan pixels, and two caption-contamination frames. Usable after culling, not clean out of the box.
+- **It is containment, not color count.** Counter to a "more colors = more noise" intuition, pixen uses *more* than twice as many colors (61 vs 28) yet reads cleaner. Neither route anti-aliases (both have 0 partial-alpha pixels), so "soft" edges are *undefined* edges, not blur. The drivers are the border and the detail level: pixen's dark outline covers **93%** of each silhouette boundary vs Pro's **56%**, and its `low detail` flattening organizes those colors into a crisp shape; Pro leaves ~44% of its edges bordered only by the item's own color meeting transparency, plus occasional orphan pixels, so shapes lose definition at `16px`.
+
+### Why Pro Looks Worse At 16px Than At 32px+
+
+Pro's native detail level resolves cleanly when there are at least `32px` to spend on an item, which is why it is the higher-quality route for `32x32+` item icons (consistent with the `32x32` item-icon rows above). Crammed into `16x16`, that same detail becomes sub-pixel noise and orphan pixels, and there is no low-detail control to flatten it. The earlier failed `16x16` Pro sheet was likely also an unoptimized prompt; an optimized single-object, no-text prompt improved Pro's `16x16` output substantially but still could not match pixen's controlled cleanliness at that size.
+
+### Guidance
+
+- **Clean, consistent, specific `16x16` icons → pixen** (`low detail` + `single color black outline`).
+- **Cheap, large, varied `16x16` treasure/loot grab-bag → Pro batch, then cull** the muddy and text-contaminated frames; at ≈`$0.0015`/image it is far cheaper per icon and gives one-shot variety pixen cannot.
+- **`32px+` item icons → Pro** (`generate-image-v2`); its detail resolves and it beats pixen on fidelity and clarity.
+- Front-load `Unlabeled pictorial assets only` and forbid text in Pro batch prompts; even so, expect occasional caption-like frames to cull.
+
+Local run outputs (not committed showcase assets) are in the `pixellab-pip-generations/pro-vs-pixen-16x16-treasure/` run folder: the 64-image Pro batch, the 9 pixen icons, inspection sheets, and clean native spritesheets.
+
 ## Bottom Line
 
-PixelLab appears capable of `16x16` pixel density, but subject type and surface context matter. Text-only `generate-image-v2` is promising for `16x16` full-cell tiles and reliable for `32x32` item-icon sheets. Strict `16x16` non-tile item *atlases* remain experimental, but individual `16x16` icons from per-job `create-image-pixen` (one short single-subject prompt) are a good-quality route, strongest for coins and currency — see the Pixen Single-Subject section.
+PixelLab appears capable of `16x16` pixel density, but subject type and surface context matter. Text-only `generate-image-v2` is promising for `16x16` full-cell tiles and reliable for `32x32` item-icon sheets. Strict `16x16` non-tile item *atlases* remain experimental, but individual `16x16` icons from per-job `create-image-pixen` (one short single-subject prompt) are a good-quality route, strongest for coins and currency — see the Pixen Single-Subject section. At `16x16`, pixen also produces cleaner icons than `generate-image-v2` (Pro), which lacks `detail`/`outline` controls and renders at a `32px+`-tuned detail level; Pro regains the quality lead at `32px+`. See the Pro vs Pixen section.
 
 The best current path is not one universal route. For strict `16x16` non-tile items, use smaller text-only tests, Aseprite/editor workflows, REST `reference_images`, or REST style-reference workflows only with explicit copy-detection. If the output copies the supplied reference/style items too closely, it should be rejected even if it passes canvas-size and cell-size checks.
