@@ -6,7 +6,7 @@ Read this for any animation longer than a single job or any seamless multi-shot 
 
 Stay subject-agnostic. The scene is whatever the user describes; assume no theme, character, object, style, or view. The user's job is to describe the scene and its length and set a budget. Everything below is the agent's job.
 
-Inputs are flexible. A cinematic can begin **from scratch** (generate the opening frame), **from one or more user-supplied images** (an opening frame, a start-and-end pair, or identity/style references — classify each per `image-input-roles.md`), and can be aimed at a **specific end frame**, supplied or generated (see Start and end frames). Match whatever the request gives you; nothing forces a from-scratch start or a transparent canvas.
+Inputs are flexible. A cinematic can begin **from scratch** (generate the opening frame), **from one or more user-supplied images** (an opening frame, a start-and-end pair, or identity/style references — classify each per `image-input-roles.md`), and can be aimed at a **specific end frame**, supplied or generated (see Start and end frames). Match whatever the request gives you; nothing forces a from-scratch start or a transparent canvas. When generating an opening frame from scratch, choose the image route by content: a transparent-background subject → `create-image-pixen`; a solid scene → `create-image-pixflux` (its `-background` variant is the same model returned as an async job, not a special scene route). Reserve Pro `generate-image-v2` for an approved quality upsell.
 
 ## What the user provides (ask only if missing or ambiguous)
 
