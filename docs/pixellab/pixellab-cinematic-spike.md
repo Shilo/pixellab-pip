@@ -16,7 +16,7 @@ This note does not link to the generated candidate frames; they live in the giti
 ## Endpoint mechanics (confirmed against the live API and OpenAPI)
 
 - **Async.** `POST /v2/animate-with-text-v3` returns a `background_job_id`; poll `GET /v2/background-jobs/{job_id}` until `completed`. Cost appears as `usage`/`billing_usage` (`{"type":"usd","usd":…}`) on the completed job.
-- **Frame count.** `frame_count` is 4–16, must be even, default 8. `frame_count=16` returned **17 images**: image 0 is the input `first_frame` echoed back (pixel-identical or a negligible re-encode difference — see the testing note), images 1–16 are the generated motion. Budget on 16 to minimize job count.
+- **Frame count.** `frame_count` is 4–16, must be even, default 8. `frame_count=16` returned **17 images**: image 0 is the input `first_frame` echoed back (pixel-identical or a negligible re-encode difference — see the testing note), images 1–16 are the generated motion. Budget on 16 to minimize job count — but the pixel budget below allows 16 only at ≤128px; a 256×256 canvas caps a job at 8 frames.
 - **Image fields are objects, not raw strings.** `first_frame`/`last_frame` are `Base64Image` = `{"type":"base64","base64":"…","format":"png"}`. Passing a bare base64 string 422s (before any charge).
 - **No `image_size`.** Output canvas equals the `first_frame` canvas (max 256×256). A 128×128 canvas left room for the subject plus a second object to move around; the subject was kept small on purpose.
 - **`action` caps at 500 characters** (hard). Over-length 422s before charge; still cheaper to check length locally before POST.
@@ -65,11 +65,13 @@ This note does not link to the generated candidate frames; they live in the giti
 
 ## Confirmed and extended by later testing
 
-A follow-up round ran many from-scratch cinematics as independent assistant instances (short public write-up in `../pixellab-cinematic-testing.md`). Three durable additions came out of it and are now in the runtime references:
+A follow-up round ran many from-scratch cinematics as independent assistant instances (short public write-up in `../pixellab-cinematic-testing.md`). Several durable additions came out of it and are now in the runtime references:
 
 - **Cyclic vs evolving — the loop-one-cycle shortcut.** Periodic motion (flicker, spin, bob, sway, flow, rain, a breathing idle) does not need chaining: generate one clean cycle as a single ≤16-frame clip and loop it at playback, tuning the per-frame delay to the requested duration. Multiple instances reached this independently; it is far cheaper than chaining and closes cleanly (measured pixel-identical endpoints with a `last_frame`=first anchor, or within-normal seam distance for a self-closing field). Reserve chaining for scenes that genuinely evolve (the 60 s build above, or a seed→flower growth arc).
 - **Robust async polling.** The outer background-job `status` can lag behind the finished, already-billed result; key completion on `last_response`'s own completed/`done` status — not merely the first image, since some endpoints stream partial progress images. Tolerate transient timeouts/5xx by re-polling the same saved job id, never resubmit a paid job on a transient error, and persist each paid response so a poller crash cannot orphan a charge. Read per-call cost from the job's top-level `usage.usd`.
 - **De-duplication is not trimming.** Dropping the duplicate frame at each seam (the echoed-back input; and a loop-close frame identical to frame 0) is expected de-duplication for a clean stitch — distinct from the ping-pong/reverse/trim playback manipulation the global rules forbid. Keep the raw frames alongside for integrity.
+- **Pixel budget couples canvas and frame count.** v3 enforces `width × height × frame_count ≤ 524,288`, so a 256×256 canvas caps a job at 8 frames while ≤128px allows the full 16 (this build ran 128px/16). Over-budget requests 422 before charge; job count and cost scale with the frames-per-job the canvas allows (a 256px scene needs ~2× the jobs of a 128px one for the same duration). The references now make the beat-sheet frame math canvas-aware rather than assuming 16-frame jobs.
+- **Start→end tweens: prefer v3 `first_frame`+`last_frame` over Pro `interpolation-v2`.** A same-task head-to-head, reproduced twice, had v3 hold both endpoints pixel-exact with a controllable 4–16 in-between frames for ~$0.04; `interpolation-v2` returned only ~2 frames, missed the endpoints, and cost ~2.4× more. Reserve `interpolation-v2` for an explicit Pro/v2 request. The same anchored tween is also what crosses a large palette/lighting shift (night→dawn) that free-run animation won't traverse — generate the target-state frame and anchor `last_frame` to it.
 
 ## Open questions / follow-ups
 
