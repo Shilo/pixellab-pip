@@ -204,6 +204,12 @@ Every plan, with no technical wording in the request, independently reached the 
 
 Both loops delivered "30 seconds" as an infinitely-looping file, closed seamlessly with `last_frame` = the opening frame, and cost about three cents — confirming that a cyclic ambient loop is a ~2-call job, not a chained one.
 
+### Live evolving arc — beautiful result, expensive path
+
+The storm arc took the chained/evolving route and produced a **genuinely striking calm→storm progression**: seven keyframes carried the scene from a golden calm evening through gathering overcast, building storm, rain, a lit sweeping beam, and a final lightning strike, with the palette shifting gold → grey → stormy blue-black and the sea escalating from calm to crashing. Crucially, **the lighthouse and its rock islet stayed pixel-locked across every keyframe** because each keyframe was generated as an *edit of the opening frame* rather than an independent render — the composition-consistency technique worked, and this is why the fixed-camera illusion held.
+
+The cost of that quality was real: the evolving run took **far longer and many more paid calls than either loop** (well over an hour of chained generation and re-rolls, versus two calls for a loop), and it re-generated its whole keyframe/tween chain once when the first pass drifted. This matches the plan's honest warning and is the round's clearest lesson: **an evolving one-way scene is the expensive, drift-prone path**, and keeping it on the rails depends on locking the composition by editing the opening frame. (The run's own final GIF assembly was still iterating when the test was closed; the keyframe arc above is the verified artifact.)
+
 ### Round findings
 
 - **Plain-brief autonomy works.** With zero technical wording, the contract alone drove correct route selection, frame/pixel-budget math, loop-vs-arc, endpoint anchoring, budget gating, and validation, across both the easy (loop) and hard (evolving) cases.
