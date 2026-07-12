@@ -1,0 +1,38 @@
+# Cinematics
+
+Read this for any animation longer than a single job or any seamless multi-shot loop: a multi-second or looping sequence built by chaining several `animate-with-text-v3` jobs, each continuing from the previous job's last frame. For one short clip (≤16 frames, ≤~1.6 s) use `animation.md` directly; this reference is the multi-job wrapper around it and does not restate its endpoint mechanics, idle-loop risk, or verification list — read `animation.md` for those.
+
+Stay subject-agnostic. The scene is whatever the user describes; assume no theme, character, object, style, or view. The user's job is to describe the scene and its length and set a budget. Everything below is the agent's job.
+
+## What the user provides (ask only if missing or ambiguous)
+
+Three things are required before any paid call:
+
+1. **Scene** — what happens, who/what is in it, and any hard rules (which things may appear, what must never appear, must it face the camera, must it stay happy, transparent vs solid background).
+2. **Duration** — target length, e.g. "30 seconds" or "1 minute."
+3. **Budget** — a spending cap in the user's currency or credits. Never start a cinematic without one; if the user did not give a budget, ask for it before spending.
+
+Ask up to three short blocking questions only for details that change the plan or the route: loop-or-not, canvas size, art style, view/orientation, and which objects are allowed on screen. Do not ask about frame counts, seeds, timing, chaining, or other mechanics — those are the agent's to decide. If a supplied image's role is unclear (start frame vs style vs reference), resolve it per `image-input-roles.md`.
+
+## Method
+
+1. **Plan first, then spend.** Write a beat sheet that covers the whole duration, one 16-frame job per beat, before any paid call. Frame math: 16 frames play at 100 ms ≈ 1.6 s, and chained jobs share their handoff frame, so a T-second cinematic needs roughly `T / 1.6` jobs. Each beat names: the subject and its state at the incoming frame, any objects and their positions, the intended motion for the next frames, and what must not appear. Present the beat list, the job count, and an estimated cost, and confirm it fits the budget before mass-running.
+2. **Calibrate.** Run one job first, read its `usage`, and recompute how many jobs the remaining budget affords. Enforce a hard stop at the budget: if the next job would exceed it, stop and report where the cinematic stands.
+3. **Chain.** Job 1's `first_frame` is the user's start frame (or a generated opening). Each later job's `first_frame` is the previous job's **handoff frame** — the latest frame that still preserves continuity (for example, the latest frame that still clearly contains a moving secondary object; objects tend to fade in a job's final frames). Author each beat's `action` after seeing the previous job's actual output, since the incoming state is whatever the model produced.
+4. **Write each `action`** (≤500 chars; see `prompt-limits.md`) to describe the depicted result, not the tool: a concise identity anchor for the subject, any objects, the incoming frame's state, the intended motion over the next frames, and an explicit exclusion of anything that must not appear. Anchor identity to the **reference frame's actual appearance**, not to a copied stored prompt, which can contradict what was drawn; confirm ambiguous traits with the user. Motion is what the endpoint acts on — protect it over description length.
+5. **Validate every job before continuing.** Check frame count, canvas size, preserved transparency, that motion occurred, and that required objects are present and forbidden ones are absent; then inspect the frames visually. If a job is below confidence, re-roll it (vary the seed and tighten the wording at the specific failure) before taking its handoff. Re-rolls spend budget.
+6. **Close the loop** (if looping): steer the last beats back toward the opening state, then have the final job set `last_frame` to the frame you display first so the end matches the start. Interpolation loads big corrections into the final frames, so a smaller correction there looks better; read `animation.md` for `last_frame` behavior and risks.
+
+## Continuity and quality rules
+
+These are generic and situational — apply the ones the scene needs, not a fixed style:
+
+- Never depict an off-screen actor. Describe an object's own physics (it flies in, bounces, rolls off an edge) instead of a person acting on it, and forbid unwanted people, hands, or props when the scene should not contain them.
+- Prefer distinct on-surface or free object states over tiny objects held against the subject, which can merge with the silhouette at small canvas sizes.
+- Restate the subject's identity, scale, and framing in every beat; long chains drift in size and palette because each job re-renders from the last.
+- Spread large orientation changes (such as a full turn) over two or more jobs rather than one.
+- Watch for stray motion marks or artifacts near the subject during validation.
+
+## Deliverables
+
+Assemble the frames into one GIF at 100 ms plus a spritesheet and the individual frames, and write the blueprint and manifest; see `local-asset-assembly.md`, `blueprint.md`, and report per `usage-reporting.md`. Local stitching and format conversion preserve pixels and are fine; any speck removal, object compositing/interpolation, or loop-smoothing morph is post-processing that alters content — do it only when reported, and for content repair only with approval (see Asset Integrity in `SKILL.md`). When you post-process, offer the raw stitched-frames cut alongside it.
