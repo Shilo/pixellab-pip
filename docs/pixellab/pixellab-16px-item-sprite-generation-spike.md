@@ -13,6 +13,7 @@ Use different expectations for tiles, `32x32` item icons, and strict `16x16` ite
 | Full-cell `16x16` terrain or block textures | Higher | Text-only `POST /v2/generate-image-v2` with opaque, edge-to-edge cell wording |
 | Transparent `32x32` inventory item icons | Higher | Text-only `POST /v2/generate-image-v2` with centered single-object icon wording |
 | Transparent or contained `16x16` non-tile item sprites | Low | Treat as experimental; use style-reference/editor workflows only with strict copy checks, or generate at `32x32` and downscale with clear reporting |
+| Individual `16x16` icons, one simple subject per job (e.g. currency, coins) | Higher for coins; Medium for other subjects | `POST /v2/create-image-pixen`, one short single-subject prompt per job, with `low detail` + `single color black outline` + `side` view; see Pixen Single-Subject section |
 
 The main observed pattern is that PixelLab can produce useful `16x16` output when the requested asset is a full-cell tile texture. It has not yet been reliable for text-only prompts asking for many standalone `16x16` food or inventory items in one atlas. Those prompts tend to drift toward larger, more readable item-icon scale. Style-reference routes can anchor the grid more strongly, but they can also over-copy the supplied reference image. Reference-image routes may copy less than style-reference routes, but still need cell occupancy and copy checks.
 
@@ -494,8 +495,46 @@ For reference-image, style-reference, or Aseprite outputs:
 10. Try a `256x256` atlas of 256 food surface textures, not object icons, using the tile prompt structure.
 11. Compare all routes with the same item list and the same verification checklist.
 
+## Pixen Single-Subject 16×16 Icons (Live Test 2026-07-11)
+
+A separate live test evaluated `create-image-pixen` (the "Create Image S-XL (New)" tool) for individual `16x16` icons, one item per job. This is distinct from the atlas work above: `create-image-pixen` returns exactly **one image per call**, whereas `generate-image-v2` returns a native-size *batch* of many images at small sizes. So pixen is the route for "one icon per job," not for a one-shot multi-item sheet.
+
+### Recipe That Worked
+
+Ten fantasy MMORPG currency icons were generated, one per job, in parallel:
+
+- One **short single-subject** `description` (e.g. `gold coin`) — never a multi-item list.
+- `image_size` `16x16`, `no_background: true`, `detail: low detail`, `outline: single color black outline`, `view: side`, fixed `seed`.
+
+Subjects: copper, silver, gold, platinum, bronze, electrum, and mithril coins; a coin stack; a gold ingot; a cut gem.
+
+### Results And Quality
+
+- All ten returned native `16x16` with clean alpha (35–47% opaque). **Transparency was honored** — the earlier 91%-opaque pixen result came from overloading a single `16x16` canvas with a 64-item list, not from the size or from `no_background`. Short single-subject prompts fix it.
+- **Coins came out clean, readable, and color-differentiated**, reading as a coherent set — a good result for `16x16`. The coin stack and gold ingot also read well.
+- The weaker outputs were subject/prompt problems, not size limits: `electrum coin` picked up a small face-like mark, and `cut blue gemstone` came out muddy (read more like a small figure than a gem). Reworded prompts (for example `faceted blue diamond, simple`) are the fix, not a different size.
+- Cost was about **$0.008 per `16x16` icon**. The observed account concurrency cap was **8 simultaneous jobs** (Tier 2 during this test); two of ten returned HTTP `429` and were re-run sequentially.
+
+### Confirmed Artifact: Hollow Coin Centers From Background Removal
+
+Several coins came out as a gold **ring with a two-pixel transparent center hole** instead of a solid disc. This was diagnosed, not assumed:
+
+- Regenerating the same `gold coin` with `no_background: false` returned a **fully opaque** coin whose center is a **dark near-black fill (RGB ≈ 56,58,64)** inside the gold rim.
+- That dark center is the **same color as the background** pixen places behind the sprite. PixelLab's `no_background` removal is color-based, so it deletes the enclosed dark center along with the outer background, leaving the hole.
+- A local **edge-flood** removal (flood from the image border, remove only background-colored pixels reachable from an edge, keep enclosed regions) applied to the opaque version restored a **solid disc with no hole** and clean transparency.
+
+This matches the enclosed-background risk in [`background-removal.md`](../../skills/pixellab-pip/references/background-removal.md). It is a background-removal side effect, not a pixen rendering flaw and not a `16x16` limit.
+
+### Practical Guidance
+
+- For individual `16x16` icons, `create-image-pixen` with one short single-subject prompt is a viable, good-quality route, strongest for coins and currency.
+- When an icon's interior is the same value as the generated background, prefer generating **opaque** (`no_background: false`) and removing the background **locally with an edge-connectivity method** that preserves enclosed fills, rather than relying on `no_background: true`. Steering the interior color away from the background with subject or palette wording also helps.
+- Keep parallel batches at or below the account's concurrent-job cap.
+
+Local run outputs (not committed showcase assets) are in the `pixellab-pip-generations/pixen-16x16-currency-set/` run folder: the ten icons, a native spritesheet, an inspection sheet, the with-background and edge-flood-repaired `gold coin` comparison, and a bundle blueprint. See [`pixellab-image-size-limits.md`](pixellab-image-size-limits.md) for the confirmed pixen `16x16` size floor.
+
 ## Bottom Line
 
-PixelLab appears capable of `16x16` pixel density, but subject type and surface context matter. Text-only `generate-image-v2` is promising for `16x16` full-cell tiles and reliable for `32x32` item-icon sheets. Strict `16x16` non-tile item sprites remain experimental.
+PixelLab appears capable of `16x16` pixel density, but subject type and surface context matter. Text-only `generate-image-v2` is promising for `16x16` full-cell tiles and reliable for `32x32` item-icon sheets. Strict `16x16` non-tile item *atlases* remain experimental, but individual `16x16` icons from per-job `create-image-pixen` (one short single-subject prompt) are a good-quality route, strongest for coins and currency — see the Pixen Single-Subject section.
 
 The best current path is not one universal route. For strict `16x16` non-tile items, use smaller text-only tests, Aseprite/editor workflows, REST `reference_images`, or REST style-reference workflows only with explicit copy-detection. If the output copies the supplied reference/style items too closely, it should be rejected even if it passes canvas-size and cell-size checks.
