@@ -113,3 +113,38 @@ Testing produced two rounds of concrete improvements to the cinematic contract, 
 **What already worked (no change needed).** Route selection (single clip vs multi-shot, cyclic vs evolving), budget discipline (required, calibrated on real usage, hard-stopped, never invented in dollars), from-scratch opening-frame routing, loop closure by reusing the opening frame, per-shot validation with re-rolls, only-these-objects enforcement by describing object physics instead of off-screen actors, non-English handling, supplied-frame handling, and the standard deliverable set (looping GIF, spritesheet, individual frames, blueprint, manifest, plus a raw un-processed cut). One instance described the fit plainly: the cinematic and animation contracts "matched the live API behavior exactly."
 
 **Overall.** Across the tested range — from scratch, cyclic loops, evolving arcs, natural loops that reuse the first frame as the last, multi-object scenes, camera-facing subjects, non-English requests, supplied frames, and budget edge cases — the workflow routed, planned, budgeted, generated, validated, and reported correctly. The one incomplete result was an external service failure during a loop-close attempt, handled honestly. With the two rounds of improvements applied, cinematic support covers the common user requests reliably.
+
+## Extended testing — backgrounds, complex scenes, detailed direction, and start→end interpolation
+
+The first round used transparent-subject scenes. A second round targets richer requests inspired by scene-driven pixel-art cinematics (full game-style backgrounds and short beats): immersive scenes with baked backgrounds, a transparent-background regression check, heavily-detailed prompts that delegate the whole direction, and precise **start→end interpolation** (generate an exact opening frame and an exact target frame, then interpolate between them over N frames — for shots that need a strict visual state and flow). It also confirms the workflow flexes across starting from any image, ending on any image, or generating everything from scratch.
+
+Same rubric, plus two dimensions for this round: **Background** (a solid, immersive scene reads as intended and stays consistent across shots) and **Interpolation** (an explicit start and end frame are both honored and the middle flows between them).
+
+### Extended smoke scenarios (no credits)
+
+| ID | Request | What it checks |
+|---|---|---|
+| ES1 | "Make a looping cinematic of a torch-lit dungeon corridor with stone walls and a couple of flickering wall torches — full scene, about 4 seconds. Budget $3." | Solid immersive background scene; scene consistency; loop. |
+| ES2 | "Make a coin spinning on a fully transparent background — no scene — looping ~2s. Budget $2." | Transparent regression: no baked background when the user wants none. |
+| ES3 | "Cinematic: a lone astronaut on a red alien cliff at dusk, two moons in a purple sky, dust drifting, cape flapping, a shooting star streaking behind — lonely and epic, loop it, ~6s. You direct all the details. Budget $5." | Heavily-detailed prompt that delegates the whole direction. |
+| ES4 | "A precise 2s shot: a closed treasure chest that opens to reveal glowing gold. Make the exact closed start frame and the exact open-glowing end frame, then interpolate between them. Budget $3." | Start→end interpolation from scratch (both frames generated, then interpolated). |
+| ES5 | "I'll give you two frames — the first and last frame of a shot — animate a smooth transition between them over ~1.5s. Budget $2." | Start from a supplied image AND end on a supplied image. |
+| ES6 | "A cozy rainy town street at night: glowing shop windows, a streetlamp, rain falling, a cat under an awning — full scene, looping ~5s. Budget $4." | Complex multi-element background scene. |
+
+### Extended live scenarios (real generation, ≤100 frames each)
+
+| ID | Request | Background | Mode | What it checks |
+|---|---|---|---|---|
+| EL1 | "A torch-lit dungeon corridor, stone background, a couple of flickering wall torches, looping ~3s." $4 | Solid | Cyclic loop | Immersive scene with a baked background; ambient loop. |
+| EL2 | "A spinning star on a fully transparent background, looping ~2s." $3 | Transparent | Cyclic loop | Regression: transparency preserved when requested. |
+| EL3 | "Lone astronaut on a red alien cliff at dusk, two moons, drifting dust, cape flapping, loop ~4s — you direct it." $5 | Solid | Cyclic loop | Detailed delegated brief + immersive scene. |
+| EL4 | "A treasure chest opening: make the exact closed start frame and the exact open-glowing end frame, then interpolate over ~1.5s." $4 | Solid | Start→end interpolation | Both frames generated; strict interpolation between them. |
+| EL5 | "A sunrise over a mountain range — sky goes from night to dawn, sun rising, ~5s, no loop." $5 | Solid | Evolving (chained) | Evolving background scene; start ≠ end; scene held steady while light changes. |
+
+### Extended results
+
+_Filled after the round runs._
+
+### Extended findings
+
+_pending_
