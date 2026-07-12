@@ -26,3 +26,15 @@ MCP tool names are not REST paths. If the user explicitly requires MCP and no ma
 ```
 
 The embedded skill is a compact example, not the repository's canonical agent contract. PixelLab Pip's maintained routing instructions remain in [`../skills/pixellab-pip/SKILL.md`](../skills/pixellab-pip/SKILL.md).
+
+## Setup
+
+For MCP, open [PixelLab MCP setup](https://www.pixellab.ai/mcp) and follow the instructions for your assistant or editor.
+
+For REST fallback, copy the `Secret` from your [PixelLab account](https://www.pixellab.ai/account) and store it locally as `PIXELLAB_SECRET`. Prefer your assistant or editor's secret settings, then restart it.
+
+- **Windows:** If needed, search for **Edit environment variables for your account**, add a user variable named `PIXELLAB_SECRET`, then restart the app.
+- **macOS:** If the app has no secret settings, add `PIXELLAB_SECRET` to your shell profile and reopen the app.
+- **Linux:** If the app has no secret settings, add `PIXELLAB_SECRET` to your shell profile and sign in again.
+
+Never paste the Secret into chat or commit it to the repository.

@@ -14,7 +14,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 ## Examples
 
-- [Minimal PixelLab Router Skill](pixellab-router.md) - compact standalone example that routes a PixelLab request to an exposed MCP tool or the documented REST v2 fallback.
+- [Minimal PixelLab Router Skill](minimal-pixellab-router.md) - compact standalone example that routes a PixelLab request to an exposed MCP tool or the documented REST v2 fallback.
 
 ## Benchmark
 
