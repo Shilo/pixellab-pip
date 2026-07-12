@@ -38,7 +38,7 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 | Prompt enhancement | 3 | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt` |
 | Managed-asset export & tagging | 3 | `characters/{id}/zip`, `characters/{id}/tags` (PATCH), `objects/{id}/tags` (PATCH) |
 
-◐ **Partial overlap** (8 of the 32 — no *dedicated* MCP tool, but a broader MCP tool covers a managed-asset-scoped version). The general pattern: **REST separates a capability into versioned, single-purpose endpoints; MCP combines them into one managed-asset tool.** the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`) and `interpolation-v2` fold into MCP `animate_character`/`animate_object` via `mode` and — for `-v3`/interpolation — the `custom_start_frame_base64`/`end_frame_base64` frame anchors (start frame alone ≈ single-anchor animation, start **and** end ≈ interpolation); `generate-8-rotations-v2`/`-v3` → `create_8_direction_object`/`create_character` 8-direction output; `generate-ui-v2` → `create_ui_asset` (structured panels); `characters/{id}/zip` → `get_character` download link. Per-endpoint notes are below.
+◐ **Partial overlap** (7 of the 32 — no *dedicated* MCP tool, but a broader MCP tool covers a managed-asset-scoped version). The general pattern: **REST separates a capability into versioned, single-purpose endpoints; MCP combines them into one managed-asset tool.** the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`) and `interpolation-v2` fold into MCP `animate_character`/`animate_object` via `mode` and — for `-v3`/interpolation — the `custom_start_frame_base64`/`end_frame_base64` frame anchors (start frame alone ≈ single-anchor animation, start **and** end ≈ interpolation); `generate-8-rotations-v2`/`-v3` → `create_8_direction_object`/`create_character` 8-direction output; `characters/{id}/zip` → `get_character` download link. (`generate-ui-v2` is **not** here — MCP's `create_ui_asset` is a structured panel builder, not a freeform UI generator; see the UI note in the Coverage Matrix.) Per-endpoint notes are below.
 
 **Missing from REST v2 — MCP has it, no REST endpoint (24 tools).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
 
@@ -103,15 +103,17 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 |---|---|---|
 | `POST /generate-font-pro` | `create_font` + `get_font` | = |
 | `POST /create-ui-asset`, `GET /ui-assets`, `GET /ui-assets/{id}`, `DELETE /ui-assets/{id}` | `create_ui_asset`, `list_ui_assets`, `get_ui_asset`, `delete_ui_asset` | = |
-| `POST /generate-ui-v2` | `create_ui_asset` (structured panels only) | ◐ |
+| `POST /generate-ui-v2` (freeform UI; no `pieces`/`elements`) | — (MCP has no freeform UI generator) | none |
 | `GET /balance` | `get_balance` | = |
 | `GET /background-jobs/{job_id}` | per-resource `get_*` tools | different model |
+
+**Note on UI generation.** MCP `create_ui_asset` — structured `pieces`/`elements` with labeled sub-parts — has a full REST equivalent, `POST /create-ui-asset` (same `pieces`/`elements`, plus REST-only `style_image` and `project_id`); that is the `=` row above. REST's *other* UI endpoint, `POST /generate-ui-v2`, is a simpler freeform generator (text + optional `concept_image`, no `pieces`/`elements`) with **no** MCP counterpart — MCP exposes no freeform UI-image tool. Details: [`pixellab-ui-generation-surfaces-research.md`](pixellab-ui-generation-surfaces-research.md).
 
 **Note on async retrieval and management rows.** Where a `=` row bundles MCP `get_*` / `list_*` helpers against a single REST `POST`, REST retrieval is via `GET /background-jobs/{job_id}` (the generic async poll) plus, where present, a dedicated GET such as `/tilesets/{id}`, `/isometric-tiles/{id}`, `/tiles-pro/{id}`, or `/characters/{id}`. So MCP `get_*` tools are never true gaps. Neither `llms.txt` nor OpenAPI, however, exposes a *list* route for sidescroller tilesets or tiles-pro, or a *delete* route for any tile/tileset family — even though MCP has tools for all of them. Those `list`/`delete` tools are genuinely MCP-only (verified 2026-07-11; see [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart)), so `=` here means create-plus-retrieve parity; the `list`/`delete` half of those families has no REST route at all.
 
 ### Create Image (raw generation)
 
-MCP has no generic text-to-image tool — it only generates managed asset types — so these are REST-only except UI, which has a structured MCP form.
+MCP has no generic text-to-image tool — it only generates managed asset types — so these are all REST-only. (Freeform UI generation `generate-ui-v2` is grouped with the structured UI endpoint in *Fonts, UI, Account* above.)
 
 | REST v2 | MCP functional counterpart | Parity |
 |---|---|---|
@@ -121,7 +123,6 @@ MCP has no generic text-to-image tool — it only generates managed asset types 
 | `POST /create-image-bitforge` (pose-guided via `skeleton_keypoints`) | — | none |
 | `POST /generate-image-v2` (Pro) | — | none |
 | `POST /generate-with-style-v2` (Pro, style ref) | `style_images` on `create_1/8_direction_object`, `create_tiles_pro` (managed only, different output) | none |
-| `POST /generate-ui-v2` (loose UI image) | `create_ui_asset` (structured panels) | ◐ |
 
 ### Image Edit, Convert, Resize
 
@@ -190,7 +191,7 @@ MCP only creates *managed asset types* (character, object, tileset, tile, font, 
 - `POST /create-image-bitforge`
 - `POST /generate-image-v2` (Pro)
 - `POST /generate-with-style-v2` (Pro, style reference) — note: MCP exposes style-guided generation only as `style_images` on managed object/tile creation, not as arbitrary styled-image output
-- `POST /generate-ui-v2` (loose/raw UI image) — ◐ partial: MCP `create_ui_asset` generates structured UI panels; only the loose raw-image variant is REST-only
+- `POST /generate-ui-v2` (freeform UI image; no `pieces`/`elements`) — none: MCP's only UI tool, `create_ui_asset`, is a structured panel builder (its REST twin is `create-ui-asset`), not a freeform generator, and lacks `concept_image`; MCP has no `generate-ui-v2` equivalent
 
 ### 2. Image edit / convert / resize (6) — MCP has no raw-image-editing tools
 
@@ -249,7 +250,7 @@ MCP covers the asset lifecycle except a full-bundle ZIP export and tag mutation:
 - `GET /background-jobs/{job_id}` — REST's generic async poll. MCP deliberately uses per-resource `get_*` tools instead, so this is a different async model, not a missing capability.
 - `GET /llms.txt` — the docs index itself, not an asset operation.
 
-**Total: 32 asset/management REST v2 endpoints with no *dedicated* MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 3 export/tags). Of these, 8 have partial, managed-asset-scoped functional overlap via a broader MCP tool (◐): the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`), `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `generate-ui-v2`, and `characters/{id}/zip`.
+**Total: 32 asset/management REST v2 endpoints with no *dedicated* MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 3 export/tags). Of these, 7 have partial, managed-asset-scoped functional overlap via a broader MCP tool (◐): the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`), `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, and `characters/{id}/zip`.
 
 ## MCP Tools With No REST v2 Counterpart
 
