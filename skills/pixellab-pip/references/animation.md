@@ -28,6 +28,8 @@ Managed v3 character and object animation (MCP `animate_character`/`animate_obje
 
 When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16, must be even, default 8; refresh the schema before choosing a non-default value when exact current behavior matters.
 
+Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is a re-render of the supplied `first_frame` (close but not pixel-identical), then the generated frames — so `frame_count=16` yields 17 images. Count and report accordingly; do not read the extra image as a frame-count mismatch. `first_frame` and `last_frame` are Base64Image objects (`{"type":"base64","base64":"…","format":"png"}`), not bare base64 strings.
+
 ## Duplicate-Filled Atlas Risk
 
 `animate-with-text-v3` cannot turn a spritesheet of identical still cells into unique sequential phases from the prompt alone. It treats the whole atlas as one image and applies synchronized motion to every cell — with `first_frame` only or with identical `first_frame`/`last_frame` anchors — and wording like "every cell unique" does not override this.

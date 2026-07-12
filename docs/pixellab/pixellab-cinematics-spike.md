@@ -22,11 +22,11 @@ This note does not link to the generated candidate frames; they live in the giti
 - **`action` caps at 500 characters** (hard). Over-length 422s before charge; still cheaper to check length locally before POST.
 - **`no_background: true`** preserved transparency when the input frame was already transparent; every output frame kept a real alpha channel (extrema 0–255).
 - **`seed`.** `0` = random; a fixed non-zero seed per job made runs reproducible and gave a lever for re-rolls.
-- **`enhance_prompt`** was unnecessary — hand-authored near-max actions already carried precise motion, and enhancement would have rewritten them.
+- **`enhance_prompt`** was not used; hand-authored near-max actions already carried the intended motion, and enabling it would expand/rewrite the action text.
 
 ## Chaining and timing
 
-- **Handoff.** Job N+1's `first_frame` = a chosen frame from job N (the "handoff"). Because job N+1's image 0 is a *re-render* of the handoff (not pixel-identical — sampled diff ~411), the smooth stitch is: keep job 1's frames 0–16, and for each later job drop its re-rendered image 0 and keep 1..handoff. The transition handoff→(next) image 1 is one clean motion step.
+- **Handoff.** Job N+1's `first_frame` = a chosen frame from job N (the "handoff"). Because job N+1's image 0 is a *re-render* of the handoff (visibly close but not pixel-identical), the smooth stitch is: keep job 1's frames 0–16, and for each later job drop its re-rendered image 0 and keep 1..handoff. The transition handoff→(next) image 1 is one clean motion step.
 - **Timing math.** Playback delay (100 ms/frame) is an assembly choice; the endpoint sets no timing. Unique frames = 1 (initial) + Σ(new frames per job). 60 s = 600 frames ≈ 37–40 jobs at ~16 new frames each, fewer when a handoff is taken before frame 16.
 - **Adaptive authoring.** Each next action was written *after* viewing the previous result, because the "current state" (subject pose, object position) is whatever the model actually produced, not what was requested.
 
