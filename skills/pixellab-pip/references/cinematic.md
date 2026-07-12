@@ -36,6 +36,10 @@ These are generic and situational — apply the ones the scene needs, not a fixe
 - Read "face the camera" as "when looking at the viewer," not every frame: an energetic beat (a spin, a chase) may briefly turn the subject away, which is fine — do not re-roll a valid beat over a momentary turn.
 - Watch for stray motion marks or artifacts near the subject during validation.
 
+## Start and end frames (strict flow)
+
+When a shot must land on an exact end state, drive it with two keyframes instead of a text action alone. `interpolation-v2` is the dedicated tween: pass the exact `start_image` and `end_image` plus a short transition `action` (e.g. "opening", "morphing") and `image_size`; it fills the in-between. `animate-with-text-v3` with `first_frame` + `last_frame` is the alternative when you want a described motion between the anchors rather than a pure tween (it echoes the first frame back as frame 0 and takes no `image_size`). Either endpoint may be user-supplied or generated — generate a target end frame the same way as the opening, and to hold the same subject generate it as an edit of the start. Verify both endpoints are honored; if a route did not return a supplied anchor unchanged, you may drop the user's exact frame back in at that position (a reported local composite).
+
 ## Deliverables
 
 Assemble the frames into one GIF at 100 ms plus a spritesheet and the individual frames, and write the blueprint and manifest; see `local-asset-assembly.md`, `blueprint.md`, and report per `usage-reporting.md`. Stitching and format conversion preserve pixels; speck removal, object compositing/interpolation, and loop-smoothing morphs alter content — treat them under Asset Integrity in `SKILL.md`, and offer the raw stitched-frames cut alongside any processed one.

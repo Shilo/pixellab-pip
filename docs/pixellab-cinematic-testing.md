@@ -143,8 +143,23 @@ Same rubric, plus two dimensions for this round: **Background** (a solid, immers
 
 ### Extended results
 
-_Filled after the round runs._
+**Extended smoke — 6 / 6 correct.**
+
+| ID | Verdict | Key behavior |
+|---|---|---|
+| ES1 | Pass | Immersive dungeon scene routed to a solid-background scene image, background held steady across the loop, background left solid (not transparent). |
+| ES2 | Pass | Transparent regression held: transparency requested and kept, no baked scene, alpha verified. |
+| ES3 | Pass | Decomposed the heavily-detailed brief into subject/setting/ambient/transient/mood/constraints and stated assumptions instead of asking; correctly spotted that the one-way shooting star makes the scene evolving (chained), not a single ambient loop. |
+| ES4 | Pass | Start→end interpolation: generated both the exact opening and target frames and interpolated between them, with a plan to restore the exact anchors if the route altered them. |
+| ES5 | Pass | Mapped the two supplied frames to the start and end anchors and interpolated between them. |
+| ES6 | Pass | Complex multi-element night scene composed into one background render and animated in place so nothing drifts. |
+
+**Extended live — deferred.** The service's generation backend was returning server-side failures during this window (the same incident noted above), so the live extended cinematics were deferred rather than run against a failing backend. The re-render claim below was instead validated from real generations already downloaded in the first round, which needs no new generation.
 
 ### Extended findings
 
-_pending_
+- **Backgrounds and complex scenes** are handled well from existing guidance: a solid-background scene route for immersive scenes, the background held consistent by composing all elements into one render and confining motion, and no baked background when the user wants transparency. No new instruction was needed for scene handling.
+- **Transparent-background support is intact** (the original approach): when the user wants no scene, transparency is preserved and verified.
+- **Heavily-detailed, fully-delegated briefs** are decomposed into a concrete plan with stated assumptions and no blocking questions, including correctly detecting when a one-way element (a transient event) turns an otherwise-ambient loop into an evolving, chained scene.
+- **Start→end interpolation** for shots that need a strict visual state: the dedicated two-keyframe route (`interpolation-v2`, with both exact frames as anchors, a short transition description, and a size) is now documented in the cinematic contract, alongside the text-driven `first_frame`+`last_frame` alternative, and the contract now states plainly that either endpoint may be supplied or generated.
+- **The "extra frame" behavior was re-validated precisely** (see below): the endpoint returns one more image than the requested frame count, and that extra image 0 is the supplied opening frame echoed back — pixel-identical or a negligible re-encode difference across four measured real generations — so it is a duplicate to drop when stitching, not a meaningful re-render. The reference wording was corrected accordingly.
