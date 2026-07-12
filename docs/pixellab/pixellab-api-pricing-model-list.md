@@ -109,4 +109,5 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 - For multiple image candidates from one call, use Pro image generation.
 - For first-frame animation or chained VFX animation, prefer `animate-with-text-v3`.
 - For Pro text animation with view/direction fields and a reference image, use `animate-with-text-v2`.
+- Exception for duplicate-filled atlases: observed `animate-with-text-v3` runs synchronized repeated cells instead of making them unique phases. `animate-with-text-v2` followed the cell-diversity instruction reasonably well, but produced lower apparent quality and greater color drift. Prefer single-sprite animation plus local atlas assembly; use Pro only as an approved tradeoff candidate.
 - For managed character/object assets, prefer the resource-specific character/object endpoints or MCP tools instead of raw image animation endpoints.

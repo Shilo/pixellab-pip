@@ -28,6 +28,12 @@ Managed v3 character and object animation (MCP `animate_character`/`animate_obje
 
 When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16, must be even, default 8; refresh the schema before choosing a non-default value when exact current behavior matters.
 
+## Duplicate-Filled Atlas Risk
+
+`animate-with-text-v3` cannot turn a spritesheet of identical still cells into unique sequential phases from the prompt alone. It treats the whole atlas as one image and applies synchronized motion to every cell — with `first_frame` only or with identical `first_frame`/`last_frame` anchors — and wording like "every cell unique" does not override this.
+
+If the user insists on animating a duplicate-filled atlas in place, `animate-with-text-v2` / Pro honors per-cell variation better but at lower pixel quality. Offer it as an optional paid candidate, not a quality upgrade; warn about palette and color drift; generate one candidate first and verify every cell.
+
 ## Walk Loops From Idle Stances
 
 Seamless walk loops generated from a single idle or neutral stance frame are high-risk:
@@ -48,6 +54,7 @@ Before calling an animation final, verify:
 - Whether `first_frame` and `last_frame` were used.
 - Whether endpoint frames match when loop closure matters.
 - Middle-frame visual quality, especially detached artifacts, palette shifts, body drift, or unexpected gestures.
+- For atlas inputs, whether cells contain genuinely different animation phases rather than synchronized copies or superficial pixel noise.
 - Preview GIF or spritesheet output faithfully represents the source frames.
 
 Report whether the result technically loops and whether it is visually acceptable. These are different claims.

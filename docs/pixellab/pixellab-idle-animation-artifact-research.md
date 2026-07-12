@@ -1,6 +1,6 @@
 # PixelLab Idle Animation Artifact Research
 
-Last reviewed: 2026-06-30.
+Last reviewed: 2026-07-11.
 
 Purpose: record live-generation findings from attempts to create a clean 9-frame idle loop from a small transparent pixel-art character frame using PixelLab REST v2 `animate-with-text-v3`.
 
@@ -39,6 +39,22 @@ Conclusion
 No tool/endpoint option is currently proven reliable for a seamless walk loop from only an idle stance. Each option trades one failure mode for another.
 ```
 
+## Follow-up: Duplicate-Filled Fireplace Atlas
+
+A 2026-07-11 comparison tested a transparent 256x256, 5x5 fireplace atlas whose 25 cells initially contained the same still sprite. The prompt explicitly identified the image field and atlas structure, required a unique sequential fire phase in every cell, and described irregular organic flame motion.
+
+Observed results:
+
+- `animate-with-text-v3` / New, with `first_frame` only, produced atlas-level animation but kept the 25 cells substantially synchronized. A second start-only run repeated the failure.
+- `animate-with-text-v3` with identical `first_frame` and `last_frame` also kept the cells synchronized after a successful retry. The anchors changed the overall temporal motion but did not make slots independent.
+- `animate-with-text-v2` / Pro, using the atlas as `reference_image`, followed the unique-cell instruction reasonably well: cells showed meaningfully different flame shapes and phases.
+- The Pro result had lower apparent pixel quality and more color/palette change than the v3 results. It is a behavioral fallback for cell diversity, not an unconditional quality upgrade.
+- Pro `interpolation-v2` showed some cell variation, but the tested route returned too little temporal evidence at its required smaller input size to validate a complete unique animation.
+
+The likely operational distinction is image interpretation: v3 treated the atlas as one animation frame and animated its repeated contents together, while Pro reasoned more independently about the requested cell roles. This is an observed workflow result, not a disclosed model guarantee.
+
+Routing consequence: do not rely on prompt wording to make v3 convert a duplicate-filled atlas into unique slots. Prefer extracting one sprite, generating a temporal sequence, and assembling those returned frames into an atlas. When the user explicitly wants in-place atlas transformation, Pro is worth one approved candidate if they accept higher cost, lower apparent quality, and palette drift.
+
 ## Quick Pitfall Tips
 
 - Treat the starting pose as a major source of failures. A neutral idle frame can bias the model toward mouth movement, arm/leg fidgeting, breathing, blowing, or other idle-like interpretation instead of locomotion.
@@ -46,6 +62,7 @@ No tool/endpoint option is currently proven reliable for a seamless walk loop fr
 - For interpolated idle animations or transparent outputs, avoid environmental descriptors unless the scene/background is intentional. A working hypothesis from animator feedback is that the model may generate a background and then remove it, so plain-background wording may reduce removal leftovers when `no_background` output is still desired. This is unproven and should be tested per asset.
 - Do not treat frame count as a quality fix. Official tool/endpoint docs define allowed counts, output counts, costs, and iteration workflows, but these tests did not establish a reliable quality best practice for 4, 8, or 16 frames.
 - Treat `animate-with-text-pro` / v2 as a separate tradeoff, not an automatic upgrade. Animator feedback notes substantially more color inconsistency, which matches the caution around drastic movement and limited testing.
+- For a duplicate-filled atlas, v3/new may synchronize all cells despite explicit unique-frame instructions. Pro/v2 followed the instruction better in one controlled fireplace comparison, but reduced apparent quality and changed colors.
 - For skeleton/template tests, separate motion-method issues from generation-quality issues when possible. Stiff gait, uncanny timing, hard shadows, and shading drift can overlap, making root cause hard to isolate.
 
 ## Official Frame-Count Notes

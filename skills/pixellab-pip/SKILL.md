@@ -155,6 +155,7 @@ Treat PixelLab model/provider language as product labels unless official docs di
 - `PixPatch`: website-surface label; no public v2 `PixPatch` endpoint exists.
 - `Pro`: a quality/tier label across many unrelated tools, not one endpoint or model. Treat Pro and Pro Tools routes as expensive unless current docs prove otherwise.
 - `v3` and `new`: workflow/version labels scoped to a selected operation. Cheap-family hints, but check the endpoint — REST `inpaint-v3` is documented as Pro.
+- `standard`: a legacy generation mode, not a quality tier (the `standard`/`pro` split on characters, tilesets). Use it only when the user explicitly asks or a route reference directs it.
 - `S-XL`, `M-XL`, `S-M`, `M-L`: size/product labels, not asset intents.
 - `Gemini`: stale older website Create Tileset Pro wording; do not present it as current.
 
