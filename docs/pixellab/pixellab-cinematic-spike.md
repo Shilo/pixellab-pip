@@ -63,6 +63,14 @@ This note does not link to the generated candidate frames; they live in the giti
 
 - ~$0.05/job average at 16 frames; a 60 s single-subject loop landed near $2 including re-rolls. Budget scales roughly linearly with duration and re-roll rate. Always gate on a user-specified budget and stop when reached.
 
+## Confirmed and extended by later testing
+
+A follow-up round ran many from-scratch cinematics as independent assistant instances (short public write-up in `../pixellab-cinematic-testing.md`). Three durable additions came out of it and are now in the runtime references:
+
+- **Cyclic vs evolving — the loop-one-cycle shortcut.** Periodic motion (flicker, spin, bob, sway, flow, rain, a breathing idle) does not need chaining: generate one clean cycle as a single ≤16-frame clip and loop it at playback, tuning the per-frame delay to the requested duration. Multiple instances reached this independently; it is far cheaper than chaining and closes cleanly (measured pixel-identical endpoints with a `last_frame`=first anchor, or within-normal seam distance for a self-closing field). Reserve chaining for scenes that genuinely evolve (the 60 s build above, or a seed→flower growth arc).
+- **Robust async polling.** The outer background-job `status` can lag behind the finished, already-billed result; key completion on the presence of `last_response` images. Tolerate transient timeouts/5xx by re-polling the same saved job id, never resubmit a paid job on a transient error, and persist each paid response so a poller crash cannot orphan a charge. Four independent instances plus this build hit the same behavior.
+- **De-duplication is not trimming.** Dropping the re-rendered duplicate frame at each seam (and a loop-close frame identical to frame 0) is expected de-duplication for a clean stitch — distinct from the ping-pong/reverse/trim playback manipulation the global rules forbid. Keep the raw frames alongside for integrity.
+
 ## Open questions / follow-ups
 
 - Whether periodically re-anchoring to the original reference frame (or a fixed-size crop) mid-chain reduces scale/palette drift without hurting motion continuity.
