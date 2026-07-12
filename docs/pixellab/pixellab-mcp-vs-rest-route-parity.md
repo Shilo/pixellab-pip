@@ -51,6 +51,17 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 | MCP meta | 2 | `agent_help`, `agent_feedback` |
 | Delete/list helpers (no REST route in llms.txt **or** OpenAPI) | 7 | `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro`, `delete_animation`, `list_sidescroller_tilesets`, `list_tiles_pro` |
 
+## Practical Picking Rule
+
+MCP is a managed-asset tool layer inside an agent; REST v2 is the complete HTTP API. MCP's create/animate/edit tools all require a **managed asset ID** and cannot operate on an arbitrary supplied image — that single constraint drives most routing.
+
+| Use MCP when | Use REST v2 when |
+|---|---|
+| You're in an MCP-enabled agent and want a managed asset (character, object, tileset, tile, isometric, tiles-pro, font, portrait, UI panel, map object) with IDs, polling, and list/get/delete helpers | You have an arbitrary image to edit / animate / convert, need batch/code/backend control or exact schemas, or need any of the 32 REST-only operations (generic image gen, edit, inpaint, resize, background removal, raw animation/rotation/skeleton, prompt enhancement, ZIP export, tag setting) |
+| You need the platform layer — projects, chat, sandbox, deployed agents (MCP-only) | You need a freeform UI image (`generate-ui-v2`) or any capability with no MCP tool |
+
+One line: **MCP is the convenient managed-asset path inside an agent; REST v2 is the complete API for arbitrary images, edits, and code.** MCP bundles REST's granular endpoints into fewer tools and adds a platform/agent layer REST lacks, but cannot touch a supplied image without first creating a managed asset.
+
 ## Coverage Matrix
 
 Parity legend (functional, not name-based): **=** covered by a dedicated MCP tool or a documented tool parameter; **~** covered only via an inferred, undocumented parameter value on a broader MCP tool; **◐** partial — a broader MCP tool produces the *same kind of output* in a scoped form (e.g., managed-asset-only), but no dedicated MCP tool exists. A merely adjacent MCP capability that yields a *different* asset type (e.g., a generation-time control such as `create_map_object`'s `inpainting`, or `style_images` on object creation) is **none** with a note, not ◐; **none** / **REST-only** no MCP tool documented. On multi-helper rows, `=` is capability-level (create + retrieve); see the note after the tables about the `list`/`delete` routes REST v2 lacks entirely. This matrix is comprehensive and REST-keyed — every REST v2 endpoint appears in a table below; MCP tools with no REST endpoint are listed separately in [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
