@@ -149,6 +149,7 @@ Optional broader docs: in full plugin/repo installs these resolve relative to th
 - Bearer-token, session, and security boundaries: `../../docs/pixellab/pixellab-auth-and-security.md`.
 - UI generation and MCP-vs-REST UI routing research: `../../docs/pixellab/pixellab-ui-generation-surfaces-research.md`.
 - Multi-shot cinematic technique research (chained-animation findings): `../../docs/pixellab/pixellab-cinematic-spike.md`.
+- Cinematic scene composition and motion technique (inspiration): `../../docs/pixellab/pixellab-cinematic-inspiration.md`.
 
 ## Model And Mode Terms
 

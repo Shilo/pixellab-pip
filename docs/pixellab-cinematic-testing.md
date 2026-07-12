@@ -176,3 +176,39 @@ Immersive solid-background scenes and the transparent regression both passed; th
 - **A big lighting or palette shift on an evolving scene also needs the anchored tween.** Free-run animation anchors to the incoming palette and won't cross a large colour change (a night→dawn shot stays dark however the action is worded), so the target-state frame is generated and anchored as the end frame. Documented.
 - **The endpoint's pixel budget is now documented.** `width × height × frame_count ≤ 524,288`, so a 256×256 canvas allows only 8 frames and 16 frames need `width × height ≤ 32,768` (about 181×181; 128px is a safe common choice) — size and frame count are coupled, and the references say so to avoid a rejected request.
 - **The "extra frame" behavior was re-validated precisely** (see below): the endpoint returns one more image than the requested frame count, and that extra image 0 is the supplied opening frame echoed back — pixel-identical or a negligible re-encode difference across four measured real generations — so it is a duplicate to drop when stitching, not a meaningful re-render. The reference wording was corrected accordingly.
+
+## Plain-brief autonomy round — beautiful full-background scenes (smoke + live)
+
+A third round tested a stricter question: given only a **plain-language user goal with no technical hints**, does the cinematic contract by itself infer the whole execution — route, frame/timing, loop-vs-arc, endpoint anchoring, budget gating, and validation? Three scenes were chosen to stress different paths, each phrased the way a real user would and each run **twice** — a dry smoke pass (plan only, no spend) and a live generation:
+
+| Scene | Intended path | Why chosen |
+|---|---|---|
+| Hooded traveler at a campfire in a snowy forest (loops) | Cyclic ambient loop | Should be one looped clip, not a 300-frame chain; layered ambient motion + a full solid background. |
+| Tiny knight facing a huge sleeping dragon on a cliff (loops) | Cyclic loop, two subjects | Scale contrast, two subjects sharing one frame, wind + breathing; silhouette readability. |
+| A lighthouse as a storm rolls in (does not loop) | Evolving one-way arc | Big calm→storm palette shift; forces chained shots and anchored keyframe tweens. |
+
+### Smoke plans — 3 / 3 correct from plain text
+
+Every plan, with no technical wording in the request, independently reached the right route and mechanics and asked no blocking questions:
+
+- **Both loops → cyclic**, one composed solid-background scene image (`create-image-pixflux`) plus one `animate-with-text-v3` loop with `last_frame` = the opening frame to close the seam; the ~30 s comes from **infinite playback**, not from rendering 30 s of unique frames or chaining ~19 jobs. The knight/dragon plan kept **both subjects in one scene render** rather than compositing separate sprites.
+- **The storm → evolving/chained**, distinct `first_frame` + `last_frame` keyframe tweens across five keyframes, with the intermediate keyframes **derived by editing the opening frame** so the lighthouse and rocks stay pixel-locked (independent re-generations would drift the composition). It also stated the honest tradeoff plainly: a smooth 30 s one-way clip needs ~300 frames, which a few-dollar budget cannot buy, so it plays as a slow cinematic dissolve.
+- All three correctly derived the **pixel budget** (size × frame-count coupling), demoted `interpolation-v2` to explicit-request-only, planned calibrate-then-hard-stop budgeting, and surfaced the **same genuine ambiguity — aspect ratio / non-square canvas** — which this round resolves.
+
+### Live loops — 2 / 2 pass, ~$0.03 each
+
+| Scene | Route | Result |
+|---|---|---|
+| Snowy campfire, loop | Cyclic, `create-image-pixflux` + one `animate-with-text-v3` | Pass — 180×180 @ 16 frames (the largest square that still allows a full 16 under the budget), exact seam (first == last frame, mean diff 0.0), gorgeous cozy scene with the fire as the warm focal point, layered depth, fire/embers/snow all moving (~$0.03) |
+| Knight + sleeping dragon, loop | Cyclic, one composed scene + one loop | Pass — 256×144 **widescreen** @ 14 frames, exact seam (mean diff 0.0), full dusk background with atmospheric depth and the intended tiny-knight/huge-dragon scale contrast (~$0.03). Honest miss: the dragon read as perched/stirring rather than curled-asleep — a prompt-fidelity gap fixable with a cheap re-roll, not a routing error |
+
+Both loops delivered "30 seconds" as an infinitely-looping file, closed seamlessly with `last_frame` = the opening frame, and cost about three cents — confirming that a cyclic ambient loop is a ~2-call job, not a chained one.
+
+### Round findings
+
+- **Plain-brief autonomy works.** With zero technical wording, the contract alone drove correct route selection, frame/pixel-budget math, loop-vs-arc, endpoint anchoring, budget gating, and validation, across both the easy (loop) and hard (evolving) cases.
+- **Cyclic loops are cheap and seamless.** Two ambient loops at ~$0.03 each with mathematically exact loop closure; the internal motion (fire, wind) made the `last_frame` = first-frame close clean rather than triggering the idle-loop artifact risk.
+- **Widescreen is supported and now recommended.** Non-square opening frames (256×144, 180×180) generate and animate correctly; cinematics read better wide than square, so the contract now recommends a widescreen frame within the pixel budget.
+- **Aspect ratio was the one recurring uncertainty** across all three plans; it is now documented (a widescreen recommendation plus the size/frame-count coupling).
+- **Evolving scenes are the expensive, drift-prone path.** The live storm arc required many chained segments and repeated composition-lock re-rolls (regenerating keyframes as edits of the opening frame to stop the lighthouse and rocks from wandering) — far more work than either loop, matching the plan's honest warning that a smooth one-way 30 s is not cheap. Keyframe-editing-from-the-opening for composition consistency is now called out in the contract.
+- **Craft guidance was promoted.** The durable, behaviour-changing subset of the scene-composition research — layer and stagger several ambient motions, build depth with atmospheric perspective, and let the subject own the brightest palette values — is now in the contract's quality rules (background research recorded separately).
