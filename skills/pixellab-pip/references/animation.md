@@ -28,7 +28,11 @@ Managed v3 character and object animation (MCP `animate_character`/`animate_obje
 
 When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16, must be even, default 8; refresh the schema before choosing a non-default value when exact current behavior matters.
 
-Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is a re-render of the supplied `first_frame` (close but not pixel-identical), then the generated frames — so `frame_count=16` yields 17 images. Count and report accordingly; do not read the extra image as a frame-count mismatch. `first_frame` and `last_frame` are Base64Image objects (`{"type":"base64","base64":"…","format":"png"}`), not bare base64 strings.
+Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is a re-render of the supplied `first_frame` (close but not pixel-identical), then the generated frames — so `frame_count=16` yields 17 images. Count and report accordingly; do not read the extra image as a frame-count mismatch. `first_frame` and `last_frame` are Base64Image objects (`{"type":"base64","base64":"…","format":"png"}`), not bare base64 strings. Because image 0 is a re-render, a from-scratch loop's true anchor is the first generated frame, not the pre-generation opening image.
+
+## Async Polling
+
+`animate-with-text-v3` (and the other generation endpoints) are async: `POST` returns a `background_job_id`; poll `GET /background-jobs/{job_id}`. Treat the job as done when `last_response` holds the images (its inner status is completed) — the top-level job `status` can lag behind the ready, already-billed result, so waiting only on it may hang. Make the poll loop tolerant of transient timeouts and 5xx: re-poll the same saved `background_job_id`, and never resubmit a paid job on a transient poll error — that double-charges (see `job-lifecycle.md`). Persist each paid response as it arrives so a poller crash cannot orphan a charged job.
 
 ## Duplicate-Filled Atlas Risk
 
