@@ -63,6 +63,7 @@ Routing consequence: do not rely on prompt wording to make v3 convert a duplicat
 - Do not treat frame count as a quality fix. Official tool/endpoint docs define allowed counts, output counts, costs, and iteration workflows, but these tests did not establish a reliable quality best practice for 4, 8, or 16 frames.
 - Treat `animate-with-text-pro` / v2 as a separate tradeoff, not an automatic upgrade. Animator feedback notes substantially more color inconsistency, which matches the caution around drastic movement and limited testing.
 - For a duplicate-filled atlas, v3/new may synchronize all cells despite explicit unique-frame instructions. Pro/v2 followed the instruction better in one controlled fireplace comparison, but reduced apparent quality and changed colors.
+- V3/new/Pixen keeps equipment placement more consistent when rotating animations than Pro/v2.
 - For skeleton/template tests, separate motion-method issues from generation-quality issues when possible. Stiff gait, uncanny timing, hard shadows, and shading drift can overlap, making root cause hard to isolate.
 
 ## Official Frame-Count Notes
