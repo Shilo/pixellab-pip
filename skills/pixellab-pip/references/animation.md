@@ -14,7 +14,7 @@ Do not assume `animate-with-text-v3` with an identical or near-identical `last_f
 
 Use `last_frame` when the user needs interpolation between distinct poses, the action has clear internal body motion, or external motion marks are acceptable and will be inspected.
 
-For a strict tween between two distinct frames (a specific start and a specific end), prefer `animate-with-text-v3` with `first_frame` + `last_frame` and a short transition `action` over `interpolation-v2`. In measured head-to-heads it held both endpoints pixel-exact and gave a controllable 4–16 in-between frames (within the pixel budget above) for ~$0.04; `interpolation-v2` is Pro (~2.4× the cost), capped at 128×128, has no frame-count field, and consistently returned only ~2 frames with no way to request more. Only reach for `interpolation-v2` if a specific need forces it.
+For a strict tween between two distinct frames (a specific start and a specific end), use `animate-with-text-v3` with `first_frame` + `last_frame` and a short transition `action`: it holds both anchors and gives a controllable 4–16 in-between frames (within the pixel budget above). Use `interpolation-v2` (Pro; 128×128 cap; no frame-count control) only if the user explicitly asks for it.
 
 Treat `last_frame` as high-risk when:
 
