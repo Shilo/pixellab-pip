@@ -4,20 +4,13 @@ Use this reference for skill/ability/spell/action-bar/hotbar icons and for inven
 
 ## Route
 
-### Size Routing (Decide First)
+Route by icon size first:
 
-- **Single `16px` icon (one `16x16` image, one item) → `create-image-pixen` (the "new" / Pixen model). Required for a clean 16px icon.** At `16px`, `generate-image-v2` (Pro) gives inconsistent outlines (~62% edge coverage), baked shadows, and orphan pixels — unreliable for a clean single icon. Pixen's `detail`/`outline` controls give consistent outlines and readable shapes. Recipe: `detail: low detail`, `outline: single color black outline`, `view` to suit the subject, `no_background: true`; Pixen returns one image per call, so one item per job. Optional polish: clamp the palette to ~16–32 colors (see `aseprite-cli.md`) — Pixen otherwise ships many shades.
-- **`16px` sheet or large varied set →** either Pixen one-item-per-job then assemble locally (clean, but N paid jobs — get batch approval per SKILL.md), or a guardrailed Pro `generate-image-v2` batch (one job returns ~64 native `16px` candidates) then cull the muddy ones. State the tradeoff and let the user choose; a Pro `16px` batch is variety-to-cull, not clean-per-icon.
-- **17–31px:** untested here; lean on Pixen's `detail`/`outline` controls toward 16px and validate a small Pro test toward 32px before trusting a sheet.
-- **`32px+` icons → `generate-image-v2` (Pro)**, per the guidance below. Guardrail the prompt (bold single-color black outline, low detail, limited palette, no gradients / noise / stray pixels); Pro is strongest at `32px+`.
+- **`16–31px` single icon → `create-image-pixen` (the "new" / Pixen model); Pro is unreliable for a clean icon below `32px`.** Confirm the route before generating unless the user named the Pixen model (route only — cost-routing and batch-approval still apply). Recipe: `detail: low detail`, `outline: single color black outline`, `view` to suit the subject, `no_background: true`. Pixen returns one image per call, so one item per job. Optional: clamp the palette to ~16–32 colors (`aseprite-cli.md`).
+- **`16–31px` sheet or large set →** Pixen one-item-per-job then assemble locally (clean; N paid jobs, get batch approval per SKILL.md), or a guardrailed Pro `generate-image-v2` batch (~64 candidates per job) then cull the muddy ones. State the tradeoff and let the user choose.
+- **`32px+` icon or sheet → `generate-image-v2` (Pro).** Guardrail the prompt: bold single-color black outline, low detail, limited palette, no gradients/noise/stray pixels. On a cheap/budget request, read `cost-routing.md` and offer a Pixen comparison or smaller test first. Use `create-image-pixen` here when the user wants a cheap attempt, exact `detail`/`outline`/`view` controls, or fast iteration over variety; verify its output reads as the requested icon type.
 
-**Confirmation:** because `16px` overrides the Pro-first default, confirm the route with the user before generating a `16px` icon via Pixen — unless the user explicitly named the new/Pixen model, then proceed. This confirms the route only; cost-routing and batch-approval rules still apply.
-
-For `32px+` icons, use REST v2 `POST /generate-image-v2` first for icon sheets and for single icons when quality or candidate variety matters. It is a Pro-family route: on a cheap/budget request, read `cost-routing.md` first and offer a lower-cost Pixen comparison or a smaller test before a full Pro sheet.
-
-Do not default to object generation (`create_1_direction_object` / `create-1-direction-object`), `create_tiles_pro`, `generate-ui-v2`, or `create-ui-asset` for icons. Object routes produced noisy/downscaled-looking icons with broken contours and weak 32px clarity in testing — avoid them for any icon request, even when the subject is a weapon, potion, or prop. Use UI routes only when the user asks for the slot, button, panel, frame, or container UI itself. (`create-image-pixen` is governed by Size Routing above, not this avoid-list: it is required at `16px` and optional otherwise.)
-
-At `32px+`, use `create-image-pixen` when the user explicitly values a cheap attempt, exact `detail`/`outline`/`view` controls, or fast iteration over candidate variety (at `16px` it is required — see Size Routing). Verify Pixen results read as the requested icon type; in testing it gave clean contours but, on multi-item sheets, semantically unclear or duplicated items and sheet-layout drift.
+Do not default to object generation (`create_1_direction_object` / `create-1-direction-object`), `create_tiles_pro`, `generate-ui-v2`, or `create-ui-asset` for icons. Object routes produced noisy/downscaled-looking icons with broken contours and weak 32px clarity in testing — avoid them for any icon request, even when the subject is a weapon, potion, or prop. Use UI routes only when the user asks for the slot, button, panel, frame, or container UI itself.
 
 Background defaults differ by icon type:
 

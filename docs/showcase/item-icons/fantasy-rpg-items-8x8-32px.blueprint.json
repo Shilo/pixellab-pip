@@ -1,0 +1,13 @@
+{
+  "_comment_prompt": "/pixellab-pip 32px fantasy rpg item icons, pro model, optimized guardrail prompt: clean single-color outline, low detail, low colors",
+  "_comment": "Native 32x32 batch: one generate-image-v2 job returned 64 separate 32x32 icons, assembled locally into an 8x8 256x256 sheet (assembly only, pixels unchanged). The guardrail prompt (outline/low-detail/limited-palette) is what makes Pro clean at this size.",
+  "POST /v2/generate-image-v2": {
+    "description": "Fantasy RPG item icon, one single centered object per image, bold clean single-color black outline around the whole object, flat color fill, low detail, minimal shading, limited palette of only a few colors, crisp readable silhouette, transparent background. Unlabeled pictorial assets only. Varied fantasy items such as swords, shields, potions, scrolls, rings, amulets, staffs, bows, helmets, keys, gems, spellbooks, torches, boots, and gauntlets. No text, letters, numbers, labels, no gradients, no noise, no stray pixels.",
+    "image_size": {
+      "width": 32,
+      "height": 32
+    },
+    "no_background": true,
+    "seed": 20260712
+  }
+}

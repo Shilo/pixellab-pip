@@ -22,6 +22,9 @@ Last reviewed: 2026-07-02.
   <tr>
     <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-inventory-64px-8x8.png" alt="Fantasy RPG 64px inventory item atlas"></td>
   </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="item-icons/fantasy-rpg-items-8x8-32px.png" alt="Guardrailed fantasy RPG item icons, native 32px batch"></td>
+  </tr>
 </table>
 
 PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complete 8 by 8 sheets. The showcased winner is the general inventory sheet after PixelLab background removal because it covers the broadest RPG inventory surface while keeping readable 32px items, transparent background, and no slot/frame treatment. The weapon, armor, consumable, and material sheets show the same route holding a consistent style across more specialized inventory categories.
@@ -37,6 +40,7 @@ PixelLab Pip's strongest item-icon route is REST `generate-image-v2` for complet
 - [Glossy Candy Sweets and Treats Sheet](#glossy-candy-sweets-and-treats-sheet)
 - [Individual 64px Fantasy Inventory Items](#individual-64px-fantasy-inventory-items)
 - [Complete 64px Fantasy Inventory Atlas](#complete-64px-fantasy-inventory-atlas)
+- [Guardrailed Fantasy Item Icons (Native 32px Batch)](#guardrailed-fantasy-item-icons-native-32px-batch)
 - [Findings](#findings)
 - [Showcase Assets](#showcase-assets)
 - [Validation Notes](#validation-notes)
@@ -525,6 +529,63 @@ Findings:
 - The sheet is a direct PixelLab atlas output, not a locally assembled sheet.
 - All cropped `64x64` cells had unique pixel hashes, and visual review found no obvious duplicate item concepts.
 
+## Guardrailed Fantasy Item Icons (Native 32px Batch)
+
+![Guardrailed fantasy RPG item icons, native 32px batch](item-icons/fantasy-rpg-items-8x8-32px.png)
+
+Original prompt:
+
+```text
+/pixellab-pip 32px fantasy rpg item icons, pro model, optimized guardrail prompt: clean single-color outline, low detail, low colors
+```
+
+The guardrailed fantasy item batch shows `generate-image-v2` (Create Image Pro) at its strongest for `32px` items. An agent-authored prompt explicitly demands a bold single-color black outline, low detail, a limited palette, and no gradients, noise, or stray pixels — the controls Pixen exposes as `detail`/`outline` but Pro does not, so the prompt carries them. One native `32x32` request returned 64 separate `32x32` icons — swords, crested shields, potions, rings, amulets, staffs, bows, helmets, keys, gems, spellbooks, torches, lanterns, gauntlets, and winged boots — with consistent strong outlines and clean silhouettes. The `8x8` sheet above was assembled locally from the 64 original PixelLab PNGs with no margins, resizing, repainting, or quantization.
+
+Source inputs: text-only request. No reference images, style images, masks, or palette images were supplied.
+
+Route: PixelLab REST v2 `generate-image-v2` (native `32x32` batch), surfaced in product language as Create Image Pro.
+
+Prompt preparation: agent-authored guardrail prompt to steer Pro toward clean, outlined, low-detail output at small size.
+
+Generation details:
+
+| Field | Value |
+|---|---|
+| Image size | `32x32` per generated item |
+| Output structure | `Separate images` (64 native `32x32` PNGs) |
+| Returned image count | `64` separate PNGs |
+| Showcase grid | `8x8`, `256x256`, assembled from original `32x32` PNGs |
+| Background | `no_background: true` |
+| Sent seed | `20260712` |
+| Reported cost | `$0.095` |
+
+Blueprint — replayable route and request body ([`fantasy-rpg-items-8x8-32px.blueprint.json`](item-icons/fantasy-rpg-items-8x8-32px.blueprint.json)):
+
+```json
+{
+  "_comment_prompt": "/pixellab-pip 32px fantasy rpg item icons, pro model, optimized guardrail prompt: clean single-color outline, low detail, low colors",
+  "_comment": "Native 32x32 batch: one generate-image-v2 job returned 64 separate 32x32 icons, assembled locally into an 8x8 256x256 sheet (assembly only, pixels unchanged). The guardrail prompt (outline/low-detail/limited-palette) is what makes Pro clean at this size.",
+  "POST /v2/generate-image-v2": {
+    "description": "Fantasy RPG item icon, one single centered object per image, bold clean single-color black outline around the whole object, flat color fill, low detail, minimal shading, limited palette of only a few colors, crisp readable silhouette, transparent background. Unlabeled pictorial assets only. Varied fantasy items such as swords, shields, potions, scrolls, rings, amulets, staffs, bows, helmets, keys, gems, spellbooks, torches, boots, and gauntlets. No text, letters, numbers, labels, no gradients, no noise, no stray pixels.",
+    "image_size": {
+      "width": 32,
+      "height": 32
+    },
+    "no_background": true,
+    "seed": 20260712
+  }
+}
+```
+
+Local processing: the 64 returned `32x32` PNGs were tiled into one `256x256` `8x8` sheet with zero gutters; assembly only, no repainting, resizing, or quantization.
+
+Findings:
+
+- Strongest `32px` item result observed: the guardrail wording produced consistent bold outlines and clean, varied, readable icons.
+- Generally production-ready; a few individual cells would benefit from minor touch-ups.
+- Guardrail wording is the key lever for Pro at small sizes; because `generate-image-v2` has no `detail`/`outline` controls, the prompt must carry the outline, low-detail, and limited-palette intent.
+- Native `32x32` generation returns separate files (a batch), not one packed sheet; the sheet is a local arrangement of the originals.
+
 ## Findings
 
 REST `generate-image-v2` is the best route currently showcased for complete fantasy RPG item-icon sheets. It handled broad and narrow item categories, transparent backgrounds, 8 by 8 composition, and readable 32px silhouettes better than object-style generation would for this use case.
@@ -553,6 +614,7 @@ The general inventory sheet is the best hero image because it demonstrates the b
 | Glossy candy sweets and treats sheet | `docs/showcase/item-icons/candy-sweets-treats-glossy-8x8-32px.png` |
 | 64px fantasy inventory item grid | `docs/showcase/item-icons/fantasy-rpg-inventory-64px-4x4.png` |
 | 64px fantasy inventory atlas | `docs/showcase/item-icons/fantasy-rpg-inventory-64px-8x8.png` |
+| Guardrailed fantasy item native 32px batch | `docs/showcase/item-icons/fantasy-rpg-items-8x8-32px.png` |
 
 ## Validation Notes
 
@@ -570,3 +632,5 @@ The general inventory sheet is the best hero image because it demonstrates the b
 - The weapon, armor, consumable, material, candy, and glossy candy showcase files were copied from saved PixelLab sheet outputs into stable showcase locations.
 - The 64px fantasy inventory grid was copied into a stable showcase location as the showcased asset.
 - No local repainting, quantization, cleanup, or procedural visual fixes were applied to the showcase copies.
+- The guardrailed fantasy item sheet is exactly `256x256` and divides exactly into an `8x8` grid of `32x32` cells, with alpha transparency (`alpha_min=0`, `alpha_max=255`).
+- It was generated as `64` original native `32x32` PNGs, then tiled locally into the showcase sheet (assembly only, zero gutters).
