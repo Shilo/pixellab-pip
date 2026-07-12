@@ -16,7 +16,7 @@ This note does not link to the generated candidate frames; they live in the giti
 ## Endpoint mechanics (confirmed against the live API and OpenAPI)
 
 - **Async.** `POST /v2/animate-with-text-v3` returns a `background_job_id`; poll `GET /v2/background-jobs/{job_id}` until `completed`. Cost appears as `usage`/`billing_usage` (`{"type":"usd","usd":…}`) on the completed job.
-- **Frame count.** `frame_count` is 4–16, must be even, default 8. `frame_count=16` returned **17 images**: image 0 is a re-render of the input `first_frame`, images 1–16 are the generated motion. Budget on 16 to minimize job count.
+- **Frame count.** `frame_count` is 4–16, must be even, default 8. `frame_count=16` returned **17 images**: image 0 is the input `first_frame` echoed back (pixel-identical or a negligible re-encode difference — see the testing note), images 1–16 are the generated motion. Budget on 16 to minimize job count.
 - **Image fields are objects, not raw strings.** `first_frame`/`last_frame` are `Base64Image` = `{"type":"base64","base64":"…","format":"png"}`. Passing a bare base64 string 422s (before any charge).
 - **No `image_size`.** Output canvas equals the `first_frame` canvas (max 256×256). A 128×128 canvas left room for the subject plus a second object to move around; the subject was kept small on purpose.
 - **`action` caps at 500 characters** (hard). Over-length 422s before charge; still cheaper to check length locally before POST.
@@ -26,7 +26,7 @@ This note does not link to the generated candidate frames; they live in the giti
 
 ## Chaining and timing
 
-- **Handoff.** Job N+1's `first_frame` = a chosen frame from job N (the "handoff"). Because job N+1's image 0 is a *re-render* of the handoff (visibly close but not pixel-identical), the smooth stitch is: keep job 1's frames 0–16, and for each later job drop its re-rendered image 0 and keep 1..handoff. The transition handoff→(next) image 1 is one clean motion step.
+- **Handoff.** Job N+1's `first_frame` = a chosen frame from job N (the "handoff"). Because job N+1's image 0 is a duplicate of the handoff (the frame you fed it, echoed back — pixel-identical or nearly so), the smooth stitch is: keep job 1's frames 0–16, and for each later job drop its image 0 and keep 1..handoff. The transition handoff→(next) image 1 is one clean motion step.
 - **Timing math.** Playback delay (100 ms/frame) is an assembly choice; the endpoint sets no timing. Unique frames = 1 (initial) + Σ(new frames per job). 60 s = 600 frames ≈ 37–40 jobs at ~16 new frames each, fewer when a handoff is taken before frame 16.
 - **Adaptive authoring.** Each next action was written *after* viewing the previous result, because the "current state" (subject pose, object position) is whatever the model actually produced, not what was requested.
 
@@ -45,7 +45,7 @@ This note does not link to the generated candidate frames; they live in the giti
 
 - The final job used `last_frame` = the movie's first frame. The end frame matched the start almost exactly (mean abs diff **1.16/255**), so the loop seam is effectively invisible.
 - But interpolation loaded the size/palette correction into the **last 1–2 frames**, producing an abrupt "snap back" (the drift from finding 4 surfacing all at once). Options, in order of preference: (a) steer the chain back toward the opening size/pose over the last few beats so the anchor has little to correct; (b) accept the raw snap; (c) smooth it in post (a scale/position/colour morph between real frames — post-processing, must be disclosed).
-- The movie's true frame 0 is the first job's re-rendered image 0, which is close but not identical to the supplied start image. Anchor the loop to whichever frame you actually display first.
+- The movie's frame 0 is the first job's image 0, which is the supplied start image echoed back. Anchor the loop to whichever frame you actually display first.
 
 ## Validation methodology
 
@@ -69,7 +69,7 @@ A follow-up round ran many from-scratch cinematics as independent assistant inst
 
 - **Cyclic vs evolving — the loop-one-cycle shortcut.** Periodic motion (flicker, spin, bob, sway, flow, rain, a breathing idle) does not need chaining: generate one clean cycle as a single ≤16-frame clip and loop it at playback, tuning the per-frame delay to the requested duration. Multiple instances reached this independently; it is far cheaper than chaining and closes cleanly (measured pixel-identical endpoints with a `last_frame`=first anchor, or within-normal seam distance for a self-closing field). Reserve chaining for scenes that genuinely evolve (the 60 s build above, or a seed→flower growth arc).
 - **Robust async polling.** The outer background-job `status` can lag behind the finished, already-billed result; key completion on the presence of `last_response` images. Tolerate transient timeouts/5xx by re-polling the same saved job id, never resubmit a paid job on a transient error, and persist each paid response so a poller crash cannot orphan a charge. Four independent instances plus this build hit the same behavior.
-- **De-duplication is not trimming.** Dropping the re-rendered duplicate frame at each seam (and a loop-close frame identical to frame 0) is expected de-duplication for a clean stitch — distinct from the ping-pong/reverse/trim playback manipulation the global rules forbid. Keep the raw frames alongside for integrity.
+- **De-duplication is not trimming.** Dropping the duplicate frame at each seam (the echoed-back input; and a loop-close frame identical to frame 0) is expected de-duplication for a clean stitch — distinct from the ping-pong/reverse/trim playback manipulation the global rules forbid. Keep the raw frames alongside for integrity.
 
 ## Open questions / follow-ups
 

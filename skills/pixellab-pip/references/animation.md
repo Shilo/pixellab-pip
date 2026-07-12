@@ -28,7 +28,7 @@ Managed v3 character and object animation (MCP `animate_character`/`animate_obje
 
 When the user does not specify `frame_count`, use the endpoint default or documented animation/template default. For REST `animate-with-text-v3`, current OpenAPI documents `frame_count` as 4-16, must be even, default 8; refresh the schema before choosing a non-default value when exact current behavior matters.
 
-Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is a re-render of the supplied `first_frame` (close but not pixel-identical), then the generated frames — so `frame_count=16` yields 17 images. Count and report accordingly; do not read the extra image as a frame-count mismatch. `first_frame` and `last_frame` are Base64Image objects (`{"type":"base64","base64":"…","format":"png"}`), not bare base64 strings. Because image 0 is a re-render, a from-scratch loop's true anchor is the first generated frame, not the pre-generation opening image.
+Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is the supplied `first_frame` echoed back as frame 0 — pixel-identical or within a negligible re-encode difference (measured mean abs diff 0.0–1.5/255 across real generations), followed by the `frame_count` generated frames, so `frame_count=16` yields 17 images. Count and report accordingly; do not read the extra image as a frame-count mismatch. Because image 0 just repeats the frame you sent, a chained job's new content is images 1..N — drop image 0 as a duplicate of the handoff; the first frame that has actually moved is image 1. `first_frame` and `last_frame` are Base64Image objects (`{"type":"base64","base64":"…","format":"png"}`), not bare base64 strings.
 
 ## Async Polling
 
