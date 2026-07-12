@@ -12,6 +12,10 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 - [Showcase](showcase/README.md) - examples of using Pip to route PixelLab requests, enhance prompts, generate assets, and document results.
 
+## Examples
+
+- [Minimal PixelLab Router Skill](pixellab-router.md) - compact standalone example that routes a PixelLab request to an exposed MCP tool or the documented REST v2 fallback.
+
 ## Benchmark
 
 - [PixelLab Pip Skill Benchmark](pixellab-pip-benchmark.md) - reproducible agent-side context/token and routing-correctness comparison of the skill vs no skill vs the official mcp/docs injection.

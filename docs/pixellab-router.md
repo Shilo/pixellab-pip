@@ -1,3 +1,12 @@
+# Minimal PixelLab Router Skill
+
+Last reviewed: 2026-07-12.
+
+This minimal Agent Skill is for agents that need one PixelLab decision: use a matching callable MCP tool, or fall back to the documented REST v2 API. It intentionally omits setup, prompt enhancement, cost controls, asset packaging, and other workflow features.
+
+## Embedded Skill
+
+```markdown
 ---
 name: pixellab-router
 description: Route PixelLab tasks to a matching visible PixelLab MCP tool, falling back to the documented PixelLab REST v2 API when no matching MCP tool exists.
@@ -14,3 +23,6 @@ Route PixelLab requests only through PixelLab MCP or REST v2.
 7. If neither surface documents the operation, say it is unsupported. Do not invent a tool, path, field, or response.
 
 MCP tool names are not REST paths. If the user explicitly requires MCP and no matching MCP tool is exposed, report that instead of falling back.
+```
+
+The embedded skill is a compact example, not the repository's canonical agent contract. PixelLab Pip's maintained routing instructions remain in [`../skills/pixellab-pip/SKILL.md`](../skills/pixellab-pip/SKILL.md).
