@@ -54,14 +54,28 @@ The extension also shows soft warnings (a "smaller than 48×48" caution, an "abo
 
 ### Editor Floors That Block API-Valid Sizes
 
-Because those editor floors are stricter than the confirmed API minimums, several sizes are reachable through REST/MCP but blocked in the Aseprite editor. The cases most relevant to small-asset work:
+Some editor tools hardcode a size floor stricter than the confirmed API, so certain sizes are reachable through REST/MCP but blocked in the Aseprite UI. Tools below are named by their plugin menu label.
 
-- **16px generation is blocked in the editor's Pro/general-image and inpaint/edit tools (32×32 floor) but works via REST `generate-image-v2`**, whose confirmed minimum is 16 and which already has a committed 16×16 showcase atlas. Routing 16px work through the REST path instead of the plugin is what unlocks it.
-- **Exact-64 editor tools (interpolation, movement) block the whole 16–128 range** that REST `interpolation-v2` accepts.
-- **Fixed-size editor pickers (one of {256, 128, 64, 32, 16}) block in-between sizes** — e.g. 48, 96, 100, 150 — that the arbitrary-integer REST fields accept (`rotate` 16–200, `generate-8-rotations-v2` 32–168).
-- On the max side, some editor tools cap at 200×200 or 128×128, below the `generate-image-v2` API max of 792×688.
+Fake blocks — the editor rejects a size the matching REST endpoint accepts:
 
-Mapping caveat: the editor tools communicate over the extension's internal transport, so a given editor tool may not call the identically named public REST endpoint; treat these as same-family comparisons. The one mismatch backed by a committed asset rather than inference is 16×16 on `generate-image-v2`. `8px` stays blocked on both surfaces.
+| Tool (menu label) | Editor block | API allows | Blocked |
+|---|---|---|---|
+| Edit image ▸ `Edit image` | selection ≥ 32×32 | `edit-image` ≥ 16 | 16–31px |
+| Animate ▸ `Interpolate` | exactly 64×64 | `interpolation-v2` 16–128 | everything but 64 |
+| Rotate ▸ `Rotate` | only 16/32/64/128 | `rotate` 16–200 | 48, 100, 150, 200, all 129–200 |
+| Animate ▸ `Animate with skeleton` | only 16/32/64/128/256 | `animate-with-skeleton` 16–256 | in-between (48, 96, 100…) |
+| Animate ▸ `Re-pose (skeleton)` | only 16/32/64/128/256 | skeleton family 16–256 | in-between |
+| Create image ▸ `Create S-M image (old)` | 16/32/64, square-only | `create-image-bitforge` 16–200, any ratio | 48, 100, non-square |
+
+Not fake — these match the real API floor, so prefer them for small sizes:
+
+- Create image ▸ `Create S-XL image (pro)` — allows 16×16, matching `generate-image-v2` (confirmed min 16, with a committed 16×16 showcase atlas). This is the editor's genuine 16px path; 16px is **not** REST-only.
+- Inpaint ▸ `Inpaint` — min 16; Map ▸ `Create isometric tile` — min 16×16.
+- Create image ▸ `Create Image S-XL (New)` (Pixen) — min 32, but that matches `create-image-pixen`'s documented min area 32×32, so it is an honest floor, not a fake block.
+
+Blocked with an unverified backend limit (caveated, not confirmed fake): `Create character with same style` (< 128×128), `Create M-XL image` (modifier ≤ 150×150), Map ▸ `Extend map (old)` (exactly 64×64), Inpaint ▸ `Inpaint M-L (pixpatch v2)` (selection ≥ 32×32). On the max side, some editor tools cap at 200×200 or 128×128, below the `generate-image-v2` API max of 792×688.
+
+Mapping caveat: the editor tools communicate over the extension's internal transport, so a tool may not call the identically named public REST endpoint; treat these as same-family comparisons. The one mismatch backed by a committed asset rather than inference is 16×16 on `generate-image-v2`. `8px` stays blocked on both surfaces.
 
 ## REST v2 Limits — Image Generation
 
