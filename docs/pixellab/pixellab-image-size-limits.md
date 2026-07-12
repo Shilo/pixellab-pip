@@ -147,7 +147,7 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 | `create-ui-asset` | `image_size` | **192×192** | 688×688 | Default 256×256; max per axis aspect-dependent (square 512, tall/wide 688). Highest minimum in the API. |
 | `generate-ui-v2` | `image_size` | 16×16 | width 792, height 688 | Default 256×256; 16 to aspect-ratio max. |
 | `generate-font-pro` | `image_size` | `enum ['1K', '2K']` | | Resolution/pricing tier, not pixel dims. |
-| `generate-font-pro` | `glyph_px` | `enum [8, 16, 32, 64]`, default 16 | | **Only field in the API that accepts `8`.** Native bitmap size per glyph. |
+| `generate-font-pro` | `glyph_px` | `enum [8, 16, 32, 64]`, default 16 | | **Only field in the API that accepts `8`** — 8px generates a rough-but-usable glyph atlas (tested). Native bitmap size per glyph. |
 | `map-objects` | `image_size` | 32×32 | 400×400 | Default 128×128. Basic mode max area 400×400; inpainting mode max area 192×192. |
 
 ## MCP Tools
@@ -185,19 +185,18 @@ Conclusion for the goal:
 - **`16px` is fully achievable** for icons, items, and tilesets at the API level; the only open question is `16px` semantic quality for non-tile item sprites, already researched.
 - **`8px` is not achievable** for icons, items, or tilesets through any documented endpoint — the hard minimum is `16`, enforced at request validation. If `8px` game assets are required, the paths are: (a) generate at `16px`+ and downscale locally with honest post-processing reporting, or (b) use `generate-font-pro` with `glyph_px: 8` when the assets are genuinely glyph-like.
 
-## What Is Still Uncertain
+## Follow-Up Tests (All Resolved 2026-07-11)
 
-The per-axis min/max/enum bounds are settled — read from the schema and empirically confirmed as `422` rejections at zero cost (both floors and ceilings). Everything that remains requires a **valid** size that starts a real generation, so it can only be confirmed with a paid call. In rough priority:
+Every generation-time rule left open was probed; all resolved, almost all via free validation errors.
 
-1. **Generation-time area / aspect / divisibility rules** — the only remaining *hard-limit* unknowns. Per-axis bounds pass validation, but a second layer is enforced after acceptance and was not probed (it would cost). Open questions:
-   - `create-image-pixen`: **resolved (live test 2026-07-11)** — it generates at `16×16` (HTTP 200, real 16×16 RGBA, ~$0.0082), so the documented "min area 32×32" does *not* gate 16×16 at generation; the true floor is 16. `create-image-pixflux` is still unverified at 16×16. (Note: a follow-up 10-icon test showed `no_background` *is* honored at 16×16 with short single-subject prompts; the earlier ~91%-opaque result came from overloading the canvas with a 64-item list. Coins can still hollow out when their center matches the removed background color — a background-removal artifact fixed by local edge-flood removal, not a limit. See the Pixen Single-Subject section of the [16px item spike](pixellab-16px-item-sprite-generation-spike.md).)
-   - Does `generate-image-v2` / `create-image-pixen` reject an over-area square (e.g. `600×600`, per-axis-valid but past the "square 512" / "area 512×512" cap) at generation, or generate it?
-   - Does `create-image-pixen`'s `÷4` requirement reject a non-multiple (e.g. `17×17`) or silently crop it?
-2. **`8px` font glyphs (`glyph_px: 8`) producing usable output** — `8` is a valid enum value (the only 8px-native path in the API), so probing it starts a paid font generation. Whether an 8px glyph atlas is legible is unverified.
-3. **`remove-background` at ≤`8px`** — its minimum is `1`, so an 8px request is valid and would run; not probed to avoid cost. Low priority.
-4. **`16px` non-tile item/icon semantic quality** against the specific target assets — a quality question, not a limit question; already characterized in the 16px spike.
+- **`create-image-pixen` generation-time rules (validation-enforced, free `422`):** width/height must be a **multiple of 4** (`18×18` → `multiple_of 4`), and total **area `32×32` to `512×512`** (`600×600` → "Canvas must be size 512x512 area or smaller"). It *does* generate at `16×16` (HTTP 200, ~$0.0082) — `16` clears the area floor and is ÷4. So pixen's valid range is per-axis 16–768, **÷4**, area 32×32–512×512. (In the 16×16 test `no_background` worked with a short single-subject prompt; the earlier ~91%-opaque came from overloading the canvas with a 64-item list. Coins can hollow out when their center matches the removed background color — a background-removal artifact fixed by local edge-flood removal, not a limit. See the Pixen Single-Subject section of the [16px item spike](pixellab-16px-item-sprite-generation-spike.md).)
+- **`create-image-pixflux` at `16×16`: rejected** — `422` "Canvas must be size 32x32 area or larger". Pixflux's real floor is a **32×32 area**, *unlike* pixen (16); the per-axis schema min 16 is overridden by the area rule at validation.
+- **`generate-image-v2` aspect max is enforced:** `600×600` → `400` "image_size must be between 16x16 and 512x512 for this aspect ratio". The square max is `512×512` (the per-axis `792`/`688` apply only at extreme aspect ratios).
+- **`glyph_px: 8` fonts: generate** (HTTP 200, ~$0.095) an 8px glyph atlas. The glyphs read as glyphs but are **rough/marginal at 8px** — usable as an experimental tiny bitmap font, not crisp letters. This is the only 8px-native path in the API.
+- **`remove-background` at `8×8`: works** (HTTP 200, ~$0.005) — cleanly removed a solid background and kept the foreground at 8×8; the `1×1` floor is real.
+- **`16px` non-tile item/icon semantic quality** is a quality question (not a limit), characterized in the [16px item spike](pixellab-16px-item-sprite-generation-spike.md), which also has a palette-clamp demo (over-shaded pixel art clamps cleanly to ~16–24 colors while keeping shape).
 
-Promote the `16px` support facts into `references/` when they should change routing behavior. Do not promote an `8px` icon/item/tileset claim — it is confirmed rejected. The only 8px-native path is font `glyph_px: 8`.
+Nothing about the size limits themselves remains untested. Do not promote an `8px` icon/item/tileset claim — it is confirmed rejected; the only 8px-native path is font `glyph_px: 8`.
 
 ## Related
 

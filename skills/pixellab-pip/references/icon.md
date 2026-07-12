@@ -45,7 +45,7 @@ Transparent item-icon sheet starting point:
 Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns and 8 rows, each cell a readable 32x32 item, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with clear centered object silhouettes, crisp hard edges, low visual noise, limited palette, consistent high-fantasy inventory style. Include varied common RPG inventory categories: melee weapons, ranged weapons, shields, armor, helmets, jewelry, potions, scrolls, books, food, coins, gems, ores, herbs, monster parts, tools, keys, chests, bags, bombs, and arrows. No text, letters, words, numbers, labels, captions, fake writing, runes, glyphs, UI slots, buttons, borders, frames, rounded corners, watermark, terrain tiles, or decorative grid lines.
 ```
 
-Adapt theme, subject list, and palette; keep the sheet-layout, per-cell-size, no-text, and no-border clauses. A validated fire-magic skill sheet used a 1994-character description at 256x256 — themed sets still work better as one cohesive sheet than as separate 32x32 generations.
+Adapt theme, subject list, and palette; keep the sheet-layout, per-cell-size, no-text, and no-border clauses.
 
 Anchors for known failure modes (use only the ones that apply): `Pictorial symbols only`; `rich full-bleed illustrated miniature background` / `Fully opaque, every pixel painted` (backgrounded only); `No borders, frames, UI slots, rounded corners, dividers, watermark`; `No black outlines around icon square edges`.
 
@@ -74,7 +74,7 @@ Internal pre-final checks (report only the constraints the user named, per `usag
 
 - Output dimensions match the requested sheet size and divide exactly into the requested cells; `32px icons` means 32px per cell.
 - Symbols/items fit the cell scale — no 64px-ish symbols, collapsed layouts, multi-object clusters in one cell, or gutters that change cell math.
-- For explicit cell-size sheet requests, check the first visible icon/item against its intended cell before trusting automated crops: the visible object must fit inside that cell's pixel bounds without crossing into adjacent cells. If the first item is already larger than the requested cell, the sheet fails even if the canvas size and crop hashes look plausible.
+- For explicit cell-size sheet requests, check the first visible icon/item against its intended cell before trusting automated crops: if the first item is already larger than the requested cell, the sheet fails even if the canvas size and crop hashes look plausible.
 - Alpha matches the request: fully opaque for backgrounded sheets, clean transparency for `no_background: true` (after `background-removal.md` verification if removal was applied).
 - No text-like marks, borders, frames, gutters, rounded corners, or slot styling unless requested. Metadata is not enough — a 1px opaque edge or a semantically unclear item passes structural checks while failing the art request; a human visual check is required for variety, readability at 32px, and recognizable semantics. For a request for unique items, inspect every cell for recognizable semantic duplication or an indistinguishable variant; do not report semantic uniqueness from pixel hashes alone.
 - Item icons: crisp readable pixel art without mixels or smeared detail. Normal stair-stepped diagonals are fine; treat stepping as failure only when it harms 32px readability or shape clarity.
