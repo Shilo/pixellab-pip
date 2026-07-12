@@ -52,6 +52,17 @@ Observed editor behavior (not the API contract):
 
 The extension also shows soft warnings (a "smaller than 48×48" caution, an "above 80×80 is experimental" note) and applies local tier gating for larger sizes. None of these are server-returned floors. **Do not treat any Aseprite-extension size minimum as the API minimum.**
 
+### Editor Floors That Block API-Valid Sizes
+
+Because those editor floors are stricter than the confirmed API minimums, several sizes are reachable through REST/MCP but blocked in the Aseprite editor. The cases most relevant to small-asset work:
+
+- **16px generation is blocked in the editor's Pro/general-image and inpaint/edit tools (32×32 floor) but works via REST `generate-image-v2`**, whose confirmed minimum is 16 and which already has a committed 16×16 showcase atlas. Routing 16px work through the REST path instead of the plugin is what unlocks it.
+- **Exact-64 editor tools (interpolation, movement) block the whole 16–128 range** that REST `interpolation-v2` accepts.
+- **Fixed-size editor pickers (one of {256, 128, 64, 32, 16}) block in-between sizes** — e.g. 48, 96, 100, 150 — that the arbitrary-integer REST fields accept (`rotate` 16–200, `generate-8-rotations-v2` 32–168).
+- On the max side, some editor tools cap at 200×200 or 128×128, below the `generate-image-v2` API max of 792×688.
+
+Mapping caveat: the editor tools communicate over the extension's internal transport, so a given editor tool may not call the identically named public REST endpoint; treat these as same-family comparisons. The one mismatch backed by a committed asset rather than inference is 16×16 on `generate-image-v2`. `8px` stays blocked on both surfaces.
+
 ## REST v2 Limits — Image Generation
 
 | Endpoint | Field | Min (per axis) | Max (per axis) | Additional prose rules |
