@@ -58,16 +58,58 @@ Each dimension scores **0 = fail, 1 = partial, 2 = pass**. Not every dimension a
 
 ## Results
 
-_Filled after each tier runs._
+Each scenario was run by a separate assistant instance given only the plain-language request and the skill contract. Smoke instances were asked to plan and did not spend; live instances built the cinematic from scratch and self-validated. Scores use the rubric above (0/1/2 per dimension).
 
-### Smoke results
+### Smoke results — 10 / 10 correct
 
-_pending_
+Every scenario was routed and handled correctly, with no dimension failing. Highlights:
 
-### Live results
+| ID | Request | Verdict | Key behavior |
+|---|---|---|---|
+| S1 | Campfire loop, no budget | Pass | Recognized a short flicker loop as a single clip (correctly de-escalated from a multi-shot cinematic) and kept it to a minimal, one-candidate-first flow. |
+| S2 | 4s waterfall loop, from scratch, $2 | Pass | Multi-shot route; opening frame via a background image route; calibrate-on-first-job budgeting; loop closed by reusing the opening frame; 3 blocking questions. |
+| S3 | "Cool looping animation", $3 | Pass | Flagged $3 as tight → single loop, not a chain; asked for scene/length/background before spending. |
+| S4 | 1s wave, $1 | Pass | Correctly a single clip, not a cinematic; cheap route; asked which "wave". |
+| S5 | 60s dragon, $0.20 | Pass | Told the user honestly that ~$0.20 cannot fund a full minute (~38 jobs), offered a short cut or a raised budget, hard-stop planned. |
+| S6 | 5s cat-bats-ball loop, only two objects, facing camera, $3 | Pass | Two-layer object enforcement (transparent canvas + per-beat exclusions) and described the ball's own physics — never an off-screen actor. |
+| S7 | Candle loop, 3s, in Spanish | Pass | Replied in Spanish, translated the generation text to English, routed and budget-gated correctly. |
+| S8 | 5s spinning coin loop at 12 fps, $2 | Pass | Generated one full turn and looped it, set the frame delay for 12 fps, treated fps as a playback (assembly) choice. |
+| S9 | 4s idle loop from a supplied frame, $2 | Pass | Used the supplied frame as the opening frame; anchored identity to its actual pixels; idle-artifact-aware loop. |
+| S10 | 6s cinematic, no scene, $3 | Pass | Had duration and budget but correctly blocked on the missing scene before spending. |
 
-_pending_
+Consistent across all ten: budgets were treated as required (asked when missing, hard-stopped as a cap) and never converted into invented dollar-per-generation prices; costs were to be calibrated on the first real job; the single-clip vs multi-shot boundary was judged correctly; from-scratch opening frames were routed sensibly (a scene/background route for scenes, a sprite route for small subjects); and no instance asked the user about frame counts, seeds, or timing.
+
+### Live results — 6 built from scratch: 5 complete, 1 honest partial
+
+All six created their own opening frame and validated every shot. Costs are the authoritative per-call figures; all were far under budget.
+
+| ID | Request | Route chosen | Loop closes | Cost | Verdict |
+|---|---|---|---|---|---|
+| L1 | Campfire flicker loop, ~3s | One looped cycle | Yes (seam ≈ a normal flame step) | ~$0.04 | Pass |
+| L2 | Fish passing a bubble, loop ~3s | One looped cycle | No — conveyor cut | ~$0.04 | Partial |
+| L3 | Spinning gold coin loop, ~2.5s | One looped cycle | Yes (endpoints pixel-identical) | ~$0.07 | Pass |
+| L4 | Seed sprouting into a flower, ~5s, no loop | Chained shots | n/a (one-way arc) | ~$0.17 | Pass |
+| L5 | Robot waving at camera, loop ~3s | One looped cycle | Yes (seam smoother than an interior step) | ~$0.06 | Pass |
+| L6 | Rain falling, loop ~3s | One looped cycle | Yes (seam within normal frame-to-frame range) | ~$0.05 | Pass |
+
+- The periodic scenes (campfire, coin, robot wave, rain) each generated **one clean cycle and looped it at playback**, tuning the frame delay to the requested seconds — cheap and seamless. Loop closure was measured, not asserted: pixel-identical endpoints where a last-frame anchor was used, and within-normal seam distance where a self-closing field was used.
+- The evolving scene (seed → flower) correctly **chained shots**, each continuing from the prior shot's frame, producing a smooth one-way growth arc with invisible seams.
+- The one partial (fish + bubble) validated its constraints well — a connected-component check confirmed exactly the two objects with no third ever appearing — but the loop did not seam-close. The correct closure technique (reuse the opening frame as the target) was attempted three times and failed on the service side during a backend incident; rather than fake a loop (disallowed) the instance shipped an honest conveyor loop and reported "loops but does not seam-close" as a separate claim.
+- Reporting quality was strong throughout: instances distinguished "technically loops" from "looks seamless", flagged concurrent-account balance movement as an overlapping observation instead of miscounting it as their own cost, refused to resubmit already-billed jobs, and offered honest quality caveats (e.g. subtle rain, calm-vs-lively flicker).
+
+Note on conditions: the live suite ran many generations at once and coincided with a period of heavy service load, so some jobs hit transient infrastructure errors and a concurrency ceiling. Those are external to the workflow; the instances handled them correctly (retry the same job, never double-charge, validate before shipping).
 
 ## Findings and workflow improvements
 
-_pending_
+Testing produced two rounds of concrete improvements to the cinematic contract, plus confirmation that the rest already works.
+
+**Round 1 (from smoke tests) — the cyclic-loop shortcut.** Several instances independently reasoned that periodic motion (a flicker, spin, bob, sway, flow, rain, or breathing idle) needs only **one clean cycle looped at playback** — with the frame delay tuned to the requested duration — rather than a multi-job chain. This is cheaper and cleaner, and the boundary matters: chaining is for scenes that genuinely evolve. The contract now decides "cyclic vs evolving" up front, and defaults a sensible few-second length for an ambient loop given no duration. The live tests confirmed the rule works in both directions: the periodic scenes took the single-cycle path, and the growth arc took the chained path — each citing the rule.
+
+**Round 2 (from live tests) — robust async handling.** Building for real surfaced two fixes:
+
+- **Completion signal and poll resilience.** The generation jobs are asynchronous, and the top-level job status can lag behind the finished, already-billed result; four separate instances found that keying completion on the presence of the returned images (rather than only the outer status) is what avoids a hang. Poll loops must also tolerate transient timeouts and 5xx by re-polling the same job — never resubmitting a paid job (which would double-charge) — and should persist each paid response as it arrives so a crash can't orphan a charged job. The animation contract now says this.
+- **De-duplication vs "no trimmed outputs."** Removing the duplicate re-rendered frame at each shipped seam (and a loop-close frame identical to the first) is expected de-duplication for a clean stitch — not the ping-pong/reverse/trim playback manipulation that is otherwise disallowed. The contract now states this explicitly and keeps the raw frames alongside for integrity.
+
+**What already worked (no change needed).** Route selection (single clip vs multi-shot, cyclic vs evolving), budget discipline (required, calibrated on real usage, hard-stopped, never invented in dollars), from-scratch opening-frame routing, loop closure by reusing the opening frame, per-shot validation with re-rolls, only-these-objects enforcement by describing object physics instead of off-screen actors, non-English handling, supplied-frame handling, and the standard deliverable set (looping GIF, spritesheet, individual frames, blueprint, manifest, plus a raw un-processed cut). One instance described the fit plainly: the cinematic and animation contracts "matched the live API behavior exactly."
+
+**Overall.** Across the tested range — from scratch, cyclic loops, evolving arcs, natural loops that reuse the first frame as the last, multi-object scenes, camera-facing subjects, non-English requests, supplied frames, and budget edge cases — the workflow routed, planned, budgeted, generated, validated, and reported correctly. The one incomplete result was an external service failure during a loop-close attempt, handled honestly. With the two rounds of improvements applied, cinematic support covers the common user requests reliably.
