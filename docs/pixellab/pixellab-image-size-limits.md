@@ -17,10 +17,21 @@ Most generation endpoints enforce size in up to two layers, and the effective al
 
 So "max 512×512" can mean a per-axis cap, a square-area cap, or an aspect-specific cap depending on the endpoint. The tables call out which.
 
+## Empirical Verification (2026-07-11)
+
+The minimums below were not just read from the schema — they were live-probed and confirmed as hard rejections. Method: send a below-minimum size to each endpoint whose size field is schema-constrained, which returns `422` at request validation before any job is created. This is safe (no generation, no credits) and proves the limit is a **reject**, not a silent clamp.
+
+- **42 below-minimum probes across all size-constrained endpoints returned `422`.** Every error was a Pydantic `greater_than_equal` / `enum` violation naming the exact bound (e.g. `Input should be greater than or equal to 16`, `Input should be 16, 32 or 64`).
+- **Zero cost, confirmed by balance snapshot.** Account balance was byte-identical before and after the whole run (`$0.626445278979185` → unchanged; `$0.00` spent). No background jobs were created.
+- `8px` was rejected by every image/tile/icon/character/object endpoint. `16px` was additionally rejected by every `ge 32` / `ge 64` / `ge 192` endpoint.
+- **There is no way to cancel a job to avoid a charge.** The API exposes only `GET /background-jobs/{job_id}` (status) — no cancel endpoint. The `DELETE` routes remove *finished* managed assets (character/object/ui-asset) and do not refund the generation. Once a valid request is accepted, the credit is committed. "Submit then cancel" is not possible.
+
+Not live-tested (would cost credits, because the value is valid and starts a real generation): valid `16px`+ sizes, `remove-background` at ≤`8px` (its min is `1`), and `generate-font-pro` with `glyph_px: 8`. Their limits are taken from the schema. `16px` *success* for icons/items/tilesets is already evidenced by committed showcase assets.
+
 ## Bottom Line
 
 - **Minimum is `16` almost everywhere; several routes floor at `32`.** No image/tile/icon endpoint accepts a dimension below `16`. The only exceptions are `remove-background` (per-axis min `1`) and font `glyph_px` (`enum` includes `8`).
-- **`8px` icons, items, and tilesets are not supported.** Every relevant field has a schema minimum of `16` (or an `enum` of `[16, 32, 64]`), so an `8px` request is rejected at validation, not padded up. The only place `8` is a legal value anywhere in the API is `generate-font-pro.glyph_px` (`enum [8, 16, 32, 64]`).
+- **`8px` icons, items, and tilesets are not supported** (empirically confirmed — see verification section). Every relevant field has a schema minimum of `16` (or an `enum` of `[16, 32, 64]`), so an `8px` request is rejected with a `422` at validation, not padded up. The only place `8` is a legal value anywhere in the API is `generate-font-pro.glyph_px` (`enum [8, 16, 32, 64]`).
 - **`16px` icons, items, and tilesets are supported at the API level.** The remaining `16px` risk is semantic quality for non-tile item sprites (they drift larger), already characterized in the 16px spike — not a hard-limit problem.
 - **The `32x32` minimum users hit in the PixelLab Aseprite extension is a client-side editor limit,** not an API floor. Different editor tools apply different local minimums.
 - Maxima vary widely and are often larger than the product wording implies (for example `generate-image-v2` per-axis max is `792×688`, not `512`; `create-tiles-pro` goes to `256`, not `128`).
@@ -65,7 +76,7 @@ The extension also shows soft warnings (a "smaller than 48×48" caution, an "abo
 
 | Endpoint | Field | Min | Max | Notes |
 |---|---|---|---|---|
-| `create-character-v3` | `image_size` | 16 (from-scratch) | 256 | Reference mode: size advisory (model picks). `reference_image` max 256×256. Canvas padded ~2× for animation. |
+| `create-character-v3` | `image_size` | **32** (schema-enforced; prose says 16) | 256 | Live probe rejected 8 and 16 with `ge 32`. Reference mode advisory (model picks). `reference_image` max 256×256. Canvas padded ~2×. |
 | `create-character-with-4-directions` | `image_size` | 16×16 | 128×128 | Per-direction reference images must match `image_size`. |
 | `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | `standard` (1 gen) vs `pro` (20–40 gens). |
 | `create-character-pro` | `image_size` | 32×32 | 168×168 | `reference_image` max 168×168; `concept_image` max 1024×1024. Canvas padded ~2×. |
@@ -148,14 +159,15 @@ Conclusion for the goal:
 - **`16px` is fully achievable** for icons, items, and tilesets at the API level; the only open question is `16px` semantic quality for non-tile item sprites, already researched.
 - **`8px` is not achievable** for icons, items, or tilesets through any documented endpoint — the hard minimum is `16`, enforced at request validation. If `8px` game assets are required, the paths are: (a) generate at `16px`+ and downscale locally with honest post-processing reporting, or (b) use `generate-font-pro` with `glyph_px: 8` when the assets are genuinely glyph-like.
 
-## What Is Still Uncertain (Optional Live Confirmation)
+## What Is Still Uncertain
 
-The schema now answers most of the earlier open questions, so little remains to test:
+The minimum/maximum limits are now settled — read from the schema and empirically confirmed as `422` rejections at zero cost. What remains is not about hard limits:
 
-1. **Enforcement mode of a below-minimum request** — the schema declares `minimum: 16`, which FastAPI/Pydantic validate as a `422` rejection before generation. If empirical certainty is wanted, one `generate-image-v2` call at `8×8` confirms reject-vs-clamp; a validation rejection normally consumes no credits. (Expectation: hard `422`, not a silent upscale.)
+1. **`8px` font glyphs (`glyph_px: 8`) actually producing usable output** — `8` is a valid enum value, so probing it starts a real (paid) generation. Not tested here. The value is accepted; whether an 8px glyph atlas is legible is a quality question for a future paid test.
 2. **`16px` non-tile item/icon semantic quality** against the specific target assets — a quality question, not a limit question; covered by the 16px spike.
+3. **`remove-background` at ≤`8px`** — its minimum is `1`, so an 8px request is valid and would run; not probed to avoid cost.
 
-Everything else in this doc is read directly from the schema and does not need a paid call. Promote the `16px` support facts into `references/` when they should change routing behavior; do not promote an `8px` icon/item/tileset claim, because the schema rejects it.
+Promote the `16px` support facts into `references/` when they should change routing behavior. Do not promote an `8px` icon/item/tileset claim — it is confirmed rejected. The only 8px-native path is font `glyph_px: 8`.
 
 ## Related
 
