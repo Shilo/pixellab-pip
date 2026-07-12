@@ -154,12 +154,25 @@ Same rubric, plus two dimensions for this round: **Background** (a solid, immers
 | ES5 | Pass | Mapped the two supplied frames to the start and end anchors and interpolated between them. |
 | ES6 | Pass | Complex multi-element night scene composed into one background render and animated in place so nothing drifts. |
 
-**Extended live — deferred.** The service's generation backend was returning server-side failures during this window (the same incident noted above), so the live extended cinematics were deferred rather than run against a failing backend. The re-render claim below was instead validated from real generations already downloaded in the first round, which needs no new generation.
+**Extended live — 6 / 6 built from scratch, all pass** (run once the backend recovered). Each created its own opening frame — or, for the interpolation shot, both anchor frames — validated every shot, and cost a few cents.
+
+| ID | Request | Route | Result |
+|---|---|---|---|
+| EL1 | Torch-lit dungeon corridor, loop ~3s | Cyclic loop, solid scene | Pass — solid background every frame, geometry stable, only torches move, seamless loop (~$0.04) |
+| EL2 | Spinning star, transparent, loop ~2s | Cyclic loop, transparent | Pass — transparency preserved every frame (no matte/halo), seamless (~$0.06) |
+| EL4 | Treasure chest opening, strict ~1.5s | Start→end interpolation | Pass — both exact anchors held pixel-exact, smooth 15-frame open (~$0.14) |
+| ES6 | Rainy town street at night, loop ~4s | Cyclic loop, complex scene | Pass — all elements present, none forbidden, solid scene stable, pixel-exact loop, exactly 4.0s (~$0.05) |
+| EL3 | Astronaut on an alien cliff, epic loop ~4s | Evolving chained + transient | Pass — 4 chained shots, loop closed pixel-exact, one honest moon-glow artifact (~$0.09) |
+| EL5 | Sunrise over mountains, ~5s, no loop | Evolving chained, non-loop | Pass — continuous night→dawn arc, non-looping (~$0.11) |
+
+Immersive solid-background scenes and the transparent regression both passed; the evolving scenes chained cleanly, and the interpolation shot honored both anchors exactly.
 
 ### Extended findings
 
 - **Backgrounds and complex scenes** are handled well from existing guidance: a solid-background scene route for immersive scenes, the background held consistent by composing all elements into one render and confining motion, and no baked background when the user wants transparency. No new instruction was needed for scene handling.
 - **Transparent-background support is intact** (the original approach): when the user wants no scene, transparency is preserved and verified.
 - **Heavily-detailed, fully-delegated briefs** are decomposed into a concrete plan with stated assumptions and no blocking questions, including correctly detecting when a one-way element (a transient event) turns an otherwise-ambient loop into an evolving, chained scene.
-- **Start→end interpolation** for shots that need a strict visual state: the dedicated two-keyframe route (`interpolation-v2`, with both exact frames as anchors, a short transition description, and a size) is now documented in the cinematic contract, alongside the text-driven `first_frame`+`last_frame` alternative, and the contract now states plainly that either endpoint may be supplied or generated.
+- **Start→end interpolation — the route was corrected after a head-to-head.** For a shot that must hit an exact start and end, the right route is **`animate-with-text-v3` with `first_frame` + `last_frame`** (a text-driven tween), not the Pro `interpolation-v2`. Measured on the same task and reproduced by two independent checks: v3 held both endpoints pixel-exact with a controllable 4–16 in-between frames for ~$0.04, up to 256px; `interpolation-v2` consistently returned only ~2 frames, missed the endpoints, and cost ~2.4× more. The contract now prefers v3 for every start→end tween and demotes `interpolation-v2` to a rarely-needed alternative. Either endpoint may be supplied or generated.
+- **A big lighting or palette shift on an evolving scene also needs the anchored tween.** Free-run animation anchors to the incoming palette and won't cross a large colour change (a night→dawn shot stays dark however the action is worded), so the target-state frame is generated and anchored as the end frame. Documented.
+- **The endpoint's pixel budget is now documented.** `width × height × frame_count ≤ 524,288`, so a 256×256 canvas allows only 8 frames and 16 frames need ~≤128px — size and frame count are coupled, and the references say so to avoid a rejected request.
 - **The "extra frame" behavior was re-validated precisely** (see below): the endpoint returns one more image than the requested frame count, and that extra image 0 is the supplied opening frame echoed back — pixel-identical or a negligible re-encode difference across four measured real generations — so it is a duplicate to drop when stitching, not a meaningful re-render. The reference wording was corrected accordingly.
