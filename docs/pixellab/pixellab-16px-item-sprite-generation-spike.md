@@ -578,6 +578,35 @@ Pro's native detail level resolves cleanly when there are at least `32px` to spe
 
 Local run outputs (not committed showcase assets) are in the `pixellab-pip-generations/pro-vs-pixen-16x16-treasure/` run folder: the 64-image Pro batch, the 9 pixen icons, inspection sheets, and clean native spritesheets.
 
+### Guardrailed Pro Prompt And The 16-vs-32 Ladder (Live Test 2026-07-11)
+
+A second test asked whether Pro's `16px` weakness is fixable by prompt guardrails, and how both routes scale from `16` to `32`. One Pro description with explicit `bold single-color black outline`, `low detail`, `flat fill`, `limited palette`, and `no gradients / noise / stray pixels` was run at `16x16` and `32x32` (64 images each); pixen ran the same four fantasy items (`iron sword`, `round wooden shield`, `red health potion`, `wooden wizard staff`) at each size. Seed `20260712`, `no_background: true` throughout.
+
+| group | n | dark-outline coverage | orphans/img | colors/img | opaque% |
+|---|---:|---:|---:|---:|---:|
+| Pro 16 | 64 | 62% | 0.45 | 22 | 37% |
+| Pro 32 | 64 | **96%** | 0.91 | 32 | 32% |
+| Pixen 16 | 4 | 100% | 0.25 | 54 | 35% |
+| Pixen 32 | 4 | 100% | 0.00 | 283 | 49% |
+
+- **Guardrail wording measurably steers Pro.** Explicit outline / low-detail / limited-palette wording raised Pro's dark-outline coverage from the un-guardrailed `56%` (treasure test) to `62%` at `16px` and `96%` at `32px`. Pro has no `outline` control, but the prompt is a real lever — most effective at `32px`.
+- **Pro is decisively a `32px+` tool.** Guardrailed Pro `32x32` was the best group overall: 64 varied, clean, strongly-outlined, game-ready fantasy icons in one job. Guardrailed Pro `16x16` improved clearly over the earlier un-guardrailed `16px` Pro but stayed softer/muddier (62% outline) — `16px` is simply too small for the model to place a consistent outline even when told to.
+- **Orphan count is not the quality signal; outline coverage is.** Pro `32` had *more* orphan pixels than Pro `16` (0.91 vs 0.45) yet looks far cleaner, because the near-complete outline and larger, resolved shapes dominate perception.
+- **Both routes gain quality from `16`→`32`.** Pixen stayed fully clean (100% outline, ~0 orphans) at both sizes and grew much richer at `32` (colors 54→283: gradient shading contained inside the outline). Pixen `16` is simple but perfectly readable.
+- **Practical split, refined:** at `16px`, pixen is still the cleaner route (100% vs 62% outline), but a guardrailed Pro `16x16` batch is a viable cheap-variety source to cull. At `32px`, guardrailed Pro is the strongest route for varied item sets; pixen `32` is the choice when you need specific, controlled, guaranteed-clean icons.
+
+Local run outputs in the `pixellab-pip-generations/fantasy-pro-vs-pixen-16-32/` run folder (Pro 16/32 batches of 64, pixen 16/32 sets of 4, inspection sheets).
+
+### Assessment: Per-Size Verdict (2026-07-11)
+
+Combining live results, metrics, and reviewer judgment — high-confidence conclusions only:
+
+- **`16px` Pixen — the viable `16px` route.** Consistent outlines (100% coverage), readable, clean shapes. Effectively the only production route at `16px`. Recommended polish: clamp the palette to roughly 16–32 colors (it ships ~54); that reads as more authentic pixel art. This is a local post-process, not a generation control.
+- **`16px` Pro — not viable for a clean single icon.** Inconsistent outline (62%), baked shadows, and orphan pixels; muddier than Pixen. Nuance: it is not *entirely* unreadable — some items read (swords, potions, keys) — and a guardrailed Pro `16px` batch is usable as a cheap variety source to cull, but it is unreliable for a clean, finished single `16px` icon.
+- **`32px` Pixen — usable but over-shaded.** Consistent pixels and outline, but ~283 colors is far more than clean pixel art needs, so it looks over-shaded/painterly for `32px`. Nuance: it is still readable at native scale; the real problem is the color/shading load, not legibility. Clamping to ~16–32 colors is the fix — `detail: low detail` alone did not limit colors at `32px`.
+- **`32px` Pro (guardrailed) — best of the four.** Clean, strongly-outlined (96%), varied, essentially production-ready with minor touch-ups. This is Pro's sweet spot.
+- **Cross-cutting: palette discipline is the shared lever.** Both Pixen sizes carry more colors than clean pixel art wants; a local palette clamp to ~16–32 colors is the recommended polish, and neither route exposes a color-count generation control (color reduction is a local/editor step — see `../../skills/pixellab-pip/references/aseprite-cli.md`).
+
 ## Bottom Line
 
 PixelLab appears capable of `16x16` pixel density, but subject type and surface context matter. Text-only `generate-image-v2` is promising for `16x16` full-cell tiles and reliable for `32x32` item-icon sheets. Strict `16x16` non-tile item *atlases* remain experimental, but individual `16x16` icons from per-job `create-image-pixen` (one short single-subject prompt) are a good-quality route, strongest for coins and currency — see the Pixen Single-Subject section. At `16x16`, pixen also produces cleaner icons than `generate-image-v2` (Pro), which lacks `detail`/`outline` controls and renders at a `32px+`-tuned detail level; Pro regains the quality lead at `32px+`. See the Pro vs Pixen section.
