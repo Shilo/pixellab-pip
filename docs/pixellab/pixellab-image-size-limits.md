@@ -19,11 +19,12 @@ So "max 512×512" can mean a per-axis cap, a square-area cap, or an aspect-speci
 
 ## Empirical Verification (2026-07-11)
 
-The minimums below were not just read from the schema — they were live-probed and confirmed as hard rejections. Method: send a below-minimum size to each endpoint whose size field is schema-constrained, which returns `422` at request validation before any job is created. This is safe (no generation, no credits) and proves the limit is a **reject**, not a silent clamp.
+The per-axis minimums and maximums below were not just read from the schema — they were live-probed and confirmed as hard rejections. Method: send an out-of-range size (below the minimum or above the maximum) to each endpoint whose size field is schema-constrained, which returns `422` at request validation before any job is created. This is safe (no generation, no credits) and proves the limit is a **reject**, not a silent clamp.
 
-- **42 below-minimum probes across all size-constrained endpoints returned `422`.** Every error was a Pydantic `greater_than_equal` / `enum` violation naming the exact bound (e.g. `Input should be greater than or equal to 16`, `Input should be 16, 32 or 64`).
-- **Zero cost, confirmed by balance snapshot.** Account balance was byte-identical before and after the whole run (`$0.626445278979185` → unchanged; `$0.00` spent). No background jobs were created.
-- `8px` was rejected by every image/tile/icon/character/object endpoint. `16px` was additionally rejected by every `ge 32` / `ge 64` / `ge 192` endpoint.
+- **74 out-of-range probes (42 below-minimum + 32 above-maximum) across all size-constrained endpoints returned `422`.** Every error was a Pydantic `greater_than_equal` / `less_than_equal` / `enum` violation naming the exact bound (e.g. `Input should be greater than or equal to 16`, `Input should be less than or equal to 792`, `Input should be 16, 32 or 64`).
+- **Zero cost, confirmed by balance snapshot.** Account balance was byte-identical before and after both runs (`$0.626445278979185` → unchanged; `$0.00` spent). No background jobs were created.
+- `8px` was rejected by every image/tile/icon/character/object endpoint. `16px` was additionally rejected by every `ge 32` / `ge 64` / `ge 192` endpoint. Every per-axis maximum in the tables was confirmed by an over-max rejection.
+- **These validation probes cover the per-axis min/max and enum bounds only.** They do not exercise the *generation-time* area/aspect/divisibility rules (e.g. a square-vs-16:9 max, a "min area 32×32", or a `÷4` requirement) — those are enforced after acceptance and can only be confirmed with a paid call. See "What Is Still Uncertain".
 - **There is no way to cancel a job to avoid a charge.** The API exposes only `GET /background-jobs/{job_id}` (status) — no cancel endpoint. The `DELETE` routes remove *finished* managed assets (character/object/ui-asset) and do not refund the generation. Once a valid request is accepted, the credit is committed. "Submit then cancel" is not possible.
 
 Not live-tested (would cost credits, because the value is valid and starts a real generation): valid `16px`+ sizes, `remove-background` at ≤`8px` (its min is `1`), and `generate-font-pro` with `glyph_px: 8`. Their limits are taken from the schema. `16px` *success* for icons/items/tilesets is already evidenced by committed showcase assets.
@@ -186,11 +187,15 @@ Conclusion for the goal:
 
 ## What Is Still Uncertain
 
-The minimum/maximum limits are now settled — read from the schema and empirically confirmed as `422` rejections at zero cost. What remains is not about hard limits:
+The per-axis min/max/enum bounds are settled — read from the schema and empirically confirmed as `422` rejections at zero cost (both floors and ceilings). Everything that remains requires a **valid** size that starts a real generation, so it can only be confirmed with a paid call. In rough priority:
 
-1. **`8px` font glyphs (`glyph_px: 8`) actually producing usable output** — `8` is a valid enum value, so probing it starts a real (paid) generation. Not tested here. The value is accepted; whether an 8px glyph atlas is legible is a quality question for a future paid test.
-2. **`16px` non-tile item/icon semantic quality** against the specific target assets — a quality question, not a limit question; covered by the 16px spike.
-3. **`remove-background` at ≤`8px`** — its minimum is `1`, so an 8px request is valid and would run; not probed to avoid cost.
+1. **Generation-time area / aspect / divisibility rules** — the only remaining *hard-limit* unknowns. Per-axis bounds pass validation, but a second layer is enforced after acceptance and was not probed (it would cost). Open questions:
+   - Does `create-image-pixen` / `create-image-pixflux` actually generate at `16×16`, or does the documented "min area 32×32" reject it at generation? (This sets the *true* floor for those two older routes; validation alone accepts `16`.)
+   - Does `generate-image-v2` / `create-image-pixen` reject an over-area square (e.g. `600×600`, per-axis-valid but past the "square 512" / "area 512×512" cap) at generation, or generate it?
+   - Does `create-image-pixen`'s `÷4` requirement reject a non-multiple (e.g. `17×17`) or silently crop it?
+2. **`8px` font glyphs (`glyph_px: 8`) producing usable output** — `8` is a valid enum value (the only 8px-native path in the API), so probing it starts a paid font generation. Whether an 8px glyph atlas is legible is unverified.
+3. **`remove-background` at ≤`8px`** — its minimum is `1`, so an 8px request is valid and would run; not probed to avoid cost. Low priority.
+4. **`16px` non-tile item/icon semantic quality** against the specific target assets — a quality question, not a limit question; already characterized in the 16px spike.
 
 Promote the `16px` support facts into `references/` when they should change routing behavior. Do not promote an `8px` icon/item/tileset claim — it is confirmed rejected. The only 8px-native path is font `glyph_px: 8`.
 
