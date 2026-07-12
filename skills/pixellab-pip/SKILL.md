@@ -225,4 +225,4 @@ When a live generation, edit, transform, conversion, background-removal, or anim
 | "Use `/tilesets/create` with my browser token." | Refuse; route to public MCP/REST tileset tools or manual website use. |
 | "What does Pro use?" | Product-level facts only; refresh official docs if current model details matter. |
 | "Cheapest way to get a few item icons?" | `references/cost-routing.md` + `references/icon.md`; prefer a non-Pro route and name the tradeoff. |
-| "Make a 30-second looping scene from this frame." | `references/cinematic.md`; ask for a budget if none given, plan the beats, chain `animate-with-text-v3`, validate each job. |
+| "Make a 30-second looping scene from this frame." | `references/cinematic.md`; ask for a budget if none given, decide cyclic vs evolving (one looped clip or chained shots), plan, validate each shot. |
