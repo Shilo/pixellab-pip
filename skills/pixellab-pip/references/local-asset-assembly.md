@@ -20,7 +20,7 @@ Inspect the underlying art against the overlay for scale, containment, boundarie
 
 ## GIF Previews
 
-Loop every preview GIF by default (`-loop 0`), even a one-way or non-seamless clip. A GIF that plays once and freezes is easy to miss or lose when shared (Discord, chat), so file-looping keeps it replaying. This is a playback setting, separate from whether the content forms a seamless loop; set play-once only when the user asks for it.
+Loop every preview GIF by default (`-loop 0`), even a one-way or non-seamless clip; set play-once only if the user asks.
 
 Transparent pixel art GIFs are disposal-sensitive: if each frame does not say how the previous frame should be cleared, some viewers accumulate old transparent-frame pixels and show trails.
 
