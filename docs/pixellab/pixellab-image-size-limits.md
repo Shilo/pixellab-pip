@@ -23,18 +23,23 @@ So "max 512×512" can mean a per-axis cap, a square-area cap, or an aspect-speci
 
 Reviewed 2026-07-13. PixelLab gates maximum image **size** by subscription tier — a soft limit that sits *under* the hard per-request schema caps and is a **distinct axis from the monthly generation quota**. **Every other maximum in this document was measured on Tier 2, so it is a Tier-2 ceiling, not a universal one.**
 
-Confirmed tier-size ladder (official per-tool docs + raw OpenAPI):
+Every image endpoint, with its per-tier max size. `?` = **genuinely undocumented** — no tier-size language exists for it in the raw schema (only edit-image carries one) or on any tool docs page (checked `create-image-flux`, `edit-image`, `text2animation`, `rotate`, `create-image-pro`, `consistent-style`, `create-ui-elements-pro`; only the first three publish a size ladder). The Tier-2 column is what this account measured; `?` cells can be filled **only** by re-probing on a Free/Tier-1 account.
 
-| Endpoint / tool | Free | Tier 1 (Apprentice) | Tier 2+ (Artisan / Architect) | Source |
+| Endpoint | Free | Tier 1 (Apprentice) | Tier 2+ (tested here) | Status |
 |---|---|---|---|---|
-| `create-image-pixflux` / `-background` | 200×200 | 320×320 | 400×400 | docs `create-image-flux` |
-| `edit-image` / `edit-images-v2` | **200×200** | 320×320 | 400×400 | docs + **raw OpenAPI** ("Free tier limit: Maximum 200x200 pixels for target canvas") |
-| `animate-with-text*` | Tier 1+ only | 256×256 | 256×256 | docs `text2animation` ("Requires Tier 1") |
-| `rotate` | fixed 16/32/64/128 | same | same | no tier gate |
+| `create-image-pixflux` / `-background` | 200×200 | 320×320 | 400×400 | documented (docs) |
+| `edit-image` / `edit-images-v2` | **200×200** | 320×320 | 400×400 | documented (docs **+ raw schema**) |
+| `animate-with-text*` | — (T1+ only) | 256×256 | 256×256 | documented (docs) |
+| `rotate` | 16/32/64/128 | 16/32/64/128 | 16/32/64/128 | no tier gate |
+| `generate-image-v2` | `?` | `?` | 792×688 aspect buckets (16:9 688×384, sq 512×512) | **tier undocumented — untested** |
+| `create-image-pixen` | `?` | `?` | 512×512 area | **tier undocumented — untested** |
+| `create-image-bitforge` | `?` | `?` | 200×200 | **tier undocumented — untested** |
+| `generate-with-style-v2` | `?` | `?` | 512×512 | **tier undocumented — untested** |
+| `create-ui-asset` | `?` | `?` | 688×688 | **tier undocumented — untested** |
+| `create-character-*` | `?` | `?` | per Characters table | **tier undocumented** |
+| tilesets / tiles | `?` | `?` | per Tilesets table | feature needs Apprentice+; size tier undocumented |
 
-The **only** tier-size gate encoded in the raw OpenAPI JSON is edit-image's Free-tier 200×200; the pixflux and animation ladders live on the per-tool docs pages and are enforced server-side (verified: no `tier`/`Requires Tier` size language elsewhere in the schema).
-
-**Undocumented — resolvable only by a Tier-1/Free test:** no tier-size language (schema or docs) exists for `generate-image-v2`, `create-image-pixen` (512×512), `create-image-bitforge` (200×200), `generate-with-style-v2`, `create-ui-asset`, characters, or tilesets. Whether a Free/Tier-1 account is silently capped below the schema max on these — in particular **generate-image-v2's 688×384 / 512×512 buckets** — cannot be answered from documentation. To resolve it, re-run the size probes on a Tier-1 account: does `generate-image-v2` still accept 688×384 and 512×512, or clamp/reject at ~320? Same for pixen at 512×512 and bitforge at 200×200.
+The **only** tier-size gate encoded in the raw OpenAPI JSON is edit-image's Free-tier 200×200; the pixflux and animation ladders live on per-tool docs pages, enforced server-side (verified: no other `tier`/`Requires Tier` size language in the schema). For the `?` rows, the priority test is `generate-image-v2`: on a Free/Tier-1 account, does it still accept 688×384 and 512×512, or clamp toward ~320/200 like pixflux does?
 
 Tiers map Apprentice = 1, Artisan = 2, Architect = 3 (docs gate Map Workshop behind "Requires Pixel Apprentice or higher"). Prices/quotas are medium-confidence (pricing page is a JS SPA); this account's balance endpoint reports `Tier 2: Pixel Artisan` with `total` 5000 generations (the schema *example* shows 2000 — illustrative, not this account). Sources: `https://www.pixellab.ai/docs/tools/create-image-flux`, `.../edit-image`, `.../text2animation`, `.../rotate`; raw `https://api.pixellab.ai/v2/openapi.json`.
 
