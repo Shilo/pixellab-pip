@@ -23,7 +23,7 @@ Split into **neutral** descriptors (what the style *is*) and **cons** (what went
 - **Style** (toggle each, neutral — no judgement): `in-game` · `detailed` · `stylized/painterly` · `flat/simple`.
 - **Cons** (toggle each, shown red — failure modes): `unwanted-view` (orientation doesn't match the prompt) · `unwanted-crop` (zoomed/cut off when the whole subject/scene was wanted) · `unwanted-detail` (over-detailed/busy for the context) · `low-quality/muddy`. A good output has no cons.
 
-(Earlier iterations used a `Frame` axis and a `low-quality` style tag; `Frame` is folded into `unwanted-crop` and `low-quality` moved to cons, so the neutral tags describe and the red tags flag problems. Known gap: the con set has no "opaque when transparency was wanted" flag for parallax — tag the closest, `unwanted-detail` for a dense opaque wall, and note it.)
+(Earlier iterations used a `Frame` axis and a `low-quality` style tag; `Frame` is folded into `unwanted-crop` and `low-quality` moved to cons, so the neutral tags describe and the red tags flag problems. Parallax note: a dense **opaque** band (transparency lost) is tagged `unwanted-crop` — the model zoomed into the foliage until the see-through gaps disappeared — so no dedicated opacity con is needed.)
 
 ## Scope
 
