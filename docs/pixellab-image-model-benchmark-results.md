@@ -7,6 +7,31 @@ This is the measured answer to the open routing question: *which PixelLab image 
 
 ---
 
+## Quick map (TL;DR)
+
+Intent → model quality order, and the best-**value** pick (folds in Pro's ~12× cost). `>` = clearly better; `≈` = tied / too close to call (**not** the same model).
+
+| Intent | Quality: best → worst | Best value |
+|---|---|---|
+| Character / single subject | Pro > Pixen > PixFlux > BitForge | **Pixen** |
+| Item / small icon (≤~32px) | Pro > Pixen > PixFlux > BitForge | **Pro** |
+| Object / standalone prop | PixFlux ≈ Pro > BitForge > Pixen | **PixFlux** |
+| Background (no subject / backdrop) | Pro > PixFlux > Pixen > BitForge | **PixFlux** |
+| Scene (subject + full environment) | Pixen > PixFlux > Pro > BitForge | **Pixen** |
+| Parallax / transparent scenery band | PixFlux ≈ Pixen > Pro | **PixFlux / Pixen** |
+| Style-consistent set / reference-driven | Pro > BitForge | **Pro** |
+
+Model → tool (model choice is **REST-v2-only**; MCP/Aseprite don't expose it; `S-XL`/`M-XL`/… are *size* labels, not models):
+
+| Model | REST v2 endpoint |
+|---|---|
+| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) |
+| Pixen | `create-image-pixen` |
+| Pro | `generate-image-v2` (async, returns candidates) |
+| BitForge | `create-image-bitforge` |
+
+---
+
 ## Method (short)
 
 - **7 categories**, each a **simple** and **complex** prompt, two fixed seeds (7, 42): C1 Character, C2 Item, C3 Object, C4 Background (no subject), C5 Scene (subject + environment), C6 Parallax (transparent mid-ground band), C7 Style-consistent set (capability test, Pro + BitForge only).
@@ -27,7 +52,7 @@ Score = mean normalized rank (higher better). Cost ≈ $0.008 cheap models, **~$
 | **C3 Object/prop** | PixFlux | 0.67 | Pro 0.67 (tie) | **PixFlux** | PixFlux ties Pro at 1/12 the cost. **Pixen is *worst* (0.25)** — surprise for the "sprite" model. |
 | **C4 Background** (no subject) | Pro | 0.69 | PixFlux 0.56 | **PixFlux** | Pro edges it but PixFlux is best-value. **PixFlux > Pixen (0.375)** — confirms "backdrop → PixFlux". |
 | **C5 Scene** (subject + env) | **Pixen** | 0.71 | PixFlux 0.56 | **Pixen** | **Surprise: Pixen wins full scenes; Pro is only 3rd (0.48).** Contradicts "solid scene → PixFlux". |
-| **C6 Parallax** (transparent band) | PixFlux = Pixen | 0.625 tie | — | **PixFlux / Pixen** | Both cheap models tie and work; **Pro is worst (0.25)** and produced 2 transparency-baked failures. |
+| **C6 Parallax** (transparent band) | PixFlux ≈ Pixen | 0.625 tie | — | **PixFlux / Pixen** | Both cheap models tie and work; **Pro is worst (0.25)** and produced 2 transparency-baked failures. |
 | **C7 Style set** | **Pro** | 2–0 | BitForge | Pro (only option pair) | Pro's `reference_images`/`style_image` held cross-pair style better than BitForge's `style_image` in both seeds. |
 
 Full per-model numbers (score / mean-rank / firsts) and the auto-metrics pre-pass are in the local (git-ignored) run folder: `pixellab-pip-generations/model-benchmark-20260713/aggregate_scores.json` and `auto_scores.csv`.
@@ -71,7 +96,7 @@ Yes, three:
 
 - **Statistical weight is low.** 2 seeds × 2 prompts = **4 samples per model per category** (fewer where BitForge is excluded), scored by **one reviewer**, **rank-only** (order, not magnitude). Treat results as **directional evidence**, not a decisive ranking.
 - **Strong, repeated signals** (trust more): Pixen wins scenes (C5); Pro dominates 32px icons (C2); BitForge weakest overall; Pixen weakest for objects (C3); Pro worst at parallax (C6).
-- **Close calls** (trust less): C1 Character (Pro over Pixen by 0.08), C3 Object (PixFlux = Pro tie), C4 Background (Pro over PixFlux by 0.13). Don't over-rewrite routing on these alone.
+- **Close calls** (trust less): C1 Character (Pro over Pixen by 0.08), C3 Object (PixFlux ≈ Pro tie), C4 Background (Pro over PixFlux by 0.13). Don't over-rewrite routing on these alone.
 - **Pro = first-candidate.** Best-of-N would raise Pro at small sizes only; it changes none of the scene/background/parallax conclusions (single candidate at ≥256px).
 - **Fairness note.** C1-simple's "facing left" was honored for Pixen via `direction:"west"` (regenerated); all other categories left facing unspecified and un-penalized. Each model ran at documented defaults + native controls only.
 - **Budget overrun.** A concurrent-process race (four runners across session restarts) drove **actual spend to ~$5.20, ~$0.20 over the $5 cap**; ~$1.00 was duplicate generations before the race was caught and killed. The final dataset is clean: 124/124 unique jobs, zero failures. Fix for future runs: a single-writer cross-process spend lock, not per-process counters.
