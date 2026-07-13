@@ -333,4 +333,28 @@ Same scoring: confidence vs the original plain-language intent, assigned by inde
 
 **Two-wave conclusion.** Ten entirely different scenes across ten distinct routes/edge cases, run cold from plain language, produced **10/10 correct routing** and a mean confidence in the high-80s, with exactly **one** contract improvement surfaced (the proactive glow-VFX forbid, wave 1) and **zero** new defects in wave 2. The cinematic contract is production-ready across the use cases tested.
 
+### Targeted quality round — the cyclic-*gesture* fix (raising the low scorer)
+
+Wave 2's low scorer, **G (cat batting yarn, 78%)**, was root-caused rather than accepted. Its three defects — a violent loop pop, the cat's posture drifting (sit → recline → sit), and injected sparkles — all traced to **one wrong build decision**: it made a periodic *gesture* (batting) as **two chained free-run shots with no loop closure**, i.e. it treated an energetic action-cycle like an ambient texture loop. Measured: the original G's final frame vs its opening was **MAD 31.65** — a hard visible jump each time the loop repeated (a clean seam is ≈3–8).
+
+**Root of the gap in the contract:** the "cyclic vs evolving" split treated *all* periodic motion identically ("one clean cycle, loop it"). It never distinguished **ambient** texture (flicker/flow/drift — loops fine first-frame-only) from a repeating **gesture** (a bat/wave/bounce/swing — a discrete body action that must *return to its own start pose* to loop). Nothing told the agent that a gesture is one self-closing cycle, never a chain.
+
+**Fix:** the cyclic branch now carries that distinction — a repeating gesture is **one self-closing cycle inside a single clip (rest → gesture → back to the start pose), never chained**, with the closure mechanism chosen per `animation.md`.
+
+**Validation — 3 fresh cold tests of the exact use case, each reading the amended contract:**
+
+| Test | Scene | How the agent built it (from the amended rule) | Loop-close MAD | Confidence |
+|---|---|---|---|---|
+| G2 | Cat batting yarn (the re-do) | One self-closing clip, `last_frame` = opening | **0.76** (was 31.65) | **88%** |
+| K | Bouncing rubber ball | One self-closing clip, symmetric first-frame-only | **3.04** | **92%** |
+| L | Swinging pocket-watch pendulum (transparent) | One self-closing clip, `last_frame` = opening (AE 0) | **4.06** | **90%** |
+
+All three built **one self-closing cyclic clip** (none chained) and **seam-closed cleanly** — the pop that sank the original G is gone (31.65 → 0.76 on the same scene), and the cat now holds a **stable upright posture** across the whole loop instead of reclining. Mean of the three ≈ **90%**, and G's own scene rose **78% → 88%**.
+
+**One empirical refinement the tests forced:** the first draft of the rule mandated "anchor `last_frame` = opening, never first-frame-only" for every gesture. K (the bounce) disproved the absolute: an identical `last_frame` made the ball "land halfway and sit still," and a *symmetric first-frame-only* arc closed better (3.04). The rule was softened to pick the closure by the motion — `last_frame` for a gesture that must land on an exact pose (cat, pendulum), first-frame-only when the motion is naturally symmetric and an identical anchor would over-constrain it (bounce) — deferring the mechanism choice to `animation.md`.
+
+**Residual (unchanged, honest):** G2 still saw v3 inject sparkles despite the forbid *and* the `last_frame` anchor (the agent isolated a seed where they land fully detached and offered a masked cut alongside the raw). This is the known stubborn glow-VFX limit, not a regression — the gesture fix targeted the pop and the drift, which it removed, and made no claim to fix the hallucination. (An early draft of the amended rule asserted the anchor "curbs" the VFX; a review pass cut that as unsupported by this very test — the anchored cat still sparkled.)
+
+**Net:** the one genuinely low score was a real, fixable contract gap, not model noise. With the cyclic-gesture distinction added, the same class of request now lands ~90%.
+
 
