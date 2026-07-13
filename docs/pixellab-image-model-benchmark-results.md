@@ -41,6 +41,13 @@ Directional guidance from this benchmark (static images only). Not a hard rule �
 - **PixFlux** (`create-image-pixflux` · Aseprite "Create M-XL image") — **standalone objects/props** (ties Pro at 1/12 the cost) and **subject-less backdrops** (best value; beats Pixen). Also a co-best pick for **parallax bands** (tied with Pixen).
 - **BitForge** (`create-image-bitforge` · Aseprite "Create S-M image") — **weakest on raw quality across the board**; every other model beats it. Reach for it only for its **unique controls** — `init_image`, `mask_image`/inpaint, `forced_palette`, `style_image` — never as a default quality pick.
 
+**Framing / composition** (measured via subject-fill = how much of the canvas the subject occupies). Overall tightest → loosest: **Pixen ≫ Pro > BitForge > PixFlux.**
+- **Pixen zooms in tightest and will crop at any size** (fills ~0.7–0.9 of the canvas across characters, items, and objects) — reads as higher-quality "portrait" framing but cuts off full bodies and whole objects, part of why it is weakest for standalone props.
+- **Pro is size-dependent:** it frames **small items/icons cleanly and uncropped** (a reason it *dominates* items) but **zooms in and can crop *larger* subjects — characters and objects**.
+- **PixFlux frames loosest** — the whole subject with margin (~0.3–0.6 fill), best when you need the complete uncropped silhouette; **BitForge sits in between** (not the loose framer it might seem).
+
+**Items/icons are not objects.** Items/icons are small pickups or symbols (≤~32px, tested at 32px); objects/props are larger standalone assets (tested at 64px). They frame, crop, and route differently — judge and route them separately (Pro for items, PixFlux for objects). When you need a full body or a complete object uncropped, prefer **PixFlux**, or explicitly prompt Pro/Pixen for "full body / whole object, not cropped".
+
 ---
 
 ## Method (short)
