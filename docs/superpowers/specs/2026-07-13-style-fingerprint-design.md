@@ -18,10 +18,12 @@ From the **existing** 124 outputs (no new generations), produce a per-model styl
 
 ## Tags (three parent axes, kept minimal)
 
-Each tagged output gets:
-- **View** (pick 1): `front` · `side` · `top-down` · `three-quarter` · `n/a` (subjectless scene).
-- **Frame** (pick 1): `full` (whole subject/scene with margin) · `cropped` (tight/portrait, subject cut off) · `scene` (environment fills the frame).
-- **Style** — five **independent** descriptors, toggle each that applies (a cell can be several at once): `in-game` · `detailed` · `stylized/painterly` · `flat/simple` · `low-quality/muddy`. (Split out rather than a single pick because each is a distinct dimension — e.g. an output can be both `detailed` and `in-game`.)
+Split into **neutral** descriptors (what the style *is*) and **cons** (what went *wrong*), so the result maps straight onto a pros/cons fingerprint. Each tagged output gets:
+- **View** (pick 1, neutral): `front` · `side` · `top-down` · `three-quarter` · `n/a` (subjectless scene).
+- **Style** (toggle each, neutral — no judgement): `in-game` · `detailed` · `stylized/painterly` · `flat/simple`.
+- **Cons** (toggle each, shown red — failure modes): `unwanted-view` (orientation doesn't match the prompt) · `unwanted-crop` (zoomed/cut off when the whole subject/scene was wanted) · `unwanted-detail` (over-detailed/busy for the context) · `low-quality/muddy`. A good output has no cons.
+
+(Earlier iterations used a `Frame` axis and a `low-quality` style tag; `Frame` is folded into `unwanted-crop` and `low-quality` moved to cons, so the neutral tags describe and the red tags flag problems. Known gap: the con set has no "opaque when transparency was wanted" flag for parallax — tag the closest, `unwanted-detail` for a dense opaque wall, and note it.)
 
 ## Scope
 
