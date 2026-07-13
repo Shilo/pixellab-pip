@@ -25,12 +25,12 @@ Model → tools. In the REST/MCP layer, model choice is a **REST-v2 decision** (
 
 | Model | REST v2 endpoint | Aseprite extension command (verbatim UI label) |
 |---|---|---|
-| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) | **Create M-XL image** (tooltip: "Create medium-extra large image (pixflux V3)") |
+| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) | **Create M-XL image** (window title: "Create medium-extra large image (pixflux V3)") |
 | Pixen | `create-image-pixen` | **Create Image S-XL (New, Pixen)** |
 | Pro | `generate-image-v2` (async, returns candidates) | **Create S-XL image (pro)**; style → **Create image from style reference (pro)** (`generate-with-style-v2`) |
-| BitForge | `create-image-bitforge` | **Create S-M image** (tooltip: "Create small-medium image (bitforge)") |
+| BitForge | `create-image-bitforge` | **Create S-M image** (window title: "Create small-medium image (bitforge)") |
 
-The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The version wording overlaps and is unreliable: both PixFlux (tooltip "pixflux V3") and Pixen ("New, Pixen") carry V3/New-series labels, so don't treat "New / Pixen / V3" as a dependable version signal.
+The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The version wording overlaps and is unreliable: both PixFlux (window title "pixflux V3") and Pixen ("New, Pixen") carry V3/New-series labels, so don't treat "New / Pixen / V3" as a dependable version signal.
 
 ---
 
