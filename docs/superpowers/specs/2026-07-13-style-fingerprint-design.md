@@ -18,12 +18,11 @@ From the **existing** 124 outputs (no new generations), produce a per-model styl
 
 ## Tags (three parent axes, kept minimal)
 
-Split into **neutral** descriptors (what the style *is*) and **cons** (what went *wrong*), so the result maps straight onto a pros/cons fingerprint. Each tagged output gets:
-- **View** (pick 1, neutral): `front` · `side` · `top-down` · `three-quarter` · `n/a` (subjectless scene).
+**Neutral** descriptors (what the style *is*) plus **cons** (what went *wrong*) — no descriptive view/frame axes, so the result maps straight onto a pros/cons fingerprint. Each tagged output gets:
 - **Style** (toggle each, neutral — no judgement): `in-game` · `detailed` · `stylized/painterly` · `flat/simple`.
-- **Cons** (toggle each, shown red — failure modes): `unwanted-view` (orientation doesn't match the prompt) · `unwanted-crop` (zoomed/cut off when the whole subject/scene was wanted) · `unwanted-detail` (over-detailed/busy for the context) · `low-quality/muddy`. A good output has no cons.
+- **Cons** (toggle each, shown red — failure modes): `bad-direction` (facing/orientation wrong for the prompt) · `bad-crop / over-zoom` (zoomed/cut off when the whole subject/scene was wanted — includes a parallax band gone opaque) · `bad-high-detail` (over-detailed/busy for the context) · `bad-low-quality / muddy`. A good output has no cons.
 
-(Earlier iterations used a `Frame` axis and a `low-quality` style tag; `Frame` is folded into `unwanted-crop` and `low-quality` moved to cons, so the neutral tags describe and the red tags flag problems. Parallax note: a dense **opaque** band (transparency lost) is tagged `unwanted-crop` — the model zoomed into the foliage until the see-through gaps disappeared — so no dedicated opacity con is needed.)
+(Iterated from earlier View+Frame+Style drafts: the descriptive **View** and **Frame** axes were dropped by the reviewer's choice for a pure pros/cons shape — orientation problems now surface only as `bad-direction`, framing/opacity problems only as `bad-crop`. Tradeoff, accepted: the fingerprint states no positive default-view bias, only flags wrong views.)
 
 ## Scope
 
