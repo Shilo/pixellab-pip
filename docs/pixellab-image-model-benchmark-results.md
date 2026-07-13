@@ -32,6 +32,15 @@ Model → tools. In the REST/MCP layer, model choice is a **REST-v2 decision** (
 
 The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The version wording overlaps and is unreliable: both PixFlux (window title "pixflux V3") and Pixen ("New, Pixen") carry V3/New-series labels, so don't treat "New / Pixen / V3" as a dependable version signal.
 
+### Model at-a-glance — what each is best at
+
+Directional guidance from this benchmark (static images only). Not a hard rule — useful context when picking a model.
+
+- **Pixen** (`create-image-pixen` · Aseprite "Create Image S-XL (New, Pixen)") — **full scenes** (subject + environment; outright winner) and **characters** (best value; Pro is marginally better at ~12× cost). **Caveat:** it **over-shades / over-saturates small icons & items** at its detailed default — force `detail: low detail` and clamp the palette, or use Pro, for clean tiny art. Weakest model for standalone objects. *(Animation is a separate workflow on different endpoints — not measured here.)*
+- **Pro** (`generate-image-v2` · Aseprite "Create S-XL image (pro)") — **small icons & items** (dominant, especially ≤32px via its many candidates) and **style-reference / variety** work. The expensive (~12×) option: worth it only where it clearly wins — **skip it for scenes, backdrops, and parallax**.
+- **PixFlux** (`create-image-pixflux` · Aseprite "Create M-XL image") — **standalone objects/props** (ties Pro at 1/12 the cost) and **subject-less backdrops** (best value; beats Pixen). Also a co-best pick for **parallax bands** (tied with Pixen).
+- **BitForge** (`create-image-bitforge` · Aseprite "Create S-M image") — **weakest on raw quality across the board**; every other model beats it. Reach for it only for its **unique controls** — `init_image`, `mask_image`/inpaint, `forced_palette`, `style_image` — never as a default quality pick.
+
 ---
 
 ## Method (short)
