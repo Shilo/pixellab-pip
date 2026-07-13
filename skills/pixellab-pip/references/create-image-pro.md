@@ -4,6 +4,8 @@ Read this for explicit Create Image Pro wording, REST `generate-image-v2`, exact
 
 Create Image Pro / REST `generate-image-v2` is a general image-generation route. It can make attractive sprite sheets and texture sheets, but exact cell layout is prompt-guided rather than structurally guaranteed. A correct output canvas size is not proof that the image contains the requested cell grid.
 
+`generate-image-v2`'s `no_background` **defaults to `true`** (it removes the background), unlike `create-image-pixflux`/`-background` which default to `false`. When the user wants an opaque, full-bleed image, scene, or sheet with its background kept, send `no_background: false` — otherwise the sky/backdrop is made transparent and wide canvases gain transparent side bars. Confirm the field's default from `openapi.json`, not a doc summary.
+
 ## Sub-32px Cell Requests
 
 For exact grid/sheet/tile/icon/sprite requests with per-cell size below `32px`, treat Create Image Pro as prompt-sensitive rather than structurally guaranteed. Do not avoid it when the user asks for it; use prompt wording that makes the cell math, independence, and no-margin packing explicit, then verify the raw output honestly.
