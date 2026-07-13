@@ -110,6 +110,20 @@ The raw schema caps each axis (`width ≤ 792`, `height ≤ 688`, both documente
 - Requested ratios **snap to the nearest bucket** (16:10 and 3:2 both → 632×424; 16:9/1.85/2:1 all → 688×384); the `400` returns the bucket, not your exact ratio. Bucket *boundary* ratios are approximate (each tested ratio fell inside the range shown), but the max at every standard ratio above is confirmed.
 - Any size **≤ its ratio's bucket** generates. Confirmed real generations (paid): 640×360, 634×360 (16:9), 792×300, 792×336 (wide), 344×688 / 360×688 / 380×688 (portrait). Rejected: over per-axis → `422` (1920×1080, 1280×720, 960×540, 793×793, 792×792); over the bucket → `400` (792×688, 400×688, 600×600, …). Isolated before/after balance proved every `400`/`422` probe costs **$0.00**; each accepted size costs ~$0.185.
 
+**16:9 widescreen ladder (menus, parallax) — absolute max = `688×384`.** Confirmed: 688×384 generates; every larger 16:9 request (690×388, 696×392, 704×396, 712×400, 768×432 — including exact 16:9 = 1.7778) returns `400 "must be between 16x16 and 688x384 for this aspect ratio"` (free). 688×384 is itself 1.79:1; the largest *mathematically exact* 16:9 (16k×9k) that fits is **672×378** (k=43 → 688×387 exceeds the 384 height cap).
+
+| 16:9 resolution | Works? |
+|---|---|
+| 1080p 1920×1080 · 720p 1280×720 · 540p 960×540 · 480p 854×480 | ❌ width > 792 (`422`) |
+| 432p 768×432 | ❌ passes per-axis, area over the 16:9 max → `400` |
+| **max 688×384** | ✅ the ceiling |
+| 360p 640×360 · 288p 512×288 · 270p 480×270 · 216p 384×216 · 180p 320×180 · 144p 256×144 · 90p 160×90 · 36p 64×36 · 18p 32×18 | ✅ |
+| 9p 16×9 | ❌ height < 16 min (`422`) |
+
+The break sits between 360p (✅ largest standard "p") and 432p (❌); 432p is the telling case — small enough per-axis (768 ≤ 792) but its 331k area exceeds the ~262k budget, so it fails at the aspect layer, not per-axis.
+
+**Most common pixel-art sizes** (all comfortably within limits): **320×180** and **640×360** are the canonical 16:9 pixel-art screen resolutions — both integer-upscale to 1080p (×6 / ×3) and 720p, so they are the usual authoring targets; **640×360** is the default for a full-screen pixel-art background. Also common: 480×270 (16:9), 256×224 / 256×240 (SNES-era), 320×240 (4:3), and square icons 16/32/64/128/256. Note the 16:9 ceiling 688×384 does **not** integer-scale to 1080p (1920/688, 1080/384 are non-integer), so for pixel-perfect upscaling prefer 640×360 or 320×180 and scale up; reserve 688×384 for when raw canvas size matters more than clean scaling.
+
 **Background default gotcha:** `no_background` **defaults to `true`** on `generate-image-v2` (raw schema; "Remove background from generated images"). Omitting it removes the background, so a full-scene landscape loses its sky (~31–39% transparent) and wide canvases gain transparent side bars (634×360 → 5px/side … 792×300 → 38px/side). **Set `no_background: false` for an opaque full-bleed scene** — verified at 688×384 → 0px bars, 0% transparency (this is the Aseprite "Create S-XL image (pro)" "Remove background" checkbox). Per-endpoint `no_background` defaults (raw schema): `generate-image-v2` = **`true`** (removes); `create-image-pixflux` and `create-image-pixflux-background` = **`false`** (keep) — the latter is opaque-by-default but caps at 400×400. Saved outputs under `pixellab-pip-generations/size-probe-2026-07-13/`.
 
 > Correction (2026-07-13): an earlier draft claimed `generate-image-v2` had *no* `no_background` field and forced removal. Wrong — that came from a WebFetch summary, not the raw schema. The field exists and defaults to `true`. Read field existence/defaults from `openapi.json` directly.
