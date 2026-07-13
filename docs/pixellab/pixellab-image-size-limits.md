@@ -89,35 +89,30 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 | `create-image-bitforge` | `image_size` | 16×16 | 200×200 | Max area 200×200. Skeleton keypoints best at 16/32/64. |
 | `generate-with-style-v2` | `image_size` | 16×16 | 512×512 | Square; non-standard sizes padded to nearest of {16, 32, 64, 128, 256, 512}. |
 
-### `generate-image-v2` Aspect/Area Max And Forced Background Removal (Empirical, 2026-07-13)
+### `generate-image-v2` Effective Max Size By Aspect Ratio (Empirical, 2026-07-13)
 
-Paid + free live tests with one identical RPG-background prompt. Two findings: the exact aspect-ratio→max-size map, and that `generate-image-v2` **force-removes the background with no opt-out**, which bars/pillarboxes wide backgrounds.
+The raw schema caps each axis (`width ≤ 792`, `height ≤ 688`, both documented "16 to aspect-ratio max") but does **not** publish the aspect formula. The effective per-ratio max is only exposed by the generation-time `400` message, e.g. `image_size must be between 16x16 and 688x384 for this aspect ratio` (free to probe — no job created). Swept across ratios 0.5→2.6 with one identical prompt, the maxima form a fixed set of ~262k–269k-pixel buckets (dims multiples of 8), transpose-symmetric except at the extremes where the differing per-axis caps (792 vs 688) bind:
 
-**Size is enforced in two layers, both free to probe.** Per-axis schema (`422`): `width ≤ 792`, `height ≤ 688`. Then a generation-time aspect/area rule (`400`) whose message names the exact max for your ratio, e.g. `image_size must be between 16x16 and 688x384 for this aspect ratio`.
-
-**Effective max = a fixed ~262,144-pixel (512×512) area budget, redistributed by aspect, dims rounded to multiples of 8, clamped to 792×688.** Measured maxima (all ≈262–269k px):
-
-| Requested ratio | Max W×H | Area |
+| Aspect (approx) | Effective max W×H | Pixels |
 |---|---|---|
-| 1:1 (1.00) | 512×512 | 262,144 |
-| 5:4 (1.25) | 576×464 | 267,264 |
-| 4:3 (1.33) | 600×448 | 268,800 |
-| 3:2 (1.50) | 632×424 | 267,968 |
-| 16:10 (1.60) | 632×424 | 267,968 |
-| 16:9 (1.78) | 688×384 | 264,192 |
-| 1.85–2.0 | 688×384 | 264,192 |
-| ≥2.2 (wide) | 792×336 | 266,112 |
+| ≤ 0.58 (portrait extreme) | 384×688 | 264,192 |
+| ~0.65 | 424×632 | 267,968 |
+| ~0.72 (2:3) | 448×600 | 268,800 |
+| ~0.80–0.89 (4:5) | 464×576 | 267,264 |
+| 1.00 (square) | 512×512 | 262,144 |
+| ~1.13–1.25 (5:4) | 576×464 | 267,264 |
+| ~1.33 (4:3) | 600×448 | 268,800 |
+| ~1.48–1.59 (3:2) | 632×424 | 267,968 |
+| ~1.71–2.05 (16:9) | 688×384 | 264,192 |
+| ≥ 2.15 (wide extreme) | 792×336 | 266,112 |
 
-- Ratios **snap to a discrete bucket** (16:10 and 3:2 both → 632×424; 16:9/1.85/2:1 all → 688×384). The `400` message returns the bucket, not your exact ratio.
-- **The per-axis 792 / 688 caps are only reached at extreme ratios** (width 792 at ≥~2.2:1 → 792×336; height 688 symmetric for portrait). At any ratio ≤2:1 the area budget binds first, so effective max width is ≤688. `792×688` together never generates (near-square → capped 576×464).
-- **Largest pixel counts:** 4:3 → 600×448 (268,800, most pixels); square → 512×512; widescreen 16:9 → 688×384.
-- Confirmed generating real images (paid $0.185 each): **640×360**, **634×360** (16:9), **792×300** (2.64:1). Rejected free: 1920×1080 / 1280×720 / 960×540 / 793×793 / 792×792 (`422`), 792×688 (`400`). Isolated before/after balance proved every `400`/`422` probe costs **$0.00**.
+- **Single largest values:** widest **792** (ratio ≥~2.15 → 792×336); tallest **688** (ratio ≤~0.58 → 384×688); most pixels **268,800** (4:3 / 2:3); largest square **512×512**. **`792×688` together never generates** — near-square caps at ≤576×464.
+- Requested ratios **snap to the nearest bucket** (16:10 and 3:2 both → 632×424; 16:9/1.85/2:1 all → 688×384); the `400` returns the bucket, not your exact ratio. Bucket *boundary* ratios are approximate (each tested ratio fell inside the range shown), but the max at every standard ratio above is confirmed.
+- Any size **≤ its ratio's bucket** generates. Confirmed real generations (paid): 640×360, 634×360 (16:9), 792×300, 792×336 (wide), 344×688 / 360×688 / 380×688 (portrait). Rejected: over per-axis → `422` (1920×1080, 1280×720, 960×540, 793×793, 792×792); over the bucket → `400` (792×688, 400×688, 600×600, …). Isolated before/after balance proved every `400`/`422` probe costs **$0.00**; each accepted size costs ~$0.185.
 
-**⚠ `no_background` defaults to `true` — the real gotcha.** `generate-image-v2` **does** have a `no_background` boolean; raw OpenAPI shows `default = true` ("Remove background from generated images"). So omitting it **removes the background**: on a full-scene landscape that stripped the sky (~31–39% transparent) and pillarboxed the sides with transparent bars that grow with canvas width — 634×360 → 5px/side, 640×360 → 8px/side, 792×300 → 38px/side. This is the same toggle the Aseprite "Create S-XL image (pro)" dialog exposes as its "Remove background" checkbox.
+**Background default gotcha:** `no_background` **defaults to `true`** on `generate-image-v2` (raw schema; "Remove background from generated images"). Omitting it removes the background, so a full-scene landscape loses its sky (~31–39% transparent) and wide canvases gain transparent side bars (634×360 → 5px/side … 792×300 → 38px/side). **Set `no_background: false` for an opaque full-bleed scene** — verified at 688×384 → 0px bars, 0% transparency (this is the Aseprite "Create S-XL image (pro)" "Remove background" checkbox). Per-endpoint `no_background` defaults (raw schema): `generate-image-v2` = **`true`** (removes); `create-image-pixflux` and `create-image-pixflux-background` = **`false`** (keep) — the latter is opaque-by-default but caps at 400×400. Saved outputs under `pixellab-pip-generations/size-probe-2026-07-13/`.
 
-**Set `no_background: false` for an opaque, full-bleed, edge-to-edge scene — same endpoint, full size.** Verified at max 16:9 **688×384 with `no_background: false` → 0px bars, 0% transparency, full canvas** ($0.185). The `no_background` *defaults* differ by endpoint (raw schema): `generate-image-v2` = **`true`** (removes), `create-image-pixflux` and `create-image-pixflux-background` = **`false`** (keep). So `create-image-pixflux-background` is an opaque-by-default alternative (400×224 → 0px bars, 0% transparency, ~$0.0065) but caps at 400×400 — smaller than 688×384. Saved outputs under `pixellab-pip-generations/size-probe-2026-07-13/`.
-
-> Correction (2026-07-13): an earlier draft of this subsection claimed `generate-image-v2` had *no* `no_background` field and forced removal. That was wrong — it came from a summarizer, not the raw schema. The field exists and defaults to `true`. Field-existence/default facts must be read from `openapi.json` directly.
+> Correction (2026-07-13): an earlier draft claimed `generate-image-v2` had *no* `no_background` field and forced removal. Wrong — that came from a WebFetch summary, not the raw schema. The field exists and defaults to `true`. Read field existence/defaults from `openapi.json` directly.
 
 ## REST v2 Limits — Tilesets And Tiles
 

@@ -190,7 +190,7 @@ Route from this skill first. Refresh official docs only when a needed tool, endp
 
 - `https://api.pixellab.ai/v2/llms.txt` — REST v2 endpoint index and auth summary
 - `https://api.pixellab.ai/v2/docs` — interactive REST v2 parameters
-- `https://api.pixellab.ai/v2/openapi.json` — exact schema checks only
+- `https://api.pixellab.ai/v2/openapi.json` — exact schema checks only; confirm a field's existence, type, or default from the raw JSON, never a prose summary of it
 - `https://api.pixellab.ai/mcp/docs` — MCP tool behavior
 - `https://www.pixellab.ai/mcp` — MCP setup
 - `https://github.com/pixellab-code` — official SDK/MCP repo state only
