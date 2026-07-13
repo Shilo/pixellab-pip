@@ -21,7 +21,7 @@ From the **existing** 124 outputs (no new generations), produce a per-model styl
 Each tagged output gets:
 - **View** (pick 1): `front` · `side` · `top-down` · `three-quarter` · `n/a` (subjectless scene).
 - **Frame** (pick 1): `full` (whole subject/scene with margin) · `cropped` (tight/portrait, subject cut off) · `scene` (environment fills the frame).
-- **Style** (pick 1–2): `in-game` · `detailed` · `stylized/painterly` · `flat/simple` · `low-quality/muddy`.
+- **Style** — five **independent** descriptors, toggle each that applies (a cell can be several at once): `in-game` · `detailed` · `stylized/painterly` · `flat/simple` · `low-quality/muddy`. (Split out rather than a single pick because each is a distinct dimension — e.g. an output can be both `detailed` and `in-game`.)
 
 ## Scope
 
