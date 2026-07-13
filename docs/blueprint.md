@@ -5,8 +5,8 @@ the tool/route used and the inputs sent — so you (or anyone you send it to) ca
 asset later, with or without changes. Think of it as a recipe card for a generation.
 
 It is deliberately minimal and human-readable: just the route, the request values, and short
-human notes — no account or cost metadata. That makes a blueprint easy to share; the notes do
-carry the wording of the request that created it, so skim them first if that matters.
+human notes — no account, auth, secrets, or cost metadata, since a blueprint is shared publicly.
+It carries the wording of the request that created it, so skim the notes first if that matters.
 
 ## What's inside
 
