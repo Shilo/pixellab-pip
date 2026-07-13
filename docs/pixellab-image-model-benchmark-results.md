@@ -23,14 +23,14 @@ Intent → model quality order, and the best-**value** pick (folds in Pro's ~12�
 
 Model → tools. In the REST/MCP layer, model choice is a **REST-v2 decision** (MCP has no raw image-model selector — it wraps models inside `create_character`/`create_object`/…). The **Aseprite extension**, however, exposes each model as a named *Create … image* command:
 
-| Model | REST v2 endpoint | Aseprite extension command |
+| Model | REST v2 endpoint | Aseprite extension command (verbatim UI label) |
 |---|---|---|
-| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) | **Create M-XL image** ("medium–extra large") |
-| Pixen | `create-image-pixen` | **Create S-XL image** ("New, Pixen") |
+| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) | **Create M-XL image** (tooltip: "Create medium-extra large image (pixflux V3)") |
+| Pixen | `create-image-pixen` | **Create Image S-XL (New, Pixen)** |
 | Pro | `generate-image-v2` (async, returns candidates) | **Create S-XL image (pro)**; style → **Create image from style reference (pro)** (`generate-with-style-v2`) |
-| BitForge | `create-image-bitforge` | **Create S-M image** ("small–medium") |
+| BitForge | `create-image-bitforge` | **Create S-M image** (tooltip: "Create small-medium image (bitforge)") |
 
-The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The "New / Pixen / V3" version wording overlaps across models; don't read it as a reliable version.
+The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The version wording overlaps and is unreliable: both PixFlux (tooltip "pixflux V3") and Pixen ("New, Pixen") carry V3/New-series labels, so don't treat "New / Pixen / V3" as a dependable version signal.
 
 ---
 
