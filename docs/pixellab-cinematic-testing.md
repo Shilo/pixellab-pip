@@ -357,4 +357,36 @@ All three built **one self-closing cyclic clip** (none chained) and **seam-close
 
 **Net:** the one genuinely low score was a real, fixable contract gap, not model noise. With the cyclic-gesture distinction added, the same class of request now lands ~90%.
 
+### Targeted quality round — the C night→dawn composition lock (raising the next low scorer)
+
+After the gesture fix, the lowest remaining score was **C (night→dawn lake, 78%)**: the palette *crossing* worked but the mountain silhouettes **warped** mid-tween. Root cause, measured: C's night opening and its generated dawn target were **different mountain ranges** — dark-silhouette overlap (IoU) only **0.72** — so the anchored tween had to morph one layout into another, spiking a frame-to-frame jump of 23.92 at the transition.
+
+**Probe (the experiment):** with C's exact night frame fixed as the opening, the dawn target was generated several ways and each was measured for (i) silhouette overlap vs the night frame and (ii) whether the palette actually crossed to warm dawn:
+
+| Technique | Silhouette IoU | Crossed to dawn? |
+|---|---|---|
+| Seed-lock, no init (contract's prior default) | **0.32** | Yes |
+| `init_image` at normal strength (150–350) | 0.99 | **No** (stayed night-dark) |
+| `init_image` at strength ~30 | 0.98 | Only at the horizon |
+| **`init_image` very low (~20) + backlit-silhouette wording** | **0.92** | **Yes** |
+
+**Findings that drove the contract change:**
+
+- **Seed-lock alone does *not* hold structure** — it crossed the palette but invented a *different* composition (IoU 0.32, worse than doing nothing). The contract had recommended seed-lock as the composition-hold path while only warning of "drift"; the drift can be total.
+- **`init_image` anchors to the *source* palette at normal strength** (confirming the prior finding) — it holds geometry perfectly but won't cross to dawn.
+- **The working technique:** a **very low `init_image_strength` (~15–30 of the 1–999 integer scale; default 300)** lets the opening's strong **edges** survive while the uniform sky/water regions repaint to the target palette — crossing the palette *and* holding the structure — **but only when the held structure reads as a backlit silhouette** in the new light (dark mountains against a bright dawn sky), worded that way. (Schema note: `init_image_strength` is an integer 1–999, not a 0–1 float.)
+- Chaining **composition-matched intermediate keyframes** (built with the same low-init lock) makes the shift rise monotonically with no boundary pop.
+
+**Before → after (C vs C2), same scene:**
+
+| Metric | C (before) | C2 (after) |
+|---|---|---|
+| Night→dawn silhouette IoU | 0.72 | **0.92** |
+| Worst frame-to-frame jump | 23.92 (a geometry **warp**) | 19.91 (a legit **sky-brighten**, silhouette holds) |
+| Job-seam pops | visible warp/banding | none (seams 8.2 / 9.6) |
+| Endpoints | — | pixel-exact (frame 0 = night, frame 48 = dawn) |
+| Confidence | **78%** | **~88%** |
+
+C2's only residual is mild water-reflection shimmer during the mid-transition (reads as light on water); the mountain-warp that defined C's 78% is gone. The contract's Continuity rule now carries the low-init-pin technique (replacing the too-absolute "don't use init_image for a palette shift," which held only at normal strength).
+
 
