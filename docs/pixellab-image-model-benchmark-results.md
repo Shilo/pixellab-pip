@@ -21,14 +21,16 @@ Intent → model quality order, and the best-**value** pick (folds in Pro's ~12�
 | Parallax / transparent scenery band | PixFlux ≈ Pixen > Pro | **PixFlux / Pixen** |
 | Style-consistent set / reference-driven | Pro > BitForge | **Pro** |
 
-Model → tool (model choice is **REST-v2-only**; MCP/Aseprite don't expose it; `S-XL`/`M-XL`/… are *size* labels, not models):
+Model → tools. In the REST/MCP layer, model choice is a **REST-v2 decision** (MCP has no raw image-model selector — it wraps models inside `create_character`/`create_object`/…). The **Aseprite extension**, however, exposes each model as a named *Create … image* command:
 
-| Model | REST v2 endpoint |
-|---|---|
-| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) |
-| Pixen | `create-image-pixen` |
-| Pro | `generate-image-v2` (async, returns candidates) |
-| BitForge | `create-image-bitforge` |
+| Model | REST v2 endpoint | Aseprite extension command |
+|---|---|---|
+| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) | **Create M-XL image** ("medium–extra large") |
+| Pixen | `create-image-pixen` | **Create S-XL image** ("New, Pixen") |
+| Pro | `generate-image-v2` (async, returns candidates) | **Create S-XL image (pro)**; style → **Create image from style reference (pro)** (`generate-with-style-v2`) |
+| BitForge | `create-image-bitforge` | **Create S-M image** ("small–medium") |
+
+The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The "New / Pixen / V3" version wording overlaps across models; don't read it as a reliable version.
 
 ---
 
