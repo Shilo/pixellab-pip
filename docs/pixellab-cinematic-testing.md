@@ -414,4 +414,27 @@ After the accumulated contract edits (glow-VFX forbid, cyclic-gesture rule, low-
 
 **Dedicated regression review of the C tightening** (a subagent tasked only with finding collateral damage to *other* cases) returned **"essentially no risk"**: the seed-lock / edit-the-start defaults survive verbatim, init-pin is a gated opt-in, and it *reinforces* rather than contradicts the anti-`init_image` reframe rule (a recurring cast crossing a palette shift is explicitly routed to seed-lock, not init). It found one narrow gap — the "Start and end frames" pointer offered the init-pin shortcut next to the "calm→storm" example without repeating the *backlit-silhouette* precondition, so an agent skipping the click-through could misapply it to a darkening shift. Fixed with a one-word inline gate ("for a **backlit silhouette** only"). No other collateral risk; the night→dawn fix is intact.
 
+### Long-form validation — a 30-second evolving cinematic (the one untested scale)
+
+Every prior *live* build was short (≤3 jobs). This round tested the last gap: does the contract hold at **production length**, where the two catastrophic failure modes live — cadence degeneration (the lighthouse's back third collapsing into frozen white blobs) and cross-shot consistency drift (the LEGO round inventing a new cast every shot). A fresh agent was given only a plain-language brief — a lone tree on a hill moving through a full day (dawn → midday → sunset → dusk → starry night), ~30s, one-way, "keep the same tree/hill" and "shift smoothly, no jarring jumps," $2 budget — **with no technical wording** (no mention of chaining, seed-lock, init-pin, keyframes, or frame counts). The point was to see whether the contract alone drives correct long-form execution.
+
+**What the agent inferred and built:** 15 seed-locked stage keyframes, each **init-pinned to the dawn master at very low strength** (the C2 technique), joined by **14 anchored `first_frame`+`last_frame` tweens** (zero free-run jobs), into a 225-frame, 256×128, play-once GIF — **$0.478 of the $2 budget**.
+
+**Independently verified (from the frames, not the self-report):**
+
+| Long-form risk | Result |
+|---|---|
+| Cadence degeneration | **Solved.** 225 frames, **zero near-identical pairs** (no loop-fill padding), frame-to-frame MAD mean 2.88; the **back third is the calmest** (2.28) — the inverse of the lighthouse collapse. The single largest jump is the golden-hour sun reveal, a natural event. |
+| Consistency drift | **Solved.** The tree, hill, and distant mountains hold position and silhouette across all 15 keyframes (confirmed visually; automated dark-mask/edge IoU reads low only because it's lighting-confounded — the tree is *designed* to go dark→lit→dark). The low-init-pin held composition across 15 stages, not just one. |
+| Unique frames over 30s | **Solved.** 225 genuinely unique frames, no clip looped to fill time. |
+| Budget discipline | Calibrated, hard-stop respected, honest report; $0.478 total, one transient CUDA-OOM auto-retried free. |
+
+**Confidence ≈ 87%** against the user's stated intent — it delivered exactly the two things the brief said mattered most (same place throughout; smooth, no jarring jumps), and the day arc reads clearly (sun and moon track across the sky, sunset silhouette, fireflies at night).
+
+**The one honest dent (disclosed by the agent, confirmed here):** the **palette range is compressed** — midday reads soft lavender rather than vivid blue, and "night" is soft moonlit twilight (mean brightness 174 ≈ midday's 175), not dark. Cause: pinning all 15 keyframes to the *light* dawn master at a strength high enough to hold structure across the whole arc (≈70/999) keeps the palette anchored near dawn's softness — the exact init-strength tradeoff the contract already documents ("at normal or high strength the init anchors the keyframe to the source palette and won't cross"). The agent chose structure-hold over palette-punch because the brief prioritized consistency.
+
+**Hypothesis for a future test (not encoded — untested):** for a long multi-stage arc, pinning every keyframe to the *same first* master anchors the whole palette to that master's tone; a **rolling pin** (each keyframe init-pinned to the *previous* keyframe instead of to k0) might let the palette walk progressively further — darker night, bluer midday — while still holding structure locally step-to-step. This was not tried, so it stays a documented hypothesis rather than a contract rule (empirical-first: the C2 technique earned its place by a live probe, and any long-arc pin refinement should too).
+
+**Verdict:** the contract holds at 30-second length. The two failure modes that historically wrecked long cinematics — cadence collapse and consistency drift — are both solved by the current rules, applied cold from plain language. The remaining palette-compression is a known, disclosed init-strength tradeoff, not a routing or degeneration defect.
+
 
