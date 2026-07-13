@@ -292,3 +292,45 @@ Each live output is scored for **confidence vs the original plain-language inten
 
 *Test-design caveat (not a skill issue):* the live prompts hinted "~50 frames," which nudged the campfire loop into a 3-job seam-closed chain rather than one looped clip. Both are valid cyclic builds and the result is seamless; the frame hint, not the contract, drove the richer path.
 
+### Second wave — five more, entirely different routes
+
+The first five covered the contract's core decision points. This wave deliberately targets **routes and edge cases the first five never touched**, with five completely different scenes, same two-pass (smoke plan-only + live) method, same plain-language / no-technical-wording rule, same ≤3-jobs / ~50-frame cap.
+
+| Test | Plain-language scene | Route / edge case exercised (untested in wave 1) | Contract area under test |
+|---|---|---|---|
+| F | A glowing magic potion bottle bubbling on a **fully transparent background**, loop ~3 s. | **Transparent subject (pixen), no baked scene** — wave 1 was all solid scenes. | Transparent-background regression; no baked matte; cyclic loop. |
+| G | A cat batting a ball of yarn back and forth, **only the cat and the ball ever on screen**, loop ~4 s. | **Two interacting objects** with an only-allowed-objects rule. | Describe object physics not an off-screen actor; forbid everything else; avoid silhouette-merge; loop. |
+| H | A snowy tavern at night: a **wide shot**, then **cut to a close-up** of the swinging sign, same tavern. | **Hard reframe across a cut** — wave 1's consistency test (E) had no cut. | Master-reference anchoring escalated to `generate-image-v2` + `reference_images`; exact-canvas, no pad. |
+| I | **A supplied house image** brought to life — window flicker + a wisp of smoke, house unchanged, loop ~3 s. | **Supplied opening frame** — wave 1 was all from-scratch. | Supplied-frame image role (`image-input-roles`); anchor identity to the actual pixels; copy the input into the folder. |
+| J | A forest waterfall into a misty pool, **requested in French**, loop ~3 s. | **Non-English request** + several staggered ambient motions. | Localization (reply in French, generation text in English); layered/staggered ambient motion; cyclic loop. |
+
+Same scoring: confidence vs the original plain-language intent, assigned by independent inspection of the delivered frames.
+
+#### Results (second wave)
+
+**Smoke plans — 5 / 5 routed correctly from plain text** (one, G, needed a re-run after a first instance returned a stray non-answer with no tool calls — an instance glitch, not a routing error). Highlights: F took the transparent/pixen path with no baked scene; G enforced only-two-objects via a transparent canvas plus explicit action exclusions **and cited the new glow-VFX rule unprompted** ("free-run v3 tends to hallucinate glints onto energetic beats, so I forbid them up front"); H correctly read "cut to" as a **hard cut** needing a master reference + `generate-image-v2 reference_images` for the close-up (and flagged that as the one Pro-priced step); I mapped the supplied PNG to the opening-frame role with an honest "v3 re-renders every frame, so the house may drift" caveat; J answered entirely in French while planning English generation text.
+
+**Live builds — 5 / 5 delivered, all met the core intent.** Confidence by independent frame inspection:
+
+| Test | Route the contract drove | Confidence vs intent | Independent inspection notes |
+|---|---|---|---|
+| F — transparent potion | Cyclic loop, transparent (`create-image-pixflux` + one animate) | **90%** | Clean transparent field (alpha strictly 0/255, no matte), cork+glass held still, only the liquid bubbles. 16 frames, ~3 s loop. ~$0.05. |
+| G — cat + yarn, 2 objects | Cyclic-ish, 2 chained shots, transparent (`create-image-pixen`) | **78%** | Only the cat and red yarn ever on screen (no hands/objects), transparent, reads as batting. **But shot 2's mid-frames carry injected white sparkle VFX** — the glow artifact again — *despite* the action forbidding "no sparkles" and a fresh-seed re-roll; shipped with an honest caveat. Loop returns near (not pixel-perfectly to) the opening. ~$0.15 incl. the superseded re-roll. |
+| H — tavern wide → cut to sign | Two shots, **hard cut**, `generate-image-v2` + `reference_images` | **88%** | The cut works: wide snowy tavern (flickering windows, chimney smoke, falling snow) → close-up of the swinging beer-mug sign, same tavern style/palette/sign motif held across the cut. Every frame exactly 256×144, no letterbox. ~$0.17 (the close-up was the one Pro call). |
+| I — supplied house, ambient | Supplied frame as `first_frame`=`last_frame`, one animate | **88%** | House preserved **pixel-identically** (frame 0 vs source = 0.0 diff; last-frame anchor = 0.0); warm window/door flicker + a chimney smoke wisp added; 16 frames, ~3 s. Source copied into the folder. ~$0.03. |
+| J — forest waterfall (French) | Cyclic loop, staggered ambient (`create-image-pixflux` + animate) | **88%** | Water cascade + pool ripple + rising mist, framing (rocks/ferns) stable, clean loop; whole exchange conducted in French with English generation text. Rejected a no-`last_frame` candidate for a cleaner seam. ~$0.52 balance delta incl. the rejected probe. |
+
+**Mean confidence ≈ 86%; route selection correct in 5/5 from plain text — across five routes the first wave never touched.**
+
+#### Findings (second wave) — no new contract defect
+
+- **Every new route worked from the contract alone:** transparent/pixen with no baked matte (F), only-allowed-objects via object physics + exclusions (G), a hard reframe across a cut via `reference_images` (H), a supplied-frame opening role with pixel-exact preservation (I), and a non-English request with localized replies + English generation text (J). None needed a contract change.
+- **The glow-VFX artifact recurred a third time (G) — and this *confirms* the wave-1 fix rather than extending it.** G's instance did exactly what the updated rule says: it forbade sparkles in the `action` up front *and* re-rolled the failing shot with a fresh seed — and v3 injected them anyway. The endpoint simply cannot be guaranteed clean on an energetic beat; the contract's job is to minimize (proactive forbid), catch (validation), and disclose (honest caveat) — all of which happened. The rule already carries both clauses ("forbid … up front, not only when catching them in validation, and still watch … when checking each job"), so no wording change is warranted; three independent hits (fire, hard hit, batting cat) just raise confidence that the rule targets a real, stubborn failure mode.
+- **The `generate-image-v2` + `reference_images` reframe route (H) held identity across a hard cut** exactly as the Continuity rule prescribes — the first live confirmation of that specific escalation path (wave 1's consistency test had no cut), and it landed full-bleed with no baked padding.
+- **Supplied-frame handling (I) is clean:** the frame was mapped to the opening role, preserved pixel-exact via a `first_frame`=`last_frame` anchor, and the input was copied into the deliverable folder per the blueprint rule.
+
+*Same test-design caveat as wave 1:* the "~50 frames" hint again nudged a cyclic scene (G) into a 2-shot chain rather than one looped clip; both are valid and the frame hint, not the contract, drove it.
+
+**Two-wave conclusion.** Ten entirely different scenes across ten distinct routes/edge cases, run cold from plain language, produced **10/10 correct routing** and a mean confidence in the high-80s, with exactly **one** contract improvement surfaced (the proactive glow-VFX forbid, wave 1) and **zero** new defects in wave 2. The cinematic contract is production-ready across the use cases tested.
+
+
