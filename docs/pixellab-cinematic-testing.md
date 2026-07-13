@@ -389,4 +389,29 @@ After the gesture fix, the lowest remaining score was **C (night→dawn lake, 78
 
 C2's only residual is mild water-reflection shimmer during the mid-transition (reads as light on water); the mountain-warp that defined C's 78% is gone. The contract's Continuity rule now carries the low-init-pin technique (replacing the too-absolute "don't use init_image for a palette shift," which held only at normal strength).
 
+### Exhaustive smoke sweep + regression audit (after all tightening)
+
+After the accumulated contract edits (glow-VFX forbid, cyclic-gesture rule, low-init-pin), a **14-scenario plain-language smoke sweep** (plan-only, no credits) checked that the contract still routes every cinematic branch correctly **and** that the new rules fire only where intended — deliberately including probes designed to trip the recent edits:
+
+| # | Scenario | Branch / rule exercised | Result |
+|---|---|---|---|
+| 1 | Glowing jellyfish, pulse loop | Cyclic ambient; **glow-scope probe** | Kept the jellyfish's own glow, forbade only *hallucinated* extra glow; read the pulse as symmetric → first-frame-only ✓ |
+| 2 | Character doing jumping jacks, loop | Cyclic **gesture** | One self-closing clip, not chained ✓ |
+| 3 | Spinning coin, transparent, loop | Transparent/pixen | No baked matte, first-frame-only rotation ✓ |
+| 4 | Waterfall + mist + fireflies, loop | Staggered ambient | Layered motions, no additive bursts ✓ |
+| 5 | Candle burning down, one-way | Evolving arc, **similar palette** | `first`+`last` tween, end frame by **edit** of start ✓ |
+| 6 | City skyline day→sunset | Big palette shift, **backlit** | Applied the **low-init-pin**, recognized the backlit-silhouette case ✓ |
+| 7 | Meadow→storm (darkens) | Big shift, **not backlit — regression probe** | Correctly **did not** misapply init-pin; fell back to seed-locked tween ✓ |
+| 8 | Wizard fireball blasts a barrel | Multi-beat action; **wanted-VFX probe** | Kept the fireball/flame, forbade only unrequested orbs; anchored the impact (no additive burst) ✓ |
+| 9 | Robot offers handshake, refused | Choreography/intent | Staged the meaning; anchored a "refusing" pose pair and named-and-forbade the wrong read ✓ |
+| 10 | Two knights duel, same courtyard | Recurring cast, **no cut** | Chained-handoff consistency, no needless master-ref ✓ |
+| 11 | Wide ship → cut to pilot close-up | **Hard cut** | Independent shots, shared style+seed (no shared subject to reference) ✓ |
+| 12 | Supplied hero sprite → idle loop | **Supplied-frame** role | Frame as `first_frame`, honest "identity not byte-identical" caveat ✓ |
+| 13 | Magic crystal shooting sparkles/beams | **Wanted-VFX probe** | Recognized the glow "is the point," did **not** strip it ✓ |
+| 14 | Campfire loop, in Spanish, no budget | Localization + budget-gate | Replied in Spanish; **asked for a budget** before spending ✓ |
+
+**Result: 14/14 routed correctly; smoke confidence ~85–92% (mean ≈89%).** Every regression probe passed — the glow-forbid keeps *wanted* glow (1, 8, 13), the cyclic-gesture rule doesn't over-fire on ambient/symmetric motion (1, 3), and the low-init-pin is applied on a backlit shift (6) but withheld on a darkening one (7).
+
+**Dedicated regression review of the C tightening** (a subagent tasked only with finding collateral damage to *other* cases) returned **"essentially no risk"**: the seed-lock / edit-the-start defaults survive verbatim, init-pin is a gated opt-in, and it *reinforces* rather than contradicts the anti-`init_image` reframe rule (a recurring cast crossing a palette shift is explicitly routed to seed-lock, not init). It found one narrow gap — the "Start and end frames" pointer offered the init-pin shortcut next to the "calm→storm" example without repeating the *backlit-silhouette* precondition, so an agent skipping the click-through could misapply it to a darkening shift. Fixed with a one-word inline gate ("for a **backlit silhouette** only"). No other collateral risk; the night→dawn fix is intact.
+
 
