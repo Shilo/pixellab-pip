@@ -91,20 +91,20 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 
 ### `generate-image-v2` Effective Max Size By Aspect Ratio (Empirical, 2026-07-13)
 
-The raw schema caps each axis (`width ≤ 792`, `height ≤ 688`, both documented "16 to aspect-ratio max") but does **not** publish the aspect formula. The effective per-ratio max is only exposed by the generation-time `400` message, e.g. `image_size must be between 16x16 and 688x384 for this aspect ratio` (free to probe — no job created). Swept across ratios 0.5→2.6 with one identical prompt, the maxima form a fixed set of ~262k–269k-pixel buckets (dims multiples of 8), transpose-symmetric except at the extremes where the differing per-axis caps (792 vs 688) bind:
+The raw schema caps each axis (`width ≤ 792`, `height ≤ 688`, both documented "16 to aspect-ratio max") but does **not** publish the aspect formula. The effective per-ratio max is only exposed by the generation-time `400` message, e.g. `image_size must be between 16x16 and 688x384 for this aspect ratio` (free to probe — no job created). Swept across ratios 0.5→2.6 with one identical prompt, the maxima form a fixed set of ~262k–269k-pixel buckets (dims multiples of 8). They are symmetric under transpose (9:16↔16:9, 3:4↔4:3, …) except the wide extreme 792×336, whose transpose 336×792 would need height 792 > the 688 cap. Each bucket labelled by its own dimensions' ratio:
 
-| Aspect (approx) | Effective max W×H | Pixels |
+| Bucket ratio | Effective max W×H | Pixels |
 |---|---|---|
-| ≤ 0.58 (portrait extreme) | 384×688 | 264,192 |
-| ~0.65 | 424×632 | 267,968 |
-| ~0.72 (2:3) | 448×600 | 268,800 |
-| ~0.80–0.89 (4:5) | 464×576 | 267,264 |
-| 1.00 (square) | 512×512 | 262,144 |
-| ~1.13–1.25 (5:4) | 576×464 | 267,264 |
-| ~1.33 (4:3) | 600×448 | 268,800 |
-| ~1.48–1.59 (3:2) | 632×424 | 267,968 |
-| ~1.71–2.05 (16:9) | 688×384 | 264,192 |
-| ≥ 2.15 (wide extreme) | 792×336 | 266,112 |
+| 9:16 (0.56, height-capped) | 384×688 | 264,192 |
+| 2:3 (0.67) | 424×632 | 267,968 |
+| 3:4 (0.75) | 448×600 | 268,800 |
+| 4:5 (0.81) | 464×576 | 267,264 |
+| 1:1 (1.00) | 512×512 | 262,144 |
+| 5:4 (1.24) | 576×464 | 267,264 |
+| 4:3 (1.34) | 600×448 | 268,800 |
+| 3:2 (1.49) | 632×424 | 267,968 |
+| 16:9 (1.79) | 688×384 | 264,192 |
+| 21:9 (2.36, width-capped) | 792×336 | 266,112 |
 
 - **Single largest values:** widest **792** (ratio ≥~2.15 → 792×336); tallest **688** (ratio ≤~0.58 → 384×688); most pixels **268,800** (4:3 / 2:3); largest square **512×512**. **`792×688` together never generates** — near-square caps at ≤576×464.
 - Requested ratios **snap to the nearest bucket** (16:10 and 3:2 both → 632×424; 16:9/1.85/2:1 all → 688×384); the `400` returns the bucket, not your exact ratio. Bucket *boundary* ratios are approximate (each tested ratio fell inside the range shown), but the max at every standard ratio above is confirmed.
