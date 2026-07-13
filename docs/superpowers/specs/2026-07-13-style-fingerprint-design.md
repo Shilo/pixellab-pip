@@ -20,7 +20,7 @@ From the **existing** 124 outputs (no new generations), produce a per-model styl
 
 **Neutral** descriptors (what the style *is*) plus **cons** (what went *wrong*) — no descriptive view/frame axes, so the result maps straight onto a pros/cons fingerprint. Each tagged output gets:
 - **Style** (toggle each, neutral — no judgement): `in-game` · `detailed` · `stylized/painterly` · `flat/simple`.
-- **Cons** (toggle each, shown red — failure modes): `bad-direction` (facing/orientation wrong for the prompt) · `bad-crop / over-zoom` (zoomed/cut off when the whole subject/scene was wanted — includes a parallax band gone opaque) · `bad-high-detail` (over-detailed/busy for the context) · `bad-low-quality / muddy`. A good output has no cons.
+- **Cons** (toggle each, shown red — failure modes): `bad-direction` (facing/orientation wrong for the prompt) · `bad-crop / over-zoom` (zoomed/cut off when the whole subject/scene was wanted — includes a parallax band gone opaque) · `bad-high-detail` (over-detailed/busy for the context) · `bad-low-quality / muddy` · `bad-follow-instructions` (ignored the prompt — missing or wrong content). A good output has no cons.
 
 (Iterated from earlier View+Frame+Style drafts: the descriptive **View** and **Frame** axes were dropped by the reviewer's choice for a pure pros/cons shape — orientation problems now surface only as `bad-direction`, framing/opacity problems only as `bad-crop`. Tradeoff, accepted: the fingerprint states no positive default-view bias, only flags wrong views.)
 
@@ -30,26 +30,26 @@ Seed 7 only — the 16 blind grids for seed 7, ~58 model-cells, covering all 4 m
 
 ## Method
 
-1. **Tagging surface:** extend the existing blind gallery into a `style_tag.html` page — identities still hidden and shuffled per grid; each cell exposes the three tag pickers and a "copy tags" export (grid/cell → View, Frame, Style). Self-contained, git-ignored, same as the review galleries.
-2. **Two independent raters:**
-   - **User tags blind** via the page.
-   - **Agent tags independently** by viewing each cell's image fresh from the pixels — deliberately *not* from the model-profile conclusions already written, so it is a genuine second rater, not an echo. Agent tags without consulting `mapping_hidden.json` first (blind), then un-blinds.
-3. **Reconcile:** compare tags cell-by-cell; compute simple agreement; **aggregate per model** into a dominant View / Frame / Style fingerprint with an agreement note. Flag disagreements for discussion.
+1. **Tagging surface:** extend the existing blind gallery into a `style_tag.html` page — identities still hidden and shuffled per grid; each cell exposes the Style + Cons togglers and a "copy tags" export. Self-contained, git-ignored, same as the review galleries.
+2. **Agent pre-tags, reviewer edits** (chosen for low reviewer effort):
+   - **Agent tags all 58 cells first**, blind, from the pixels — deliberately *not* from the model-profile conclusions already written — saved to `style_tags_agent.txt`.
+   - The page **pre-loads the agent tags**; the **reviewer edits** any cell they'd tag differently, then exports.
+3. **Reconcile:** compare tags cell-by-cell; **aggregate per model** into a Style + Cons fingerprint. Because the reviewer edits from the agent's tags (not independent), the higher-signal data is the reviewer's **overrides** — where they changed a tag — not raw agreement. Flag those for discussion.
 4. **Honesty guardrail:** every output's `*.blueprint.json` records the exact prompt + any controls. Where Pixen ran with `view`/`detail`/`direction` set (subject categories C1–C3), tags are marked **control-applied**; *true default bias* is read mainly from the default cases (Pixen C4/C5/C6; all PixFlux/Pro/BitForge everywhere).
 
 ## Deliverable
 
 A **Style fingerprint** doc — a new sibling `docs/pixellab-image-model-style-fingerprint.md` (keeps the already-large results doc focused; cross-linked from it) — with:
-- A per-model table: dominant **View**, **Frame**, **Style** tags + a confidence/agreement note.
+- A per-model table: dominant **Style** tags (the pros) + **Cons** frequency (the failure modes) + a confidence note.
 - A short reconciliation: which existing model-profile statements the tags **confirm**, and which they **contradict** (with fixes applied to the profile docs).
 - Raw tags kept in the git-ignored run folder (`style_tags_user.*`, `style_tags_agent.*`).
 
 ## Confidence & caveats
 
-- **Blindness is weaker than the ranking pass** — the reviewer has strong priors after extensive discussion. Tagging blind still forces judging the pixels over the label, but is not pristine; stated honestly, not oversold.
+- **Anchoring (not independent)** — the reviewer edits from the agent's pre-filled tags, not from a blank slate, so raw tag agreement is inflated. The meaningful signal is the reviewer's **overrides**; agreement alone is weak confirmation. (Chosen deliberately to cut reviewer effort.)
+- **Blindness is weaker than the ranking pass** — the reviewer has strong priors after extensive discussion; identities are still hidden but this is not pristine.
 - **Small n** — seed 7 only, ~1–2 samples per model per category; a fingerprint is directional, not decisive.
 - **Partial contamination** — Pixen's subject categories carried controls; handled via the control-applied annotation above.
-- **Style is partly prompt-driven** — our prompts rarely specified view/framing, so the view/frame a model *chose* is informative; where a prompt did imply a view, note it.
 
 ## Validation
 
