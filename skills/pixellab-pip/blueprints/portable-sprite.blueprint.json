@@ -1,10 +1,36 @@
-{
-  "_comment": "A portable REST recipe for a configurable transparent sprite.",
-  "_comment_prompt": "/pixellab-pip create the portable sprite blueprint",
-  "POST /v2/create-image-pixen": {
-    "description": "{{sprite description}}",
-    "image_size": "{{canvas size | default: {\"width\": 64, \"height\": 64}}}",
-    "no_background": "{{transparent background | default: true}}",
-    "seed": "{{seed | default: null}}"
+[
+  {
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/portable-sprite-run",
+      "output_collision_policy": "stop_if_exists"
+    },
+    "_comment": "A portable REST recipe for a configurable transparent sprite.",
+    "_comment_prompt": "/pixellab-pip create the portable sprite blueprint",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and create the declared output_directory as a new empty folder. If the directory already exists or any precondition fails, stop before spending.",
+      "verify": "Run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
+    }
+  },
+  {
+    "POST /v2/create-image-pixen": {
+      "description": "{{sprite description}}",
+      "image_size": "{{canvas size | default: {\"width\": 64, \"height\": 64}}}",
+      "no_background": "{{transparent background | default: true}}",
+      "seed": "{{seed | default: null}}"
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save the image returned by the immediately preceding PixelLab call unchanged as sprite.png.",
+      "outputs": ["sprite.png"],
+      "verify": "sprite.png is readable, its dimensions equal the resolved image_size sent above, its alpha matches the resolved no_background request, and its bytes match the returned image payload."
+    }
   }
-}
+]

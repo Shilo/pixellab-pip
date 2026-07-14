@@ -39,12 +39,23 @@ class BlueprintShapeTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "at least one MCP or REST v2 step"):
             qa.validate_blueprint_data({"TASK": "Do unrelated work."}, "test blueprint")
 
-    def test_rejects_unknown_task_field(self) -> None:
-        with self.assertRaisesRegex(AssertionError, "unknown fields"):
+    def test_accepts_extensions_while_validating_known_task_fields(self) -> None:
+        qa.validate_blueprint_data(
+            [
+                {
+                    "_vendor_note": {"portable": True},
+                    "MCP create_character": {"description": "a knight"},
+                    "extension_hint": {"mode": "semantic"},
+                },
+                {"TASK": {"instruction": "Package it.", "command": "tool --run"}},
+            ],
+            "test blueprint",
+        )
+        with self.assertRaisesRegex(AssertionError, "instruction must be a nonblank string"):
             qa.validate_blueprint_data(
                 [
                     {"MCP create_character": {"description": "a knight"}},
-                    {"TASK": {"instruction": "Package it.", "command": "tool --run"}},
+                    {"TASK": {"instruction": "", "command": "tool --run"}},
                 ],
                 "test blueprint",
             )
@@ -113,7 +124,6 @@ class BlueprintShapeTests(unittest.TestCase):
             ("{{weapon|default:}}", "blank default"),
             ("{{weapon", "is not closed"),
             ("weapon}}", "closing marker without an opening"),
-            ("{{weapon|fallback:sword}}", "unsupported syntax"),
             ("{{weapon|default:sword|default:axe}}", "multiple default markers"),
         )
         for placeholder, error in invalid:
@@ -132,6 +142,53 @@ class BlueprintShapeTests(unittest.TestCase):
                 },
                 "test blueprint",
             )
+
+    def test_accepts_unknown_variable_modifiers_but_validates_known_default(self) -> None:
+        qa.validate_blueprint_data(
+            {
+                "MCP create_character": {
+                    "description": "a {{weapon | fallback: sword}} with {{armor | vendor: light | default: silver}}"
+                }
+            },
+            "test blueprint",
+        )
+        with self.assertRaisesRegex(AssertionError, "blank default"):
+            qa.validate_blueprint_data(
+                {"MCP create_character": {"description": "{{weapon | fallback: sword | default: }}"}},
+                "test blueprint",
+            )
+
+    def test_validates_known_pixellab_metadata_and_allows_extensions(self) -> None:
+        qa.validate_blueprint_data(
+            {
+                "_pixellab": {
+                    "api_base_url": "https://api.pixellab.ai",
+                    "auth": {"type": "bearer", "env": "PIXELLAB_SECRET", "required_before_calls": True, "provider_hint": "local"},
+                    "paid_call_policy": "explicit_user_run_request_required",
+                    "output_directory": "pixellab-pip-generations/test-run",
+                    "output_collision_policy": "stop_if_exists",
+                    "mcp_server": {"name": "PixelLab", "url": "https://api.pixellab.ai/mcp", "transport": "http", "docs_url": "https://api.pixellab.ai/mcp/docs"},
+                    "extension": {"portable": True},
+                },
+                "POST /v2/create-image-pixen": {"description": "a well"},
+            },
+            "test blueprint",
+        )
+        invalid = (
+            ({"api_base_url": "https://evil.example"}, "public PixelLab API origin"),
+            ({"auth": {"type": "basic", "env": "PIXELLAB_SECRET"}}, "bearer env"),
+            ({"auth": {"type": "bearer", "env": "PIXELLAB_SECRET", "token": "literal"}}, "credential values"),
+            ({"mcp_server": {"name": "PixelLab", "url": "https://evil.example/mcp"}}, "public PixelLab MCP URL"),
+            ({"paid_call_policy": "blueprint_is_approval"}, "explicit user run request"),
+            ({"output_directory": "../outside"}, "under pixellab-pip-generations"),
+            ({"output_collision_policy": "overwrite"}, "stop_if_exists"),
+        )
+        for metadata, error in invalid:
+            with self.subTest(metadata=metadata), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(
+                    {"_pixellab": metadata, "POST /v2/create-image-pixen": {"description": "a well"}},
+                    "test blueprint",
+                )
 
     def test_rejects_blueprint_variables_in_keys_or_non_scalar_defaults_in_text(self) -> None:
         invalid = (

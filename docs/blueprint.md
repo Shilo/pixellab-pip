@@ -12,6 +12,12 @@ IDs, or machine-specific command history. The notes preserve the request and use
 skim them first when understanding or sharing a blueprint. The agent following one may choose an
 appropriate method for a task, but must satisfy its named outcome and constraints.
 
+Blueprint writing is deliberately consistent; blueprint reading is deliberately flexible. Pip emits
+one compact canonical shape for efficiency and predictability. An agent reading a shared file may
+interpret reasonable extensions and equivalent shapes when their meaning is clear. Nonstandard does
+not mean unsafe, but unfamiliar syntax also cannot grant permission, change known request fields, or
+bypass credentials, spending approval, public-endpoint boundaries, paths, or verification.
+
 ## What's inside
 
 A blueprint is named `<name>.blueprint.json`. A one-step blueprint is a single object; an ordered
@@ -24,6 +30,43 @@ optionally preceded by `_comment*` human notes:
 
 Every blueprint includes at least one PixelLab call. An agent-only procedure belongs in ordinary
 project documentation or its own skill.
+
+For a recipe intended to run without PixelLab Pip installed, the first step can carry compact public
+connection metadata:
+
+```json
+"_pixellab": {
+  "api_base_url": "https://api.pixellab.ai",
+  "auth": {
+    "type": "bearer",
+    "env": "PIXELLAB_SECRET",
+    "required_before_calls": true
+  },
+  "paid_call_policy": "explicit_user_run_request_required",
+  "output_directory": "pixellab-pip-generations/example-run",
+  "output_collision_policy": "stop_if_exists",
+  "mcp_server": {
+    "name": "PixelLab",
+    "url": "https://api.pixellab.ai/mcp",
+    "transport": "http",
+    "docs_url": "https://api.pixellab.ai/mcp/docs"
+  }
+}
+```
+
+The API base combines with relative `POST /v2/...` step keys, and `mcp_server` identifies and locates
+the MCP integration that owns the tool. `auth.env` is only the name of a local bearer-secret source
+shared by API and MCP; the blueprint never
+contains the secret value or an authorization header, and the metadata does not authorize accessing
+or spending with it. The explicit paid-call policy means the file itself is never approval; the
+current user must explicitly ask to run it. That request covers each recorded call once, not retries
+or adjacent generations. REST-only recipes omit `mcp_server`; MCP-only recipes omit only `api_base_url`.
+`output_directory` gives a safe project-relative destination. The reader creates it as a new folder
+and `output_collision_policy` stops instead of overwriting an existing run; relative task outputs go there unless the current
+user explicitly chooses a different new destination.
+A portable paid template uses an initial `TASK` to perform those authority, credential-presence, and
+empty-folder checks before its first PixelLab call, so a no-skill reader cannot accidentally check
+for collisions only after spending.
 
 Only request fields that matter need to be included; omitted fields use PixelLab defaults. A
 ready-made template can also contain variables that are resolved before its request is sent. Image
@@ -53,8 +96,9 @@ Defaulted: {{plain-language description | default: value}}
 ```
 
 Write one space around `|` and after `:` for readability. Spacing remains optional when a blueprint
-is read, so compact placeholders are still accepted. `default` is the only supported modifier;
-other pipe modifiers such as `fallback` are invalid.
+is read, so compact placeholders are still accepted. Pip writes only `default`. A reader can
+interpret an unfamiliar modifier such as `fallback:` when its meaning is obvious, or ask when it is
+ambiguous; unfamiliar wording alone does not make an otherwise understandable recipe invalid.
 
 ```text
 {{weapon | default: sword}}
@@ -94,8 +138,8 @@ valid JSON keeps that JSON type; any other default is text. A placeholder embedd
 sentence must be a scalar value. Placeholders never change field names, route names, or comments,
 and a resolved value is never treated as another placeholder.
 
-Pip resolves every variable before credit approval and execution, stops on malformed or unresolved
-variables, and never edits the source template. After a successful run, the newly recorded blueprint
+Pip resolves every variable before credit approval and execution, stops on structurally malformed,
+ambiguous, or unresolved variables, and never edits the source template. After a successful run, the newly recorded blueprint
 contains the concrete values that were actually sent, not the original placeholders.
 
 For an ordered workflow, array position supplies the sequencing:
@@ -264,6 +308,9 @@ Common ways to trigger a replay:
 Before spending credits, the assistant resolves all variables, then reads and preflights the entire
 sequence. It asks when required values or files are missing or instructions conflict in a way that
 could change the result, while using ordinary judgment for flexible implementation details.
+It validates known MCP, REST, `TASK`, variable, and metadata fields but does not require every shared
+file to have been written by Pip. Equivalent public URLs, metadata names, wrappers, and task details
+may be interpreted semantically when unambiguous.
 
 You can override any value or instruction in plain language:
 

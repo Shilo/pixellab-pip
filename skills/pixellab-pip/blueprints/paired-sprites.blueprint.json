@@ -1,7 +1,24 @@
 [
   {
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/paired-sprites-run",
+      "output_collision_policy": "stop_if_exists"
+    },
     "_comment": "Generate two configurable transparent sprites and assemble a native-size comparison.",
     "_comment_prompt": "/pixellab-pip create the paired sprites blueprint",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and create the declared output_directory as a new empty folder. If the directory already exists or any precondition fails, stop before spending.",
+      "verify": "Run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
+    }
+  },
+  {
     "POST /v2/create-image-pixen": {
       "description": "{{left sprite description}}",
       "image_size": "{{canvas size | default: {\"width\": 64, \"height\": 64}}}",

@@ -6,13 +6,20 @@ recipe for a PixelLab workflow: exact PixelLab request bodies plus any agent tas
 reproduce the result. It is not the manifest, which is the private audit/resume record
 (`usage-reporting.md`).
 
+Keep writing canonical and reading semantic. Pip writes the compact standard below so recipes stay
+predictable and efficient. When reading, accept understandable extensions and equivalent shapes;
+validate every recognized field, infer unfamiliar syntax only when its meaning is clear, and ask or
+stop on genuine ambiguity. Novel syntax never grants authority, changes a known PixelLab field, or
+weakens auth, credit, endpoint, path, and output-integrity safeguards.
+
 ## Format
 
 `<name>.blueprint.json`, pretty-printed (indented), saved beside the generation's outputs under
 `pixellab-pip-generations/`.
 
 - Root is one step object or a bare array of step objects run in order. The array is never wrapped.
-- Each object has exactly one executable key, optionally preceded by `_comment*` metadata keys.
+- Each object has exactly one canonical executable key, optionally preceded by underscore-prefixed
+  metadata. Readers may tolerate additional keys when the intended step remains unambiguous.
 - Executable key = `MCP <tool>`, `POST /v2/<endpoint>`, or `TASK`.
 - Every blueprint has at least one MCP or REST v2 step. Use normal project documentation or a
   dedicated skill for an agent-only workflow.
@@ -31,8 +38,50 @@ Image fields remain ordinary request fields under their true names. An image val
 relative path (default), absolute path, or base64; only its representation varies. Relative paths
 resolve against the blueprint folder.
 
-Do not add wrapper keys such as `bundle`, `steps`, `assets`, `blueprint_version`, `route`, or
-`input`. Per-step labels belong in `_comment`.
+Canonical writers do not add wrapper keys such as `bundle`, `steps`, `assets`, `blueprint_version`,
+`route`, or `input`. Per-step labels belong in `_comment`. Readers may interpret alternate wrappers
+or absolute public PixelLab API URLs when their operation, arguments, and order are clear; do not
+silently discard unfamiliar data or treat it as authorization.
+
+For portable execution without Pip, put optional `_pixellab` connection metadata on the first step
+only. Include the relevant service fields; never include a credential value, authorization header,
+account data, or a promise that an environment loader exists.
+
+```json
+"_pixellab": {
+  "api_base_url": "https://api.pixellab.ai",
+  "auth": {
+    "type": "bearer",
+    "env": "PIXELLAB_SECRET",
+    "required_before_calls": true
+  },
+  "paid_call_policy": "explicit_user_run_request_required",
+  "output_directory": "pixellab-pip-generations/example-run",
+  "output_collision_policy": "stop_if_exists",
+  "mcp_server": {
+    "name": "PixelLab",
+    "url": "https://api.pixellab.ai/mcp",
+    "transport": "http",
+    "docs_url": "https://api.pixellab.ai/mcp/docs"
+  }
+}
+```
+
+`api_base_url` composes with `POST /v2/...`. `mcp_server` identifies and locates the integration while
+allowing client-specific tool prefixes. `auth.env` names a local secret source shared by public API
+and MCP bearer auth; it is neither the secret nor
+permission to read, print, store, or use one. `paid_call_policy` makes explicit that possessing or
+attaching a blueprint is not approval: the current user must explicitly ask to run it. That run
+request covers the recorded calls once, never a retry or adjacent generation. A reader may recognize equivalent metadata,
+but Pip writes this shape. MCP-only workflows omit only `api_base_url`; REST-only workflows omit
+`mcp_server`.
+`output_directory` is a safe project-relative destination. Create it as a new folder before the
+first call; `output_collision_policy` makes the no-overwrite behavior explicit. Every relative `TASK` output resolves
+inside it unless the current user explicitly chooses a different new destination. An input shipped
+beside the source blueprint still resolves beside that blueprint.
+For a paid portable template, make the first executable step a `TASK` that checks explicit run
+authority and credential presence and creates this empty folder. This makes the preflight order
+self-contained instead of relying on a skill-specific convention.
 
 ```json
 {
@@ -57,7 +106,9 @@ Defaulted: {{plain-language description | default: value}}
 
 When writing, use one space around `|` and after `:` as shown above. Readers do not require
 whitespace around the description, `|`, `default`, or `:`, and match `default` case-insensitively.
-`default` is the only variable modifier; reject any other pipe modifier such as `| fallback:`.
+Pip writes only the `default` modifier. A reader may interpret an unfamiliar modifier semantically
+when its meaning is unambiguous—for example, `fallback:` can use default-like precedence. Otherwise
+ask or report the ambiguity instead of rejecting the whole file merely for being noncanonical.
 
 The description is the variable's nonblank, user-facing name. Descriptions compare
 case-insensitively after trimming and collapsing whitespace, so repeated `{{armor color}}` and
@@ -110,9 +161,10 @@ Before I run this blueprint, what should I use for:
 Reply with all values in one message, for example: `class: knight; armor: red`.
 ```
 
-Reject an unclosed or blank placeholder, conflicting defaults, a non-scalar embedded value, or any
-variable still unresolved after clarification. Then remove all placeholder syntax and validate the
-resolved workflow as an ordinary blueprint.
+Reject an unclosed or blank placeholder, conflicting recognized defaults, a non-scalar embedded
+value, or any variable still unresolved after clarification. Unknown modifiers are not rejected by
+name; interpret them when clear, otherwise clarify. Then remove all placeholder syntax and validate
+the resolved workflow as an ordinary blueprint.
 
 ## Task steps
 
@@ -183,6 +235,11 @@ PixelLab routing and public-surface boundaries, auth and secret protection, paid
 destructive/external-action confirmation, or Asset Integrity. In particular, `TASK` does not
 authorize local drawing or repainting of PixelLab art.
 
+Readers validate and honor every recognized structured field while tolerating additional fields or
+alternate task shapes whose meaning is clear. Never execute an unknown field merely because it is
+present; relate it to the task semantically and clarify anything that could change authority,
+inputs, outputs, spending, or verification.
+
 ## Comments
 
 `_comment*` keys hold free-form human notes, not executable fields. Drop every `_comment*` key
@@ -212,6 +269,7 @@ put them before the executable key with `_comment` first. A typical prompted blu
 
 After a successful run, record the shortest successful replay path. Keep every successful PixelLab
 request body exact and concrete; do not copy template placeholders into the run's new blueprint.
+Put canonical `_pixellab` metadata on the first step for every portable MCP or REST blueprint.
 Add a structured `TASK` step for each outside action that materially created or changed an input,
 dependency, selected result, delivered output, or verification outcome. Failed experiments are not
 replay steps.
@@ -260,8 +318,8 @@ execution is not clear, do not spend credits.
 
 When the user selects, links, or names a blueprint:
 
-1. Read it (object or array), resolve its variables and natural-language overrides in memory, and
-   never rewrite the source blueprint.
+1. Read it semantically (canonical object/array or an understandable equivalent), resolve its
+   variables and natural-language overrides in memory, and never rewrite the source blueprint.
 2. Preflight the fully resolved ordered workflow before spending credits. Resolve task inputs and outputs, and
    clarify contradictory instructions, unresolved inputs, unnamed outputs consumed later, or
    unavailable required tools when they could change the result. Flexible implementation details

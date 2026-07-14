@@ -1,7 +1,45 @@
-{
-  "_comment": "A configurable knight character sprite.",
-  "_comment_prompt": "/pixellab-pip create the knight blueprint",
-  "MCP create_character": {
-    "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}"
+[
+  {
+    "_pixellab": {
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/knight-run",
+      "output_collision_policy": "stop_if_exists",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "A configurable knight character sprite.",
+    "_comment_prompt": "/pixellab-pip create the knight blueprint",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and create the declared output_directory as a new empty folder. If the directory already exists or any precondition fails, stop before spending.",
+      "verify": "Run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
+    }
+  },
+  {
+    "MCP create_character": {
+      "body_type": "humanoid",
+      "detail": "medium detail",
+      "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}",
+      "mode": "v3",
+      "name": "Knight",
+      "outline": "selective outline",
+      "size": 48,
+      "view": "low top-down"
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use the fresh character ID returned by the immediately preceding MCP call with PixelLab get_character. Poll every 10 seconds for at most 10 minutes; on timeout or failed status, stop and report without resubmitting the paid creation. The recorded v3 route contract returns eight rotations. Stage image payloads or PixelLab URLs from the completed response in a partial subfolder, map returned labels case-insensitively to the hyphenated filenames in outputs (for example south_west or southwest to south-west), or use outputs-array order when labels are absent. Publish the eight declared files only after every staged rotation passes verification; on mismatch, keep them labeled as partial failure evidence and report without inventing or repainting missing directions. Do not follow a download origin outside the completed PixelLab response.",
+      "outputs": ["south.png", "south-west.png", "west.png", "north-west.png", "north.png", "north-east.png", "east.png", "south-east.png"],
+      "verify": "All eight declared direction filenames are present exactly once; every PNG is readable and transparent, and all have identical runtime dimensions. The request size describes subject scale rather than guaranteed canvas padding, so compatibility is checked across current returned frames instead of requiring a historical pixel dimension."
+    }
   }
-}
+]
