@@ -58,10 +58,6 @@ Defaulted: {{plain-language description | default: value}}
 When writing, use one space around `|` and after `:` as shown above. Readers do not require
 whitespace around the description, `|`, `default`, or `:`, and match `default` case-insensitively.
 
-```text
-{{weapon | default: sword}}
-```
-
 The description is the variable's nonblank, user-facing name. Descriptions compare
 case-insensitively after trimming and collapsing whitespace, so repeated `{{armor color}}` and
 `{{ Armor   Color }}` placeholders share one value across the workflow. A variable may have no
@@ -75,9 +71,8 @@ Resolve the entire workflow in memory before normal preflight:
 3. Otherwise use the declared default without asking.
 4. Otherwise ask for every unresolved variable in one concise prompt.
 
-Never infer a value that grants authority, spends additional credits, weakens a safety boundary,
-or resolves a genuine routing collision. User values such as `false`, `0`, or an empty string are
-explicit values, not missing values to replace with a default.
+User values such as `false`, `0`, or an empty string are explicit values, not missing values to
+replace with a default.
 
 Substitute only in executable values, including nested request fields and structured `TASK` data;
 never substitute route or object keys or `_comment*` metadata. A placeholder that occupies its
@@ -106,10 +101,8 @@ Reply with all values in one message, for example: `class: knight; armor: red`.
 ```
 
 Reject an unclosed or blank placeholder, conflicting defaults, a non-scalar embedded value, or any
-variable still unresolved after clarification. Then remove all placeholder syntax, validate the
-resolved workflow as an ordinary blueprint, and continue with its concrete request bodies. Never
-rewrite the source template. The new blueprint written after a successful replay contains only the
-resolved literal values.
+variable still unresolved after clarification. Then remove all placeholder syntax and validate the
+resolved workflow as an ordinary blueprint.
 
 ## Task steps
 
