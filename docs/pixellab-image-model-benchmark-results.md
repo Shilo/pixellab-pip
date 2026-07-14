@@ -123,4 +123,4 @@ Yes, three:
 
 ## Artifacts (this run)
 
-Under `pixellab-pip-generations/model-benchmark-20260713/`: raw outputs + `*.blueprint.json` per job, `run_manifest.json`, `auto_scores.csv`, blind `grids/`, `mapping_hidden.json` (un-blind key), `aggregate_scores.json`, `blind_review.html` (self-contained blind gallery).
+Under `pixellab-pip-generations/model-benchmark-20260713/` (git-ignored, local): raw outputs + `*.blueprint.json` per job, `run_manifest.json`, `auto_scores.csv`, blind `grids/`, `mapping_hidden.json` (un-blind key), `aggregate_scores.json`; the self-contained review pages `blind_review.html`, `results_review.html`, and `style_tag.html` (each also saved as a wrapped `*.standalone.html` for offline viewing); and the style-fingerprint tags `style_tags_agent.txt` / `style_tags_user.txt`.

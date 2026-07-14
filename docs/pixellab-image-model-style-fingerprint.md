@@ -10,7 +10,7 @@ Counts are cells carrying the tag / cells for that model (seed 7).
 
 | Model | Dominant style (pros) | Cons (failure modes) | Reads as |
 |---|---|---|---|
-| **PixFlux** | stylized 9/16 · flat 8/16 · in-game 11/16 · **detailed just 4/16** | almost none (1 dir, 1 follow) | **low-detail, painterly / stylized / flat, and clean** — few failure modes |
+| **PixFlux** | stylized 9/16 · flat 8/16 · in-game 11/16 · **detailed just 4/16** | almost none (1 dir, 1 follow) | **low-detail, painterly / stylized / flat** — and few cons flagged (see verdict on "clean") |
 | **Pixen** | **detailed 15/16** · in-game 11/16 · stylized 3 · **flat 0** | **bad-crop 4 · bad-high-detail 3** (+1 dir, 1 follow) | **the high-detail model** — and its detail bites back as crop / over-detail cons |
 | **Pro** | in-game 13/16 · detailed 9/16 · flat 4 · stylized 2 | bad-crop 2 · bad-follow 1 | **in-game, fairly detailed, low-con** — occasionally crops larger subjects (2 cells) |
 | **BitForge** | in-game 6/10 · detailed 3 · flat 2 · stylized 2 | **bad-low-quality 6/10** · dir 2 · follow 2 · high-detail 1 | **the weakest render** — low-quality is its *distinctive* con (flagged on no other model) |
