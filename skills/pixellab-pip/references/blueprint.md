@@ -82,6 +82,15 @@ placeholder must resolve to a scalar and is inserted as text. Match an inferred 
 whole-field value to the target schema. Values are literal data: do not recursively expand
 placeholder-like text inside a resolved value.
 
+An object default inside a JSON string ends with three closing braces: one closes the object and
+two close the placeholder.
+
+```json
+{
+  "settings": "{{settings | default: {\"style\": \"flat\"}}}"
+}
+```
+
 ```json
 {
   "MCP create_character": {
