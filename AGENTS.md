@@ -2,18 +2,17 @@ PixelLab Pip is an unofficial, agent-agnostic PixelLab workflow router shipped a
 
 Project rules:
 - Apply KISS and YAGNI to every task: additions, fixes, documentation, tests, and refactors. Make the smallest complete change that satisfies the current requirement without weakening functionality, correctness, safety, or efficiency. Shorter is not automatically better — challenge every cut and every addition.
-- Add only what the current task, verified PixelLab behavior, or an existing safety/correctness constraint requires. No speculative future-proofing, unused outputs/formats, compatibility paths without a current requirement, redundant examples, or optional machinery.
-- Every runtime instruction must change an agent decision, action, safety boundary, or verification step. Move research and background explanation to docs/; remove wording that does not change agent behavior.
-- Keep each rule in one canonical place: SKILL.md if global, or one reference if route-specific. Search for an existing rule or section before adding another; elsewhere, use a pointer.
+- Add only what the current task requires, using verified PixelLab behavior where relevant and preserving applicable safety/correctness constraints. No speculative future-proofing, unused outputs/formats, compatibility paths without a current requirement, redundant examples, or optional machinery.
+- Keep runtime content only when it changes an agent decision, action, safety boundary, or verification step. Retain only the rationale needed to apply it; move research, evidence, and background explanation to docs/.
+- Keep each runtime rule in one canonical place: SKILL.md if global, or one reference if specific to a task or route. Search for an existing rule or section before adding another; elsewhere, use a pointer.
 - Reuse and simplify existing structure before creating a file, section, workflow, example, schema mapping, or helper. When new guidance replaces old guidance, remove the obsolete text in the same change.
-- Never remove rules protecting routing accuracy, public-vs-private PixelLab endpoint boundaries, secret/auth safety, paid-credit control, output integrity, or user trust. Simplify these protections through consolidation, not removal.
-- Human-facing updates are rare and useful (per references/usage-reporting.md). PixelLab-facing prompts describe the visual result and never repeat structured parameters (per SKILL.md Text Preparation).
+- Never weaken protections for routing accuracy, public-vs-private PixelLab endpoint boundaries, secret/auth safety, paid-credit control, output integrity, or user trust. Simplify them through consolidation.
 
-Structure (progressive discovery):
-- skills/pixellab-pip/SKILL.md — agent-facing canonical contract and lean router: triggers, guardrails, surface selection, pointers. Common requests must resolve from SKILL.md alone.
+Content placement (progressive discovery):
+- skills/pixellab-pip/SKILL.md — agent-facing canonical contract and lean router: triggers, guardrails, surface selection, pointers. It must classify common requests and point directly to any required reference.
 - skills/pixellab-pip/references/*.md — agent-facing operational contracts loaded on demand: durable routing rules, schema mappings, safety constraints, verification. Never restate SKILL.md globals (it is always co-loaded); use a pointer.
-- docs/ — human/developer research, evidence, and background; never loaded at runtime. Promote a finding into SKILL.md or references/ only when it changes general agent behavior. (docs/pixellab/ terminology and routing research; docs/tools/ integration background; docs/developer.md repo structure and local install; docs/showcase/README.md showcase rules.)
+- docs/ — human/developer research, evidence, and background; not required for normal runtime routing. Promote a finding into SKILL.md or references/ only when it changes agent behavior. (docs/pixellab/ terminology and routing research; docs/tools/ integration background; docs/developer.md repo structure and local install; docs/showcase/README.md showcase rules.)
 - .local/ — temporary agent-generated or cache files.
 
-Validate every edit: `python dev-tools/qa.py` and `python -m pytest tests/test_helpers.py` (CI enforces markdown link/reference existence and one exact prompt-limits table row).
+Validate every edit: `python dev-tools/qa.py` (includes the unit tests).
 Commits: conventional `<type>[optional scope]: <description>`.
