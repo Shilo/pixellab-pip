@@ -157,13 +157,8 @@ Use this response template, repeating the numbered row for every valid blueprint
 1. {name} — {description}
 2. {name} — {description}
 
-{selection prompt}
+Reply with a name or number to run it, or ask to inspect one. You can include changes.
 ```
-
-Set `{selection prompt}` to one concise line matching the inferred intent, such as `Reply with a
-name or number to inspect it.` or `Reply with a name or number to run it. You can include changes.`
-When the intended action is not established, use `Reply with a name or number to run it, or ask to
-inspect one. You can include changes.` so a direct name or number reply selects replay.
 
 Do not show installation paths, raw routes, request bodies, or other implementation details in the
 list. Listing is read-only and needs no bearer token or credit confirmation. If none are installed,

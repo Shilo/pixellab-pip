@@ -221,13 +221,12 @@ this compact template, repeating the numbered row for every blueprint:
 1. {name} — {description}
 2. {name} — {description}
 
-{selection prompt}
+Reply with a name or number to run it, or ask to inspect one. You can include changes.
 ```
 
 You can reply with the name, its number, or a natural request such as “the knight, with red armor.”
 Names remain stable. Numbers are shortcuts for the latest list only and may change when the
-installed collection changes. The final prompt matches your request; otherwise it invites you to
-run a selection or ask to inspect one.
+installed collection changes.
 
 ## Recipes (blueprints you can run by name)
 
