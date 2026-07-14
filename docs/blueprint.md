@@ -1,119 +1,226 @@
 # Blueprints
 
-A **blueprint** is a small JSON file that records exactly how one PixelLab asset was made —
-the tool/route used and the inputs sent — so you (or anyone you send it to) can recreate that
-asset later, with or without changes. Think of it as a recipe card for a generation.
+A **blueprint** is a small JSON recipe that records how a PixelLab result was made so you—or anyone
+you share it with—can recreate the workflow later, with or without changes. It records exact MCP or
+REST requests and can also tell an agent how to prepare inputs, choose or transform intermediate
+results, and assemble or verify final files. Think of it as a recipe card that can include both
+PixelLab calls and the meaningful work around them.
 
-It is deliberately minimal and human-readable: just the route, the request values, and short
-human notes — no account, auth, secrets, or cost metadata, since a blueprint is shared publicly.
-It carries the wording of the request that created it, so skim the notes first if that matters.
+Blueprints are deliberately human-readable and portable: the executable steps, short human notes,
+and referenced files needed for replay, but no account data, secrets, cost metadata, transient job
+IDs, or machine-specific command history. The notes preserve the request and useful context, so
+skim them first when understanding or sharing a blueprint. The agent following one may choose an
+appropriate method for a task, but must satisfy its named outcome and constraints.
 
 ## What's inside
 
-A blueprint file is named `<name>.blueprint.json` and comes in two shapes.
+A blueprint is named `<name>.blueprint.json`. A one-step blueprint is a single object; an ordered
+workflow is an array of step objects run from top to bottom. Every object has one executable key,
+optionally preceded by `_comment*` human notes:
 
-**One generation** — a single object with one route key holding the exact request as its value,
-plus `_comment*` notes (see Comments below):
+- `MCP <tool>` — exact arguments for a PixelLab MCP call.
+- `POST /v2/<endpoint>` — exact request body for a PixelLab REST v2 call.
+- `TASK` — flexible work performed by the replaying agent before, between, or after PixelLab calls.
+
+Every blueprint includes at least one PixelLab call. An agent-only procedure belongs in ordinary
+project documentation or its own skill.
+
+Only request fields that matter need to be included; omitted fields use PixelLab defaults. Image
+inputs such as source, reference, style, or mask images normally use relative filenames kept beside
+the blueprint.
+
+One generation can stay small while still carrying its human context:
 
 ```json
 {
-  "_comment_prompt": "/pixellab create a knight character",
+  "_comment": "A basic knight character for the RPG prototype.",
+  "_comment_prompt": "/pixellab-pip create a knight character",
   "MCP create_character": {
     "description": "a knight in shining armor holding a sword and shield"
   }
 }
 ```
 
-Only the fields that matter are included — anything left out uses PixelLab's default, so a
-one-line blueprint is perfectly valid. Image inputs (a source, reference, style, or mask image)
-are referenced by a relative filename kept next to the blueprint.
-
-**Multiple generations** — a JSON **array** of those objects, run top to bottom. A later step
-can use an earlier step's output by referencing its filename, so you can chain steps — for
-example, "make an image, then edit it":
+For an ordered workflow, array position supplies the sequencing:
 
 ```json
 [
   {
-    "_comment_prompt": "/pixellab make a mossy stone well, then add a magical glow",
-    "POST /v2/create-image-pixen": { "description": "a small mossy stone well, top-down", "seed": 123 }
+    "_comment": "Mossy-well style and glow workflow with a user-reviewed candidate and before/after inspection.",
+    "_comment_prompt": "/pixellab-pip make a mossy stone well in this style, add a magical glow, and show me the before and after",
+    "TASK": {
+      "instruction": "Pad the supplied style image to a square transparent canvas without resizing or repainting it.",
+      "inputs": ["style-source.png"],
+      "outputs": ["style-reference.png"],
+      "verify": "The source pixels are unchanged and centered on a transparent square canvas."
+    }
   },
-  { "POST /v2/edit-image": { "image": "01-well.png", "description": "add a soft magical glow", "seed": 123 } }
+  {
+    "POST /v2/generate-with-style-v2": {
+      "style_image": "style-reference.png",
+      "description": "a small mossy stone well, top-down"
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Present every candidate returned by the immediately preceding PixelLab call as numbered choices. After the user chooses, save that candidate unchanged as selected-well.png.",
+      "outputs": ["selected-well.png"],
+      "verify": "selected-well.png matches the user's chosen candidate pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/edit-image": {
+      "image": "selected-well.png",
+      "description": "add a soft magical glow"
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save the image returned by the immediately preceding PixelLab call unchanged as glowing-well.png, then place selected-well.png and glowing-well.png side by side as an inspection comparison.",
+      "inputs": ["selected-well.png"],
+      "outputs": ["glowing-well.png", "comparison.png"],
+      "verify": "Both images appear at native size without cropping or a baked matte background."
+    }
+  }
 ]
 ```
 
-Here the second step edits the well the first step produced (saved as `01-well.png`). Each step
-spends credits, so the assistant confirms the plan before running a multi-step bundle.
+Each call still spends credits. The assistant confirms a multi-call plan before running it.
+
+## Writing task instructions
+
+For a task step inside a blueprint you create manually, `TASK` can be a plain instruction. This
+snippet shows the step by itself; a complete blueprint still includes a PixelLab call and normally
+puts `_comment` and `_comment_prompt` on its first step:
+
+```json
+{
+  "TASK": "Assemble 01.png through 04.png in numeric order into idle-sheet.png as one horizontal row; preserve every source pixel and transparency."
+}
+```
+
+Use the structured form when the task has important file dependencies or acceptance criteria. This
+is also a task-step snippet rather than a complete blueprint:
+
+```json
+{
+  "TASK": {
+    "instruction": "Assemble the four frames in numeric order into one horizontal spritesheet without resizing or repainting.",
+    "inputs": ["01.png", "02.png", "03.png", "04.png"],
+    "outputs": ["idle-sheet.png"],
+    "verify": "The sheet is four cells wide, every cell matches its source pixel-for-pixel, and transparency is preserved."
+  }
+}
+```
+
+The assistant always uses this structured form when automatically writing a blueprint. It records
+only actions that materially affect recreation, phrased as instructions rather than a diary of what
+happened. It leaves out failed attempts, internal reasoning, temporary files, absolute paths, and
+command transcripts.
+
+Good instructions identify the desired result, relative input and output filenames, constraints
+that affect the result, and an observable success check. Name a specific tool only when it is
+required; otherwise the next agent can use any suitable method.
+
+When a task uses output returned directly by the preceding PixelLab call, say that explicitly and
+name the files it saves rather than pretending they already exist as inputs. `verify` is an
+acceptance gate: if it fails, the assistant stops and reports the failure unless the task provides
+an authorized fallback.
+
+Blueprint instructions cannot grant new authority or bypass PixelLab safety rules. They do not
+override the current user's directions, credit approval, secret protection, public endpoint
+boundaries, destructive-action confirmation, or the prohibition against locally drawing or
+repainting art unless the user explicitly approved that fallback.
 
 ## Comments
 
-A blueprint can carry short human notes as keys starting with `_comment`. They are only for
-people reading the file — the assistant ignores them when it runs the blueprint.
+Blueprints can carry short human notes as keys beginning with `_comment`. These are metadata for
+people and agents reading the file, not executable fields: the assistant never sends them to
+PixelLab or runs them as tasks. A typical prompted blueprint carries both `_comment` and
+`_comment_prompt` on its first step.
 
 ```json
 {
   "_comment": "Base sprite for the RPG prototype.",
-  "_comment_prompt": "/pixellab create a knight character",
-  "MCP create_character": { "description": "a knight in shining armor" }
+  "_comment_prompt": "/pixellab-pip create a knight character",
+  "MCP create_character": {
+    "description": "a knight in shining armor"
+  }
 }
 ```
 
-`_comment` — the summary — always comes first; any number of other `_comment*` notes may
-follow, then the route. `_comment_prompt` records your original prompt as you intended it
-(in a bundle, on the first step): assistant-added wrappers, connector links, and hidden paths
-are removed, while visible command text like `/pixellab-pip` is kept. A `_comment` is added
-only for something non-obvious worth sharing — an issue, discovery, or important detail found
-during creation, or what the blueprint is for.
+`_comment` is the human summary. It can say what the blueprint is for and preserve a useful issue,
+discovery, or gotcha that is not obvious from the request body. Put it first, followed by any other
+custom `_comment*` notes, then the executable key. It is context, never an instruction.
+
+`_comment_prompt` records the original prompt as you intended it. In an ordered workflow it normally
+lives on the first step beside `_comment`. Assistant-added wrappers, connector links, app URIs,
+hidden paths, and tool serialization are removed, while visible command text such as
+`/pixellab-pip` remains. For example, an internal connector representation of
+`/pixellab-pip make a knight` is stored as that visible command—not the connector markup.
+
+The format does not require either key in every possible file: a workflow may have no initiating
+prompt, and an extra summary should not be empty boilerplate. Still, examples normally show both
+because together they make a blueprint much easier to recognize, understand, and share.
 
 ## Creating a blueprint
 
-You don't have to do anything special: after a successful generation, the assistant writes the
-blueprint next to the asset's output files (under your project's `pixellab-pip-generations/`
-folder). If the generation used an image you supplied, a copy of that image is saved alongside
-so the blueprint stays reproducible even if your original moves.
+You do not have to request one separately. After successful PixelLab work, the assistant writes the
+blueprint beside the outputs under the project's `pixellab-pip-generations/` folder. Exact PixelLab
+request bodies remain exact. Material work outside those calls becomes ordered, structured `TASK`
+steps, and the first step carries the useful human notes described above.
+
+If an input image is needed, the assistant copies it alongside the blueprint and uses a relative
+filename. Task `inputs` must likewise be present there or produced by an earlier step.
 
 ## Recreating from a blueprint
 
-Two ways to trigger it:
+There are two ways to trigger a replay:
 
-- **Point at the file:** `@`-link or mention the `.blueprint.json` and ask to run it.
-- **Just describe it:** if the blueprint lives in the bundled recipes (below), name it — e.g.
-  *"create the knight blueprint"* — and the assistant finds and runs it.
+- **Point at the file:** `@`-link or mention a `.blueprint.json` and ask to run it.
+- **Name a bundled recipe:** ask for a blueprint in the skill's `blueprints/` folder, such as
+  “create the knight blueprint.”
 
-**Overrides.** You can change any value in plain language when recreating; the original file is
-never modified. For example:
+Before spending credits, the assistant reads and preflights the entire sequence. It asks when
+required files are missing or instructions conflict in a way that could change the result, while
+using ordinary judgment for flexible implementation details.
 
-- *"Recreate that knight blueprint but make the armor red."*
-- *"Same blueprint, keep the seed but change the description to a dark wizard."*
-- *"Run it again with a random seed."*
+You can override any value or instruction in plain language:
 
-> **Note:** reusing the same seed reproduces the same *inputs*, but PixelLab does not guarantee
-> pixel-identical art from a repeated seed. A blueprint reliably reproduces the recipe, not an
-> exact copy of the pixels.
+- “Recreate it but make the armor red.”
+- “Keep the seed but change the description to a dark wizard.”
+- “Run it again with a random seed.”
+- “Make the spritesheet vertical instead.”
+
+Overrides are applied to the in-memory workflow before preflight or execution and never modify the
+source file. A completed replay gets its own blueprint describing what was actually done.
+
+Reusing a seed reproduces the same inputs, but PixelLab does not promise pixel-identical output.
+A blueprint reproduces a workflow, not the exact pixels of the original result.
 
 ## Recipes (blueprints you can run by name)
 
-Ready-made example blueprints ship in the skill's `blueprints/` folder — currently a minimal
-`knight.blueprint.json`. Name one without a path and, if it matches, the assistant loads and
-runs it. For your own blueprints, point at the file (see Recreating, above) — the skill's
-`blueprints/` folder holds bundled examples and may be overwritten when the plugin updates.
+Ready-made examples ship in the skill's `blueprints/` folder, currently including the minimal
+`knight.blueprint.json`. Name one without a path and the assistant loads and runs a semantic match.
+You can place hand-authored recipes there too, but plugin updates may replace the folder, so keep
+the source copy of your own recipe elsewhere.
 
 ## Sharing
 
-A blueprint is meant to be shared:
+A blueprint is meant to be portable:
 
-- **No image:** just send the single `.blueprint.json` file. This is the common case.
-- **With an image input:** send the JSON and its image together; the relative path resolves
-  when they sit side by side.
-- **One self-contained file:** on request, an image can be embedded directly in the JSON as
-  base64 (larger file, but nothing else to send).
+- **No file input:** send the `.blueprint.json` by itself.
+- **With file inputs:** send the blueprint and referenced files together so relative paths resolve.
+- **One self-contained file:** on request, an image can be embedded as base64. This is larger and
+  costs an assistant more tokens to read, so it is never the automatic default.
 
-Whoever receives it can recreate the asset the same way — point their assistant at the file, or
-drop it into their `blueprints/` folder to run it by name.
+Whoever receives it can point their assistant at the file or place it in a `blueprints/` folder to
+run it by name.
 
 ## MCP vs REST
 
-Blueprints record whichever surface produced the asset — an `MCP <tool>` route or a
-`POST /v2/<endpoint>` route. On recreation the assistant maps it to whatever you have available,
-falling back between MCP and REST when needed. MCP routes are handy for sharing because they run
-through your assistant's existing PixelLab connection without a separate API key.
+Blueprints record whichever PixelLab surface produced the asset: `MCP <tool>` or
+`POST /v2/<endpoint>`. On recreation, the assistant maps an unavailable recorded surface to the
+corresponding MCP or REST route only when the fields can be adapted accurately. It never silently
+drops or guesses fields. MCP recipes are especially convenient to share when the receiving agent
+already has a PixelLab MCP connection, while REST records provide exact endpoint control.

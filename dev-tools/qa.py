@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import html
 import json
+import posixpath
 import re
 import subprocess
 import sys
@@ -111,14 +112,76 @@ def check_manifest_metadata() -> None:
         raise AssertionError("keywords mismatch: " + ", ".join(keyword_mismatches))
 
 
+def validate_blueprint_data(data: object, label: str) -> None:
+    steps = data if isinstance(data, list) else [data]
+    if not steps:
+        raise AssertionError(f"{label}: blueprint must contain at least one step")
+
+    pixellab_routes = 0
+    for number, step in enumerate(steps, 1):
+        if not isinstance(step, dict):
+            raise AssertionError(f"{label}: step {number} must be an object")
+        actions = [key for key in step if not key.startswith("_comment")]
+        if len(actions) != 1:
+            raise AssertionError(f"{label}: step {number} must have exactly one executable key, got {actions}")
+
+        action = actions[0]
+        value = step[action]
+        if action.startswith(("MCP ", "POST /v2/")):
+            prefix = "MCP " if action.startswith("MCP ") else "POST /v2/"
+            route_name = action[len(prefix):]
+            if not route_name or any(character.isspace() for character in route_name):
+                raise AssertionError(f"{label}: step {number} PixelLab route name must be nonblank with no whitespace")
+            if not isinstance(value, dict):
+                raise AssertionError(f"{label}: step {number} PixelLab request body must be an object")
+            pixellab_routes += 1
+            continue
+        if action != "TASK":
+            raise AssertionError(f"{label}: unsupported executable key {action!r}")
+        if isinstance(value, str):
+            if not value.strip():
+                raise AssertionError(f"{label}: step {number} TASK instruction must not be blank")
+            continue
+        if not isinstance(value, dict):
+            raise AssertionError(f"{label}: step {number} TASK value must be a string or object")
+
+        allowed = {"instruction", "inputs", "outputs", "verify"}
+        unknown = set(value) - allowed
+        if unknown:
+            raise AssertionError(f"{label}: step {number} TASK has unknown fields {sorted(unknown)}")
+        instruction = value.get("instruction")
+        if not isinstance(instruction, str) or not instruction.strip():
+            raise AssertionError(f"{label}: step {number} TASK instruction must be a nonblank string")
+        for field in ("inputs", "outputs"):
+            paths = value.get(field)
+            if paths is None:
+                continue
+            if not isinstance(paths, list) or not paths or any(not isinstance(path, str) or not path.strip() for path in paths):
+                raise AssertionError(f"{label}: step {number} TASK {field} must be a nonempty string array")
+            normalized = [path.replace("\\", "/") for path in paths]
+            if any(
+                path.startswith("/")
+                or re.match(r"^[A-Za-z]:/", path)
+                or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", path)
+                or ".." in path.split("/")
+                for path in normalized
+            ):
+                raise AssertionError(f"{label}: step {number} TASK {field} must use local relative paths")
+            portable_paths = [posixpath.normpath(path).casefold() for path in normalized]
+            if len(portable_paths) != len(set(portable_paths)):
+                raise AssertionError(f"{label}: step {number} TASK {field} must be unique")
+        verify = value.get("verify")
+        if verify is not None and (not isinstance(verify, str) or not verify.strip()):
+            raise AssertionError(f"{label}: step {number} TASK verify must be a nonblank string")
+
+    if not pixellab_routes:
+        raise AssertionError(f"{label}: blueprint must contain at least one MCP or REST v2 step")
+
+
 def check_blueprint_shapes() -> None:
     for path in run_git_ls_files("*.blueprint.json"):
         data = json.loads(path.read_text(encoding="utf-8"))
-        for step in data if isinstance(data, list) else [data]:
-            routes = [key for key in step if not key.startswith("_comment")]
-            if len(routes) != 1 or not routes[0].startswith(("MCP ", "POST /v2/")):
-                rel = path.relative_to(REPO_ROOT)
-                raise AssertionError(f"{rel}: expected exactly one 'MCP ' or 'POST /v2/' route key, got {routes}")
+        validate_blueprint_data(data, str(path.relative_to(REPO_ROOT)))
 
 
 def check_python_compiles() -> None:
@@ -222,7 +285,7 @@ def run_unit_tests() -> None:
 
 CHECKS = [
     ("JSON manifests parse", check_json_files),
-    ("blueprints have exactly one route key", check_blueprint_shapes),
+    ("blueprint step shapes are valid", check_blueprint_shapes),
     ("manifest metadata matches", check_manifest_metadata),
     ("Python files compile", check_python_compiles),
     ("workflows declare required runtimes", check_workflows),
