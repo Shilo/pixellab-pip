@@ -1,13 +1,22 @@
-{
-  "_comment": "64 native 32x32 tiles generated as separate images, then arranged locally into the 8x8 sheet.",
-  "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
-  "POST /v2/generate-image-v2": {
-    "description": "Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.",
-    "image_size": {
-      "width": 32,
-      "height": 32
-    },
-    "no_background": false,
-    "seed": 1323610680
+[
+  {
+    "_comment": "64 native 32x32 tiles generated as separate images, then arranged locally into the 8x8 sheet.",
+    "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
+    "POST /v2/generate-image-v2": {
+      "description": "Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.",
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "no_background": false,
+      "seed": 1323610680
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 sheet with no margins, spacing, resizing, repainting, quantization, or other visual changes.",
+      "outputs": ["minecraft-mod-generate-image-v2-8x8-32px-sheet.png"],
+      "verify": "The sheet is exactly 256x256 with sixty-four edge-to-edge 32x32 cells, and every cell is pixel-identical to its corresponding returned tile."
+    }
   }
-}
+]

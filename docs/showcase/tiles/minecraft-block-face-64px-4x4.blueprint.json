@@ -1,11 +1,20 @@
-{
-  "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Separate 64x64 textures arranged locally into the showcase grid.",
-  "POST /v2/generate-image-v2": {
-    "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
-    "image_size": {
-      "width": 64,
-      "height": 64
-    },
-    "no_background": false
+[
+  {
+    "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Separate 64x64 textures arranged locally into the showcase grid.",
+    "POST /v2/generate-image-v2": {
+      "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all 16 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into a 4 by 4 sheet with no margins, spacing, resizing, repainting, quantization, or other visual changes.",
+      "outputs": ["minecraft-block-face-64px-4x4.png"],
+      "verify": "The sheet is exactly 256x256 with sixteen edge-to-edge 64x64 cells, and every cell is pixel-identical to its corresponding returned texture."
+    }
   }
-}
+]

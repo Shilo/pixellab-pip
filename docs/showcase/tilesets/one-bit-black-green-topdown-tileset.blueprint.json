@@ -1,20 +1,29 @@
-{
-  "_comment": "PixelLab generated the tileset structure. The strict black/white (#000000/#FFFFFF) and gameplay-green (#0F380F/#9BBC0F) copies were produced LOCALLY by Aseprite palette-clamping, not by PixelLab, so they are not blueprint steps.",
-  "_comment_prompt": "/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.",
-  "MCP create_topdown_tileset": {
-    "lower_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
-    "upper_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
-    "transition_description": "solid black transition bands with crisp horizontal pure white stripes, high contrast black and white only, no gray tones",
-    "transition_size": 0.5,
-    "detail": "low detail",
-    "shading": "flat shading",
-    "outline": "lineless",
-    "mode": "standard",
-    "tile_size": {
-      "width": 16,
-      "height": 16
-    },
-    "view": "high top-down",
-    "text_guidance_scale": 12
+[
+  {
+    "_comment": "PixelLab generated the tileset structure; local palette clamping creates the strict black/white and gameplay-green halves of the showcase image.",
+    "_comment_prompt": "/pixellab-pip create 1-bit tileset with black upper, black lower, and black transition with horizontal white stripes. after done, create a copy with gameplay 1 bit green colors.",
+    "MCP create_topdown_tileset": {
+      "lower_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
+      "upper_description": "solid black 1-bit terrain, pure black fill, flat untextured surface, no gray tones",
+      "transition_description": "solid black transition bands with crisp horizontal pure white stripes, high contrast black and white only, no gray tones",
+      "transition_size": 0.5,
+      "detail": "low detail",
+      "shading": "flat shading",
+      "outline": "lineless",
+      "mode": "standard",
+      "tile_size": {
+        "width": 16,
+        "height": 16
+      },
+      "view": "high top-down",
+      "text_guidance_scale": 12
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use the 64x64 tileset image returned by the immediately preceding PixelLab call. Palette-clamp one native-size copy to exactly #000000 and #FFFFFF. Remap that accepted black/white copy to a second native-size copy using #0F380F for black and #9BBC0F for white. Place the black/white copy on the left and the gameplay-green copy on the right without scaling or shape edits.",
+      "outputs": ["one-bit-black-green-topdown-tileset.png"],
+      "verify": "The output is exactly 128x64; each half is 64x64 and shape/alpha-identical; the left uses only #000000/#FFFFFF and the right uses only #0F380F/#9BBC0F for opaque pixels."
+    }
   }
-}
+]

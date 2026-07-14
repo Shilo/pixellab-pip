@@ -1,20 +1,29 @@
-{
-  "_comment": "PixelLab generated the raw tileset. The showcased image is a local side-by-side composition of the black/white Aseprite derivative on the left and the Game Boy green derivative on the right. Local post-processing and side-by-side assembly are documented in the showcase page, not replayed as PixelLab blueprint steps.",
-  "_comment_prompt": "/pixellab-pip create 1-bit sidescroller tileset: pure black platform center, jagged white icy top cap, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
-  "MCP create_sidescroller_tileset": {
-    "tile_size": {
-      "width": 32,
-      "height": 32
-    },
-    "lower_description": "pure solid black platform center, clean 1-bit silhouette, opaque black platform body, no texture, no gray, transparent outside the platform",
-    "transition_description": "jagged icy top cap, sharp irregular white ice teeth and snow crust along only the upper edge, clean 1-bit white, no gray, transparent outside the platform",
-    "transition_size": 0.5,
-    "detail": "low detail",
-    "shading": "flat shading",
-    "outline": "lineless",
-    "text_guidance_scale": 10,
-    "tile_strength": 0.8,
-    "tileset_adherence": 0.8,
-    "tileset_adherence_freedom": 0.2
+[
+  {
+    "_comment": "PixelLab generated the raw tileset; the showcase image combines a locally outlined and palette-clamped black/white derivative with its Game Boy green remap.",
+    "_comment_prompt": "/pixellab-pip create 1-bit sidescroller tileset: pure black platform center, jagged white icy top cap, transparent outside. use Aseprite FX Outline: inside, 4 sides, #FFFFFF; then 1-bit clamp to #000000/#FFFFFF. Create a copy that uses Game Boy 1-bit green colors #0F380F/#9BBC0F.",
+    "MCP create_sidescroller_tileset": {
+      "tile_size": {
+        "width": 32,
+        "height": 32
+      },
+      "lower_description": "pure solid black platform center, clean 1-bit silhouette, opaque black platform body, no texture, no gray, transparent outside the platform",
+      "transition_description": "jagged icy top cap, sharp irregular white ice teeth and snow crust along only the upper edge, clean 1-bit white, no gray, transparent outside the platform",
+      "transition_size": 0.5,
+      "detail": "low detail",
+      "shading": "flat shading",
+      "outline": "lineless",
+      "text_guidance_scale": 10,
+      "tile_strength": 0.8,
+      "tileset_adherence": 0.8,
+      "tileset_adherence_freedom": 0.2
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use the 128x128 tileset image returned by the immediately preceding PixelLab call. In Aseprite, apply FX Outline with place=inside, four-side matrix 170, color #FFFFFF, and transparent background. Palette-clamp the outlined result to exactly #000000/#FFFFFF, remap a copy to #0F380F/#9BBC0F, then place the black/white derivative on the left and the Game Boy green derivative on the right at native size without other shape edits.",
+      "outputs": ["one-bit-sidescroller-icy-cap-bw-gameboy.png"],
+      "verify": "The output is exactly 256x128; each half is 128x128 and shape/alpha-identical; the left uses only #000000/#FFFFFF and the right uses only #0F380F/#9BBC0F for opaque pixels, with transparency preserved outside the platform."
+    }
   }
-}
+]

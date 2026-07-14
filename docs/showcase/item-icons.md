@@ -446,17 +446,26 @@ Generation details:
 Blueprint — replayable route and request body ([`fantasy-rpg-inventory-64px-4x4.blueprint.json`](item-icons/fantasy-rpg-inventory-64px-4x4.blueprint.json)):
 
 ```json
-{
-  "_comment": "From a multi-task 'do the following simultaneously' batch request; see item-icons.md. no_background 64x64 returns separate PNGs, arranged locally into the showcase grid.",
-  "POST /v2/generate-image-v2": {
-    "description": "Sixteen unique fantasy RPG inventory item icons as separate 64x64 generated images: emberglass potion, moonsteel dagger, thornhide boots, sunmarked shield, frostberry ration, stormglass lantern, gravegold ring, wolfsalt charm, ironroot hatchet, starfall scroll, copperwing key, deepmoss herb bundle, bloodruby ore, seasilk cloak, ashbone horn, and clockwork bomb. Each image contains exactly one centered readable item silhouette with crisp hard pixel edges, limited palette, consistent high-fantasy inventory style, strong shape language, and no duplicate item concepts. No text, letters, numbers, labels, captions, fake writing, UI slots, borders, frames, terrain tiles, skill effects, watermark, or decorative grid.",
-    "image_size": {
-      "width": 64,
-      "height": 64
-    },
-    "no_background": true
+[
+  {
+    "_comment": "From a multi-task 'do the following simultaneously' batch request; see item-icons.md. no_background 64x64 returns separate PNGs, arranged locally into the showcase grid.",
+    "POST /v2/generate-image-v2": {
+      "description": "Sixteen unique fantasy RPG inventory item icons as separate 64x64 generated images: emberglass potion, moonsteel dagger, thornhide boots, sunmarked shield, frostberry ration, stormglass lantern, gravegold ring, wolfsalt charm, ironroot hatchet, starfall scroll, copperwing key, deepmoss herb bundle, bloodruby ore, seasilk cloak, ashbone horn, and clockwork bomb. Each image contains exactly one centered readable item silhouette with crisp hard pixel edges, limited palette, consistent high-fantasy inventory style, strong shape language, and no duplicate item concepts. No text, letters, numbers, labels, captions, fake writing, UI slots, borders, frames, terrain tiles, skill effects, watermark, or decorative grid.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all 16 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into a 4 by 4 sheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["fantasy-rpg-inventory-64px-4x4.png"],
+      "verify": "The sheet is exactly 256x256 with sixteen 64x64 cells, and every cell is pixel-identical to its corresponding returned image with transparency preserved."
+    }
   }
-}
+]
 ```
 
 Generated item names:
@@ -562,19 +571,28 @@ Generation details:
 Blueprint — replayable route and request body ([`fantasy-rpg-items-8x8-32px.blueprint.json`](item-icons/fantasy-rpg-items-8x8-32px.blueprint.json)):
 
 ```json
-{
-  "_comment_prompt": "/pixellab-pip 32px fantasy rpg item icons, pro model, optimized guardrail prompt: clean single-color outline, low detail, low colors",
-  "_comment": "Native 32x32 batch: one generate-image-v2 job returned 64 separate 32x32 icons, assembled locally into an 8x8 256x256 sheet (assembly only, pixels unchanged). The guardrail prompt (outline/low-detail/limited-palette) is what makes Pro clean at this size.",
-  "POST /v2/generate-image-v2": {
-    "description": "Fantasy RPG item icon, one single centered object per image, bold clean single-color black outline around the whole object, flat color fill, low detail, minimal shading, limited palette of only a few colors, crisp readable silhouette, transparent background. Unlabeled pictorial assets only. Varied fantasy items such as swords, shields, potions, scrolls, rings, amulets, staffs, bows, helmets, keys, gems, spellbooks, torches, boots, and gauntlets. No text, letters, numbers, labels, no gradients, no noise, no stray pixels.",
-    "image_size": {
-      "width": 32,
-      "height": 32
-    },
-    "no_background": true,
-    "seed": 20260712
+[
+  {
+    "_comment": "Native 32x32 batch: one generate-image-v2 job returned 64 separate 32x32 icons, assembled locally into an 8x8 256x256 sheet (assembly only, pixels unchanged). The guardrail prompt (outline/low-detail/limited-palette) is what makes Pro clean at this size.",
+    "_comment_prompt": "/pixellab-pip 32px fantasy rpg item icons, pro model, optimized guardrail prompt: clean single-color outline, low detail, low colors",
+    "POST /v2/generate-image-v2": {
+      "description": "Fantasy RPG item icon, one single centered object per image, bold clean single-color black outline around the whole object, flat color fill, low detail, minimal shading, limited palette of only a few colors, crisp readable silhouette, transparent background. Unlabeled pictorial assets only. Varied fantasy items such as swords, shields, potions, scrolls, rings, amulets, staffs, bows, helmets, keys, gems, spellbooks, torches, boots, and gauntlets. No text, letters, numbers, labels, no gradients, no noise, no stray pixels.",
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "no_background": true,
+      "seed": 20260712
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 sheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["fantasy-rpg-items-8x8-32px.png"],
+      "verify": "The sheet is exactly 256x256 with sixty-four 32x32 cells, and every cell is pixel-identical to its corresponding returned image with transparency preserved."
+    }
   }
-}
+]
 ```
 
 Local processing: the 64 returned `32x32` PNGs were tiled into one `256x256` `8x8` sheet with zero gutters; assembly only, no repainting, resizing, or quantization.

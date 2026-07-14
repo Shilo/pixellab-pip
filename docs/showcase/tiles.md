@@ -118,19 +118,28 @@ Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographi
 Blueprint — replayable route and request body ([`minecraft-mod-generate-image-v2-8x8-32px-sheet.blueprint.json`](tiles/minecraft-mod-generate-image-v2-8x8-32px-sheet.blueprint.json)):
 
 ```json
-{
-  "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
-  "_comment": "64 native 32x32 tiles generated as separate images, then arranged locally into the 8x8 sheet.",
-  "POST /v2/generate-image-v2": {
-    "description": "Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.",
-    "image_size": {
-      "width": 32,
-      "height": 32
-    },
-    "no_background": false,
-    "seed": 1323610680
+[
+  {
+    "_comment": "64 native 32x32 tiles generated as separate images, then arranged locally into the 8x8 sheet.",
+    "_comment_prompt": "pip create a grid of 32x32 tiles using create image pro. they must be various tiles for a minecraft mod",
+    "POST /v2/generate-image-v2": {
+      "description": "Varied Minecraft mod terrain block top-face textures, seamless 32x32 orthographic voxel-inspired tiles, no text/icons/borders/perspective.",
+      "image_size": {
+        "width": 32,
+        "height": 32
+      },
+      "no_background": false,
+      "seed": 1323610680
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 sheet with no margins, spacing, resizing, repainting, quantization, or other visual changes.",
+      "outputs": ["minecraft-mod-generate-image-v2-8x8-32px-sheet.png"],
+      "verify": "The sheet is exactly 256x256 with sixty-four edge-to-edge 32x32 cells, and every cell is pixel-identical to its corresponding returned tile."
+    }
   }
-}
+]
 ```
 
 Findings:
@@ -231,17 +240,26 @@ Generation details:
 Blueprint — replayable route and request body ([`minecraft-block-face-64px-4x4.blueprint.json`](tiles/minecraft-block-face-64px-4x4.blueprint.json)):
 
 ```json
-{
-  "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Separate 64x64 textures arranged locally into the showcase grid.",
-  "POST /v2/generate-image-v2": {
-    "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
-    "image_size": {
-      "width": 64,
-      "height": 64
-    },
-    "no_background": false
+[
+  {
+    "_comment": "From a multi-task 'do the following simultaneously' batch; see tiles.md. Separate 64x64 textures arranged locally into the showcase grid.",
+    "POST /v2/generate-image-v2": {
+      "description": "Sixteen unique 64x64 voxel sandbox block face tile textures as separate generated images: sunlit grass, granite ore fleck, mossy cobblestone, birch planks, deep slate crack, red sandstone cut, snowy dirt, glowstone cluster, obsidian sheen, clay bricks, jungle leaves, oxidized copper, amethyst stone, muddy roots, ember nether rock, and prismarine wave stone. Each image is one seamless square block face, edge-to-edge filled, chunky pixel art, crisp 64px texture detail, clear distinct material identity, no duplicate materials. No items, icons, characters, text, labels, UI, borders, frames, perspective scene, transparent background, or connected multi-image panorama.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all 16 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into a 4 by 4 sheet with no margins, spacing, resizing, repainting, quantization, or other visual changes.",
+      "outputs": ["minecraft-block-face-64px-4x4.png"],
+      "verify": "The sheet is exactly 256x256 with sixteen edge-to-edge 64x64 cells, and every cell is pixel-identical to its corresponding returned texture."
+    }
   }
-}
+]
 ```
 
 Generated texture names:

@@ -80,12 +80,26 @@ Blueprint — replayable route and request body ([`spark-explosion.blueprint.jso
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["spark-explosion.png"],
+      "verify": "spark-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated).",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "spark-explosion.png",
       "action": "bright spark flash pop explosions viewed top-down orthographic looking straight down, small radial burst of yellow and white sparks and glinting star-shaped flash on the ground plane, circular symmetrical blast",
       "frame_count": 8,
       "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use the nine animation frames returned by the immediately preceding PixelLab call. Reorder the whole frames by visual progression into the strongest top-down spark loop, remove one redundant near-duplicate, and assemble a transparent 256x256 GIF at 0.12 seconds per frame. Do not resize or repaint frame content.",
+      "outputs": ["spark-explosion.gif"],
+      "verify": "spark-explosion.gif is exactly 256x256 with eight 0.12-second frames, uses only returned frame content apart from GIF palette encoding, and preserves transparency."
     }
   }
 ]
@@ -144,12 +158,26 @@ Blueprint — replayable route and request body ([`void-implosion.blueprint.json
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["void-implosion.png"],
+      "verify": "void-implosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated).",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "void-implosion.png",
       "action": "dark void magic implosions viewed top-down orthographic looking straight down, radial burst of purple and violet arcane energy with black core, swirling shadow tendrils and magic sparks on the ground plane, circular symmetrical blast",
       "frame_count": 8,
       "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use the nine animation frames returned by the immediately preceding PixelLab call. Reorder the whole frames by visual progression into the strongest top-down implosion loop, remove two redundant near-duplicates, and assemble a transparent 256x256 GIF at 0.12 seconds per frame. Do not resize or repaint frame content.",
+      "outputs": ["void-implosion.gif"],
+      "verify": "void-implosion.gif is exactly 256x256 with seven 0.12-second frames, uses only returned frame content apart from GIF palette encoding, and preserves transparency."
     }
   }
 ]
@@ -208,12 +236,26 @@ Blueprint — replayable route and request body ([`fire-explosion.blueprint.json
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["fire-explosion.png"],
+      "verify": "fire-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated).",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "fire-explosion.png",
       "action": "fiery explosion blasts viewed top-down orthographic looking straight down, radial burst of orange and red flames with bright yellow-white core, smoke and ember debris spreading outward on the ground plane, circular symmetrical blast",
       "frame_count": 8,
       "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all nine animation frames returned by the immediately preceding PixelLab call. Reorder the whole frames by visual progression into the strongest top-down fire-blast loop, retaining all nine, and assemble a transparent 256x256 GIF at 0.12 seconds per frame. Do not resize or repaint frame content.",
+      "outputs": ["fire-explosion.gif"],
+      "verify": "fire-explosion.gif is exactly 256x256 with nine 0.12-second frames, uses only returned frame content apart from GIF palette encoding, and preserves available transparency including any residual background pixels."
     }
   }
 ]
@@ -273,7 +315,14 @@ Blueprint — replayable route and request body ([`toxic-explosion.blueprint.jso
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["toxic-explosion.png"],
+      "verify": "toxic-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). The historical 10-frame GIF used hand polishing whose exact repeat/order is not recoverable, so that local step is intentionally not encoded.",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "toxic-explosion.png",
       "action": "toxic acid explosions viewed top-down orthographic looking straight down, radial burst of green and lime slime splatter with bubbling ooze, corrosive droplets and vapor spreading outward on the ground plane, circular symmetrical blast",

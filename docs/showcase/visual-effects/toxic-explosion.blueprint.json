@@ -12,7 +12,14 @@
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). GIF assembly and frame polishing were local post-processing, not blueprint steps.",
+    "TASK": {
+      "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
+      "outputs": ["toxic-explosion.png"],
+      "verify": "toxic-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+    }
+  },
+  {
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). The historical 10-frame GIF used hand polishing whose exact repeat/order is not recoverable, so that local step is intentionally not encoded.",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "toxic-explosion.png",
       "action": "toxic acid explosions viewed top-down orthographic looking straight down, radial burst of green and lime slime splatter with bubbling ooze, corrosive droplets and vapor spreading outward on the ground plane, circular symmetrical blast",
