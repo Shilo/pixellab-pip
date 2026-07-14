@@ -110,7 +110,8 @@ put them before the executable key with `_comment` first. A typical prompted blu
   issue, discovery, or gotcha without duplicating the request body.
 - `_comment_prompt` records the user's original prompt as intended, only when a prompt initiated the
   workflow. Remove host-added connector Markdown, app URIs, hidden paths, and tool serialization;
-  keep visible command text. Example: `[$pixellab-pip:pixellab-pip](...) make a knight` becomes
+  keep visible command text. Normalize a connector wrapper or stale skill invocation to the
+  canonical `/pixellab-pip` command: `[$pixellab-pip:pixellab-pip](...) make a knight` becomes
   `/pixellab-pip make a knight`.
 
 ```json
@@ -139,19 +140,20 @@ the original agent happened to do.
 
 When the user links or names a blueprint:
 
-1. Read it and apply the user's natural-language overrides to the in-memory workflow; never rewrite
-   the source blueprint.
-2. Preflight all ordered steps before spending credits. Resolve task inputs and outputs. Clarify
-   contradictory instructions, unresolved inputs,
-   unnamed outputs consumed later, or unavailable required tools when they could change the result;
-   do not guess. Flexible implementation details may use ordinary agent judgment.
-3. For each PixelLab step, use the recorded surface and send fields verbatim. If unavailable, fall
-   back MCP↔REST using SKILL.md's Intent Router and the inspected fallback schema. Prefer the
-   recorded surface when a field has no counterpart rather than dropping or guessing it.
-4. Resolve image values to what the endpoint requires and run steps in array order. Save produced
+1. Read it (object or array) and apply the user's natural-language overrides to the in-memory
+   workflow; never rewrite the source blueprint.
+2. Preflight the ordered workflow before spending credits. Resolve task inputs and outputs, and
+   clarify contradictory instructions, unresolved inputs, unnamed outputs consumed later, or
+   unavailable required tools when they could change the result. Flexible implementation details
+   may use ordinary agent judgment.
+3. Map each PixelLab route to an available surface. On the recorded surface, send fields verbatim.
+   If it is unavailable, fall back MCP↔REST using SKILL.md's Intent Router and the inspected fallback
+   schema. Prefer the recorded surface when a field has no counterpart rather than dropping or
+   guessing it.
+4. Resolve image values to what the endpoint requires. Run array steps in order and save produced
    artifacts to the exact relative filenames later steps consume.
-5. Generate and report per `usage-reporting.md`, then write a new blueprint and manifest describing
-   what the replay actually did. Copy each referenced input image into the new folder.
+5. After execution, report per `usage-reporting.md` and write a new blueprint and manifest for what
+   the replay actually did. Copy each referenced input image into the new folder.
 
 A multi-call blueprint spends credits per call, so apply SKILL.md's multi-asset batch approval.
 Same seed does not guarantee identical pixels (`official-pixellab-documentation.md`); a blueprint

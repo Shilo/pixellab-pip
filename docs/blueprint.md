@@ -156,8 +156,10 @@ custom `_comment*` notes, then the executable key. It is context, never an instr
 `_comment_prompt` records the original prompt as you intended it. In an ordered workflow it normally
 lives on the first step beside `_comment`. Assistant-added wrappers, connector links, app URIs,
 hidden paths, and tool serialization are removed, while visible command text such as
-`/pixellab-pip` remains. For example, an internal connector representation of
-`/pixellab-pip make a knight` is stored as that visible command—not the connector markup.
+`/pixellab-pip` remains. Connector wrappers and stale skill invocation spellings are normalized to
+the canonical `/pixellab-pip` command. For example, an internal connector representation of
+`/pixellab-pip make a knight` is stored as that visible command—not the connector markup or a stale
+skill invocation spelling.
 
 The format does not require either key in every possible file: a workflow may have no initiating
 prompt, and an extra summary should not be empty boilerplate. Still, examples normally show both
