@@ -147,9 +147,7 @@ def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str |
                 if len(markers) > 1:
                     raise AssertionError(f"{label}: blueprint variable has multiple default markers")
                 marker = markers[0] if markers else None
-                if marker is None and "|" in body:
-                    raise AssertionError(f"{label}: blueprint variable has unsupported syntax after '|'")
-                description = body[:marker.start()] if marker else body
+                description = body.split("|", 1)[0]
                 description = " ".join(description.split())
                 if not description:
                     raise AssertionError(f"{label}: blueprint variable description must not be blank")
@@ -215,6 +213,57 @@ def whole_blueprint_placeholder(value: object, label: str) -> tuple[str, str | N
     return None
 
 
+def validate_pixellab_metadata(value: object, label: str) -> None:
+    if not isinstance(value, dict):
+        raise AssertionError(f"{label}: _pixellab must be an object")
+    api_base_url = value.get("api_base_url")
+    if api_base_url is not None and api_base_url != "https://api.pixellab.ai":
+        raise AssertionError(f"{label}: _pixellab api_base_url must be the public PixelLab API origin")
+    mcp_server = value.get("mcp_server")
+    if mcp_server is not None:
+        if isinstance(mcp_server, str):
+            if not mcp_server.strip():
+                raise AssertionError(f"{label}: _pixellab mcp_server must be a nonblank string or object")
+        elif isinstance(mcp_server, dict):
+            if not isinstance(mcp_server.get("name"), str) or not mcp_server["name"].strip():
+                raise AssertionError(f"{label}: _pixellab mcp_server name must be a nonblank string")
+            if mcp_server.get("url") != "https://api.pixellab.ai/mcp":
+                raise AssertionError(f"{label}: _pixellab mcp_server url must be the public PixelLab MCP URL")
+            if mcp_server.get("transport") not in (None, "http"):
+                raise AssertionError(f"{label}: _pixellab mcp_server transport must be http")
+            if mcp_server.get("docs_url") not in (None, "https://api.pixellab.ai/mcp/docs"):
+                raise AssertionError(f"{label}: _pixellab mcp_server docs_url must be the public PixelLab MCP docs")
+        else:
+            raise AssertionError(f"{label}: _pixellab mcp_server must be a nonblank string or object")
+    auth = value.get("auth")
+    if auth is not None:
+        if not isinstance(auth, dict):
+            raise AssertionError(f"{label}: _pixellab auth must be an object")
+        if auth.get("type") != "bearer" or auth.get("env") != "PIXELLAB_SECRET":
+            raise AssertionError(f"{label}: _pixellab auth must reference bearer env PIXELLAB_SECRET")
+        if auth.get("required_before_calls") not in (None, True):
+            raise AssertionError(f"{label}: _pixellab auth required_before_calls must be true")
+        unsafe_keys = {
+            key for key in auth
+            if key.casefold() in {"token", "secret", "value", "authorization", "header"}
+        }
+        if unsafe_keys:
+            raise AssertionError(f"{label}: _pixellab auth must not contain credential values or headers")
+    paid_call_policy = value.get("paid_call_policy")
+    if paid_call_policy is not None and paid_call_policy != "explicit_user_run_request_required":
+        raise AssertionError(f"{label}: _pixellab paid_call_policy must require an explicit user run request")
+    output_directory = value.get("output_directory")
+    if output_directory is not None:
+        if not isinstance(output_directory, str) or not output_directory.startswith("pixellab-pip-generations/"):
+            raise AssertionError(f"{label}: _pixellab output_directory must be under pixellab-pip-generations")
+        normalized_output = output_directory.replace("\\", "/")
+        if normalized_output.endswith("/") or ".." in normalized_output.split("/"):
+            raise AssertionError(f"{label}: _pixellab output_directory must be a safe relative directory")
+    collision_policy = value.get("output_collision_policy")
+    if collision_policy is not None and collision_policy != "stop_if_exists":
+        raise AssertionError(f"{label}: _pixellab output_collision_policy must be stop_if_exists")
+
+
 def validate_blueprint_data(data: object, label: str) -> None:
     steps = data if isinstance(data, list) else [data]
     if not steps:
@@ -230,13 +279,16 @@ def validate_blueprint_data(data: object, label: str) -> None:
         for key, comment in step.items():
             if key.startswith("_comment") and (not isinstance(comment, str) or not comment.strip()):
                 raise AssertionError(f"{label}: step {number} {key} must be a nonblank string")
-        actions = [key for key in step if not key.startswith("_comment")]
-        if len(actions) != 1:
-            raise AssertionError(f"{label}: step {number} must have exactly one executable key, got {actions}")
+        if "_pixellab" in step:
+            validate_pixellab_metadata(step["_pixellab"], f"{label}: step {number}")
+        actions = [
+            key for key in step
+            if key == "TASK" or key.startswith("MCP ") or key.startswith("POST /v2/")
+        ]
+        if len(actions) > 1:
+            raise AssertionError(f"{label}: step {number} has multiple recognized executable keys {actions}")
 
-        action = actions[0]
-        value = step[action]
-        for text_value in blueprint_strings(value):
+        for text_value in blueprint_strings(step):
             for description, default, start, end in iter_blueprint_placeholders(
                 text_value, f"{label}: step {number}"
             ):
@@ -253,6 +305,10 @@ def validate_blueprint_data(data: object, label: str) -> None:
                     raise AssertionError(
                         f"{label}: blueprint variable {description!r} has conflicting defaults"
                     )
+        if not actions:
+            continue
+        action = actions[0]
+        value = step[action]
         if action.startswith(("MCP ", "POST /v2/")):
             prefix = "MCP " if action.startswith("MCP ") else "POST /v2/"
             route_name = action[len(prefix):]
@@ -263,8 +319,6 @@ def validate_blueprint_data(data: object, label: str) -> None:
                 raise AssertionError(f"{label}: step {number} PixelLab request body must be an object")
             pixellab_routes += 1
             continue
-        if action != "TASK":
-            raise AssertionError(f"{label}: unsupported executable key {action!r}")
         if isinstance(value, str):
             if not value.strip():
                 raise AssertionError(f"{label}: step {number} TASK instruction must not be blank")
@@ -272,10 +326,6 @@ def validate_blueprint_data(data: object, label: str) -> None:
         if not isinstance(value, dict):
             raise AssertionError(f"{label}: step {number} TASK value must be a string or object")
 
-        allowed = {"instruction", "inputs", "outputs", "verify"}
-        unknown = set(value) - allowed
-        if unknown:
-            raise AssertionError(f"{label}: step {number} TASK has unknown fields {sorted(unknown)}")
         instruction = value.get("instruction")
         if not isinstance(instruction, str) or not instruction.strip():
             raise AssertionError(f"{label}: step {number} TASK instruction must be a nonblank string")
