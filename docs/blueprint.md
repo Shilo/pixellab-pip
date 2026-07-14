@@ -177,11 +177,21 @@ filename. Task `inputs` must likewise be present there or produced by an earlier
 
 ## Recreating from a blueprint
 
-There are two ways to trigger a replay:
+You can ask naturally to see, inspect, choose, or run a blueprint. There is no required command
+syntax. For example:
+
+- “What blueprints are available?”
+- “Show me your ready-made recipes.”
+- “Tell me about the knight blueprint.”
+- “Use the knight one, but make the armor red.”
+
+Common ways to trigger a replay:
 
 - **Point at the file:** `@`-link or mention a `.blueprint.json` and ask to run it.
 - **Name a bundled recipe:** ask for a blueprint in the skill's `blueprints/` folder, such as
   “create the knight blueprint.”
+- **Choose from the installed collection:** ask what is available, then reply with a listed name or
+  number.
 
 Before spending credits, the assistant reads and preflights the entire sequence. It asks when
 required files are missing or instructions conflict in a way that could change the result, while
@@ -200,12 +210,31 @@ source file. A completed replay gets its own blueprint describing what was actua
 Reusing a seed reproduces the same inputs, but PixelLab does not promise pixel-identical output.
 A blueprint reproduces a workflow, not the exact pixels of the original result.
 
+## Finding bundled blueprints
+
+Ask Pip what blueprints are available and it will read the currently installed collection. It uses
+this compact template, repeating the numbered row for every blueprint:
+
+```markdown
+**Available blueprints**
+
+1. {name} — {description}
+2. {name} — {description}
+
+{selection prompt}
+```
+
+You can reply with the name, its number, or a natural request such as “the knight, with red armor.”
+Names remain stable. Numbers are shortcuts for the latest list only and may change when the
+installed collection changes. The final prompt matches your request; otherwise it invites you to
+run a selection or ask to inspect one.
+
 ## Recipes (blueprints you can run by name)
 
 Ready-made examples ship in the skill's `blueprints/` folder, currently including the minimal
-`knight.blueprint.json`. Name one without a path and the assistant loads and runs a semantic match.
-You can place hand-authored recipes there too, but plugin updates may replace the folder, so keep
-the source copy of your own recipe elsewhere.
+`knight.blueprint.json`. Name one without a path and the assistant semantically matches it, then
+inspects or replays it according to your request. You can place hand-authored recipes there too, but
+plugin updates may replace the folder, so keep the source copy of your own recipe elsewhere.
 
 ## Sharing
 

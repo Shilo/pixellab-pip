@@ -95,10 +95,12 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 | Balance, credits, account check | MCP `get_balance` if available. | `GET /balance`. |
 | REST async job status | `GET /background-jobs/{job_id}`. | MCP managed assets use resource-specific `get_*` tools instead. |
 | PixelLab projects, sandbox, chat, deployed agents, MCP help/feedback | Read `references/mcp-platform-tools.md` before using `list_projects`, `sandbox_*`, `chat_*`, or `agent_*` tools. | No public REST v2 equivalent is documented. |
-| Recreate/replay a past generation, use a named blueprint or recipe, or run a supplied `*.blueprint.json` | Read `references/blueprint.md`; for a named blueprint/recipe with no path, look in the skill's `blueprints/` folder for a semantic match. Map the recorded route to an available surface, apply any user overrides, never rewrite the source. Only match a saved blueprint when the user names one or `@`-links a `*.blueprint.json`; a blueprint name that contains an asset word (e.g. "knight") is still a replay. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
+| Discover, inspect, select, or replay blueprints/recipes, including a supplied `*.blueprint.json` | Read `references/blueprint.md` and follow its discovery, selection, and replay contract. A blueprint name that contains an asset word (e.g. "knight") is still blueprint intent when the conversation identifies it as one. | The exact route recorded in the blueprint (`MCP <tool>` or `POST /v2/...`). |
 
 ## Clarify Only For Collisions
 
+- "Presets": infer bundled blueprints from established blueprint context and preset/template
+  animations from animation or motion context; ask which collection only when neither is clear.
 - "Tiles": terrain/autotile tileset, platformer tileset, or individual tile variants?
 - "Map": whole map, map object, map image, tileset, isometric tile, or tile variants?
 - "Isometric tileset": one isometric tile or a full set? Public docs expose a single-tile route.
