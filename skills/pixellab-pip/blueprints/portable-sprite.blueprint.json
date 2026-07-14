@@ -1,0 +1,10 @@
+{
+  "_comment": "A portable REST recipe for a configurable transparent sprite.",
+  "_comment_prompt": "/pixellab-pip create the portable sprite blueprint",
+  "POST /v2/create-image-pixen": {
+    "description": "{{sprite description}}",
+    "image_size": "{{canvas size | default: {\"width\": 64, \"height\": 64}}}",
+    "no_background": "{{transparent background | default: true}}",
+    "seed": "{{seed | default: null}}"
+  }
+}

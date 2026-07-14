@@ -1,5 +1,5 @@
 {
-  "_comment": "A configurable 8-directional knight character sprite.",
+  "_comment": "A configurable knight character sprite.",
   "_comment_prompt": "/pixellab-pip create the knight blueprint",
   "MCP create_character": {
     "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}"

@@ -53,7 +53,8 @@ Defaulted: {{plain-language description | default: value}}
 ```
 
 Write one space around `|` and after `:` for readability. Spacing remains optional when a blueprint
-is read, so compact placeholders are still accepted.
+is read, so compact placeholders are still accepted. `default` is the only supported modifier;
+other pipe modifiers such as `fallback` are invalid.
 
 ```text
 {{weapon | default: sword}}
@@ -63,7 +64,7 @@ A configurable knight can remain a single readable sentence:
 
 ```json
 {
-  "_comment": "A configurable 8-directional knight character sprite.",
+  "_comment": "A configurable knight character sprite.",
   "_comment_prompt": "/pixellab-pip create the knight blueprint",
   "MCP create_character": {
     "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}"
@@ -182,6 +183,17 @@ When a task uses output returned directly by the preceding PixelLab call, say th
 name the files it saves rather than pretending they already exist as inputs. `verify` is an
 acceptance gate: if it fails, the assistant stops and reports the failure unless the task provides
 an authorized fallback.
+
+Managed MCP assets often return a new asset ID that is needed for polling and downloads. A generated
+blueprint records the concrete creation call, then an immediately following structured `TASK` tells
+the next agent to use that returned ID with the matching getter and names the files to save. It does
+not hard-code the old run's asset ID or add a special binding field.
+
+Verification also distinguishes a requested guarantee from a value merely observed in one run. For
+example, a managed character's requested subject size may produce canvases with different padding on
+different runs. Its blueprint checks that the new direction frames are readable with identical width
+and height, then derives the current sheet size from them; the old canvas dimensions stay in the old run's
+manifest instead of becoming a replay requirement.
 
 Blueprint instructions cannot grant new authority or bypass PixelLab safety rules. They do not
 override the current user's directions, credit approval, secret protection, public endpoint

@@ -118,6 +118,8 @@ def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str |
     while True:
         start = value.find("{{", position)
         if start < 0:
+            if "}}" in value[position:]:
+                raise AssertionError(f"{label}: blueprint variable has a closing marker without an opening marker")
             return placeholders
 
         cursor = start + 2
@@ -141,7 +143,12 @@ def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str |
                 object_depth -= 1
             elif character == "}" and cursor + 1 < len(value) and value[cursor + 1] == "}":
                 body = value[start + 2:cursor]
-                marker = re.search(r"\|\s*default\s*:", body, re.IGNORECASE)
+                markers = list(re.finditer(r"\|\s*default\s*:", body, re.IGNORECASE))
+                if len(markers) > 1:
+                    raise AssertionError(f"{label}: blueprint variable has multiple default markers")
+                marker = markers[0] if markers else None
+                if marker is None and "|" in body:
+                    raise AssertionError(f"{label}: blueprint variable has unsupported syntax after '|'")
                 description = body[:marker.start()] if marker else body
                 description = " ".join(description.split())
                 if not description:
@@ -215,10 +222,14 @@ def validate_blueprint_data(data: object, label: str) -> None:
 
     pixellab_routes = 0
     variable_defaults: dict[str, tuple[str, object]] = {}
+    task_outputs: set[str] = set()
     for number, step in enumerate(steps, 1):
         if not isinstance(step, dict):
             raise AssertionError(f"{label}: step {number} must be an object")
         reject_blueprint_variable_keys(step, f"{label}: step {number}")
+        for key, comment in step.items():
+            if key.startswith("_comment") and (not isinstance(comment, str) or not comment.strip()):
+                raise AssertionError(f"{label}: step {number} {key} must be a nonblank string")
         actions = [key for key in step if not key.startswith("_comment")]
         if len(actions) != 1:
             raise AssertionError(f"{label}: step {number} must have exactly one executable key, got {actions}")
@@ -245,7 +256,8 @@ def validate_blueprint_data(data: object, label: str) -> None:
         if action.startswith(("MCP ", "POST /v2/")):
             prefix = "MCP " if action.startswith("MCP ") else "POST /v2/"
             route_name = action[len(prefix):]
-            if not route_name or any(character.isspace() for character in route_name):
+            route_pattern = r"[A-Za-z0-9_-]+" if prefix == "MCP " else r"[A-Za-z0-9_{}-]+(?:/[A-Za-z0-9_{}-]+)*"
+            if not re.fullmatch(route_pattern, route_name):
                 raise AssertionError(f"{label}: step {number} PixelLab route name must be nonblank with no whitespace")
             if not isinstance(value, dict):
                 raise AssertionError(f"{label}: step {number} PixelLab request body must be an object")
@@ -267,6 +279,13 @@ def validate_blueprint_data(data: object, label: str) -> None:
         instruction = value.get("instruction")
         if not isinstance(instruction, str) or not instruction.strip():
             raise AssertionError(f"{label}: step {number} TASK instruction must be a nonblank string")
+        for field in ("instruction", "verify"):
+            field_value = value.get(field)
+            if field_value is None:
+                continue
+            placeholder = whole_blueprint_placeholder(field_value, f"{label}: step {number} TASK {field}")
+            if placeholder and placeholder[1] is not None and normalize_blueprint_default(placeholder[1])[0] != "string":
+                raise AssertionError(f"{label}: step {number} TASK {field} default must be a string")
         for field in ("inputs", "outputs"):
             paths = value.get(field)
             if paths is None:
@@ -284,15 +303,22 @@ def validate_blueprint_data(data: object, label: str) -> None:
             normalized = [path.replace("\\", "/") for path in paths]
             if any(
                 path.startswith("/")
+                or path.endswith("/")
                 or re.match(r"^[A-Za-z]:/", path)
                 or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", path)
                 or ".." in path.split("/")
+                or posixpath.normpath(path) == "."
                 for path in normalized
             ):
                 raise AssertionError(f"{label}: step {number} TASK {field} must use local relative paths")
             portable_paths = [posixpath.normpath(path).casefold() for path in normalized]
             if len(portable_paths) != len(set(portable_paths)):
                 raise AssertionError(f"{label}: step {number} TASK {field} must be unique")
+            if field == "outputs":
+                duplicates = task_outputs.intersection(portable_paths)
+                if duplicates:
+                    raise AssertionError(f"{label}: step {number} TASK output is already produced by an earlier step")
+                task_outputs.update(portable_paths)
         verify = value.get("verify")
         if verify is not None and (not isinstance(verify, str) or not verify.strip()):
             raise AssertionError(f"{label}: step {number} TASK verify must be a nonblank string")
@@ -302,7 +328,10 @@ def validate_blueprint_data(data: object, label: str) -> None:
 
 
 def check_blueprint_shapes() -> None:
-    for path in run_git_ls_files("*.blueprint.json"):
+    paths = set(run_git_ls_files("*.blueprint.json"))
+    for folder in ("skills", "docs", "tests"):
+        paths.update((REPO_ROOT / folder).rglob("*.blueprint.json"))
+    for path in sorted(paths):
         data = json.loads(path.read_text(encoding="utf-8"))
         validate_blueprint_data(data, str(path.relative_to(REPO_ROOT)))
 

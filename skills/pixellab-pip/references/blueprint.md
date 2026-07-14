@@ -57,6 +57,7 @@ Defaulted: {{plain-language description | default: value}}
 
 When writing, use one space around `|` and after `:` as shown above. Readers do not require
 whitespace around the description, `|`, `default`, or `:`, and match `default` case-insensitively.
+`default` is the only variable modifier; reject any other pipe modifier such as `| fallback:`.
 
 The description is the variable's nonblank, user-facing name. Descriptions compare
 case-insensitively after trimming and collapsing whitespace, so repeated `{{armor color}}` and
@@ -151,6 +152,18 @@ When a task consumes a result returned by the immediately preceding PixelLab cal
 `instruction` and name any files it saves in `outputs`; do not invent an `inputs` filename before
 the result has been materialized. Treat `verify` as an acceptance gate. If it fails, stop and report
 the failure unless the instruction defines an authorized fallback.
+
+Managed MCP creation is the same pattern when its fresh asset ID is needed for polling or download:
+record the concrete creation call, then use an immediately following structured `TASK` that tells the
+agent to poll the matching getter with the returned ID and names the saved outputs. Do not add a
+concrete getter step containing the original run's stale ID, and do not invent a binding key.
+
+Generated verification records request guarantees, not incidental observations from one run. Use an
+exact dimension as a future gate only when the recorded request or current route contract guarantees
+that output dimension. When a managed route's `size` describes the subject while its returned canvas
+padding may vary, require the current frames to be readable with identical width and height and
+preserve their pixels/transparency; derive any sheet dimensions from those returned frames. Keep the
+original run's observed dimensions in its manifest, not as a replay requirement.
 
 Write replayable intent, not a history or chain of thought. For each material action outside a
 PixelLab request, state:

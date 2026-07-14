@@ -1,0 +1,40 @@
+[
+  {
+    "_comment": "Generate two configurable transparent sprites and assemble a native-size comparison.",
+    "_comment_prompt": "/pixellab-pip create the paired sprites blueprint",
+    "POST /v2/create-image-pixen": {
+      "description": "{{left sprite description}}",
+      "image_size": "{{canvas size | default: {\"width\": 64, \"height\": 64}}}",
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save the image returned by the immediately preceding PixelLab call unchanged as left-sprite.png.",
+      "outputs": [
+        "left-sprite.png"
+      ],
+      "verify": "left-sprite.png decodes successfully and is byte-for-byte identical to the returned PNG."
+    }
+  },
+  {
+    "POST /v2/create-image-pixen": {
+      "description": "{{right sprite description}}",
+      "image_size": "{{ canvas   size | default: {\"width\": 64, \"height\": 64}}}",
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save the image returned by the immediately preceding PixelLab call unchanged as right-sprite.png, then place left-sprite.png and right-sprite.png side by side in that order without resizing or repainting either source.",
+      "inputs": [
+        "left-sprite.png"
+      ],
+      "outputs": [
+        "right-sprite.png",
+        "paired-sprites.png"
+      ],
+      "verify": "Both source PNGs decode at the requested canvas size; paired-sprites.png is exactly two cells wide, preserves transparency, and each cell matches its source pixel-for-pixel."
+    }
+  }
+]

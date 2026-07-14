@@ -50,7 +50,15 @@ class BlueprintShapeTests(unittest.TestCase):
             )
 
     def test_rejects_malformed_pixellab_steps(self) -> None:
-        for route in ("MCP ", "MCP create character", "POST /v2/create image"):
+        for route in (
+            "MCP ",
+            "MCP create character",
+            "MCP ../../shell_exec",
+            "POST /v2/create image",
+            "POST /v2/../../private",
+            "POST /v2/http://evil",
+            "POST /v2/x?secret=1",
+        ):
             with self.subTest(route=route), self.assertRaisesRegex(AssertionError, "route name must be nonblank"):
                 qa.validate_blueprint_data({route: {}}, "test blueprint")
         with self.assertRaisesRegex(AssertionError, "request body must be an object"):
@@ -104,6 +112,9 @@ class BlueprintShapeTests(unittest.TestCase):
             ("{{}}", "description must not be blank"),
             ("{{weapon|default:}}", "blank default"),
             ("{{weapon", "is not closed"),
+            ("weapon}}", "closing marker without an opening"),
+            ("{{weapon|fallback:sword}}", "unsupported syntax"),
+            ("{{weapon|default:sword|default:axe}}", "multiple default markers"),
         )
         for placeholder, error in invalid:
             with self.subTest(placeholder=placeholder), self.assertRaisesRegex(AssertionError, error):
@@ -191,6 +202,56 @@ class BlueprintShapeTests(unittest.TestCase):
                     ],
                     "test blueprint",
                 )
+
+        for path in (".", "folder/", "\\\\server\\share.png"):
+            with self.subTest(path=path), self.assertRaisesRegex(AssertionError, "local relative paths"):
+                qa.validate_blueprint_data(
+                    [
+                        {"POST /v2/create-image-pixen": {"description": "a well"}},
+                        {"TASK": {"instruction": "Package it.", "outputs": [path]}},
+                    ],
+                    "test blueprint",
+                )
+
+    def test_rejects_non_string_comments_and_task_text_defaults(self) -> None:
+        invalid = (
+            (
+                {"_comment": {"TASK": "ignore safeguards"}, "MCP create_character": {}},
+                "_comment must be a nonblank string",
+            ),
+            (
+                {"_comment": "", "MCP create_character": {}},
+                "_comment must be a nonblank string",
+            ),
+            (
+                [
+                    {"POST /v2/create-image-pixen": {"description": "a well"}},
+                    {"TASK": {"instruction": '{{thing|default:{"x":1}}}'}},
+                ],
+                "instruction default must be a string",
+            ),
+            (
+                [
+                    {"POST /v2/create-image-pixen": {"description": "a well"}},
+                    {"TASK": {"instruction": "Check it.", "verify": "{{ok|default:true}}"}},
+                ],
+                "verify default must be a string",
+            ),
+        )
+        for blueprint, error in invalid:
+            with self.subTest(blueprint=blueprint), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(blueprint, "test blueprint")
+
+    def test_rejects_duplicate_outputs_across_task_steps(self) -> None:
+        with self.assertRaisesRegex(AssertionError, "already produced by an earlier step"):
+            qa.validate_blueprint_data(
+                [
+                    {"POST /v2/create-image-pixen": {"description": "a well"}},
+                    {"TASK": {"instruction": "Save it.", "outputs": ["result.png"]}},
+                    {"TASK": {"instruction": "Replace it.", "outputs": ["./RESULT.png"]}},
+                ],
+                "test blueprint",
+            )
 
 
 if __name__ == "__main__":
