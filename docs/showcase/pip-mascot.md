@@ -115,13 +115,6 @@ Blueprint — replayable route and request body ([`pip.blueprint.json`](pip/pip.
     }
   },
   {
-    "TASK": {
-      "instruction": "Use the south-facing image returned by the earlier character creation call. Crop away only transparent canvas padding to the 34x54 display bounds without resizing or repainting, and save the static showcase sprite.",
-      "outputs": ["pip.png"],
-      "verify": "pip.png is exactly 34x54, preserves the south-facing character pixels and alpha unchanged, and contains no added background pixels."
-    }
-  },
-  {
     "_comment": "Animates the character created earlier: pass its character_id (runtime value from create_character, omitted here). Follow-up request: 'it should be happy and also loopable, ... must be a repeated smile or tongue out'.",
     "MCP animate_character": {
       "animation_name": "happy-pant-idle",
@@ -133,10 +126,9 @@ Blueprint — replayable route and request body ([`pip.blueprint.json`](pip/pip.
   },
   {
     "TASK": {
-      "instruction": "Use the nine south-facing animation frames returned by the immediately preceding PixelLab call and pip.png as the crop/alignment reference. In Aseprite, crop every frame to the same 34x54 display bounds without resizing or repainting, preserve returned order and transparency, and assemble pip.gif with a 1.2-second first frame followed by eight 0.1-second frames.",
-      "inputs": ["pip.png"],
-      "outputs": ["pip.gif"],
-      "verify": "pip.gif is exactly 34x54 with nine frames; frame 1 lasts 1.2 seconds, frames 2-9 last 0.1 seconds each, and all visible pixels come unchanged from the returned animation frames."
+      "instruction": "Use the nine south-facing animation frames returned by the immediately preceding PixelLab call. Find their union alpha bounds: the smallest axis-aligned rectangle containing every nontransparent pixel across all nine frames. In Aseprite, crop every frame and the earlier south-facing base image to that same rectangle without resizing or repainting. Save the cropped base image as pip.png, then assemble the cropped frames in returned order as pip.gif with a 1.2-second first frame followed by eight 0.1-second frames.",
+      "outputs": ["pip.png", "pip.gif"],
+      "verify": "pip.png and pip.gif are exactly 34x54; the GIF has nine frames, frame 1 lasts 1.2 seconds, frames 2-9 last 0.1 seconds each, and all visible pixels and alpha come unchanged from the corresponding PixelLab images."
     }
   }
 ]

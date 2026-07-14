@@ -18,8 +18,10 @@ reproduce the result. It is not the manifest, which is the private audit/resume 
   dedicated skill for an agent-only workflow.
 - Array order is the dependency model. Do not add IDs, hooks, dependency keys, or a workflow graph.
 
-A PixelLab step's value is the literal request body (for MCP, the tool arguments). Include only
-fields that matter; omitted fields take the PixelLab default.
+A concrete PixelLab step's value is the literal request body (for MCP, the tool arguments). A
+hand-authored or bundled template may contain variables as described below; resolve every variable
+before treating the step as a request body. Include only fields that matter; omitted fields take
+the PixelLab default.
 
 Exact field fidelity (hard rule): every PixelLab key and value maps verbatim to the real request
 body. Never rename, abbreviate, merge, or simplify a field: `style_image` stays `style_image`, and
@@ -41,6 +43,73 @@ Do not add wrapper keys such as `bundle`, `steps`, `assets`, `blueprint_version`
   }
 }
 ```
+
+## Variables
+
+Hand-authored and bundled blueprints may place variables in any string value under an executable
+MCP, REST, or `TASK` key. Automatically written blueprints record the concrete values that were
+actually used and do not contain variables.
+
+```text
+Required: {{plain-language description}}
+Defaulted: {{plain-language description | default: value}}
+```
+
+When writing, use one space around `|` and after `:` as shown above. Readers do not require
+whitespace around the description, `|`, `default`, or `:`, and match `default` case-insensitively.
+
+```text
+{{weapon | default: sword}}
+```
+
+The description is the variable's nonblank, user-facing name. Descriptions compare
+case-insensitively after trimming and collapsing whitespace, so repeated `{{armor color}}` and
+`{{ Armor   Color }}` placeholders share one value across the workflow. A variable may have no
+default or one distinct default; conflicting defaults are invalid. A blank default is invalid;
+write `""` when the intended default is an empty string.
+
+Resolve the entire workflow in memory before normal preflight:
+
+1. Use a value explicitly supplied or overridden in the current request.
+2. Otherwise use a value confidently inferred from the request and relevant conversation context.
+3. Otherwise use the declared default without asking.
+4. Otherwise ask for every unresolved variable in one concise prompt.
+
+Never infer a value that grants authority, spends additional credits, weakens a safety boundary,
+or resolves a genuine routing collision. User values such as `false`, `0`, or an empty string are
+explicit values, not missing values to replace with a default.
+
+Substitute only in executable values, including nested request fields and structured `TASK` data;
+never substitute route or object keys or `_comment*` metadata. A placeholder that occupies its
+entire JSON string may resolve to any JSON value. Parse a default as JSON when it is valid JSON
+(`8`, `true`, `null`, `[1, 2]`, or an object); otherwise treat it as a string. An embedded
+placeholder must resolve to a scalar and is inserted as text. Match an inferred or user-supplied
+whole-field value to the target schema. Values are literal data: do not recursively expand
+placeholder-like text inside a resolved value.
+
+```json
+{
+  "MCP create_character": {
+    "description": "a {{character class}} in {{armor color}} armor holding a {{weapon | default: sword}}"
+  }
+}
+```
+
+Use defaults such as `sword` silently. If several required variables remain, ask once:
+
+```markdown
+Before I run this blueprint, what should I use for:
+- Character class
+- Armor color
+
+Reply with all values in one message, for example: `class: knight; armor: red`.
+```
+
+Reject an unclosed or blank placeholder, conflicting defaults, a non-scalar embedded value, or any
+variable still unresolved after clarification. Then remove all placeholder syntax, validate the
+resolved workflow as an ordinary blueprint, and continue with its concrete request bodies. Never
+rewrite the source template. The new blueprint written after a successful replay contains only the
+resolved literal values.
 
 ## Task steps
 
@@ -127,9 +196,10 @@ put them before the executable key with `_comment` first. A typical prompted blu
 ## Writing a blueprint
 
 After a successful run, record the shortest successful replay path. Keep every successful PixelLab
-request body exact. Add a structured `TASK` step for each outside action that materially created or
-changed an input, dependency, selected result, delivered output, or verification outcome. Failed
-experiments are not replay steps.
+request body exact and concrete; do not copy template placeholders into the run's new blueprint.
+Add a structured `TASK` step for each outside action that materially created or changed an input,
+dependency, selected result, delivered output, or verification outcome. Failed experiments are not
+replay steps.
 
 Reference copied-in user inputs by relative path so the recipe survives if the original moves. A
 task that produces artifacts names them in `outputs`; preserve those filenames if later steps use
@@ -175,9 +245,9 @@ execution is not clear, do not spend credits.
 
 When the user selects, links, or names a blueprint:
 
-1. Read it (object or array) and apply the user's natural-language overrides to the in-memory
-   workflow; never rewrite the source blueprint.
-2. Preflight the ordered workflow before spending credits. Resolve task inputs and outputs, and
+1. Read it (object or array), resolve its variables and natural-language overrides in memory, and
+   never rewrite the source blueprint.
+2. Preflight the fully resolved ordered workflow before spending credits. Resolve task inputs and outputs, and
    clarify contradictory instructions, unresolved inputs, unnamed outputs consumed later, or
    unavailable required tools when they could change the result. Flexible implementation details
    may use ordinary agent judgment.

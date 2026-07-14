@@ -19,7 +19,7 @@
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated).",
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 returned frames (frame 0 + 8 generated).",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "void-implosion.png",
       "action": "dark void magic implosions viewed top-down orthographic looking straight down, radial burst of purple and violet arcane energy with black core, swirling shadow tendrils and magic sparks on the ground plane, circular symmetrical blast",
@@ -29,9 +29,9 @@
   },
   {
     "TASK": {
-      "instruction": "Use the nine animation frames returned by the immediately preceding PixelLab call. Reorder the whole frames by visual progression into the strongest top-down implosion loop, remove two redundant near-duplicates, and assemble a transparent 256x256 GIF at 0.12 seconds per frame. Do not resize or repaint frame content.",
+      "instruction": "Use returned animation frames 1 through 6 in order, omit frames 7 through 9, then append one fully transparent 256x256 frame. Assemble those seven frames as a transparent GIF at 0.12 seconds per frame without resizing or repainting returned frame content.",
       "outputs": ["void-implosion.gif"],
-      "verify": "void-implosion.gif is exactly 256x256 with seven 0.12-second frames, uses only returned frame content apart from GIF palette encoding, and preserves transparency."
+      "verify": "void-implosion.gif is exactly 256x256 with seven 0.12-second frames: returned frames 1-6 remain in order, followed by one fully transparent frame; returned frame content changes only through GIF palette encoding."
     }
   }
 ]

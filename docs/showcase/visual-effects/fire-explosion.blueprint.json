@@ -15,11 +15,11 @@
     "TASK": {
       "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
       "outputs": ["fire-explosion.png"],
-      "verify": "fire-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+      "verify": "fire-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell's alpha channel and visible RGB pixels are pixel-identical to its corresponding returned image."
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated).",
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 returned frames (frame 0 + 8 generated).",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "fire-explosion.png",
       "action": "fiery explosion blasts viewed top-down orthographic looking straight down, radial burst of orange and red flames with bright yellow-white core, smoke and ember debris spreading outward on the ground plane, circular symmetrical blast",
@@ -29,9 +29,9 @@
   },
   {
     "TASK": {
-      "instruction": "Use all nine animation frames returned by the immediately preceding PixelLab call. Reorder the whole frames by visual progression into the strongest top-down fire-blast loop, retaining all nine, and assemble a transparent 256x256 GIF at 0.12 seconds per frame. Do not resize or repaint frame content.",
+      "instruction": "Use returned animation frames 1 through 7 and frame 9 in that order, omit frame 8, then append one fully transparent 256x256 frame. Assemble those nine frames as a transparent GIF at 0.12 seconds per frame without resizing or repainting returned frame content.",
       "outputs": ["fire-explosion.gif"],
-      "verify": "fire-explosion.gif is exactly 256x256 with nine 0.12-second frames, uses only returned frame content apart from GIF palette encoding, and preserves available transparency including any residual background pixels."
+      "verify": "fire-explosion.gif is exactly 256x256 with nine 0.12-second frames: returned frames 1-7 and 9 remain in order, followed by one fully transparent frame; returned frame content changes only through GIF palette encoding."
     }
   }
 ]

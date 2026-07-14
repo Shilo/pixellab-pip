@@ -15,16 +15,23 @@
     "TASK": {
       "instruction": "Use all 64 images returned by the immediately preceding PixelLab call in returned order. Arrange them row-major into an 8 by 8 spritesheet with no margins, spacing, resizing, repainting, or quantization.",
       "outputs": ["toxic-explosion.png"],
-      "verify": "toxic-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell is pixel-identical to its corresponding returned image and transparency is preserved."
+      "verify": "toxic-explosion.png is exactly 256x256 with sixty-four 32x32 cells; every cell's alpha channel and visible RGB pixels are pixel-identical to its corresponding returned image."
     }
   },
   {
-    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 total (frame 0 + 8 generated). The historical 10-frame GIF used hand polishing whose exact repeat/order is not recoverable, so that local step is intentionally not encoded.",
+    "_comment": "Animate with Text (new) using the spritesheet as first_frame reference, pluralized action, 8 frames producing 9 returned frames (frame 0 + 8 generated).",
     "POST /v2/animate-with-text-v3": {
       "first_frame": "toxic-explosion.png",
       "action": "toxic acid explosions viewed top-down orthographic looking straight down, radial burst of green and lime slime splatter with bubbling ooze, corrosive droplets and vapor spreading outward on the ground plane, circular symmetrical blast",
       "frame_count": 8,
       "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use all nine returned animation frames in order, then append one fully transparent 256x256 frame. Assemble those ten frames as a transparent GIF at 0.12 seconds per frame without resizing or repainting returned frame content.",
+      "outputs": ["toxic-explosion.gif"],
+      "verify": "toxic-explosion.gif is exactly 256x256 with ten 0.12-second frames: all nine returned frames remain in order, followed by one fully transparent frame; returned frame content changes only through GIF palette encoding."
     }
   }
 ]

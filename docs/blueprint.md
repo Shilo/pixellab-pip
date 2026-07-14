@@ -25,7 +25,8 @@ optionally preceded by `_comment*` human notes:
 Every blueprint includes at least one PixelLab call. An agent-only procedure belongs in ordinary
 project documentation or its own skill.
 
-Only request fields that matter need to be included; omitted fields use PixelLab defaults. Image
+Only request fields that matter need to be included; omitted fields use PixelLab defaults. A
+ready-made template can also contain variables that are resolved before its request is sent. Image
 inputs such as source, reference, style, or mask images normally use relative filenames kept beside
 the blueprint.
 
@@ -40,6 +41,61 @@ One generation can stay small while still carrying its human context:
   }
 }
 ```
+
+## Making a configurable blueprint
+
+Use a plain-language placeholder when a hand-authored or bundled blueprint should adapt to the
+current request:
+
+```text
+Required: {{plain-language description}}
+Defaulted: {{plain-language description | default: value}}
+```
+
+Write one space around `|` and after `:` for readability. Spacing remains optional when a blueprint
+is read, so compact placeholders are still accepted.
+
+```text
+{{weapon | default: sword}}
+```
+
+A configurable knight can remain a single readable sentence:
+
+```json
+{
+  "_comment": "A configurable 8-directional knight character sprite.",
+  "_comment_prompt": "/pixellab-pip create the knight blueprint",
+  "MCP create_character": {
+    "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}"
+  }
+}
+```
+
+When you run it, your current request wins over the recipe. Pip next uses details it can confidently
+infer, then defaults, and asks once for all values that are still missing. For example:
+
+```markdown
+Before I run this blueprint, what should I use for:
+- Character class
+- Armor color
+
+Reply with all values in one message, for example: `class: knight; armor: red`.
+```
+
+Variables with defaults are not included in that question. The same description, ignoring case and
+extra whitespace, identifies the same variable everywhere in the workflow; it may have only one
+distinct default. Explicit `false`, `0`, and empty-string values are real choices rather than missing
+values.
+
+Variables work in nested MCP, REST, and `TASK` string values. When a placeholder fills an entire
+JSON string, it can resolve to a string, number, boolean, `null`, list, or object. A default that is
+valid JSON keeps that JSON type; any other default is text. A placeholder embedded in a longer
+sentence must be a scalar value. Placeholders never change field names, route names, or comments,
+and a resolved value is never treated as another placeholder.
+
+Pip resolves every variable before credit approval and execution, stops on malformed or unresolved
+variables, and never edits the source template. After a successful run, the newly recorded blueprint
+contains the concrete values that were actually sent, not the original placeholders.
 
 For an ordered workflow, array position supplies the sequencing:
 
@@ -193,9 +249,9 @@ Common ways to trigger a replay:
 - **Choose from the installed collection:** ask what is available, then reply with a listed name or
   number.
 
-Before spending credits, the assistant reads and preflights the entire sequence. It asks when
-required files are missing or instructions conflict in a way that could change the result, while
-using ordinary judgment for flexible implementation details.
+Before spending credits, the assistant resolves all variables, then reads and preflights the entire
+sequence. It asks when required values or files are missing or instructions conflict in a way that
+could change the result, while using ordinary judgment for flexible implementation details.
 
 You can override any value or instruction in plain language:
 

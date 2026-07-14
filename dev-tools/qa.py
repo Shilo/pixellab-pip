@@ -112,21 +112,136 @@ def check_manifest_metadata() -> None:
         raise AssertionError("keywords mismatch: " + ", ".join(keyword_mismatches))
 
 
+def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str | None, int, int]]:
+    placeholders: list[tuple[str, str | None, int, int]] = []
+    position = 0
+    while True:
+        start = value.find("{{", position)
+        if start < 0:
+            return placeholders
+
+        cursor = start + 2
+        object_depth = 0
+        in_json_string = False
+        escaped = False
+        while cursor < len(value):
+            character = value[cursor]
+            if in_json_string:
+                if escaped:
+                    escaped = False
+                elif character == "\\":
+                    escaped = True
+                elif character == '"':
+                    in_json_string = False
+            elif character == '"':
+                in_json_string = True
+            elif character == "{":
+                object_depth += 1
+            elif character == "}" and object_depth:
+                object_depth -= 1
+            elif character == "}" and cursor + 1 < len(value) and value[cursor + 1] == "}":
+                body = value[start + 2:cursor]
+                marker = re.search(r"\|\s*default\s*:", body, re.IGNORECASE)
+                description = body[:marker.start()] if marker else body
+                description = " ".join(description.split())
+                if not description:
+                    raise AssertionError(f"{label}: blueprint variable description must not be blank")
+                default = body[marker.end():].strip() if marker else None
+                if marker and not default:
+                    raise AssertionError(
+                        f'{label}: blueprint variable {description!r} has a blank default; use default: "" for an empty string'
+                    )
+                position = cursor + 2
+                placeholders.append((description, default, start, position))
+                break
+            cursor += 1
+        else:
+            raise AssertionError(f"{label}: blueprint variable starting at character {start + 1} is not closed")
+
+
+def blueprint_strings(value: object):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, list):
+        for item in value:
+            yield from blueprint_strings(item)
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from blueprint_strings(item)
+
+
+def reject_blueprint_variable_keys(value: object, label: str) -> None:
+    if isinstance(value, list):
+        for item in value:
+            reject_blueprint_variable_keys(item, label)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            if "{{" in key or "}}" in key:
+                raise AssertionError(f"{label}: blueprint variables are not allowed in object or route keys")
+            reject_blueprint_variable_keys(item, label)
+
+
+def normalize_blueprint_default(value: str) -> tuple[str, object]:
+    try:
+        resolved = json.loads(value)
+    except json.JSONDecodeError:
+        resolved = value
+    if resolved is None:
+        return "null", None
+    if isinstance(resolved, bool):
+        return "boolean", resolved
+    if isinstance(resolved, str):
+        return "string", resolved
+    if isinstance(resolved, list):
+        return "array", resolved
+    if isinstance(resolved, dict):
+        return "object", resolved
+    return type(resolved).__name__, resolved
+
+
+def whole_blueprint_placeholder(value: object, label: str) -> tuple[str, str | None] | None:
+    if not isinstance(value, str):
+        return None
+    placeholders = iter_blueprint_placeholders(value, label)
+    if len(placeholders) == 1 and placeholders[0][2] == 0 and placeholders[0][3] == len(value):
+        return placeholders[0][0], placeholders[0][1]
+    return None
+
+
 def validate_blueprint_data(data: object, label: str) -> None:
     steps = data if isinstance(data, list) else [data]
     if not steps:
         raise AssertionError(f"{label}: blueprint must contain at least one step")
 
     pixellab_routes = 0
+    variable_defaults: dict[str, tuple[str, object]] = {}
     for number, step in enumerate(steps, 1):
         if not isinstance(step, dict):
             raise AssertionError(f"{label}: step {number} must be an object")
+        reject_blueprint_variable_keys(step, f"{label}: step {number}")
         actions = [key for key in step if not key.startswith("_comment")]
         if len(actions) != 1:
             raise AssertionError(f"{label}: step {number} must have exactly one executable key, got {actions}")
 
         action = actions[0]
         value = step[action]
+        for text_value in blueprint_strings(value):
+            for description, default, start, end in iter_blueprint_placeholders(
+                text_value, f"{label}: step {number}"
+            ):
+                if default is None:
+                    continue
+                variable = description.casefold()
+                normalized_default = normalize_blueprint_default(default)
+                if normalized_default[0] in {"array", "object"} and (start != 0 or end != len(text_value)):
+                    raise AssertionError(
+                        f"{label}: blueprint variable {description!r} has a non-scalar default embedded in text"
+                    )
+                previous_default = variable_defaults.setdefault(variable, normalized_default)
+                if previous_default != normalized_default:
+                    raise AssertionError(
+                        f"{label}: blueprint variable {description!r} has conflicting defaults"
+                    )
         if action.startswith(("MCP ", "POST /v2/")):
             prefix = "MCP " if action.startswith("MCP ") else "POST /v2/"
             route_name = action[len(prefix):]
@@ -156,6 +271,14 @@ def validate_blueprint_data(data: object, label: str) -> None:
             paths = value.get(field)
             if paths is None:
                 continue
+            placeholder = whole_blueprint_placeholder(paths, f"{label}: step {number} TASK {field}")
+            if placeholder:
+                _, default = placeholder
+                if default is None:
+                    continue
+                default_type, paths = normalize_blueprint_default(default)
+                if default_type != "array":
+                    raise AssertionError(f"{label}: step {number} TASK {field} default must be an array")
             if not isinstance(paths, list) or not paths or any(not isinstance(path, str) or not path.strip() for path in paths):
                 raise AssertionError(f"{label}: step {number} TASK {field} must be a nonempty string array")
             normalized = [path.replace("\\", "/") for path in paths]

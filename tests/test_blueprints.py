@@ -56,6 +56,89 @@ class BlueprintShapeTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "request body must be an object"):
             qa.validate_blueprint_data({"POST /v2/create-image-pixen": None}, "test blueprint")
 
+    def test_accepts_blueprint_variables_with_flexible_default_spacing(self) -> None:
+        for placeholder in (
+            "{{weapon|default:sword}}",
+            "{{weapon |default:sword}}",
+            "{{weapon| default : sword}}",
+            "{{ weapon | default: sword }}",
+        ):
+            with self.subTest(placeholder=placeholder):
+                qa.validate_blueprint_data(
+                    {
+                        "MCP create_character": {
+                            "description": f"a knight holding a {placeholder}",
+                            "seed": "{{seed|default:123}}",
+                            "options": '{{options|default:{"directions": 8}}}',
+                        }
+                    },
+                    "test blueprint",
+                )
+
+    def test_accepts_required_and_repeated_blueprint_variables(self) -> None:
+        qa.validate_blueprint_data(
+            [
+                {"MCP create_character": {"description": "a {{character class}} with {{armor color}} armor"}},
+                {
+                    "TASK": {
+                        "instruction": "Save the {{character class}} using {{output format|default:PNG}}.",
+                        "inputs": '{{input files|default:["a.png"]}}',
+                    }
+                },
+            ],
+            "test blueprint",
+        )
+
+    def test_accepts_equivalent_quoted_and_unquoted_string_defaults(self) -> None:
+        qa.validate_blueprint_data(
+            {
+                "MCP create_character": {
+                    "description": 'a {{weapon|default:sword}} and another {{ Weapon | default: "sword" }}'
+                }
+            },
+            "test blueprint",
+        )
+
+    def test_rejects_malformed_or_conflicting_blueprint_variables(self) -> None:
+        invalid = (
+            ("{{}}", "description must not be blank"),
+            ("{{weapon|default:}}", "blank default"),
+            ("{{weapon", "is not closed"),
+        )
+        for placeholder, error in invalid:
+            with self.subTest(placeholder=placeholder), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(
+                    {"MCP create_character": {"description": placeholder}},
+                    "test blueprint",
+                )
+
+        with self.assertRaisesRegex(AssertionError, "conflicting defaults"):
+            qa.validate_blueprint_data(
+                {
+                    "MCP create_character": {
+                        "description": "a {{weapon|default:sword}} and {{ Weapon | DEFAULT: axe }}"
+                    }
+                },
+                "test blueprint",
+            )
+
+    def test_rejects_blueprint_variables_in_keys_or_non_scalar_defaults_in_text(self) -> None:
+        invalid = (
+            ({"MCP {{tool}}": {}}, "object or route keys"),
+            ({"MCP create_character": {"{{field}}": "value"}}, "object or route keys"),
+            (
+                {"MCP create_character": {"description": "prefix {{options|default:[1, 2]}} suffix"}},
+                "non-scalar default embedded in text",
+            ),
+            (
+                {"MCP create_character": {"description": 'prefix {{options|default:{"x": 1}}} suffix'}},
+                "non-scalar default embedded in text",
+            ),
+        )
+        for blueprint, error in invalid:
+            with self.subTest(blueprint=blueprint), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(blueprint, "test blueprint")
+
     def test_rejects_unsafe_or_nonportable_paths(self) -> None:
         with self.assertRaisesRegex(AssertionError, "local relative paths"):
             qa.validate_blueprint_data(
@@ -92,6 +175,22 @@ class BlueprintShapeTests(unittest.TestCase):
                 ],
                 "test blueprint",
             )
+
+        invalid_defaults = (
+            ('{{files|default:["../outside.png"]}}', "local relative paths"),
+            ('{{files|default:["https://example.com/a.png"]}}', "local relative paths"),
+            ("{{files|default:[]}}", "nonempty string array"),
+            ("{{files|default:true}}", "default must be an array"),
+        )
+        for placeholder, error in invalid_defaults:
+            with self.subTest(placeholder=placeholder), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(
+                    [
+                        {"POST /v2/create-image-pixen": {"description": "a well"}},
+                        {"TASK": {"instruction": "Package it.", "inputs": placeholder}},
+                    ],
+                    "test blueprint",
+                )
 
 
 if __name__ == "__main__":
