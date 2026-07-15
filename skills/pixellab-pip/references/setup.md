@@ -37,10 +37,10 @@ MCP setup stays agent-agnostic and OS-agnostic until the app is named or detecte
   codex mcp add pixellab --url https://api.pixellab.ai/mcp --bearer-token-env-var PIXELLAB_SECRET
   ```
 
-- **Claude Code**: `claude mcp add --help` supports HTTP MCP headers, but header values can expand or store literals if used carelessly. Prefer a verified token-free secret-reference path: Claude Code MCP config, HTTP transport, URL `https://api.pixellab.ai/mcp`, and `Authorization: Bearer <PIXELLAB_SECRET>` as a private env/secret reference. Verify current secret-reference syntax or ask for the exact settings/config path before writing. If no token-free path exists, do not auto-write; offer: (1) open or link `https://www.pixellab.ai/mcp`; (2) a user-run external-terminal command that hardcodes the Secret, after warning Claude Code may store the raw Secret in its MCP config; or (3) a token-free wrapper workaround. For option 2, show only this placeholder and tell the user to replace it themselves outside chat — never run it:
+- **Claude Code**: `claude mcp add --help` supports HTTP MCP headers, and Claude Code expands `${VAR}` in `url` and `headers` at load, so the Secret stays referenced by name. Token-free preview (ask before running; `-s user` registers it for all projects, and single quotes keep `${PIXELLAB_SECRET}` literal instead of expanding it):
 
   ```text
-  claude mcp add --transport http pixellab https://api.pixellab.ai/mcp --header "Authorization: Bearer <paste-your-Secret-here>"
+  claude mcp add -s user pixellab -t http https://api.pixellab.ai/mcp -H 'Authorization: Bearer ${PIXELLAB_SECRET}'
   ```
 
 - **Cursor, VS Code Agent Plugins, Gemini CLI, GitHub Copilot CLI, generic MCP apps**: do not invent config syntax. Use the app's settings UI/docs, PixelLab's MCP page, or an exact path/format the user provides. Always show a token-free preview and ask before writing.
@@ -84,9 +84,8 @@ Compact templates (`[account step]` = the account-step sentence from section 2):
 
 - **Codex preview, Secret missing**: "Codex can register PixelLab MCP with a token-free config that references `PIXELLAB_SECRET`: [command]. Before live use, [account step] Should I run the registration command?"
 - **Codex registered, Secret missing**: "PixelLab MCP is registered in Codex but not ready for live use — `PIXELLAB_SECRET` is not visible in this session. [account step] Then restart/reload Codex."
-- **Claude Code token-free blocked**: "I cannot safely auto-write Claude Code HTTP MCP auth without a verified token-free header path. [account step] Your options: open `https://www.pixellab.ai/mcp`, run the placeholder command yourself in an external terminal, or discuss a wrapper workaround."
 - **API-only / MCP + API, Secret missing**: "[account step] Then Pip can use the same Secret for documented REST v2 fallback when MCP tools are unavailable or insufficient."
-- **MCP-only, user-chosen hardcoded token**: "This can make MCP work, but it stores the raw Secret in local MCP config or shell history and does not configure `PIXELLAB_SECRET` for Pip's REST v2 fallback. Replace `<paste-your-Secret-here>` yourself in an external terminal; do not paste it here."
+- **MCP-only, user-chosen hardcoded token**: "This can make MCP work, but it stores the raw Secret in local MCP config or shell history and does not configure `PIXELLAB_SECRET` for Pip's REST v2 fallback. Replace the placeholder yourself in an external terminal; do not paste it here."
 - **Pasted Secret**: "I cannot use a Secret pasted here — treat it as exposed and replace it. Repeat the account step for a fresh Secret; do not paste it here."
 - **Unsafe scan or session token**: "I will not scan broad secret locations or use browser/session tokens. [account step]"
 - **No writes while auth incomplete**: "I will not write anything. [account step] I can show token-free setup previews only."
