@@ -307,10 +307,10 @@ The user's purchased `Customizable Pixel Art Character Kit` / `CPACK v2` is now 
 
 Local reference files reviewed:
 
-- `C:\Users\shilo\Downloads\CPACK v2 Documentation.pdf`
-- `C:\Users\shilo\Downloads\readme.rtf`
-- `C:\Users\shilo\Downloads\Male_Skin_01.png`
-- `C:\Users\shilo\Downloads\Female_Skin_01.png`
+- `CPACK v2 Documentation.pdf`
+- `readme.rtf`
+- `Male_Skin_01.png`
+- `Female_Skin_01.png`
 
 Documentation and readme facts:
 
@@ -624,8 +624,8 @@ Plans and summaries:
 | `prompt-plan-v3-30-sweep.json` | Thirty 32x64 Pixen prompts compiled before generation. |
 | `prompt-plan-v4-rescue-sweep.json` | Twenty 64x64 Pixen rescue prompts after 32x64 failed semantically. |
 | `phase-2-pixen-probe/results.json` | Four-probe Pixen results and verification. |
-| `phase-3-pixen-30-sweep/summary.json` | Thirty 32x64 Pixen results, contact sheet metadata, balance data. |
-| `phase-4-pixen-rescue-64/summary.json` | Twenty 64x64 Pixen rescue results, contact sheet metadata, balance data. |
+| `phase-3-pixen-30-sweep/summary.json` | Thirty 32x64 Pixen results, contact sheet metadata, cost data. |
+| `phase-4-pixen-rescue-64/summary.json` | Twenty 64x64 Pixen rescue results, contact sheet metadata, cost data. |
 
 Settings used:
 
@@ -638,10 +638,10 @@ Settings used:
 
 Cost:
 
-- Probe balance: `2305.45 -> 2299.45`, delta `6` subscription generations. This includes four Pixen probes and balance after the V3 job had already consumed its cost.
-- Thirty-prompt Pixen sweep balance: `2299.45 -> 2269.45`, delta `30` subscription generations.
-- Twenty-prompt 64x64 rescue sweep balance: `2269.45 -> 2249.45`, delta `20` subscription generations.
-- Total tracked Pixen/image-sweep cost for this documented set: `56` subscription generations, excluding the earlier V3 cost already reflected before the probe balance snapshot.
+- Probe cost: `6` subscription generations. This includes four Pixen probes, measured after the V3 job had already consumed its cost.
+- Thirty-prompt Pixen sweep cost: `30` subscription generations.
+- Twenty-prompt 64x64 rescue sweep cost: `20` subscription generations.
+- Total tracked Pixen/image-sweep cost for this documented set: `56` subscription generations, excluding the earlier V3 cost already reflected before the probe snapshot.
 
 ### V3 Redundant CPACK-Derived Prompt
 

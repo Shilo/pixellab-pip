@@ -170,7 +170,7 @@ When the user asks about budget planning, prefer route-specific estimates:
 - For Pro grids, state both candidate count and generation-unit cost.
 - For tilesets, state both the call cost and the number of returned tile cells.
 - For animations, state whether counting final animation files, frames, or directional frame sets.
-- For retry-heavy work, budget attempts explicitly. Completed jobs can spend credits even if the result is rejected for quality; failed jobs should be reported from actual `usage` or balance delta instead of assumed.
+- For retry-heavy work, budget attempts explicitly. Completed jobs can spend credits even if the result is rejected for quality; failed jobs should be reported from actual `usage` or a balance delta instead of assumed.
 
 ## Do Not Overclaim
 

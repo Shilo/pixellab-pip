@@ -1,7 +1,7 @@
 # PixelLab Static-Image Model Benchmark — Results
 
 **Run date:** 2026-07-13 · **Models:** PixFlux, Pixen, Pro (`generate-image-v2`), BitForge
-**Method:** blind, shuffled, rank-only human review · **Budget:** $5 cap, actual spend **~$5.20** (see Caveats) · balance $9.95 → $4.76
+**Method:** blind, shuffled, rank-only human review · **Budget:** $5 cap, actual spend **~$5.20** (see Caveats)
 
 This is the measured answer to the open routing question: *which PixelLab image model is best for which kind of static image?* It replaces vendor-wording assumptions ("Pixen = sprites, PixFlux = scenes/backgrounds, Pro = candidates") with a blind quality comparison. **Read the Confidence & caveats section before acting on any single-category result.**
 

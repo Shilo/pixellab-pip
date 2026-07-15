@@ -50,7 +50,7 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 | Local Aseprite CLI workspaces | Move generated assets into Aseprite without driving the PixelLab extension UI: create or update `.aseprite` copies, import frames as layers/tags, export PNG sequences, GIFs, sprite sheets, and metadata, or locally clamp/reduce colors to palettes such as 1-bit black/white, Game Boy green, PICO-8, or supplied hex colors through documented Aseprite CLI/Lua. |
 | Safer auth and automation | Use bearer-token and MCP secret setup, avoid copied website session tokens, and stay away from undocumented internal endpoints used by first-party surfaces such as the website or Aseprite extension. |
 | Current docs and SDK checks | Refresh official PixelLab docs, OpenAPI schemas, MCP docs, SDK coverage, auth setup, pricing, limits, model labels, or endpoint fields before making exact claims. |
-| Clear generation reports | Report the PixelLab tool or endpoint used, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, credit/balance delta when available, and verification status. |
+| Clear generation reports | Report the PixelLab tool or endpoint used, prompt prep method, final natural-language parameters, key controls, IDs, output locations, async status, cost delta when available, and verification status. |
 | Bark completion sound | Play a generic success sound after PixelLab generation-style jobs finish, with a persistent on/off toggle. |
 | PixelLab terminology support | Explain confusing labels such as `Pro`, `v3`, `new`, `create tiles`, `create tileset`, Pixen, PixFlux, BitForge, and PixPatch at the documented product level. |
 | Agent-agnostic | Work from any agent that supports Agent Skills. |

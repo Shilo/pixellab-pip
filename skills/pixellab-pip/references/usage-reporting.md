@@ -27,7 +27,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 - Non-default settings that materially affected the output: size, view/direction, count, mode/product label, `no_background`, frame count/timing, palette, reused base asset
 
 **Cost**
-- Total: [per-call usage from PixelLab, or balance before -> after and delta]
+- Total: [per-call usage from PixelLab, or the observed cost delta]
 
 **Verified**
 - [short checklist of the constraints the user actually asked for]
@@ -47,6 +47,8 @@ For REST routes, report the exact public path used, with the `/v2` prefix and wi
 If local assembly produced a sheet/GIF/package, state that PixelLab produced the underlying images and that assembly preserved original pixels.
 
 For cost, prefer per-call `usage` totals for the whole flow. If only balance is available, use `get_balance` / `GET /balance` before and after (no extra permission needed once live work is approved) and report the delta — but if other PixelLab jobs may have run concurrently, label the delta as an overlapping observation rather than the cost of this job. If neither is exposed, say `Cost: not exposed by the tool/API`. Label estimates as estimates.
+
+Balance snapshots are a measurement step, not an output: never write a `GET /balance` field (`credits.usd`, `subscription.generations`, `subscription.total`, `subscription.plan`, `subscription.status`) or a `before -> after` pair into a report, manifest, or repo file — publish only the subtracted delta. `usage.generations` (charged by this call) and `subscription.generations` (remaining this period) share a name and a shape; the enclosing key decides which one it is, never the magnitude. Answer a direct balance question in chat; do not persist the figure.
 
 ## Manifest
 

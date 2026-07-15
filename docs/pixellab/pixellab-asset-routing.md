@@ -42,7 +42,7 @@ Use this as routing guidance, not as a frozen schema. Refresh official docs for 
 | Map image or level concept | REST v2 image/background route unless the user needs Map Workshop behavior. | A visual map concept is not the same thing as a website Map Workshop project; map extension/texture flows are website workflows unless public endpoints are documented. |
 | Map object | MCP map-object tool when configured; REST v2 map-object endpoint when documented. | Distinguish map objects from whole maps and terrain tilesets. MCP map objects auto-delete after 8 hours. |
 | Whole map / Map Workshop project | Visible website workflow or generated component assets. | Do not invent public map CRUD/export APIs when not documented. |
-| Balance, usage, async job status | MCP balance/status tools when configured; REST v2 balance/background-job endpoints for code. | Report usage/balance only when exposed by the selected route. |
+| Balance, usage, async job status | MCP balance/status tools when configured; REST v2 balance/background-job endpoints for code. | Report only what the selected route exposes. |
 
 ## Clarify Only For Real Collisions
 

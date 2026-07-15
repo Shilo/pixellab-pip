@@ -8,6 +8,7 @@ Project rules:
 - Reuse and simplify existing structure before creating a file, section, workflow, example, schema mapping, or helper. When new guidance replaces old guidance, remove the obsolete text in the same change.
 - The KISS/YAGNI, runtime-content, canonical-placement, and reuse/consolidation rules above do not apply to docs/. docs/ is user-facing; follow the user's request and the document's own requirements.
 - Never weaken protections for routing accuracy, public-vs-private PixelLab endpoint boundaries, secret/auth safety, paid-credit control, output integrity, or user trust. Simplify them through consolidation.
+- Never write personal or machine-specific data into a non-gitignored file or commit message, docs/ included: the user's real absolute or home paths, OS username, location or timezone, email, hostname or IP, or anything else that identifies the user or their machine — availability is never a reason to record it. Use repo-relative paths and placeholders; if neither fits, omit the value. Gitignored paths (`.local/`, `pixellab-pip-generations/`) are exempt; secret and token values are not, and stay out of every file.
 
 Content placement (progressive discovery):
 - skills/pixellab-pip/SKILL.md — agent-facing canonical contract and lean router: triggers, guardrails, surface selection, pointers. It must classify common requests and point directly to any required reference.

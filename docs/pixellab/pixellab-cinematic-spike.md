@@ -51,7 +51,7 @@ This note does not link to the generated candidate frames; they live in the giti
 
 - **Per job, every job.** Programmatic: frame count, canvas size, alpha preserved, motion present (frame-to-frame diff), object present (colour detection), handoff extracted. Visual: a contact sheet on a neutral checkerboard to confirm identity, pose, orientation, and absence of unwanted elements. Re-roll below confidence by varying the seed and tightening the wording at the specific failure (hands, missing object, wrong orientation). Re-rolls spend budget.
 - **Plan before spending.** A full beat sheet (one job per beat) was written and documented before any paid call. One calibration job then fixed the real per-job cost and confirmed output shape.
-- **Budget gating.** Capture balance first; track cumulative cost with a hard stop; report per-job and total usage.
+- **Budget gating.** Capture a balance baseline first; track cumulative cost with a hard stop; report per-job and total usage.
 
 ## Assembly and integrity
 
