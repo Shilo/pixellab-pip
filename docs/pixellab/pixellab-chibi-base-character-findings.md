@@ -307,10 +307,10 @@ The user's purchased `Customizable Pixel Art Character Kit` / `CPACK v2` is now 
 
 Local reference files reviewed:
 
-- `CPACK v2 Documentation.pdf`
-- `readme.rtf`
-- `Male_Skin_01.png`
-- `Female_Skin_01.png`
+- `C:\Users\shilo\Downloads\CPACK v2 Documentation.pdf`
+- `C:\Users\shilo\Downloads\readme.rtf`
+- `C:\Users\shilo\Downloads\Male_Skin_01.png`
+- `C:\Users\shilo\Downloads\Female_Skin_01.png`
 
 Documentation and readme facts:
 
