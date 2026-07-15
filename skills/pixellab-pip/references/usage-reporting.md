@@ -48,7 +48,7 @@ If local assembly produced a sheet/GIF/package, state that PixelLab produced the
 
 For cost, prefer per-call `usage` totals for the whole flow. If only balance is available, use `get_balance` / `GET /balance` before and after (no extra permission needed once live work is approved) and report the delta — but if other PixelLab jobs may have run concurrently, label the delta as an overlapping observation rather than the cost of this job. If neither is exposed, say `Cost: not exposed by the tool/API`. Label estimates as estimates.
 
-Balance snapshots are a measurement step, not an output: never write a `GET /balance` field (`credits.usd`, `subscription.generations`, `subscription.total`, `subscription.plan`, `subscription.status`) or a `before -> after` pair into a report, manifest, or repo file — publish only the subtracted delta. `usage.generations` (charged by this call) and `subscription.generations` (remaining this period) share a name and a shape; the enclosing key decides which one it is, never the magnitude. Answer a direct balance question in chat; do not persist the figure.
+Balance is a measurement step, not an output: publish only the subtracted delta — never a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair in a report, manifest, or repo file. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude. Answer a balance question in chat; never persist the figure.
 
 ## Manifest
 
