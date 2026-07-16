@@ -584,6 +584,14 @@ Six single-fox `16x16` probes, seed `715642`, `no_background: true`, `detail: lo
 - **Judge tiny art at 1×.** At 16× magnification the worst probe looks admirably flat (9 raw colors) and the best looks noisy (81). Four metrics — raw color count, orphan-color distance, region fragmentation, per-color coherence — each confirmed that inverted reading; a native-size strip settled it in one glance. Magnification flatters illegible art, and raw color count is not a flatness proxy.
 - **Confidence: directional only.** One subject, one seed, n=1 per configuration, one reviewer. Route and grey% separate cleanly; the prompt-wording claims are confounded with route and are the weakest here.
 
+### Correction: grey% Does Not Generalize (same day)
+
+A 25-animal pixen run (`pixellab-pip-generations/animal-face-emoji-16px/`) refuted grey% as a quality predictor. Koala `57%`, elephant `55%`, raccoon `51%`, wolf `46%` — **3-4x the rejected bitforge probes above — and all four read cleanly.**
+
+The *mechanism* survives: grey used as a **shading ramp** on a warm subject destroys legibility at `16px`. The *metric* does not: it cannot separate that from grey as a subject's **actual local colour**, so it over-flags achromatic species. **Do not use grey% to veto a subject or pick a species list** — an earlier draft recommendation to exclude grey animals would have thrown away four good icons. Use it only to diagnose a ramp on a subject whose palette is otherwise warm.
+
+The same run surfaced a likelier `16px` subject constraint, unrelated to colour: **high-frequency markings do not survive 16 pixels.** Tiger and zebra (stripes) and giraffe (spots) all degraded into noise while solid-form species read fine; rerolling seeds reproduces it, since the face has fewer pixels across than the marking needs. Directional (n=3, one uncontrolled run) — treat bold blocks over stripes/spots as a hypothesis to test, not a rule.
+
 Local run outputs (not showcase assets): `pixellab-pip-generations/flat-animal-emojis-16px/`.
 
 ## Pro (generate-image-v2) vs Pixen at 16×16 (Live Test 2026-07-11)
