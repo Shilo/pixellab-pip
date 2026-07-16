@@ -14,7 +14,7 @@ Use different expectations for tiles, `32x32` item icons, and strict `16x16` ite
 | Transparent `32x32` inventory item icons | Higher | Text-only `POST /v2/generate-image-v2` with centered single-object icon wording |
 | Transparent or contained `16x16` non-tile item sprites | Low | Treat as experimental; use style-reference/editor workflows only with strict copy checks, or generate at `32x32` and downscale with clear reporting |
 | Individual `16x16` icons, one simple subject per job (e.g. currency, coins) | Higher for coins; Medium for other subjects | `POST /v2/create-image-pixen`, one short single-subject prompt per job, with `low detail` + `single color black outline` + `side` view; see Pixen Single-Subject section |
-| Full-bleed `16x16` icon set (art cropped by the cell edge, not a backdrop behind a smaller subject) | Low for silhouette-varied sets; Medium for one shared cell-filling shape varied by interior features | Fix one cell-filling shape, then `create-image-pixen` per icon (frames tightest, crops) or `create-image-bitforge` with `coverage_percentage`. Not text-only `generate-image-v2`: it has no coverage or detail field. See Full-Bleed 16x16 Icon Sets section |
+| Full-bleed `16x16` icon set (art cropped by the cell edge, not a backdrop behind a smaller subject) | Low for silhouette-varied sets; Medium for one shared cell-filling shape varied by interior features | Fix one cell-filling shape, then `create-image-pixen` per icon (frames tightest, crops). **The `create-image-bitforge` + `coverage_percentage` option below was later probed and failed on both counts** — it did not deliver bleed and ranked worst on quality; see BitForge At 16x16. Not text-only `generate-image-v2`: it has no coverage or detail field. See Full-Bleed 16x16 Icon Sets section |
 
 The main observed pattern is that PixelLab can produce useful `16x16` output when the requested asset is a full-cell tile texture. It has not yet been reliable for text-only prompts asking for many standalone `16x16` food or inventory items in one atlas. Those prompts tend to drift toward larger, more readable item-icon scale. Style-reference routes can anchor the grid more strongly, but they can also over-copy the supplied reference image. Reference-image routes may copy less than style-reference routes, but still need cell occupancy and copy checks.
 
@@ -562,8 +562,29 @@ Four causes, in rough order of leverage. The first is route selection; the rest 
 - Decide bleed vs backdrop with the requester before generating; do not infer it from the word `full-bleed`.
 - For a varied full-bleed set, fix one shared cell-filling shape and vary interior features. Do not vary the silhouette.
 - State the palette as construction (`one flat fill plus one shade`), not as a list of hues. A ten-hue list plus per-subject schemes is what produced 19 colors per cell.
-- Route by field, not by candidate count: `create-image-pixen` for `detail`/`outline`, `create-image-bitforge` for `coverage_percentage`. The `generate-image-v2` batch is attractive at ~$0.095 for 64 candidates, but 64 pixen jobs at ~$0.008 each is ~$0.51 and is the route that has the controls.
+- Route by field, not by candidate count: `create-image-pixen` for `detail`/`outline`, `create-image-bitforge` for `coverage_percentage`. The `generate-image-v2` batch is attractive at ~$0.095 for 64 candidates, but 64 pixen jobs at ~$0.008 each is ~$0.51 and is the route that has the controls. **Superseded for bitforge:** a later probe found `coverage_percentage: 100` neither produced bleed nor acceptable art at `16px` — having the field is not the same as the field working. See BitForge At 16x16.
 - Do not use `forced_palette`. It does not exist in the v2 schema; the field is `color_image`, and these request schemas set `additionalProperties: false`, so an unknown field is a hard `422`.
+
+## BitForge At 16x16: The Mid-Grey Mechanism (Live Test 2026-07-15)
+
+Follow-up to the full-bleed animal-emoji rejection above. **Context: BitForge is already the measured worst model across the board** — it placed last or near-last in every category of the [model benchmark](../pixellab-image-model-benchmark-results.md), which recommends it *only* for its unique controls (`init_image`, `mask_image`, `color_image`, `coverage_percentage`, `style_image`) and never as a quality pick. This section does not re-discover that; it explains **why** it fails specifically at `16px`, and finds that even its `coverage_percentage` justification does not hold at this size.
+
+Six single-fox `16x16` probes, seed `715642`, `no_background: true`, `detail: low detail`, `outline: lineless`, `view: side`; the requester ranked them without seeing the metrics. **The ranking maps 1:1 to route** — all four pixen probes beat both bitforge probes.
+
+| Rank | Route | Extra fields | Muddy mid-grey |
+|---:|---|---|---:|
+| 1-4 | `create-image-pixen` | none | **0%** |
+| 5 | `create-image-bitforge` | `shading: flat shading` + anti-shading `negative_description` | **16%** |
+| 6 | `create-image-bitforge` | same + `coverage_percentage: 100` | **13%** |
+
+- **The mechanism is desaturated mid-grey** (HSV `s < 0.28`, `0.3 < v < 0.85` — excludes cream highlights and the dark outline). Binary: 0% in every accepted probe, 13-16% in both rejected. Mid-grey is the color a shading ramp is made of, not the color of a part; at `16px` the eye stops segmenting parts and reads blur. **Quantizing to 8 colors did not redeem them** — it preserves the grey with fewer steps. This is a plausible mechanism for the benchmark's measured "BitForge weakest overall" at small sizes, though the benchmark's verdict stands on its own evidence and does not depend on this one.
+- **The `shading` enum has no "off" rung:** `flat → basic → medium → detailed → highly detailed shading`. Setting `flat shading` selects the *least* shading, not none — it still requests a ramp. `create-image-pixen` exposes **no `shading` field at all**, which is why it renders flat by default. Do not reach for the field to *get* flat.
+- **`coverage_percentage: 100` did not produce edge-to-edge** (117/256 opaque, 0/64 border pixels painted) *and* ranked worst. The Full-Bleed guidance above ("`create-image-bitforge` for `coverage_percentage`") did not hold at this size.
+- **A closed named palette beat negations.** The top probe stated `three vivid flat colors only: bright orange, cream, dark brown` and never said "no shading". The 4th-ranked said `absolutely flat… no shading, no shadows, no highlights, no gradients, no dithering` and came out *more* shaded. Three named warm colors cannot build a ramp — the constraint is structural rather than a request.
+- **Judge tiny art at 1×.** At 16× magnification the worst probe looks admirably flat (9 raw colors) and the best looks noisy (81). Four metrics — raw color count, orphan-color distance, region fragmentation, per-color coherence — each confirmed that inverted reading; a native-size strip settled it in one glance. Magnification flatters illegible art, and raw color count is not a flatness proxy.
+- **Confidence: directional only.** One subject, one seed, n=1 per configuration, one reviewer. Route and grey% separate cleanly; the prompt-wording claims are confounded with route and are the weakest here.
+
+Local run outputs (not showcase assets): `pixellab-pip-generations/flat-animal-emojis-16px/`.
 
 ## Pro (generate-image-v2) vs Pixen at 16×16 (Live Test 2026-07-11)
 
