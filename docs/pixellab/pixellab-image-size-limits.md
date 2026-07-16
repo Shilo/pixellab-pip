@@ -176,7 +176,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 
 | Endpoint | Field | Min | Max | Notes |
 |---|---|---|---|---|
-| `create-character-v3` | `image_size` | **32** (schema-enforced; **prose wrongly says 16**) | 256 | Probe-confirmed: 8, 16, 24, 31 all → `422 ge 32`; 32 generates. Reference mode advisory (model picks). `reference_image` max 256×256. Canvas padded ~2× **and capped at 256**, so sizes above ~128 get less than the full 2× animation room (32 → 64 canvas, confirmed). |
+| `create-character-v3` | `image_size` | **32** (REST schema only; prose says 16) | 256 | Probe-confirmed: 8, 16, 24, 31 all → `422 ge 32`; 32 generates. **The 32 floor is REST-side validation, not a pipeline limit** — MCP `create_character(mode="v3", size=16)` runs the same v3 mode and generates (see MCP section), so the prose's "16" reflects what the model does and the REST schema is stricter than the pipeline. Reference mode advisory (model picks). `reference_image` max 256×256. Canvas padded ~2× **and capped at 256** (32 → 64 canvas, confirmed). |
 | `create-character-with-4-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.007, canvas 24×24). Per-direction reference images must match `image_size`. |
 | `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.009, canvas 24×24, 8 rotations). `standard` (1 gen) vs `pro` (20–40 gens). |
 | `create-character-pro` | `image_size` | 32×32 | 168×168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. `reference_image` max 168×168; `concept_image` max 1024×1024. Canvas padded ~2× (32 → 60, confirmed). |
@@ -194,11 +194,19 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 | `create-character-v3` | **32** | Pixen sprite → v3 rotation, `ceil(s²·8/65536)` gens |
 | `create-character-pro` | **32** | AI reference-based, 20–40 gens |
 
-The two AI-rotation pipelines floor at 32; the two template/skeleton ones accept 16. **A 16px character on the website can only be standard mode** — no other public character route accepts 16. PixelLab publishes no rationale for the 32 floor; do not present one as fact.
+The two AI-rotation pipelines floor at 32 **over REST**; the two template/skeleton ones accept 16. `8×8` is rejected by all four character routes and both object routes — there is no lower tier below these floors.
 
-`8×8` is rejected by all four character routes and both object routes — there is no lower tier below these floors.
+**But the 32 floor is REST validation, not a model limit.** The same v3 and pro modes run at `size=16` through MCP `create_character` and produce output (live-confirmed) — see [MCP Tools](#mcp-tools). PixelLab publishes no rationale for the REST floor; do not present one as fact.
 
-**16px character output quality** (live, 8-direction, `description="knight"`): 8 coherent rotations, 16 colours, subject occupying ~8×16px inside the padded 24×24 canvas. Legible humanoid, but the "knight" semantics are gone — no readable armour or helmet. Same scale-drift as the [16px item spike](pixellab-16px-item-sprite-generation-spike.md): full-cell art survives at 16px, subject semantics do not.
+**`size=16` output quality differs sharply by route** (live, 8-direction, `description="knight"`):
+
+| Route | Canvas | Subject | Colours | Honours 16px? |
+|---|---|---|---|---|
+| standard (REST `create-character-with-8-directions`) | 24×24 | 8×16 | 16 | **Yes** — clean pixel art, but "knight" semantics gone (no readable armour/helmet) |
+| MCP `create_character(mode="v3")` | 28×28 | 11×14 | 93 | Roughly — but 93 colours means a downscaled render, not clean 16px pixel art |
+| MCP `create_character(mode="pro")` | 56×56 | 17×28 | 23 | **No — size silently ignored.** A 28px-tall subject; REST pro at *32* returns a 60×60 canvas, so 16 is being inflated to ~28–30 |
+
+**Only standard mode actually respects a 16px request.** v3 gets close but muddy; pro silently returns a larger character than asked for — a worse failure than the REST 422, because nothing signals it. For a genuine 16px character, use standard mode and expect scale-drift on costume detail, as in the [16px item spike](pixellab-16px-item-sprite-generation-spike.md).
 | `portrait-character-pro` | `result_size` | `enum [16, 32, 48, 64, 128, 160]`, default 64 | | 128/160 render at 2K (cost more). |
 
 ## REST v2 Limits — Animation And Rotation
@@ -263,7 +271,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 
 | MCP tool | Size parameter | Default | MCP schema bound | vs REST |
 |---|---|---|---|---|
-| `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | **Misleading — the declared 16 holds only for `mode="standard"` (the default).** `mode="v3"` and `mode="pro"` route to the 32-floor REST endpoints, so `size=16` passes the MCP schema and then fails downstream. The tool prose documents per-mode *maxima* (128 standard/pro, 256 v3) but never the v3/pro *minimum* of 32. **Downstream failure inferred from routing — not live-tested through MCP.** |
+| `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | **Looser than REST — live-confirmed.** `size=16` is accepted and *generates* for **all three modes**, including `v3` (2 gens) and `pro` (20 gens), which the REST routes reject outright with `422 ge 32`. It does not fail downstream. But only `standard` honours 16px: `v3` returns a 93-colour downscaled render, `pro` silently inflates to a ~28px subject on a 56×56 canvas. Prose documents per-mode *maxima* (128 standard/pro, 256 v3) and no minimum. |
 | `create_topdown_tileset` | `tile_size` | `{16, 16}` | **none declared** — plain integer object; "16 or 32 for standard; 64 requires `mode='pro'`" is prose only | REST declares `enum [16,32,64]`; MCP does not, so a bad value is not caught by the tool schema |
 | `create_sidescroller_tileset` | `tile_size` | `{16, 16}` | **none declared** — prose "16 or 32 pixels" only | REST declares `enum [16,32]`; MCP does not |
 | `create_isometric_tile` | `size` | 32 | 16–64 | matches REST `image_size`. MCP exposes no `isometric_tile_size` — it has `tile_shape` instead |
@@ -274,7 +282,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 32–256 / 32–168 | matches |
 | `create_map_object` | `width` / `height` | **`null`** — mandatory in basic mode, auto-detected from `background_image` | 32–400 | bound matches; **default diverges** — REST `map-objects` defaults `image_size` to 128×128, MCP has none. MCP prose also carries the mode split REST omits: basic max 400×400, inpainting max 192×192 |
 
-No MCP tool is *looser* than its REST route. The two tileset tools are the only ones declaring no bound, and `create_tiles_pro` is the only numeric disagreement.
+**MCP is not merely a wrapper over the REST bounds — it diverges in both directions.** `create_character` is *looser* (generates at `size=16` in v3/pro where REST returns `422 ge 32`), `create_tiles_pro` is *stricter* (128 vs 256), and the two tileset tools declare no bound at all. Check the MCP schema and the REST schema separately; neither is authoritative for the other.
 
 ## For The Goal: 8px And 16px Icons, Items, Tilesets
 
@@ -285,7 +293,7 @@ No MCP tool is *looser* than its REST route. The two tileset tools are the only 
 | `16px` isometric tile | Yes | `image_size` min 16×16. |
 | `16px` icons/items canvas (`generate-image-v2`) | Yes | `image_size` min 16×16. |
 | `16px` standalone item/icon **semantics** | Partial | Item sprites drift larger; full-cell tiles/textures reliable, transparent item sprites experimental. See [`pixellab-16px-item-sprite-generation-spike.md`](pixellab-16px-item-sprite-generation-spike.md). |
-| `16px` character | Yes — **standard mode only** | Live-confirmed on `create-character-with-4/8-directions` (canvas pads to 24×24). `v3`/`pro` reject 16 (`ge 32`). Semantics drift as with items: legible figure, lost costume detail. |
+| `16px` character | Yes — **standard mode only** | Live-confirmed on `create-character-with-4/8-directions` (canvas pads to 24×24, 16 colours). REST `v3`/`pro` reject 16 (`ge 32`); MCP `v3`/`pro` accept it but don't honour it (93-colour render / silent inflate to ~28px). Semantics drift as with items: legible figure, lost costume detail. |
 | `16px` object (`create-1/8-direction-object`) | **No** | Both floor at 32 (probe-confirmed). Use a character route or `generate-image-v2` for a 16px prop. |
 | `8px` icons / items | **No** | `generate-image-v2` and all image routes have schema min 16 → request rejected. |
 | `8px` tilesets | **No** | Top-down/sidescroller `tile_size` enum is `[16,32,64]`/`[16,32]`; `create-tiles-pro` min 16; isometric min 16×16. All reject 8. |
