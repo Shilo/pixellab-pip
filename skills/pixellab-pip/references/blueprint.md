@@ -1,6 +1,6 @@
 # Blueprint
 
-Read when writing a blueprint after a generation, or when recreating one (the user `@link`s a
+Read when writing a blueprint after a generation returns image(s), or when recreating one (the user `@link`s a
 `*.blueprint.json` or asks to remake a past generation). A blueprint is the minimal, shareable
 recipe for a PixelLab workflow: exact PixelLab request bodies plus any agent tasks needed to
 reproduce the result. It is not the manifest, which is the private audit/resume record
@@ -267,7 +267,7 @@ put them before the executable key with `_comment` first. A typical prompted blu
 
 ## Writing a blueprint
 
-After a successful run, record the shortest successful replay path. Keep every successful PixelLab
+After a run that returned image(s), record the shortest replay path to it. Keep every PixelLab
 request body exact and concrete; do not copy template placeholders into the run's new blueprint.
 Put canonical `_pixellab` metadata on the first step for every portable MCP or REST blueprint.
 Add a structured `TASK` step for each outside action that materially created or changed an input,

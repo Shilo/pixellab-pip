@@ -1,6 +1,6 @@
 # PixelLab 16px Item Sprite Generation Spike
 
-Last reviewed: 2026-07-09.
+Last reviewed: 2026-07-15.
 
 Purpose: capture current findings about generating strict `16x16` sprites with PixelLab, especially the difference between successful full-cell tile atlases and less reliable non-tile inventory item sprites. This is a research spike for prompt design, route selection, and verification. It is not a canonical agent instruction contract.
 
@@ -14,6 +14,7 @@ Use different expectations for tiles, `32x32` item icons, and strict `16x16` ite
 | Transparent `32x32` inventory item icons | Higher | Text-only `POST /v2/generate-image-v2` with centered single-object icon wording |
 | Transparent or contained `16x16` non-tile item sprites | Low | Treat as experimental; use style-reference/editor workflows only with strict copy checks, or generate at `32x32` and downscale with clear reporting |
 | Individual `16x16` icons, one simple subject per job (e.g. currency, coins) | Higher for coins; Medium for other subjects | `POST /v2/create-image-pixen`, one short single-subject prompt per job, with `low detail` + `single color black outline` + `side` view; see Pixen Single-Subject section |
+| Full-bleed `16x16` icon set (art cropped by the cell edge, not a backdrop behind a smaller subject) | Low for silhouette-varied sets; Medium for one shared cell-filling shape varied by interior features | Fix one cell-filling shape, then `create-image-pixen` per icon (frames tightest, crops) or `create-image-bitforge` with `coverage_percentage`. Not text-only `generate-image-v2`: it has no coverage or detail field. See Full-Bleed 16x16 Icon Sets section |
 
 The main observed pattern is that PixelLab can produce useful `16x16` output when the requested asset is a full-cell tile texture. It has not yet been reliable for text-only prompts asking for many standalone `16x16` food or inventory items in one atlas. Those prompts tend to drift toward larger, more readable item-icon scale. Style-reference routes can anchor the grid more strongly, but they can also over-copy the supplied reference image. Reference-image routes may copy less than style-reference routes, but still need cell occupancy and copy checks.
 
@@ -532,6 +533,37 @@ This matches the enclosed-background risk in [`background-removal.md`](../../ski
 - Keep parallel batches at or below the account's concurrent-job cap.
 
 Local run outputs (not committed showcase assets) are in the `pixellab-pip-generations/pixen-16x16-currency-set/` run folder: the ten icons, a native spritesheet, an inspection sheet, the with-background and edge-flood-repaired `gold coin` comparison, and a bundle blueprint. See [`pixellab-image-size-limits.md`](pixellab-image-size-limits.md) for the confirmed pixen `16x16` size floor.
+
+## Full-Bleed 16x16 Icon Sets (Live Test 2026-07-15)
+
+Two `16x16` native-batch runs on `POST /v2/generate-image-v2` (one call each, 64 images, $0.095 each) were rejected by the requester as noisy, unreadable, and not full size: `ui-icons-questboard` (64 fantasy UI icons, `no_background: true`) and `cute-animal-emojis-16px` (64 cute animal emoji faces, `no_background: false`). Both are local run folders, not showcase assets. A comparison set of round yellow smiley emojis generated on the same endpoint at the same size was accepted as crisp and readable, which is what makes the pair diagnostic: the endpoint is not the whole story.
+
+Measured across the 64 cells of each run:
+
+| Measure | Questboard | Animal emojis | Reference for clean `16x16` |
+|---|---:|---:|---|
+| Unique colors per cell (median) | 19 | 19 | ~4-12 |
+| Subject longest side within the 16px cell (median) | 14px | 14px | 16px for full-bleed |
+| Cells whose art reaches the cell edge | 0/64 | 9/64 | 64/64 for full-bleed |
+
+A subject 14px across in a 16px cell spends about 40% of the available area on margin, which at this size is the difference between readable and muddy.
+
+### Why They Failed
+
+Four causes, in rough order of leverage. The first is route selection; the rest are request design.
+
+1. **The route had no field for anything being asked for.** Both prompts specified `flat`, `no gradients`, `limited palette`, and `bold single-color black outline`. `generate-image-v2` has no `detail`, `outline`, `shading`, `color_image`, or `coverage_percentage` field, so every one of those was unenforceable text and all four were ignored — hence 19 colors per cell. This is the mechanism behind the existing "Pro is unreliable for a clean icon below `32px`" guidance, and it is why the fix is a route with the fields rather than more prompt wording. Recorded canonically in [`create-image-pro.md`](../../skills/pixellab-pip/references/create-image-pro.md).
+2. **`full-bleed` was read as backdrop rather than crop.** The animal run sent `no_background: false` and wrote `every pixel is painted, including all four corners and all four edges`. A painted backdrop with a small creature on it satisfies that literally, and that is what came back. The background was requested, not a model failure. The requester meant the art itself should reach the edges. Two readings, opposite settings; `cropped` is the term that cannot be misread.
+3. **Silhouette variety and bleed competed.** The animal run asked for 22 species each with `a distinct ear or horn silhouette` *and* edge-to-edge fill. A silhouette reads only against negative space, so outline-varied sets and full-bleed are mutually exclusive as the same design axis; the model resolves the conflict with margin or a backdrop. This is not a hard geometric impossibility — a cropped close-up fox face is full-bleed — but it does mean variety must move to interior features (color, markings, eyes, expression) once bleed is required. The questboard run is the sharper case: a key or feather has no cell-filling form at all, and its prompt additionally said `each a single centered emblem`, which explicitly requests the margin. Avoid `centered` in any full-bleed prompt.
+4. **Prior strength at the target size.** The accepted smiley set had the advantages the failed sets lacked: one fixed round head that inscribes a square naturally, variety carried entirely by interior features, a palette stated as construction (`flat yellow fill with one darker yellow shade`, near-black features — roughly five colors) rather than as a list of ten hues, and a subject that genuinely exists at `16px` in the wild via emoji fonts, favicons, and UI icons. There is no comparable `16px` corpus of full-bleed animal portraits or fantasy props. This reinforces hypotheses 1 and 3 above: shape simplicity and native-size priors, not transparency, drive the result.
+
+### Guidance
+
+- Decide bleed vs backdrop with the requester before generating; do not infer it from the word `full-bleed`.
+- For a varied full-bleed set, fix one shared cell-filling shape and vary interior features. Do not vary the silhouette.
+- State the palette as construction (`one flat fill plus one shade`), not as a list of hues. A ten-hue list plus per-subject schemes is what produced 19 colors per cell.
+- Route by field, not by candidate count: `create-image-pixen` for `detail`/`outline`, `create-image-bitforge` for `coverage_percentage`. The `generate-image-v2` batch is attractive at ~$0.095 for 64 candidates, but 64 pixen jobs at ~$0.008 each is ~$0.51 and is the route that has the controls.
+- Do not use `forced_palette`. It does not exist in the v2 schema; the field is `color_image`, and these request schemas set `additionalProperties: false`, so an unknown field is a hard `422`.
 
 ## Pro (generate-image-v2) vs Pixen at 16×16 (Live Test 2026-07-11)
 

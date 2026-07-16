@@ -1,6 +1,6 @@
 # Bark
 
-Use this reference when the user runs a bark command, or when a live PixelLab job finishes successfully.
+Use this reference when the user runs a bark command, or when a live PixelLab job returns image(s).
 
 ## Commands
 
@@ -52,20 +52,20 @@ When the user runs `bark`, `bark on`, or `bark off`, write the valid shape above
 
 ## When To Play
 
-When bark is enabled, play the configured sound only after a live PixelLab generation, edit, transform, conversion, background-removal, or animation job or task finishes successfully and passes verification. Eligible completions:
+When bark is enabled, play the configured sound only after a live PixelLab generation, edit, transform, conversion, background-removal, or animation job or task returns image(s). Eligible completions:
 
-- Successful PixelLab asset generation.
-- Successful PixelLab image edit, transform, conversion, or background-removal job that produces a new generated result.
-- Successful PixelLab animation or animation-edit job.
-- Successful MCP managed asset task after the final asset/result existence and requested constraints are verified.
-- Successful REST async job after polling reaches a final success state and the result is verified.
+- PixelLab asset generation.
+- PixelLab image edit, transform, conversion, or background-removal job that produces a new generated result.
+- PixelLab animation or animation-edit job.
+- MCP managed asset task once the final asset/result exists.
+- REST async job once polling reaches a final success state.
 
 Do not bark for:
 
 - Setup, auth, readiness, or no-credit balance checks.
 - Status checks for jobs that were already completed earlier.
 - Docs lookups, endpoint selection, prompt enhancement alone, or normal chat answers.
-- Failed, canceled, rejected, timed-out, still-pending, or unknown-status jobs.
+- Failed, canceled, rejected, timed-out, still-pending, or unknown-status jobs — job status, not a returned result that fails verification.
 - Downloads, local file assembly, local previews, spritesheet/GIF assembly, or validation when no live PixelLab generation/edit/animation job finished in this turn.
 - Manual website instructions unless the assistant directly observed a PixelLab generation finish in the visible website flow and the user had approved that action.
 

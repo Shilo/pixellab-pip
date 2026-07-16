@@ -1,6 +1,6 @@
 # Usage Reporting
 
-Read this after live PixelLab calls when preparing the final user report or a generation manifest. For polling, MCP review state, rate limits, and expiring download URLs, read `job-lifecycle.md`. After final success verification, apply the bark contract per SKILL.md, then give this report.
+Read this after live PixelLab calls when preparing the final user report or a generation manifest. For polling, MCP review state, rate limits, and expiring download URLs, read `job-lifecycle.md`. Once the job returns image(s), apply the bark contract per SKILL.md, then give this report.
 
 ## Report Shape
 
