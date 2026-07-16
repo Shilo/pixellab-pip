@@ -1,6 +1,6 @@
 # Showcase
 
-Last reviewed: 2026-07-02.
+Last reviewed: 2026-07-15.
 
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
@@ -69,6 +69,14 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <p><code>pip create a 64px character based on .pip-mascot.md</code></p>
 </details>
 <a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
+</td>
+<td width="50%" valign="top">
+<h3><a href="ui-icons.md">UI Icons</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>/pixellab-pip pixen create 25 unique 16x16 animal-face emojis in one shared flat style. each a different animal with its own vivid palette. simple geometry, flat shading, few colors, hard edges, transparent background. quantize each image to 8 colors and than create sprite sheet.</code></p>
+</details>
+<a href="ui-icons.md"><img src="ui-icons/animal-face-emoji-5x5-16px.png" alt="16px animal-face emoji sheet"></a>
 </td>
 </tr>
 </table>

@@ -1,0 +1,409 @@
+[
+  {
+    "_comment": "25 unique 16x16 animal-face emojis in one shared flat style, each with its own vivid palette. One Pixen job per animal (Pixen returns a single image per call), then each cell is quantized to 8 colors and the set is assembled into a 5x5 / 80x80 sheet. Pixen accepts 16x16 (per-axis min 16, divisible by 4); create-image-pixflux does not - it rejects 16x16 on a 32x32 area floor.",
+    "_comment_prompt": "/pixellab-pip pixen create 25 unique 16x16 animal-face emojis in one shared flat style. each a different animal with its own vivid palette. simple geometry, flat shading, few colors, hard edges, transparent background. quantize each image to 8 colors and than create sprite sheet.",
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/animal-face-emoji-16px",
+      "output_collision_policy": "stop_if_exists"
+    },
+    "TASK": {
+      "instruction": "Confirm the current user explicitly asked to run this blueprint and that a PixelLab bearer token is configured locally, then create the empty output directory. This blueprint makes 25 paid Pixen calls; stop and ask if either condition is unmet.",
+      "verify": "Run authority and credential presence are confirmed and the output directory exists and is empty."
+    }
+  },
+  {
+    "_comment": "Fox.",
+    "POST /v2/create-image-pixen": {
+      "description": "fox face, bright orange fur, white muzzle and cheeks, black nose, pointed ears with black tips, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 101
+    }
+  },
+  {
+    "_comment": "Cat.",
+    "POST /v2/create-image-pixen": {
+      "description": "cat face, warm golden yellow fur, green eyes, pink nose, pointed ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 102
+    }
+  },
+  {
+    "_comment": "Dog.",
+    "POST /v2/create-image-pixen": {
+      "description": "dog face, rich brown fur, tan muzzle, black nose, floppy ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 103
+    }
+  },
+  {
+    "_comment": "Panda.",
+    "POST /v2/create-image-pixen": {
+      "description": "panda face, white fur, black eye patches, black round ears, black nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 104
+    }
+  },
+  {
+    "_comment": "Tiger. Weakest cell of the original run - stripes read as noise at 16px; vary the seed if a cleaner take is needed.",
+    "POST /v2/create-image-pixen": {
+      "description": "tiger face, vivid orange fur, black stripes, white muzzle, yellow eyes, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 105
+    }
+  },
+  {
+    "_comment": "Lion.",
+    "POST /v2/create-image-pixen": {
+      "description": "lion face, golden yellow face, thick amber mane, dark nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 106
+    }
+  },
+  {
+    "_comment": "Bear.",
+    "POST /v2/create-image-pixen": {
+      "description": "bear face, deep brown fur, lighter tan snout, small round ears, black nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 107
+    }
+  },
+  {
+    "_comment": "Wolf.",
+    "POST /v2/create-image-pixen": {
+      "description": "wolf face, cool slate grey fur, white muzzle, yellow eyes, pointed ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 108
+    }
+  },
+  {
+    "_comment": "Rabbit.",
+    "POST /v2/create-image-pixen": {
+      "description": "rabbit face, soft white fur, long upright ears with pink inner ears, pink nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 109
+    }
+  },
+  {
+    "_comment": "Frog.",
+    "POST /v2/create-image-pixen": {
+      "description": "frog face, bright green skin, big bulging eyes with golden irises, wide mouth, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 110
+    }
+  },
+  {
+    "_comment": "Owl.",
+    "POST /v2/create-image-pixen": {
+      "description": "owl face, tawny brown feathers, huge round yellow eyes, orange beak, feather tufts, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 111
+    }
+  },
+  {
+    "_comment": "Penguin.",
+    "POST /v2/create-image-pixen": {
+      "description": "penguin face, black head, white face patch, orange beak, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 112
+    }
+  },
+  {
+    "_comment": "Koala.",
+    "POST /v2/create-image-pixen": {
+      "description": "koala face, soft grey fur, big fluffy white ears, large black nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 113
+    }
+  },
+  {
+    "_comment": "Monkey.",
+    "POST /v2/create-image-pixen": {
+      "description": "monkey face, brown fur, light peach face and muzzle, round ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 114
+    }
+  },
+  {
+    "_comment": "Pig.",
+    "POST /v2/create-image-pixen": {
+      "description": "pig face, bright pink skin, big snout with nostrils, floppy pink ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 115
+    }
+  },
+  {
+    "_comment": "Cow.",
+    "POST /v2/create-image-pixen": {
+      "description": "cow face, white face with black patches, pink muzzle, small horns, floppy ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 116
+    }
+  },
+  {
+    "_comment": "Sheep.",
+    "POST /v2/create-image-pixen": {
+      "description": "sheep face, cream woolly forehead, dark grey face, floppy ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 117
+    }
+  },
+  {
+    "_comment": "Deer.",
+    "POST /v2/create-image-pixen": {
+      "description": "deer face, light tan fur, white muzzle, small brown antlers, dark nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 118
+    }
+  },
+  {
+    "_comment": "Raccoon.",
+    "POST /v2/create-image-pixen": {
+      "description": "raccoon face, grey fur, black bandit mask around eyes, white muzzle, black nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 119
+    }
+  },
+  {
+    "_comment": "Hedgehog.",
+    "POST /v2/create-image-pixen": {
+      "description": "hedgehog face, dark brown spiky quills on top, light tan face, black nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 120
+    }
+  },
+  {
+    "_comment": "Elephant.",
+    "POST /v2/create-image-pixen": {
+      "description": "elephant face, light grey skin, huge floppy ears, short trunk, small tusks, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 121
+    }
+  },
+  {
+    "_comment": "Giraffe.",
+    "POST /v2/create-image-pixen": {
+      "description": "giraffe face, pale yellow fur, orange brown patches, small ossicone horns, dark nose, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 122
+    }
+  },
+  {
+    "_comment": "Zebra.",
+    "POST /v2/create-image-pixen": {
+      "description": "zebra face, white face with bold black stripes, black muzzle, upright ears, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 123
+    }
+  },
+  {
+    "_comment": "Whale. Weakest cell of the original run alongside the tiger - came out whale-shaped with a tail stub rather than a pure face; vary the seed if a tighter head crop is needed.",
+    "POST /v2/create-image-pixen": {
+      "description": "whale face, bright blue skin, white underside, small round eye, wide smiling mouth, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 124
+    }
+  },
+  {
+    "_comment": "Chick.",
+    "POST /v2/create-image-pixen": {
+      "description": "baby chick face, vivid yellow fluffy feathers, tiny orange beak, round black eyes, flat shading, hard edges, simple geometry, few colors, thick chunky pixels",
+      "image_size": { "width": 16, "height": 16 },
+      "detail": "low detail",
+      "outline": "single color black outline",
+      "view": "side",
+      "direction": "south",
+      "no_background": true,
+      "seed": 125
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save the 25 returned images in call order as 01-fox.png through 25-chick.png, naming each file for the animal its call requested.",
+      "outputs": [
+        "01-fox.png", "02-cat.png", "03-dog.png", "04-panda.png", "05-tiger.png",
+        "06-lion.png", "07-bear.png", "08-wolf.png", "09-rabbit.png", "10-frog.png",
+        "11-owl.png", "12-penguin.png", "13-koala.png", "14-monkey.png", "15-pig.png",
+        "16-cow.png", "17-sheep.png", "18-deer.png", "19-raccoon.png", "20-hedgehog.png",
+        "21-elephant.png", "22-giraffe.png", "23-zebra.png", "24-whale.png", "25-chick.png"
+      ],
+      "verify": "25 files exist, each 16x16 with a transparent background."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Quantize each of the 25 images to at most 8 colors independently, deriving each animal's palette from its own source pixels so the vivid per-animal palettes stay distinct. Preserve transparency and every silhouette; do not dither, repaint, or resize. Write RGB PNG copies into quantized-8color/ under the same filenames, leaving the originals untouched. Aseprite's ColorQuantization plus an indexed round-trip back to RGB satisfies this; note that Aseprite reserves one of the 8 palette slots for the transparent index, so visible colors land at 7 or fewer.",
+      "inputs": [
+        "01-fox.png", "02-cat.png", "03-dog.png", "04-panda.png", "05-tiger.png",
+        "06-lion.png", "07-bear.png", "08-wolf.png", "09-rabbit.png", "10-frog.png",
+        "11-owl.png", "12-penguin.png", "13-koala.png", "14-monkey.png", "15-pig.png",
+        "16-cow.png", "17-sheep.png", "18-deer.png", "19-raccoon.png", "20-hedgehog.png",
+        "21-elephant.png", "22-giraffe.png", "23-zebra.png", "24-whale.png", "25-chick.png"
+      ],
+      "outputs": [
+        "quantized-8color/01-fox.png", "quantized-8color/02-cat.png", "quantized-8color/03-dog.png",
+        "quantized-8color/04-panda.png", "quantized-8color/05-tiger.png", "quantized-8color/06-lion.png",
+        "quantized-8color/07-bear.png", "quantized-8color/08-wolf.png", "quantized-8color/09-rabbit.png",
+        "quantized-8color/10-frog.png", "quantized-8color/11-owl.png", "quantized-8color/12-penguin.png",
+        "quantized-8color/13-koala.png", "quantized-8color/14-monkey.png", "quantized-8color/15-pig.png",
+        "quantized-8color/16-cow.png", "quantized-8color/17-sheep.png", "quantized-8color/18-deer.png",
+        "quantized-8color/19-raccoon.png", "quantized-8color/20-hedgehog.png", "quantized-8color/21-elephant.png",
+        "quantized-8color/22-giraffe.png", "quantized-8color/23-zebra.png", "quantized-8color/24-whale.png",
+        "quantized-8color/25-chick.png"
+      ],
+      "verify": "Each quantized file is 16x16, uses at most 8 distinct colors among pixels with nonzero alpha, keeps its transparent background, and the 25 originals are unchanged."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Assemble the 25 quantized images into one spritesheet as a 5-column by 5-row grid of 16x16 cells in filename order, left to right then top to bottom, with no spacing, padding, or background. Preserve every source pixel and transparency; do not resize or repaint.",
+      "inputs": [
+        "quantized-8color/01-fox.png", "quantized-8color/02-cat.png", "quantized-8color/03-dog.png",
+        "quantized-8color/04-panda.png", "quantized-8color/05-tiger.png", "quantized-8color/06-lion.png",
+        "quantized-8color/07-bear.png", "quantized-8color/08-wolf.png", "quantized-8color/09-rabbit.png",
+        "quantized-8color/10-frog.png", "quantized-8color/11-owl.png", "quantized-8color/12-penguin.png",
+        "quantized-8color/13-koala.png", "quantized-8color/14-monkey.png", "quantized-8color/15-pig.png",
+        "quantized-8color/16-cow.png", "quantized-8color/17-sheep.png", "quantized-8color/18-deer.png",
+        "quantized-8color/19-raccoon.png", "quantized-8color/20-hedgehog.png", "quantized-8color/21-elephant.png",
+        "quantized-8color/22-giraffe.png", "quantized-8color/23-zebra.png", "quantized-8color/24-whale.png",
+        "quantized-8color/25-chick.png"
+      ],
+      "outputs": ["animal-face-emoji-5x5-16px.png"],
+      "verify": "The sheet is 80x80, each dimension divides evenly by 16 into a 5x5 grid, every cell matches its source file pixel-for-pixel in order, and transparency is preserved."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Create a separate inspection aid from a copy of the sheet: upscale it with nearest-neighbour, flatten it onto a dark backdrop for legibility, and overlay a contrasting one-pixel grid line at every 16px cell boundary. Label it 'Inspection aid - expected grid overlay' wherever it is shown. Keep it out of the final deliverables and never bake the grid into the sheet itself.",
+      "inputs": ["animal-face-emoji-5x5-16px.png"],
+      "outputs": ["animal-face-emoji-5x5-16px-inspection-grid.png"],
+      "verify": "The overlay copy exists with grid lines at every cell boundary and animal-face-emoji-5x5-16px.png is unchanged."
+    }
+  }
+]
