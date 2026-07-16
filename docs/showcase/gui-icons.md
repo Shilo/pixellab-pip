@@ -1,14 +1,14 @@
-# UI Icons
+# GUI Icons
 
 Last reviewed: 2026-07-15.
 
 <table>
   <tr>
-    <td align="center"><img src="ui-icons/animal-face-emoji-5x5-16px.png" alt="16px animal-face emoji sheet, 5 by 5"></td>
+    <td align="center"><img src="gui-icons/animal-face-emoji-5x5-16px.png" alt="16px animal-face emoji sheet, 5 by 5"></td>
   </tr>
 </table>
 
-UI icons are the small pictorial marks a game shows outside the inventory grid: emojis, chat and social reactions, status and buff markers, map pins, and toolbar glyphs. This page covers those. Inventory, equipment, loot, and pickup icons live in [item-icons.md](item-icons.md); ability and hotbar icons live in [skill-icons.md](skill-icons.md); the panels, frames, and slots that contain icons live in [gameplay-gui.md](gameplay-gui.md).
+GUI icons are the small pictorial marks a game shows outside the inventory grid: emojis, chat and social reactions, status and buff markers, map pins, and toolbar glyphs. This page covers those. Inventory, equipment, loot, and pickup icons live in [item-icons.md](item-icons.md); ability and hotbar icons live in [skill-icons.md](skill-icons.md); the panels, frames, and slots that contain icons live in [gameplay-gui.md](gameplay-gui.md).
 
 The animal-face emoji set is the first showcased example and the page's smallest-canvas workflow: 25 individually generated `16x16` emojis, each quantized to 8 colors, assembled into one `80x80` sheet. It is also the clearest demonstration of the `16px` Pixen route, which is the only image route that generates at `16x16` at all.
 
@@ -21,7 +21,7 @@ The animal-face emoji set is the first showcased example and the page's smallest
 
 ## Primary Example: 16px Animal Face Emoji Set
 
-![16px animal-face emoji sheet, 5 by 5](ui-icons/animal-face-emoji-5x5-16px.png)
+![16px animal-face emoji sheet, 5 by 5](gui-icons/animal-face-emoji-5x5-16px.png)
 
 Original prompt:
 
@@ -55,7 +55,7 @@ Generation details:
 
 Local processing: each of the 25 originals was quantized to at most 8 colors with Aseprite `ColorQuantization` (octree, source-derived per image), round-tripped back to RGB PNG copies, then tiled into the `80x80` sheet with zero gutters. Quantization reduced palettes and assembly arranged cells; neither repainted, resized, nor redrew any pixel. Every pixel is PixelLab-generated.
 
-Blueprint — replayable route and request bodies ([`animal-face-emoji-5x5-16px.blueprint.json`](ui-icons/animal-face-emoji-5x5-16px.blueprint.json)). The 25 Pixen calls are identical except for `description` and `seed`; the first, the two weakest, and the last are shown, with the remaining 21 elided for readability:
+Blueprint — replayable route and request bodies ([`animal-face-emoji-5x5-16px.blueprint.json`](gui-icons/animal-face-emoji-5x5-16px.blueprint.json)). The 25 Pixen calls are identical except for `description` and `seed`; the first, the two weakest, and the last are shown, with the remaining 21 elided for readability:
 
 ```json
 [
@@ -176,7 +176,7 @@ Findings:
 
 ## Findings
 
-REST `create-image-pixen` is the best route currently showcased for `16px` UI icons and emojis. It is the only image route that generates at `16x16`, and its native `detail`, `outline`, `view`, and `direction` controls hold a flat readable style at a size where `generate-image-v2` adds detail the canvas cannot carry.
+REST `create-image-pixen` is the best route currently showcased for `16px` GUI icons and emojis. It is the only image route that generates at `16x16`, and its native `detail`, `outline`, `view`, and `direction` controls hold a flat readable style at a size where `generate-image-v2` adds detail the canvas cannot carry.
 
 One emoji per call is the cost shape to plan around. Pixen returns a single image per call, so a set of N emojis is N jobs — cheap individually (~`$0.008` at `16x16`) but worth approving as a batch before starting. In exchange, every icon gets its own prompt, its own palette, and its own seed, which is what makes a set of individually distinct emojis possible at all.
 
@@ -187,13 +187,13 @@ Prompt language that helped:
 - Naming each subject's palette inline produces vivid per-icon color without a palette image.
 - Leaving flatness, outline, and view to Pixen's own fields, rather than describing them in the prompt, keeps the `description` on content.
 
-Future UI-icon showcases should live on this page when they cover other non-inventory icon surfaces, including status and buff markers, chat and social reaction sets, map pins and markers, and toolbar or settings glyphs.
+Future GUI-icon showcases should live on this page when they cover other non-inventory icon surfaces, including status and buff markers, chat and social reaction sets, map pins and markers, and toolbar or settings glyphs.
 
 ## Showcase Assets
 
 | Output | Stable showcase file |
 |---|---|
-| 16px animal-face emoji sheet | `docs/showcase/ui-icons/animal-face-emoji-5x5-16px.png` |
+| 16px animal-face emoji sheet | `docs/showcase/gui-icons/animal-face-emoji-5x5-16px.png` |
 
 ## Validation Notes
 
