@@ -1,6 +1,6 @@
 # Icon And Icon Sheet Generation
 
-Use this reference for skill/ability/spell/action-bar/hotbar icons and for inventory item/equipment/loot/pickup/consumable icons, single or sheets, including transparent, no-border, and split-PNG requests.
+Use this reference for skill/ability/spell/action-bar/hotbar icons, inventory item/equipment/loot/pickup/consumable icons, and emojis, single or sheets, including transparent, no-border, and split-PNG requests.
 
 ## Route
 
