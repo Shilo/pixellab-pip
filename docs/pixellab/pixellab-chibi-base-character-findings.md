@@ -1,6 +1,6 @@
 # PixelLab Chibi Base Character Findings
 
-Last reviewed: 2026-06-30.
+Last reviewed: 2026-07-15.
 
 Purpose: record live-generation findings from attempts to create a reusable chibi base character for clothing and paperdoll-style outfit work. This is an unresolved prompt and routing spike. The best current result is useful as a style reference, but no tested prompt has reliably produced the desired bald, hairless, no-clothes template with the target proportions.
 
@@ -34,7 +34,8 @@ Current working hypothesis:
 - The desired proportions may need wording such as `tall chibi avatar base`, `young adult proportions`, `tiny pinched torso`, `narrow upside-down hourglass torso`, `longer simple limbs`, and `big simple hands and feet`.
 - `Unisex` appears important. When omitted, PixelLab more often invents gendered body signals, facial styling, or anatomy emphasis instead of treating the image as a neutral outfit base.
 - A visible thigh gap is a failure signal for this target. The desired limb shape is compact and thick, with legs reading as close-set columns or simple wedges rather than separated stick legs.
-- V3 can still look high-detail even when `detail="low detail"` is passed. In MCP V3, detail and outline are soft guidance, while proportions and shading controls are ignored. If lower finish is important in V3, prompt text should explicitly say `flat low-shading`, `minimal interior shading`, or similar, but this is still not a guaranteed control.
+- V3 can still look high-detail even when `detail="low detail"` is passed. In MCP V3, detail is soft guidance, while proportions and shading controls are ignored. If lower finish is important in V3, prompt text should explicitly say `flat low-shading`, `minimal interior shading`, or similar, but this is still not a guaranteed control.
+- Outline is not soft guidance on V3 and Pro character generation; it is inert. Extensive manual testing and visual review of past characters found that `single color outline`, `selective outline`, and `lineless` behave identically: output defaults to a black outline most of the time and comes back selective on rare occasions, but that variation correlates with neither the `outline` value nor outline wording in `description` (for example `no black outline, no border`). Read it as run-to-run noise, not a control. The `outline` value is still recorded on the character and reported by `get_character`, so a stored setting is not evidence the output honored it. Treat outline as uncontrollable on these routes rather than spending credits tuning it. On 2026-07-15 the PixelLab developers said they would work on this, so re-test before relying on this finding.
 
 ## Closest Candidate 1: Best Overall, But Has Hair
 
@@ -194,6 +195,7 @@ Detail:
 
 Outline:
 
+- Superseded by the outline finding in Current working hypothesis: `outline` is inert on V3 and Pro character generation. The observations below were recorded before that was established, and the quality differences they attribute to outline values are more likely run-to-run variation.
 - Selective outline performed poorly in later bald tests.
 - Default or omitted outline resolved to single color black outline and generally produced more usable pixel sprites.
 - Single color outline remains a reasonable fallback if default outline is unavailable or inconsistent.
