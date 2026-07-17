@@ -10,9 +10,9 @@ Purpose: record how the original `skills/pixellab-pip/assets/bark.wav` was built
 
 The bark fires after every live PixelLab generation, edit, and animation job. That is a high-frequency, low-priority confirmation cue, played at a moment of relief rather than urgency. Material Design's own guidance is that the more often an interaction happens, the less intrusive its sound should be, and Google has publicly described dialing every sound up to maximum personality as coming "at the expense of the user experience" ([Google Design](https://design.google/library/ux-sound-haptic-material-design)). Any bark redesign is therefore constrained more by repetition tolerance than by first-play charm.
 
-## The Current Asset, Reverse-Engineered
+## The Original Asset, Reverse-Engineered
 
-Nothing in the repository generated `bark.wav`. The commit that introduced it added the binary with no synthesis script, so the file itself is the only record. The structure below was recovered by fitting a parametric model to the samples with `scipy.optimize.curve_fit`.
+This section describes the asset as it stood before replacement. Nothing in the repository generated it: the commit that introduced it added the binary with no synthesis script, so the file itself was the only record. The structure below was recovered by fitting a parametric model to the samples with `scipy.optimize.curve_fit`.
 
 Container: mono, 16-bit PCM, **22050 Hz**, 4629 frames, **210 ms**. Peak `0.6048`, true peak `-4.36` dBTP, `-17.2` LUFS.
 
@@ -33,13 +33,11 @@ Three structural facts follow:
 
 - **`220.00 -> 165.00 Hz` is exactly `4:3`, a descending perfect fourth.** The interval is deliberate, not incidental.
 - **`1 : 2.1 : 3.4` is inharmonic.** A harmonic series would be `1 : 2 : 3`.
-- **The 79 ms interval is textbook for a notification gesture, and only looks wrong if you read the sound as a dog.** See [Beat Count And Spacing](#beat-count-and-spacing) — this was initially recorded here as a defect, and the shipped-sound corpus overturned that.
+- **The 79 ms interval is textbook for a notification gesture, and only looks wrong if you read the sound as a dog.** See [Beat Count And Spacing](#beat-count-and-spacing) — this was initially recorded here as a defect, and the shipped-sound corpus overturned that. It is *not* one of the defects, and was carried forward unchanged into two candidates.
 
-The inharmonicity is measurable, not cosmetic. A harmonic replica of the same sound (same `f0`, same amplitudes, same decay, same sample rate) measures **40 dB** harmonic-to-noise ratio; the real file measures **13.6 dB**. Three independent literatures treat that direction as a cost: Brewster lists "irregular harmonics" among the properties that make a sound attention-grabbing, Edworthy found irregular harmonic frequencies raise perceived urgency, and Pongracz found low harmonic-to-noise ratio is the strongest acoustic predictor of a bark being rated angry. The current sound is mild enough (only three partials, all low) that this is a small effect, but it points the wrong way.
+The inharmonicity is measurable, not cosmetic. A harmonic replica of the same sound (same `f0`, same amplitudes, same decay, same sample rate) measures **40 dB** harmonic-to-noise ratio; the real file measures **13.6 dB**. Three independent literatures treat that direction as a cost: Brewster lists "irregular harmonics" among the properties that make a sound attention-grabbing, Edworthy found irregular harmonic frequencies raise perceived urgency, and Pongracz found low harmonic-to-noise ratio is the strongest acoustic predictor of a bark being rated angry. The effect is mild — only three partials, all low — but it points the wrong way.
 
-It is also the only property of the current asset that survives scrutiny as a defect. `c0-heritage-harmonic` exists to test correcting it: it harmonises the ratios and softens the onset while keeping the `220 -> 165` identity.
-
-The asset's **descending** direction is the more interesting open question. Every shipped task-complete sound measured for this spike **rises** — see [Beat Count And Spacing](#beat-count-and-spacing). `c8-heritage-rising` inverts it to test that.
+Together with the **descending** interval — every shipped task-complete sound measured for this spike rises, see [Beat Count And Spacing](#beat-count-and-spacing) — the inharmonicity is one of exactly two properties of the original that survived scrutiny as a defect. Both are corrected in the shipped replacement; see [Outcome](#outcome).
 
 ### Analysis Caveat Worth Recording
 
@@ -190,7 +188,7 @@ That is the decisive point. **Brightness is the annoyance direction** — the 2-
 
 The verifier independently confirmed the reverse-engineering **exactly**: partials at `1 : 2.1000 : 3.4000`, amplitudes `1 : 0.384 : 0.154`, f0 `220.01 -> 165.00`, ratio exactly `0.7500`, spacing `78.5 ms`, onset `0.41 ms`.
 
-It refuted the decay figure, and re-measurement showed that neither party should assert one — see the decay note in [The Current Asset, Reverse-Engineered](#the-current-asset-reverse-engineered). The envelope is not a single exponential.
+It refuted the decay figure, and re-measurement showed that neither party should assert one — see the decay note in [The Original Asset, Reverse-Engineered](#the-original-asset-reverse-engineered). The envelope is not a single exponential.
 
 ## Outcome
 
@@ -265,13 +263,15 @@ The two bodies of evidence give **opposite answers to the same parameter**:
 
 The resolution is that the bark finding is **conditional on the sound reading as a dog**. A chime motif at 100 ms carries no aggression semantics, because a chime is not an animal. Tight-bout-means-aggression only fires if the listener hears a bark bout in the first place.
 
-That yields the design rule, and it maps onto the candidates:
+That yields the design rule:
 
-- **The more convincingly canine the timbre, the more the ~450 ms interval is required.** `c2-boof-falling` has real formants and is therefore stuck at ~640 ms — and is the candidate least like anything that ships.
-- **The more chime-like, the tighter the cluster can go.** `c7-gesture-rising` takes this position: bark timbre, but in the shipped envelope (2 events, 85 ms, rising perfect fourth, 335 ms total).
-- **One beat sidesteps the conflict entirely.** `c4-pip-single` has no interval to get wrong.
+- **The more convincingly canine the timbre, the more the ~450 ms interval is required** — and the less the sound resembles anything that ships. Round one's `c2-boof-falling` sat at this extreme, with real formants and a ~640 ms total.
+- **The more chime-like, the tighter the cluster can go**, up to the shipped 55-135 ms.
+- **One beat sidesteps the conflict entirely**, since there is no interval to get wrong.
 
-**The current asset sits on the chime side of this line.** It has no formants, so it does not read as a dog, so the bark-bout finding does not apply to it — and its 79 ms interval is almost exactly Xbox's 85 ms and Slack's 58 ms. It is not misconfigured; it is a conventional two-note notification gesture that happens to be *called* a bark. Its questionable property is direction, not spacing.
+Round two resolved this by keeping real formants but rolling brightness off hard, then taking the shipped tight spacing anyway — betting that a *stylized* bark does not trigger the bark-bout reading that a recorded dog would. That bet is unverified: no study tests whether a synthetic, formant-light bark at 100 ms reads as aggressive. It is the largest untested assumption in the design.
+
+**The original asset sat on the chime side of this line.** It had no formants, so it did not read as a dog, so the bark-bout finding did not apply to it — and its 79 ms interval is almost exactly Xbox's 85 ms and Slack's 58 ms. It was not misconfigured; it was a conventional two-note notification gesture that happened to be *called* a bark. Its questionable property was direction, not spacing.
 
 One conflation avoided: Farago's "shorter calls rated more positive" refers to the individual vocalization, not the bout, so it does not discriminate between one beat and two.
 
@@ -281,31 +281,45 @@ Brewster, directly actionable for any two-beat design: *"the first note should b
 
 Under-signalling is a real failure mode. Apple's move to the gentler two-note Rebound drew complaints that it was less noticeable, and **iOS 17.2 added customization so users could restore Tri-tone**. Quieter and smoother is not monotonically better.
 
-### Provisional Ranking
+### Final Ranking
 
-Ranked on measurements and literature only. **The sounds were not auditioned before ranking**, so this ordering is a prior, not a verdict, and the loop test is expected to reorder the top three.
+Ranked on: survives repetition (dominant) > dog character > standards margin. This ordering is the filename prefix in `.local/bark-final/`. It was produced **before** any audition and after the adversarial verification, and it is a prior rather than a verdict.
 
-1. **`c2-boof-falling`** — most convincingly canine while staying inside the safe psychoacoustic envelope (centroid 995 Hz, sharpness 1.14, HNR 14.3). Falling interval reads resolved and final, which suits a completion cue.
-2. **`c4-pip-single`** — 200 ms, single event, least fatiguing under repetition. Best aligned with the frequency-of-use constraint, which is this asset's dominant one.
-3. **`c3-chime-dog`** — most charming and closest to the chime-meets-bark brief; highest tonality (HNR 23.7). At 770 ms it is the longest, against the "shorter reads more positive" finding.
-4. `c1-spec-rising` — safest numbers, but with no formant filter it reads closer to a synth blip than a dog.
-5. `c0-heritage-harmonic` — excellent measurements and the smallest possible change, but barely reads as a bark. The strongest option if the goal is to fix the current sound rather than replace it.
-6. `c6-heritage-body` — heritage pitch with a body; F0 220/165 is large-dog territory under the motivation-structural rules.
-7. `c5-yip-playful` — brightest; the 2019 data places this direction toward annoyance. Included to hear the axis.
+| # | Candidate | Body LUFS | Attack | Why |
+| --- | --- | --- | --- | --- |
+| 1 | `woof-hush` | -14.2 | 8.5 ms | Best dog character that survives repetition. Softest attack of the paired set, beat 2 closest to the friendly band (539 Hz), centroid 694. |
+| 2 | `heritage-rising` | -17.3 | 3.2 ms | Cleanest spectrum in the set (centroid 268, sharpness 0.46, harmonic to deviation 0.003). Demerits: 3.2 ms onset, barely reads as a dog, 165 Hz thins out on small speakers. |
+| 3 | `pup-warm` | -14.2 | 8.8 ms | Slowest attack in the set; dark and low-arousal. |
+| 4 | `boof-minor-third` | -13.7 | 8.2 ms | Gentlest rising interval. |
+| 5 | `boof-third` | -13.6 | 8.2 ms | Beat 2 at 592 Hz, further out of band than 1-3, and runs hot. |
+| 6 | `marimba-pup-octave` | -17.9 | 1.0 ms | Harmonic and dark, but the sharpest onset in the set — 1 ms is squarely Brewster's attention-grabber. |
+| 7 | `boof-beats` | -13.0 | 8.1 ms | Loudest by body level; its -53 dB trough reads as two separate events rather than one. |
+| 8 | `gesture-rising` | -13.5 | 7.1 ms | Hot, and the highest beat-2 F0 of any candidate (613 Hz). |
+| — | `boof-single-tail` | -17.5 | 3.0 ms | **Cut: inharmonic** (h2/h1 = 1.77), worse than the asset being replaced. |
+| — | `chime-pup-fourth` | -17.9 | 2.0 ms | **Cut: inharmonic**, brightest (1296 Hz), sharpest (1.27), 2 ms onset. |
 
-Unresolved by the literature: **rising versus falling interval.** Rising correlates with higher arousal and positive/open affect; falling reads final, and Material's Guided Frame precedent resolves to the tonic at completion because it "feels like home". Both are represented in the candidate set because the sources do not settle it.
+**The Body LUFS column is the reason this ranking is weaker than it looks.** The set spans 4.95 dB in body loudness despite every file reporting -18.5 whole-file. Intensity is the documented annoyance driver, so an audition of this set partly measures that defect: the quiet candidates seem gentler than they are, and the hot ones more annoying. Ranks 1 and 2 sit ~3 dB apart and are not separated by these numbers.
+
+**Attack times are all below the stated 12 ms rule.** This is definitional rather than a defect in the sounds: a raised-cosine attack's 10-90% rise is 0.5904x its nominal length, and `finish()`'s waveshaping shortens it further. The 12 ms figure was always an interpolation rather than a citation. For scale, the asset being replaced has a 0.41 ms attack.
+
+The literature does **not** settle rising versus falling in general — rising correlates with higher arousal, and falling reads final. It is settled for *this* category: every measured task-complete sound rises, and rising to a consonant target (Xbox's octave, Slack's fourth) is both energetic and resolved, so finality is not traded away.
 
 ## Measurement Methodology
 
 Measurement code is `dsp.py` in the candidate folder; `python dsp.py` runs a self-check that validates every metric against signals with known answers (calibrated harmonic-plus-noise mixes, pure tones, band-limited noise, a decaying tone, and the int16 round-trip).
 
-Three metrics were wrong on the first attempt, and each failure is worth recording:
+**Six measurement errors were made across this spike.** Every one produced a confident wrong answer that survived until something forced a cross-check. They are recorded in full because the traps are generic, not specific to bark sounds.
 
 1. **Spectral analysis over an amplitude-thresholded selection.** Gathering "the loud samples" with `x[abs(x) > threshold]` concatenates non-contiguous regions. Each join is a step discontinuity that smears broadband energy across the spectrum. This inflated centroid and sharpness for every candidate. Fix: analyze one contiguous window from the voiced body of the loudest event.
 2. **Moving-average HNR with the window narrower than the spectral peaks.** A 10-bin moving average over a 2.7 Hz/bin spectrum spans 27 Hz, but a 50 ms Hann window produces peaks ~80 Hz wide, so the "noise floor" tracked the peaks themselves and the difference collapsed. The metric reported HNR near 0 dB for provably noise-free signals.
 3. **Autocorrelation HNR without envelope flattening.** Autocorrelation assumes stationarity. A percussive exponential decay depresses the correlation on its own, which the metric reports as noise that is not present. Fix: divide out the analytic (Hilbert) amplitude envelope before correlating, with the smoothing window longer than the pitch period.
+4. **Whole-file LUFS on short, padded sounds.** Trailing silence is averaged into the measurement, so 300 ms of padding alone shifts the value 3 dB. This produced a reported 0.01 dB loudness match across a set whose real body-level spread was 4.95 dB. Fix: measure loudness on the audible body, or on a fixed short-term window.
+5. **A self-check whose tolerance was wider than its own error.** The HNR validation signal was mis-specified by 6.02 dB and checked with a +/-6.0 dB tolerance, so it passed for the wrong reason. A tolerance must be tighter than the error class it is meant to catch, or the test is decorative.
+6. **Autocorrelation pitch tracking locking onto subharmonics.** Two candidates read as "falling" and "flat" when both in fact rise; the tracker had locked to half the true f0 (277 = 553/2, 416 = 830/2). The tell was the suspiciously exact ratios (0.667, 1.000). Fix: cross-check pitch with a spectral-peak method before believing a direction.
 
-The decisive diagnostic in each case was the same: **measure a signal whose answer is already known.** The current `bark.wav` has a numerically verified noise floor near -114 dB, so any metric reporting it as noisy was broken. Synthesizing a provably clean replica at the same sample rate and pitch (which read 40 dB) separated "the metric is biased" from "the file really does contain something aperiodic" — and it was the latter, which is how the inharmonicity was found.
+Three further errors were errors of *definition* rather than measurement, and are worth separating: HNR was used as a harmonicity gate although it cannot detect inharmonicity; sharpness was gated in absolute acum although acum requires an SPL reference a file does not carry; and "no AM in 15-300 Hz" was specified although a percussive envelope violates it by construction. See [Verification](#verification).
+
+The decisive diagnostic in nearly every case was the same: **measure a signal whose answer is already known.** The original `bark.wav` had a numerically verified noise floor near -114 dB, so any metric reporting it as noisy was broken. Synthesizing a provably clean replica at the same sample rate and pitch (which read 40 dB) separated "the metric is biased" from "the file really does contain something aperiodic" — and it was the latter, which is how the inharmonicity was found.
 
 Final metric definitions:
 
@@ -313,6 +327,10 @@ Final metric definitions:
 - **Sharpness**: Aures / DIN 45692-style, from a Bark-band specific-loudness approximation.
 - **LUFS**: ITU-R BS.1770 K-weighting, ungated — short-form sounds defeat the gate, so integrated loudness is unreliable under ~400 ms.
 - **True peak**: 4x oversampled peak.
+- **Onset / IBI**: Schmitt-triggered envelope, armed only after the envelope falls below a low threshold, so a decaying tail cannot re-fire as a new onset. Counts *re-articulated* hits; legato notes inside a motif read as one.
+- **Loudness for comparison**: body-window LUFS, not whole-file.
+
+**Known-good caveat:** an amplitude-onset detector and a note counter answer different questions. 44 of 47 Windows notification sounds have exactly one re-articulated hit, yet most are 2-3 note legato motifs. Both statements are true of the same files. State which is being counted.
 
 ### Reproduction Note
 
@@ -320,11 +338,13 @@ Writing 16-bit WAV from numpy has a trap the self-check covers: `+1.0 * 32768` o
 
 ## Open / Untested
 
-- **Nothing has been auditioned.** The ranking is a measurement prior. The loop test at `.local/bark-candidates/loop-test/` is the decisive check and has not been run.
-- Rising versus falling interval is unresolved by the sources and needs an ear.
-- No candidate was tested on laptop speakers or phone speakers, where the sub-500 Hz content that carries `c0`/`c6` will largely disappear. Small-speaker reproduction may be the deciding constraint, and it favours the harmonic-2 energy peak.
-- Sample rate for a replacement is undecided. Candidates render at 44100 Hz (~40–70 KB); the current asset is 22050 Hz (9 KB). `winsound` and the POSIX players in `assets/bark.py` accept both.
-- Roughness (asper) is argued to be near zero by construction — strictly harmonic partials, no modulation in the 15–300 Hz band — but was not measured. Only sharpness has an implemented metric.
-- The measured `1 : 2.1 : 3.4` ratio set was not traced to a known synthesis recipe or preset. Whether it was hand-picked or inherited from a tool is unknown.
+- **The shipped sound is +1.62 dB body-loudness against the asset it replaced.** Level is the documented annoyance driver, so this is the property most worth watching in real use. It is a gain change, not a rebuild, if it grates.
+- **Long-run repetition tolerance is unmeasured.** `woof-hush` was chosen from a first-listen audition. The loop files at `.local/bark-final/loop-test/` (12x at 1.2 s) exist for the Berlyne check, and the only real test is days of ordinary use. Nothing in this document predicts play #100.
+- **The set was auditioned under an unfair loudness match** (4.95 dB body spread). The choice may partly reflect which candidates were louder. A renormalized re-audition would be a cleaner comparison, and might not pick the same sound.
+- **Small-speaker reproduction was never tested.** Laptop and phone speakers lose most sub-500 Hz content. This matters most for `heritage-rising` (165/220 Hz), and it is the strongest surviving argument for the harmonic-2 energy peak that the set does not achieve.
+- **The h2 energy peak is unachieved across the set** and would require flattening the glottal source tilt, not moving formants. That trade buys dog brightness at the cost of repetition safety; it was declined, not solved.
+- Roughness (asper) was never implemented as a metric. The adversarial pass found no discrete AM lines and argued the candidates are clean, but on its reasoning rather than on a measurement.
+- The `1 : 2.1 : 3.4` ratio set was not traced to a known synthesis recipe or preset. Whether it was hand-picked or inherited from a tool is unknown.
 - Candidate synthesis depends on numpy and scipy. The runtime helper `assets/bark.py` is deliberately dependency-free; if a generator is ever committed it belongs in `dev-tools/`, not in the skill payload.
 - Third-party summaries circulate Material Design LUFS figures (-18/-14/-12) and a "sound never lasts more than 0.3 s longer than its animation" rule. Neither could be verified against Material's own documentation, which is JavaScript-rendered. They are excluded from the spec above. Slack's "Knock Brush" has no design rationale that could be located; do not cite one.
+- Discord, WhatsApp, Telegram, Messenger, Teams, Zoom and Google Chat sounds were measured from community-extracted copies rather than first-party assets, except Telegram (official source repos). Their identity is one tier below the Windows/AOSP/Xbox/Slack numbers.
