@@ -131,7 +131,6 @@ Public controls when a preset walk/idle/jump is close but needs style correction
 | `detail` | Lower detail can reduce noisy limb pixels or over-rendered joints. |
 | `outline` | Reassert the original outline when limbs become too thick, broken, or overdrawn. |
 | `color_image` + `force_colors` | Constrain palette when template frames introduce extra dark tones. |
-| `seed` | Try a small number of reproducible candidates; template outputs vary. |
 
 Template mode does not expose direct controls for 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, `bone_scaling`, shadow strength, or keypoint edits, and `frame_count` does not tune preset motion; choose a different template id such as `walking-4-frames`/`walking-6-frames`/`walking-8-frames`. If the rendering style is the problem, retry template mode with conservative style controls. If the gait itself is wrong (robotic walk, stiff torso, missing weight shift, bad limb timing), use v3/pro custom animation or raw skeleton/Aseprite keypoint authoring instead of expecting preset mode to behave like a full rig editor.
 
