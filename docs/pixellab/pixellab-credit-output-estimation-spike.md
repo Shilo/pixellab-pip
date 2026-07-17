@@ -25,7 +25,7 @@ There is no single subscription-vs-credits percentage. Value is **per route**, a
 - Route implied `$/generation`: about `$0.0026` (tilesets) up to `$0.0956` (template animation at `128x128`).
 - Subscription wins whenever a route's implied `$/generation` is **above** your plan's rate.
 
-Observed regimes, quoted against Tier 1 first month (`$0.0060/generation`, the worst rate; tenure brackets, higher tiers, and annual billing all improve every figure):
+Observed regimes, quoted against Tier 1 first month (`$0.0060/generation`, the worst generally-available rate — Brazil-only Tier 0 is worse at `$0.0071`; tenure brackets, higher tiers, and annual billing all improve every figure):
 
 - Helper routes (`estimate-skeleton`, prompt enhancers) and template animation = strongest subscription value, roughly `5-16x`.
 - `v3` character routes = strong subscription value, roughly `1.5-6.8x` depending on size and whether a reference image is used.
@@ -33,9 +33,9 @@ Observed regimes, quoted against Tier 1 first month (`$0.0060/generation`, the w
 - Pro Tools = near break-even; roughly `0.77-1.36x` across all plans, with the tenure bracket deciding the sign.
 - Tilesets = credits win on every plan, roughly `0.44-0.90x`.
 
-Sweeping all `118` priced rows at the deepest published discount (Tier 1 `$9.00` or Tier 2 `$22`): the subscription wins `114/118`, and the `4` losses are **entirely tilesets** on both plans. **Even at the deepest published discount, tilesets remain credits-only — the only route family where that is true at every plan.** See [Every Endpoint At Maximum Discount](#every-endpoint-at-maximum-discount). Tier choice is worth only `2.3%` and is dominated by utilization, tenure, and billing period — see [Choosing A Tier: Volume, Not Unit Rate](#choosing-a-tier-volume-not-unit-rate).
+Sweeping all `124` published priced rows: at first-month Tier 1 the subscription wins only `63/124`; at the deepest tenure bracket it wins `119/124`. **Even at the deepest discount, tilesets remain credits-only — the only family that loses on all 12 plans.** The fifth loser at max discount is `animate-with-text-v3` `@256`/8 frames, which is not a tileset. See [Every Endpoint At Maximum Discount](#every-endpoint-at-maximum-discount). Tier choice is worth only `2.3%` and is dominated by utilization, tenure, and billing period — see [Choosing A Tier: Volume, Not Unit Rate](#choosing-a-tier-volume-not-unit-rate).
 
-These bands overlap and are not a strict ranking — `generate-8-rotations-v3` at `5.6x` (if it bills `1` generation, which is unverified) outranks template animation at `64`/dir at `5.4x`. Two caveats bound the whole table: the figures assume **full allowance utilization** (see [Utilization Breaks These Rates](#utilization-breaks-these-rates)), and several generation counts are assumed rather than measured (see [Step 2](#step-2-the-routes-implied-rate) and [Step 2b](#step-2b-routes-whose-generation-count-is-unknown)).
+These bands overlap and are not a strict ranking — `generate-8-rotations-v3` `@64` at `5.6x` outranks template animation at `64`/dir at `5.4x`, and the same route `@256` drops to `0.79x`. Size drives more variation than family does. Three caveats bound the whole table: the figures assume **full allowance utilization** (see [Utilization Breaks These Rates](#utilization-breaks-these-rates)); every max-discount figure assumes a **tenure bracket you must earn over months**; and Tier 1 physically cannot reach `12` of the `124` rows (see [Outside the arithmetic](#outside-the-arithmetic)). Generation counts are **published by PixelLab, not inferred**.
 
 ## Rough Estimate
 
@@ -69,7 +69,7 @@ Therefore:
 - For rough planning, `1 credit` was treated as `$1 USD` account balance based on the observed purchase UI.
 - `generation` or `generation-unit` is a spend/accounting unit used by PixelLab tools.
 - Literal outputs are the returned artifacts: images, candidate grid cells, frames, tiles, or generated asset entries, depending on workflow.
-- Subscription tiers expose an `Image generation limit` in the homepage card logic; this spike treats that as a monthly generation allowance, which makes tier price divided by allowance a usable `$/generation` rate. It is not raw USD credit and does not roll over.
+- Subscription tiers expose an `Image generation limit` in the homepage card logic; this spike treats that as a monthly generation allowance, which makes tier price divided by allowance a usable `$/generation` rate. It is not raw USD credit, and is believed not to roll over (see [Outside the arithmetic](#outside-the-arithmetic) — indicated by a "resets next month" string, not documented).
 - There is no single stable conversion from USD credit to either generation-units or literal outputs across all tools.
 - USD prices track GPU processing time; generation counts are a coarser, step-quantized unit (several routes do scale with output area, but in integer steps via `ceil`). The two do **not** track each other, and that divergence — not any bundle discount — is what decides whether credits or a subscription is cheaper for a given route.
 - Subscription monthly prices step down with tenure (Tier 1 `$12`/`$10`/`$9.50`/`$9.00`; Tier 2 `$24`/`$23`/`$22.50`/`$22`). These brackets are not exposed by [get-subscriptions](https://api.pixellab.ai/get-subscriptions), which reports only the first-month price.
@@ -84,10 +84,13 @@ The two payment units only meet at a single question: for the route you are abou
 
 ### Step 1: your subscription rate
 
-Tier price divided by monthly generation allowance. Monthly prices step down with subscription tenure. Base prices are confirmed against [get-subscriptions](https://api.pixellab.ai/get-subscriptions); allowances are from homepage card logic; the tenure brackets are from the checkout page and are **not exposed by the API**. Tier 3 brackets are unverified. Tier 0 (`$5`, Brazil-only) has no published allowance and is omitted.
+Tier price divided by monthly generation allowance. Base prices are confirmed against [get-subscriptions](https://api.pixellab.ai/get-subscriptions). Allowances are published in the homepage card logic, keyed by the same `plan_id` values `get-subscriptions` returns (`{914016:700, 902410:2000, 902412:2000, 902411:5000, 902413:5000, 840828:10000, 921083:10000}`) — verified, not inferred.
+
+**The tenure brackets are a loyalty ladder you must earn.** The checkout bundle renders them from per-account `discount_steps` under the label **"Monthly Discount Progress"**, with copy describing a discount you "built up" that cancelling forfeits (with roughly a one-week grace to reactivate and keep it), gated to non-annual plans. The bracket values below are user-reported; `discount_steps` comes from an authenticated endpoint and is absent from every public bundle, so they are **not independently verifiable** and Tier 3's ladder is unknown. **Read bracket 4 as a month-4-and-later rate that a new subscriber cannot buy today.** Every "max discount" figure in this document carries that condition.
 
 | Plan | Price | Allowance | `$/generation` |
 |---|---:|---:|---:|
+| Tier 0 monthly, Pixel Novice (Brazil only) | `$5` | `700` | `$0.0071` |
 | Tier 1 monthly, bracket 1 | `$12` | `2,000` | `$0.0060` |
 | Tier 1 monthly, bracket 2 | `$10` | `2,000` | `$0.0050` |
 | Tier 1 monthly, bracket 3 | `$9.50` | `2,000` | `$0.0047` |
@@ -101,61 +104,55 @@ Tier price divided by monthly generation allowance. Monthly prices step down wit
 | Tier 2 annual | `$220` | `60,000` | `$0.0037` |
 | Tier 3 annual | `$500` | `120,000` | `$0.0042` |
 
-Four consequences:
+Five consequences:
 
-- **The tenure discount is worth more than the tier choice.** Tier 1 falls `25%` from `$0.0060` to `$0.0045`. A long-tenured Tier 1 (`$0.0045`) beats a first-month Tier 2 (`$0.0048`).
-- **Annual still beats every monthly bracket**, including the deepest: `$0.0041` vs `$0.0045` on Tier 1, `$0.0037` vs `$0.0044` on Tier 2.
+- **Tier 0 (`$0.0071`) is the worst rate in the catalog**, not first-month Tier 1. It is Brazil-only, so it rarely enters the comparison, but it is the floor.
+- **First-month Tier 1 (`$0.0060`) is the worst generally-available rate**, and it is the rate most cost complaints are computed against.
+- **The tenure discount is worth more than the tier choice.** Tier 1 falls `25%` from `$0.0060` to `$0.0045` — but only after several monthly bills. A long-tenured Tier 1 (`$0.0045`) beats a first-month Tier 2 (`$0.0048`).
+- **Annual still beats every monthly bracket**, including the deepest: `$0.0041` vs `$0.0045` on Tier 1, `$0.0037` vs `$0.0044` on Tier 2. Annual is also excluded from the loyalty ladder.
 - **Tier 2 annual (`$0.0037`) is the best rate in the catalog.** Tier 3 is *worse* per generation than Tier 2 on both billing periods; Tier 3 buys volume headroom, size caps, and concurrency, not a better unit rate.
-- **First-month Tier 1 (`$0.0060`) is the worst rate**, and it is the rate most cost complaints are computed against.
 
 ### Step 2: the route's implied rate
 
-USD price divided by generation count. Subscription wins when this exceeds your Step 1 rate. Prices are from [pixellab-api-pricing-model-list.md](pixellab-api-pricing-model-list.md). Generation counts are marked by confidence: **D** = documented count or formula; **B** = the "most base/`new`/`v3` routes are about `1` generation" baseline, not a verified count.
+USD price divided by generation count. Subscription wins when this exceeds your Step 1 rate.
+
+**Both numbers are published.** The pricing page's Credits/Generations toggle is backed by a data object in which every one of its `124` priced rows carries both a `credits:` (USD) and a `generations:` field. Nothing in this section is inferred, and no generation count here needs a balance-delta test. Independently verified by parsing the bundle (`/_next/static/chunks/pages/pixellab-api-<hash>.js`).
 
 | Route | Gens | USD | Implied `$/gen` | vs T1 bracket 1 | vs T1 bracket 4 | vs T2 annual |
 |---|---:|---:|---:|---:|---:|---:|
-| `create-tileset` `16x16` **D** | `3` | `$0.0079` | `$0.0026` | `0.44x` | `0.59x` | `0.72x` |
-| `create-tileset` `32x32` **D** | `3` | `$0.0099` | `$0.0033` | `0.55x` | `0.73x` | `0.90x` |
-| Pro Tools, large rung **D** | `40` | `$0.185` | `$0.0046` | `0.77x` | `1.03x` | `1.26x` |
-| Pro Tools, small rung **D** | `20` | `$0.095` | `$0.0047` | `0.79x` | `1.06x` | `1.30x` |
-| Pro Tools, mid rung **D** | `25` | `$0.125` | `$0.0050` | `0.83x` | `1.11x` | `1.36x` |
-| `remove-background` `64x64` **B** | `1` | `$0.00554` | `$0.0055` | `0.92x` | `1.23x` | `1.51x` |
-| `create-image-pixen` `64x64` **B** | `1` | `$0.00718` | `$0.0072` | `1.20x` | `1.60x` | `1.96x` |
-| `create-image-pixflux` `64x64` **B** | `1` | `$0.00793` | `$0.0079` | `1.32x` | `1.76x` | `2.16x` |
-| `create-character-v3` `168` scratch **D** | `5` | `$0.045` | `$0.0090` | `1.50x` | `2.00x` | `2.45x` |
-| `create-character-v3` `168` from ref **D** | `4` | `$0.045` | `$0.0112` | `1.88x` | `2.50x` | `3.07x` |
-| `create-character-4-dir` `64x64` **D** | `1` | `$0.0122` | `$0.0122` | `2.03x` | `2.71x` | `3.33x` |
-| `animate-character` v3 `64x64` **B** | `1` | `$0.0129` | `$0.0129` | `2.15x` | `2.87x` | `3.52x` |
-| `create-character-v3` `128` scratch **D** | `3` | `$0.042` | `$0.0140` | `2.33x` | `3.11x` | `3.82x` |
-| `create-image-pixen` `512x512` **B** | `1` | `$0.0169` | `$0.0169` | `2.82x` | `3.76x` | `4.61x` |
-| `create-character-8-dir` `64x64` **D** | `1` | `$0.0173` | `$0.0173` | `2.88x` | `3.84x` | `4.72x` |
-| `create-character-v3` `64` scratch **D** | `2` | `$0.041` | `$0.0205` | `3.42x` | `4.56x` | `5.59x` |
-| `animate-character` template `64`/dir **D** | `1` | `$0.0323` | `$0.0323` | `5.38x` | `7.18x` | `8.81x` |
-| Prompt enhancement **D** | `~0.05` | `$0.002` | `$0.0400` | `6.67x` | `8.89x` | `10.91x` |
-| `create-character-v3` `64` from ref **D** | `1` | `$0.041` | `$0.0410` | `6.83x` | `9.11x` | `11.18x` |
-| `estimate-skeleton` `256` **D** | `~0.1` | `$0.00516` | `$0.0516` | `8.60x` | `11.47x` | `14.07x` |
-| `animate-character` template `128`/dir **D** | `1` | `$0.0956` | `$0.0956` | `15.93x` | `21.24x` | `26.07x` |
+| `create-tileset` `16x16` | `3` | `$0.0079` | `$0.0026` | `0.44x` | `0.59x` | `0.72x` |
+| `create-tileset` `32x32` | `3` | `$0.0099` | `$0.0033` | `0.55x` | `0.73x` | `0.90x` |
+| `animate-with-text-v3` `256`, 8f | `8` | `$0.0302` | `$0.0038` | `0.63x` | `0.84x` | `1.03x` |
+| Pro Tools, large rung | `40` | `$0.185` | `$0.0046` | `0.77x` | `1.03x` | `1.26x` |
+| `generate-8-rotations-v3` `256` | `8` | `$0.0377` | `$0.0047` | `0.79x` | `1.05x` | `1.28x` |
+| Pro Tools, small rung | `20` | `$0.095` | `$0.0047` | `0.79x` | `1.06x` | `1.30x` |
+| Pro Tools, mid rung | `25` | `$0.125` | `$0.0050` | `0.83x` | `1.11x` | `1.36x` |
+| `remove-background` `64x64` | `1` | `$0.00554` | `$0.0055` | `0.92x` | `1.23x` | `1.51x` |
+| `create-image-pixen` `64x64` | `1` | `$0.00718` | `$0.0072` | `1.20x` | `1.60x` | `1.96x` |
+| `create-image-pixflux` `64x64` | `1` | `$0.00793` | `$0.0079` | `1.32x` | `1.76x` | `2.16x` |
+| `create-character-v3` `168` | `5` | `$0.045` | `$0.0090` | `1.50x` | `2.00x` | `2.45x` |
+| `create-map-object` per object | `1` | `$0.0099` | `$0.0099` | `1.65x` | `2.20x` | `2.70x` |
+| `animate-with-text-v3` `128`, 16f | `4` | `$0.0424` | `$0.0106` | `1.77x` | `2.36x` | `2.89x` |
+| `create-character-4-dir` `64x64` | `1` | `$0.0122` | `$0.0122` | `2.03x` | `2.71x` | `3.33x` |
+| `animate-character` v3 `64x64` | `1` | `$0.0129` | `$0.0129` | `2.15x` | `2.87x` | `3.52x` |
+| `create-character-v3` `128` | `3` | `$0.042` | `$0.0140` | `2.33x` | `3.11x` | `3.82x` |
+| `generate-8-rotations-v3` `128` | `2` | `$0.0345` | `$0.0173` | `2.88x` | `3.83x` | `4.70x` |
+| `create-character-8-dir` `64x64` | `1` | `$0.0173` | `$0.0173` | `2.88x` | `3.84x` | `4.72x` |
+| `create-character-v3` `64` | `2` | `$0.041` | `$0.0205` | `3.42x` | `4.56x` | `5.59x` |
+| `animate-with-text-v3` `32`, 4f | `1` | `$0.0221` | `$0.0221` | `3.68x` | `4.91x` | `6.03x` |
+| `animate-character` template `64`/dir | `1` | `$0.0323` | `$0.0323` | `5.38x` | `7.18x` | `8.81x` |
+| `generate-8-rotations-v3` `64` | `1` | `$0.0337` | `$0.0337` | `5.62x` | `7.49x` | `9.19x` |
+| Prompt enhancement (all three) | `0.05` | `$0.002` | `$0.0400` | `6.67x` | `8.89x` | `10.91x` |
+| `estimate-skeleton` `256` | `0.1` | `$0.00516` | `$0.0516` | `8.60x` | `11.47x` | `14.07x` |
+| `animate-character` template `128`/dir | `1` | `$0.0956` | `$0.0956` | `15.93x` | `21.24x` | `26.07x` |
 
-Caveats on the inputs:
+Notes on the inputs:
 
-- **The Pro rung mapping is an assumption, not a citation.** Both supporting files record only "Pro Tools ~`20-40` generations per call". The specific pairing `20`→`$0.095`, `25`→`$0.125`, `40`→`$0.185` comes from this spike's own earlier reading of the pricing page's generations view. Only `20`→`$0.095` is independently corroborated (by a user report). If a `$0.095` call actually bills `40`, its implied rate is `$0.0024` — worse than a tileset, which would invert two conclusions below.
-- **`~0.05` and `~0.1` are tilde-qualified in the source.** The `6.67x` and `8.60x` figures are inversely proportional to them: if `estimate-skeleton` is really `0.2`, its figure halves to `4.3x`. The `0.05` was observed live for `enhance-pixen-prompt` only and is generalized here to all three enhancers.
-- **`create-character-v3`** uses the documented formula: `1 + ceil(s * s * 8 / 65536)` from scratch, `ceil(w * h * 8 / 65536)` when rotating a reference image.
-
-### Step 2b: routes whose generation count is unknown
-
-[pixellab-api-pricing-model-list.md](pixellab-api-pricing-model-list.md) **explicitly excludes** `create-character-v3`, `generate-8-rotations-v3`, and `animate-with-text-v3` from the `~1` baseline — it states they "scale with output area". Only `create-character-v3` has a published formula. **Do not assign the other two a point estimate.** An earlier revision of this spike cited that same baseline line as authority for treating `generate-8-rotations-v3` as `~1` generation; that was a misreading of a source that says the opposite.
-
-Range below: low = `1` generation (floor); high = the documented 8-rotation area term `ceil(s * s * 8 / 65536)`, if it transfers to this route. It may not.
-
-| Route | Size | USD | Gens (unknown, range) | Implied `$/gen` | vs T1 bracket 1 |
-|---|---:|---:|---:|---:|---:|
-| `generate-8-rotations-v3` | `32` | `$0.0293` | `1` | `$0.0293` | `4.88x` |
-| `generate-8-rotations-v3` | `64` | `$0.0337` | `1` | `$0.0337` | `5.62x` |
-| `generate-8-rotations-v3` | `128` | `$0.0345` | `1-2` | `$0.0173-$0.0345` | `2.88-5.75x` |
-| `generate-8-rotations-v3` | `256` | `$0.0377` | `1-8` | `$0.0047-$0.0377` | **`0.79-6.28x`** |
-
-The `256` row is the warning: depending on which end is true, `generate-8-rotations-v3` at that size is either the best subscription route in the table or a route where credits win outright. A balance delta on this one call would resolve it. `animate-with-text-v3` is frame-driven as well as area-driven and has no formula at all; it is omitted rather than guessed.
+- **The Pro rung mapping is published, not assumed:** `20`→`$0.095`, `25`→`$0.125`, `40`→`$0.185`, uniform across all `51` Pro rows. This does **not** license a claim about PixelLab's intent — the rungs landing near the subscription rate is an observation, not evidence of design.
+- **`create-character-v3` published counts (`2`/`3`/`5` at `64`/`128`/`168`) exactly match the documented from-scratch formula** `1 + ceil(s * s * 8 / 65536)`. The reference-image variant (`ceil(w * h * 8 / 65536)`) is documented in [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md), but the pricing page publishes **one row per size**, and it is the from-scratch one. Pairing the reference-image count with the from-scratch USD price would invent a rate PixelLab does not publish, so no such row appears above.
+- **`generate-8-rotations-v3` published counts (`1`/`1`/`2`/`8` at `32`/`64`/`128`/`256`) are exactly `ceil(s * s * 8 / 65536)`** — the same area term. Its `256` row is the one place the area scaling bites: `8` generations for `$0.0377` collapses it to `$0.0047/gen`, statistically identical to a Pro rung.
+- **`animate-with-text-v3` scales on frames and area together** (`1`/`8`/`4` at `32`&#8239;4f / `256`&#8239;8f / `128`&#8239;16f) and has no published formula, but every listed row has a published count. The `256`&#8239;8f row is the only non-tileset route that loses at max discount.
+- **`create-map-object` bills `1` generation** (`$0.0099`), resolving a cost this repo's [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md) still records as unlabeled. It is `2.20x` at Tier 1 bracket 4 — a subscription win, not a hidden tileset.
 
 ### Step 3: interpretation
 
@@ -166,14 +163,18 @@ The `256` row is the warning: depending on which end is true, `generate-8-rotati
 
 ### Every Endpoint At Maximum Discount
 
-Sweeping all `118` priced rows in [pixellab-api-pricing-model-list.md](pixellab-api-pricing-model-list.md) (every endpoint, every size row) against the two deepest published monthly brackets:
+Sweeping **all `124` published priced rows** (every endpoint, every size row, using PixelLab's own `credits` and `generations` fields) against the deepest monthly brackets. Reminder: bracket 4 is a month-4-and-later rate, not one a new subscriber can buy.
 
 | Plan | Rate | Subscription wins | Credits win |
 |---|---:|---:|---:|
-| Tier 1 bracket 4 (`$9.00`) | `$0.0045` | `114/118` | `4` |
-| Tier 2 bracket 4 (`$22`) | `$0.0044` | `114/118` | `4` |
+| Tier 1 bracket 1 (`$12`) | `$0.0060` | `63/124` | `61` |
+| Tier 1 bracket 4 (`$9.00`) | `$0.0045` | `119/124` | `5` |
+| Tier 2 bracket 4 (`$22`) | `$0.0044` | `119/124` | `5` |
+| Tier 2 annual (`$220`) | `$0.0037` | `120/124` | `4` |
 
-**The losing set is identical on both, and it is entirely tilesets:**
+The first row is the headline the tenure ladder hides: **in the first month, Tier 1 loses on `61` of `124` rows — roughly half the catalog** — because every Pro row (`51` of them) and both background-removal sizes sit below `$0.0060`. The subscription only becomes broadly correct once the ladder has been climbed.
+
+**The losing set at max discount, identical on Tier 1 and Tier 2:**
 
 | Endpoint | Size | Gens | USD | Implied `$/gen` | T1 bracket 4 | T2 bracket 4 |
 |---|---|---:|---:|---:|---:|---:|
@@ -181,16 +182,18 @@ Sweeping all `118` priced rows in [pixellab-api-pricing-model-list.md](pixellab-
 | `create-tileset-sidescroller` | `16x16` | `3` | `$0.0079` | `$0.0026` | `0.59x` | `0.60x` |
 | `create-tileset` | `32x32` | `3` | `$0.0099` | `$0.0033` | `0.73x` | `0.75x` |
 | `create-tileset-sidescroller` | `32x32` | `3` | `$0.0099` | `$0.0033` | `0.73x` | `0.75x` |
+| `animate-with-text-v3` | `256x256`, 8 frames | `8` | `$0.0302` | `$0.0038` | `0.84x` | `0.86x` |
 
-**Even at the deepest published discount, tilesets remain credits-only — the only route family where that is true at every plan.** The gap is structural, not marginal: a `3`-generation call must cost more than `$0.0135` in credits to break even at `$0.0045`, and tilesets cost `$0.0079-$0.0099`. Tier 1 would have to fall to about `$6.60/month` to reach parity on `16x16` tiles, far below the `$9.00` floor. No published bracket closes it.
+**Tilesets are the only family that loses on every one of the 12 plans**, and they are structurally immune: a `3`-generation call must cost more than `$0.0135` in credits to break even at `$0.0045`, and tilesets cost `$0.0079-$0.0099`. Tier 1 would have to fall to **`$5.27/month`** to reach parity on `16x16` tiles (or `$6.60` on `32x32`) — below the `$9.00` floor. No published bracket closes it.
 
-Three qualifications on the `114` wins:
+**`animate-with-text-v3` at `256x256`/8 frames is the one non-tileset loser** at max discount: `8` generations for `$0.0302` is `$0.0038/gen`. It loses on `11` of `12` plans, winning only at Tier 2 annual (`1.03x`). It is the counterexample to "`v3` always favors the subscription" — frame-and-area scaling can push a `v3` route below the subscription rate, and this is the single row where it does.
 
-- **The Pro `40`-generation rung wins by only `1.03x`.** That is `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `inpaint-v3`, `edit-images-v2`, `animate-with-text-v2`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, and the large rung of every Pro character/object route. A `3%` margin sits inside the GPU-time variance the source already warns about, and it rests on the unverified rung mapping. Treat as break-even, not a win.
-- **About `40` of the `114` wins use the **B** baseline**, not measured counts. The direction is safe for those (all are low-generation, high-GPU routes), but `114/118` is a catalog count, not `114` verified facts. The `4` losses use documented `3`-generation counts, so the tileset conclusion rests on firmer ground than the win column.
-- **The `generate-8-rotations-v3` uncertainty stops mattering at this bracket.** Its `256` row ranges `0.79-6.28x` at first-month Tier 1 — the difference between credits winning and the best route in the table. At bracket 4 the worst case is `1.05x`, so the subscription wins across the entire plausible range. The open question still matters for budgeting, not for this decision.
+Two qualifications on the `119` wins:
 
-**`create-map-object` is the one unresolved route that could change the answer.** It is priced at `$0.0099` per object with **no documented generation count** — identical pricing to a `32x32` tileset. At `1` generation it is `2.20x` (subscription wins); at `3` generations, like the tileset it is priced identically to, it is `0.73x` — a **fifth** member of the credits-only set. [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md) already flags this route's cost as unlabeled. A single balance delta on one `create_map_object` call would settle it, and it is the highest-value measurement target in this document.
+- **The Pro `40`-generation rung wins by only `1.03x`.** That is the large rung of `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `inpaint-v3`, `edit-images-v2`, `animate-with-text-v2`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, and every Pro character/object route. A `3%` margin sits inside the GPU-time variance the source warns about. Treat as break-even, not a win.
+- **`generate-8-rotations-v3` `@256` wins by `1.05x`** for the same reason — its published `8`-generation count puts it at `$0.0047/gen`, statistically identical to a Pro rung. At first-month Tier 1 it is `0.79x` and credits win.
+
+Unlike earlier revisions of this document, **none of these counts is inferred** — all `124` rows publish theirs.
 
 ### Choosing A Tier: Volume, Not Unit Rate
 
@@ -206,7 +209,7 @@ All-in monthly cost, Tier 1 at max plus USD credits for anything past its `2,000
 | `3,000` | `$29.50` | `$22.00` | **Tier 2** |
 | `5,000` | `$70.50` | `$22.00` | **Tier 2** |
 
-Crossover is about **`2,634` generations/month** for `v3`-heavy work, and it moves with the route mix: about `2,136` for template-animation-heavy, `3,806` for Pixen-heavy, `4,737` for Pro-heavy (Pro overflow is cheap enough in credits that Tier 2 barely pays off before its own cap).
+Crossover is about **`2,634` generations/month** for `v3`-heavy work (overflow at `create-character-v3` `@64`'s `$0.0205/gen`), and it moves with the route mix: about `2,136` for template-animation-heavy (at the `128`/dir rate, `$0.0956`; the `64`/dir rate gives `2,402`), `3,811` for Pixen-heavy (`$0.00718`), `4,737` for Pro-heavy (`$0.00475` — Pro overflow is cheap enough in credits that Tier 2 barely pays off before its own cap).
 
 Effective all-in `$/generation` at real volume:
 
@@ -218,23 +221,23 @@ Effective all-in `$/generation` at real volume:
 | `3,000` | `$0.0098` | `$0.0073` | **Tier 2** |
 | `5,000` | `$0.0141` | `$0.0044` | **Tier 2** |
 
-At `2,000` generations Tier 2 costs `$0.0110/gen` against Tier 1's `$0.0045` — **`2.4x` worse**, despite advertising the better rate. Pick a tier by volume, not by unit rate: below about `2,600` generations/month, Tier 1 at max discount is the best monthly plan in the catalog on both absolute cost and effective rate.
+At `2,000` generations Tier 2 costs `$0.0110/gen` against Tier 1's `$0.0045` — **`2.4x` worse**, despite advertising the better rate. Pick a tier by volume, not by unit rate: below about `2,600` generations/month, Tier 1 at max discount is the cheapest monthly plan on both absolute cost and effective rate. Both rates above are tenured; a first-month comparison is `$12` vs `$24` at the same allowances, and Tier 1 wins there too below the crossover.
 
 What actually moves the bill, in order:
 
 1. **Utilization.** Tier 1 at `25%` use is `$0.0180/gen`, `4x` worse than the same plan at full use, and worse than credits on most routes.
-2. **Tenure.** Worth `25%` on Tier 1 (`$0.0060` to `$0.0045`), automatic and free.
-3. **Billing period.** Tier 2 annual (`$0.0037`) still beats Tier 2 max monthly (`$0.0044`) by `16%`.
+2. **Tenure.** Worth `25%` on Tier 1 (`$0.0060` to `$0.0045`) — but it accrues over consecutive monthly bills and is forfeited on cancellation. It is earned, not chosen, and it is a switching cost once earned.
+3. **Billing period.** Tier 2 annual (`$0.0037`) still beats Tier 2 max monthly (`$0.0044`) by `16%` — and annual is excluded from the loyalty ladder, so the two are alternatives, not a stack.
 4. **Tier.** Worth `2.3%`, and only above about `2,600` generations/month.
-5. **Route.** Only decides anything for tilesets, where credits always win.
+5. **Route.** Only decides anything for tilesets (credits always win) and `animate-with-text-v3` `@256`/8f (credits win on all but Tier 2 annual).
 
 ### Worked baskets
 
-Both assume full allowance utilization (see the scope limit above) and cost `create-1-direction-object` at the **low** end of its `20-40` range; at `40` the second basket's advantage drops from `1.4x` to `1.19x`.
+Both assume full allowance utilization (see the scope limit above). `create-1-direction-object` publishes exactly `20` generations at its single `$0.095` rung, so there is no range to pick from; an earlier revision hedged against a `40`-generation reading that does not exist.
 
 A `v3`-centric workflow (`10x` `create-character-v3` `@128`, `40x` v3 `animate-character` `@64`, `20x` Pixen `@128`, `3x` `generate-8-rotations-v3` `@64`):
 
-- Credits: about `$1.20`. Subscription: `93` generations, about `$0.56` at first-month Tier 1. Subscription about `2.1x` better. (The `3x` rotation calls use the unverified `1`-generation floor; see Step 2b.)
+- Credits: about `$1.20`. Subscription: `93` generations, about `$0.56` at first-month Tier 1. Subscription about `2.1x` better. (All four counts are published; `generate-8-rotations-v3` `@64` bills `1`.)
 
 The same basket plus `5x` `create-1-direction-object`:
 
@@ -244,7 +247,7 @@ Those `5` Pro calls are `28%` of the USD but `52%` of the generations. Pro Tools
 
 ### Utilization Breaks These Rates
 
-Every rate in Step 1 is a **floor**, reachable only by spending the entire allowance. Allowance does not roll over, so actual `$/generation` is `price / generations_actually_used`:
+Every rate in Step 1 is a **floor**, reachable only by spending the entire allowance. Assuming allowance does not roll over (strongly indicated, not documented — see [Outside the arithmetic](#outside-the-arithmetic)), actual `$/generation` is `price / generations_actually_used`:
 
 | Plan | At 100% use | At 50% use | At 25% use |
 |---|---:|---:|---:|
@@ -257,9 +260,10 @@ At `50%` utilization Tier 1 annual (`$0.0083`) no longer beats `create-character
 
 ### Outside the arithmetic
 
-- **Raw credits are flexible USD balance that does not expire.** Subscription allowance does not roll over.
-- **The hosted MCP spends subscription generations before USD credits.** A subscriber on hosted MCP therefore **cannot elect** to pay credits for a tileset. The "credits win on tilesets and first-month Pro" conclusions are actionable only for a credits-only account, or on direct REST where the spend order can be controlled. On hosted MCP they describe a cost you cannot avoid without cancelling.
-- **Size caps may make some rows unreachable.** Tiers advertise different maximum image sizes. If a tier cannot request `512x512`, its rate cannot be spent on the large Pro rung at all and that row's ratio is meaningless for it. The per-tier caps are not recorded here — verify before relying on a large-size row.
+- **Raw credits are flexible USD balance that does not expire.** Subscription allowance is **believed** not to roll over: no public source states this directly, but the upgrade modal offers to "wait until your limit resets next month", and a monthly *reset* implies no carry-over. The FAQ is silent. Treat as strongly indicated, not documented.
+- **The hosted MCP is believed to spend subscription generations before USD credits.** This is **not corroborated by any public source** — it rests on this repo's own notes plus the MCP server blurb ("Requires PixelLab subscription (with credit fallback support)"), which implies subscription-first. If true, a subscriber on hosted MCP cannot elect to pay credits for a tileset, and the "credits win on tilesets and first-month Pro" conclusions are actionable only for a credits-only account or on direct REST. Verify before advising anyone to restructure spending around it.
+- **The loyalty discount is not free.** Tenure brackets are forfeited on cancellation (with roughly a one-week reactivation grace) and do not apply to annual plans. A deep bracket is a switching cost as much as a benefit: leaving resets you to `$0.0060`.
+- **Size caps make some rows unreachable for Tier 1.** From the homepage card logic: Tier 0 and Tier 1 cap at **`320x320`**; Tier 2 reaches **`512x512`** (including edits/inpaint) and up to `10` concurrent jobs; Tier 3 inherits those and reaches `20` concurrent. **`12` of the `124` priced rows sit above Tier 1's `320` cap** — including `create-image-pixen` `512x512`, which an earlier revision of this document compared against Tier 1 rates. That comparison was meaningless and has been removed. The caps bite narrowly: only the five *image* Pro routes (`generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `inpaint-v3`, `edit-images-v2`) reach `341`/`512` at `$0.125`/`$0.185`. The Pro character, object, and animation routes top out at `168x168` or `256x256`, under the cap and reachable on Tier 1, so the generic "Pro Tools, large rung" row survives. Caveat: `320`/`512` are the advertised card benefit; the OpenAPI documents only route-level maxima, and whether the API hard-enforces a per-tier cap is unverified.
 - **The precision here exceeds the input quality.** The USD side is officially an estimate that varies with GPU processing time; the generation side is what actually bills. Pro spans `0.77-1.14x` across monthly brackets — a window narrow enough that a few percent of GPU-time drift flips the sign. Treat Pro as "roughly break-even, tenure-dependent", not as a computed edge.
 - Subscriptions also add tier benefits — concurrency and priority slots, support level, early access — and holding both a subscription and credits is not an either/or. Quality, retry rate, and feature access sit outside this comparison entirely.
 
@@ -341,7 +345,7 @@ When asked how much 1 PixelLab credit gives:
 
 When asked whether a subscription beats credits:
 
-> It depends on the route, and it genuinely flips. Subscription generations cost about `$0.0037-$0.0060` each depending on tier, tenure bracket, and billing period — assuming you spend the whole allowance. Compare that to the route's own USD price divided by its generation count: `v3` characters, template animation, and helper endpoints run `$0.009-$0.096` per generation, so a subscription is worth roughly `1.5-16x` there. Pro Tools sit near `$0.005` per generation — close enough to break-even that the answer depends on your tenure bracket: credits win in the first month of Tier 1, the subscription wins from bracket 4 or any annual plan. Tilesets favor credits on every plan. Reviewed mixed baskets land at `1.4-2.1x` for the subscription on the worst plan, so it usually wins, but a Pro-heavy or tileset-heavy workflow in a first month is genuinely better off on credits. Two things matter more than route choice: **spend the allowance** (a half-used plan doubles your real per-generation cost) and note that on hosted MCP you cannot elect credits anyway — generations are spent first.
+> It depends on the route **and on how long you have been subscribed**, and it genuinely flips. Subscription generations cost `$0.0037-$0.0071` each; the pricing page publishes both a USD price and a generation count for every route, so divide one by the other and compare. In a **first month on Tier 1 (`$0.0060`), the subscription loses on about half the catalog** — all `51` Pro rows sit just below that rate. Monthly prices then step down over consecutive bills (Tier 1 to `$0.0045`), which flips Pro positive and takes the subscription to `119` of `124` rows. So the honest answer to "why does my Pro call cost more on subscription": it does, in month one, and that is temporary — but the discount is earned over months and forfeited if you cancel. `v3` characters, template animation, and helper endpoints run `$0.009-$0.096` per generation and favor the subscription `1.5-16x` at any bracket. Tilesets favor credits on **every** plan and no discount fixes them. `animate-with-text-v3` at `256x256`/8 frames also favors credits on all but Tier 2 annual — `v3` is not automatically subscription-friendly; size and frame count decide. Two things matter more than route choice: **spend the allowance** (a half-used plan doubles your real per-generation cost, dwarfing every route difference) and **pick the tier by volume** — below ~`2,600` generations/month Tier 1 beats Tier 2 despite Tier 2's better headline rate.
 
 When the user asks about budget planning, prefer route-specific estimates:
 
@@ -359,10 +363,12 @@ When the user asks about budget planning, prefer route-specific estimates:
 - Do not assume a subscription always beats credits. Pro Tools in a first month and tilesets on any plan are cheaper with credits.
 - Do not treat generations-per-`$1` as a value ranking; it inverts the subscription comparison.
 - Do not quote a subscription `$/generation` without stating the utilization assumption. Every rate here is a floor that requires spending the full allowance; at `50%` use it doubles.
-- Do not assign `generate-8-rotations-v3` or `animate-with-text-v3` a generation count. The pricing source explicitly excludes both from the `~1` baseline, and neither has a published formula.
-- Do not claim PixelLab priced Pro Tools to match the subscription rate. The rung mapping behind that observation is this spike's assumption; only `20`->`$0.095` is corroborated.
-- Do not advise "pay with credits instead" on hosted MCP. It spends subscription generations first; the choice is not exposed.
-- Do not assign `create-map-object` a generation count or a subscription verdict. Its cost is unlabeled; at `1` generation it is `2.20x`, at `3` it is `0.73x` — the verdict inverts. Measure it.
+- Do not guess a generation count. The pricing page publishes one for all `124` priced rows; read it instead of inferring from a route's family or label.
+- Do not treat `v3` as a subscription-favoring family. `animate-with-text-v3` `@256`/8f bills `8` generations and loses to credits on `11` of `12` plans; `generate-8-rotations-v3` `@256` bills `8` and is `0.79x` at first-month Tier 1. Size and frame count decide, not the label.
+- Do not claim PixelLab priced Pro Tools to match the subscription rate. The rung mapping is published and confirmed, but nothing documents *why*; near-parity is an observation, not evidence of intent.
+- Do not quote a max-discount rate without its condition. Tenure brackets accrue over consecutive monthly bills, are forfeited on cancellation, and do not apply to annual plans. `$0.0045` is a month-4+ rate, not an available price.
+- Do not state as fact that hosted MCP spends generations before credits, or that allowance does not roll over. Both are indicated but uncited to any public source.
+- Do not compare a Tier 1 rate against a row above `320x320`. Tier 1 caps there; Tier 2 reaches `512x512`. `12` of `124` rows are unreachable on Tier 1.
 - Do not recommend a tier by its `$/generation` rate. Tier choice is worth about `2.3%`; below about `2,600` generations/month Tier 1 at max discount beats Tier 2 at max discount on both absolute cost and effective rate. Recommend by expected monthly volume.
 - Do not compare routes only by generation-units when the user cares about literal outputs.
 - Do not compare routes only by literal output count when the user cares about quality, consistency, editability, or final usable assets.
