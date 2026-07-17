@@ -1,6 +1,6 @@
 # Preset Template And Raw Skeleton Animations
 
-Read this for PixelLab requests involving skeletons, preset/template/built-in character animations, or named motions such as `walking-8-frames`, `breathing-idle`, `jumping-1`, `running-6-frames`, or "make the website's walk template".
+Read this for PixelLab character animation requests that use a preset/template/built-in motion or a custom skeleton. Exact preset ids are cataloged below.
 
 SKILL.md holds the global rules this file does not restate: MCP-first routing with the not-configured / explicit-MCP fallback contract, the south-first direction default and ask-before-all-directions cost gate, frame-order preservation, and the ban on undocumented website / Aseprite-extension endpoints.
 
