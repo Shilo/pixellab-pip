@@ -22,8 +22,10 @@ Each burst is **three partials at `f0 x [1, 2.1, 3.4]`** with relative amplitude
 
 | Burst | f0 | Partials (Hz) | Relative amps | Decay tau |
 | --- | --- | --- | --- | --- |
-| 1 | **220.00 Hz** | 220.0 / 462.2 / 748.3 | 1.000 / 0.380 / 0.157 | ~46 ms |
-| 2 | **165.00 Hz** | 165.0 / 346.5 / 561.0 | 1.000 / 0.385 / 0.153 | ~52 ms |
+| 1 | **220.00 Hz** | 220.0 / 462.2 / 748.3 | 1.000 / 0.380 / 0.157 | see below |
+| 2 | **165.00 Hz** | 165.0 / 346.5 / 561.0 | 1.000 / 0.385 / 0.153 | see below |
+
+**The decay is not a clean exponential, and no single tau should be quoted for it.** A whole-waveform parametric fit returns ~46/52 ms; a log-envelope slope fit returns anywhere from 26 ms to 70 ms depending on which dB range is fitted; an independent adversarial re-measurement returned ~35/36 ms. The spread *is* the finding — the envelope departs from a single exponential, which is also the most likely source of the residual noted below. Any reconstruction should match the measured envelope rather than assume one time constant.
 
 Free-parameter fit residuals: **-16.7 dB** (burst 1) and **-20.8 dB** (burst 2). Both bursts recover the same partial ratios (`2.101`/`3.402` and `2.100`/`3.400`) and the same relative amplitudes, so this is one synthesis function called twice with a different `f0`. The residual that remains is consistent with the onset shape not being a pure exponential from `t=0`.
 
@@ -31,11 +33,13 @@ Three structural facts follow:
 
 - **`220.00 -> 165.00 Hz` is exactly `4:3`, a descending perfect fourth.** The interval is deliberate, not incidental.
 - **`1 : 2.1 : 3.4` is inharmonic.** A harmonic series would be `1 : 2 : 3`.
-- **The 79 ms inter-bark interval sits in the measured most-annoying band.** The 2019 study tested inter-bark interval directly: **0.5 s scored least annoying and happiest, 0.1 s scored most annoying**. The current asset is at 0.079 s — at or below the worst interval the study tested.
+- **The 79 ms interval is textbook for a notification gesture, and only looks wrong if you read the sound as a dog.** See [Beat Count And Spacing](#beat-count-and-spacing) — this was initially recorded here as a defect, and the shipped-sound corpus overturned that.
 
 The inharmonicity is measurable, not cosmetic. A harmonic replica of the same sound (same `f0`, same amplitudes, same decay, same sample rate) measures **40 dB** harmonic-to-noise ratio; the real file measures **13.6 dB**. Three independent literatures treat that direction as a cost: Brewster lists "irregular harmonics" among the properties that make a sound attention-grabbing, Edworthy found irregular harmonic frequencies raise perceived urgency, and Pongracz found low harmonic-to-noise ratio is the strongest acoustic predictor of a bark being rated angry. The current sound is mild enough (only three partials, all low) that this is a small effect, but it points the wrong way.
 
-So the current asset carries **two independent defects that both point toward annoyance**: inharmonic partials, and a near-worst-case inter-bark interval. Neither is severe on its own — the sound is quiet, dark, and short, which covers for a lot — but both are cheap to correct, and `c0-heritage-harmonic` exists to test exactly that (it fixes the ratios and the onset, and widens the interval to 300 ms, while keeping the 220->165 identity).
+It is also the only property of the current asset that survives scrutiny as a defect. `c0-heritage-harmonic` exists to test correcting it: it harmonises the ratios and softens the onset while keeping the `220 -> 165` identity.
+
+The asset's **descending** direction is the more interesting open question. Every shipped task-complete sound measured for this spike **rises** — see [Beat Count And Spacing](#beat-count-and-spacing). `c8-heritage-rising` inverts it to test that.
 
 ### Analysis Caveat Worth Recording
 
@@ -103,7 +107,7 @@ The practical consequence is a required test rather than a guideline. Sonic-bran
 
 ## Candidates
 
-Seven candidates were rendered to `.local/bark-candidates/` (local-only, gitignored), each with a 12x repetition file under `.local/bark-candidates/loop-test/` for the Berlyne check. `dsp.py` and `synth.py` in that folder regenerate everything.
+Nine candidates were rendered to `.local/bark-candidates/` (local-only, gitignored), each with a 12x repetition file under `.local/bark-candidates/loop-test/` for the Berlyne check. `dsp.py` and `synth.py` in that folder regenerate everything.
 
 | Candidate | Concept |
 | --- | --- |
@@ -114,6 +118,8 @@ Seven candidates were rendered to `.local/bark-candidates/` (local-only, gitigno
 | `c4-pip-single` | One soft boof, 200 ms, with a quiet tonal underlayer. Minimal and least intrusive. |
 | `c5-yip-playful` | Higher F0 band (620/740 Hz), brightest, shortest gap. Included to audition the 2006 "high and tonal reads friendly" reading against the 2019 annoyance finding. |
 | `c6-heritage-body` | The heritage 220/165 pitch identity given formants and a body. |
+| `c7-gesture-rising` | Bark timbre in the shipped task-complete envelope: 2 events, **85 ms** apart (Xbox spacing), rising perfect fourth (415 -> 553), 335 ms total. The beats overlap into one gesture. |
+| `c8-heritage-rising` | The current asset's exact gesture, inverted: harmonic partials, 79 ms spacing kept, and `220 -> 165` flipped to `165 -> 220` (**rising** 4:3) -- structurally the Slack task-complete sound. |
 
 ### Measurements
 
@@ -128,21 +134,79 @@ All candidates are loudness-matched to **-18.5 LUFS** with true peak at or below
 | `c4-pip-single` | 1 | — | 200 ms | -4.66 dBTP | -18.5 | 1118 Hz | 1.07 acum | 18.3 dB |
 | `c5-yip-playful` | 2 | 250 ms | 420 ms | -2.63 dBTP | -18.5 | 1305 Hz | 1.26 acum | 14.0 dB |
 | `c6-heritage-body` | 2 | 300 ms | 530 ms | -2.03 dBTP | -18.5 | 514 Hz | 0.71 acum | 15.8 dB |
-| *(current `bark.wav`)* | *2* | ***79 ms*** | *210 ms* | *-4.36 dBTP* | *-17.2* | *251 Hz* | *0.40 acum* | *13.6 dB* |
+| `c7-gesture-rising` | 2 | **85 ms** | 335 ms | -4.32 dBTP | -18.5 | 811 Hz | 0.92 acum | 13.3 dB |
+| `c8-heritage-rising` | 1 gesture | 79 ms | 349 ms | -7.61 dBTP | -18.5 | 268 Hz | 0.46 acum | 40.0 dB |
+| *(current `bark.wav`)* | *2* | *79 ms* | *210 ms* | *-4.36 dBTP* | *-17.2* | *251 Hz* | *0.40 acum* | *13.6 dB* |
 
-Bold IBI values sit in the 2019 study's least-annoying band (~0.5 s). Every candidate clears the sharpness threshold (`< 1.75 acum`) and keeps its centroid well under 2 kHz. All except `c5` sit inside or above the 2019 study's tonal band (HNR 11.6–35.4 dB).
+Bold IBI values sit in the ~60-130 ms band that shipped notification sounds converge on (see [Beat Count And Spacing](#beat-count-and-spacing)). `c8` reports one beat because at 79 ms its two notes overlap into a single gesture rather than re-articulating -- the same legato effect that makes 44 of 47 Windows notification sounds read as one hit despite being multi-note motifs. Every candidate clears the sharpness threshold (`< 1.75 acum`) and keeps its centroid well under 2 kHz. All except `c5` sit inside or above the 2019 study's tonal band (HNR 11.6–35.4 dB).
 
-`c0`, `c5`, and `c6` occupy an unhappy middle at 250–300 ms: too wide to read as a fast double-tap, too narrow to earn the measured happy interval. If any of them survives an audition, its interval should move to ~450 ms.
+`c0`, `c5`, and `c6` occupy an unhappy middle at 250-300 ms: too wide to cluster into one gesture, too narrow to read as two deliberate beats. `c1`, `c2`, and `c3` at 430-450 ms are wider than anything measured in the shipped corpus -- defensible only if the timbre reads convincingly canine.
 
-### On Beat Count
+## Beat Count And Spacing
 
-Two beats is not an arbitrary inheritance from the current asset. Real barks come in bouts, and once the bright formants are rolled off for the sharpness and accessibility constraints, the two-event rhythm is the cheapest remaining cue that says "dog" rather than "blip". Two also stays clear of the IEC 60601-1-8 alarm patterns, which are 3-pulse and 5-pulse.
+This section supersedes an earlier conclusion in this spike. The original reasoning applied the dog-bout literature directly and concluded the current asset's 79 ms interval was a defect, and that a replacement should use a ~450 ms interval. **A survey of shipped notification sounds overturned both claims.** The correction is recorded rather than quietly edited out, because the failure mode is reusable: bark bioacoustics and notification-sound convention give opposite answers, and which one applies depends on what the sound reads as.
 
-The direct evidence favours two: the 2019 study tested bark **bouts** and found long-interval bouts least annoying and happiest. There is no single-bark condition in it to compare against, so it cannot settle 1 vs 2 — it can only say that *if* you use a bout, use a wide interval.
+### Does Beat Count Drive Annoyance? No.
 
-One conflation to avoid: Farago's "shorter calls rated more positive" refers to the individual vocalization, not the bout. Every candidate already uses short individual barks (~150 ms), so that finding does not discriminate between one beat and two.
+**No rigorous evidence was found that multi-event sounds are more annoying than single hits.** This is a negative result and is recorded as one. The documented annoyance drivers are:
 
-The real cost of two beats is total duration — a happy interval forces ~640 ms versus 200 ms for a single. **The trap: do not resolve "too long" by tightening the interval.** That moves toward the measured most-annoying condition, which is precisely the mistake the current asset makes. Shorten the individual barks, or drop to one beat.
+- **Intensity.** Brewster, citing Berglund: *"Great care must be taken over the use of intensity because it is the main cause of annoyance due to sound."*
+- **Alert frequency and relevance.** The notification-fatigue literature is entirely about volume of alerts and usefulness, not acoustic structure.
+- **Duration, via audio ducking.** Apple, [WWDC17 §803](https://developer.apple.com/videos/play/wwdc2017/803/): *"If your notification sound is too long, it ducks for a very long time, so it becomes annoying."* That penalises *long*, not *multi-onset* — two notes 85 ms apart are shorter than one note with a 1.5 s tail.
+
+Note count is not on the list. The concern that "two beats is more annoying than one" is not supported by the evidence found.
+
+### What Ships
+
+Measured from actual shipped audio (Windows media folder on a Win11 26200 machine; AOSP `.ogg` from `android.googlesource.com`; Xbox's official master file; Slack's `slack_sfx` archive; macOS/iOS system sounds hash-verified across two independent archives):
+
+| Sound | Events | Interval | Direction | Category |
+| --- | --- | --- | --- | --- |
+| **Xbox 360 achievement** | 2 | **85 ms** | D5 -> D6, rising octave | task complete |
+| **Slack `complete_quest_requirement`** | 2 | **58 ms** | E6 -> A6, rising perfect fourth | task complete |
+| **iOS Tri-tone** (origin: CD-burn complete) | 3 | ~115, ~100 ms | D4 -> A4 -> D5, rising 1-5-8 | task complete |
+| Discord `message1` | 2 | 95 ms | G4 -> G5, rising octave | message |
+| Skype message | 2 | 100 ms | — | message |
+| Messenger "pop ding" | 2 | 100 ms | rising pop -> C7 ding | message |
+| Teams chat | ~2 | ~110 ms | — | message |
+| Google Chat | 2 | 125 ms | G3 -> G5, octave | message |
+| Windows Notify Messaging | 3 | ~115, ~120 ms | C5 -> G4 -> C4, descending | message |
+| Windows Notify Calendar | 3 | ~115, ~225 ms | C4 -> F4 -> C5, ascending | reminder |
+| AOSP notification set (n=17) | **10 are 2 events, 7 are 1, none are 3+** | median 160 ms | — | notification |
+
+Four findings converge:
+
+1. **Two events is the modal choice**, and the standard one for task-complete specifically. Apple's own default alert went 3 (Tri-tone) -> 1 (Note) -> **2** (Rebound, iOS 17).
+2. **The interval clusters at ~60–130 ms**, not 450 ms. This is the strongest convergence in the whole dataset, and it holds across vendors who did not coordinate. At that spacing the events overlap into **one gesture**, not two beats.
+3. **Task-complete sounds rise.** Xbox (octave), Slack (perfect fourth), Tri-tone (1-5-8) all resolve upward. Rising broadly reads as arrive/complete, falling as leave/end.
+4. **The motif is short; the tail is free.** Every onset lands in the first ~250–500 ms; file durations of 1–2 s are almost entirely decay. "How long is the sound" and "how long is the motif" are different questions.
+
+### Why This Conflicts With The Bark Literature
+
+The two bodies of evidence give **opposite answers to the same parameter**:
+
+| | Says | Interval |
+| --- | --- | --- |
+| Dog bioacoustics (Pongracz 2019) | tight bouts read aggressive | **450–500 ms** |
+| Shipped notification sounds | tight clusters read as one gesture | **60–130 ms** |
+
+The resolution is that the bark finding is **conditional on the sound reading as a dog**. A chime motif at 100 ms carries no aggression semantics, because a chime is not an animal. Tight-bout-means-aggression only fires if the listener hears a bark bout in the first place.
+
+That yields the design rule, and it maps onto the candidates:
+
+- **The more convincingly canine the timbre, the more the ~450 ms interval is required.** `c2-boof-falling` has real formants and is therefore stuck at ~640 ms — and is the candidate least like anything that ships.
+- **The more chime-like, the tighter the cluster can go.** `c7-gesture-rising` takes this position: bark timbre, but in the shipped envelope (2 events, 85 ms, rising perfect fourth, 335 ms total).
+- **One beat sidesteps the conflict entirely.** `c4-pip-single` has no interval to get wrong.
+
+**The current asset sits on the chime side of this line.** It has no formants, so it does not read as a dog, so the bark-bout finding does not apply to it — and its 79 ms interval is almost exactly Xbox's 85 ms and Slack's 58 ms. It is not misconfigured; it is a conventional two-note notification gesture that happens to be *called* a bark. Its questionable property is direction, not spacing.
+
+One conflation avoided: Farago's "shorter calls rated more positive" refers to the individual vocalization, not the bout, so it does not discriminate between one beat and two.
+
+Brewster, directly actionable for any two-beat design: *"the first note should be accented (played slightly louder) and the last note should be slightly longer"* — so it reads as one closed rhythmic unit.
+
+### Counter-Evidence
+
+Under-signalling is a real failure mode. Apple's move to the gentler two-note Rebound drew complaints that it was less noticeable, and **iOS 17.2 added customization so users could restore Tri-tone**. Quieter and smoother is not monotonically better.
 
 ### Provisional Ranking
 
