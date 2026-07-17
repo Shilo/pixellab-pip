@@ -327,8 +327,9 @@ jobs:
           CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
         shell: bash
         # One-time setup: create a ClawHub account, generate an API token, add it as the CLAWHUB_TOKEN repo secret
-        # (optionally set a CLAWHUB_OWNER repo variable). Publishing auto-triggers ClawHub's scan/badge; the skill
-        # folder stays agent-agnostic — no OpenClaw-specific files are added to it.
+        # (optionally set a CLAWHUB_OWNER repo variable). Publishing uploads the version; the scan below is what
+        # produces its public audit verdict and badge data. The skill folder stays agent-agnostic — no
+        # OpenClaw-specific files are added to it.
         run: |
           npx --yes clawhub@latest --no-input login --token "$CLAWHUB_TOKEN"
           owner_args=()
@@ -345,3 +346,15 @@ jobs:
             --source-ref "${{ steps.bump.outputs.tag }}" \
             --source-path "skills/${{ steps.bump.outputs.skill_name }}" \
             "${owner_args[@]}"
+
+      - name: Scan the published ClawHub version
+        if: env.CLAWHUB_TOKEN != ''
+        timeout-minutes: 35 # the CLI polls the scan queue for up to 30 minutes
+        # The CLI equivalent of the Rescan button on the ClawHub security-audit page. Publishing alone leaves the
+        # version without an audit verdict, which is what the README badges read, so scan every release.
+        shell: bash
+        run: |
+          npx --yes clawhub@latest --no-input scan \
+            --slug "${{ steps.bump.outputs.skill_name }}" \
+            --version "${{ steps.bump.outputs.new_version }}" \
+            --update
