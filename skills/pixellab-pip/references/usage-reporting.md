@@ -23,7 +23,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 **Inputs Used**
 - `description` / `action` / other natural-language fields: the exact final text sent
 - Image/frame fields that anchored the result, by API field name: `image`, `first_frame`, `last_frame`, `reference_image`, `style_image`, `init_image`, `mask_image`; note omissions that change interpretation, e.g. `last_frame: omitted`
-- Seed: the seed sent, the resolved seed returned, `multiple, see Manifest`, or `not exposed` when the route returns none
+- Seed: the seed sent, the resolved seed returned, `multiple, see Manifest`, or `omitted` when none was sent
 - Non-default settings that materially affected the output: size, view/direction, count, mode/product label, `no_background`, frame count/timing, palette, reused base asset
 
 **Cost**
@@ -55,7 +55,7 @@ Never write a balance figure (`credits.usd`, `subscription.generations`, `subscr
 Write a manifest for every live generation flow. Record per call or per result item (not just top-level):
 
 - `job_id` / `background_job_id`, `asset_id`, and route-specific result/child IDs when present — enough to resume, inspect, or reproduce later.
-- `seed`: the seed sent, or the resolved seed PixelLab returned. Only `generate-image-v2` is known to return one, at `last_response.seed` on `GET /background-jobs/{job_id}`, which the OpenAPI does not document; the `create-image-*` routes return none, async variants included. Record `not exposed` when neither exists; never back-fill a value that was not sent or returned. Reuse a recorded seed when the user wants a near-variant of an approved result.
+- `seed`: the seed sent, or the resolved seed PixelLab returned. Only `generate-image-v2` is known to return one, at `last_response.seed` on `GET /background-jobs/{job_id}`, which the OpenAPI does not document; the `create-image-*` routes return none, async variants included. Record `omitted` when none was sent and none came back; never back-fill a value that was not sent or returned.
 
 ## Pending Jobs
 

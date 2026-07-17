@@ -11,7 +11,7 @@ Read this for terrain tilesets, platformer tilesets, isometric tiles, tile varia
 - Packed texture sheet/image grid via Create Image Pro.
 - Manual website Create Tileset Pro.
 
-Capture tile size, route/view, terrain pair or platform body/surface descriptions, transition description/size, base tile IDs, style/reference/palette images, seed, and target engine/export convention when relevant.
+Capture tile size, route/view, terrain pair or platform body/surface descriptions, transition description/size, base tile IDs, style/reference/palette images, and target engine/export convention when relevant.
 
 ## MCP Route Inputs
 
