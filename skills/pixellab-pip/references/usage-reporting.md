@@ -23,7 +23,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 **Inputs Used**
 - `description` / `action` / other natural-language fields: the exact final text sent
 - Image/frame fields that anchored the result, by API field name: `image`, `first_frame`, `last_frame`, `reference_image`, `style_image`, `init_image`, `mask_image`; note omissions that change interpretation, e.g. `last_frame: omitted`
-- Seed: the seed sent, the resolved seed returned, `multiple, see Manifest`, or `not exposed` when the route returns none; never a value you invented
+- Seed: the seed sent, the resolved seed returned, `multiple, see Manifest`, or `not exposed` when the route returns none
 - Non-default settings that materially affected the output: size, view/direction, count, mode/product label, `no_background`, frame count/timing, palette, reused base asset
 
 **Cost**
@@ -48,7 +48,7 @@ If local assembly produced a sheet/GIF/package, state that PixelLab produced the
 
 For cost, prefer per-call `usage` totals for the whole flow. If only balance is available, use `get_balance` / `GET /balance` before and after (no extra permission needed once live work is approved) and report the delta — but if other PixelLab jobs may have run concurrently, label the delta as an overlapping observation rather than the cost of this job. If neither is exposed, say `Cost: not exposed by the tool/API`. Label estimates as estimates.
 
-Report cost as the delta. Never write a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair into a blueprint, manifest, or repo file; chat is fine. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude.
+Never write a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair into a blueprint, manifest, or repo file; chat is fine. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude.
 
 ## Manifest
 

@@ -30,7 +30,6 @@
       "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}",
       "mode": "v3",
       "name": "Knight",
-      "outline": "selective outline",
       "size": 48,
       "view": "low top-down"
     }
