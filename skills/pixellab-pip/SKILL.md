@@ -34,7 +34,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 9. If the user says cheap, budget, low-cost, fewer credits, or similar, read `references/cost-routing.md` before choosing a paid route, and ask before each extra paid attempt unless a concrete budget or attempt count was approved.
 10. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat (see Auth And Execution).
 11. `seed`: omit by default; PixelLab randomizes it. Send it in two cases only — the user gave a seed (send verbatim), or two or more calls share near-identical wording and must land on the same composition (seed-lock): generate one random positive integer (`0` means random, so never 0) and send that same value on every call in the set. Never ask the user for a seed.
-12. Act or answer. Ask a short clarification only for known collisions.
+12. Act or answer, then report once. Ask a short clarification only for known collisions. After the first tool call, send nothing but blockers and questions — no status, plans, or notes on routing, schema checks, balance, calls, polling, downloads, or file writes. Silence until the report is correct; the report carries all of it.
 
 ## Asset Integrity
 
@@ -211,8 +211,6 @@ For questions, answer with: recommended surface/endpoint, why it fits, warnings 
 For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Before a multi-asset batch, list each planned item with its route and cost category so the user approves the full scope and rough total first. Ask before ambiguous credit-spending batches or destructive deletes. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
 
 Capture a balance snapshot before a nontrivial paid call when available. After live PixelLab work, read `references/usage-reporting.md` and use its report layout; verify the output against the user's explicit constraints before calling it final, and say plainly when verification failed instead of silently salvaging. Do not paste secrets, raw base64, full response JSON, or internal IDs unless needed for pending status, follow-up, or debugging.
-
-Between request and final report, send only blockers and necessary questions — never narrate what you are doing or about to do.
 
 When a live generation, edit, transform, conversion, background-removal, or animation job returns image(s), read `references/bark.md` and apply the completion-sound contract.
 
