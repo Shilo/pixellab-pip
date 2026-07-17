@@ -40,8 +40,6 @@ magick "frame-*.png" -delay 12 -dispose Background -loop 0 "preview.gif"
 
 Putting `-delay`, `-dispose`, or `-loop` only after the input frames can produce frames with `Dispose: Undefined`, which is exactly the condition that causes past frames to remain visible in transparent GIF previews.
 
-If a shared GIF halos or trails on Discord, re-encode it (`magick in.gif -coalesce out.gif`); the trigger is Discord-side, not the pixels.
-
 ## Verification
 
 Before reporting a GIF preview as complete:
