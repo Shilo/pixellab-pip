@@ -67,7 +67,7 @@ Item-icon specifics:
 }
 ```
 
-Set `no_background: true` for item icons and requested-transparent skill icons. When the endpoint exposes `seed` and the user did not provide one, send an agent-chosen non-zero seed and record it per `usage-reporting.md`.
+Set `no_background: true` for item icons and requested-transparent skill icons.
 
 ## Verification
 

@@ -23,7 +23,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 **Inputs Used**
 - `description` / `action` / other natural-language fields: the exact final text sent
 - Image/frame fields that anchored the result, by API field name: `image`, `first_frame`, `last_frame`, `reference_image`, `style_image`, `init_image`, `mask_image`; note omissions that change interpretation, e.g. `last_frame: omitted`
-- Seed: exact seed, `multiple, see Manifest`, `not supported`, or `not exposed`
+- Seed: the seed sent, the resolved seed returned, `multiple, see Manifest`, or `not exposed` when neither
 - Non-default settings that materially affected the output: size, view/direction, count, mode/product label, `no_background`, frame count/timing, palette, reused base asset
 
 **Cost**
@@ -48,14 +48,14 @@ If local assembly produced a sheet/GIF/package, state that PixelLab produced the
 
 For cost, prefer per-call `usage` totals for the whole flow. If only balance is available, use `get_balance` / `GET /balance` before and after (no extra permission needed once live work is approved) and report the delta — but if other PixelLab jobs may have run concurrently, label the delta as an overlapping observation rather than the cost of this job. If neither is exposed, say `Cost: not exposed by the tool/API`. Label estimates as estimates.
 
-Balance is a measurement step, not an output: publish only the subtracted delta — never a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair in a report, manifest, or repo file. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude. Answer a balance question in chat; never persist the figure.
+Report cost as the delta. Never write a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair into a blueprint, manifest, or repo file; chat is fine. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude.
 
 ## Manifest
 
 Write a manifest for every live generation flow. Record per call or per result item (not just top-level):
 
 - `job_id` / `background_job_id`, `asset_id`, and route-specific result/child IDs when present — enough to resume, inspect, or reproduce later.
-- `seed`: the exact integer sent, or the resolved seed PixelLab returned. PixelLab does not reliably expose seeds later, so when the endpoint has a `seed` input and the user gave none, choose a non-zero integer before the first paid call and send it — unless the user explicitly wants PixelLab-random output or the endpoint only documents random behavior; then record that the seed was not exposed. Vary the seed across candidates/retries; a recorded seed enables reproduction, it does not mean reusing one seed everywhere. Reuse a recorded seed when the user wants a near-variant of an approved result; vary it for fresh candidates. If a random/omitted-seed run later exposes a resolved seed in the job/status response, update the manifest with it.
+- `seed`: the seed sent, or the resolved seed from the job/status response when the route returns one. Leave `seed` at its default (`0`, random) unless the user asks for one or another rule directs otherwise. Reuse a recorded seed when the user wants a near-variant of an approved result.
 
 ## Pending Jobs
 
