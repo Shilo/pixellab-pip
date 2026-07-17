@@ -334,7 +334,8 @@ jobs:
           npx --yes clawhub@latest --no-input login --token "$CLAWHUB_TOKEN"
           owner_args=()
           if [ -n "$CLAWHUB_OWNER" ]; then owner_args=(--owner "$CLAWHUB_OWNER"); fi
-          npx --yes clawhub@latest --no-input skill publish "skills/${{ steps.bump.outputs.skill_name }}" \
+          set +e
+          out="$(npx --yes clawhub@latest --no-input skill publish "skills/${{ steps.bump.outputs.skill_name }}" \
             --slug "${{ steps.bump.outputs.skill_name }}" \
             --name "PixelLab Pip" \
             --version "${{ steps.bump.outputs.new_version }}" \
@@ -345,7 +346,15 @@ jobs:
             --source-commit "$(git rev-parse HEAD)" \
             --source-ref "${{ steps.bump.outputs.tag }}" \
             --source-path "skills/${{ steps.bump.outputs.skill_name }}" \
-            "${owner_args[@]}"
+            "${owner_args[@]}" 2>&1)"
+          status=$?
+          set -e
+          echo "$out"
+          # An upload that already landed is success for this step's purpose: the scan below still has to run,
+          # and without this a re-release of the same version could never finish.
+          if [ "$status" -ne 0 ] && ! grep -qF "already exists" <<<"$out"; then
+            exit "$status"
+          fi
 
       - name: Scan the published ClawHub version
         if: env.CLAWHUB_TOKEN != ''
