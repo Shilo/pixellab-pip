@@ -2,9 +2,9 @@
 
 Last reviewed: 2026-07-16.
 
-Purpose: record how the bundled `skills/pixellab-pip/assets/bark.wav` is actually built, the auditory-display and bioacoustics research behind a possible replacement, the candidate sounds generated from that research, and the measurement methodology used to compare them. This is a research spike for sound design and evidence. It is not a canonical agent instruction contract — the bark routing/config/playback contract stays in [`../skills/pixellab-pip/references/bark.md`](../skills/pixellab-pip/references/bark.md).
+Purpose: record how the original `skills/pixellab-pip/assets/bark.wav` was built, the auditory-display and bioacoustics research behind its replacement, the candidate sounds generated from that research, the adversarial verification that found real defects in them, and the measurement methodology — including the traps that produced three wrong answers along the way. This is a research spike for sound design and evidence. It is not a canonical agent instruction contract — the bark routing/config/playback contract stays in [`../skills/pixellab-pip/references/bark.md`](../skills/pixellab-pip/references/bark.md).
 
-No asset was replaced. `bark.wav` is unchanged; the candidates are local-only pending an audition decision. Mascot identity context lives in [`pip-mascot.md`](pip-mascot.md).
+**Outcome: `bark.wav` was replaced** with the `woof-hush` candidate, chosen by ear from a ranked set of ten. See [Outcome](#outcome). Mascot identity context lives in [`pip-mascot.md`](pip-mascot.md).
 
 ## Why This Matters
 
@@ -107,40 +107,113 @@ The practical consequence is a required test rather than a guideline. Sonic-bran
 
 ## Candidates
 
-Nine candidates were rendered to `.local/bark-candidates/` (local-only, gitignored), each with a 12x repetition file under `.local/bark-candidates/loop-test/` for the Berlyne check. `dsp.py` and `synth.py` in that folder regenerate everything.
+Two rounds were rendered, both local-only and gitignored, each candidate accompanied by a 12x repetition file for the Berlyne loop check.
 
-| Candidate | Concept |
-| --- | --- |
-| `c0-heritage-harmonic` | The current file, minimally repaired: partial ratios `1:2.1:3.4` -> `1:2:3`, plus a 12 ms raised-cosine attack. Same 220->165 descending fourth, same amplitudes, same taus. |
-| `c1-spec-rising` | The psychoacoustic spec taken literally. Strictly harmonic stack, energy peak on harmonic 2, F0 415 -> 523 (rising major third), no formant filter. |
-| `c2-boof-falling` | Full source-filter dog: glottal pulse source, three-stage formant "wah" morph, per-bark pitch drop, breath onset. Falling major third (523 -> 415 sense). |
-| `c3-chime-dog` | Bark voice layered under a prominent Chowning FM marimba/bell tone. Rising major third. The "chime with a bark vibe" reading. |
-| `c4-pip-single` | One soft boof, 200 ms, with a quiet tonal underlayer. Minimal and least intrusive. |
-| `c5-yip-playful` | Higher F0 band (620/740 Hz), brightest, shortest gap. Included to audition the 2006 "high and tonal reads friendly" reading against the 2019 annoyance finding. |
-| `c6-heritage-body` | The heritage 220/165 pitch identity given formants and a body. |
-| `c7-gesture-rising` | Bark timbre in the shipped task-complete envelope: 2 events, **85 ms** apart (Xbox spacing), rising perfect fourth (415 -> 553), 335 ms total. The beats overlap into one gesture. |
-| `c8-heritage-rising` | The current asset's exact gesture, inverted: harmonic partials, 79 ms spacing kept, and `220 -> 165` flipped to `165 -> 220` (**rising** 4:3) -- structurally the Slack task-complete sound. |
+### Round One: Exploration (`.local/bark-candidates/`, nine candidates)
+
+Round one spanned the design space before the shipped-sound corpus was gathered. It is superseded, and is retained only for context. Its candidates ranged across the dog-to-chime axis (`c2-boof-falling` most canine, `c3-chime-dog` most tonal), tested descending against rising intervals, and used 250-450 ms inter-beat intervals derived from the dog-bout literature. The corpus survey later showed that 430-450 ms is wider than anything shipped, which retired most of the round.
+
+Two round-one candidates survived into round two: `c7-gesture-rising` and `c8-heritage-rising`.
+
+### Round Two: The Final Set (`.local/bark-final/`, ten candidates)
+
+Round two applied every rule the research produced, with **surviving repetition as the primary objective**, since this asset fires after every generation. Candidates are prefixed with their recommended rank. `dsp.py`, `synth.py`, and `final.py` in that folder regenerate everything deterministically — verified by re-running and reproducing every WAV byte-for-byte.
+
+| Candidate | Character | Concept |
+| --- | --- | --- |
+| `01-boof-third` | dog | Rising major third (415 -> 523) at Xbox's 85 ms spacing. |
+| `02-woof-hush` | dog | **Shipped.** Softest attack, hard 2.2 kHz roll-off, minimal breath, rising minor third. |
+| `03-heritage-rising` | chime | The original asset harmonised and inverted to rise. Cleanest spectrum of the set. |
+| `04-boof-single-tail` | dog | One boof plus a legato tonal tail (the macOS single-strike position). |
+| `05-pup-warm` | dog | Dark, warm, slowest attack. |
+| `06-chime-pup-fourth` | hybrid | Voice under a marimba, rising perfect fourth. |
+| `07-boof-minor-third` | dog | Gentlest rising interval. |
+| `08-gesture-rising` | dog | Round-one survivor. Rising perfect fourth. |
+| `09-boof-beats` | dog | Two distinct beats at AOSP's 125 ms rather than one gesture. |
+| `10-marimba-pup-octave` | chime | Xbox's exact structure: rising octave, dog voice recessed to -13 dB. |
+
+Design decisions specific to round two, each traceable to a finding:
+
+- **Rising intervals throughout.** Every shipped task-complete sound rises.
+- **Spacing 85-125 ms.** The shipped convergence, not the dog-bout 450 ms.
+- **The interval is capped for a dog voice.** From F0 = 415 Hz, only a minor third (493 Hz) or major third (523 Hz) keeps the second beat inside Pongracz's 401-531 Hz friendly band. A perfect fourth reaches 553 Hz; an octave reaches 830 Hz, landing in the *most-annoying* band. Chime-forward candidates carry no F0-aggression semantics and may take the wider Xbox/Slack intervals, which is why `10` can use an octave safely while `08`'s fourth is marginal. **This reasoning was later partly refuted; see [Verification](#verification).**
+- **Repetition levers applied set-wide:** attacks 16-22 ms nominal, breath noise -24 to -30 dB, centroids 650-1300 Hz, roll-off 2.2-2.9 kHz, no exaggerated sweeps, no gag gestures. Charm from timbre, never from a joke: a gag front-loads its appeal and then decays.
+- **Brewster's closure rule:** beat 1 accented, beat 2 longer, so the pair reads as one closed unit.
 
 ### Measurements
 
-All candidates are loudness-matched to **-18.5 LUFS** with true peak at or below **-1.0 dBTP**. Matching matters: comparing candidates at unequal loudness is not a fair test, because louder simply reads as better. `-18.5` is the loudest level every candidate reaches without breaching the peak ceiling — percussive sounds have a high crest factor, and several hit `-1 dBTP` while still 2–3 dB short of `-16 LUFS`. Absolute ship level is a separate decision once one is chosen.
+| Candidate | Beats | IBI | Duration | True peak | Centroid | Sharpness | HNR |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `01-boof-third` | 2 | 86 ms | 340 ms | -4.51 dBTP | 791 Hz | 0.90 | 13.8 dB |
+| `02-woof-hush` | 2 | 101 ms | 370 ms | -5.11 dBTP | 694 Hz | 0.86 | 14.9 dB |
+| `03-heritage-rising` | fused | 79 ms | 349 ms | -7.61 dBTP | 268 Hz | 0.46 | 40.0 dB |
+| `04-boof-single-tail` | 1 | — | 300 ms | -4.00 dBTP | 1074 Hz | 1.02 | 15.2 dB |
+| `05-pup-warm` | 2 | 91 ms | 345 ms | -4.94 dBTP | 696 Hz | 0.85 | 14.5 dB |
+| `06-chime-pup-fourth` | fused | 85 ms | 465 ms | -7.91 dBTP | 1296 Hz | 1.27 | 24.2 dB |
+| `07-boof-minor-third` | 2 | 96 ms | 350 ms | -4.57 dBTP | 784 Hz | 0.89 | 13.8 dB |
+| `08-gesture-rising` | 2 | 85 ms | 335 ms | -4.32 dBTP | 811 Hz | 0.92 | 13.3 dB |
+| `09-boof-beats` | 2 | 126 ms | 385 ms | -4.02 dBTP | 796 Hz | 0.91 | 13.8 dB |
+| `10-marimba-pup-octave` | fused | 85 ms | 485 ms | -8.44 dBTP | 653 Hz | 0.84 | 33.2 dB |
+| *(original `bark.wav`)* | *2* | *79 ms* | *210 ms* | *-4.36 dBTP* | *251 Hz* | *0.40* | *13.6 dB* |
 
-| Candidate | Beats | IBI | Duration | True peak | LUFS | Centroid | Sharpness | HNR |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `c0-heritage-harmonic` | 2 | 300 ms | 550 ms | -5.86 dBTP | -18.5 | 267 Hz | 0.46 acum | 40.0 dB |
-| `c1-spec-rising` | 2 | **450 ms** | 660 ms | -1.00 dBTP | -18.7 | 1216 Hz | 1.14 acum | 17.0 dB |
-| `c2-boof-falling` | 2 | **430 ms** | 640 ms | -1.50 dBTP | -18.5 | 995 Hz | 1.14 acum | 14.3 dB |
-| `c3-chime-dog` | 2 | **450 ms** | 770 ms | -5.28 dBTP | -18.5 | 1319 Hz | 1.28 acum | 23.7 dB |
-| `c4-pip-single` | 1 | — | 200 ms | -4.66 dBTP | -18.5 | 1118 Hz | 1.07 acum | 18.3 dB |
-| `c5-yip-playful` | 2 | 250 ms | 420 ms | -2.63 dBTP | -18.5 | 1305 Hz | 1.26 acum | 14.0 dB |
-| `c6-heritage-body` | 2 | 300 ms | 530 ms | -2.03 dBTP | -18.5 | 514 Hz | 0.71 acum | 15.8 dB |
-| `c7-gesture-rising` | 2 | **85 ms** | 335 ms | -4.32 dBTP | -18.5 | 811 Hz | 0.92 acum | 13.3 dB |
-| `c8-heritage-rising` | 1 gesture | 79 ms | 349 ms | -7.61 dBTP | -18.5 | 268 Hz | 0.46 acum | 40.0 dB |
-| *(current `bark.wav`)* | *2* | *79 ms* | *210 ms* | *-4.36 dBTP* | *-17.2* | *251 Hz* | *0.40 acum* | *13.6 dB* |
+An automated gate reported all ten clearing every hard rule. **That gate was substantially wrong.** See [Verification](#verification).
 
-Bold IBI values sit in the ~60-130 ms band that shipped notification sounds converge on (see [Beat Count And Spacing](#beat-count-and-spacing)). `c8` reports one beat because at 79 ms its two notes overlap into a single gesture rather than re-articulating -- the same legato effect that makes 44 of 47 Windows notification sounds read as one hit despite being multi-note motifs. Every candidate clears the sharpness threshold (`< 1.75 acum`) and keeps its centroid well under 2 kHz. All except `c5` sit inside or above the 2019 study's tonal band (HNR 11.6–35.4 dB).
+## Verification
 
-`c0`, `c5`, and `c6` occupy an unhappy middle at 250-300 ms: too wide to cluster into one gesture, too narrow to read as two deliberate beats. `c1`, `c2`, and `c3` at 430-450 ms are wider than anything measured in the shipped corpus -- defensible only if the timbre reads convincingly canine.
+The final set was handed to an independent adversarial verifier, instructed to write its own measurement code from scratch (reusing this spike's `dsp.py` would inherit its bugs), to validate every metric against known-answer signals first, and to hunt for violations rather than confirm compliance. It found real defects. Everything below was independently reproduced before being accepted.
+
+### The Compliance Gate Was Theatre
+
+- **HNR cannot detect inharmonicity.** Demonstrated directly: an inharmonic `1 : 2.1 : 3.4` stack reads 12.7 dB and a harmonic `1 : 2 : 3` reads 39.6 dB, but a wide-lag autocorrelation search launders the difference away. The HNR gate was **blind to the exact defect it existed to catch**, which is how an inharmonic candidate passed it.
+- **The self-check passed for the wrong reason.** `dsp.py`'s `demo()` used an HNR test signal mis-specified by 6.02 dB, with a tolerance of +/-6.0 dB — exactly wide enough to hide it. The validation built to prevent this class of error contained the same class of error.
+- **Sharpness in acum is not absolutely testable on a file.** Acum is defined at a real SPL, and a WAV carries no SPL reference. The values are usable as *ordering only*; "< 1.75 acum" is not a test that can be run against an audio file.
+- **"No AM in 15-300 Hz" is unsatisfiable.** A percussive envelope's broadband skirt puts energy across that band by construction: a 19.5 ms decay alone lands -18.7 dB at 70 Hz. The rule measures envelope bandwidth, not roughness.
+
+### Real Defects Found
+
+- **The loudness match was fake.** All ten reported -18.50 LUFS with a 0.01 dB spread. That is an artifact of measuring whole-file LUFS on sounds that are mostly trailing silence: 300 ms of padding alone shifts the number by 3 dB. Measured on the audible body, the spread is **4.95 dB**. Since intensity is the single documented annoyance driver, the A/B comparison was never fair, and louder candidates would have read as better for the wrong reason.
+- **Two candidates were inharmonic — the exact defect under repair.** `pup()` sweeps f0 while `fm_tone()` is static, so voice and tail are in tune only at t=0; the ratio slides 1.56 -> 2.30 across the sound. `04-boof-single-tail` measures h2/h1 = **1.7679** (deviation 0.23) against the original asset's 2.1012 (deviation 0.10) — **2.3x worse than the sound it was replacing**. `06` is likewise inharmonic. Both were cut.
+- **`decay_ms` is not a decay time.** `adsr()` computes `tau = decay_time / (40/8.686)`, so `decay_ms=90` yields **tau = 19.5 ms**. At 85 ms spacing, beat 1 is already 37.8 dB down. The claim that the beats "fuse into one gesture" is **false**: six of the ten are two discrete hits, and the rationale given for the 55-135 ms spacing did not apply to the sounds built on it. The spacing is still conventional — Discord at 95 ms and Skype at 100 ms are also discrete hits.
+- **Beat 2 is outside the friendly band in every dog candidate** (539-613 Hz). The interval-cap reasoning above used *nominal* f0 and ignored the synth's own +28% contour overshoot, making the major-third argument arithmetic on a number the synth never produces. Nothing reached the 732-1833 Hz most-annoying band, so the error was not fatal.
+- **The h2 energy peak — the headline design goal — is not achieved on 8/10.** h2 sits 7.1-11.5 dB *below* h1.
+- **`finish()` waveshapes every candidate.** `softclip(x, 1.6)` maps 0.5 -> 0.72, which is compression, not a safety limiter. It brightens the spectrum and shortens attacks *after* formant levels are set precisely, so the shipped spectrum is not the one the formant spec describes.
+
+### Why The h2 Miss Was Not Worth Fixing
+
+The verifier attributed the h2 miss to `dog_stages` placing its t=0 formant at `f1*0.55`, landing on h1. **That diagnosis is incomplete.** Parking the formant on h2 for the entire sound was tested directly, and changes almost nothing: centroid 692 -> 696 Hz, sharpness 0.86 -> 0.86, h2 still 8.2 dB below h1.
+
+The actual cause is the **source spectral tilt**. The glottal source uses 1/n rolloff plus -9 dB/oct of additional tilt, putting h2 roughly 15 dB below h1 before any filter is applied. No formant placement recovers that; only flattening the source tilt would, and that produces a brighter, buzzier sound.
+
+That is the decisive point. **Brightness is the annoyance direction** — the 2-5 kHz sensitivity peak, sharpness, and Pongracz's high-F0 finding all point the same way. Achieving the h2 goal would move the sound *toward* the annoying end. The h2 peak was an instrumental goal whose purpose was to land the sound dark but bright enough; the outcome landed by another route. The miss serves the primary objective, so it was left alone.
+
+### The Original Asset, Re-Adjudicated
+
+The verifier independently confirmed the reverse-engineering **exactly**: partials at `1 : 2.1000 : 3.4000`, amplitudes `1 : 0.384 : 0.154`, f0 `220.01 -> 165.00`, ratio exactly `0.7500`, spacing `78.5 ms`, onset `0.41 ms`.
+
+It refuted the decay figure, and re-measurement showed that neither party should assert one — see the decay note in [The Current Asset, Reverse-Engineered](#the-current-asset-reverse-engineered). The envelope is not a single exponential.
+
+## Outcome
+
+**`02-woof-hush` shipped**, chosen by ear from the ranked set. It replaced `bark.wav` as-is: no rebuild, no gain change.
+
+| | original | `woof-hush` |
+| --- | --- | --- |
+| Partials | `1 : 2.1 : 3.4` (**inharmonic**) | strict harmonic series |
+| Interval | descending perfect fourth | **rising minor third** |
+| Attack | **0.41 ms** (instant) | 8.5 ms |
+| Centroid | 251 Hz | 694 Hz |
+| Format | 22050 Hz, 210 ms, 9,302 B | 44100 Hz, 370 ms, 32,678 B |
+| Peak sample | 0.605 | 0.555 |
+| Body loudness | -15.77 LUFS | -14.15 LUFS (**+1.62 dB**) |
+
+Both defects that survived scrutiny — the inharmonic partials and the inverted interval — are corrected, and peak amplitude is *lower* than the original. Playback was verified through the bundled helper (`bark.py play` returns `played: true`; `winsound` handles 44.1 kHz), and `dev-tools/qa.py` passes. The repo's WAV gate only checks for a non-empty file, so the format change is safe.
+
+Two decisions worth recording, both deliberate:
+
+1. **Not rebuilt.** `woof-hush` carries the h2 miss, the non-fused beats, and the contour overshoot. None is an audible defect. The h2 miss makes it darker, which is the safe direction; the fusion claim was an error in prose rather than in the file; and the contour overshoot lands beat 2 at 539 Hz, 8 Hz past a band edge drawn from a study that tested a few discrete levels. That is 0.26 semitones, and not perceptible as a category change.
+2. **Not renormalized.** It ships 1.62 dB hotter than the original. Level is the documented annoyance driver and is the one property worth watching in real use, but the candidate was chosen by ear at exactly this level, and overriding a direct human judgement with a proxy metric is the same error as rebuilding. It is a one-line gain change if it grates.
+
+The general lesson: **a human listening is a better instrument than any metric in this document.** The metrics exist to narrow the field to plausible candidates and to catch what an ear misses — inharmonicity, clipping, DC, loudness confounds. They do not decide.
 
 ## Beat Count And Spacing
 

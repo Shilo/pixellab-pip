@@ -34,7 +34,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 9. If the user says cheap, budget, low-cost, fewer credits, or similar, read `references/cost-routing.md` before choosing a paid route, and ask before each extra paid attempt unless a concrete budget or attempt count was approved.
 10. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat (see Auth And Execution).
 11. `seed`: omit by default; PixelLab randomizes it. Send it in two cases only — the user gave a seed (send verbatim), or two or more calls share near-identical wording and must land on the same composition (seed-lock): generate one random positive integer (`0` means random, so never 0) and send that same value on every call in the set. Never ask the user for a seed.
-12. Act or answer, then report once. Ask a short clarification only for known collisions. After the first tool call, send nothing but blockers and questions — no status, plans, or notes on routing, schema checks, balance, calls, polling, downloads, or file writes. Silence until the report is correct; the report carries all of it.
+12. Act or answer, then report once. Ask a short clarification only for known collisions. Between the first tool call and that report, send only a blocker or a question you need answered — never progress, status, findings, or intentions; they belong in the report.
 
 ## Asset Integrity
 

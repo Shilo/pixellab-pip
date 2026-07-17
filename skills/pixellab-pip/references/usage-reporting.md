@@ -55,7 +55,7 @@ Never write a balance figure (`credits.usd`, `subscription.generations`, `subscr
 Write a manifest for every live generation flow. Record per call or per result item (not just top-level):
 
 - `job_id` / `background_job_id`, `asset_id`, and route-specific result/child IDs when present — enough to resume, inspect, or reproduce later.
-- `seed`: the seed sent, or the resolved seed PixelLab returned. Only `generate-image-v2` is known to return one, at `last_response.seed` on `GET /background-jobs/{job_id}`, which the OpenAPI does not document; the `create-image-*` routes return none, async variants included. Record `omitted` when none was sent and none came back; never back-fill a value that was not sent or returned.
+- `seed`: the seed sent, or the resolved seed PixelLab returned. Async jobs may expose it at `last_response.seed` on `GET /background-jobs/{job_id}` — confirmed on `generate-image-v2` and `animate-with-text-v3`, documented nowhere in the OpenAPI, so read the response instead of assuming. The sync `create-image-*` routes and async `create-image-pixflux-background` return none. Record `omitted` only when none was sent and none came back; never back-fill a value that was not sent or returned.
 
 ## Pending Jobs
 
