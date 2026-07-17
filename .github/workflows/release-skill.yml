@@ -320,7 +320,9 @@ jobs:
 
       - name: Publish to ClawHub for its independent security audit
         if: env.CLAWHUB_TOKEN != ''
-        continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
+        # No continue-on-error: the README badges pin the released version, so a silent publish
+        # failure leaves them resolving to "resource not found". This is the last step, so the
+        # release is already published — a red run only signals that ClawHub needs a re-publish.
         env:
           CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
         shell: bash
@@ -337,7 +339,7 @@ jobs:
             --version "${{ steps.bump.outputs.new_version }}" \
             --changelog "Release ${{ steps.bump.outputs.tag }}" \
             --tags latest \
-            --topics "pixellab,pixellab-pip,pixel-art,pixel-art-generator,game-assets,game-development,ai-agents,agent-skills,agent-plugin,codex-plugin,claude-code,cursor-plugin,github-copilot,gemini-cli,mcp,rest-api,sprites,pixelorama,aseprite,tilesets,api" \
+            --topics "pixellab,pixel-art,game-assets,sprites,mcp" \
             --source-repo "${{ github.repository }}" \
             --source-commit "$(git rev-parse HEAD)" \
             --source-ref "${{ steps.bump.outputs.tag }}" \
