@@ -33,7 +33,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 8. For animation, preserve the user's requested frame count; otherwise use the endpoint or template default. Exception: preset/template character animations take no `frame_count`; pick a matching template id such as `walking-8-frames` (catalog in `references/preset-skeleton-template-animation.md`) or fall back to v3 custom mode. Preserve PixelLab's returned frame order; no ping-pong, reversed, duplicated, or trimmed outputs unless the user asks for that playback style.
 9. If the user says cheap, budget, low-cost, fewer credits, or similar, read `references/cost-routing.md` before choosing a paid route, and ask before each extra paid attempt unless a concrete budget or attempt count was approved.
 10. Before live generation, confirm the PixelLab bearer token is configured without asking the user to paste it into chat (see Auth And Execution).
-11. Never invent a seed — a number you pick is not random, just your bias. Send one only when the user gives it, or when reusing a seed PixelLab returned; otherwise leave it unset. If the user wants a seed-locked set or a near-variant later, ask for a seed before the first paid call.
+11. Leave `seed` unset by default so PixelLab randomizes it. Send one in exactly two cases: the user volunteered a seed, or a set must hold together — then choose any integer yourself and reuse it across every call in the set. Never ask the user for a seed.
 12. Act or answer. Ask a short clarification only for known collisions.
 
 ## Asset Integrity

@@ -9,8 +9,8 @@ These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2
 Do not globally cap every prompt at 500 characters. `maxLength` follows a rough tier by field kind:
 
 - 2000 for most primary `description` fields.
-- 1000 for the managed state/edit-description family: character/object state `edit_description` and object `animation_description`.
-- 500 for raw-animation `action` fields, single-image edit descriptions, and some style/reference descriptions.
+- 1000 for the managed state/edit-description family: character/object state `edit_description` and object `animation_description`, and `animate-with-text-v3` `action`.
+- 500 for the other raw-animation `action` fields, single-image edit descriptions, and some style/reference descriptions.
 - 200 for some UI/font fields (`color_palette`, `font_name`).
 
 ## Non-Obvious Limits
@@ -20,7 +20,7 @@ These are the rows that do not follow the tier you would guess from the field na
 | Endpoint | Field | Max chars |
 |---|---|---:|
 | `POST /animate-with-text-v2` | `action` | 500 |
-| `POST /animate-with-text-v3` | `action` | 500 |
+| `POST /animate-with-text-v3` | `action` | 1000 |
 | `POST /edit-image` | `description` | 500 |
 | `POST /enhance-animation-v3-prompt` | `action` | 500 |
 | `POST /generate-8-rotations-v2` | `style_description` | 500 |
