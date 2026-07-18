@@ -1,1 +1,3 @@
+# Pillow: required by the tests/ suite (run by dev-tools/qa.py), which imports both
+# dev-tools/pixellab_mcp_tileset_sim.py and skills/pixellab-pip/assets/background_removal.py.
 Pillow==12.2.0
