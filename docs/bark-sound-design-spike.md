@@ -4,7 +4,7 @@ Last reviewed: 2026-07-16.
 
 Purpose: record how the original `skills/pixellab-pip/assets/bark.wav` was built, the auditory-display and bioacoustics research behind its replacement, the candidate sounds generated from that research, the adversarial verification that found real defects in them, and the measurement methodology — including the traps that produced three wrong answers along the way. This is a research spike for sound design and evidence. It is not a canonical agent instruction contract — the bark routing/config/playback contract stays in [`../skills/pixellab-pip/references/bark.md`](../skills/pixellab-pip/references/bark.md).
 
-**Outcome: `bark.wav` was replaced** with the `woof-hush` candidate, chosen by ear from a ranked set of ten. See [Outcome](#outcome). Mascot identity context lives in [`pip-mascot.md`](pip-mascot.md).
+**Outcome: `bark.wav` was replaced** with the `woof-hush` candidate, chosen by ear from a ranked set of ten, then turned down ~9.85 dB after it proved too loud in use. See [Outcome](#outcome) and [Loudness](#loudness). Mascot identity context lives in [`pip-mascot.md`](pip-mascot.md).
 
 ## Why This Matters
 
@@ -209,9 +209,55 @@ Both defects that survived scrutiny — the inharmonic partials and the inverted
 Two decisions worth recording, both deliberate:
 
 1. **Not rebuilt.** `woof-hush` carries the h2 miss, the non-fused beats, and the contour overshoot. None is an audible defect. The h2 miss makes it darker, which is the safe direction; the fusion claim was an error in prose rather than in the file; and the contour overshoot lands beat 2 at 539 Hz, 8 Hz past a band edge drawn from a study that tested a few discrete levels. That is 0.26 semitones, and not perceptible as a category change.
-2. **Not renormalized.** It ships 1.62 dB hotter than the original. Level is the documented annoyance driver and is the one property worth watching in real use, but the candidate was chosen by ear at exactly this level, and overriding a direct human judgement with a proxy metric is the same error as rebuilding. It is a one-line gain change if it grates.
+2. **Shipped +1.62 dB hotter than the original**, chosen by ear at that level. This was flagged as the one property to watch, and in real use it proved too loud — corrected in a follow-up pass; see [Loudness](#loudness).
 
 The general lesson: **a human listening is a better instrument than any metric in this document.** The metrics exist to narrow the field to plausible candidates and to catch what an ear misses — inharmonicity, clipping, DC, loudness confounds. They do not decide.
+
+## Loudness
+
+After living with the shipped sound, it was reported **too loud** relative to subtle reference chimes (the Claude desktop notification was cited). The audition that selected `woof-hush` was run under an unfair loudness match (see [Verification](#verification)), so the level was never actually vetted — this closed that gap. Two independent lines of research were run and **converged on the same target**.
+
+### The Level Was Objectively Hot
+
+A survey measuring shipped notification sounds with a validated BS.1770 meter (Windows on-machine, macOS/iOS/Android from public mirrors) placed the sound near the loud end of the distribution:
+
+- The **subtle, well-regarded cluster** — macOS Purr, Frog, Pop, Ping, Glass, Bottle, Basso, Sosumi, Submarine; iOS Chord, Note, Bamboo, Pulse — sits at **body median -23.0 LUFS** (range -27.5 to -21.2), RMS median -31.6 dBFS, true peaks -8 to -15 dBTP (never maximized).
+- The shipped bark measured **body -14.15 LUFS** — **+8.8 dB above the subtle median**. Its nearest neighbours were Android TaDa, Android Ariel, and iOS sms-received4: deliberately attention-grabbing tones, not gentle ones.
+- Android Material and Discord sounds form a separate loud tier (body -7 to -11, true peaks pinned at 0.0 dBTP, brick-wall limited) — engineered to cut through, the opposite of the goal here.
+
+The one thing already right: true peak -5.11 dBTP left healthy headroom, so the sound was loud but clean, never clipped.
+
+### Why -23/-24 And Not Higher
+
+Standards research reached the same number by a different route, and every adjustment factor pointed the same way — quieter:
+
+- **No published standard exists for "short UI success-sound loudness."** Integrated LUFS targets (-16 mobile, -23 EBU R128, -14 streaming) are *program-loudness* figures for long-form content measured over minutes; a 370 ms one-shot is a single event inside a mix, not a stream. The relevant question is how far *below* the app's notification reference the cue sits, which is qualitative in every HIG.
+- **Apple HIG:** UI sound "has a much lower volume than a notification sound… keep it very quiet… a very subtle layer."
+- **Material:** frequency-of-use scales intrusiveness *down*; a constantly-heard cue should be quieter and duller than a rare alert.
+- **Percussive penalty:** an impulsive sound is rated as annoying as a steady tone **7.1 dB louder** ([ScienceDirect](https://www.sciencedirect.com/science/article/abs/pii/S0360132319307516)). A two-beat bark is percussive, so it should sit *below* a smooth chime at equal meter reading, not level with it.
+- **High-frequency = more annoying** at equal loudness — another reason to bias down.
+- **Playback path.** Other apps' notification sounds are ducked by the OS notification system; part of why the Claude chime *feels* quiet is that management. The bundled helper plays through `winsound` (and `afplay`/`paplay`) **directly, at source level with no ducking**, so the authored level *is* the playback level. The file must therefore be authored conservatively quiet to match the perceived level of a sound that gets OS volume management for free.
+
+The **under-signalling floor** is roughly -26 LUFS body: below that a 370 ms high-frequency cue starts disappearing under room noise on quiet speakers. The defensible window is **-23 to -26**; the two research lines centre it at -23, and the adjustment factors push toward the quiet end.
+
+### Decision
+
+**Shipped at body -24 LUFS** — a flat -9.85 dB gain on the selected sound. `-24` is the convergent -23 nudged 1 dB toward the quiet end (justified by the percussive penalty, the no-ducking playback path, and the user's clear "far too loud" signal), while staying 2 dB above the -26 floor.
+
+| | before | after (-24) | subtle-cluster target |
+| --- | --- | --- | --- |
+| Body LUFS | -14.2 | **-24.0** | -23.0 median |
+| Body RMS | -13.5 dBFS | -23.4 dBFS | -31.6 median |
+| True peak | -5.1 dBTP | -15.0 dBTP | -8 to -15 |
+| Peak sample | -5.1 dBFS | -15.0 dBFS | — |
+
+Method notes, each a deliberate choice:
+
+- **Flat gain, no limiter or compressor.** A limiter would squash the percussive transient — dulling the "bark" *and raising* perceived loudness relative to peak, the opposite of the goal. A linear multiply preserves the crest factor intact.
+- **Measured on the audible body, not the whole file.** Integrated LUFS is gated in 400 ms blocks; at 370 ms the sound is shorter than one block, so the whole-file -18.5 figure is degenerate and was ignored. `ffmpeg loudnorm` is the wrong tool for the same reason.
+- **One residual mismatch, left alone.** Even at body -24, the bark's body RMS (-23.4) sits far above the subtle cluster's (-31.6) because it is *more sustained* — RMS only ~1 dB under its body LUFS, where the cluster sounds are 8-9 dB under. Body LUFS is the perceptual-loudness match, so loudness is handled; the extra sustained energy reads as a fuller *character*, not more volume. Shortening the sound would close it, but that is a rebuild, not a level change.
+
+A gain ladder from body -16 to -24 is in `.local/bark-volume/` for re-auditioning; moving the ship level is a one-line change of the target constant.
 
 ## Beat Count And Spacing
 
@@ -338,9 +384,9 @@ Writing 16-bit WAV from numpy has a trap the self-check covers: `+1.0 * 32768` o
 
 ## Open / Untested
 
-- **The shipped sound is +1.62 dB body-loudness against the asset it replaced.** Level is the documented annoyance driver, so this is the property most worth watching in real use. It is a gain change, not a rebuild, if it grates.
+- **Loudness was corrected to body -24 LUFS** after the sound proved too loud in use; see [Loudness](#loudness). The residual: even at -24 the bark is more *sustained* than the subtle-cluster reference (body RMS -23.4 vs -31.6), which reads as fuller character rather than louder. Closing that is a rebuild (shorter sound), not a level change, and was not done.
 - **Long-run repetition tolerance is unmeasured.** `woof-hush` was chosen from a first-listen audition. The loop files at `.local/bark-final/loop-test/` (12x at 1.2 s) exist for the Berlyne check, and the only real test is days of ordinary use. Nothing in this document predicts play #100.
-- **The set was auditioned under an unfair loudness match** (4.95 dB body spread). The choice may partly reflect which candidates were louder. A renormalized re-audition would be a cleaner comparison, and might not pick the same sound.
+- **The set was auditioned under an unfair loudness match** (4.95 dB body spread), so the *choice of candidate* may partly reflect which candidates were louder — the [Loudness](#loudness) pass fixed the level of the winner but not the possibility that a different candidate would have won under a fair match. A renormalized re-audition might pick a different sound.
 - **Small-speaker reproduction was never tested.** Laptop and phone speakers lose most sub-500 Hz content. This matters most for `heritage-rising` (165/220 Hz), and it is the strongest surviving argument for the harmonic-2 energy peak that the set does not achieve.
 - **The h2 energy peak is unachieved across the set** and would require flattening the glottal source tilt, not moving formants. That trade buys dog brightness at the cost of repetition safety; it was declined, not solved.
 - Roughness (asper) was never implemented as a metric. The adversarial pass found no discrete AM lines and argued the candidates are clean, but on its reasoning rather than on a measurement.
