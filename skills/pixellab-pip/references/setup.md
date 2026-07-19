@@ -31,7 +31,7 @@ In setup mode, apply `credentials.md`'s token-safety rules (safest-default order
 
 MCP setup stays agent-agnostic and OS-agnostic until the app is named or detected; do not assume an app, OS, shell, runtime, package manager, or config path. Use PixelLab MCP URL `https://api.pixellab.ai/mcp` and `Authorization: Bearer <PIXELLAB_SECRET>` or the app's documented env/secret syntax. Never preview or run a real literal token. Explain the exact setting or likely config path before inspecting it, and only for a named/detected app. Patch or create config only after confirmation, and tell the user to restart or reload only when the app requires it or tools do not appear.
 
-Scope is agent-specific: default to a global/user install so PixelLab works in every project — the friendly default — and use a project scope only when the user wants one project or a team-committed config, through the app's own mechanism. `.mcp.json` is Claude Code's config format, not a cross-app standard: never write it for another app. Each app differs — Codex uses TOML at `~/.codex/config.toml` (or a project `.codex/config.toml` in a trusted project), Cursor uses `.cursor/mcp.json`, and others have their own — so use only the named/detected app's documented format.
+Scope is agent-specific: default to a global/user install so PixelLab works in every project — the friendly default — and use a project scope only when the user wants one project or a team-committed config, through the app's own mechanism. `.mcp.json` is Claude Code's config format, not a cross-app standard: never write it for another app. Each app differs — Codex uses a TOML config file (global `config.toml`, or a project `.codex/config.toml` in a trusted project), Cursor uses `.cursor/mcp.json`, and others have their own — so use only the named/detected app's documented format.
 
 - **Codex CLI**: `codex mcp add --help` supports HTTP MCP auth via `--bearer-token-env-var`. Token-free preview (ask before running; it stores the URL and env var name, not the Secret):
 
@@ -39,7 +39,7 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
   codex mcp add pixellab --url https://api.pixellab.ai/mcp --bearer-token-env-var PIXELLAB_SECRET
   ```
 
-  Scope: `codex mcp add` writes the global `~/.codex/config.toml` (all projects). For one repo only, put the same `[mcp_servers.pixellab]` block in a project `.codex/config.toml` instead — Codex reads that only after the project is trusted (it prompts to trust a folder the first time you open it there).
+  Scope: `codex mcp add` writes Codex's global user `config.toml` (all projects). For one repo only, put the same `[mcp_servers.pixellab]` block in a project `.codex/config.toml` instead — Codex reads that only after the project is trusted (it prompts to trust a folder the first time you open it there).
 
 - **Claude Code**: `claude mcp add --help` supports HTTP MCP headers, and Claude Code expands `${VAR}` in `url` and `headers` at load, so the Secret stays referenced by name. Token-free preview (ask before running; `-s user` registers it for all projects, and single quotes keep `${PIXELLAB_SECRET}` literal instead of expanding it):
 
