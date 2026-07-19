@@ -31,6 +31,8 @@ In setup mode, apply `credentials.md`'s token-safety rules (safest-default order
 
 MCP setup stays agent-agnostic and OS-agnostic until the app is named or detected; do not assume an app, OS, shell, runtime, package manager, or config path. Use PixelLab MCP URL `https://api.pixellab.ai/mcp` and `Authorization: Bearer <PIXELLAB_SECRET>` or the app's documented env/secret syntax. Never preview or run a real literal token. Explain the exact setting or likely config path before inspecting it, and only for a named/detected app. Patch or create config only after confirmation, and tell the user to restart or reload only when the app requires it or tools do not appear.
 
+Scope is agent-specific: default to a global/user install so PixelLab works in every project — the friendly default — and use a project scope only when the user wants one project or a team-committed config, through the app's own mechanism. `.mcp.json` is Claude Code's config format, not a cross-app standard: never write it for another app. Each app differs — Codex uses TOML at `~/.codex/config.toml` (or a project `.codex/config.toml` in a trusted project), Cursor uses `.cursor/mcp.json`, and others have their own — so use only the named/detected app's documented format.
+
 - **Codex CLI**: `codex mcp add --help` supports HTTP MCP auth via `--bearer-token-env-var`. Token-free preview (ask before running; it stores the URL and env var name, not the Secret):
 
   ```text
@@ -43,7 +45,7 @@ MCP setup stays agent-agnostic and OS-agnostic until the app is named or detecte
   claude mcp add -s user pixellab -t http https://api.pixellab.ai/mcp -H 'Authorization: Bearer ${PIXELLAB_SECRET}'
   ```
 
-  Default to `-s user` (global, all projects) — the friendly default. Switch scope only if the user asks: `-s local` for this project only (private), or `-s project` to write a committed `.mcp.json` shared with their team.
+  Scope (Claude Code's own flags): `-s user` = global default; `-s local` = this project only (private); `-s project` = a committed `.mcp.json` shared with the team.
 
 - **Cursor, VS Code Agent Plugins, Gemini CLI, GitHub Copilot CLI, generic MCP apps**: do not invent config syntax. Use the app's settings UI/docs, PixelLab's MCP page, or an exact path/format the user provides. Always show a token-free preview and ask before writing.
 - **Unknown app**: route to Manual — open or link `https://www.pixellab.ai/mcp` and stop unless the user returns with a known app name, exact settings screen, config path, or documented MCP format. Do not guess config paths or syntax.
