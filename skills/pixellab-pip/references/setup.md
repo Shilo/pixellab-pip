@@ -6,9 +6,9 @@ The first-run command is one word after the trigger, such as `/pixellab-pip setu
 
 ## 1. Choose a mode first
 
-For a bare `setup`, the mode is `unknown` unless the user named an assistant/editor/app target or the prior conversation established one. Detecting the current app does not by itself resolve the mode. Already-set-up shortcut (ambient signals only, no config inspection): if PixelLab MCP tools are already visible in this session and a live `PIXELLAB_SECRET` is present, the effective state is already `both` — report that PixelLab is ready, offer the section 5 no-credit verify, and ask the mode question only if the user then wants to add, change, or narrow the setup. Otherwise, mode selection is mandatory before any MCP/API-specific work: do not inspect config, prepare write previews, or request write approval until the user picks a mode. A brief credential-readiness note is expected (see section 5 for how narrow it must be) and doubles as the shortcut check above, but the next user-facing question must be the mode choice — never a yes/no question such as "Should I prepare a Codex MCP config preview?"
+For a bare `setup`, the mode is `unknown` unless the user gave an explicit mode signal (see the inference list below). Naming or detecting an assistant/editor/app resolves only which app to target, not the mode — a named app with no mode word still needs the mode question. Already-set-up shortcut (ambient signals only, no config inspection): if PixelLab MCP tools are already visible in this session and a live `PIXELLAB_SECRET` is present, the effective state is already `both` — report that PixelLab is ready, offer the section 5 no-credit verify, and ask the mode question only if the user then wants to add, change, or narrow the setup. Otherwise, mode selection is mandatory before any MCP/API-specific work: do not inspect config, prepare write previews, or request write approval until the user picks a mode. A brief credential-readiness note is expected (see section 5 for how narrow it must be) and doubles as the shortcut check above; when the shortcut does not fire, the next user-facing question must be the mode choice — never a yes/no question such as "Should I prepare a Codex MCP config preview?"
 
-When the app exposes an interactive choice prompt, use it (Claude Code `AskUserQuestion`; Codex `request_user_input` only when actually available, typically Plan mode — full-access/sandbox does not imply it). Otherwise ask this exact question: "Which setup do you want: MCP + API (recommended), MCP only, API only, or Manual?"
+When the app exposes an interactive choice prompt, use it (Claude Code `AskUserQuestion`; Codex `request_user_input` only when actually available, typically Plan mode — full-access/sandbox does not imply it). Otherwise ask this exact question, paired with a one-line plain-language gloss so a non-technical user can choose: "Which setup do you want: MCP + API (recommended), MCP only, API only, or Manual?" Gloss — MCP = PixelLab's tools built directly into your app; API = a backup connection Pip uses when those tools are missing; MCP + API = both (recommended); Manual = you set it up on PixelLab's website yourself.
 
 The four modes:
 
@@ -17,7 +17,7 @@ The four modes:
 - **API only** — `api`. Configure `PIXELLAB_SECRET` for REST v2 fallback without adding MCP. This is for Pip's fallback, not the user's frameworks, scripts, backends, SDK projects, or deployment platforms.
 - **Manual** — `manual`. Open or link `https://www.pixellab.ai/mcp`, tell the user to follow the instructions there, and stop. Add the account/Secret step only when auth/token setup is part of the request. Do not inspect, write, verify, or continue.
 
-Infer intent from wording: MCP signals ("assistant", "editor", "app", "agent", "Claude", "Codex", "Cursor", "MCP", "tools", "connect PixelLab to my assistant"); API signals ("REST", "API", "fallback", "when MCP is unavailable", "direct PixelLab API"); both signals ("recommended", "everything", "MCP plus API", "MCP and REST", "full setup"); manual signals ("manual", "website", "I'll do it myself"). Treat "both", "everything", or "recommended" as `both`, and do not hide API fallback behind a follow-up when the user chose the recommended path.
+Infer intent from wording. A plain "connect PixelLab to my app/assistant/editor" or a bare app target ("set up for Cursor") signals wanting PixelLab in the app but not exclusion of fallback — treat it as `both` (recommended) or ask the mode question; do not silently pick MCP only. Reserve `mcp` for an explicit exclusivity signal ("only MCP", "just MCP", "no API/REST"). API signals ("REST", "API", "fallback", "when MCP is unavailable", "direct PixelLab API") → `api`; both signals ("recommended", "everything", "MCP plus API", "MCP and REST", "full setup") → `both`; manual signals ("manual", "website", "I'll do it myself") → `manual`. Treat "both", "everything", or "recommended" as `both`, and do not hide API fallback behind a follow-up when the user chose the recommended path.
 
 ## 2. Credential policy
 
@@ -39,6 +39,8 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
   codex mcp add pixellab --url https://api.pixellab.ai/mcp --bearer-token-env-var PIXELLAB_SECRET
   ```
 
+  Scope: `codex mcp add` writes the global `~/.codex/config.toml` (all projects). For one repo only, put the same `[mcp_servers.pixellab]` block in a project `.codex/config.toml` instead — Codex reads that only after the project is trusted.
+
 - **Claude Code**: `claude mcp add --help` supports HTTP MCP headers, and Claude Code expands `${VAR}` in `url` and `headers` at load, so the Secret stays referenced by name. Token-free preview (ask before running; `-s user` registers it for all projects, and single quotes keep `${PIXELLAB_SECRET}` literal instead of expanding it):
 
   ```text
@@ -47,8 +49,8 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
 
   Scope (Claude Code's own flags): `-s user` = global default; `-s local` = this project only (private); `-s project` = a committed `.mcp.json` shared with the team.
 
-- **Cursor, VS Code Agent Plugins, Gemini CLI, GitHub Copilot CLI, generic MCP apps**: do not invent config syntax. Use the app's settings UI/docs, PixelLab's MCP page, or an exact path/format the user provides. Always show a token-free preview and ask before writing.
-- **Unknown app**: route to Manual — open or link `https://www.pixellab.ai/mcp` and stop unless the user returns with a known app name, exact settings screen, config path, or documented MCP format. Do not guess config paths or syntax.
+- **Cursor, VS Code Agent Plugins, Gemini CLI, GitHub Copilot CLI, or any other named MCP-capable app**: do not invent config syntax. Use the app's settings UI/docs, PixelLab's MCP page, or an exact path/format the user provides. Always show a token-free preview and ask before writing. A named app not listed here (e.g. Zed, Windsurf, an in-house agent) still gets this generic handling — do not route it to Manual just because it is unlisted.
+- **No app named or identifiable**: route to Manual — open or link `https://www.pixellab.ai/mcp` and stop unless the user returns with a known app name, exact settings screen, config path, or documented MCP format. Do not guess config paths or syntax.
 
 ## 4. Before any write
 
@@ -80,7 +82,7 @@ After the check, report success/failure, the surface checked, and whether creden
 
 ## 6. Output
 
-Keep wording friendly, action-oriented, agent-agnostic, and OS-agnostic; prefer "Next step" over long diagnostics; say "assistant", "editor", "app", or the product name, not "host". Do not show OS/shell/package-manager/SDK/framework/language setup commands unless the user asks for a specific manual secret-storage path. When the app has no secret-settings UI (many CLIs and generic agents), storing `PIXELLAB_SECRET` as a user-level environment variable is itself the manual secret-storage path: offer the user both ways per `credentials.md` — the OS settings dialog (friendliest, history-safe) and a placeholder terminal command — never a literal token, and include the new-shell-inheritance caveat so the user does not verify from a stale session.
+Keep wording friendly, action-oriented, agent-agnostic, OS-agnostic, and in the user's language (for non-English requests follow `references/localization.md`); prefer "Next step" over long diagnostics; say "assistant", "editor", "app", or the product name, not "host". Do not show OS/shell/package-manager/SDK/framework/language setup commands unless the user asks for a specific manual secret-storage path. When the app has no secret-settings UI (many CLIs and generic agents), storing `PIXELLAB_SECRET` as a user-level environment variable is itself the manual secret-storage path: offer the user both ways per `credentials.md` — the OS settings dialog (friendliest, history-safe) and a placeholder terminal command — never a literal token, and include the new-shell-inheritance caveat so the user does not verify from a stale session.
 
 Include the account step (defined in section 2) whenever `PIXELLAB_SECRET` is missing or unknown, a Secret was pasted or must be rotated, a write or MCP registration is proposed while the Secret is still missing, or an unsafe path is refused (broad scans, `.env*` scans, session tokens, assistant-visible commands). If MCP registers but the Secret is still missing from the session, say PixelLab is registered but not ready for live use until `PIXELLAB_SECRET` is set and the app is reloaded. If the user asks for no writes, stay instruction-only but still include the account step.
 
