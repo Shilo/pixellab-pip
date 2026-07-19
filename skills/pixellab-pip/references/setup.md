@@ -47,7 +47,7 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
   claude mcp add -s user pixellab -t http https://api.pixellab.ai/mcp -H 'Authorization: Bearer ${PIXELLAB_SECRET}'
   ```
 
-  Scope (Claude Code's own flags): `-s user` = global default; `-s local` = this project only (private); `-s project` = a committed `.mcp.json` shared with the team.
+  Scope (Claude Code's own flags): `-s user` = global default; `-s local` = this project only (private); `-s project` = a committed `.mcp.json` shared with the team (Claude Code marks a newly added project config as pending approval — approve it before the tools load).
 
 - **Cursor, VS Code Agent Plugins, Gemini CLI, GitHub Copilot CLI, or any other named MCP-capable app**: do not invent config syntax. Use the app's settings UI/docs, PixelLab's MCP page, or an exact path/format the user provides. Always show a token-free preview and ask before writing. A named app not listed here (e.g. Zed, Windsurf, an in-house agent) still gets this generic handling — do not route it to Manual just because it is unlisted.
 - **No app named or identifiable**: route to Manual — open or link `https://www.pixellab.ai/mcp` and stop unless the user returns with a known app name, exact settings screen, config path, or documented MCP format. Do not guess config paths or syntax.
