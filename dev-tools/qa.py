@@ -485,6 +485,46 @@ def run_unit_tests() -> None:
         raise SystemExit(1)
 
 
+# Patterns that make NVIDIA SkillSpector open a GitHub Code Scanning alert. We block the
+# *avoidable* ones locally (and therefore in push-CI and the release gate, which both run this
+# file) so they never reach the security tab. Sourced from the scanner's own rules:
+#   - malware.yar `backdoor_persistence` (shell-startup / cron / ssh / LD_PRELOAD persistence IOCs)
+#   - agent_snooping `AS1` (references to ~/.<agent>/config directories)
+# NOT guarded: the project's accepted by-design findings (documented api.pixellab.ai URLs,
+# bearer-token-handling rules, the bark.py sound-helper subprocess) — those are legitimate and
+# intentionally kept, so guarding them would block every release. This mirrors specific rules;
+# the authoritative full scan stays the SkillSpector step in the release/security workflows.
+SECURITY_TRIGGER_PATTERNS = [
+    (r"echo\s+.*>>?\s*.*\.bashrc", "backdoor_persistence: echo-append to .bashrc"),
+    (r"echo\s+.*>>?\s*.*\.profile", "backdoor_persistence: echo-append to .profile"),
+    (r">>?\s*.*\.ssh/authorized_keys", "backdoor_persistence: write to authorized_keys"),
+    (r"LD_PRELOAD.*\.so", "backdoor_persistence: LD_PRELOAD injection"),
+    (r"crontab\s.*(?:curl|wget|nc|bash|python)", "backdoor_persistence: crontab payload"),
+    (r"useradd\s+.*-o\s+-u\s+0", "backdoor_persistence: hidden root user"),
+    (
+        r"~?/\.(?:claude|codex|gemini|continue)/(?:config|settings?|credentials?|preferences?)",
+        "AS1: agent-config-directory path (name just the file, e.g. `config.toml`, not `~/.codex/config...`)",
+    ),
+]
+
+
+def check_no_security_trigger_patterns() -> None:
+    compiled = [(re.compile(rx, re.IGNORECASE), label) for rx, label in SECURITY_TRIGGER_PATTERNS]
+    hits: list[str] = []
+    for path in run_git_ls_files("skills/pixellab-pip"):
+        if path.suffix not in {".md", ".py"}:
+            continue
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            for rx, label in compiled:
+                if rx.search(line):
+                    hits.append(f"{path.relative_to(REPO_ROOT)}:{lineno} — {label}")
+    if hits:
+        raise AssertionError(
+            "content matches a SkillSpector rule that would open a GitHub security alert; "
+            "reword to avoid it:\n  " + "\n  ".join(hits)
+        )
+
+
 CHECKS = [
     ("JSON manifests parse", check_json_files),
     ("blueprint step shapes are valid", check_blueprint_shapes),
@@ -494,6 +534,7 @@ CHECKS = [
     ("no generated cache artifacts are tracked", check_no_tracked_generated_artifacts),
     ("Markdown local links resolve", check_markdown_local_links),
     ("SKILL.md reference files exist", check_skill_reference_files),
+    ("no SkillSpector-triggering security patterns", check_no_security_trigger_patterns),
     ("tracked media signatures are valid", check_media_files),
     ("unit tests pass", run_unit_tests),
 ]
