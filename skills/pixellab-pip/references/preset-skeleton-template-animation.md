@@ -17,7 +17,7 @@ PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the 
 
 ## MCP vs REST v2 Field Coverage
 
-MCP `animate_character` handles normal managed-character template work when its visible schema exposes template mode, v3 custom mode, explicit `directions`, and `frame_count` (v3). When the visible schema exposes pro mode with cost confirmation, it can route pro animation. Inspect the visible schema before relying on `mode`, `frame_count`, `custom_start_frame`, `end_frame`, `keep_first_frame`, `pro`, `confirm_cost`, cost reporting, or any raw-skeleton support.
+MCP `animate_character` handles normal managed-character template work when its visible schema exposes template mode, v3 custom mode, explicit `directions`, and `frame_count` (v3). When the visible schema exposes pro mode with cost confirmation, it can route pro animation. Inspect the visible schema before relying on `mode`, `frame_count`, `ai_freedom`, `custom_start_frame`, `end_frame`, `keep_first_frame`, `pro`, `confirm_cost`, cost reporting, or any raw-skeleton support.
 
 It is not field-for-field equivalent to REST `/characters/animations`. REST exposes extra exact-control fields: `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, v3-only `custom_start_frame`/`end_frame`, and inline `enhance_prompt` (v3 mode). Use REST when those fields matter, for integration code, or to validate exact API behavior.
 
@@ -132,7 +132,7 @@ Public controls when a preset walk/idle/jump is close but needs style correction
 | `outline` | Reassert the original outline when limbs become too thick, broken, or overdrawn. |
 | `color_image` + `force_colors` | Constrain palette when template frames introduce extra dark tones. |
 
-Template mode does not expose direct controls for 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, `bone_scaling`, shadow strength, or keypoint edits, and `frame_count` does not tune preset motion; choose a different template id such as `walking-4-frames`/`walking-6-frames`/`walking-8-frames`. If the rendering style is the problem, retry template mode with conservative style controls. If the gait itself is wrong (robotic walk, stiff torso, missing weight shift, bad limb timing), use v3/pro custom animation or raw skeleton/Aseprite keypoint authoring instead of expecting preset mode to behave like a full rig editor.
+Template mode does not expose direct controls for 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, `bone_scaling`, shadow strength, or keypoint edits, and `frame_count` does not tune preset motion; choose a different template id such as `walking-4-frames`/`walking-6-frames`/`walking-8-frames`. If the rendering style is the problem, retry template mode with conservative style controls. If the gait itself is too rigid or robotic, MCP `animate_character` exposes `ai_freedom` (0–900, default 0 = rigid template following; higher lets the pose deviate more from the template skeleton) — raise it before escalating. Only if the motion is still wrong (missing weight shift, bad limb timing), use v3/pro custom animation or raw skeleton/Aseprite keypoint authoring instead of expecting preset mode to behave like a full rig editor.
 
 For template mode keep `action_description` light or omit it; the template id carries the motion. Use `animation_name` for organization. Do not use prompt enhancement for template mode.
 

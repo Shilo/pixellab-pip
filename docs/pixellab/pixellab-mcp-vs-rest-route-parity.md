@@ -1,6 +1,8 @@
 # PixelLab MCP vs REST v2 Route Parity
 
-Last reviewed: 2026-07-11.
+Last reviewed: 2026-07-19.
+
+> 2026-07-19 refresh: REST v2 added `DELETE` routes for tilesets, sidescroller tilesets, isometric tiles, tiles-pro, and managed character animations, plus `GET` list routes for sidescroller tilesets and tiles-pro — closing the seven "MCP-only delete/list helper" gaps this doc previously listed. MCP added `update_character_tags` / `update_object_tags`, closing the two `PATCH .../tags` "REST-only" gaps. Counts below reflect the new state (REST-only 32→30, MCP-only 24→17).
 
 Purpose: a route-level comparison of PixelLab's hosted MCP tool surface against the public REST v2 API — the missing features both ways: every REST v2 asset/management endpoint with no MCP counterpart, and every MCP tool with no REST v2 counterpart. (Two non-asset REST infrastructure routes are handled separately below.) This is the parity map behind SKILL.md's rule "do not assume a REST endpoint has an MCP equivalent just because MCP is configured." It complements the *service*-level comparison in [Official PixelLab MCP Service Comparison](../tools/official-pixellab-mcp-service-comparison.md) and the *label*-level crosswalk in [User-Facing Term To Backend Mapping](pixellab-user-facing-term-backend-mapping.md); this file is the *endpoint*-level view.
 
@@ -8,8 +10,8 @@ Purpose: a route-level comparison of PixelLab's hosted MCP tool surface against 
 
 Parity is a moving target because both surfaces ship independently. This review compares:
 
-- **REST v2 index:** `https://api.pixellab.ai/v2/llms.txt`, fetched 2026-07-11 and cross-checked against `https://api.pixellab.ai/v2/openapi.json` the same day. `llms.txt` is the curated published index; OpenAPI is the fuller machine-readable schema. Where both agree a route is absent (e.g., any tileset/tile `delete`), it is treated as genuinely absent, not an index abbreviation.
-- **MCP inventory:** `https://api.pixellab.ai/mcp/docs`, auto-generated snapshot dated 2026-07-02 (cached locally). This is the authoritative public MCP tool list; the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` is not.
+- **REST v2 index:** `https://api.pixellab.ai/v2/llms.txt`, cross-checked against `https://api.pixellab.ai/v2/openapi.json`, cached snapshot 2026-07-19. `llms.txt` is the curated published index; OpenAPI is the fuller machine-readable schema. Where both agree a route is absent, it is treated as genuinely absent, not an index abbreviation.
+- **MCP inventory:** `https://api.pixellab.ai/mcp/docs`, auto-generated snapshot 2026-07-19 (cached locally). This is the authoritative public MCP tool list; the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` is not.
 
 Absence from a snapshot is not proof of absence from the live API. When a route or tool matters for code, re-verify against current OpenAPI/MCP docs (SKILL.md → Current Docs Refresh).
 
@@ -25,9 +27,9 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 
 **Matching basis:** counterparts are judged by **functional capability, not tool name** — a REST endpoint counts as "covered" if any MCP tool or documented MCP parameter does the same job, even under a different name or bundled into a broader tool (and the reverse for MCP tools). A scoped or partial overlap (for example, an MCP capability that works only on a managed asset) is marked partial (◐), not dropped.
 
-**On both surfaces — full functional parity, so they live in the [Coverage Matrix](#coverage-matrix) below, not in the gap lists:** characters (4/8-direction, v3, pro, state, animate, list/get/delete), **portrait ↔ character conversion** (`portrait-character-pro` ↔ `create_portrait_character`), objects (1/8-direction, state, animate, review, list/get/delete), map objects, top-down / sidescroller / isometric / pro tilesets & tiles, structured UI assets, **pixel font Pro** (`generate-font-pro` ↔ `create_font`), and balance. There is no vocal / voice / lip-sync / audio animation capability on either surface as of these snapshots.
+**On both surfaces — full functional parity, so they live in the [Coverage Matrix](#coverage-matrix) below, not in the gap lists:** characters (4/8-direction, v3, pro, state, animate, list/get/delete), **portrait ↔ character conversion** (`portrait-character-pro` ↔ `create_portrait_character`), objects (1/8-direction, state, animate, review, list/get/delete), map objects, top-down / sidescroller / isometric / pro tilesets & tiles, structured UI assets, **pixel font Pro** (`generate-font-pro` ↔ `create_font`), balance, and **tag setting** (`PATCH .../tags` ↔ `update_character_tags` / `update_object_tags`). There is no vocal / voice / lip-sync / audio animation capability on either surface as of these snapshots.
 
-**Missing from MCP — REST v2 has it, no dedicated MCP tool (32 endpoints; ◐ = partial overlap via a broader tool).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
+**Missing from MCP — REST v2 has it, no dedicated MCP tool (30 endpoints; ◐ = partial overlap via a broader tool).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
 
 | Category | # | REST v2 endpoints |
 |---|---|---|
@@ -36,11 +38,11 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 | Inpaint | 2 | `inpaint`, `inpaint-v3` |
 | Raw animation / rotation / skeleton | 11 | `animate-with-text`, `animate-with-text-v2`, `animate-with-text-v3`, `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `rotate` |
 | Prompt enhancement | 3 | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt` |
-| Managed-asset export & tagging | 3 | `characters/{id}/zip`, `characters/{id}/tags` (PATCH), `objects/{id}/tags` (PATCH) |
+| Managed-asset ZIP export | 1 | `characters/{id}/zip` (the two `.../tags` PATCH routes now have MCP `update_character_tags` / `update_object_tags`) |
 
-◐ **Partial overlap** (7 of the 32 — no *dedicated* MCP tool, but a broader MCP tool covers a managed-asset-scoped version). The general pattern: **REST separates a capability into versioned, single-purpose endpoints; MCP combines them into one managed-asset tool.** the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`) and `interpolation-v2` fold into MCP `animate_character`/`animate_object` via `mode` and — for `-v3`/interpolation — the `custom_start_frame_base64`/`end_frame_base64` frame anchors (start frame alone ≈ single-anchor animation, start **and** end ≈ interpolation); `generate-8-rotations-v2`/`-v3` → `create_8_direction_object`/`create_character` 8-direction output; `characters/{id}/zip` → `get_character` download link. (`generate-ui-v2` is **not** here — MCP's `create_ui_asset` is a structured panel builder, not a freeform UI generator; see the UI note in the Coverage Matrix.) Per-endpoint notes are below.
+◐ **Partial overlap** (7 of the 30 — no *dedicated* MCP tool, but a broader MCP tool covers a managed-asset-scoped version). The general pattern: **REST separates a capability into versioned, single-purpose endpoints; MCP combines them into one managed-asset tool.** the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`) and `interpolation-v2` fold into MCP `animate_character`/`animate_object` via `mode` and — for `-v3`/interpolation — the `custom_start_frame_base64`/`end_frame_base64` frame anchors (start frame alone ≈ single-anchor animation, start **and** end ≈ interpolation); `generate-8-rotations-v2`/`-v3` → `create_8_direction_object`/`create_character` 8-direction output; `characters/{id}/zip` → `get_character` download link. (`generate-ui-v2` is **not** here — MCP's `create_ui_asset` is a structured panel builder, not a freeform UI generator; see the UI note in the Coverage Matrix.) Per-endpoint notes are below.
 
-**Missing from REST v2 — MCP has it, no REST endpoint (24 tools).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
+**Missing from REST v2 — MCP has it, no REST endpoint (17 tools).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
 
 | Category | # | MCP tools |
 |---|---|---|
@@ -49,7 +51,6 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 | Sandbox (code execution) | 8 | `sandbox_create_session`, `sandbox_destroy_session`, `sandbox_bash`, `sandbox_run`, `sandbox_read`, `sandbox_write`, `sandbox_edit`, `sandbox_sync` |
 | Deployed agents | 3 | `agent_list`, `agent_inspect`, `agent_talk` |
 | MCP meta | 2 | `agent_help`, `agent_feedback` |
-| Delete/list helpers (no REST route in llms.txt **or** OpenAPI) | 7 | `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro`, `delete_animation`, `list_sidescroller_tilesets`, `list_tiles_pro` |
 
 ## Practical Picking Rule
 
@@ -57,14 +58,14 @@ MCP is a managed-asset tool layer inside an agent; REST v2 is the complete HTTP 
 
 | Use MCP when | Use REST v2 when |
 |---|---|
-| You're in an MCP-enabled agent and want a managed asset (character, object, tileset, tile, isometric, tiles-pro, font, portrait, UI panel, map object) with IDs, polling, and list/get/delete helpers | You have an arbitrary image to edit / animate / convert, need batch/code/backend control or exact schemas, or need any of the 32 REST-only operations (generic image gen, edit, inpaint, resize, background removal, raw animation/rotation/skeleton, prompt enhancement, ZIP export, tag setting) |
+| You're in an MCP-enabled agent and want a managed asset (character, object, tileset, tile, isometric, tiles-pro, font, portrait, UI panel, map object) with IDs, polling, and list/get/delete helpers | You have an arbitrary image to edit / animate / convert, need batch/code/backend control or exact schemas, or need any of the 30 REST-only operations (generic image gen, edit, inpaint, resize, background removal, raw animation/rotation/skeleton, prompt enhancement, ZIP export) |
 | You need the platform layer — projects, chat, sandbox, deployed agents (MCP-only) | You need a freeform UI image (`generate-ui-v2`) or any capability with no MCP tool |
 
 One line: **MCP is the convenient managed-asset path inside an agent; REST v2 is the complete API for arbitrary images, edits, and code.** MCP bundles REST's granular endpoints into fewer tools and adds a platform/agent layer REST lacks, but cannot touch a supplied image without first creating a managed asset.
 
 ## Coverage Matrix
 
-Parity legend (functional, not name-based): **=** covered by a dedicated MCP tool or a documented tool parameter; **~** covered only via an inferred, undocumented parameter value on a broader MCP tool; **◐** partial — a broader MCP tool produces the *same kind of output* in a scoped form (e.g., managed-asset-only), but no dedicated MCP tool exists. A merely adjacent MCP capability that yields a *different* asset type (e.g., a generation-time control such as `create_map_object`'s `inpainting`, or `style_images` on object creation) is **none** with a note, not ◐; **none** / **REST-only** no MCP tool documented. On multi-helper rows, `=` is capability-level (create + retrieve); see the note after the tables about the `list`/`delete` routes REST v2 lacks entirely. This matrix is comprehensive and REST-keyed — every REST v2 endpoint appears in a table below; MCP tools with no REST endpoint are listed separately in [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
+Parity legend (functional, not name-based): **=** covered by a dedicated MCP tool or a documented tool parameter; **~** covered only via an inferred, undocumented parameter value on a broader MCP tool; **◐** partial — a broader MCP tool produces the *same kind of output* in a scoped form (e.g., managed-asset-only), but no dedicated MCP tool exists. A merely adjacent MCP capability that yields a *different* asset type (e.g., a generation-time control such as `create_map_object`'s `inpainting`, or `style_images` on object creation) is **none** with a note, not ◐; **none** / **REST-only** no MCP tool documented. On multi-helper rows, `=` is capability-level (create + retrieve + list/delete). This matrix is comprehensive and REST-keyed — every REST v2 endpoint appears in a table below; MCP tools with no REST endpoint are listed separately in [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
 
 ### Characters
 
@@ -80,9 +81,9 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 | `GET /characters/{id}` | `get_character` | = |
 | `DELETE /characters/{id}` | `delete_character` | = |
 | `GET /characters/{id}/zip` | `get_character` download link (no full ZIP bundle) | ◐ |
-| `PATCH /characters/{id}/tags` | — | **REST-only** |
+| `PATCH /characters/{id}/tags` | `update_character_tags` | = |
 | `POST /portrait-character-pro` | `create_portrait_character` + `get_portrait_character` | = |
-| (managed animation delete) | `delete_animation` | MCP-only |
+| `DELETE /characters/{id}/animations` | `delete_animation` | = |
 
 ### Objects & Map Objects
 
@@ -95,18 +96,17 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 | `POST /objects/{id}/select-frames` | `select_object_frames` | = |
 | `POST /objects/{id}/dismiss-review` | `dismiss_review` | = |
 | `GET /objects`, `GET /objects/{id}`, `DELETE /objects/{id}` | `list_objects`, `get_object`, `delete_object` | = |
-| `PATCH /objects/{id}/tags` | — | **REST-only** |
-| `POST /map-objects` | `create_map_object` + `get_map_object` | = |
+| `PATCH /objects/{id}/tags` | `update_object_tags` | = |
+| `POST /map-objects`, `GET /map-objects/{id}` | `create_map_object` + `get_map_object` | = |
 
 ### Tiles & Tilesets
 
 | REST v2 | MCP tool | Parity |
 |---|---|---|
-| `POST /create-tileset`, `POST /tilesets`, `GET /tilesets`, `GET /tilesets/{id}` | `create_topdown_tileset`, `get_topdown_tileset`, `list_topdown_tilesets` | = |
-| `POST /create-tileset-sidescroller`, `POST /tilesets-sidescroller` | `create_sidescroller_tileset`, `get_sidescroller_tileset`, `list_sidescroller_tilesets` | = |
-| `POST /create-isometric-tile`, `GET /isometric-tiles`, `GET /isometric-tiles/{id}` | `create_isometric_tile`, `list_isometric_tiles`, `get_isometric_tile` | = |
-| `POST /create-tiles-pro`, `GET /tiles-pro/{id}` | `create_tiles_pro`, `get_tiles_pro`, `list_tiles_pro` | = |
-| (tileset/tile delete) | `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro` | MCP-only |
+| `POST /create-tileset`, `POST /tilesets`, `GET /tilesets`, `GET /tilesets/{id}`, `DELETE /tilesets/{id}` | `create_topdown_tileset`, `get_topdown_tileset`, `list_topdown_tilesets`, `delete_topdown_tileset` | = |
+| `POST /create-tileset-sidescroller`, `POST /tilesets-sidescroller`, `GET /tilesets-sidescroller`, `GET /tilesets-sidescroller/{id}`, `DELETE /tilesets-sidescroller/{id}` | `create_sidescroller_tileset`, `get_sidescroller_tileset`, `list_sidescroller_tilesets`, `delete_sidescroller_tileset` | = |
+| `POST /create-isometric-tile`, `GET /isometric-tiles`, `GET /isometric-tiles/{id}`, `DELETE /isometric-tiles/{id}` | `create_isometric_tile`, `list_isometric_tiles`, `get_isometric_tile`, `delete_isometric_tile` | = |
+| `POST /create-tiles-pro`, `GET /tiles-pro`, `GET /tiles-pro/{id}`, `DELETE /tiles-pro/{id}` | `create_tiles_pro`, `get_tiles_pro`, `list_tiles_pro`, `delete_tiles_pro` | = |
 
 ### Fonts, UI, Account
 
@@ -120,7 +120,7 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 
 **Note on UI generation.** MCP `create_ui_asset` — structured `pieces`/`elements` with labeled sub-parts — has a full REST equivalent, `POST /create-ui-asset` (same `pieces`/`elements`, plus REST-only `style_image` and `project_id`); that is the `=` row above. REST's *other* UI endpoint, `POST /generate-ui-v2`, is a simpler freeform generator (text + optional `concept_image`, no `pieces`/`elements`) with **no** MCP counterpart — MCP exposes no freeform UI-image tool. Details: [`pixellab-ui-generation-surfaces-research.md`](pixellab-ui-generation-surfaces-research.md).
 
-**Note on async retrieval and management rows.** Where a `=` row bundles MCP `get_*` / `list_*` helpers against a single REST `POST`, REST retrieval is via `GET /background-jobs/{job_id}` (the generic async poll) plus, where present, a dedicated GET such as `/tilesets/{id}`, `/isometric-tiles/{id}`, `/tiles-pro/{id}`, or `/characters/{id}`. So MCP `get_*` tools are never true gaps. Neither `llms.txt` nor OpenAPI, however, exposes a *list* route for sidescroller tilesets or tiles-pro, or a *delete* route for any tile/tileset family — even though MCP has tools for all of them. Those `list`/`delete` tools are genuinely MCP-only (verified 2026-07-11; see [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart)), so `=` here means create-plus-retrieve parity; the `list`/`delete` half of those families has no REST route at all.
+**Note on async retrieval and management rows.** Where a `=` row bundles MCP `get_*` / `list_*` helpers against a single REST `POST`, REST retrieval is via `GET /background-jobs/{job_id}` (the generic async poll) plus, where present, a dedicated GET such as `/tilesets/{id}`, `/isometric-tiles/{id}`, `/tiles-pro/{id}`, or `/characters/{id}`. So MCP `get_*` tools are never true gaps. As of the 2026-07-19 snapshot REST v2 also exposes the *list* routes for sidescroller tilesets (`GET /tilesets-sidescroller`) and tiles-pro (`GET /tiles-pro`), and *delete* routes for every tile/tileset family and for managed character animations — so these families now have full create/retrieve/list/delete parity on both surfaces. (Before 2026-07-19 the `list`/`delete` half was MCP-only.)
 
 ### Create Image (raw generation)
 
@@ -248,24 +248,24 @@ MCP exposes `agent_help` (a docs Q&A knowledge agent), which is not a prompt rew
 - `POST /enhance-character-v3-prompt`
 - `POST /enhance-animation-v3-prompt`
 
-### 6. Managed-asset export & tagging (3) — MCP has create/get/list/delete but not these
+### 6. Managed-asset ZIP export (1) — MCP has create/get/list/delete/tags but not this
 
-MCP covers the asset lifecycle except a full-bundle ZIP export and tag mutation:
+MCP covers the asset lifecycle except a full-bundle ZIP export:
 
 - `GET /characters/{id}/zip` (full-bundle ZIP export) — ◐ partial: MCP `get_character` returns a download link, but no documented full-bundle ZIP export
-- `PATCH /characters/{id}/tags` (set tags; MCP `list_characters` can *filter* by tags but cannot set them)
-- `PATCH /objects/{id}/tags` (set tags)
+
+(The `PATCH /characters/{id}/tags` and `PATCH /objects/{id}/tags` set-tags routes were listed here before 2026-07-19; MCP now covers them with `update_character_tags` / `update_object_tags`.)
 
 ### Not counted as asset gaps
 
 - `GET /background-jobs/{job_id}` — REST's generic async poll. MCP deliberately uses per-resource `get_*` tools instead, so this is a different async model, not a missing capability.
 - `GET /llms.txt` — the docs index itself, not an asset operation.
 
-**Total: 32 asset/management REST v2 endpoints with no *dedicated* MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 3 export/tags). Of these, 7 have partial, managed-asset-scoped functional overlap via a broader MCP tool (◐): the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`), `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, and `characters/{id}/zip`.
+**Total: 30 asset/management REST v2 endpoints with no *dedicated* MCP counterpart** (7 image gen + 6 edit + 2 inpaint + 11 animation/rotation + 3 prompt enhance + 1 ZIP export). Of these, 7 have partial, managed-asset-scoped functional overlap via a broader MCP tool (◐): the `animate-with-text` family (`animate-with-text`, `-v2`, `-v3`), `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, and `characters/{id}/zip`.
 
 ## MCP Tools With No REST v2 Counterpart
 
-The mirror of the gap list above: MCP tools with no public REST v2 endpoint. Grouped by why the gap exists. Of the 60 MCP tools in the snapshot, 24 have no REST v2 counterpart: 17 in the platform layer, plus 7 `delete`/`list` lifecycle helpers absent from both `llms.txt` and OpenAPI.
+The mirror of the gap list above: MCP tools with no public REST v2 endpoint. Grouped by why the gap exists. Of the 62 MCP tools in the snapshot, 17 have no REST v2 counterpart — all in the platform layer. (Before 2026-07-19 there were also 7 `delete`/`list` lifecycle helpers here; REST v2 has since added matching routes, and MCP added `update_character_tags` / `update_object_tags`.)
 
 ### 1. Platform, agent, sandbox, chat (17) — genuinely MCP-only
 
@@ -279,19 +279,16 @@ No public REST v2 art API covers these; they exist only as MCP tools. Every plat
 
 Handle these per [`mcp-platform-tools.md`](../../skills/pixellab-pip/references/mcp-platform-tools.md) — most are account reads or state-changing actions that need explicit approval.
 
-### 2. Management `delete`/`list` helpers with no REST route (7)
+### Formerly MCP-only, now on REST too (as of 2026-07-19)
 
-MCP documents these `delete` / `list` tools, but neither the `llms.txt` index nor the OpenAPI schema exposes a matching REST route (verified 2026-07-11 — REST v2 documents `DELETE` only for characters, objects, and UI assets, and no `list` route for sidescroller tilesets or tiles-pro). So MCP is the only surface that can delete a tileset/tile or a managed animation, or list those collections:
-
-- **Deletes** (no REST *delete* route for any tile/tileset family, nor a managed-animation delete): `delete_topdown_tileset`, `delete_sidescroller_tileset`, `delete_isometric_tile`, `delete_tiles_pro`, `delete_animation`
-- **Lists** (no REST *list* route): `list_sidescroller_tilesets`, `list_tiles_pro`
+The 2026-07-19 snapshot added REST routes for the `delete` / `list` lifecycle helpers this section previously listed as MCP-only, so they are no longer gaps: `delete_topdown_tileset` (`DELETE /tilesets/{id}`), `delete_sidescroller_tileset` (`DELETE /tilesets-sidescroller/{id}`), `delete_isometric_tile` (`DELETE /isometric-tiles/{id}`), `delete_tiles_pro` (`DELETE /tiles-pro/{id}`), `delete_animation` (`DELETE /characters/{id}/animations`), `list_sidescroller_tilesets` (`GET /tilesets-sidescroller`), `list_tiles_pro` (`GET /tiles-pro`).
 
 ### Not counted as MCP-only
 
-- Per-resource `get_*` tools without a dedicated REST GET (`get_font`, `get_map_object`, `get_portrait_character`, `get_sidescroller_tileset`) are not gaps: async retrieval maps to REST `GET /background-jobs/{job_id}` plus dedicated GETs where present.
+- Per-resource `get_*` tools map to a dedicated REST GET where one exists — `GET /generate-font-pro/{job_id}` (`get_font`), `GET /map-objects/{id}` (`get_map_object`), `GET /portrait-character-pro/{job_id}` (`get_portrait_character`), `GET /tilesets-sidescroller/{id}` (`get_sidescroller_tileset`) — and otherwise to the generic `GET /background-jobs/{job_id}` async poll. Either way they are not gaps.
 - `pixellab://docs/...` resources (Godot/Unity/Python/Wang/sidescroller/isometric/overview integration guides) are MCP-only, but they are documentation, not an API surface.
 
-**Total: 24 MCP tools with no REST v2 counterpart** — 17 in the platform layer, plus 7 `delete`/`list` lifecycle helpers absent from both `llms.txt` and OpenAPI.
+**Total: 17 MCP tools with no REST v2 counterpart** — all in the platform layer. (The 7 `delete`/`list` lifecycle helpers counted here before 2026-07-19 now have REST routes.)
 
 ## Routing Implications
 
@@ -303,7 +300,7 @@ These follow from the gaps above and are already encoded in SKILL.md's Intent Ro
 
 ## Caveats
 
-- Snapshot-bound: MCP inventory is the 2026-07-02 auto-generated docs; REST index is 2026-07-11 `llms.txt`. Both can drift; the doc-watch cache workflow ([`pixellab-doc-watch-cache.md`](pixellab-doc-watch-cache.md)) is how drift is detected.
+- Snapshot-bound: both the MCP inventory and the REST index/OpenAPI are the 2026-07-19 cached snapshots. Both can drift; the doc-watch cache workflow ([`pixellab-doc-watch-cache.md`](pixellab-doc-watch-cache.md)) is how drift is detected.
 - MCP↔REST are not guaranteed pixel-identical for the same prompt/seed even where parity is `=`; treat them as one workflow family with overlapping controls, REST generally exposing the fuller documented schema.
 - `~` rows (`create-character-pro` and `create-character-v3` via the `create_character` `mode` parameter) are inferred capability mappings: the MCP snapshot documents `mode` with a `standard` default but does not enumerate `v3`/`pro` values, so the exact mapping is not proven from public docs. SKILL.md nonetheless defaults `create_character` to `mode="v3"`.
 - This spike compares only public REST v2 and public MCP. Website/Map Workshop, Pixelorama/editor, Aseprite-extension, and legacy v1 routes are out of scope here; see [User-Facing Term To Backend Mapping](pixellab-user-facing-term-backend-mapping.md) for those surfaces.
