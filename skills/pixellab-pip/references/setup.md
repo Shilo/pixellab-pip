@@ -6,7 +6,7 @@ The first-run command is one word after the trigger, such as `/pixellab-pip setu
 
 ## 1. Choose a mode first
 
-For a bare `setup`, the mode is `unknown` unless the user named an assistant/editor/app target or the prior conversation established one. Detecting the current app does not by itself resolve the mode. Mode selection is mandatory before any MCP/API-specific work: do not inspect config, prepare write previews, or request write approval until the user picks a mode. A brief credential-readiness note is allowed (see section 5 for how narrow it must be), but the next user-facing question must be the mode choice — never a yes/no question such as "Should I prepare a Codex MCP config preview?"
+For a bare `setup`, the mode is `unknown` unless the user named an assistant/editor/app target or the prior conversation established one. Detecting the current app does not by itself resolve the mode. Already-set-up shortcut (ambient signals only, no config inspection): if PixelLab MCP tools are already visible in this session and a live `PIXELLAB_SECRET` is present, the effective state is already `both` — report that PixelLab is ready, offer the section 5 no-credit verify, and ask the mode question only if the user then wants to add, change, or narrow the setup. Otherwise, mode selection is mandatory before any MCP/API-specific work: do not inspect config, prepare write previews, or request write approval until the user picks a mode. A brief credential-readiness note is expected (see section 5 for how narrow it must be) and doubles as the shortcut check above, but the next user-facing question must be the mode choice — never a yes/no question such as "Should I prepare a Codex MCP config preview?"
 
 When the app exposes an interactive choice prompt, use it (Claude Code `AskUserQuestion`; Codex `request_user_input` only when actually available, typically Plan mode — full-access/sandbox does not imply it). Otherwise ask this exact question: "Which setup do you want: MCP + API (recommended), MCP only, API only, or Manual?"
 
@@ -60,7 +60,7 @@ Then get explicit approval before changing anything.
 
 ## 5. Verify without spending credits
 
-Diagnose before changing anything, keeping checks narrow to the user's stated environment. For MCP readiness: whether PixelLab MCP tools are already available (match by suffix if prefixed), whether the app and its target settings screen or config file are known, whether a config path was explicitly provided or a specific likely path approved, and whether the app can pass `PIXELLAB_SECRET` from an env var or secret setting. For API readiness: whether `PIXELLAB_SECRET` is present and non-empty (checked as below), whether network access to `https://api.pixellab.ai/v2` is available when a live check is requested, and whether the session where Pip runs can see the same `PIXELLAB_SECRET` source.
+Diagnose before changing anything, keeping checks narrow to the user's stated environment. The broad diagnostics in this paragraph apply only after a mode is chosen; before mode selection, limit any readiness note to the ambient signals in this section's last paragraph. For MCP readiness: whether PixelLab MCP tools are already available (match by suffix if prefixed), whether the app and its target settings screen or config file are known, whether a config path was explicitly provided or a specific likely path approved, and whether the app can pass `PIXELLAB_SECRET` from an env var or secret setting. For API readiness: whether `PIXELLAB_SECRET` is present and non-empty (checked as below), whether network access to `https://api.pixellab.ai/v2` is available when a live check is requested, and whether the session where Pip runs can see the same `PIXELLAB_SECRET` source.
 
 Verify only after the user approves a no-credit check; never spend credits during setup. Before it, confirm it uses the locally configured credential, and state that the token value will not be printed and that no generation or edit will run.
 
@@ -68,7 +68,7 @@ Verify only after the user approves a no-credit check; never spend credits durin
 - **REST v2**: `GET /balance` with `Authorization: Bearer <env value>` — never print auth headers or full JSON.
 - **Tool availability**: list or identify PixelLab MCP tools (match by suffix if prefixed) without generation calls.
 
-Check `PIXELLAB_SECRET` presence without outputting, logging, measuring, transforming, or inspecting the value — pass it only to the approved check. For a readiness note before mode selection, check only whether the live `PIXELLAB_SECRET` environment variable is visible to the current process; do not inspect project-local secret files, broad config directories, or recursive paths.
+Check `PIXELLAB_SECRET` presence without outputting, logging, measuring, transforming, or inspecting the value — test only whether it is non-empty and emit a status word such as `set`/`not set`, never the value, and pass the value only to the approved check. For a readiness note before mode selection, check only whether the live `PIXELLAB_SECRET` environment variable is visible to the current process and whether PixelLab MCP tools are already visible in this session (already-loaded tools only — no config inspection); do not inspect project-local secret files, broad config directories, or recursive paths.
 
 After the check, report success/failure, the surface checked, and whether credentials were found; summarize any balance without raw headers or full JSON. On failure, name the likely layer: missing env var, app not reloaded, auth rejected, network failure, endpoint unavailable, or tool mismatch.
 
@@ -76,18 +76,19 @@ After the check, report success/failure, the surface checked, and whether creden
 
 ## 6. Output
 
-Keep wording friendly, action-oriented, agent-agnostic, and OS-agnostic; prefer "Next step" over long diagnostics; say "assistant", "editor", "app", or the product name, not "host". Do not show OS/shell/package-manager/SDK/framework/language setup commands unless the user asks for a specific manual secret-storage path.
+Keep wording friendly, action-oriented, agent-agnostic, and OS-agnostic; prefer "Next step" over long diagnostics; say "assistant", "editor", "app", or the product name, not "host". Do not show OS/shell/package-manager/SDK/framework/language setup commands unless the user asks for a specific manual secret-storage path. When the app has no secret-settings UI (many CLIs and generic agents), storing `PIXELLAB_SECRET` as a user-level environment variable is itself the manual secret-storage path: show placeholder-based external-terminal commands per `credentials.md` (never a literal token), and include the shell-history and new-shell-inheritance caveats so the user does not verify from a stale session.
 
 Include the account step (defined in section 2) whenever `PIXELLAB_SECRET` is missing or unknown, a Secret was pasted or must be rotated, a write or MCP registration is proposed while the Secret is still missing, or an unsafe path is refused (broad scans, `.env*` scans, session tokens, assistant-visible commands). If MCP registers but the Secret is still missing from the session, say PixelLab is registered but not ready for live use until `PIXELLAB_SECRET` is set and the app is reloaded. If the user asks for no writes, stay instruction-only but still include the account step.
 
-Compact templates (`[account step]` = the account-step sentence from section 2):
+Compact templates (`[account step]` = the account-step sentence from section 2; `[command]` = the app's token-free MCP preview from section 3):
 
+- **Already configured**: "PixelLab is ready — MCP tools are connected and `PIXELLAB_SECRET` is available for REST v2 fallback. I can run a no-credit balance check to confirm (no token printed, no credits spent), or leave it as is."
 - **Codex preview, Secret missing**: "Codex can register PixelLab MCP with a token-free config that references `PIXELLAB_SECRET`: [command]. Before live use, [account step] Should I run the registration command?"
 - **Codex registered, Secret missing**: "PixelLab MCP is registered in Codex but not ready for live use — `PIXELLAB_SECRET` is not visible in this session. [account step] Then restart/reload Codex."
 - **API-only / MCP + API, Secret missing**: "[account step] Then Pip can use the same Secret for documented REST v2 fallback when MCP tools are unavailable or insufficient."
 - **MCP-only, user-chosen hardcoded token**: "This can make MCP work, but it stores the raw Secret in local MCP config or shell history and does not configure `PIXELLAB_SECRET` for Pip's REST v2 fallback. Replace the placeholder yourself in an external terminal; do not paste it here."
 - **Pasted Secret**: "I cannot use a Secret pasted here — treat it as exposed and replace it. Repeat the account step for a fresh Secret; do not paste it here."
-- **Unsafe scan or session token**: "I will not scan broad secret locations or use browser/session tokens. [account step]"
+- **Unsafe scan or session token**: "I will not scan broad secret locations or use browser/session tokens. If you pasted a session token here, treat it as exposed and sign out or rotate it. [account step]"
 - **No writes while auth incomplete**: "I will not write anything. [account step] I can show token-free setup previews only."
 - **Manual**: "Open `https://www.pixellab.ai/mcp` and follow PixelLab's instructions. I will stop here."
 - **Manual with auth**: "Open `https://www.pixellab.ai/mcp` and follow PixelLab's instructions. If it asks for auth, [account step] I will stop here."
