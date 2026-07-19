@@ -137,6 +137,15 @@ Efficiency judgment: build the lightweight Aseprite CLI integration into Pip fir
 | Try-on and reshape | In-editor single-image compositing and reshape workflows; observed operation names include `generate-try-on` and `generate-reshape`. | Website/editor for single-image try-on/reshape behavior; REST v2 `transfer-outfit-v2` only for animation-frame outfit transfer. No public REST v2/MCP reshape endpoint was documented. |
 | Quantize/reduce colors, unzoom, pixel correction | In-editor color reduction, unzooming, and pixel-art correction workflows; observed operation names include `quantize-image`, `unzoom-pixelart`, and `correct-pixelart`. The observed reduce-colors flow is server-backed PixelLab editor behavior, not local-only Aseprite quantization. | For exact PixelLab editor behavior, use visible Aseprite/Pixelorama editor workflow. For local file-level palette clamps, indexed conversion, 1-bit black/white, or document palette replacement, use documented Aseprite CLI/Lua on local copies and verify visible colors plus palette entries when requested. No public REST v2/MCP route was documented for the exact editor-only PixelLab tools. |
 
+## Seed Handling
+
+The extension stores the resolved (returned) seed on essentially every generation; public Pip routes rarely see one. The cause is the surface, not the workflow:
+
+- The extension is a first-party editor integration that drives generation over PixelLab's private WebSocket transport. Its completion event carries the resolved `seed`, which the extension records in its editor-side request history. This is private integration behavior, not a public contract, so Pip does not and should not replicate it by calling that transport.
+- Public REST v2 and MCP do not declare a `seed` in any response schema (verified against the live v1 and v2 `openapi.json`). The one confirmed public seed-echo path is empirical and undocumented: async v2 background jobs may expose `last_response.seed` on `GET /background-jobs/{job_id}` — confirmed on `generate-image-v2` and `animate-with-text-v3`. The sync `create-image-*` routes and `create-image-pixflux-background` return none.
+
+Pip's practical equivalent: when it already polls an async v2 job, read `last_response.seed` and store it when present. It costs nothing extra (the poll already happens) and needs no new machinery. Runtime rule lives in `skills/pixellab-pip/references/usage-reporting.md`. Default behavior is unchanged: omit the seed by default and record only a seed that was sent or returned.
+
 ## Gaps Fixed In Pip
 
 - Multi-image routing now points to REST v2 `edit-images-v2` instead of saying no public route exists.
