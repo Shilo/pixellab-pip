@@ -485,15 +485,20 @@ def run_unit_tests() -> None:
         raise SystemExit(1)
 
 
-# Patterns that make NVIDIA SkillSpector open a GitHub Code Scanning alert. We block the
-# *avoidable* ones locally (and therefore in push-CI and the release gate, which both run this
-# file) so they never reach the security tab. Sourced from the scanner's own rules:
-#   - malware.yar `backdoor_persistence` (shell-startup / cron / ssh / LD_PRELOAD persistence IOCs)
-#   - agent_snooping `AS1` (references to ~/.<agent>/config directories)
-# NOT guarded: the project's accepted by-design findings (documented api.pixellab.ai URLs,
-# bearer-token-handling rules, the bark.py sound-helper subprocess) — those are legitimate and
-# intentionally kept, so guarding them would block every release. This mirrors specific rules;
-# the authoritative full scan stays the SkillSpector step in the release/security workflows.
+# Author-assist guard: predicts the *avoidable* NVIDIA SkillSpector findings that open GitHub Code
+# Scanning alerts, and fails here (local, push-CI, and the release gate all run this file) so they
+# never reach the security tab. security-scan.yml uploads SARIF for every finding but only fails on
+# an aggregate-score threshold, so a lone sub-threshold AS1/backdoor_persistence IOC still opens an
+# alert to dismiss by hand — this closes that gap early.
+#
+# Honestly scoped: a NON-ADVERSARIAL predictor for maintainer-authored text, not a security control.
+# Trivial variants (printf, tee -a, .zshrc/.bash_profile, ${HOME}) are intentionally NOT covered, and
+# it scans text files only (.md/.py/.json). The AUTHORITATIVE scan is the pinned SkillSpector step in
+# the security/release workflows. These regexes are a hand-derived subset of two rules from
+# SkillSpector commit dde36f258729b5aec7c835295a9556e64a2def0c (the pin in security-scan.yml /
+# release-skill.yml) — malware.yar `backdoor_persistence` and agent_snooping `AS1`; re-check them
+# when that pin is bumped. Not guarded: the project's accepted by-design findings (documented
+# api.pixellab.ai URLs, bearer-token-handling rules, the bark.py subprocess), intentionally kept.
 SECURITY_TRIGGER_PATTERNS = [
     (r"echo\s+.*>>?\s*.*\.bashrc", "backdoor_persistence: echo-append to .bashrc"),
     (r"echo\s+.*>>?\s*.*\.profile", "backdoor_persistence: echo-append to .profile"),
@@ -506,16 +511,18 @@ SECURITY_TRIGGER_PATTERNS = [
         "AS1: agent-config-directory path (name just the file, e.g. `config.toml`, not `~/.codex/config...`)",
     ),
 ]
+SECURITY_TRIGGER_REGEXES = [(re.compile(rx, re.IGNORECASE), label) for rx, label in SECURITY_TRIGGER_PATTERNS]
+SECURITY_SCAN_SUFFIXES = {".md", ".py", ".json"}
 
 
 def check_no_security_trigger_patterns() -> None:
-    compiled = [(re.compile(rx, re.IGNORECASE), label) for rx, label in SECURITY_TRIGGER_PATTERNS]
     hits: list[str] = []
     for path in run_git_ls_files("skills/pixellab-pip"):
-        if path.suffix not in {".md", ".py"}:
+        if path.suffix.lower() not in SECURITY_SCAN_SUFFIXES:
             continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            for rx, label in compiled:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for rx, label in SECURITY_TRIGGER_REGEXES:
                 if rx.search(line):
                     hits.append(f"{path.relative_to(REPO_ROOT)}:{lineno} — {label}")
     if hits:
