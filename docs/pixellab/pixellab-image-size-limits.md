@@ -319,6 +319,7 @@ Nothing about the size limits themselves remains untested. Do not promote an `8p
 
 ## Related
 
+- [`pixellab-hd-region-edit-animate-spike.md`](pixellab-hd-region-edit-animate-spike.md) — editing/animating a region of an image larger than the edit/animate/interpolate max size (the "Use selection tool to select painting area" technique).
 - [`pixellab-16px-item-sprite-generation-spike.md`](pixellab-16px-item-sprite-generation-spike.md) — why 16px full-cell tiles work better than strict 16px non-tile item sprites.
 - [`pixellab-32px-vfx-atlas-density-spike.md`](pixellab-32px-vfx-atlas-density-spike.md) — semantic scale drift at small cell sizes.
 - [`../../skills/pixellab-pip/references/create-image-pro.md`](../../skills/pixellab-pip/references/create-image-pro.md) — sub-32px cell request handling.
