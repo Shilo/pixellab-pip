@@ -267,7 +267,7 @@ MCP covers the asset lifecycle except a full-bundle ZIP export:
 
 The mirror of the gap list above: MCP tools with no public REST v2 endpoint. Grouped by why the gap exists. Of the 62 MCP tools in the snapshot, 17 have no REST v2 counterpart — all in the platform layer. (Before 2026-07-19 there were also 7 `delete`/`list` lifecycle helpers here; REST v2 has since added matching routes, and MCP added `update_character_tags` / `update_object_tags`.)
 
-### 1. Platform, agent, sandbox, chat (17) — genuinely MCP-only
+### Platform, agent, sandbox, chat (17) — genuinely MCP-only
 
 No public REST v2 art API covers these; they exist only as MCP tools. Every platform tool except `get_balance` (which maps to `GET /balance`) is here. There is no REST fallback to offer — if these tools are not visible, the capability is unavailable.
 
