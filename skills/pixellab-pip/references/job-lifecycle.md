@@ -10,6 +10,8 @@ For REST `POST /v2/tilesets`, the create response can contain both `background_j
 
 Poll gently. Start with a short delay, then back off instead of tight loops. Stop polling in the current turn when the job is still pending after a reasonable wait, report the job or asset ID, and tell the user which status route or getter can resume the check.
 
+Any wait that runs outside the current turn — a backgrounded poll loop, a log/file watcher, a scheduled wake — must be bounded so it always ends and returns control on every outcome: success, failure or terminal error, and a hard deadline. Never gate the only exit or wake signal on success alone. A background `until <success>; do sleep; done; echo DONE` loop never exits when the job fails or stalls, so nothing ever wakes you; a `tail -f … | grep <success>` watcher blocks until its own timeout when the job crashes before that marker. Add a deadline and a failure-status exit, and emit a terminal marker on every path. On resuming from any wait, re-fetch actual status with the status route or getter before acting — the wait ending is not proof of success — and if the deadline passed with the job still pending, do not wait again: fall back to reporting the ID and resume route above.
+
 Do not resubmit a paid job because a poll timed out or a `423`/`404`/`review`/stale-URL lookup came back — poll again or re-fetch with the matching getter instead.
 
 Handle statuses as:
