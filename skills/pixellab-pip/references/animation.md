@@ -36,11 +36,11 @@ Raw `animate-with-text-v3` returns `frame_count`+1 images: image 0 is the suppli
 
 `animate-with-text-v3` (and the other generation endpoints) are async: `POST` returns a `background_job_id`; poll `GET /background-jobs/{job_id}` until the job `status` is `completed` (results at `last_response.images`) or `failed`. Two robustness notes from live runs: under heavy load the top-level `status` can briefly lag the ready result, so `last_response`'s own completed/`done` status is the earliest reliable signal — but do not treat the mere first appearance of an image as done, since some endpoints stream partial progress images. Read per-call cost from the job's top-level `usage.usd`. Make the poll loop tolerant of transient timeouts and 5xx: re-poll the same saved `background_job_id`, and never resubmit a paid job on a transient poll error — that double-charges (see `job-lifecycle.md`). Persist each paid response as it arrives so a poller crash cannot orphan a charged job.
 
-## Duplicate-Filled Atlas Risk
+## Atlas Animation Risk
 
-`animate-with-text-v3` cannot turn a spritesheet of identical still cells into unique sequential phases from the prompt alone. It treats the whole atlas as one image and applies synchronized motion to every cell — with `first_frame` only or with identical `first_frame`/`last_frame` anchors — and wording like "every cell unique" does not override this.
+`animate-with-text-v3` treats a spritesheet as one image rather than isolated cells. Prompt wording cannot reliably enforce cell boundaries or preserve each cell independently; motion may deform cells or cross between them. Animate one selected cell as the default. If the user explicitly approves animating several cells independently, use one job per cell and disclose the multi-job cost first.
 
-If the user insists on animating a duplicate-filled atlas in place, `animate-with-text-v2` / Pro honors per-cell variation better but at lower pixel quality. Offer it as an optional paid candidate, not a quality upgrade; warn about palette and color drift; generate one candidate first and verify every cell.
+If the user insists on animating an atlas in one job, explain that the result is experimental. `animate-with-text-v2` / Pro may honor per-cell variation better but at lower pixel quality; offer it as an optional paid candidate, not a quality upgrade, warn about palette and color drift, and verify every cell.
 
 ## Walk Loops From Idle Stances
 
