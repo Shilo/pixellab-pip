@@ -71,7 +71,7 @@ Blueprint — replayable route and request bodies ([`animal-face-emoji-5x5-16px.
       },
       "paid_call_policy": "explicit_user_run_request_required",
       "output_directory": "pixellab-pip-generations/animal-face-emoji-16px",
-      "output_collision_policy": "stop_if_exists"
+      "output_collision_policy": "create_unique"
     },
     "TASK": {
       "instruction": "Confirm the current user explicitly asked to run this blueprint and that a PixelLab bearer token is configured locally, then create the empty output directory. This blueprint makes 25 paid Pixen calls; stop and ask if either condition is unmet.",

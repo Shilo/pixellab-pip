@@ -44,7 +44,7 @@ connection metadata:
   },
   "paid_call_policy": "explicit_user_run_request_required",
   "output_directory": "pixellab-pip-generations/example-run",
-  "output_collision_policy": "stop_if_exists",
+  "output_collision_policy": "create_unique",
   "mcp_server": {
     "name": "PixelLab",
     "url": "https://api.pixellab.ai/mcp",
@@ -61,9 +61,10 @@ contains the secret value or an authorization header, and the metadata does not 
 or spending with it. The explicit paid-call policy means the file itself is never approval; the
 current user must explicitly ask to run it. That request covers each recorded call once, not retries
 or adjacent generations. REST-only recipes omit `mcp_server`; MCP-only recipes omit only `api_base_url`.
-`output_directory` gives a safe project-relative destination. The reader creates it as a new folder
-and `output_collision_policy` stops instead of overwriting an existing run; relative task outputs go there unless the current
-user explicitly chooses a different new destination.
+`output_directory` gives a safe project-relative destination. With `create_unique`, the reader uses
+that directory when available or appends the lowest available suffix beginning with `-2`, then creates
+the resolved directory empty. Existing runs are never overwritten or mixed; relative task outputs go
+there unless the current user explicitly chooses a different new destination.
 A portable paid template uses an initial `TASK` to perform those authority, credential-presence, and
 empty-folder checks before its first PixelLab call, so a no-skill reader cannot accidentally check
 for collisions only after spending.

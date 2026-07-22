@@ -169,7 +169,7 @@ class BlueprintShapeTests(unittest.TestCase):
                     "auth": {"type": "bearer", "env": "PIXELLAB_SECRET", "required_before_calls": True, "provider_hint": "local"},
                     "paid_call_policy": "explicit_user_run_request_required",
                     "output_directory": "pixellab-pip-generations/test-run",
-                    "output_collision_policy": "stop_if_exists",
+                    "output_collision_policy": "create_unique",
                     "mcp_server": {"name": "PixelLab", "url": "https://api.pixellab.ai/mcp", "transport": "http", "docs_url": "https://api.pixellab.ai/mcp/docs"},
                     "extension": {"portable": True},
                 },
@@ -184,7 +184,9 @@ class BlueprintShapeTests(unittest.TestCase):
             ({"mcp_server": {"name": "PixelLab", "url": "https://evil.example/mcp"}}, "public PixelLab MCP URL"),
             ({"paid_call_policy": "blueprint_is_approval"}, "explicit user run request"),
             ({"output_directory": "../outside"}, "under pixellab-pip-generations"),
-            ({"output_collision_policy": "overwrite"}, "stop_if_exists"),
+            ({"output_directory": "pixellab-pip-generations/test-run"}, "create_unique"),
+            ({"output_collision_policy": "overwrite"}, "create_unique"),
+            ({"output_collision_policy": "stop_if_exists"}, "create_unique"),
         )
         for metadata, error in invalid:
             with self.subTest(metadata=metadata), self.assertRaisesRegex(AssertionError, error):

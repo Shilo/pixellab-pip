@@ -262,8 +262,8 @@ def validate_pixellab_metadata(value: object, label: str) -> None:
         if normalized_output.endswith("/") or ".." in normalized_output.split("/"):
             raise AssertionError(f"{label}: _pixellab output_directory must be a safe relative directory")
     collision_policy = value.get("output_collision_policy")
-    if collision_policy is not None and collision_policy != "stop_if_exists":
-        raise AssertionError(f"{label}: _pixellab output_collision_policy must be stop_if_exists")
+    if (output_directory is not None or collision_policy is not None) and collision_policy != "create_unique":
+        raise AssertionError(f"{label}: _pixellab output_collision_policy must be create_unique")
 
 
 def validate_blueprint_data(data: object, label: str) -> None:

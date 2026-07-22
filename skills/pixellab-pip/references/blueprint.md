@@ -57,7 +57,7 @@ account data, or a promise that an environment loader exists.
   },
   "paid_call_policy": "explicit_user_run_request_required",
   "output_directory": "pixellab-pip-generations/example-run",
-  "output_collision_policy": "stop_if_exists",
+  "output_collision_policy": "create_unique",
   "mcp_server": {
     "name": "PixelLab",
     "url": "https://api.pixellab.ai/mcp",
@@ -75,9 +75,11 @@ attaching a blueprint is not approval: the current user must explicitly ask to r
 request covers the recorded calls once, never a retry or adjacent generation. A reader may recognize equivalent metadata,
 but Pip writes this shape. MCP-only workflows omit only `api_base_url`; REST-only workflows omit
 `mcp_server`.
-`output_directory` is a safe project-relative destination. Create it as a new folder before the
-first call; `output_collision_policy` makes the no-overwrite behavior explicit. Every relative `TASK` output resolves
-inside it unless the current user explicitly chooses a different new destination. An input shipped
+`output_directory` is a safe project-relative destination. Before the first call, `create_unique`
+uses that directory when available; otherwise it appends the lowest available numeric suffix starting
+at `-2`. Create the resolved directory empty and never overwrite or mix it with an earlier run. Every
+relative `TASK` output resolves inside it unless the current user explicitly chooses a different new
+destination. An input shipped
 beside the source blueprint still resolves beside that blueprint.
 For a paid portable template, make the first executable step a `TASK` that checks explicit run
 authority and credential presence and creates this empty folder. This makes the preflight order

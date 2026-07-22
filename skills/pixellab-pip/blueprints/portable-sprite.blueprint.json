@@ -9,12 +9,12 @@
       },
       "paid_call_policy": "explicit_user_run_request_required",
       "output_directory": "pixellab-pip-generations/portable-sprite-run",
-      "output_collision_policy": "stop_if_exists"
+      "output_collision_policy": "create_unique"
     },
     "_comment": "A portable REST recipe for a configurable transparent sprite.",
     "_comment_prompt": "/pixellab-pip create the portable sprite blueprint",
     "TASK": {
-      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and create the declared output_directory as a new empty folder. If the directory already exists or any precondition fails, stop before spending.",
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty; if any precondition fails, stop before spending.",
       "verify": "Run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
     }
   },
