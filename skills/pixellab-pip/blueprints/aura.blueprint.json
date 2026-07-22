@@ -36,7 +36,7 @@
   },
   {
     "TASK": {
-      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet. Explain before asking that continuing runs one additional paid animate-with-text-v3 job and that V3 treats the sheet as one image, so cell isolation is not guaranteed. If the user declines, finish successfully with the static outputs and stop before the following POST. If the user explicitly approves, verify candidates.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails. Before continuing, resolve the following first_frame path from candidates.png in memory.",
+      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet. Explain before asking that continuing runs one additional paid animate-with-text-v3 job and that V3 treats the sheet as one image, so cell isolation is not guaranteed. If the user declines, finish successfully with the static outputs and stop before the following POST. If the user explicitly approves, verify candidates.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails. Before continuing, resolve the following first_frame path to {\"type\": \"base64\", \"base64\": \"<base64 PNG bytes from candidates.png>\", \"format\": \"png\"} in memory.",
       "inputs": [
         "candidates.png"
       ],
@@ -46,7 +46,7 @@
   {
     "POST /v2/animate-with-text-v3": {
       "first_frame": "candidates.png",
-      "action": "each aura's existing outer edges shimmer gently in place while its shape and center remain unchanged",
+      "action": "all aura effects flicker and pulse simultaneously in place with subtle brightness variation",
       "frame_count": 8,
       "no_background": true,
       "enhance_prompt": false
@@ -54,7 +54,7 @@
   },
   {
     "TASK": {
-      "instruction": "Persist the background_job_id returned by the immediately preceding PixelLab call, then poll GET /v2/background-jobs/{background_job_id} gently with backoff. Never resubmit the paid animation. On failure or a bounded-wait timeout, stop and report the saved job. On completion, save all nine returned images in API order as frame-00.png through frame-08.png. Assemble them without resizing or repainting into animation-frames.png as a three-column by three-row sheet and animation.gif at 100 milliseconds per frame, looping forever with disposal Previous.",
+      "instruction": "Persist the background_job_id returned by the immediately preceding PixelLab call, then poll GET /v2/background-jobs/{background_job_id} gently with backoff. Treat top-level completed or last_response completed/done as success, failed as terminal failure, and never infer completion from the first returned image alone. Re-poll the same job after transient errors and never resubmit the paid animation. After a reasonable bounded wait, if the job remains pending, stop and report the saved ID and GET /v2/background-jobs/{background_job_id} as the resume route. On failure, stop and report it. On completion, save all nine returned images in API order as frame-00.png through frame-08.png. Assemble them without resizing or repainting into animation-frames.png as a three-column by three-row sheet and into animation.gif at 100 milliseconds per frame, looping forever with disposal Previous. Inspect GIF metadata, coalesce it, and compare the coalesced frames to the ordered PNGs.",
       "outputs": [
         "frame-00.png",
         "frame-01.png",
@@ -68,7 +68,7 @@
         "animation-frames.png",
         "animation.gif"
       ],
-      "verify": "There are nine ordered transparent frames at the same dimensions as candidates.png; visible motion occurs throughout each aura without a static seam; animation-frames.png and animation.gif preserve frame order and pixels; and no cells merge, cross boundaries, detach artifacts, clip, fill ring centers unacceptably, or drift unacceptably in palette. Report technical success separately from visual acceptability."
+      "verify": "There are nine ordered transparent frames at the same dimensions as candidates.png; animation-frames.png contains the nine frames in row-major order; and animation.gif has 100-millisecond frames, loops forever, uses a defined disposal method, and coalesces to the ordered source frames. Inspect all generated frames and confirm every source cell remains recognizable and in its original grid position, synchronized visible motion occurs across the sheet, and no cells merge, cross boundaries, detach artifacts, clip, or drift unacceptably in palette. Report technical success separately from visual acceptability."
     }
   }
 ]
