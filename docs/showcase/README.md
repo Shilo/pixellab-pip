@@ -1,6 +1,6 @@
 # Showcase
 
-Last reviewed: 2026-07-15.
+Last reviewed: 2026-07-22.
 
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
@@ -56,9 +56,9 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <h3><a href="visual-effects.md">Visual Effects</a></h3>
 <details>
 <summary>Prompt</summary>
-<p><code>/pixellab-pip create 32px explosion visual effects. must be a variety of top down explosions that are all unique.</code></p>
+<p><code>/pixellab-pip create aura blueprint with energy, fire, water, ice, lightning, wind, nature, poison, darkness, holy, arcane, blood, bone, ghost, smoke, sand</code></p>
 </details>
-<a href="visual-effects.md"><img src="visual-effects/spark-explosion.gif" alt="Top-down spark flash explosion animation"></a>
+<a href="visual-effects.md"><img src="visual-effects/fantasy-aura-effects.gif" alt="Sixteen separately animated fantasy aura effects"></a>
 </td>
 </tr>
 <tr>

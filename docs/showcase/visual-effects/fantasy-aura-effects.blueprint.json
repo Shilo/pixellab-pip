@@ -1,0 +1,685 @@
+[
+  {
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/fantasy-aura-effects-run",
+      "output_collision_policy": "create_unique"
+    },
+    "_comment": "Generate sixteen transparent 64px aura candidates, animate each candidate independently in theme-array order, then assemble the synchronized frames into one 4x4 GIF.",
+    "_comment_prompt": "/pixellab-pip create aura blueprint with energy, fire, water, ice, lightning, wind, nature, poison, darkness, holy, arcane, blood, bone, ghost, smoke, sand",
+    "POST /v2/generate-image-v2": {
+      "description": "fully contained symmetrical energy, fire, water, ice, lightning, wind, nature, poison, darkness, holy, arcane, blood, bone, ghost, smoke, sand aura with vertical power spikes and a bottom energy ring",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Require exactly sixteen returned images. Save them unchanged in response order as 01/source.png through 16/source.png, assigning the array-order themes energy, fire, water, ice, lightning, wind, nature, poison, darkness, holy, arcane, blood, bone, ghost, smoke, and sand. Assemble them row-major into fantasy-aura-effects.png as a transparent 4x4 sheet without resizing, repainting, spacing, or margins.",
+      "outputs": [
+        "01/source.png",
+        "02/source.png",
+        "03/source.png",
+        "04/source.png",
+        "05/source.png",
+        "06/source.png",
+        "07/source.png",
+        "08/source.png",
+        "09/source.png",
+        "10/source.png",
+        "11/source.png",
+        "12/source.png",
+        "13/source.png",
+        "14/source.png",
+        "15/source.png",
+        "16/source.png",
+        "fantasy-aura-effects.png"
+      ],
+      "verify": "There are exactly sixteen transparent 64x64 source files; fantasy-aura-effects.png is 256x256, contains every source once in array order, and every cell matches its source pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "01/source.png",
+      "action": "energy aura surges in rhythmic concentric pulses while its vertical power spikes breathe brighter and dimmer in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding energy animation job to completion, save all nine returned images in API order as 01/frame-00.png through 01/frame-08.png, then assemble them horizontally without resizing or repainting into 01/spritesheet.png.",
+      "inputs": [
+        "01/source.png"
+      ],
+      "outputs": [
+        "01/frame-00.png",
+        "01/frame-01.png",
+        "01/frame-02.png",
+        "01/frame-03.png",
+        "01/frame-04.png",
+        "01/frame-05.png",
+        "01/frame-06.png",
+        "01/frame-07.png",
+        "01/frame-08.png",
+        "01/spritesheet.png"
+      ],
+      "verify": "The energy animation has nine ordered transparent 64x64 frames and 01/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "02/source.png",
+      "action": "fire aura flames lick and flicker upward unevenly while the molten ring flares with rolling heat",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding fire animation job to completion, save all nine returned images in API order as 02/frame-00.png through 02/frame-08.png, then assemble them horizontally without resizing or repainting into 02/spritesheet.png.",
+      "inputs": [
+        "02/source.png"
+      ],
+      "outputs": [
+        "02/frame-00.png",
+        "02/frame-01.png",
+        "02/frame-02.png",
+        "02/frame-03.png",
+        "02/frame-04.png",
+        "02/frame-05.png",
+        "02/frame-06.png",
+        "02/frame-07.png",
+        "02/frame-08.png",
+        "02/spritesheet.png"
+      ],
+      "verify": "The fire animation has nine ordered transparent 64x64 frames and 02/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "03/source.png",
+      "action": "water aura ripples circulate around the ring while blue wave crests rise and settle smoothly in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding water animation job to completion, save all nine returned images in API order as 03/frame-00.png through 03/frame-08.png, then assemble them horizontally without resizing or repainting into 03/spritesheet.png.",
+      "inputs": [
+        "03/source.png"
+      ],
+      "outputs": [
+        "03/frame-00.png",
+        "03/frame-01.png",
+        "03/frame-02.png",
+        "03/frame-03.png",
+        "03/frame-04.png",
+        "03/frame-05.png",
+        "03/frame-06.png",
+        "03/frame-07.png",
+        "03/frame-08.png",
+        "03/spritesheet.png"
+      ],
+      "verify": "The water animation has nine ordered transparent 64x64 frames and 03/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "04/source.png",
+      "action": "ice aura crystalline spikes shimmer with traveling frost light and subtly grow then contract in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding ice animation job to completion, save all nine returned images in API order as 04/frame-00.png through 04/frame-08.png, then assemble them horizontally without resizing or repainting into 04/spritesheet.png.",
+      "inputs": [
+        "04/source.png"
+      ],
+      "outputs": [
+        "04/frame-00.png",
+        "04/frame-01.png",
+        "04/frame-02.png",
+        "04/frame-03.png",
+        "04/frame-04.png",
+        "04/frame-05.png",
+        "04/frame-06.png",
+        "04/frame-07.png",
+        "04/frame-08.png",
+        "04/spritesheet.png"
+      ],
+      "verify": "The ice animation has nine ordered transparent 64x64 frames and 04/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "05/source.png",
+      "action": "lightning aura crackles with irregular electric arcs while sharp bolts flash around the charged ring",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding lightning animation job to completion, save all nine returned images in API order as 05/frame-00.png through 05/frame-08.png, then assemble them horizontally without resizing or repainting into 05/spritesheet.png.",
+      "inputs": [
+        "05/source.png"
+      ],
+      "outputs": [
+        "05/frame-00.png",
+        "05/frame-01.png",
+        "05/frame-02.png",
+        "05/frame-03.png",
+        "05/frame-04.png",
+        "05/frame-05.png",
+        "05/frame-06.png",
+        "05/frame-07.png",
+        "05/frame-08.png",
+        "05/spritesheet.png"
+      ],
+      "verify": "The lightning animation has nine ordered transparent 64x64 frames and 05/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "06/source.png",
+      "action": "wind aura currents spiral around the ring while pale air wisps sweep upward and circle in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding wind animation job to completion, save all nine returned images in API order as 06/frame-00.png through 06/frame-08.png, then assemble them horizontally without resizing or repainting into 06/spritesheet.png.",
+      "inputs": [
+        "06/source.png"
+      ],
+      "outputs": [
+        "06/frame-00.png",
+        "06/frame-01.png",
+        "06/frame-02.png",
+        "06/frame-03.png",
+        "06/frame-04.png",
+        "06/frame-05.png",
+        "06/frame-06.png",
+        "06/frame-07.png",
+        "06/frame-08.png",
+        "06/spritesheet.png"
+      ],
+      "verify": "The wind animation has nine ordered transparent 64x64 frames and 06/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "07/source.png",
+      "action": "nature aura vines and leafy spikes sway organically while green life energy pulses through the ring",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding nature animation job to completion, save all nine returned images in API order as 07/frame-00.png through 07/frame-08.png, then assemble them horizontally without resizing or repainting into 07/spritesheet.png.",
+      "inputs": [
+        "07/source.png"
+      ],
+      "outputs": [
+        "07/frame-00.png",
+        "07/frame-01.png",
+        "07/frame-02.png",
+        "07/frame-03.png",
+        "07/frame-04.png",
+        "07/frame-05.png",
+        "07/frame-06.png",
+        "07/frame-07.png",
+        "07/frame-08.png",
+        "07/spritesheet.png"
+      ],
+      "verify": "The nature animation has nine ordered transparent 64x64 frames and 07/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "08/source.png",
+      "action": "poison aura toxic bubbles swell and pop while sickly fumes churn and pulse around the ring",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding poison animation job to completion, save all nine returned images in API order as 08/frame-00.png through 08/frame-08.png, then assemble them horizontally without resizing or repainting into 08/spritesheet.png.",
+      "inputs": [
+        "08/source.png"
+      ],
+      "outputs": [
+        "08/frame-00.png",
+        "08/frame-01.png",
+        "08/frame-02.png",
+        "08/frame-03.png",
+        "08/frame-04.png",
+        "08/frame-05.png",
+        "08/frame-06.png",
+        "08/frame-07.png",
+        "08/frame-08.png",
+        "08/spritesheet.png"
+      ],
+      "verify": "The poison animation has nine ordered transparent 64x64 frames and 08/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "09/source.png",
+      "action": "darkness aura shadows throb inward and outward while violet wisps curl around the dark ring",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding darkness animation job to completion, save all nine returned images in API order as 09/frame-00.png through 09/frame-08.png, then assemble them horizontally without resizing or repainting into 09/spritesheet.png.",
+      "inputs": [
+        "09/source.png"
+      ],
+      "outputs": [
+        "09/frame-00.png",
+        "09/frame-01.png",
+        "09/frame-02.png",
+        "09/frame-03.png",
+        "09/frame-04.png",
+        "09/frame-05.png",
+        "09/frame-06.png",
+        "09/frame-07.png",
+        "09/frame-08.png",
+        "09/spritesheet.png"
+      ],
+      "verify": "The darkness animation has nine ordered transparent 64x64 frames and 09/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "10/source.png",
+      "action": "holy aura golden rays radiate in waves while the luminous halo brightens and settles in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding holy animation job to completion, save all nine returned images in API order as 10/frame-00.png through 10/frame-08.png, then assemble them horizontally without resizing or repainting into 10/spritesheet.png.",
+      "inputs": [
+        "10/source.png"
+      ],
+      "outputs": [
+        "10/frame-00.png",
+        "10/frame-01.png",
+        "10/frame-02.png",
+        "10/frame-03.png",
+        "10/frame-04.png",
+        "10/frame-05.png",
+        "10/frame-06.png",
+        "10/frame-07.png",
+        "10/frame-08.png",
+        "10/spritesheet.png"
+      ],
+      "verify": "The holy animation has nine ordered transparent 64x64 frames and 10/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "11/source.png",
+      "action": "arcane aura mystic ring markings rotate in opposing directions while violet magical currents pulse through the spires",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding arcane animation job to completion, save all nine returned images in API order as 11/frame-00.png through 11/frame-08.png, then assemble them horizontally without resizing or repainting into 11/spritesheet.png.",
+      "inputs": [
+        "11/source.png"
+      ],
+      "outputs": [
+        "11/frame-00.png",
+        "11/frame-01.png",
+        "11/frame-02.png",
+        "11/frame-03.png",
+        "11/frame-04.png",
+        "11/frame-05.png",
+        "11/frame-06.png",
+        "11/frame-07.png",
+        "11/frame-08.png",
+        "11/spritesheet.png"
+      ],
+      "verify": "The arcane animation has nine ordered transparent 64x64 frames and 11/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "12/source.png",
+      "action": "blood aura crimson liquid waves surge around the ring while sharp red splashes rise and recede in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding blood animation job to completion, save all nine returned images in API order as 12/frame-00.png through 12/frame-08.png, then assemble them horizontally without resizing or repainting into 12/spritesheet.png.",
+      "inputs": [
+        "12/source.png"
+      ],
+      "outputs": [
+        "12/frame-00.png",
+        "12/frame-01.png",
+        "12/frame-02.png",
+        "12/frame-03.png",
+        "12/frame-04.png",
+        "12/frame-05.png",
+        "12/frame-06.png",
+        "12/frame-07.png",
+        "12/frame-08.png",
+        "12/spritesheet.png"
+      ],
+      "verify": "The blood animation has nine ordered transparent 64x64 frames and 12/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "13/source.png",
+      "action": "bone aura ivory spikes rattle subtly while pale necrotic light travels around the skeletal ring",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding bone animation job to completion, save all nine returned images in API order as 13/frame-00.png through 13/frame-08.png, then assemble them horizontally without resizing or repainting into 13/spritesheet.png.",
+      "inputs": [
+        "13/source.png"
+      ],
+      "outputs": [
+        "13/frame-00.png",
+        "13/frame-01.png",
+        "13/frame-02.png",
+        "13/frame-03.png",
+        "13/frame-04.png",
+        "13/frame-05.png",
+        "13/frame-06.png",
+        "13/frame-07.png",
+        "13/frame-08.png",
+        "13/spritesheet.png"
+      ],
+      "verify": "The bone animation has nine ordered transparent 64x64 frames and 13/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "14/source.png",
+      "action": "ghost aura spectral flames waver and phase rhythmically while cold blue spirit light drifts around the ring",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding ghost animation job to completion, save all nine returned images in API order as 14/frame-00.png through 14/frame-08.png, then assemble them horizontally without resizing or repainting into 14/spritesheet.png.",
+      "inputs": [
+        "14/source.png"
+      ],
+      "outputs": [
+        "14/frame-00.png",
+        "14/frame-01.png",
+        "14/frame-02.png",
+        "14/frame-03.png",
+        "14/frame-04.png",
+        "14/frame-05.png",
+        "14/frame-06.png",
+        "14/frame-07.png",
+        "14/frame-08.png",
+        "14/spritesheet.png"
+      ],
+      "verify": "The ghost animation has nine ordered transparent 64x64 frames and 14/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "15/source.png",
+      "action": "smoke aura gray plumes billow and curl upward at varied speeds while the smoky ring slowly churns",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding smoke animation job to completion, save all nine returned images in API order as 15/frame-00.png through 15/frame-08.png, then assemble them horizontally without resizing or repainting into 15/spritesheet.png.",
+      "inputs": [
+        "15/source.png"
+      ],
+      "outputs": [
+        "15/frame-00.png",
+        "15/frame-01.png",
+        "15/frame-02.png",
+        "15/frame-03.png",
+        "15/frame-04.png",
+        "15/frame-05.png",
+        "15/frame-06.png",
+        "15/frame-07.png",
+        "15/frame-08.png",
+        "15/spritesheet.png"
+      ],
+      "verify": "The smoke animation has nine ordered transparent 64x64 frames and 15/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "16/source.png",
+      "action": "sand aura golden grains spiral around the ring while sandy ridges ripple and rise then settle in place",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll the immediately preceding sand animation job to completion, save all nine returned images in API order as 16/frame-00.png through 16/frame-08.png, then assemble them horizontally without resizing or repainting into 16/spritesheet.png.",
+      "inputs": [
+        "16/source.png"
+      ],
+      "outputs": [
+        "16/frame-00.png",
+        "16/frame-01.png",
+        "16/frame-02.png",
+        "16/frame-03.png",
+        "16/frame-04.png",
+        "16/frame-05.png",
+        "16/frame-06.png",
+        "16/frame-07.png",
+        "16/frame-08.png",
+        "16/spritesheet.png"
+      ],
+      "verify": "The sand animation has nine ordered transparent 64x64 frames and 16/spritesheet.png is 576x64 with every frame preserved pixel-for-pixel."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "For each frame index 00 through 08, assemble the matching frame from themes 01 through 16 into a transparent 4x4 row-major image. Encode the nine combined frames as fantasy-aura-effects.gif at 100 milliseconds per frame, looping forever with disposal Previous. Preserve theme-array order and do not resize or repaint returned frame content.",
+      "inputs": [
+        "01/frame-00.png",
+        "01/frame-01.png",
+        "01/frame-02.png",
+        "01/frame-03.png",
+        "01/frame-04.png",
+        "01/frame-05.png",
+        "01/frame-06.png",
+        "01/frame-07.png",
+        "01/frame-08.png",
+        "02/frame-00.png",
+        "02/frame-01.png",
+        "02/frame-02.png",
+        "02/frame-03.png",
+        "02/frame-04.png",
+        "02/frame-05.png",
+        "02/frame-06.png",
+        "02/frame-07.png",
+        "02/frame-08.png",
+        "03/frame-00.png",
+        "03/frame-01.png",
+        "03/frame-02.png",
+        "03/frame-03.png",
+        "03/frame-04.png",
+        "03/frame-05.png",
+        "03/frame-06.png",
+        "03/frame-07.png",
+        "03/frame-08.png",
+        "04/frame-00.png",
+        "04/frame-01.png",
+        "04/frame-02.png",
+        "04/frame-03.png",
+        "04/frame-04.png",
+        "04/frame-05.png",
+        "04/frame-06.png",
+        "04/frame-07.png",
+        "04/frame-08.png",
+        "05/frame-00.png",
+        "05/frame-01.png",
+        "05/frame-02.png",
+        "05/frame-03.png",
+        "05/frame-04.png",
+        "05/frame-05.png",
+        "05/frame-06.png",
+        "05/frame-07.png",
+        "05/frame-08.png",
+        "06/frame-00.png",
+        "06/frame-01.png",
+        "06/frame-02.png",
+        "06/frame-03.png",
+        "06/frame-04.png",
+        "06/frame-05.png",
+        "06/frame-06.png",
+        "06/frame-07.png",
+        "06/frame-08.png",
+        "07/frame-00.png",
+        "07/frame-01.png",
+        "07/frame-02.png",
+        "07/frame-03.png",
+        "07/frame-04.png",
+        "07/frame-05.png",
+        "07/frame-06.png",
+        "07/frame-07.png",
+        "07/frame-08.png",
+        "08/frame-00.png",
+        "08/frame-01.png",
+        "08/frame-02.png",
+        "08/frame-03.png",
+        "08/frame-04.png",
+        "08/frame-05.png",
+        "08/frame-06.png",
+        "08/frame-07.png",
+        "08/frame-08.png",
+        "09/frame-00.png",
+        "09/frame-01.png",
+        "09/frame-02.png",
+        "09/frame-03.png",
+        "09/frame-04.png",
+        "09/frame-05.png",
+        "09/frame-06.png",
+        "09/frame-07.png",
+        "09/frame-08.png",
+        "10/frame-00.png",
+        "10/frame-01.png",
+        "10/frame-02.png",
+        "10/frame-03.png",
+        "10/frame-04.png",
+        "10/frame-05.png",
+        "10/frame-06.png",
+        "10/frame-07.png",
+        "10/frame-08.png",
+        "11/frame-00.png",
+        "11/frame-01.png",
+        "11/frame-02.png",
+        "11/frame-03.png",
+        "11/frame-04.png",
+        "11/frame-05.png",
+        "11/frame-06.png",
+        "11/frame-07.png",
+        "11/frame-08.png",
+        "12/frame-00.png",
+        "12/frame-01.png",
+        "12/frame-02.png",
+        "12/frame-03.png",
+        "12/frame-04.png",
+        "12/frame-05.png",
+        "12/frame-06.png",
+        "12/frame-07.png",
+        "12/frame-08.png",
+        "13/frame-00.png",
+        "13/frame-01.png",
+        "13/frame-02.png",
+        "13/frame-03.png",
+        "13/frame-04.png",
+        "13/frame-05.png",
+        "13/frame-06.png",
+        "13/frame-07.png",
+        "13/frame-08.png",
+        "14/frame-00.png",
+        "14/frame-01.png",
+        "14/frame-02.png",
+        "14/frame-03.png",
+        "14/frame-04.png",
+        "14/frame-05.png",
+        "14/frame-06.png",
+        "14/frame-07.png",
+        "14/frame-08.png",
+        "15/frame-00.png",
+        "15/frame-01.png",
+        "15/frame-02.png",
+        "15/frame-03.png",
+        "15/frame-04.png",
+        "15/frame-05.png",
+        "15/frame-06.png",
+        "15/frame-07.png",
+        "15/frame-08.png",
+        "16/frame-00.png",
+        "16/frame-01.png",
+        "16/frame-02.png",
+        "16/frame-03.png",
+        "16/frame-04.png",
+        "16/frame-05.png",
+        "16/frame-06.png",
+        "16/frame-07.png",
+        "16/frame-08.png"
+      ],
+      "outputs": [
+        "fantasy-aura-effects.gif"
+      ],
+      "verify": "fantasy-aura-effects.gif is 256x256 with nine 100-millisecond frames, loops forever, uses disposal Previous, preserves transparency, and keeps all sixteen themes in their original 4x4 array-order positions; visible color changes are limited to GIF palette encoding."
+    }
+  }
+]
