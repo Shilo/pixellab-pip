@@ -1,0 +1,46 @@
+[
+  {
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/aura-run",
+      "output_collision_policy": "stop_if_exists"
+    },
+    "_comment": "Create transparent aura candidates at a configurable native size, assemble every returned candidate into a review spritesheet, then offer to animate that complete sheet only if the user separately approves the additional V3 job.",
+    "_comment_prompt": "/pixellab-pip create the aura blueprint",
+    "TASK": {
+      "instruction": "Before any PixelLab call, resolve the optional power spike theme and aura size, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and create the declared output_directory as a new empty folder. If the directory already exists or any precondition fails, stop before spending.",
+      "verify": "The variable is resolved, run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
+    }
+  },
+  {
+    "POST /v2/generate-image-v2": {
+      "description": "fully contained symmetrical energy aura with vertical {{power spike theme | default: \"\"}} power spikes and a bottom energy ring",
+      "image_size": "{{aura size | default: {\"width\": 64, \"height\": 64}}}",
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save every candidate returned by the immediately preceding PixelLab call unchanged in response order as sequentially numbered candidate PNGs. Determine the candidate count from the completed response rather than assuming it from the requested size. Assemble every candidate once in row-major order into candidates.png using a compact near-square grid with no resizing, repainting, margins, or spacing. Present every numbered candidate for user review without selecting or discarding one automatically.",
+      "outputs": [
+        "candidates.png"
+      ],
+      "verify": "The number of saved candidate PNGs equals the number returned; every candidate matches the resolved aura size, preserves transparency, and matches its returned payload; candidates.png contains every candidate exactly once at native size and each cell matches its source pixel-for-pixel."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet with the bundled aura-animation blueprint. Explain before asking that this is one additional paid animate-with-text-v3 job and that V3 treats the atlas as one image, applying simultaneous motion across its cells rather than making an independent animation sequence for each candidate. Run the companion blueprint only after explicit approval; otherwise finish with the static outputs.",
+      "inputs": [
+        "candidates.png"
+      ],
+      "verify": "No animation call is made without explicit approval given after the static candidates are available."
+    }
+  }
+]

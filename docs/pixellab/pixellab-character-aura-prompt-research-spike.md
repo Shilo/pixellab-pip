@@ -231,6 +231,332 @@ Observed result:
 
 Evidence: [`mvp-surrounding-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-surrounding-bottom-ring-auras-pro-20260721/).
 
+### `fully contained symmetrical energy aura with vertical power spikes and a flat bottom energy ring`
+
+Observed result:
+
+- Containment passed, but `flat` did not reliably produce a fuller ground-plane aura ring.
+- The vertical effect moved into the dead center of the ring instead of emerging around its outside perimeter.
+- That central mass often read as an elemental object seated inside the ring rather than an aura surrounding a future character.
+- Several candidates also became floating emblems, crystals, ornamental forms, or other constructed objects.
+- The modifier weakened the established aura composition rather than improving only ring orientation.
+- This did not improve on the current best prompt.
+
+Evidence: [`mvp-flat-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-flat-bottom-ring-auras-pro-20260721/).
+
+### `fully contained symmetrical energy aura with vertical power spikes and a wide bottom energy ring`
+
+Observed result:
+
+- Retained the front-facing composition overall.
+- As in the `flat` batch, the effect became a dead-center elemental object inside the ring instead of energy distributed around the ring's outer circumference.
+- `Wide` made the lower feature broad and visually dominant rather than merely fuller.
+- Several candidates drifted into physical platforms, crystals, stones, or constructed bases, repeating part of the earlier `grounded base` failure.
+- The wide ring also regained an overly three-dimensional, material-like form rather than the desired flat aura-circle appearance.
+- One candidate touched a canvas edge.
+- This did not improve on the current best prompt.
+
+Evidence: [`mvp-wide-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-wide-bottom-ring-auras-pro-20260721/).
+
+The shared failure across both batches is more important than their individual modifier effects: adding either `flat` or `wide` broke the established outside-perimeter distribution. The model centered a discrete subject inside the ring, making the output resemble an elemental summon, crystal, flame object, or emblem rather than a character aura. Because the two calls used different randomized seeds, the experiment cannot prove that either word deterministically causes this layout. The repeated batch-level tendency is sufficient to reject both variants for production, while a seed-locked repeat would be required to separate prompt causality from RNG.
+
+### Seed-Locked `bottom aura ring` Versus `bottom aura circle`
+
+These two calls used the same seed, `1379246801`, to reduce RNG as a comparison variable.
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom aura ring`:
+
+- Preserved containment and mostly upright compositions.
+- Many candidates still placed a discrete elemental, emblem, flower, or crystal-like subject at the center.
+- The rings were generally less full and coherent than those produced by `energy ring at the base`.
+- Replacing `energy` with `aura` did not recover the desired Ragnarok-like lower ring.
+
+Evidence: [`mvp-bottom-aura-ring-pro-20260721`](../../pixellab-pip-generations/mvp-bottom-aura-ring-pro-20260721/).
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom aura circle`:
+
+- Preserved containment and mostly upright compositions.
+- Circles were often fuller than the `aura ring` results.
+- Several became portals, disks, constructed bases, or central elemental objects rather than perimeter aura energy.
+- Replacing `ring` with `circle` improved fullness inconsistently while weakening aura identity.
+
+Evidence: [`mvp-bottom-aura-circle-pro-20260721`](../../pixellab-pip-generations/mvp-bottom-aura-circle-pro-20260721/).
+
+The seed-locked comparison favors neither replacement over the current best. `Aura ring` weakened ring fullness; `aura circle` increased fullness at the cost of portals, disks, and central-object drift.
+
+Most importantly, the central-subject failure was not present in the unmodified best batch. It appeared after replacing the proven phrase `bottom energy ring`:
+
+- `Bottom aura ring` repeatedly generated an emblem, flower, crystal, or elemental symbol inside the ring rather than a continuous aura effect.
+- `Bottom aura circle` came closer to the desired full lower shape, but it also repeatedly generated objects or discrete effects in the ring's center.
+
+Because these two calls were seed-locked, this is stronger evidence than the earlier unpaired prompt comparisons. It does not prove that every future seed will behave identically, but it supports a practical conclusion: `energy ring` preserves the intended effect identity better than `aura ring` or `aura circle`. The added synonyms introduced a new center-object prior instead of refining the lower ring.
+
+Further ring-synonym tweaking is low-value. It has made the causal picture harder to track while repeatedly degrading a prompt that already met the core requirements. Return to the unmodified best prompt for production and treat later variants as rejected research branches:
+
+> fully contained symmetrical energy aura with vertical power spikes and a bottom energy ring
+
+### Current-Best Repeat: Seed Dominates The Center-Object Failure
+
+The current-best prompt was repeated twice without wording changes.
+
+Control seed `1379246801`, shared with the earlier `aura ring` and `aura circle` tests:
+
+- Produced the same central-object and emblem-like tendency despite restoring the proven `bottom energy ring` wording.
+- Most candidates did not distribute energy around the ring perimeter.
+- This disproves the earlier working assumption that the two noun substitutions were the primary cause of the central-object failure.
+
+Evidence: [`mvp-current-best-control-seed-pro-20260721`](../../pixellab-pip-generations/mvp-current-best-control-seed-pro-20260721/).
+
+Fresh seed `2057719043`:
+
+- Produced sixteen coherent front-facing aura rings with vertical energy distributed around their circumference.
+- Avoided the emblem and central-elemental-object pattern.
+- Closely reproduced the desirable behavior of the original current-best batch.
+
+Evidence: [`mvp-current-best-fresh-seed-pro-20260721`](../../pixellab-pip-generations/mvp-current-best-fresh-seed-pro-20260721/).
+
+This is the clearest causal result in the spike: seed `1379246801` strongly drives the central-object composition across multiple nearby prompts, while the fresh seed restores the desired perimeter aura using unchanged wording. The prompt remains the best tested production description, but a single Pro batch can land in an unsuitable compositional family. Production should omit the seed by default, review all sixteen candidates, and retry only when the returned batch is dominated by central objects. Do not reuse seed `1379246801` for this aura prompt family.
+
+### Same-Seed Inline Exclusion Did Not Override The Composition
+
+Prompt:
+
+> fully contained symmetrical energy aura with vertical power spikes and a bottom energy ring; continuous aura only, no central object or emblem
+
+Seed: `1379246801`.
+
+Observed result:
+
+- The explicit exclusion did not remove the seed's central-subject tendency.
+- Many candidates still contained crystals, stars, elemental forms, or emblem-like objects.
+- The batch can plausibly look more explicitly object- or emblem-driven because the exclusion itself names `object` and `emblem`; text-to-image models may respond to named visual concepts even when they occur inside a negated clause.
+- Several lower rings became detached, reduced, or visually secondary instead of integrating with perimeter energy.
+- Containment still passed, but the target aura composition degraded.
+
+This shows that a concise inline negative clause is weaker than the compositional prior selected by this seed and can introduce additional separation between the ring and effect. It does **not** prove that the negative wording caused or intensified the objects, because the clean current-best prompt already produced central objects at the same seed. A controlled attribution test would apply the negative wording to known-good seed `2057719043`, whose clean baseline already exists. Until then, treat prompt-token leakage as plausible and the seed as the demonstrated cause. Avoid spending more prompt effort trying to rescue seed `1379246801`; use a fresh randomized seed with the concise current-best prompt instead.
+
+Evidence: [`mvp-current-best-no-central-object-pro-20260721`](../../pixellab-pip-generations/mvp-current-best-no-central-object-pro-20260721/).
+
+### Random-Seed Ring-Consistency Modifiers
+
+Three one-word variants were run without supplied seeds, as requested. Because each resolved to a different random seed, the batches compare production tendencies but do not cleanly isolate the modifiers.
+
+`filled bottom energy ring`, resolved seed `1992979433`:
+
+- Produced visible lower ring outlines, but none became the substantial, filled-out aura band intended by the modifier.
+- Retained front-facing vertical energy and containment.
+- Several candidates placed symbols or constructed details inside the ring.
+- `Filled` modified neither the ring thickness nor its open-center topology reliably.
+
+Evidence: [`mvp-filled-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-filled-bottom-ring-auras-pro-20260721/).
+
+`complete bottom energy ring`, resolved seed `1371509464`:
+
+- Produced the weakest batch: objects, emblems, creatures, and constructed designs often dominated.
+- Ring consistency and front-facing aura identity were mixed.
+- One candidate touched a canvas edge.
+- Given the known strength of seed effects, this run cannot establish that `complete` caused the failure.
+
+Evidence: [`mvp-complete-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-complete-bottom-ring-auras-pro-20260721/).
+
+`continuous bottom energy ring`, resolved seed `1090711118`:
+
+- Produced coherent ring outlines and front-facing perimeter energy in many candidates, but did not create a substantial filled-out aura band.
+- Several candidates still drifted toward central symbols or object-like forms.
+- Passed containment throughout the batch.
+
+Evidence: [`mvp-continuous-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-continuous-bottom-ring-auras-pro-20260721/).
+
+None of the three modifiers achieved the intended ring fullness. `Filled`, `complete`, and `continuous` continued to produce thin or open ring outlines, and all three batches showed some degree of central-object drift. This suggests that the noun `ring` itself may impose the wrong topology: a narrow loop surrounding an available center. Once the center is compositionally available, the model often places an emblem, crystal, creature, flame, or other discrete subject there.
+
+This does not mean `ring` always fails—the earlier `energy ring at the base` batch produced attractive, substantial Ragnarok-like lower effects. It means adjective-level attempts to thicken `bottom energy ring` have not worked, and further modifiers are unlikely to repair the noun's loop prior reliably. The next meaningful branch should replace `ring` with a phrase describing a broad circular energy **field** or foot-level aura, then test whether that avoids both the thin outline and the central-object slot. Do not reinterpret these three unseeded batches as successful fullness tests.
+
+### `bottom energy field` And `bottom energy glow`
+
+Both replacements failed more severely than `bottom energy ring`.
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom energy field`, resolved seed `1095428719`:
+
+- Did not produce a consistent flat foot-level field.
+- Most candidates became centered orbs, stars, crystals, portals, emblems, or discrete elemental effects.
+- Two candidates touched a canvas edge.
+
+Evidence: [`mvp-bottom-energy-field-auras-pro-20260721`](../../pixellab-pip-generations/mvp-bottom-energy-field-auras-pro-20260721/).
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom energy glow`, resolved seed `1830412773`:
+
+- Did not produce a consistent flat foot-level glow.
+- Nearly every candidate became a central object or emblem, including stars, crystals, portals, masks, and orb-like effects.
+- Containment passed but aura identity failed.
+
+Evidence: [`mvp-bottom-energy-glow-auras-pro-20260721`](../../pixellab-pip-generations/mvp-bottom-energy-glow-auras-pro-20260721/).
+
+Despite different randomized seeds, both batches converged on the same central-subject failure. `Field` and `glow` are too broad to preserve the lower circular aura structure; they allow the model to reinterpret the entire image as one centered energy asset. `Ring` remains valuable because it supplies the lower spatial scaffold, even though attempts to make that ring fuller have been inconsistent.
+
+### Energy-Field Rerun And `bottom energy circle`
+
+The `bottom energy field` prompt was rerun with fresh randomized seed `1441055806`:
+
+- The second batch repeated the same centered-subject tendency as the first field batch.
+- Orbs, eyes, emblems, and elemental objects occupied the center throughout.
+- No broad flat foot-level energy field emerged.
+- Candidates 09 through 16 contained nontransparent canvas-edge pixels.
+
+The recurrence across two independent random seeds substantially weakens the seed-only explanation. `Bottom energy field` is now rejected as a prompt phrase for this target.
+
+Evidence: [`mvp-bottom-energy-field-rerun-pro-20260721`](../../pixellab-pip-generations/mvp-bottom-energy-field-rerun-pro-20260721/).
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom energy circle`, resolved seed `732782691`:
+
+- Preserved containment but failed the aura composition.
+- The circle became a central disk, orb, target, eye, or portal in nearly every candidate.
+- `Circle` strengthened the centered-shape prior rather than producing a flat aura around a character.
+
+Evidence: [`mvp-bottom-energy-circle-pro-20260721`](../../pixellab-pip-generations/mvp-bottom-energy-circle-pro-20260721/).
+
+These results clarify the noun tradeoff: `field`, `glow`, and `circle` all collapse toward a centered standalone asset. `Ring` is the only tested noun that reliably maintains the lower perimeter scaffold, despite inconsistent band fullness.
+
+### Known-Good Seed: `energy field` Versus `energy ring`
+
+Known-good seed: **`2057719043`**. This seed produced the successful fresh-seed current-best batch and should be retained as the reproducible reference seed for this research.
+
+Both prompts were run with that exact seed.
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom energy field`:
+
+- Some candidates retained broad lower energy shapes that are directionally closer to the desired full foot aura.
+- Central symbols, emblems, crystals, and discrete elemental objects still appeared throughout the batch.
+- Because the same seed produces clean perimeter auras with `bottom energy ring`, the persistent object drift is attributable to `bottom energy field`, not merely RNG.
+
+Evidence: [`mvp-energy-field-working-seed-pro-20260721`](../../pixellab-pip-generations/mvp-energy-field-working-seed-pro-20260721/).
+
+`fully contained symmetrical energy aura with vertical power spikes and a bottom energy ring`:
+
+- Produced sixteen highly consistent, contained, front-facing aura effects.
+- Coherent bottom rings appeared throughout.
+- Vertical spikes occupied the back, sides, and front rather than collapsing into discrete center objects.
+- This independently reproduces the earlier successful batch at the same known-good seed.
+
+Evidence: [`mvp-energy-ring-working-seed-pro-20260721`](../../pixellab-pip-generations/mvp-energy-ring-working-seed-pro-20260721/).
+
+The controlled result favors `energy ring`, but the `2057719043` ring batch still contains circular motifs that can be read as objects. It should therefore be described as a previously favorable seed, not a guaranteed working seed. Seed `1379246801` remains a clearly poor central-object seed for this prompt family.
+
+### Additional Unseeded Field And Ring Rerun
+
+Both prompts were run again with no supplied seed.
+
+`bottom energy field`, resolved seed `1600192573`:
+
+- Repeated the central-object failure for a fourth field batch.
+- Produced orbs, bowls, architecture, flowers, a bird-like emblem, and other standalone subjects.
+- Did not produce a consistent foot-level perimeter field.
+
+Evidence: [`mvp-energy-field-unseeded-rerun-pro-20260721`](../../pixellab-pip-generations/mvp-energy-field-unseeded-rerun-pro-20260721/).
+
+`bottom energy ring`, resolved seed `1734275022`:
+
+- Produced sixteen consistent front-facing aura rings.
+- Vertical energy surrounded the lower ring without discrete center objects.
+- The ring centers remained open, but they read as character placement space rather than object slots.
+- One candidate touched a canvas edge.
+
+Evidence: [`mvp-energy-ring-unseeded-rerun-pro-20260721`](../../pixellab-pip-generations/mvp-energy-ring-unseeded-rerun-pro-20260721/).
+
+The growing evidence is no longer consistent with a seed-only explanation for `energy field`: four field runs across distinct seeds, including the previously favorable ring seed, all produced substantial object drift. By contrast, `energy ring` repeatedly produces coherent aura batches on random seeds, although individual batches can still contain motifs or thin/open rings. The reliable production strategy remains an unseeded `bottom energy ring` call followed by batch review.
+
+## Consolidated Findings After The Initial Spike
+
+The later experiments resolve several earlier uncertainties:
+
+1. **Seed has a major effect, but it is not the whole explanation.** Seed `1379246801` repeatedly favored central objects across nearby prompts. A concise inline exclusion did not overcome it and may have reinforced the named `object` and `emblem` concepts. Seed `2057719043` was favorable for some ring batches but still produced motifs in later review, so it is a reproducible reference seed rather than a guaranteed good seed.
+2. **`Bottom energy field` has a prompt-level object prior.** Four field batches across distinct seeds—including `2057719043`—produced orbs, emblems, architecture, flowers, crystals, and other standalone subjects. The failure persists beyond ordinary seed variance.
+3. **`Bottom energy glow` is a total composition failure for this target.** It discarded the lower scaffold and produced centered standalone effects almost throughout.
+4. **`Bottom energy circle` is a top-down cue.** It produced disks, eyes, targets, portals, and other centered circular assets rather than a front-facing character aura.
+5. **`Ring` is structurally necessary in the tested vocabulary.** It is the only lower-feature noun that repeatedly preserves a foot-level perimeter, character-placement space, and front-facing vertical effect.
+6. **Attempts to thicken the ring did not reliably work.** `Filled`, `complete`, `continuous`, `flat`, and `wide` did not create a consistently substantial aura band. Some introduced central objects, physical materials, excessive three-dimensionality, or weakened foreground energy.
+7. **The clean unseeded ring rerun is the strongest production validation.** Resolved seed `1734275022` produced sixteen consistent front-facing aura rings without discrete center objects. This supports omitting the seed in production and reviewing the returned batch.
+
+Current reliable structural prompt:
+
+> fully contained symmetrical energy aura with vertical power spikes and a bottom energy ring
+
+The next research axis is no longer the ring. The ring should remain unchanged while the emitted effect vocabulary is varied. `Energy aura` plus `vertical power spikes` reliably establishes orientation, but it also strongly favors flame-, crystal-, lightning-, and raw-energy-like silhouettes and palettes. A more flexible prompt should preserve containment, symmetry, vertical presentation, and `bottom energy ring` while replacing those morphology-heavy words with a broader aura-effect phrase.
+
+### Broad Emitted-Effect Wording While Keeping The Ring
+
+`fully contained symmetrical aura effect emanating vertically from a bottom energy ring`, resolved seed `1862474265`:
+
+- Greatly increased semantic variety, but became too broad for aura production.
+- Produced crystals, trees, machinery, fountains, tornadoes, winged symbols, and other standalone objects.
+- Several candidates lost or minimized the ring, and three touched canvas edges.
+- `Emanating vertically` did not preserve aura identity without the stronger `power spikes` morphology cue.
+
+Evidence: [`mvp-vertical-emanating-aura-ring-pro-20260721`](../../pixellab-pip-generations/mvp-vertical-emanating-aura-ring-pro-20260721/).
+
+`fully contained symmetrical vertical aura effect with a bottom energy ring`, resolved seed `961142007`:
+
+- Preserved containment and produced somewhat more usable aura-like candidates than the emanating variant.
+- Still drifted broadly into fire objects, smoke columns, spirals, wings, crystals, pillars, pedestals, and portals.
+- Ring preservation was inconsistent.
+- Removing `power spikes` increased variety but also removed the strongest constraint preventing standalone objects.
+
+Evidence: [`mvp-vertical-aura-effect-ring-pro-20260721`](../../pixellab-pip-generations/mvp-vertical-aura-effect-ring-pro-20260721/).
+
+The result exposes a real tradeoff. `Vertical power spikes` narrows style toward flame, crystal, lightning, and energy-crown silhouettes, but it also maintains the asset's identity as a surrounding aura. Broad replacements allow more effect families but frequently become objects. Future experiments should preserve a perimeter-distribution cue while relaxing the word `spikes`; removing the morphology cue entirely is too unconstrained.
+
+The user review confirms that neither broad replacement is consistent enough for production. Both
+prompts were too permissive, and both frequently placed a discrete object in the center instead of
+distributing an effect around the character space. The blueprint therefore retains `vertical power
+spikes` and makes only the spike theme configurable. This preserves the strongest known composition
+constraint while allowing elemental and non-elemental variation.
+
+### Configurable Blueprint Decision
+
+Bundled blueprint: [`aura.blueprint.json`](../../skills/pixellab-pip/blueprints/aura.blueprint.json)
+
+```text
+fully contained symmetrical energy aura with vertical {{power spike theme | default: ""}} power spikes and a bottom energy ring
+```
+
+`Power spike theme` is preferred over `elements`. It is singular, precisely scopes the value to the
+emitted spikes, and accepts broader concepts such as `fire`, `lightning`, `shadow`, `floral`, or
+`cosmic`. Calling the variable `element` would imply a narrower classical-element vocabulary;
+calling it only `effect` would be too ambiguous about which part of the composition changes.
+
+The canonical empty default is `{{power spike theme | default: ""}}`. The proposed `{elements : }`
+form is not Pip blueprint syntax and cannot be relied on for portable replay. With no supplied value,
+literal substitution produces two adjacent spaces between `vertical` and `power`; with `fire`, it
+produces `vertical fire power spikes`. The extra whitespace is a presentational blemish rather than a
+prompt concept. The current blueprint grammar has no conditional-space operator, and adding one only
+for this sentence would make the recipe more complex and less portable than leaving the benign space.
+
+The blank default also does not create thematic variety by itself. It deliberately reproduces the
+current best neutral prompt. A caller must supply a theme to move the spikes away from the baseline
+raw-energy tendency, and each new theme remains subject to full-batch candidate review because it
+may introduce its own object or material prior.
+
+The blueprint accepts a configurable `aura size`, defaulting to `64x64`. Candidate count is derived
+from the completed Pro response because changing native size changes how many images the route may
+return. All returned candidates are preserved and assembled into a compact review sheet without
+assuming sixteen images or a four-by-four layout.
+
+Animation is a separately approved optional branch implemented by the bundled
+[`aura-animation.blueprint.json`](../../skills/pixellab-pip/blueprints/aura-animation.blueprint.json).
+Keeping it separate avoids pretending that a sequential blueprint can conditionally skip a paid
+`POST`. After the static sheet is presented, the agent asks whether to run one additional
+`animate-with-text-v3` job and explains that V3 treats the sheet as one canvas, applying simultaneous
+motion across its cells rather than producing an independent animation sequence per candidate. The
+theme-neutral action is:
+
+```text
+all aura effects animate in place within their original cells, preserving the spritesheet layout and transparent background
+```
+
+This wording avoids assuming fire, lightning, or another specific motion family. It is intentionally
+broad about motion but strict about cell containment and layout. The companion uses eight generated
+frames because a 256x256 sheet reaches V3's documented `width × height × frame_count ≤ 524288`
+budget at that count.
+
 ## Phrase-Level Findings
 
 | Wording | Observed tendency |

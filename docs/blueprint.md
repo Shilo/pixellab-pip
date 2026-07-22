@@ -345,10 +345,12 @@ installed collection changes.
 
 ## Recipes (blueprints you can run by name)
 
-Ready-made examples ship in the skill's `blueprints/` folder, currently including the minimal
-`knight.blueprint.json`. Name one without a path and the assistant semantically matches it, then
-inspects or replays it according to your request. You can place hand-authored recipes there too, but
-plugin updates may replace the folder, so keep the source copy of your own recipe elsewhere.
+Ready-made examples ship in the skill's `blueprints/` folder, including the configurable
+`knight.blueprint.json`, `aura.blueprint.json` with its optional `aura-animation.blueprint.json`
+companion, and portable sprite recipes. Name one
+without a path and the assistant semantically matches it, then inspects or replays it according to
+your request. You can place hand-authored recipes there too, but plugin updates may replace the
+folder, so keep the source copy of your own recipe elsewhere.
 
 ## Sharing
 
