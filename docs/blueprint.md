@@ -135,8 +135,8 @@ values.
 Use `''` for an empty-string default.
 
 Variables work in nested MCP, REST, and `TASK` string values. When a placeholder fills an entire
-JSON string, it can resolve to a string, number, boolean, `null`, list, or object. Resolve `''` or JSON
-`""` as an empty string; otherwise a valid JSON default keeps its JSON type and any other default is
+JSON string, it can resolve to a string, number, boolean, `null`, list, or object. Resolve `''` and
+`""` as empty strings; otherwise a valid JSON default keeps its JSON type and any other default is
 text. A placeholder embedded in a longer
 sentence must be a scalar value. Placeholders never change field names, route names, or comments,
 and a resolved value is never treated as another placeholder.
