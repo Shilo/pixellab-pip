@@ -11,16 +11,16 @@
       "output_directory": "pixellab-pip-generations/aura-run",
       "output_collision_policy": "create_unique"
     },
-    "_comment": "Configurable transparent aura candidates assembled into a review spritesheet, with optional user-approved synchronized V3 animation of the sheet.",
+    "_comment": "Configurable themed transparent aura candidates assembled into a review spritesheet, with optional user-approved synchronized V3 animation of the sheet.",
     "_comment_prompt": "/pixellab-pip create the aura blueprint",
     "TASK": {
-      "instruction": "Resolve all blueprint variables from the current request, confidently inferred context, or their defaults; resolve `''` and `\"\"` as empty strings and collapse spaces left by an empty substitution. Resolve aura size as an image_size object with positive integer width and height accepted by generate-image-v2; interpret a single size such as 64 as {\"width\": 64, \"height\": 64}. Before any PixelLab call, validate the resolved request, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty and stop if any check fails.",
+      "instruction": "Resolve all blueprint variables from the current request, confidently inferred context, or their defaults; resolve `''` and `\"\"` as empty strings and collapse spaces left by an empty substitution. Treat the entire user-supplied aura theme wording, including a comma-separated list, as one literal scalar value: substitute it once into the existing description, do not split it across candidates, and do not expand the static generation into multiple calls. Resolve aura size as an image_size object with positive integer width and height accepted by generate-image-v2; interpret a single size such as 64 as {\"width\": 64, \"height\": 64}. Before any PixelLab call, validate the resolved request, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty and stop if any check fails.",
       "verify": "The resolved request is valid, approval and credential presence are confirmed, and the output directory is new, empty, and writable."
     }
   },
   {
     "POST /v2/generate-image-v2": {
-      "description": "fully contained symmetrical energy aura with vertical {{power spike theme | default: ''}} power spikes and a bottom energy ring",
+      "description": "fully contained symmetrical {{aura theme | default: energy}} aura with vertical power spikes and a bottom energy ring",
       "image_size": "{{aura size | default: {\"width\": 64, \"height\": 64}}}",
       "no_background": true
     }
