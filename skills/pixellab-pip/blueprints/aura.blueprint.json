@@ -11,7 +11,7 @@
       "output_directory": "pixellab-pip-generations/aura-run",
       "output_collision_policy": "stop_if_exists"
     },
-    "_comment": "Configurable transparent aura candidates assembled into a review spritesheet, with optional user-approved V3 animation of one selected aura.",
+    "_comment": "Configurable transparent aura candidates assembled into a review spritesheet, with optional user-approved synchronized V3 animation of the sheet.",
     "_comment_prompt": "/pixellab-pip create the aura blueprint",
     "TASK": {
       "instruction": "Resolve all blueprint variables from the current request, confidently inferred context, or their defaults; resolve `''` and `\"\"` as empty strings and collapse spaces left by an empty substitution. Resolve aura size as an image_size object with positive integer width and height accepted by generate-image-v2; interpret a single size such as 64 as {\"width\": 64, \"height\": 64}. Before any PixelLab call, validate the resolved request, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and create the declared output_directory as a new empty folder. Stop if any check fails.",
@@ -36,20 +36,17 @@
   },
   {
     "TASK": {
-      "instruction": "After presenting the static candidates, ask whether the user wants to animate one selected aura. Explain before asking that continuing runs one additional paid animate-with-text-v3 job. If the user declines, finish successfully with the static outputs and stop before the following POST. If the user explicitly approves, ask them to select one numbered candidate unless they already did, then save that candidate unchanged as selected-aura.png. Verify selected-aura.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails. Before continuing, resolve the following first_frame path to {\"type\": \"base64\", \"base64\": \"<base64 PNG bytes from selected-aura.png>\", \"format\": \"png\"} in memory.",
+      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet. Explain before asking that continuing runs one additional paid animate-with-text-v3 job and that V3 treats the sheet as one image, so cell isolation is not guaranteed. If the user declines, finish successfully with the static outputs and stop before the following POST. If the user explicitly approves, verify candidates.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails. Before continuing, resolve the following first_frame path to {\"type\": \"base64\", \"base64\": \"<base64 PNG bytes from candidates.png>\", \"format\": \"png\"} in memory.",
       "inputs": [
         "candidates.png"
       ],
-      "outputs": [
-        "selected-aura.png"
-      ],
-      "verify": "The workflow stops before the animation POST when approval is declined. When approved, selected-aura.png matches the chosen candidate pixel-for-pixel and satisfies the V3 size and pixel-budget limits."
+      "verify": "The workflow stops before the animation POST when approval is declined. When approved, candidates.png satisfies the V3 size and pixel-budget limits."
     }
   },
   {
     "POST /v2/animate-with-text-v3": {
-      "first_frame": "selected-aura.png",
-      "action": "the {{power spike theme | default: ''}} aura pulses and flickers in place while its bottom energy ring shimmers",
+      "first_frame": "candidates.png",
+      "action": "all aura effects flicker and pulse simultaneously in place with subtle brightness variation",
       "frame_count": 8,
       "no_background": true,
       "enhance_prompt": false
@@ -71,7 +68,7 @@
         "animation-frames.png",
         "animation.gif"
       ],
-      "verify": "There are nine ordered transparent frames at the same dimensions as selected-aura.png; animation-frames.png contains the nine frames in row-major order; and animation.gif has 100-millisecond frames, loops forever, uses a defined disposal method, and coalesces to the ordered source frames. Inspect all generated frames and confirm the selected aura remains recognizable and in place, visible motion occurs, and no detached artifacts, clipping, or unacceptable palette drift appear. Report technical success separately from visual acceptability."
+      "verify": "There are nine ordered transparent frames at the same dimensions as candidates.png; animation-frames.png contains the nine frames in row-major order; and animation.gif has 100-millisecond frames, loops forever, uses a defined disposal method, and coalesces to the ordered source frames. Inspect all generated frames and confirm every source cell remains recognizable and in its original grid position, synchronized visible motion occurs across the sheet, and no cells merge, cross boundaries, detach artifacts, clip, or drift unacceptably in palette. Report technical success separately from visual acceptability."
     }
   }
 ]
