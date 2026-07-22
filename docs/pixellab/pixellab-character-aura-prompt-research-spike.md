@@ -205,6 +205,32 @@ Observed result:
 
 Evidence: [`mvp-energy-ring-at-base-auras-pro-20260721`](../../pixellab-pip-generations/mvp-energy-ring-at-base-auras-pro-20260721/).
 
+### `fully contained symmetrical energy aura with vertical power spikes and a subtle bottom energy ring`
+
+Observed result:
+
+- Retained the front-facing vertical composition.
+- The subtler ring itself remained visually appealing.
+- `Subtle` also reduced the small vertical spikes on the ring's front arc instead of affecting only ring prominence.
+- Many candidates therefore emphasized rear spikes and a bright interior, repeating the runner-up's depth problem and reducing the clear front-side-back integration of the current best prompt.
+- One candidate touched a canvas edge.
+- This did not improve on the current best prompt.
+
+Evidence: [`mvp-subtle-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-subtle-bottom-ring-auras-pro-20260721/).
+
+### `fully contained symmetrical energy aura with vertical power spikes surrounding a bottom energy ring`
+
+Observed result:
+
+- Retained front-facing orientation and full containment.
+- Energy consistently occupied the ring circumference, reinforcing surrounding depth.
+- `Surrounding` made the lower ring too volumetric: instead of reading as a flat aura ring lying on the ground plane, it often read as a freestanding three-dimensional ring or circular object.
+- The ring also became the dominant subject, and several candidates drifted toward thorns, vines, debris, or constructed ring materials.
+- The original `with ... and a bottom energy ring` wording preserved a better balance between the vertical aura and its lower ring.
+- This did not improve on the current best prompt.
+
+Evidence: [`mvp-surrounding-bottom-ring-auras-pro-20260721`](../../pixellab-pip-generations/mvp-surrounding-bottom-ring-auras-pro-20260721/).
+
 ## Phrase-Level Findings
 
 | Wording | Observed tendency |
@@ -233,6 +259,20 @@ The primary visual difference is depth distribution. `Bottom energy ring` produc
 | Simplest all-behind-character layering | `...and an energy ring at the base` |
 
 For the best prompt, a game may split the final composition into a background aura and a subtle foreground accent, or render the complete effect above the character when the small front spikes do not obscure important body details. That is an engine compositing decision; the static PixelLab output is still one image.
+
+## Ragnarok Online Ring Reference
+
+Ragnarok Online is a useful reference for why the runner-up's ring remains aesthetically strong. Gameplay examples emphasize a substantial luminous ring concentrated around the character's feet. The effect reads as an aura largely because the lower ring is visually complete and prominent, not because tall energy occupies every depth plane.
+
+Community documentation for Ragnarok aura modification explicitly lists separate `Middle` and `Bottom` effects for normal, transcendent, and later-class auras. This supports treating the foot ring as a major aura component rather than a minor termination detail. See the [Hercules aura modification guide](https://board.herc.ws/threads/guide-aura-modification.3357/) and [rAthena aura examples](https://rathena.org/board/topic/112357-aura-color/). The Ragnarök Wiki likewise describes the original level-99 aura as condensed around the character; see [Aura](https://ragnarok.fandom.com/wiki/Aura).
+
+This changes the interpretation of the two leading prompts:
+
+- `Bottom energy ring` remains the best complete composition because energy occupies the back, sides, and front, creating volume and immersion.
+- `Energy ring at the base` produces the better ring morphology: fuller, more substantial, and more reminiscent of Ragnarok Online's foot-focused aura language.
+- Its weakness is not the ring. Its weakness is that the vertical spikes sit mainly behind that ring, so the combined effect feels flatter and less enveloping.
+
+The desired next improvement is therefore a hybrid, not simply a smaller or less prominent ring: preserve the runner-up's full Ragnarok-like lower ring while restoring the current best prompt's restrained energy on the sides and front.
 
 ## Why `Bottom Energy Ring` Looks More Immersive
 
