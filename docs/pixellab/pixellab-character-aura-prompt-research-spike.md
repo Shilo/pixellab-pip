@@ -515,7 +515,7 @@ constraint while allowing elemental and non-elemental variation.
 Bundled blueprint: [`aura.blueprint.json`](../../skills/pixellab-pip/blueprints/aura.blueprint.json)
 
 ```text
-fully contained symmetrical energy aura with vertical {{power spike theme | default: ""}} power spikes and a bottom energy ring
+fully contained symmetrical energy aura with vertical {{power spike theme | default: ''}} power spikes and a bottom energy ring
 ```
 
 `Power spike theme` is preferred over `elements`. It is singular, precisely scopes the value to the
@@ -523,7 +523,7 @@ emitted spikes, and accepts broader concepts such as `fire`, `lightning`, `shado
 `cosmic`. Calling the variable `element` would imply a narrower classical-element vocabulary;
 calling it only `effect` would be too ambiguous about which part of the composition changes.
 
-The canonical empty default is `{{power spike theme | default: ""}}`. The proposed `{elements : }`
+The canonical empty default is `{{power spike theme | default: ''}}`. The proposed `{elements : }`
 form is not Pip blueprint syntax and cannot be relied on for portable replay. With no supplied value,
 literal substitution produces two adjacent spaces between `vertical` and `power`; with `fire`, it
 produces `vertical fire power spikes`. The extra whitespace is a presentational blemish rather than a
@@ -541,21 +541,24 @@ return. All returned candidates are preserved and assembled into a compact revie
 assuming sixteen images or a four-by-four layout.
 
 Animation is a separately approved optional branch inside the same portable
-[`aura.blueprint.json`](../../skills/pixellab-pip/blueprints/aura.blueprint.json). A top-level `POST`
-step cannot be conditional, so the final `TASK` records the exact V3 route, request values, polling,
-outputs, and verification to perform only after approval. This keeps the recipe injectable and
-shareable as one file without allowing the initial run request to authorize the extra paid call.
+[`aura.blueprint.json`](../../skills/pixellab-pip/blueprints/aura.blueprint.json). An approval `TASK`
+acts as a stop-or-continue gate immediately before a canonical `POST /v2/animate-with-text-v3` step.
+Declining ends the workflow successfully with the static outputs; approval continues to the exact
+animation request. This preserves one-file sharing, canonical request-field fidelity, and separate
+authority for the additional paid call without adding a conditional-step schema.
 After the static sheet is presented, the agent asks whether to run one additional
 `animate-with-text-v3` job and explains that V3 treats the sheet as one canvas, applying simultaneous
 motion across its cells rather than producing an independent animation sequence per candidate. The
 theme-neutral action is:
 
 ```text
-all aura effects animate in place within their original cells, preserving the spritesheet layout and transparent background
+all {{power spike theme | default: ''}} aura effects pulse in place as their vertical power spikes rise and fall around their bottom energy rings, each remaining fully contained within its original cell
 ```
 
-This wording avoids assuming fire, lightning, or another specific motion family. It is intentionally
-broad about motion but strict about cell containment and layout. The optional branch uses eight
+The repeated theme variable gives V3 the same semantic subject used for static generation without
+introducing another choice: `fire` resolves to `all fire aura effects`, while the empty default
+retains neutral aura wording. The action remains broad about motion but strict about cell containment
+and layout. The optional branch uses eight
 generated frames because a 256x256 sheet reaches V3's documented
 `width × height × frame_count ≤ 524288` budget at that count.
 

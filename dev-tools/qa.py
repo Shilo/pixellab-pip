@@ -154,7 +154,7 @@ def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str |
                 default = body[marker.end():].strip() if marker else None
                 if marker and not default:
                     raise AssertionError(
-                        f'{label}: blueprint variable {description!r} has a blank default; use default: "" for an empty string'
+                        f"{label}: blueprint variable {description!r} has a blank default; use default: '' for an empty string"
                     )
                 position = cursor + 2
                 placeholders.append((description, default, start, position))
@@ -187,6 +187,8 @@ def reject_blueprint_variable_keys(value: object, label: str) -> None:
 
 
 def normalize_blueprint_default(value: str) -> tuple[str, object]:
+    if value == "''":
+        return "string", ""
     try:
         resolved = json.loads(value)
     except json.JSONDecodeError:

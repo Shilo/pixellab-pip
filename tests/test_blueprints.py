@@ -118,6 +118,9 @@ class BlueprintShapeTests(unittest.TestCase):
             "test blueprint",
         )
 
+        self.assertEqual(qa.normalize_blueprint_default("''"), ("string", ""))
+        self.assertEqual(qa.normalize_blueprint_default('""'), ("string", ""))
+
     def test_rejects_malformed_or_conflicting_blueprint_variables(self) -> None:
         invalid = (
             ("{{}}", "description must not be blank"),

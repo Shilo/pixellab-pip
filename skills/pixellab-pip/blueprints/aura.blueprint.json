@@ -14,20 +14,20 @@
     "_comment": "Configurable transparent aura candidates assembled into a review spritesheet, with optional user-approved V3 animation of the complete sheet.",
     "_comment_prompt": "/pixellab-pip create the aura blueprint",
     "TASK": {
-      "instruction": "Resolve all variables. Before any PixelLab call, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and create the declared output_directory as a new empty folder. Stop if any check fails.",
-      "verify": "Approval and credential presence are confirmed, and the output directory is new, empty, and writable."
+      "instruction": "Resolve all variables. Resolve aura size as an image_size object with positive integer width and height accepted by generate-image-v2; interpret a single size such as 64 as {\"width\": 64, \"height\": 64}. Before any PixelLab call, validate the resolved request, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and create the declared output_directory as a new empty folder. Stop if any check fails.",
+      "verify": "The resolved request is valid, approval and credential presence are confirmed, and the output directory is new, empty, and writable."
     }
   },
   {
     "POST /v2/generate-image-v2": {
-      "description": "fully contained symmetrical energy aura with vertical {{power spike theme | default: \"\"}} power spikes and a bottom energy ring",
+      "description": "fully contained symmetrical energy aura with vertical {{power spike theme | default: ''}} power spikes and a bottom energy ring",
       "image_size": "{{aura size | default: {\"width\": 64, \"height\": 64}}}",
       "no_background": true
     }
   },
   {
     "TASK": {
-      "instruction": "Use the background_job_id returned by the immediately preceding PixelLab call to poll GET /v2/background-jobs/{background_job_id} until completed or failed. Re-poll the same job after transient errors and never resubmit the paid generation. On failure, stop and report it. On completion, save every image from last_response.images unchanged in response order as sequentially numbered candidate PNGs. Determine the candidate count from the completed response rather than assuming it from the requested size. Assemble every candidate once in row-major order into candidates.png using a compact near-square grid with no resizing, repainting, margins, or spacing. Present every numbered candidate for user review without selecting or discarding one automatically.",
+      "instruction": "Persist the background_job_id returned by the immediately preceding PixelLab call, then poll GET /v2/background-jobs/{background_job_id} gently with backoff. Treat top-level completed or last_response completed/done as success, failed as terminal failure, and never infer completion from the first returned image alone. Re-poll the same job after transient errors and never resubmit the paid generation. After a reasonable bounded wait, if the job remains pending, stop and report the saved ID and GET /v2/background-jobs/{background_job_id} as the resume route. On failure, stop and report it. On completion, save every image from last_response.images unchanged in response order as candidate-1.png through candidate-N.png. Derive N from the completed response rather than assuming it from the requested size. Assemble every candidate once in row-major order into candidates.png using a compact near-square grid with no resizing, repainting, margins, or spacing. Present every numbered candidate for user review without selecting or discarding one automatically.",
       "outputs": [
         "candidates.png"
       ],
@@ -36,11 +36,39 @@
   },
   {
     "TASK": {
-      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet. Explain before asking that this is one additional paid animate-with-text-v3 job and that V3 treats the atlas as one image, applying simultaneous motion across its cells rather than making an independent animation sequence for each candidate. If the user declines, finish with the static outputs and make no animation call. If the user explicitly approves, verify candidates.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails. Then send POST /v2/animate-with-text-v3 with candidates.png encoded as the first_frame Base64Image, action `all aura effects animate in place within their original cells, preserving the spritesheet layout and transparent background`, frame_count 8, no_background true, and enhance_prompt false. Poll the returned job without resubmitting it, save all nine returned images in API order as frame-00.png through frame-08.png including the echoed source at frame 0, and assemble them without resizing or repainting into animation-frames.png as a three-column by three-row sheet and into animation.gif as a looping transparent preview.",
+      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet. Explain before asking that continuing runs one additional paid animate-with-text-v3 job and that V3 treats the atlas as one image, applying simultaneous motion across its cells rather than making an independent animation sequence for each candidate. If the user declines, finish successfully with the static outputs and stop the workflow before the following POST. If the user explicitly approves, verify candidates.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails, otherwise continue.",
       "inputs": [
         "candidates.png"
       ],
-      "verify": "No animation call is made without explicit approval given after the static candidates are available. If declined, the static outputs remain complete. If approved, there are nine ordered transparent frames at the same dimensions as candidates.png, frame-00 matches candidates.png pixel-for-pixel in visible content, animation-frames.png contains the nine frames in row-major order, and animation.gif preserves their order and dimensions."
+      "verify": "The workflow stops before the animation POST when approval is declined. When approved, the spritesheet satisfies the V3 size and pixel-budget limits."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "candidates.png",
+      "action": "all {{power spike theme | default: ''}} aura effects pulse in place as their vertical power spikes rise and fall around their bottom energy rings, each remaining fully contained within its original cell",
+      "frame_count": 8,
+      "no_background": true,
+      "enhance_prompt": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Persist the background_job_id returned by the immediately preceding PixelLab call, then poll GET /v2/background-jobs/{background_job_id} gently with backoff. Treat top-level completed or last_response completed/done as success, failed as terminal failure, and never infer completion from the first returned image alone. Re-poll the same job after transient errors and never resubmit the paid animation. After a reasonable bounded wait, if the job remains pending, stop and report the saved ID and GET /v2/background-jobs/{background_job_id} as the resume route. On failure, stop and report it. On completion, save all nine returned images in API order as frame-00.png through frame-08.png, including the echoed source at frame 0. Assemble them without resizing or repainting into animation-frames.png as a three-column by three-row sheet and into animation.gif at 100 milliseconds per frame, looping forever with disposal Previous. Inspect GIF metadata, coalesce it, and compare the coalesced frames to the ordered PNGs.",
+      "outputs": [
+        "frame-00.png",
+        "frame-01.png",
+        "frame-02.png",
+        "frame-03.png",
+        "frame-04.png",
+        "frame-05.png",
+        "frame-06.png",
+        "frame-07.png",
+        "frame-08.png",
+        "animation-frames.png",
+        "animation.gif"
+      ],
+      "verify": "There are nine ordered transparent frames at the same dimensions as candidates.png; frame-00 matches candidates.png pixel-for-pixel in visible content; animation-frames.png contains the nine frames in row-major order; and animation.gif has 100-millisecond frames, loops forever, uses a defined disposal method, and coalesces to the ordered source frames. Inspect all generated frames and confirm every source cell remains in its original grid position, visible motion occurs across the sheet, no cell merges or crosses boundaries, and no detached artifacts or unacceptable palette drift appear. Report technical success separately from visual acceptability."
     }
   }
 ]

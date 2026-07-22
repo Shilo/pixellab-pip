@@ -114,7 +114,7 @@ The description is the variable's nonblank, user-facing name. Descriptions compa
 case-insensitively after trimming and collapsing whitespace, so repeated `{{armor color}}` and
 `{{ Armor   Color }}` placeholders share one value across the workflow. A variable may have no
 default or one distinct default; conflicting defaults are invalid. A blank default is invalid;
-write `""` when the intended default is an empty string.
+write `''` when the intended default is an empty string.
 
 Resolve the entire workflow in memory before normal preflight:
 
@@ -128,8 +128,9 @@ replace with a default.
 
 Substitute only in executable values, including nested request fields and structured `TASK` data;
 never substitute route or object keys or `_comment*` metadata. A placeholder that occupies its
-entire JSON string may resolve to any JSON value. Parse a default as JSON when it is valid JSON
-(`8`, `true`, `null`, `[1, 2]`, or an object); otherwise treat it as a string. An embedded
+entire JSON string may resolve to any JSON value. Resolve `''` or JSON `""` as an empty string;
+otherwise parse a default as JSON when it is valid JSON (`8`, `true`, `null`, `[1, 2]`, or an object),
+or treat it as a string. An embedded
 placeholder must resolve to a scalar and is inserted as text. Match an inferred or user-supplied
 whole-field value to the target schema. Values are literal data: do not recursively expand
 placeholder-like text inside a resolved value.
