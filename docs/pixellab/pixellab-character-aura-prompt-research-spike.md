@@ -540,10 +540,12 @@ from the completed Pro response because changing native size changes how many im
 return. All returned candidates are preserved and assembled into a compact review sheet without
 assuming sixteen images or a four-by-four layout.
 
-Animation is a separately approved optional branch implemented by the bundled
-[`aura-animation.blueprint.json`](../../skills/pixellab-pip/blueprints/aura-animation.blueprint.json).
-Keeping it separate avoids pretending that a sequential blueprint can conditionally skip a paid
-`POST`. After the static sheet is presented, the agent asks whether to run one additional
+Animation is a separately approved optional branch inside the same portable
+[`aura.blueprint.json`](../../skills/pixellab-pip/blueprints/aura.blueprint.json). A top-level `POST`
+step cannot be conditional, so the final `TASK` records the exact V3 route, request values, polling,
+outputs, and verification to perform only after approval. This keeps the recipe injectable and
+shareable as one file without allowing the initial run request to authorize the extra paid call.
+After the static sheet is presented, the agent asks whether to run one additional
 `animate-with-text-v3` job and explains that V3 treats the sheet as one canvas, applying simultaneous
 motion across its cells rather than producing an independent animation sequence per candidate. The
 theme-neutral action is:
@@ -553,9 +555,9 @@ all aura effects animate in place within their original cells, preserving the sp
 ```
 
 This wording avoids assuming fire, lightning, or another specific motion family. It is intentionally
-broad about motion but strict about cell containment and layout. The companion uses eight generated
-frames because a 256x256 sheet reaches V3's documented `width × height × frame_count ≤ 524288`
-budget at that count.
+broad about motion but strict about cell containment and layout. The optional branch uses eight
+generated frames because a 256x256 sheet reaches V3's documented
+`width × height × frame_count ≤ 524288` budget at that count.
 
 ## Phrase-Level Findings
 

@@ -11,11 +11,11 @@
       "output_directory": "pixellab-pip-generations/aura-run",
       "output_collision_policy": "stop_if_exists"
     },
-    "_comment": "Create transparent aura candidates at a configurable native size, assemble every returned candidate into a review spritesheet, then offer to animate that complete sheet only if the user separately approves the additional V3 job.",
+    "_comment": "Configurable transparent aura candidates assembled into a review spritesheet, with optional user-approved V3 animation of the complete sheet.",
     "_comment_prompt": "/pixellab-pip create the aura blueprint",
     "TASK": {
-      "instruction": "Before any PixelLab call, resolve the optional power spike theme and aura size, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and create the declared output_directory as a new empty folder. If the directory already exists or any precondition fails, stop before spending.",
-      "verify": "The variable is resolved, run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
+      "instruction": "Resolve all variables. Before any PixelLab call, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and create the declared output_directory as a new empty folder. Stop if any check fails.",
+      "verify": "Approval and credential presence are confirmed, and the output directory is new, empty, and writable."
     }
   },
   {
@@ -27,7 +27,7 @@
   },
   {
     "TASK": {
-      "instruction": "Save every candidate returned by the immediately preceding PixelLab call unchanged in response order as sequentially numbered candidate PNGs. Determine the candidate count from the completed response rather than assuming it from the requested size. Assemble every candidate once in row-major order into candidates.png using a compact near-square grid with no resizing, repainting, margins, or spacing. Present every numbered candidate for user review without selecting or discarding one automatically.",
+      "instruction": "Use the background_job_id returned by the immediately preceding PixelLab call to poll GET /v2/background-jobs/{background_job_id} until completed or failed. Re-poll the same job after transient errors and never resubmit the paid generation. On failure, stop and report it. On completion, save every image from last_response.images unchanged in response order as sequentially numbered candidate PNGs. Determine the candidate count from the completed response rather than assuming it from the requested size. Assemble every candidate once in row-major order into candidates.png using a compact near-square grid with no resizing, repainting, margins, or spacing. Present every numbered candidate for user review without selecting or discarding one automatically.",
       "outputs": [
         "candidates.png"
       ],
@@ -36,11 +36,11 @@
   },
   {
     "TASK": {
-      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet with the bundled aura-animation blueprint. Explain before asking that this is one additional paid animate-with-text-v3 job and that V3 treats the atlas as one image, applying simultaneous motion across its cells rather than making an independent animation sequence for each candidate. Run the companion blueprint only after explicit approval; otherwise finish with the static outputs.",
+      "instruction": "After presenting the static candidates, ask whether the user wants to animate the entire candidates.png spritesheet. Explain before asking that this is one additional paid animate-with-text-v3 job and that V3 treats the atlas as one image, applying simultaneous motion across its cells rather than making an independent animation sequence for each candidate. If the user declines, finish with the static outputs and make no animation call. If the user explicitly approves, verify candidates.png is at most 256 pixels on either axis and that width times height times 8 does not exceed 524288; stop before spending if either check fails. Then send POST /v2/animate-with-text-v3 with candidates.png encoded as the first_frame Base64Image, action `all aura effects animate in place within their original cells, preserving the spritesheet layout and transparent background`, frame_count 8, no_background true, and enhance_prompt false. Poll the returned job without resubmitting it, save all nine returned images in API order as frame-00.png through frame-08.png including the echoed source at frame 0, and assemble them without resizing or repainting into animation-frames.png as a three-column by three-row sheet and into animation.gif as a looping transparent preview.",
       "inputs": [
         "candidates.png"
       ],
-      "verify": "No animation call is made without explicit approval given after the static candidates are available."
+      "verify": "No animation call is made without explicit approval given after the static candidates are available. If declined, the static outputs remain complete. If approved, there are nine ordered transparent frames at the same dimensions as candidates.png, frame-00 matches candidates.png pixel-for-pixel in visible content, animation-frames.png contains the nine frames in row-major order, and animation.gif preserves their order and dimensions."
     }
   }
 ]
