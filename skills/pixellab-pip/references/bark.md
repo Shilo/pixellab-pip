@@ -48,7 +48,7 @@ Precedence: skill-local `pixellab-pip.json` is authoritative whenever it can be 
 
 The user-config path is only a read fallback when no valid skill-local config exists, and a write fallback when skill-local persistence fails. Do not scan broad config, home, shell, credential, or project directories. An update or reinstall that replaces the skill directory may reset skill-local config to default-on.
 
-When the user runs `bark`, `bark on`, or `bark off`, write the valid shape above to skill-local config first; if that write fails, write the exact user-config fallback path. If both writes fail, say the setting could not be saved persistently and do not claim it changed. Do not rewrite config during normal generation completion. Preserve any extra fields when changing `bark` if the available file-editing tools make that practical; otherwise keep only `bark`.
+When the user runs `bark`, `bark on`, or `bark off`, write the valid shape above to skill-local config first; if that write fails, write the exact user-config fallback path. If both writes fail, say the setting could not be saved persistently and do not claim it changed. Do not rewrite config during normal generation completion. Preserve the file's other keys — notably `auto` (`references/auto.md`) — when changing `bark` if the available file-editing tools make that practical; if they truly cannot, write at least `bark` and any existing `auto` value.
 
 ## When To Play
 
