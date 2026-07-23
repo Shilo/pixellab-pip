@@ -15,6 +15,7 @@ PixelLab natural-language parameters should be English unless SKILL.md preserves
 
 ## User-Facing Responses
 
+- These responses override any fixed English wording a template or reference supplies, such as the cost-approval gate and auto-on reminder (`references/auto.md`), the `Auto is on.`/`Bark is on.` confirmations, the candidate-selection prompt (`references/reviewable-candidates.md`), collision clarifications, and the final usage report (`references/usage-reporting.md`). Render their visible prose and labels in the user's language, keeping each template's structure and order. Keep literal the non-language values listed above, command tokens such as `/pixellab-pip auto`, and any reply keyword the skill matches literally (e.g. `all`, `dismiss`) so the user can type it back.
 - Ask clarifying questions, confirmations, refusals, and follow-up explanations in the user's language.
 - When confirming or reporting a live call, include the English parameter values actually sent to PixelLab, but explain their meaning in the user's language.
 - If PixelLab returns English-only errors or field names, keep the exact technical term and summarize the problem in the user's language.
