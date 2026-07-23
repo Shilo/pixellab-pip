@@ -6,3 +6,4 @@ skills/pixellab-pip/pixellab-pip.json
 pixellab-pip-generations/
 .mcp.json
 .codex/config.toml
+.agents/mcp_config.json
