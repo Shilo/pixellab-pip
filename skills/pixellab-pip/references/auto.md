@@ -35,7 +35,7 @@ Post a short, readable **Markdown** approval message — render it, do not wrap 
 
 For prompt text, show what will actually be sent: if you enhanced it agent-side, show the enhanced value; if you are using inline `enhance_prompt` (server-side refinement), show the literal prompt and note PixelLab will refine it — never run a separate paid enhancer before the gate just to populate it.
 
-The user approves both the spend and how each call is set up, so show enough of each call to judge that. Use the template below every time so the message stays predictable to read: keep the header, closing question, and tip lines **verbatim** (only the generation count changes); fill and repeat the numbered call block, one entry per predicted paid call. Keep keywords in backticks or bold so they stand out, and the tip quiet.
+The user approves both the spend and how each call is set up, so show enough of each call to judge that. Use the template below every time so the message stays predictable to read: keep the header, closing question, and tip lines fixed in wording and order (only the generation count and the call list change); fill one numbered block per predicted paid call. Keep keywords in backticks or bold so they stand out, and the tip quiet. For a non-English user, apply `references/localization.md`: put the fixed lines and labels in their language (translated the same way each time), keep the PixelLab-facing values — tool/endpoint and enum names, sizes, and the exact `description`/`action` text to be sent — as they will be sent, and add a short gloss of that sent text so they can judge it.
 
 Template:
 
