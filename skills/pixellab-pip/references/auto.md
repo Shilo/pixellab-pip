@@ -46,7 +46,7 @@ Template:
 >    - `{short param}`: {value} · `{short param}`: {value}  — group short inputs on one line
 > 2. …one numbered entry per predicted paid call…
 >
-> Reply **approve** to run, say what to change, or **no** to stop.
+> Reply **approve** to run, say what to **change**, or **no** to stop.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Filled example:
@@ -59,7 +59,7 @@ Filled example:
 > 2. **`animate_character`** · MCP · ~1 gen
 >    - `action`: "walk" · `direction`: south · `template_animation_id`: `walking-8-frames`
 >
-> Reply **approve** to run, say what to change, or **no** to stop.
+> Reply **approve** to run, say what to **change**, or **no** to stop.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Handle the reply:
