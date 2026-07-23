@@ -12,7 +12,7 @@ When the app exposes an interactive choice prompt, use it (Claude Code `AskUserQ
 
 The four modes:
 
-- **MCP + API (recommended)** — `both`. Connect PixelLab MCP tools to the app, then confirm `PIXELLAB_SECRET` is available for Pip's REST v2 fallback. Reuse one secret source when the app supports it; when an app such as Antigravity documents only a literal MCP header, the same Secret needs separate MCP-header and environment storage. Recommend this for normal assistant/editor use: full MCP tools plus fallback when MCP tools are unavailable, incomplete, or insufficient. Do not hide the API step behind a later follow-up.
+- **MCP + API (recommended)** — `both`. Connect PixelLab MCP tools to the app, then confirm `PIXELLAB_SECRET` is available for Pip's REST v2 fallback. Recommend this for normal assistant/editor use: full MCP tools plus fallback when MCP tools are unavailable, incomplete, or insufficient. Do not hide the API step behind a later follow-up.
 - **MCP only** — `mcp`. Connect PixelLab MCP tools only. Prefer app secret settings or an env/secret reference. A literal-token MCP config is an explicit user-chosen fallback only when the app has no token-free option; warn that REST-only features stay unavailable through Pip fallback.
 - **API only** — `api`. Configure `PIXELLAB_SECRET` for REST v2 fallback without adding MCP. This is for Pip's fallback, not the user's frameworks, scripts, backends, SDK projects, or deployment platforms.
 - **Manual** — `manual`. Open or link `https://www.pixellab.ai/mcp`, tell the user to follow the instructions there, and stop. Add the account/Secret step only when auth/token setup is part of the request. Do not inspect, write, verify, or continue.
@@ -31,7 +31,7 @@ In setup mode, apply `credentials.md`'s token-safety rules (safest-default order
 
 MCP setup stays agent-agnostic and OS-agnostic until the app is named or detected; do not assume an app, OS, shell, runtime, package manager, or config path. Use PixelLab MCP URL `https://api.pixellab.ai/mcp` and `Authorization: Bearer <PIXELLAB_SECRET>` or the app's documented env/secret syntax. Never preview or run a real literal token. Explain the exact setting or likely config path before inspecting it, and only for a named/detected app. Patch or create config only after confirmation, and tell the user to restart or reload only when the app requires it or tools do not appear.
 
-Scope is agent-specific: default to a global/user install so PixelLab works in every project — the friendly default — and use a project scope only when the user wants one project or a team-committed config, through the app's own mechanism. `.mcp.json` is Claude Code's config format, not a cross-app standard: never write it for another app. Each app differs — Codex uses a TOML config file (global `config.toml`, or a project `.codex/config.toml` in a trusted project), Cursor uses `.cursor/mcp.json`, Antigravity uses `mcp_config.json`, and others have their own — so use only the named/detected app's documented format.
+Scope is agent-specific: default to a global/user install so PixelLab works in every project — the friendly default — and use a project scope only when the user wants one project or a team-committed config, through the app's own mechanism. `.mcp.json` is Claude Code's config format, not a cross-app standard: never write it for another app. Each app differs — Codex uses TOML, Cursor uses `.cursor/mcp.json`, and others have their own formats — so use only the named/detected app's documented format.
 
 - **Codex CLI**: `codex mcp add --help` supports HTTP MCP auth via `--bearer-token-env-var`. Token-free preview (ask before running; it stores the URL and env var name, not the Secret):
 
@@ -50,7 +50,7 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
   Scope (Claude Code's own flags): `-s user` = global default; `-s local` = this project only (private); `-s project` = a committed `.mcp.json` shared with the team (Claude Code marks a newly added project config as pending approval — approve it before the tools load).
 
 - **Antigravity 2.0, Antigravity IDE, and Antigravity CLI**: use the matching product surface, then the common config contract below:
-  - Antigravity 2.0: **Settings → Customizations → Installed MCP Servers → Add MCP**. Use its supported custom-server flow when PixelLab is available there; otherwise use the common raw config.
+  - Antigravity 2.0: **Settings → Customizations → Installed MCP Servers → Add MCP** opens the MCP Store; use it only when PixelLab is listed. If it is not listed, report that the current 2.0 docs do not document custom-server import and offer the IDE or CLI custom-config route instead.
   - Antigravity IDE: **Agent panel ... → MCP Servers → Manage MCP Servers → View raw config**.
   - Antigravity CLI: `/mcp` for status, reload, and logs; use its `mcp_config.json` for manual server definitions.
 
@@ -69,7 +69,7 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
   }
   ```
 
-  Antigravity's current MCP docs document custom headers with literal credential values but do not document environment-variable expansion inside `headers` or a secret store for custom bearer headers. Do not claim the placeholder will expand, do not write a literal Secret, and do not leave the placeholder presented as a ready configuration. Explain that the user must replace the placeholder themselves outside chat as the explicit literal-token fallback. This is guided manual credential completion, not an agent-completed secret write. In `both` mode, the same Secret must also be configured separately as `PIXELLAB_SECRET` for Pip's REST v2 fallback. After configuration, reload from the MCP UI or `/mcp`, then offer the no-credit `get_balance` verification.
+  Antigravity's current MCP docs document literal custom-header values but neither environment-variable expansion inside `headers` nor a secret store for custom bearer headers. This preview is not ready to use: do not claim the placeholder will expand, and require the user to replace it locally outside chat before reload. Apply section 2's literal-header credential handling and `both`-mode requirements, reload from the MCP UI or `/mcp`, then verify per section 5.
 
 - **Cursor, VS Code Agent Plugins, Gemini CLI, GitHub Copilot CLI, or any other named MCP-capable app**: do not invent config syntax. Use the app's settings UI/docs, PixelLab's MCP page, or an exact path/format the user provides. Always show a token-free preview and ask before writing. A named app not listed here (e.g. Zed, Windsurf, an in-house agent) still gets this generic handling — do not route it to Manual just because it is unlisted.
 - **No app named or identifiable**: route to Manual — open or link `https://www.pixellab.ai/mcp` and stop unless the user returns with a known app name, exact settings screen, config path, or documented MCP format. Do not guess config paths or syntax.

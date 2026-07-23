@@ -39,6 +39,7 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 | Guided PixelLab setup | Pip connects PixelLab to your agent, works out what is missing when generation fails, and changes only what you approve — without ever reading or printing your secret. |
 | Cost and credit control | Say cheap or set a budget, and Pip picks the cheapest option that fits, names the tradeoff, and does not quietly upgrade you to a pricier `Pro` one. Pip lists what it plans to make and the cost before a batch, asks before each extra paid attempt, and re-checks a stuck job instead of paying for it twice. |
 | Asset integrity | Pip only delivers art that came from PixelLab or from you. It may crop, mask, assemble, package, and convert those pixels, and says when it did; it will not resize, combine, or patch a result and call it final without your approval, and anything it draws itself is labeled as not from PixelLab. Pip checks results against what you asked for, and reports a failure rather than papering over it. |
+| Protects your remote assets | Pip never deletes, clears, or overwrites your characters, animations, tilesets, or other remote PixelLab assets without your permission — never as a guess, a cleanup, or a fix for something that merely looks missing. Pip may still think a destructive change is a good idea and suggest one, but it always asks first, shows exactly what would go, and waits for your approval. When a list comes back empty or out of sync, Pip investigates read-only and tells you what it found instead of destroying anything. |
 | Local output folder | Pip saves downloads, previews, blueprints, packages, and a record of each job in a `pixellab-pip-generations/` folder in your project, unless you name another location. When a job comes back as separate frames, Pip also builds a single spritesheet. |
 | Generation reports | Pip reports every generation: which PixelLab tool ran, the exact wording sent, the settings that mattered, where the files went, what it cost, and whether it passed the checks. When your request runs as several separate generations (a cinematic's shots, each direction of an animation, or a batch you approved), Pip shows each finished image as it lands instead of waiting until the end. It saves a record beside the files with the job IDs and seed. |
 | Preset and custom animation | Describe an action and Pip sends it to PixelLab's text animation, its recommended default. Name a stock motion (walk, run, idle, jump, and more — for humanoids, dogs, cats, horses, bears, and lions) and Pip picks the matching PixelLab preset. Pip can also rig a sprite from its skeleton when you want control over the joints. It previews one direction before animating the rest, and keeps frames in the order PixelLab returned them. |
@@ -58,13 +59,12 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 
 ## Install
 
-### Agent-Assisted Install
+### Agent-Assisted Install (Recommended)
 
-Ask your local coding agent:
+Easiest for most people — your agent picks the right marketplace, plugin, or skill method for its own platform. Ask your local coding agent:
 
 ```text
-Install PixelLab Pip from https://github.com/Shilo/pixellab-pip using the proper marketplace or plugin workflow for this agent. Prefer marketplace install/update over copying files.
-Then run `/pixellab-pip setup` or `@pixellab-pip setup`.
+Install the PixelLab Pip plugin / Agent Skill from https://github.com/Shilo/pixellab-pip. First read the install steps at https://github.com/Shilo/pixellab-pip#install, then install it with whatever method fits you — marketplace or plugin if you support one, otherwise copy the whole skill folder (every file inside `skills/pixellab-pip/`, not just `SKILL.md`) into my skills directory as shown in the Manual Skill Install steps — preferring marketplace install/update over copying files. Then run PixelLab Pip setup if it is loaded, and tell me about any blockers, whether I need to restart or reload first, and when it is ready to use.
 ```
 
 ### Marketplace Install
@@ -116,7 +116,16 @@ Use Cursor's plugin marketplace or team marketplace flow when available, or inst
 
 #### Antigravity
 
-Pip is best installed as a native Agent Skill in Antigravity because it does not need bundled rules, hooks, sidecars, or a credential-bearing MCP config. Copy the entire `skills/pixellab-pip/` directory, including every reference, helper, asset, blueprint, and config file it contains. The paths below show where the copied directory's top-level `SKILL.md` must land; keep all of its sibling files and folders with it:
+Antigravity supports two installation shapes:
+
+1. **Custom plugin — Antigravity IDE / 2.0.** When the product supports custom plugins, copy or extract the whole repository so its root `plugin.json` lands at either path below. No Git installation is required. Keep `plugin.json` and `skills/` together; the manifest marks the plugin and `skills/pixellab-pip/` contains the complete skill.
+
+```text
+Global:    ~/.gemini/config/plugins/pixellab-pip/plugin.json
+Workspace: <workspace-root>/.agents/plugins/pixellab-pip/plugin.json
+```
+
+2. **Native Agent Skill — fallback or Antigravity CLI.** Copy the entire `skills/pixellab-pip/` directory, including all references, helpers, assets, blueprints, and config files, so its top-level `SKILL.md` lands at the matching path:
 
 ```text
 Antigravity IDE / 2.0 workspace: <workspace-root>/.agents/skills/pixellab-pip/SKILL.md
@@ -125,16 +134,7 @@ Antigravity CLI workspace:       <workspace-root>/.agents/skills/pixellab-pip/SK
 Antigravity CLI global:          ~/.gemini/antigravity-cli/skills/pixellab-pip/SKILL.md
 ```
 
-Restart or reload Antigravity, then ask it to use `pixellab-pip` for setup. In Antigravity CLI, `/pixellab-pip setup` invokes the installed skill. The setup wizard supports Antigravity's MCP UI, global and workspace `mcp_config.json`, required remote `serverUrl` schema, and separate REST v2 fallback readiness.
-
-Antigravity IDE and 2.0 also support a custom-plugin folder. If you specifically want the plugin wrapper, clone or copy the whole repository so its root `plugin.json` lands at one of these locations:
-
-```text
-~/.gemini/config/plugins/pixellab-pip/plugin.json
-<workspace-root>/.agents/plugins/pixellab-pip/plugin.json
-```
-
-The root `plugin.json` is the IDE/2.0 plugin marker and `skills/pixellab-pip/SKILL.md` is its packaged skill. Do not use that shared manifest as an Antigravity CLI native plugin manifest: Antigravity CLI's stricter schema allows only `$schema`, `name`, and `description`, while this repository's root manifest also serves other plugin ecosystems. Antigravity does not document a third-party marketplace manifest: its UI marketplace is for bundled Google plugins, while custom plugins use the folders above. The repository's `.agents/plugins/marketplace.json` belongs to the separate VS Code Agent Plugins format and is not used for Antigravity.
+The plugin form is a packaging convenience, not a requirement for Pip's behavior. Antigravity does not document a third-party marketplace manifest, so do not use the repository's `.agents/plugins/marketplace.json`; that file belongs to the separate VS Code Agent Plugins format. Also do not install the repository root as an Antigravity CLI plugin because its strict manifest schema is incompatible with the shared root manifest. Restart or reload Antigravity after either supported install, then ask it to use `pixellab-pip` for setup. In Antigravity CLI, `/pixellab-pip setup` invokes the installed skill. The setup wizard supports Antigravity's MCP UI, global and workspace `mcp_config.json`, required remote `serverUrl` schema, and separate REST v2 fallback readiness.
 
 Pip intentionally does not bundle an Antigravity `mcp_config.json`: PixelLab MCP requires a private bearer token, and Antigravity does not document environment-variable expansion in custom HTTP headers. `/pixellab-pip setup` gives a token-free MCP preview and guides the user through credential completion after approval, then separately checks `PIXELLAB_SECRET` for REST v2 fallback.
 
