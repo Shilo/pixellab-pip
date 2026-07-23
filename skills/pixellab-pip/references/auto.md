@@ -46,7 +46,7 @@ Template:
 >    - `{short param}`: {value} · `{short param}`: {value}  — group short inputs on one line
 > 2. …one numbered entry per predicted paid call…
 >
-> Reply **approve** to run, say what to **change**, or **no** to stop.
+> Reply **ok** to approve the run, say what to **change**, or **no** to stop.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Filled example:
@@ -59,12 +59,12 @@ Filled example:
 > 2. **`animate_character`** · MCP · ~1 gen
 >    - `action`: "walk" · `direction`: south · `template_animation_id`: `walking-8-frames`
 >
-> Reply **approve** to run, say what to **change**, or **no** to stop.
+> Reply **ok** to approve the run, say what to **change**, or **no** to stop.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Handle the reply:
 
-- approve / continue / ok / yes → run the approved chain, with no further per-call permission asks.
+- ok / approve / continue / yes, or any other clear go-ahead → run the approved chain, with no further per-call permission asks.
 - "auto" → run the `auto` command (turn it on and persist it), then continue the chain without re-prompting. This reply approves the current job; if the setting cannot be persisted, still continue and report that separately rather than re-asking.
 - change → adjust, and re-show the block only if the paid plan materially changed; otherwise proceed.
 - decline / no → stop before spending.
