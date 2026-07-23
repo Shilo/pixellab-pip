@@ -35,7 +35,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 
 Two rules that always apply:
 
-- Every final natural-language value sent to PixelLab (`description`, `action`, `edit_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, `color_palette`) must appear in Inputs Used, even when the output failed verification or the field seems obvious. If a value is too large for chat, label it truncated and link the manifest/request file holding the full text.
+- Every final natural-language value sent to PixelLab (`description`, `action`, `edit_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, `color_palette`) must appear in Inputs Used, even when the output failed verification or the field seems obvious. If a value is too large for chat, label it truncated and link the manifest/request file holding the full text. For a non-English user, show each in both English and their language per `references/localization.md`.
 - Report settings that materially affected the output; do not dump schema defaults.
 
 Use Markdown links with user-facing labels (`Spritesheet`, `ZIP package`) for every listed file. Files live under the project `pixellab-pip-generations/` folder per SKILL.md; copy temporary URLs or cache paths there before reporting them as local outputs.
