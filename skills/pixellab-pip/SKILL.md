@@ -20,8 +20,8 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 ## Workflow
 
 1. Classify intent; values combine, such as `animate + cost_sensitive`:
-   `question | setup | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | blueprint/recipe`.
-   A standalone `setup` or `bark` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent. For setup, read `references/setup.md` and run the wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval. For bark, read `references/bark.md` and apply the persistent toggle contract.
+   `question | setup | update | uninstall | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | blueprint/recipe`.
+   A standalone `setup`, `update`, `uninstall`, or `bark` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent. For setup, read `references/setup.md` and run the wizard contract: recommend MCP + API first, support MCP-only/API-only/manual modes, and change settings only after a token-free preview and explicit approval. For update, read `references/update.md` and update the installed Pip to the latest version via the same method it was installed with, never touching `PIXELLAB_SECRET` or `pixellab-pip-generations/`. For uninstall, read `references/uninstall.md` and remove Pip via its install method, confirming the exact scope first and keeping the user's outputs, remote assets, and `PIXELLAB_SECRET` unless they explicitly ask to remove them. For bark, read `references/bark.md` and apply the persistent toggle contract.
 2. Classify the target:
    `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
    Fitted visual additions to an existing character image, such as hair, facial features, wearables, accessories, or held gear, are `existing_image` paperdoll edits, not standalone `object` requests, unless the user explicitly wants a separate unattached prop.
@@ -123,6 +123,8 @@ Read only the relevant reference:
 
 - Bearer-token setup, PixelLab UI naming, MCP auth reuse: `references/credentials.md`.
 - Setup wizard for MCP, REST v2 fallback, auth after install: `references/setup.md`.
+- Update an installed Pip to the latest version via its install method: `references/update.md`.
+- Remove Pip via its install method (confirm scope first; keep the user's outputs/Secret): `references/uninstall.md`.
 - Persistent completion sound toggle: `references/bark.md`.
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
 - Skill/ability and inventory item icon sheets: `references/icon.md`.

@@ -302,6 +302,26 @@ $pixellab-pip setup
 
 Runs the beginner-friendly PixelLab setup wizard. Pip recommends MCP + API for AI assistants/editors, can configure documented REST v2 fallback for Pip with the same PixelLab Secret, and only changes settings after a token-free preview and explicit approval.
 
+#### Update
+
+```text
+/pixellab-pip update
+@pixellab-pip update
+$pixellab-pip update
+```
+
+Updates PixelLab Pip to the latest version using however your agent installed it — a marketplace, plugin, or extension update, or re-copying the latest skill folder. It also migrates a pre-v1.0 `pixellab-pip` marketplace install to the current one. Manual alternative: run your agent's own update command (the per-agent **Update** blocks under [Install](#install)), or just ask your agent to update PixelLab Pip.
+
+#### Uninstall
+
+```text
+/pixellab-pip uninstall
+@pixellab-pip uninstall
+$pixellab-pip uninstall
+```
+
+Removes PixelLab Pip — Pip confirms first and shows exactly what it will remove, and keeps your PixelLab Secret and `pixellab-pip-generations/` outputs unless you ask otherwise. Manual alternative: use your agent's plugin or extension uninstall command, or delete the copied `pixellab-pip` skill folder — or just ask your agent to uninstall PixelLab Pip.
+
 #### Bark
 
 ```text

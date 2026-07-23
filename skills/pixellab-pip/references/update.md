@@ -1,0 +1,70 @@
+# Update
+
+Reference for natural-language updates: bringing an installed Pip up to the latest version using whatever method installed it. This extends the existing Pip skill; it is not a separate skill. Update only replaces skill/plugin files — it never touches the user's `PIXELLAB_SECRET` or their `pixellab-pip-generations/` outputs.
+
+The command is one word after the trigger, such as `/pixellab-pip update`, `@pixellab-pip update`, or `$pixellab-pip update`. Some apps pass it as an argument, others as prose; treat it the same either way and require no flags or app-specific syntax.
+
+## 1. Detect the install method first
+
+Update via the same method that installed Pip; do not assume. Three shapes exist:
+
+- **Marketplace plugin** — installed through the app's plugin/marketplace command (plugin id `pixellab-pip`, marketplace `pixellab-pip-plugins`).
+- **Extension** — installed through the app's extension mechanism.
+- **Manual skill copy** — the `skills/pixellab-pip/` folder copied into the app's skills directory, or an extracted release zip.
+
+Detect from what the app exposes (an installed-plugin list, an extensions list, or a skill folder on disk) before choosing an update path. If detection is ambiguous, ask which way the user installed it rather than guessing. If unsure of an app's exact command, use the app's own documented update mechanism or refresh its plugin/extension list — do not invent syntax.
+
+## 2. Per-app update mechanics
+
+Stays agent-agnostic and OS-agnostic until the app is named or detected. The commands below are the documented mechanism for each app; use the named/detected app's mechanism only.
+
+- **Claude Code** (marketplace): refresh the marketplace, then update the plugin.
+
+  ```text
+  /plugin marketplace update pixellab-pip-plugins
+  /plugin update pixellab-pip
+  ```
+
+  CLI equivalents: `claude plugin marketplace update pixellab-pip-plugins` then `claude plugin update pixellab-pip`.
+
+- **Codex** (marketplace): upgrade the marketplace, then remove and re-add the plugin.
+
+  ```text
+  codex plugin marketplace upgrade pixellab-pip-plugins
+  codex plugin remove pixellab-pip@pixellab-pip-plugins
+  codex plugin add pixellab-pip@pixellab-pip-plugins
+  ```
+
+- **Gemini CLI** (extension):
+
+  ```text
+  gemini extensions update pixellab-pip
+  ```
+
+- **GitHub Copilot CLI** (marketplace):
+
+  ```text
+  copilot plugin update pixellab-pip
+  ```
+
+- **Cursor**: if installed via its marketplace, re-index/update it through that flow; otherwise re-copy the skill (below).
+- **OpenCode, Deep Code, Antigravity, VS Code Agent Plugins, or any manual skill-copy install**: re-copy the entire latest `skills/pixellab-pip/` folder (every file, not just `SKILL.md`) over the existing install, or re-download and extract the latest release zip. Overwrite in place; do not delete sibling files first.
+- **Any other named marketplace/extension app**: use the app's own documented update or refresh command with plugin id `pixellab-pip` / marketplace `pixellab-pip-plugins`. Do not invent syntax; fall back to the skill re-copy when no update command exists.
+
+## 3. Pre-v1.0 marketplace-rename migration
+
+The marketplace was renamed `pixellab-pip` → `pixellab-pip-plugins` at v1.0. A plain update will not switch marketplaces, so an install still under the old `pixellab-pip` marketplace needs a one-time clean reinstall (remove the old marketplace and plugin, add the new marketplace, install `pixellab-pip@pixellab-pip-plugins`). Follow the README "Upgrading from a pre-v1.0 install" section for the exact per-app commands rather than duplicating them here.
+
+## 4. Restart or reload
+
+Tell the user to restart or reload only when the app requires it or the new version does not appear after the update. Otherwise the running session picks up the change without a restart.
+
+## 5. Verify after
+
+Confirm the new version is active, agent-agnostic: use the app's plugin/extension list (e.g. `plugin list` showing the new version), or the app's own version display. For a skill-copy install, confirm the updated files landed at the install path. No credit spend and no secret handling here — this is a version check only.
+
+## Update guardrails
+
+- Update replaces only skill/plugin files. Do not read, move, rewrite, or clear `PIXELLAB_SECRET` or the `pixellab-pip-generations/` folder.
+- Do not guess the install method or invent an app's update syntax; detect or ask, then use the app's documented mechanism.
+- Do not spend credits or run any generation, edit, or animation as part of an update or its verification.
