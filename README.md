@@ -115,7 +115,7 @@ Update:
 
 ```text
 /plugin marketplace update pixellab-pip-plugins
-/plugin update pixellab-pip
+/plugin update pixellab-pip@pixellab-pip-plugins
 ```
 
 #### Codex

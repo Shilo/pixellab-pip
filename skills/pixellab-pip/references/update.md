@@ -22,10 +22,10 @@ Stays agent-agnostic and OS-agnostic until the app is named or detected. The com
 
   ```text
   /plugin marketplace update pixellab-pip-plugins
-  /plugin update pixellab-pip
+  /plugin update pixellab-pip@pixellab-pip-plugins
   ```
 
-  CLI equivalents: `claude plugin marketplace update pixellab-pip-plugins` then `claude plugin update pixellab-pip`.
+  CLI equivalents: `claude plugin marketplace update pixellab-pip-plugins` then `claude plugin update pixellab-pip@pixellab-pip-plugins`. (Claude's `plugin update` needs the qualified `plugin@marketplace` id — the bare `pixellab-pip` reports "not found".)
 
 - **Codex** (marketplace): upgrade the marketplace, then remove and re-add the plugin.
 
