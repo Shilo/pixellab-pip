@@ -15,9 +15,9 @@ If you cannot tell which shape applies, ask, or use the app's documented listing
 
 ## 2. Per-app uninstall mechanics
 
-Use the app's documented mechanism; if unsure of exact syntax, check its help/refresh its plugin list rather than guessing. The marketplace is `pixellab-pip-plugins` and the plugin is `pixellab-pip`.
+Use the app's documented mechanism; if unsure of exact syntax, check its help/refresh its plugin list rather than guessing. Prefer the non-interactive CLI form (e.g. `claude plugin …`, `codex plugin …`) and run the removal yourself once the user approves; only hand the user an interactive in-app command when the app has no CLI. The marketplace is `pixellab-pip-plugins` and the plugin is `pixellab-pip`.
 
-- **Claude Code**: `/plugin uninstall pixellab-pip@pixellab-pip-plugins` (CLI: `claude plugin uninstall pixellab-pip@pixellab-pip-plugins`). Optionally also remove the marketplace: `/plugin marketplace remove pixellab-pip-plugins`.
+- **Claude Code**: `claude plugin uninstall pixellab-pip@pixellab-pip-plugins`. Optionally also remove the marketplace: `claude plugin marketplace remove pixellab-pip-plugins`.
 - **Codex**: `codex plugin remove pixellab-pip@pixellab-pip-plugins`. Optionally `codex plugin marketplace remove pixellab-pip-plugins`.
 - **Gemini CLI**: `gemini extensions uninstall pixellab-pip`.
 - **GitHub Copilot CLI**: `copilot plugin uninstall pixellab-pip`. Optionally `copilot plugin marketplace remove pixellab-pip-plugins`.

@@ -16,16 +16,16 @@ Detect from what the app exposes (an installed-plugin list, an extensions list, 
 
 ## 2. Per-app update mechanics
 
-Stays agent-agnostic and OS-agnostic until the app is named or detected. The commands below are the documented mechanism for each app; use the named/detected app's mechanism only.
+Stays agent-agnostic and OS-agnostic until the app is named or detected. The commands below are the documented mechanism for each app; use the named/detected app's mechanism only. Prefer the non-interactive CLI form and run the update yourself; only hand the user an interactive in-app command when the app has no CLI.
 
 - **Claude Code** (marketplace): refresh the marketplace, then update the plugin.
 
   ```text
-  /plugin marketplace update pixellab-pip-plugins
-  /plugin update pixellab-pip@pixellab-pip-plugins
+  claude plugin marketplace update pixellab-pip-plugins
+  claude plugin update pixellab-pip@pixellab-pip-plugins
   ```
 
-  CLI equivalents: `claude plugin marketplace update pixellab-pip-plugins` then `claude plugin update pixellab-pip@pixellab-pip-plugins`. (Claude's `plugin update` needs the qualified `plugin@marketplace` id — the bare `pixellab-pip` reports "not found".)
+  Claude's `plugin update` needs the qualified `plugin@marketplace` id — the bare `pixellab-pip` reports "not found".
 
 - **Codex** (marketplace): upgrade the marketplace, then remove and re-add the plugin.
 
