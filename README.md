@@ -122,7 +122,7 @@ Update:
 
 ```text
 codex plugin marketplace upgrade pixellab-pip-plugins
-codex plugin remove pixellab-pip
+codex plugin remove pixellab-pip@pixellab-pip-plugins
 codex plugin add pixellab-pip@pixellab-pip-plugins
 ```
 

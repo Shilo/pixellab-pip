@@ -181,7 +181,6 @@ function Pause-BeforeExit {
 
 function Get-InstallState {
     param(
-        [Parameter(Mandatory = $true)][string]$PluginName,
         [Parameter(Mandatory = $true)][string]$PluginSelector,
         [Parameter(Mandatory = $true)][string]$MarketplaceName,
         [Parameter(Mandatory = $true)][string]$RemoteSource
@@ -320,7 +319,7 @@ function Invoke-Main {
     Write-Host "Plugin:   $pluginName"
     Write-Host ""
 
-    $state = Get-InstallState -PluginName $pluginName -PluginSelector $pluginSelector -MarketplaceName $marketplaceName -RemoteSource $remoteSource
+    $state = Get-InstallState -PluginSelector $pluginSelector -MarketplaceName $marketplaceName -RemoteSource $remoteSource
     Write-InstallState -State $state
     Write-Host ""
 
