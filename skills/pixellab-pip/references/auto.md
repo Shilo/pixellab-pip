@@ -46,7 +46,7 @@ Template:
 >    - `{short param}`: {value} · `{short param}`: {value}  — group short inputs on one line
 > 2. …one numbered entry per predicted paid call…
 >
-> Reply **yes** to approve the run, say what to **change**, or **no** to stop.
+> Reply **yes** to approve the run, **no** to stop, or say what to **change**.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Filled example:
@@ -59,7 +59,7 @@ Filled example:
 > 2. **`animate_character`** · MCP · ~1 gen
 >    - `action`: "walk" · `direction`: south · `template_animation_id`: `walking-8-frames`
 >
-> Reply **yes** to approve the run, say what to **change**, or **no** to stop.
+> Reply **yes** to approve the run, **no** to stop, or say what to **change**.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Handle the reply by intent, not literal tokens — infer what the user means from whatever they write (any wording, any language) and map it to one of these:
