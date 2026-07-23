@@ -183,6 +183,7 @@ function Get-InstallState {
     param(
         [Parameter(Mandatory = $true)][string]$PluginName,
         [Parameter(Mandatory = $true)][string]$PluginSelector,
+        [Parameter(Mandatory = $true)][string]$MarketplaceName,
         [Parameter(Mandatory = $true)][string]$RemoteSource
     )
 
@@ -193,7 +194,7 @@ function Get-InstallState {
 
     $marketplaceList = Invoke-Claude -Arguments @("plugin", "marketplace", "list", "--json") -Json
     $installedMarketplace = @($marketplaceList) |
-        Where-Object { $_.name -eq $PluginName } |
+        Where-Object { $_.name -eq $MarketplaceName } |
         Select-Object -First 1
 
     $installedVersion = if ($installedPlugin) { [string]$installedPlugin.version } else { $null }
@@ -299,16 +300,27 @@ function Invoke-Main {
         throw ".claude-plugin\plugin.json must include a repository URL for production remote installs."
     }
 
-    # Marketplace name comes from .claude-plugin/marketplace.json; for this repo it
-    # matches the plugin name, so the selector is pluginName@pluginName either way.
-    $pluginSelector = "$pluginName@$pluginName"
+    # Marketplace name comes from .claude-plugin/marketplace.json and is intentionally
+    # different from the plugin name (a matching name makes Codex collapse its cache path
+    # and mis-locate SKILL.md; the manifests are kept consistent across agents). Build the
+    # selector as pluginName@marketplaceName.
+    $marketplacePath = Join-Path $repoRoot ".claude-plugin\marketplace.json"
+    if (-not (Test-Path -LiteralPath $marketplacePath)) {
+        throw "Could not find .claude-plugin\marketplace.json under repo root: $repoRoot"
+    }
+    $marketplaceName = [string]((Get-Content -LiteralPath $marketplacePath -Raw | ConvertFrom-Json).name)
+    if ([string]::IsNullOrWhiteSpace($marketplaceName)) {
+        throw ".claude-plugin\marketplace.json must include a marketplace name."
+    }
+
+    $pluginSelector = "$pluginName@$marketplaceName"
     $remoteSource = Get-RepositorySource -Repository $repository
 
     Write-Host "Repo root: $repoRoot"
     Write-Host "Plugin:   $pluginName"
     Write-Host ""
 
-    $state = Get-InstallState -PluginName $pluginName -PluginSelector $pluginSelector -RemoteSource $remoteSource
+    $state = Get-InstallState -PluginName $pluginName -PluginSelector $pluginSelector -MarketplaceName $marketplaceName -RemoteSource $remoteSource
     Write-InstallState -State $state
     Write-Host ""
 

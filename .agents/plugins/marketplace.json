@@ -1,5 +1,5 @@
 {
-  "name": "pixellab-pip",
+  "name": "pixellab-pip-plugins",
   "interface": {
     "displayName": "PixelLab Pip"
   },

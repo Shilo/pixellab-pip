@@ -183,6 +183,7 @@ function Get-InstallState {
     param(
         [Parameter(Mandatory = $true)][string]$PluginName,
         [Parameter(Mandatory = $true)][string]$PluginSelector,
+        [Parameter(Mandatory = $true)][string]$MarketplaceName,
         [Parameter(Mandatory = $true)][string]$RepoRoot,
         [Parameter(Mandatory = $true)][string]$RemoteSource
     )
@@ -194,7 +195,7 @@ function Get-InstallState {
 
     $marketplaceList = Invoke-Codex -Arguments @("plugin", "marketplace", "list", "--json") -Json
     $installedMarketplace = @($marketplaceList.marketplaces) |
-        Where-Object { $_.name -eq $PluginName } |
+        Where-Object { $_.name -eq $MarketplaceName } |
         Select-Object -First 1
 
     $installedPath = $null
@@ -318,14 +319,27 @@ function Invoke-Main {
         throw "plugin.json must include a repository URL for production remote installs."
     }
 
-    $pluginSelector = "$pluginName@$pluginName"
+    # Codex reads the marketplace name from .agents/plugins/marketplace.json. It is
+    # intentionally different from the plugin name: when the two match, Codex collapses
+    # the duplicate cache path segment and hands the agent a wrong SKILL.md path, forcing
+    # it to hunt on every skill invocation. The selector is pluginName@marketplaceName.
+    $marketplacePath = Join-Path $repoRoot ".agents\plugins\marketplace.json"
+    if (-not (Test-Path -LiteralPath $marketplacePath)) {
+        throw "Could not find Codex marketplace manifest: $marketplacePath"
+    }
+    $marketplaceName = [string]((Get-Content -LiteralPath $marketplacePath -Raw | ConvertFrom-Json).name)
+    if ([string]::IsNullOrWhiteSpace($marketplaceName)) {
+        throw ".agents/plugins/marketplace.json must include a marketplace name."
+    }
+
+    $pluginSelector = "$pluginName@$marketplaceName"
     $remoteSource = Get-RepositorySource -Repository $repository
 
     Write-Host "Repo root: $repoRoot"
     Write-Host "Plugin:   $pluginName"
     Write-Host ""
 
-    $state = Get-InstallState -PluginName $pluginName -PluginSelector $pluginSelector -RepoRoot $repoRoot -RemoteSource $remoteSource
+    $state = Get-InstallState -PluginName $pluginName -PluginSelector $pluginSelector -MarketplaceName $marketplaceName -RepoRoot $repoRoot -RemoteSource $remoteSource
     Write-InstallState -State $state -PluginName $pluginName
     Write-Host ""
 
