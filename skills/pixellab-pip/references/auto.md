@@ -1,6 +1,6 @@
 # Auto
 
-Reference for the `auto` command and the cost-approval gate it governs. The gate is Pip's single, up-front permission check before spending PixelLab credits. `auto` is off by default, so Pip asks before paid work; turning `auto` on lets jobs run without that check.
+Reference for the `auto` command and the cost-approval gate it governs. The gate is Pip's single, up-front permission check before a job spends any PixelLab **generations** — or **credits**, once the account's included generation allowance is used up. `auto` is off by default, so Pip asks before paid work; turning `auto` on lets jobs run without that check.
 
 ## Commands
 
@@ -20,50 +20,48 @@ Persist `auto` as a boolean in the same `pixellab-pip.json` that bark uses; foll
 
 ## The cost-approval gate
 
-Fire this gate once per job, as early as feasible: after any blocking clarification and after prompt enhancement, immediately before the first PixelLab call that spends credits. Read the `auto` setting exactly once, at this moment, and apply that one decision for the rest of the job — never re-read it mid-job.
+Fire this gate once per job, as early as feasible: after any blocking clarification and after prompt enhancement, immediately before the first paid PixelLab call. Read the `auto` setting exactly once, at this moment, and apply that one decision for the rest of the job — never re-read it mid-job.
 
-Plan the whole paid chain before the gate so the user approves everything in one message and never waits between steps. This covers single jobs, multi-asset batches, all-direction runs, and multi-shot cinematics alike. It does not remove per-shot output validation (e.g. `references/cinematic.md`) — that checks results, not permission.
+Plan the whole paid chain before the gate so the user approves the whole job — both the spend and how each call is set up — in one message, instead of a cost prompt between each step. This covers single jobs, multi-asset batches, and multi-shot cinematics alike. The gate replaces repeated cost-permission asks only — not the content and quality checkpoints (produce-one-candidate-first, the `south`-first animation default, ask-before-all-directions, per-shot validation). When your listed plan explicitly includes that wider scope and the user approves it, that approval also covers those scope asks, so you neither skip them silently nor ask twice.
 
 ### When auto is off — ask first
 
-Show a concise, readable approval block listing, in order, every predicted paid call:
+Post a short, readable **Markdown** approval message — render it, do not wrap it in a code fence — listing, in order, every predicted paid call:
 
-- the tool or endpoint name (e.g. MCP `create_character`, REST `create-image-pixen`);
-- its material inputs, including the exact final `description`/`prompt`/`action` text that will be sent;
+- the tool or endpoint name;
+- its material inputs as `key: value` pairs — not only the `description`/`prompt`/`action`, but every input that shapes the result or that you chose or changed for the user: size, mode/view, direction(s) and counts, `no_background`, template/skeleton id, style/reference/palette/mask inputs (named by role), negative prompt, and `seed` when you set one. Skip inputs left at harmless defaults;
 - a rough cost per call and a rough total, in generations (use `references/cost-routing.md` counts and ranges; ranges are fine — the goal is awareness, not precision);
-- a short flag on any call changed from the user's literal request (enhanced prompt, re-routed endpoint).
+- a short flag on any call you changed from the user's literal request (enhanced prompt, re-routed endpoint).
 
-End with one concise question that infers the choices — approve, change anything, or decline — plus a footer noting autonomous runs. Do not enumerate every option; keep it intuitive. Illustrative shape only:
+For prompt text, show what will actually be sent: if you enhanced it agent-side, show the enhanced value; if you are using inline `enhance_prompt` (server-side refinement), show the literal prompt and note PixelLab will refine it — never run a separate paid enhancer before the gate just to populate it.
 
-```text
-💳 Cost check — approve before I spend PixelLab credits
+The user approves both the spend and how each call is set up, so show enough of each call to judge that. End with one short question that infers the choices — approve, change anything, or decline — and one quiet one-line tip about autonomous runs. Keep keywords in backticks or bold so they stand out; keep the tip from overpowering the message. Illustrative shape (wording and fields vary per job):
 
-1. MCP create_character (v3)  ~2 gen
-   description: "stout dwarf blacksmith, flat pixel art, leather apron"  (prompt enhanced)
-2. MCP animate_character — south, template walking-8-frames  ~1 gen
-
-Estimated total: ~3 generations (rough)
-
-Approve, tell me what to change, or say no?
-Tip: reply "auto" (or run /pixellab-pip auto) to run future jobs without this check.
-```
+> **Approve this PixelLab run?** — about **3 generations** *(credits if the generation balance is used up)*.
+>
+> 1. **`create_character`** · MCP · v3 · ~2 gen
+>    - `description`: "stout dwarf blacksmith, flat pixel art, leather apron" *(enhanced)*
+>    - `size`: 48×48 · `n_directions`: 4 · `no_background`: true
+> 2. **`animate_character`** · MCP · ~1 gen
+>    - `action`: "walk" · `direction`: south · `template_animation_id`: `walking-8-frames`
+>
+> Reply **approve** to run, say what to change, or **no** to stop.
+> *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
 
 Handle the reply:
 
 - approve / continue / ok / yes → run the approved chain, with no further per-call permission asks.
-- "auto" → run the `auto` command (turn it on and persist it), then continue the chain without re-prompting.
+- "auto" → run the `auto` command (turn it on and persist it), then continue the chain without re-prompting. This reply approves the current job; if the setting cannot be persisted, still continue and report that separately rather than re-asking.
 - change → adjust, and re-show the block only if the paid plan materially changed; otherwise proceed.
 - decline / no → stop before spending.
 
-Ask only once. After approval, run the whole approved chain without re-gating. If the plan later turns into a paid call the user did not approve — a different route, an extra retry or candidate, a batch expansion — that new spend needs its own brief approval. Free or local work (polling, downloads, cropping, assembly, packaging, manifests, verification, balance/status reads) is never gated.
+Ask only once. After approval, run the whole approved chain without re-gating. If the plan later turns into a paid call the user did not approve — a different route, an extra retry or candidate, a batch expansion — that new spend needs its own brief approval. Free or local work (downloads, assembly, verification, balance/status reads, and the like) is never gated.
 
 ### When auto is on — run, but remind
 
-Skip the approval block. Once, early (before or at the first paid call), show a one-line reminder that auto is on and how to turn it off, then proceed:
+Skip the approval message. Once, early (before or at the first paid call), post a single quiet Markdown line that auto is on and how to turn it off, then proceed:
 
-```text
-⚡ Auto is on — running this job without a cost check. Disable anytime with /pixellab-pip auto.
-```
+> ⚡ *Auto is on — running this job without a cost check. Disable anytime with `/pixellab-pip auto`.*
 
 ## Scope
 
