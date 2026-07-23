@@ -39,7 +39,7 @@ The user approves both the spend and how each call is set up, so show enough of 
 
 Template:
 
-> **Approve this PixelLab run?** — **~{N} generations** *(or credits)*.
+> 💳 **Approve this PixelLab run?** — **~{N} generations** *(or credits)*.
 >
 > 1. **`{tool or endpoint}`** · {surface} · {mode/key notes} · ~{cost}
 >    - `{long prompt/description}`: "{exact text to send}" *(flag `(enhanced)` or `(rerouted)` if you changed it)*
@@ -51,7 +51,7 @@ Template:
 
 Filled example:
 
-> **Approve this PixelLab run?** — **~3 generations** *(or credits)*.
+> 💳 **Approve this PixelLab run?** — **~3 generations** *(or credits)*.
 >
 > 1. **`create_character`** · MCP · v3 · ~2 gen
 >    - `description`: "stout dwarf blacksmith, flat pixel art, leather apron" *(enhanced)*
