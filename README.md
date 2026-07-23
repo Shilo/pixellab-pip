@@ -302,6 +302,32 @@ $pixellab-pip setup
 
 Runs the beginner-friendly PixelLab setup wizard. Pip recommends MCP + API for AI assistants/editors, can configure documented REST v2 fallback for Pip with the same PixelLab Secret, and only changes settings after a token-free preview and explicit approval.
 
+#### Auto
+
+```text
+/pixellab-pip auto
+@pixellab-pip auto
+$pixellab-pip auto
+/pixellab-pip auto on
+/pixellab-pip auto off
+```
+
+Toggles whether Pip asks before spending credits. Auto is **off** by default: right before the first paid PixelLab call of a job, Pip shows every call it plans to make, the exact wording it will send, and a rough total cost, then asks once — approve, change anything, or decline. Reply `auto` to that prompt (or run the command) to turn Auto on and continue without stopping. With Auto on, Pip skips the check and instead shows a one-line reminder of how to turn it back off. The check is a single up-front gate, not a prompt between each step. Auto never overrides an explicit "ask me first" instruction or Pip's confirmation before deleting or overwriting remote assets. The setting persists in `skills/pixellab-pip/pixellab-pip.json` next to `SKILL.md` (the same file bark uses), with an exact user-config fallback if that directory is read-only.
+
+#### Bark
+
+```text
+/pixellab-pip bark
+@pixellab-pip bark
+$pixellab-pip bark
+/pixellab-pip bark on
+/pixellab-pip bark off
+```
+
+Toggles Pip's completion sound. Bark is on by default and persists in `skills/pixellab-pip/pixellab-pip.json` next to `SKILL.md` when the installed skill directory is writable, with an exact user-config fallback only if skill-local persistence fails. Because bark starts on, a first-run `bark` command usually toggles it off without playing; use `bark on` to test the sound. Pip only barks after a live PixelLab generation, edit, transform, conversion, background-removal, or animation job finishes successfully. It does not bark for setup, auth checks, balance/status checks, docs, failed or pending jobs, downloads alone, or local post-processing alone.
+
+The current sound is hardcoded in the bundled helper as `skills/pixellab-pip/assets/bark.wav`. Running `bark` or `bark on` plays the sound immediately when bark ends up on, which doubles as a sound test. If the helper cannot run, Pip falls back to a native system success or alert sound instead of passing an audio file path to the app.
+
 #### Update
 
 ```text
@@ -321,32 +347,6 @@ $pixellab-pip uninstall
 ```
 
 Removes PixelLab Pip — Pip confirms first and shows exactly what it will remove, and keeps your PixelLab Secret and `pixellab-pip-generations/` outputs unless you ask otherwise. Manual alternative: use your agent's plugin or extension uninstall command, or delete the copied `pixellab-pip` skill folder — or just ask your agent to uninstall PixelLab Pip.
-
-#### Bark
-
-```text
-/pixellab-pip bark
-@pixellab-pip bark
-$pixellab-pip bark
-/pixellab-pip bark on
-/pixellab-pip bark off
-```
-
-Toggles Pip's completion sound. Bark is on by default and persists in `skills/pixellab-pip/pixellab-pip.json` next to `SKILL.md` when the installed skill directory is writable, with an exact user-config fallback only if skill-local persistence fails. Because bark starts on, a first-run `bark` command usually toggles it off without playing; use `bark on` to test the sound. Pip only barks after a live PixelLab generation, edit, transform, conversion, background-removal, or animation job finishes successfully. It does not bark for setup, auth checks, balance/status checks, docs, failed or pending jobs, downloads alone, or local post-processing alone.
-
-The current sound is hardcoded in the bundled helper as `skills/pixellab-pip/assets/bark.wav`. Running `bark` or `bark on` plays the sound immediately when bark ends up on, which doubles as a sound test. If the helper cannot run, Pip falls back to a native system success or alert sound instead of passing an audio file path to the app.
-
-#### Auto
-
-```text
-/pixellab-pip auto
-@pixellab-pip auto
-$pixellab-pip auto
-/pixellab-pip auto on
-/pixellab-pip auto off
-```
-
-Toggles whether Pip asks before spending credits. Auto is **off** by default: right before the first paid PixelLab call of a job, Pip shows every call it plans to make, the exact wording it will send, and a rough total cost, then asks once — approve, change anything, or decline. Reply `auto` to that prompt (or run the command) to turn Auto on and continue without stopping. With Auto on, Pip skips the check and instead shows a one-line reminder of how to turn it back off. The check is a single up-front gate, not a prompt between each step. Auto never overrides an explicit "ask me first" instruction or Pip's confirmation before deleting or overwriting remote assets. The setting persists in `skills/pixellab-pip/pixellab-pip.json` next to `SKILL.md` (the same file bark uses), with an exact user-config fallback if that directory is read-only.
 
 ## Setup MCP / API
 
