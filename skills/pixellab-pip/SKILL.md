@@ -20,8 +20,8 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 ## Workflow
 
 1. Classify intent; values combine, such as `animate + cost_sensitive`:
-   `question | setup | update | uninstall | bark | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | blueprint/recipe`.
-   A standalone `setup`, `update`, `uninstall`, or `bark` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent: for setup read `references/setup.md`, for update read `references/update.md`, for uninstall read `references/uninstall.md`, for bark read `references/bark.md`.
+   `question | setup | update | uninstall | bark | auto | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | blueprint/recipe`.
+   A standalone `setup`, `update`, `uninstall`, `bark`, or `auto` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent: for setup read `references/setup.md`, for update read `references/update.md`, for uninstall read `references/uninstall.md`, for bark read `references/bark.md`, for auto read `references/auto.md`.
 2. Classify the target:
    `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | isometric_tile | tile_variants | animation | existing_image`.
    Fitted visual additions to an existing character image, such as hair, facial features, wearables, accessories, or held gear, are `existing_image` paperdoll edits, not standalone `object` requests, unless the user explicitly wants a separate unattached prop.
@@ -115,7 +115,7 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 - "Effect": static or animated? If a target image is supplied, infer a one-off edit; ask reusable-asset vs one-off only without a clear edit target.
 - "Paperdoll": gather base image, desired layers, target regions, directions, and whether the user wants separate transparent layer files, editor layers, composited previews, or both; see `references/paperdolling.md`.
 - Supplied images: infer each file's low-risk endpoint-specific role from wording. Before credit-spending calls, ask when role uncertainty (identity vs style vs concept vs edit target vs mask vs palette vs first/last frame) would change the endpoint or output; see `references/image-input-roles.md`.
-- If prompt enhancement adds material inferred details, show the proposed description and confirm before a credit-spending call.
+- If prompt enhancement adds material inferred details, surface the proposed description in the cost-approval gate (`references/auto.md`) before a credit-spending call.
 
 ## References
 
@@ -126,6 +126,7 @@ Read only the relevant reference:
 - Update an installed Pip to the latest version: `references/update.md`.
 - Remove an installed Pip: `references/uninstall.md`.
 - Persistent completion sound toggle: `references/bark.md`.
+- Cost-approval gate before paid calls, and the `auto` on/off toggle: `references/auto.md`.
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
 - Skill/ability and inventory item icon sheets: `references/icon.md`.
 - Create Image Pro, native-size multi-output batches, exact grids, below-32px cells: `references/create-image-pro.md`.
@@ -214,7 +215,7 @@ If no bearer token is configured, stop before generation and offer the setup wiz
 
 For questions, answer with: recommended surface/endpoint, why it fits, warnings for unsupported alternatives, and a verification note only when the answer depends on an unverified current fact.
 
-For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Before a multi-asset batch, list each planned item with its route and cost category so the user approves the full scope and rough total first. Ask before ambiguous credit-spending batches; for destructive remote actions, follow Destructive Remote Actions. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
+For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Before the first credit-spending call, apply the cost-approval gate in `references/auto.md`: unless the persistent `auto` setting is on, plan the whole paid chain, then in one message show every predicted paid call, its exact inputs, and a rough total for approval. For destructive remote actions, follow Destructive Remote Actions. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
 
 Capture a balance snapshot before a nontrivial paid call when available. After live PixelLab work, read `references/usage-reporting.md` and use its report layout; verify the output against the user's explicit constraints before calling it final, and say plainly when verification failed instead of silently salvaging. Do not paste secrets, raw base64, full response JSON, or internal IDs unless needed for pending status, follow-up, or debugging.
 

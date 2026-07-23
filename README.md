@@ -37,7 +37,7 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 |---|---|
 | Easy PixelLab workflow | Ask in plain language — no tool names, settings, or modes to learn — and Pip works out which PixelLab tool fits each kind of asset (characters, animations, sprites, top-down and platformer tilesets, isometric tiles, map objects, icons, UI, backgrounds, portraits, fonts, effects), and whether to use PixelLab's MCP tools, its API, the website editor, or Aseprite. When PixelLab has no supported way to do something, Pip says so instead of inventing one. |
 | Guided PixelLab setup | Pip connects PixelLab to your agent, works out what is missing when generation fails, and changes only what you approve — without ever reading or printing your secret. |
-| Cost and credit control | Say cheap or set a budget, and Pip picks the cheapest option that fits, names the tradeoff, and does not quietly upgrade you to a pricier `Pro` one. Pip lists what it plans to make and the cost before a batch, asks before each extra paid attempt, and re-checks a stuck job instead of paying for it twice. |
+| Cost and credit control | By default Pip asks before spending anything: right before the first paid call it shows every PixelLab call it plans to make, the exact wording it will send, and a rough total cost — all in one message, so you approve, tweak, or cancel the whole job at once instead of waiting between steps. Turn this off with `/pixellab-pip auto` (or just reply `auto`) to let approved jobs run without the check, and back on the same way. Say cheap or set a budget and Pip also picks the cheapest option that fits, names the tradeoff, does not quietly upgrade you to a pricier `Pro` one, and re-checks a stuck job instead of paying for it twice. |
 | Asset integrity | Pip only delivers art that came from PixelLab or from you. It may crop, mask, assemble, package, and convert those pixels, and says when it did; it will not resize, combine, or patch a result and call it final without your approval, and anything it draws itself is labeled as not from PixelLab. Pip checks results against what you asked for, and reports a failure rather than papering over it. |
 | Protects your remote assets | Pip never deletes, clears, or overwrites your characters, animations, tilesets, or other remote PixelLab assets without your permission — never as a guess, a cleanup, or a fix for something that merely looks missing. Pip may still think a destructive change is a good idea and suggest one, but it always asks first, shows exactly what would go, and waits for your approval. When a list comes back empty or out of sync, Pip investigates read-only and tells you what it found instead of destroying anything. |
 | Local output folder | Pip saves downloads, previews, blueprints, packages, and a record of each job in a `pixellab-pip-generations/` folder in your project, unless you name another location. When a job comes back as separate frames, Pip also builds a single spritesheet. |
@@ -335,6 +335,18 @@ $pixellab-pip bark
 Toggles Pip's completion sound. Bark is on by default and persists in `skills/pixellab-pip/pixellab-pip.json` next to `SKILL.md` when the installed skill directory is writable, with an exact user-config fallback only if skill-local persistence fails. Because bark starts on, a first-run `bark` command usually toggles it off without playing; use `bark on` to test the sound. Pip only barks after a live PixelLab generation, edit, transform, conversion, background-removal, or animation job finishes successfully. It does not bark for setup, auth checks, balance/status checks, docs, failed or pending jobs, downloads alone, or local post-processing alone.
 
 The current sound is hardcoded in the bundled helper as `skills/pixellab-pip/assets/bark.wav`. Running `bark` or `bark on` plays the sound immediately when bark ends up on, which doubles as a sound test. If the helper cannot run, Pip falls back to a native system success or alert sound instead of passing an audio file path to the app.
+
+#### Auto
+
+```text
+/pixellab-pip auto
+@pixellab-pip auto
+$pixellab-pip auto
+/pixellab-pip auto on
+/pixellab-pip auto off
+```
+
+Toggles whether Pip asks before spending credits. Auto is **off** by default: right before the first paid PixelLab call of a job, Pip shows every call it plans to make, the exact wording it will send, and a rough total cost, then asks once — approve, change anything, or decline. Reply `auto` to that prompt (or run the command) to turn Auto on and continue without stopping. With Auto on, Pip skips the check and instead shows a one-line reminder of how to turn it back off. The check is a single up-front gate, not a prompt between each step. Auto never overrides an explicit "ask me first" instruction or Pip's confirmation before deleting or overwriting remote assets. The setting persists in `skills/pixellab-pip/pixellab-pip.json` next to `SKILL.md` (the same file bark uses), with an exact user-config fallback if that directory is read-only.
 
 ## Setup MCP / API
 
