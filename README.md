@@ -64,7 +64,17 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 Easiest for most people — your agent picks the right marketplace, plugin, extension, or skill method for its own platform. Ask your local coding agent:
 
 ```text
-Install the PixelLab Pip plugin / extension / Agent Skill from https://github.com/Shilo/pixellab-pip. First read the install steps at https://github.com/Shilo/pixellab-pip#install, then install it with whatever method fits you — marketplace, plugin, or extension if you support one, otherwise copy the whole skill folder (every file inside `skills/pixellab-pip/`, not just `SKILL.md`) into my skills directory as shown in the Manual Skill Install steps — preferring marketplace install/update over copying files. If a pre-v1.0 version is already installed under a `pixellab-pip` marketplace, remove it first, then install fresh. Then run the PixelLab Pip setup command (for example `/pixellab-pip setup`), and tell me about any blockers, whether I need to restart or reload first, and when it is ready to use.
+Install the PixelLab Pip plugin / extension / Agent Skill from
+https://github.com/Shilo/pixellab-pip. First read the install steps at
+https://github.com/Shilo/pixellab-pip#install, then install it with whatever
+method fits you — marketplace, plugin, or extension if you support one,
+otherwise copy the whole skill folder (every file inside `skills/pixellab-pip/`,
+not just `SKILL.md`) into my skills directory as shown in the Manual Skill
+Install steps — preferring marketplace install/update over copying files. If a
+pre-v1.0 version is already installed under a `pixellab-pip` marketplace, remove
+it first, then install fresh. Then run the PixelLab Pip setup command (for
+example `/pixellab-pip setup`), and tell me about any blockers, whether I need
+to restart or reload first, and when it is ready to use.
 ```
 
 ### Upgrading from a pre-v1.0 install
