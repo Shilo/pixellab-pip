@@ -35,7 +35,21 @@ Post a short, readable **Markdown** approval message — render it, do not wrap 
 
 For prompt text, show what will actually be sent: if you enhanced it agent-side, show the enhanced value; if you are using inline `enhance_prompt` (server-side refinement), show the literal prompt and note PixelLab will refine it — never run a separate paid enhancer before the gate just to populate it.
 
-The user approves both the spend and how each call is set up, so show enough of each call to judge that. End with one short question that infers the choices — approve, change anything, or decline — and one quiet one-line tip about autonomous runs. Keep keywords in backticks or bold so they stand out; keep the tip from overpowering the message. Illustrative shape (wording and fields vary per job):
+The user approves both the spend and how each call is set up, so show enough of each call to judge that. Use the template below every time so the message stays predictable to read: keep the header, closing question, and tip lines **verbatim** (only the generation count changes); fill and repeat the numbered call block, one entry per predicted paid call. Keep keywords in backticks or bold so they stand out, and the tip quiet.
+
+Template:
+
+> **Approve this PixelLab run?** — about **{N} generations** *(credits if the generation balance is used up)*.
+>
+> 1. **`{tool or endpoint}`** · {surface} · {mode/key notes} · ~{cost}
+>    - `{long prompt/description}`: "{exact text to send}" *(flag `(enhanced)` or `(rerouted)` if you changed it)*
+>    - `{short param}`: {value} · `{short param}`: {value}  — group short inputs on one line
+> 2. …one numbered entry per predicted paid call…
+>
+> Reply **approve** to run, say what to change, or **no** to stop.
+> *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
+
+Filled example:
 
 > **Approve this PixelLab run?** — about **3 generations** *(credits if the generation balance is used up)*.
 >
