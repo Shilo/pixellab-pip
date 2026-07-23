@@ -114,6 +114,30 @@ Use Cursor's plugin marketplace or team marketplace flow when available, or inst
 /pixellab-pip setup
 ```
 
+#### Antigravity
+
+Pip is best installed as a native Agent Skill in Antigravity because it does not need bundled rules, hooks, sidecars, or a credential-bearing MCP config. Copy the entire `skills/pixellab-pip/` directory, including every reference, helper, asset, blueprint, and config file it contains. The paths below show where the copied directory's top-level `SKILL.md` must land; keep all of its sibling files and folders with it:
+
+```text
+Antigravity IDE / 2.0 workspace: <workspace-root>/.agents/skills/pixellab-pip/SKILL.md
+Antigravity IDE / 2.0 global:    ~/.gemini/antigravity/skills/pixellab-pip/SKILL.md
+Antigravity CLI workspace:       <workspace-root>/.agents/skills/pixellab-pip/SKILL.md
+Antigravity CLI global:          ~/.gemini/antigravity-cli/skills/pixellab-pip/SKILL.md
+```
+
+Restart or reload Antigravity, then ask it to use `pixellab-pip` for setup. In Antigravity CLI, `/pixellab-pip setup` invokes the installed skill. The setup wizard supports Antigravity's MCP UI, global and workspace `mcp_config.json`, required remote `serverUrl` schema, and separate REST v2 fallback readiness.
+
+Antigravity IDE and 2.0 also support a custom-plugin folder. If you specifically want the plugin wrapper, clone or copy the whole repository so its root `plugin.json` lands at one of these locations:
+
+```text
+~/.gemini/config/plugins/pixellab-pip/plugin.json
+<workspace-root>/.agents/plugins/pixellab-pip/plugin.json
+```
+
+The root `plugin.json` is the IDE/2.0 plugin marker and `skills/pixellab-pip/SKILL.md` is its packaged skill. Do not use that shared manifest as an Antigravity CLI native plugin manifest: Antigravity CLI's stricter schema allows only `$schema`, `name`, and `description`, while this repository's root manifest also serves other plugin ecosystems. Antigravity does not document a third-party marketplace manifest: its UI marketplace is for bundled Google plugins, while custom plugins use the folders above. The repository's `.agents/plugins/marketplace.json` belongs to the separate VS Code Agent Plugins format and is not used for Antigravity.
+
+Pip intentionally does not bundle an Antigravity `mcp_config.json`: PixelLab MCP requires a private bearer token, and Antigravity does not document environment-variable expansion in custom HTTP headers. `/pixellab-pip setup` gives a token-free MCP preview and guides the user through credential completion after approval, then separately checks `PIXELLAB_SECRET` for REST v2 fallback.
+
 #### Gemini CLI
 
 Install:
