@@ -5,9 +5,9 @@
 # PixelLab Pip
 
 [![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
-[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F1.0.0&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
-[![VirusTotal](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F1.0.0&query=%24.version.security.scanners.vt.normalizedStatus&label=VirusTotal&color=2ea44f&logo=virustotal&logoColor=white&cacheSeconds=3600)](https://www.virustotal.com/gui/file-analysis/NTlkNDdhNmE4MzdlMmRiNzRjNTc3NmM5MTM5YTExNjA6MTc4NDc5NjAzNA==/detection)
-[![Build Provenance attested](https://img.shields.io/badge/Build_Provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations/36720233)
+[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F1.1.0&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
+[![VirusTotal](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F1.1.0&query=%24.version.security.scanners.vt.normalizedStatus&label=VirusTotal&color=2ea44f&logo=virustotal&logoColor=white&cacheSeconds=3600)](https://www.virustotal.com/gui/file-analysis/YzJmODVkNmJhZjY0OTk5YmJjMzk0ZDBjNTNjOTU5ZmI6MTc4NDgxNjA1MQ==/detection)
+[![Build Provenance attested](https://img.shields.io/badge/Build_Provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations/36772511)
 
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
 
