@@ -23,10 +23,8 @@ Use the app's documented mechanism; if unsure of exact syntax, check its help/re
 - **GitHub Copilot CLI**: `copilot plugin uninstall pixellab-pip@pixellab-pip-plugins`.
 - **Cursor**: `cursor-agent plugin marketplace remove pixellab-pip-plugins`, or delete the copied skill folder (`.cursor/skills/pixellab-pip`).
 - **Antigravity CLI**: `agy plugin uninstall pixellab-pip`, or delete the skill folder (e.g. `~/.gemini/antigravity-cli/skills/pixellab-pip`).
-- **OpenCode, Deep Code, Antigravity IDE/2.0, VS Code, or any manual skill-copy install**: delete the `pixellab-pip` skill folder from the skills directory the agent reads — e.g. `.opencode/skills/pixellab-pip`, `~/.agents/skills/pixellab-pip`, `.claude/skills/pixellab-pip`, `.cursor/skills/pixellab-pip`. If Pip was installed as an Antigravity plugin, delete the `pixellab-pip` plugin folder instead (e.g. `~/.gemini/config/plugins/pixellab-pip`).
+- **OpenCode, Deep Code, Antigravity IDE/2.0, VS Code, or any manual skill-copy install**: delete the `pixellab-pip` skill folder from the skills directory the agent reads — e.g. `.opencode/skills/pixellab-pip`, `~/.agents/skills/pixellab-pip`, `.claude/skills/pixellab-pip`, `.cursor/skills/pixellab-pip`. If Pip was installed as an Antigravity custom plugin, delete its `pixellab-pip` plugin folder from Antigravity's plugins directory instead.
 - **Any other named app**: use its documented plugin/extension uninstall command, or delete the copied skill folder. Do not invent syntax.
-
-Pre-v1.0 installs used a marketplace named `pixellab-pip` (not `pixellab-pip-plugins`) — an old install removes under the old names (e.g. `/plugin uninstall pixellab-pip@pixellab-pip` and `/plugin marketplace remove pixellab-pip`).
 
 ## 3. Confirm before removing
 
