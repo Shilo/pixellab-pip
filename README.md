@@ -66,15 +66,16 @@ Easiest for most people — your agent picks the right marketplace, plugin, exte
 ```text
 Install the PixelLab Pip plugin / extension / Agent Skill from
 https://github.com/Shilo/pixellab-pip. First read the install steps at
-https://github.com/Shilo/pixellab-pip#install, then install it with whatever
-method fits you — marketplace, plugin, or extension if you support one,
-otherwise copy the whole skill folder (every file inside `skills/pixellab-pip/`,
-not just `SKILL.md`) into my skills directory as shown in the Manual Skill
-Install steps — preferring marketplace install/update over copying files. If a
-pre-v1.0 version is already installed under a `pixellab-pip` marketplace, remove
-it first, then install fresh. Then run the PixelLab Pip setup command (for
-example `/pixellab-pip setup`), and tell me about any blockers, whether I need
-to restart or reload first, and when it is ready to use.
+https://github.com/Shilo/pixellab-pip#install. If a pre-v1.0 version is already
+installed under a `pixellab-pip` marketplace, remove it first. Then install it
+using whichever method your platform supports, preferring a marketplace,
+plugin, or extension over copying files, and non-interactive CLI commands over
+interactive ones you cannot type yourself. If you do copy the skill, copy the
+whole `skills/pixellab-pip/` folder, not just `SKILL.md`, into my skills
+directory as shown in the Manual Skill Install steps. Finally, run
+the PixelLab Pip setup command (for example `/pixellab-pip setup`), and tell me
+about any blockers, whether I need to restart or reload first, and when it is
+ready to use.
 ```
 
 ### Upgrading from a pre-v1.0 install
@@ -82,11 +83,11 @@ to restart or reload first, and when it is ready to use.
 Pre-v1.0 used the `pixellab-pip` marketplace; v1.0 uses `pixellab-pip-plugins`. Do a one-time clean reinstall (a normal update won't switch marketplaces). Easiest: re-run the [Agent-Assisted Install](#agent-assisted-install-recommended) above. Or manually — remove the old, install the new:
 
 ```text
-# Claude Code
-/plugin uninstall pixellab-pip@pixellab-pip
-/plugin marketplace remove pixellab-pip
-/plugin marketplace add Shilo/pixellab-pip
-/plugin install pixellab-pip@pixellab-pip-plugins
+# Claude Code (terminal CLI; in-session, use the /plugin … equivalents)
+claude plugin uninstall pixellab-pip@pixellab-pip
+claude plugin marketplace remove pixellab-pip
+claude plugin marketplace add Shilo/pixellab-pip
+claude plugin install pixellab-pip@pixellab-pip-plugins
 
 # Codex
 codex plugin remove pixellab-pip@pixellab-pip
@@ -111,11 +112,27 @@ Install:
 /pixellab-pip setup
 ```
 
+Or from a terminal:
+
+```text
+claude plugin marketplace add Shilo/pixellab-pip
+claude plugin install pixellab-pip@pixellab-pip-plugins
+```
+
+Then reload and run `/pixellab-pip setup` in Claude Code.
+
 Update:
 
 ```text
 /plugin marketplace update pixellab-pip-plugins
 /plugin update pixellab-pip@pixellab-pip-plugins
+```
+
+Or from a terminal:
+
+```text
+claude plugin marketplace update pixellab-pip-plugins
+claude plugin update pixellab-pip@pixellab-pip-plugins
 ```
 
 #### Codex
@@ -138,7 +155,7 @@ codex plugin add pixellab-pip@pixellab-pip-plugins
 
 #### Cursor
 
-Use Cursor's plugin marketplace or team marketplace flow when available, or install the raw skill manually.
+Use Cursor's plugin marketplace or team marketplace flow when available, or [install the raw skill manually](#manual-skill-install).
 
 ```text
 /pixellab-pip setup
@@ -203,7 +220,7 @@ copilot plugin update pixellab-pip
 
 #### VS Code Agent Plugins
 
-Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin marketplace flow.
+Use **Chat: Install Plugin From Source** with this repo URL or VS Code's plugin marketplace flow, or [install the skill manually](#manual-skill-install).
 
 ```text
 /pixellab-pip setup
