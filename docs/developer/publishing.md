@@ -18,9 +18,8 @@ Pip is a SKILL.md skill, so these apply. Each is free and does not currently lis
 - [x] **heilcheng/awesome-agent-skills** — ~6k★. Submitted to Community Skills → Development and Testing: [PR #370](https://github.com/heilcheng/awesome-agent-skills/pull/370) (pending review).
 - [ ] **VoltAgent/awesome-agent-skills** — 28.9k★, ~1,500 skills. **On hold — do not submit yet.** Its `CONTRIBUTING.md` explicitly rejects brand-new skills ("Brand new skills that were just created are not accepted. Give your skill time to mature and gain users"). Pip is currently ~12★ / ~1 tracked install. Revisit once installs grow; entry format is `- **[Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip)** — <=10-word desc` under Community Skills → Development and Testing.
 
-**Medium traffic — only because each is a low-effort paste-URL form or CLI:**
+**Medium traffic — only because each is a low-effort paste-URL form:**
 
-- [ ] **Smithery (skills)** — https://smithery.ai/skills — accepts plain SKILL.md skills via the `smithery-ai/cli` publish command. Medium–High reach; could later be automated in the release workflow like ClawHub.
 - [ ] **LobeHub skills** — listed at https://lobehub.com/skills; submit by pasting the repo URL (import scrapes SKILL.md). Verify the current submit path on the site before relying on it.
 - [ ] **ClaudeSkills.info** — https://claudeskills.info/submit/ — form + light moderation.
 - [ ] **awesomeskill.ai** — https://awesomeskill.ai/submit — form, ~48h review.
@@ -48,6 +47,7 @@ These pull from GitHub or ClawHub on their own. A GitHub release *is* the publis
 | **awesomeskills.dev** — /en/skill/shilo-pixellab-pip | **Live.** Display card is a snapshot frozen at submit; the *install* it hands out targets your GitHub live. Optional lever: re-paste the URL at /en/submit only after a major description rewrite. |
 | **SkillsMP** — skillsmp.com/creators/shilo | **Live**, auto-indexed from the public repo. |
 | **skills.sh** — /shilo/pixellab-pip/pixellab-pip | Auto-listed via install telemetry; grows with installs, not submission. Metadata is a snapshot it derives itself — not controllable. |
+| **Smithery skills** — smithery.ai/skills | **No skill-publish command exists** — its CLI `publish` is MCP-server-only. Skills are discovered from GitHub (the `agent-skill`/`agent-skills` topic). Passive: nothing to submit, nothing to automate. |
 | **FindSkills / SkillsMD / claudemarketplaces.com / quemsah/awesome-claude-plugins** | Passive scrapers; they index off the repo (several off the `agent-skills` topic) and metrics. Keep the repo topics on and they appear on their own. |
 
 **Keep these repo topics on** so the scrapers keep finding Pip: `agent-skills` and `gemini-cli-extension` (both present).
