@@ -13,6 +13,8 @@ Last reviewed: 2026-07-05.
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
 - [Skill Benchmark: Routing and Cost](#skill-benchmark-routing-and-cost)
+- [Reference Files](#reference-files)
+- [Skill File Sizing](#skill-file-sizing)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
 
@@ -245,6 +247,18 @@ The published report at [docs/pixellab-pip-benchmark.md](pixellab-pip-benchmark.
 The `full` preset is exhaustive but **spends no PixelLab credits** (every scenario is dry). At its default `-Reps 1` it runs 3 agents x 4 variants x 20 scenarios = 240 agent calls — cells run sequentially at ~30 s median, so budget **~2 hours per rep**; `-Reps 2` doubles that to 480 calls and ~4 hours, and more than 2 reps is rarely worth the wall-clock. Its only cost is agent-provider tokens — on the order of a million-plus input tokens per proprietary-model agent per rep; deepseek-v4-pro via OpenCode is far cheaper. Scope with `--scenarios` for quick checks. (Both the raw `skill_benchmark.py --reps` default and the launcher's `-Reps` default are 1.)
 
 All 20 scenarios are dry routing checks — the agent names the route it would take and deterministic regexes score only the **exact** correct tool. They span the full Intent Router surface: all 6 [showcase](showcase/README.md) results (icon/tile **sheets** routing to REST `generate-image-v2` where a pure-MCP agent tends to pick `create_ui_asset`/`create_tiles_pro`, the tiles-vs-tileset distinction, local 1-bit/palette recolor as Aseprite processing, the modular GUI kit, the animated character) plus the routes that separate the skill from the docs: standalone objects, REST-only backgrounds (no MCP tool exists — the sharpest docs blind spot), fonts, isometric tiles, sidescroller tilesets, balance checks, blueprint replay, the skeleton pipeline, setup, cost routing, background-removal fallback, the refusal floor, and the paperdoll trap (a fitted addition is an edit on the base frame, not object generation).
+
+## Reference Files
+
+How Pip's progressive-discovery reference system works, the rules every `references/*.md` must follow (one level deep, relative paths, TOC over 100 lines, one canonical home per rule), the cross-client path-resolution caveat behind those rules, and every external source. Sizing lives in its own guide below.
+
+Full guide: [Reference Files](developer/reference-files.md).
+
+## Skill File Sizing
+
+Recommended lengths (lines/tokens) for `SKILL.md` and every `references/*.md`, the authorities behind them, current measurements, and what to do when a file is over. Sizing is a maintainer review signal, not a CI gate.
+
+Full guide: [Skill File Sizing](developer/skill-file-sizing.md).
 
 ## Tileset Research Notes
 
