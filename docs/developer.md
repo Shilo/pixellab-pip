@@ -15,6 +15,7 @@ Last reviewed: 2026-07-05.
 - [Skill Benchmark: Routing and Cost](#skill-benchmark-routing-and-cost)
 - [Reference Files](#reference-files)
 - [Skill File Sizing](#skill-file-sizing)
+- [Publishing](#publishing)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
 
@@ -259,6 +260,12 @@ Full guide: [Reference Files](developer/reference-files.md).
 Recommended lengths (lines/tokens) for `SKILL.md` and every `references/*.md`, the authorities behind them, current measurements, and what to do when a file is over. Sizing is a maintainer review signal, not a CI gate.
 
 Full guide: [Skill File Sizing](developer/skill-file-sizing.md).
+
+## Publishing
+
+Where to list Pip for discovery as both an Agent Skill and an Agent Plugin, prioritized by traffic and effort: which registries auto-index from the repo, which are worth a one-time manual submit or PR, and which are deliberately excluded. Only ClawHub publishes per-release (already automated in [release-skill.yml](../.github/workflows/release-skill.yml)); everything else pulls from GitHub.
+
+Full guide: [Publishing checklist](developer/publishing.md).
 
 ## Tileset Research Notes
 
