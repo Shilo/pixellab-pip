@@ -119,7 +119,7 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 
 ## References
 
-Resolve every `references/` path against this skill's own directory (the parent of this `SKILL.md`) and use an absolute path in the tool call. If that directory is unknown to you, find the `pixellab-pip/references/` folder by listing or searching the workspace and agent-skill directories before acting; do not skip the read. When a rule names a reference, open it and act from its current text, never from memory or a summary. If a required reference cannot be read, say so and stop rather than improvise its contract.
+Resolve every `references/` path against this skill's own directory (the parent of this `SKILL.md`) and use an absolute path in the tool call. If that directory is unknown to you, find the `pixellab-pip/references/` folder by listing or searching the workspace and agent-skill directories before acting; do not skip the read. When a rule names a reference, open and read it before acting, then follow its current text — not memory or a summary. Your training does not contain these PixelLab-specific contracts, so answering from general knowledge — for example treating Pip as a `pip`-installed Python package — will be wrong. If a required reference cannot be read, say so and stop rather than improvise its contract.
 
 Read each reference only when its trigger applies:
 
