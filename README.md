@@ -175,11 +175,11 @@ Workspace: <workspace-root>/.agents/plugins/pixellab-pip/plugin.json
 2. **Native Agent Skill — fallback or Antigravity CLI.** Copy the entire `skills/pixellab-pip/` directory, including all references, helpers, assets, blueprints, and config files, so its top-level `SKILL.md` lands at the matching path:
 
 ```text
-Antigravity IDE / 2.0 workspace: <workspace-root>/.agents/skills/pixellab-pip/SKILL.md
-Antigravity IDE / 2.0 global:    ~/.gemini/antigravity/skills/pixellab-pip/SKILL.md
-Antigravity CLI workspace:       <workspace-root>/.agents/skills/pixellab-pip/SKILL.md
-Antigravity CLI global:          ~/.gemini/antigravity-cli/skills/pixellab-pip/SKILL.md
+Any Antigravity workspace: <workspace-root>/.agents/skills/pixellab-pip/SKILL.md
+Any Antigravity global:     ~/.gemini/config/skills/pixellab-pip/SKILL.md
 ```
+
+Prefer the workspace path; it is scanned by every Antigravity flavor (base `agy`, the CLI, and the IDE). For a global install use `~/.gemini/config/skills/` — it is the only global directory read by all of them. Other `~/.gemini/*/skills/` locations (such as `antigravity/skills/` or `antigravity-cli/skills/`) are read by some flavors but not others, so a skill placed there can appear to vanish when you switch flavor. Install a real directory, not a symlink — Antigravity's skill scan does not follow symlinks (and likely not Windows junctions), so a linked install is silently skipped with no error.
 
 The plugin form is a packaging convenience, not a requirement for Pip's behavior. Antigravity does not document a third-party marketplace manifest, so do not use the repository's `.agents/plugins/marketplace.json`; that file belongs to the separate VS Code Agent Plugins format. Also do not install the repository root as an Antigravity CLI plugin because its strict manifest schema is incompatible with the shared root manifest. Restart or reload Antigravity after either supported install, then ask it to use `pixellab-pip` for setup. In Antigravity CLI, `/pixellab-pip setup` invokes the installed skill. The setup wizard supports Antigravity's MCP UI, global and workspace `mcp_config.json`, required remote `serverUrl` schema, and separate REST v2 fallback readiness.
 
