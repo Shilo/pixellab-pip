@@ -14,9 +14,9 @@ Pip is a SKILL.md skill, so these apply. Each is free and does not currently lis
 
 **High traffic — do regardless of effort (PRs):**
 
-- [ ] **ComposioHQ/awesome-claude-skills** — ~70k★ (Composio brand). PR adding an entry per its `CONTRIBUTING.md`. Highest reach.
-- [ ] **VoltAgent/awesome-agent-skills** — 28.9k★, ~1,500 skills. PR: add `- **[Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip)** — <=10-word desc` to the right category. Note: the list favors skills with usage traction, so a brand-new entry may be deferred — submit anyway, re-try after installs grow.
-- [ ] **heilcheng/awesome-agent-skills** — ~6k★. Fork → edit per `CONTRIBUTING.md` → PR.
+- [x] **ComposioHQ/awesome-claude-skills** — ~70k★ (Composio brand). Submitted as a link entry in Development: [PR #1436](https://github.com/ComposioHQ/awesome-claude-skills/pull/1436) (pending review).
+- [x] **heilcheng/awesome-agent-skills** — ~6k★. Submitted to Community Skills → Development and Testing: [PR #370](https://github.com/heilcheng/awesome-agent-skills/pull/370) (pending review).
+- [ ] **VoltAgent/awesome-agent-skills** — 28.9k★, ~1,500 skills. **On hold — do not submit yet.** Its `CONTRIBUTING.md` explicitly rejects brand-new skills ("Brand new skills that were just created are not accepted. Give your skill time to mature and gain users"). Pip is currently ~12★ / ~1 tracked install. Revisit once installs grow; entry format is `- **[Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip)** — <=10-word desc` under Community Skills → Development and Testing.
 
 **Medium traffic — only because each is a low-effort paste-URL form or CLI:**
 
