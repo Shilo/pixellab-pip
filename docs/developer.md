@@ -15,6 +15,7 @@ Last reviewed: 2026-07-05.
 - [Skill Benchmark: Routing and Cost](#skill-benchmark-routing-and-cost)
 - [Reference Files](#reference-files)
 - [Skill File Sizing](#skill-file-sizing)
+- [TODO ↗](developer/todo.md)
 - [Publishing](#publishing)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
