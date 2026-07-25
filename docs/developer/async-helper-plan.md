@@ -131,6 +131,14 @@ the user babysitting a "ask me to check back later" handoff. Keep that boundary 
 - **Rate limits & expiry.** Honor `429`/`529` + `Retry-After`; MCP download URLs and map objects can
   expire (map objects auto-delete after 8h) — retrieve promptly and re-fetch stale URLs via the getter,
   per `references/job-lifecycle.md`.
+- **Implement it scanner-safe (if it ships in the skill).** A network+secret+file executable WILL be
+  scanned (SkillSpector/ClawHub/VirusTotal/provenance). Build it to read as by-design, like the existing
+  `assets/bark.py` / `assets/background_removal.py`: read `PIXELLAB_SECRET` only from the environment and
+  never print/log it; no `eval`/`exec`/dynamic-code or obfuscation; no shell-out to untrusted input; a
+  clear top-of-file docstring stating purpose and exact network scope (`api.pixellab.ai` + the returned
+  asset URLs only); minimal, auditable dependencies (prefer stdlib). Then run the repo security scan and
+  QA, expect a few by-design findings, and prepare a short per-finding dismissal rationale (as the repo
+  already does). Getting flagged is fine; getting flagged for something avoidable is not.
 
 ## What is only ENCOURAGEMENT (weigh it, override it freely)
 

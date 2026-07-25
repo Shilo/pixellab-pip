@@ -14,12 +14,20 @@ and Codex tolerate this (longer turns / background-task notifications); Antigrav
 During testing this was worked around with a gitignored `.local/poll_download.py` crutch. That is not
 shipped, so real users hit the gap.
 
-**Scope (post-fix).** SKILL.md step 12 now makes the *agent* write bark/manifest/blueprint after a
-job's generations finish — that obligation-skip is handled by wording and does NOT need this helper.
-This helper is specifically about **retrieving async results and autonomy**: completing async jobs (and
-chains) so their assets land on disk without a manual "ask me to check back later." Whether it's even
-needed depends on whether the step-12/job-lifecycle wording already makes short-turn agents wait via a
-background task — confirm that first; build this for the residual pause/abandon gap it doesn't cover.
+**Scope (post-fix): what wording already covers, and the residual this helper is for.** Two wording
+fixes now handle the common cases pre-helper: (a) SKILL.md step 12 makes the agent write
+bark/manifest/blueprint after a job's generations; (b) `references/job-lifecycle.md` now says **poll to
+completion with your own tools, or a bounded background wait that resumes you — never stop at a
+"reasonable wait" and hand back**, so a capable agent should no longer pause casually (it uses the
+agent's own tools + the harness's background mechanism, no shipped helper).
+
+What wording CANNOT guarantee, and this helper is for:
+- **Reliability of retrieval** — correct image extraction across every response shape (base64/URL/raw-RGBA/quantized/ttf/tiles), no dropped jobs. Agents hand-rolling their own pollers get this wrong repeatedly.
+- **A harness that can neither hold the turn nor resume the agent** — wording there can only produce a clean handoff, never true "don't stop." Honest limit; a helper/background daemon may close part of it, a truly locked harness cannot.
+- **Continuing a chain** (create→animate) after a background completion — see the caveat below; may not be fully solvable by a download helper alone.
+
+Confirm with an **unscaffolded** test whether the job-lifecycle wording alone now stops the pause; build
+this for the residual it can't reach.
 
 **Full build plan + enforced process (run it later):** [`async-helper-plan.md`](async-helper-plan.md).
 Known hard caveats (chained autonomy, review status, validation credit cost, no-Python/no-shell, rate
