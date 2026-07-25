@@ -40,15 +40,7 @@ Persist bark state in `pixellab-pip.json` next to this skill's `SKILL.md`:
 }
 ```
 
-Precedence: skill-local `pixellab-pip.json` is authoritative whenever it can be written. If the skill directory is read-only, fall back to the exact user-config path for the current OS:
-
-- Windows: `%APPDATA%\pixellab-pip\pixellab-pip.json`
-- macOS: `~/Library/Application Support/pixellab-pip/pixellab-pip.json`
-- Linux: `${XDG_CONFIG_HOME:-~/.config}/pixellab-pip/pixellab-pip.json`
-
-The user-config path is only a read fallback when no valid skill-local config exists, and a write fallback when skill-local persistence fails. Do not scan broad config, home, shell, credential, or project directories. An update or reinstall that replaces the skill directory may reset skill-local config to default-on.
-
-When the user runs `bark`, `bark on`, or `bark off`, write the valid shape above to skill-local config first; if that write fails, write the exact user-config fallback path. If both writes fail, say the setting could not be saved persistently and do not claim it changed. Do not rewrite config during normal generation completion. Preserve the file's other keys — notably `auto` — when changing `bark` if the available file-editing tools make that practical; if they truly cannot, write at least `bark` and any existing `auto` value.
+The helper writes `bark` to this file atomically, preserving the other key (notably `auto`), and uses an OS user-config location only when the skill directory is read-only. Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts. If Python is unavailable, hand-write `bark` as a boolean here, preserving `auto`, and do not scan other config, home, shell, credential, or project directories for it. Do not rewrite config during normal generation completion. If persistence fails everywhere, say the setting could not be saved and do not claim it changed. A reinstall that replaces the skill directory may reset skill-local config to default-on.
 
 ## When To Play
 
