@@ -71,11 +71,17 @@ Handle the reply by intent, not literal tokens — infer what the user means fro
 
 Ask only once. After approval, run the whole approved chain without re-gating. If the plan later turns into a paid call the user did not approve — a different route, an extra retry or candidate, a batch expansion — that new spend needs its own brief approval. Free or local work (downloads, assembly, verification, balance/status reads, and the like) is never gated.
 
-### When auto is on — run, but remind
+### When auto is on — run, but show what's happening
 
-Skip the approval message. Once, early (before or at the first paid call), post a single quiet Markdown line that auto is on and how to turn it off, then proceed:
+Don't pause and don't gate per call, but still show the plan. Once, early (before or at the first paid call), post the same numbered list of predicted paid calls as the off-mode message above — identical per-call inputs, rough per-call and total cost, `(enhanced)`/`(rerouted)` flags, and the same localization rules. Only the framing changes: the ⚡ auto header replaces the 💳 approval header, the reply prompt is dropped, and a disable tip replaces the enable tip. Then run the whole chain without re-prompting.
 
-> ⚡ *Auto is on — running this job without a cost check. Disable anytime with `/pixellab-pip auto`.*
+Template — reuse the off-mode numbered blocks verbatim; only the header and footer differ:
+
+> ⚡ **Auto is on — running PixelLab job(s)** — **~{N} generations** *(or credits)*.
+>
+> {off-mode numbered per-call blocks, verbatim}
+>
+> *Disable auto with `/pixellab-pip auto`.*
 
 ## Scope
 
