@@ -17,6 +17,28 @@ shipped, so real users hit the gap.
 **Task.** Design and ship a small, generic "works for every case" poll-and-download helper in the
 skill (alongside `assets/bark.py`, `assets/background_removal.py`), plus a no-Python fallback.
 
+**Autonomy is the real goal, and it IS achievable on Antigravity (not just Codex/Claude).** Observed
+in testing: Antigravity emits background-task-completion notifications and resumes the agent on them
+("Task id …/task-187 finished with result…") — the same re-invoke mechanism Codex/Claude use for
+autonomous waits. Yet in real use (user asked "create a slime, then animate it") Antigravity submitted
+the character job and **ended the turn with "ask me to check status in a few minutes"** — dumping the
+user into manual polling. That is the failure to eliminate: the skill promises an intuitive, autonomous
+workflow, and a bare handoff to manual status-checking breaks that promise. Root cause: the skill says
+"bounded background wait" (SKILL.md step 12) but ships no helper, so the agent falls to the last-resort
+manual handoff instead. Ship the helper AND make the intended pattern explicit:
+
+- Run the poller as a **background task** (not a blocking in-turn wait, not a manual handoff). On
+  harnesses that notify on task completion (Antigravity confirmed, Codex, Claude), the agent is
+  re-invoked when the job finishes and **continues the workflow on its own** — e.g. create character →
+  (notified) → animate → (notified) → report. The user should never be told "ask me to check later"
+  for a job the agent could have waited on in the background.
+- Support **chained multi-step workflows** end to end, not just single-job download: a create→animate
+  request must flow through create → poll → download → animate → poll → download → final report without
+  a manual resume. Either the helper drives the whole chain, or each step launches a background wait
+  whose completion notification resumes the agent to fire the next step.
+- Only fall back to a manual "resume with this ID" handoff when the harness genuinely cannot notify on
+  completion — and say so, rather than defaulting to it.
+
 **Requirements to brainstorm/validate:**
 
 - **Covers every async surface:** REST `background-jobs/{id}` and every MCP-managed getter
