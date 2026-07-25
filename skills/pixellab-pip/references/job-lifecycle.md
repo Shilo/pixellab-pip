@@ -14,12 +14,12 @@ Any wait that runs outside the current turn — a backgrounded poll loop, a log/
 
 Do not resubmit a paid job because a poll timed out or a `423`/`404`/`review`/stale-URL lookup came back — poll again or re-fetch with the matching getter instead.
 
-Handle statuses as:
+Detect completion by the result, not by matching a status word: `status` is a free-form string whose in-progress vocabulary is open and endpoint-specific (`processing`, `pending`, `running`, `finalizing`, … — not a fixed set), and the tileset family carries no `status` field at all. Check in this order:
 
-- Success: completed asset/result is available and the returned URL or local download verifies.
-- Review: user or agent selection is required before finalizing; do not call it completed.
-- Failed: report the failed status and error summary; do not retry paid work unless the user approves.
-- Pending/processing: keep the ID and continue polling later.
+- **Done** — the result payload is present: the asset/image/download/rotation URL is populated (e.g. a character's `rotation_urls` is null until done), or a tileset-family getter returns HTTP 200 (see the 423/404 note above). Verify the URL or local download.
+- **Failed** — `status: "failed"` or HTTP 410 (permanent). Report it; do not retry paid work unless the user approves.
+- **Review** — `status: "review"` (objects): selection is required; do not call it completed.
+- **Otherwise keep polling** — any in-progress status word, HTTP 423/404, or a value you do not recognize — bounded by a deadline (below). Never treat "the status isn't a word I listed" as done.
 
 ## MCP Managed Assets
 
