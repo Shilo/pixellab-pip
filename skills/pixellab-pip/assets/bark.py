@@ -221,7 +221,7 @@ def main() -> int:
             result["bark"] = bark_enabled()
         elif args.command == "auto":
             data, _, _ = read_config()
-            current = bool(data.get("auto", False))
+            current = data.get("auto") is True
             result["auto"] = not current
             result["config"] = str(write_config("auto", result["auto"]))
         elif args.command == "auto-on":
@@ -233,7 +233,7 @@ def main() -> int:
         elif args.command == "status":
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))
-            result["auto"] = bool(data.get("auto", False))
+            result["auto"] = data.get("auto") is True
             result["config"] = str(source) if source else None
             result["invalid_config"] = str(invalid_source) if invalid_source else None
     except Exception as exc:

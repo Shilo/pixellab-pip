@@ -4,7 +4,7 @@ Use this reference when the user runs a bark command, or when a live PixelLab jo
 
 ## Commands
 
-One word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` variants all work, whether the app passes it as an argument or as prose:
+One short word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` variants all work, whether the app passes it as an argument or as prose:
 
 ```text
 /pixellab-pip bark

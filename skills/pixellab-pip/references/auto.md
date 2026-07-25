@@ -4,7 +4,7 @@ Reference for the `auto` command and the cost-approval gate it governs. The gate
 
 ## Commands
 
-One word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` variants all work, whether the app passes it as an argument or as prose:
+One short word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` variants all work, whether the app passes it as an argument or as prose:
 
 ```text
 /pixellab-pip auto
