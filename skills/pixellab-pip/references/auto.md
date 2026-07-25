@@ -18,6 +18,16 @@ $pixellab-pip auto off
 
 `auto` is off by default: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.`
 
+## Config
+
+`pixellab-pip.json` holds a boolean per setting:
+
+```json
+{
+  "auto": false
+}
+```
+
 The helper writes `auto` to `pixellab-pip.json` beside `SKILL.md` atomically, preserving the other key (notably `bark`). Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, hand-write `auto` as a boolean in that file, preserving `bark`; if the skill directory is read-only, write instead to `pixellab-pip/pixellab-pip.json` inside the OS user-config dir (`%APPDATA%` on Windows, `~/Library/Application Support` on macOS, `${XDG_CONFIG_HOME:-~/.config}` on Linux) — where the helper also reads it. Do not scan other config, home, shell, credential, or project directories for it. Do not rewrite config except when the user runs an explicit `auto` command. If persistence fails everywhere, say the setting could not be saved and do not claim it changed.
 
 ## The cost-approval gate

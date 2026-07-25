@@ -4,7 +4,7 @@ Use this reference when the user runs a bark command, or when a live PixelLab jo
 
 ## Commands
 
-One short word after the skill trigger. Any of the `/`, `@`, `$` prefixes work, and `on`/`off` variants set state explicitly:
+One word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` variants all work, whether the app passes it as an argument or as prose:
 
 ```text
 /pixellab-pip bark
@@ -12,23 +12,13 @@ One short word after the skill trigger. Any of the `/`, `@`, `$` prefixes work, 
 $pixellab-pip bark off
 ```
 
-Some apps expose post-trigger text as structured arguments, others as normal prompt text; treat `bark`, `bark on`, and `bark off` the same either way.
+- `bark`: run `python assets/bark.py bark` (reads, flips, and persists the value).
+- `bark on`: run `python assets/bark.py on`.
+- `bark off`: run `python assets/bark.py off`.
 
-- `bark`: read the persisted state, toggle it, write the new state.
-- `bark on`: write `"bark": true`.
-- `bark off`: write `"bark": false`.
+`bark` is on by default: no config, no `bark` key, or a non-boolean value all mean on. After a successful write, reply `Bark is on.` or `Bark is off.` If the command enables bark, immediately play the sound so it also tests audio; if it disables bark, do not play.
 
-With the bundled helper, pass the same intent:
-
-```text
-python assets/bark.py bark
-python assets/bark.py on
-python assets/bark.py off
-```
-
-After a successful write, respond `Bark is on.` or `Bark is off.` If the command enables bark, immediately play the sound so it also tests audio; if it disables bark, do not play.
-
-Bark is on by default: no `pixellab-pip.json` — or invalid JSON with no valid fallback config — means bark is enabled for the current command. So a bare first-run `bark` usually toggles bark off and plays nothing; use `bark on` to test the sound without risking an off toggle.
+A bare first-run `bark` usually toggles bark off and plays nothing; use `bark on` to test the sound without risking an off toggle.
 
 ## Config
 
