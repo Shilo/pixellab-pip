@@ -55,9 +55,9 @@ Stays agent-agnostic and OS-agnostic until the app is named or detected. The com
 
 Tell the user to restart or reload to activate the updated version — many apps load plugins and skills at startup, so the running session keeps the old version until then; a few pick up the change live. Also restart if the new version does not appear.
 
-## 4. Verify after
+## 4. Verify and report the version
 
-Confirm the new version is active, agent-agnostic: use the app's plugin/extension list (e.g. `plugin list` showing the new version), or the app's own version display. For a skill-copy install, confirm the updated files landed at the install path. No credit spend and no secret handling here — this is a version check only.
+Must confirm the update landed and report the installed version number. Read the version from a plugin manifest's `version` field (`plugin.json`), or the app's plugin/extension list; confirm via that list, the app's version display, or (skill-copy) the files at the install path. Version check only — no credit spend, no secret handling.
 
 ## Update guardrails
 
