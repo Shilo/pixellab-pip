@@ -250,6 +250,30 @@ npm install -g @vegamo/deepcode-cli
 
 Open Deep Code's skill picker with `/` or type the skill name, then run PixelLab Pip setup.
 
+### CLI install with `npx skills` (skills.sh)
+
+The cross-agent [`npx skills`](https://www.skills.sh/shilo/pixellab-pip/pixellab-pip) CLI copies the whole skill into whichever agent you target — no marketplace needed. It works for Claude Code, Cursor, Codex, OpenCode, and any agent that reads a skills directory.
+
+Install (prompts for the agent and scope):
+
+```text
+npx skills add Shilo/pixellab-pip --skill pixellab-pip
+```
+
+Or non-interactively — pick the agent with `-a` (e.g. `claude-code`), use `-g` for a global install (omit for the current project), and `-y` to skip prompts:
+
+```text
+npx skills add Shilo/pixellab-pip --skill pixellab-pip -a claude-code -g -y
+```
+
+This copies `SKILL.md` plus its `references/`, `assets/`, and `blueprints/`. Then run `/pixellab-pip setup`.
+
+To run it once without installing (prints the skill's prompt to stdout):
+
+```text
+npx skills use Shilo/pixellab-pip --skill pixellab-pip
+```
+
 ### Manual Skill Install
 
 Manual install is useful for project-local setup or agent apps that support raw Agent Skills without plugin installation. Copy the contents of `skills/pixellab-pip/` into a folder named `pixellab-pip` inside your agent's skills directory, so `SKILL.md` is directly inside the final folder.
