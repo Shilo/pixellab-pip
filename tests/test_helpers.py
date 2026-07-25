@@ -108,6 +108,30 @@ class BarkConfigTests(unittest.TestCase):
             finally:
                 bark.SKILL_CONFIG = original_skill_config
 
+    def test_main_auto_toggle_flips_and_preserves_bark(self) -> None:
+        import io
+        from contextlib import redirect_stdout
+
+        with tempfile.TemporaryDirectory() as tmp:
+            original_skill_config = bark.SKILL_CONFIG
+            original_argv = sys.argv
+            try:
+                bark.SKILL_CONFIG = Path(tmp) / "pixellab-pip.json"
+                bark.SKILL_CONFIG.write_text('{"bark": true, "auto": true}\n', encoding="utf-8")
+
+                sys.argv = ["bark.py", "auto"]
+                out = io.StringIO()
+                with redirect_stdout(out):
+                    rc = bark.main()
+
+                self.assertEqual(rc, 0)
+                data = json.loads(bark.SKILL_CONFIG.read_text(encoding="utf-8"))
+                self.assertEqual(data, {"auto": False, "bark": True})
+                self.assertFalse(json.loads(out.getvalue())["auto"])
+            finally:
+                bark.SKILL_CONFIG = original_skill_config
+                sys.argv = original_argv
+
     def test_non_bool_skill_config_falls_back_to_valid_user_config(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             original_skill_config = bark.SKILL_CONFIG
