@@ -32,7 +32,7 @@ Bark is on by default: no `pixellab-pip.json` — or invalid JSON with no valid 
 
 ## Config
 
-Persist bark state in `pixellab-pip.json` next to this skill's `SKILL.md`:
+`pixellab-pip.json` holds a boolean per setting:
 
 ```json
 {
@@ -40,7 +40,7 @@ Persist bark state in `pixellab-pip.json` next to this skill's `SKILL.md`:
 }
 ```
 
-The helper writes `bark` to this file atomically, preserving the other key (notably `auto`), and uses an OS user-config location only when the skill directory is read-only. Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts. If Python is unavailable, hand-write `bark` as a boolean here, preserving `auto`, and do not scan other config, home, shell, credential, or project directories for it. Do not rewrite config during normal generation completion. If persistence fails everywhere, say the setting could not be saved and do not claim it changed. A reinstall that replaces the skill directory may reset skill-local config to default-on.
+The helper writes `bark` to `pixellab-pip.json` beside `SKILL.md` atomically, preserving the other key (notably `auto`). Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, hand-write `bark` as a boolean in that file, preserving `auto`; if the skill directory is read-only, write instead to `pixellab-pip/pixellab-pip.json` inside the OS user-config dir (`%APPDATA%` on Windows, `~/Library/Application Support` on macOS, `${XDG_CONFIG_HOME:-~/.config}` on Linux) — where the helper also reads it. Do not scan other config, home, shell, credential, or project directories for it. Do not rewrite config except when the user runs an explicit `bark` command. If persistence fails everywhere, say the setting could not be saved and do not claim it changed.
 
 ## When To Play
 
