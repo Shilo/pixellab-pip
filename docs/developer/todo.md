@@ -14,6 +14,17 @@ and Codex tolerate this (longer turns / background-task notifications); Antigrav
 During testing this was worked around with a gitignored `.local/poll_download.py` crutch. That is not
 shipped, so real users hit the gap.
 
+**Scope (post-fix).** SKILL.md step 12 now makes the *agent* write bark/manifest/blueprint after a
+job's generations finish — that obligation-skip is handled by wording and does NOT need this helper.
+This helper is specifically about **retrieving async results and autonomy**: completing async jobs (and
+chains) so their assets land on disk without a manual "ask me to check back later." Whether it's even
+needed depends on whether the step-12/job-lifecycle wording already makes short-turn agents wait via a
+background task — confirm that first; build this for the residual pause/abandon gap it doesn't cover.
+
+**Full build plan + enforced process (run it later):** [`async-helper-plan.md`](async-helper-plan.md).
+Known hard caveats (chained autonomy, review status, validation credit cost, no-Python/no-shell, rate
+limits/expiry) are enumerated there — read them before starting.
+
 **Task.** Design and ship a small, generic "works for every case" poll-and-download helper in the
 skill (alongside `assets/bark.py`, `assets/background_removal.py`), plus a no-Python fallback.
 
@@ -105,3 +116,23 @@ asset. Validate on Antigravity (the failing harness) and confirm no regression o
 **Prereqs:** run `superpowers:brainstorming` before building — this needs design exploration, not a
 rushed script. Then QA (`python dev-tools/qa.py`) and, if shipped as a skill asset, the media/security
 scan gates apply.
+
+## Handoff (paste to an agent when you're ready to build this)
+
+```text
+Read `docs/developer/async-helper-plan.md` in full, then follow its ENFORCED process exactly — but the design is yours to decide from evidence, not to inherit.
+
+You are designing and building a helper that lets any agent COMPLETE PixelLab async jobs (and chains) so their assets land on disk without abandoning them or dumping the user into manual status-checking. Note: SKILL.md step 12 already makes the agent WRITE bark/manifest/blueprint — this helper is NOT about that; it is about async retrieval and autonomy. Before writing any code:
+
+1. CHALLENGE the plan, `docs/developer/todo.md`, and the gitignored `.local/poll_download.py` prototype (if present) — interrogate them, do not obey. Write down what you reject and why. Do not inherit the prototype's choices by default.
+2. Brainstorm first (superpowers:brainstorming) — this is design work, not a rushed script.
+3. Do your OWN exhaustive research: the full REST OpenAPI (https://api.pixellab.ai/v2/openapi.json) — every endpoint's request AND response schema, sync vs async, where images live (base64/URL/raw-RGBA/quantized/rotation_urls/frame_urls/storage_urls/ttf/tiles); the MCP docs (https://api.pixellab.ai/mcp/docs) and every getter (asset-id vs job-id); real patterns in skills/pixellab-pip/blueprints/, docs/showcase/**/*.blueprint.json, and pixellab-pip-generations/**/{*.blueprint.json,manifest*.json} (blueprints are request recipes, not responses); and the skill contract in references/{job-lifecycle,usage-reporting,blueprint,reviewable-candidates}.md.
+4. Decide the design yourself and justify it (script vs not; script-first-when-available vs native-first; how jobs are discovered/auto-registered; how autonomy works per harness; language + no-runtime fallback). Write the rationale before coding, re-challenge after seeing the API evidence.
+5. It MUST work for every case (incl. review-status) and cause NO regressions — idempotent, no re-spend, no clobber, no fabrication; self-verify what it saved and cleanly DEFER to the agent on anything it can't handle. The helper must ALWAYS fall back (script -> native -> honest handoff), never hard-depend on any runtime/shell/harness feature. Minimize credit spend when validating (reuse existing completed job/asset IDs; generate the minimum). Keep `python dev-tools/qa.py` green.
+
+Address the "Known hard problems / caveats" in the plan explicitly (chained autonomy may not be fully solvable by a download helper alone; review status; validation credit cost; no-Python/no-shell; rate limits/expiry) — solve or honestly scope each out.
+
+Non-negotiables: the plan's process, and the outcome — every case works, nothing regresses, and the user never babysits a paid job the agent could have finished.
+
+Start by reading `docs/developer/async-helper-plan.md`, then challenge, research, design, build, prove.
+```
