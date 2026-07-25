@@ -86,11 +86,25 @@ class BarkConfigTests(unittest.TestCase):
                 bark.SKILL_CONFIG = Path(tmp) / "pixellab-pip.json"
                 bark.SKILL_CONFIG.write_text('{"other": 7, "bark": true}\n', encoding="utf-8")
 
-                written = bark.write_config(False)
+                written = bark.write_config("bark", False)
                 data = json.loads(written.read_text(encoding="utf-8"))
 
                 self.assertEqual(written, bark.SKILL_CONFIG)
                 self.assertEqual(data, {"bark": False, "other": 7})
+            finally:
+                bark.SKILL_CONFIG = original_skill_config
+
+    def test_write_config_auto_preserves_bark(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            original_skill_config = bark.SKILL_CONFIG
+            try:
+                bark.SKILL_CONFIG = Path(tmp) / "pixellab-pip.json"
+                bark.SKILL_CONFIG.write_text('{"bark": true}\n', encoding="utf-8")
+
+                written = bark.write_config("auto", True)
+                data = json.loads(written.read_text(encoding="utf-8"))
+
+                self.assertEqual(data, {"auto": True, "bark": True})
             finally:
                 bark.SKILL_CONFIG = original_skill_config
 

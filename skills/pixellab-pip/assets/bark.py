@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """PixelLab Pip bark helper.
 
-This helper is intentionally small and dependency-free. It keeps the bark
-configuration portable with the skill first, then falls back to a user config
-directory only when the installed skill directory is not writable.
+This helper is intentionally small and dependency-free. It keeps the bark and
+auto configuration portable with the skill first, then falls back to a user
+config directory only when the installed skill directory is not writable.
+Config writes are atomic and key-preserving so agents never hand-edit the JSON.
 """
 
 from __future__ import annotations
@@ -112,9 +113,9 @@ def write_text_atomic(path: Path, content: str) -> None:
             temp_path.unlink(missing_ok=True)
 
 
-def write_config(enabled: bool) -> Path:
+def write_config(key: str, enabled: bool) -> Path:
     existing, _, _ = read_config()
-    existing["bark"] = bool(enabled)
+    existing[key] = bool(enabled)
     content = json.dumps(existing, indent=2, sort_keys=True) + "\n"
 
     candidates = [SKILL_CONFIG]
@@ -190,7 +191,7 @@ def play_sound() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="PixelLab Pip bark helper")
-    parser.add_argument("command", choices=["status", "bark", "on", "off", "play"])
+    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off"])
     args = parser.parse_args()
 
     result: dict[str, Any] = {
@@ -204,23 +205,35 @@ def main() -> int:
     try:
         if args.command == "bark":
             result["bark"] = not bark_enabled()
-            result["config"] = str(write_config(bool(result["bark"])))
+            result["config"] = str(write_config("bark", bool(result["bark"])))
             if result["bark"]:
                 result["played"] = play_sound()
         elif args.command == "on":
             result["bark"] = True
-            result["config"] = str(write_config(True))
+            result["config"] = str(write_config("bark", True))
             result["played"] = play_sound()
         elif args.command == "off":
             result["bark"] = False
-            result["config"] = str(write_config(False))
+            result["config"] = str(write_config("bark", False))
         elif args.command == "play":
             if bark_enabled():
                 result["played"] = play_sound()
             result["bark"] = bark_enabled()
+        elif args.command == "auto":
+            data, _, _ = read_config()
+            current = bool(data.get("auto", False))
+            result["auto"] = not current
+            result["config"] = str(write_config("auto", result["auto"]))
+        elif args.command == "auto-on":
+            result["auto"] = True
+            result["config"] = str(write_config("auto", True))
+        elif args.command == "auto-off":
+            result["auto"] = False
+            result["config"] = str(write_config("auto", False))
         elif args.command == "status":
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))
+            result["auto"] = bool(data.get("auto", False))
             result["config"] = str(source) if source else None
             result["invalid_config"] = str(invalid_source) if invalid_source else None
     except Exception as exc:

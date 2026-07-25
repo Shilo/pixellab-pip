@@ -12,11 +12,11 @@ One word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` 
 $pixellab-pip auto off
 ```
 
-- `auto`: read the persisted state, toggle it, write the new state.
-- `auto on`: write `"auto": true`.
-- `auto off`: write `"auto": false`.
+- `auto`: run `python assets/bark.py auto` (reads, flips, and persists the value).
+- `auto on`: run `python assets/bark.py auto-on`.
+- `auto off`: run `python assets/bark.py auto-off`.
 
-Persist `auto` as a boolean in the same `pixellab-pip.json` that bark uses; follow the config location, precedence, read-only fallback, and field-preserving write rules in `references/bark.md`, writing `auto` without disturbing `bark`. Default is off: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.` If persistence fails everywhere, say it could not be saved and do not claim it changed.
+The helper writes `auto` in the same `pixellab-pip.json` bark uses, atomically and preserving `bark` — do not hand-edit the JSON, since the read-modify-write step is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, fall back to the field-preserving hand-write per `references/bark.md` (config location, precedence, read-only fallback). Default is off: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.` If persistence fails everywhere, say it could not be saved and do not claim it changed.
 
 ## The cost-approval gate
 
