@@ -17,6 +17,25 @@ shipped, so real users hit the gap.
 **Task.** Design and ship a small, generic "works for every case" poll-and-download helper in the
 skill (alongside `assets/bark.py`, `assets/background_removal.py`), plus a no-Python fallback.
 
+**Design principles (non-negotiable).** The helper exists to *streamline* jobs — it must never
+introduce regressions, double-spends, or new failure modes.
+
+- **Agent-agnostic.** No dependence on one harness's tools, paths, or quirks. It must work driven by
+  Claude Code, Codex, Antigravity, OpenCode, Gemini CLI, Cursor, or any Agent-Skills host, and degrade
+  gracefully to each harness's capabilities (background-task notifications where available, bounded
+  in-turn wait or manual resume where not). Nothing Windows-only or Python-only in the contract.
+- **Generic and complete — every case, no exceptions.** Handle every job type and every input/output
+  shape the skill can produce: sync and async; single image, multi-direction sets, animation frames,
+  rotations, tileset tiles, review candidates, spritesheets, ZIP bundles, fonts/TTF; images delivered
+  as base64 or as URLs; IDs that are asset IDs or job IDs; single jobs and chained multi-step
+  workflows. If a new PixelLab surface appears, the helper should extend by data (a getter mapping),
+  not by rewrite.
+- **Flexible and intuitive.** Simple to invoke with sensible defaults; self-describing; the agent
+  should not need to know internals. One obvious way to "finish everything pending."
+- **Safe / do-no-harm.** Idempotent and re-runnable: never re-spend credits on a completed job, never
+  clobber or mix existing outputs, never fabricate. Verify what it saved (real image, right place).
+  Failing loudly is acceptable; silently making things worse is not.
+
 **Autonomy is the real goal, and it IS achievable on Antigravity (not just Codex/Claude).** Observed
 in testing: Antigravity emits background-task-completion notifications and resumes the agent on them
 ("Task id …/task-187 finished with result…") — the same re-invoke mechanism Codex/Claude use for
