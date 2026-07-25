@@ -16,7 +16,7 @@ $pixellab-pip auto off
 - `auto on`: run `python assets/bark.py auto-on`.
 - `auto off`: run `python assets/bark.py auto-off`.
 
-The helper writes `auto` in the same `pixellab-pip.json` bark uses, atomically and preserving `bark` — do not hand-edit the JSON, since the read-modify-write step is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, fall back to the field-preserving hand-write per `references/bark.md` (config location, precedence, read-only fallback). Default is off: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.` If persistence fails everywhere, say it could not be saved and do not claim it changed.
+The helper writes `auto` in the same `pixellab-pip.json` that stores `bark`, atomically — do not hand-edit the JSON, since the read-modify-write step is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, hand-write `auto` as a boolean in `pixellab-pip.json` beside `SKILL.md`, preserving the existing `bark` value. Default is off: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.` If persistence fails everywhere, say it could not be saved and do not claim it changed.
 
 ## The cost-approval gate
 
