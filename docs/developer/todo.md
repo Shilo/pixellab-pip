@@ -24,6 +24,16 @@ skill (alongside `assets/bark.py`, `assets/background_removal.py`), plus a no-Py
   style, animate-with-text, etc.). Verified during testing that recorded IDs may be *asset* IDs
   (poll `/v2/<kind>/{id}`) or *job* IDs (poll `/v2/background-jobs/{id}`) — the helper must try the
   right getter per kind.
+- **Auto-register jobs so a sloppy agent can't drop one (highest-value fix).** The prototype
+  required the agent to manually register each job (`poll_download.py job <id> <dir>`). In clean-room
+  testing Antigravity registered dozens of junk `dummy` entries and *forgot to register the two
+  chained-edit jobs it actually needed* — so 2/8 outputs never downloaded while the agent reported
+  8/8. The shipped helper must not depend on the agent registering jobs by hand. Options: have the
+  submit call itself write the job to the registry; or derive the pending set from the manifests the
+  skill already writes per job (`usage-reporting.md`); or scan a run directory for jobs with no saved
+  image yet. Whatever the source, the "download everything pending" pass must be driven by real data,
+  not by whatever the agent remembered to type. This is the class of failure that made an otherwise
+  correct run report a false pass — treat it as a first-class requirement, not a nicety.
 - **Correct image extraction:** decode base64 AND fetch image URLs (character `rotation_urls`,
   object `frame_urls`/`storage_urls` — these 403 the default urllib UA, need a browser UA);
   verify PNG magic and prefer the PNG-encoded field when a response exposes raw RGBA in one field
