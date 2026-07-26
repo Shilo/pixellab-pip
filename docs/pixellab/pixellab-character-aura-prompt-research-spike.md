@@ -1,6 +1,6 @@
 # PixelLab Character Aura Prompt Research Spike
 
-Last reviewed: 2026-07-21.
+Last reviewed: 2026-07-25.
 
 Purpose: record live Create Image prompt experiments for static `64x64` transparent character-aura effects. The target is an isolated, front-facing aura that can sit behind and around a standing character without generating the character itself. This is developer research, not the canonical runtime contract.
 
@@ -650,3 +650,400 @@ Keep color, material, motion, brightness, and center occupancy unspecified unles
 - The foreground-spike z-index tradeoff has not yet been tested with an actual character composite.
 - Animation may change containment or layering and should be evaluated separately from the static prompt.
 - Different resolutions may alter how strongly the ring, spikes, and negative space are expressed.
+
+## Pixen Prompt Search (2026-07-25)
+
+### Batch 1: direct aura nouns
+
+Eight `64x64` transparent Pixen calls used `view: low top-down`, `detail: low detail`,
+`outline: lineless`, and no prompt enhancement or fixed seed. The tested MVP descriptions were
+`upright aura effect`, `vertical aura effect`, `standing aura effect`, `character aura effect`,
+`power-up aura effect`, `aura rising from a foot-level glow`, `aura surrounding a standing point`,
+and `vertical aura anchored at ground level`.
+
+The batch failed. Pixen usually converted the short aura phrase into a concrete subject: shrines,
+staffs, humanoids, framed portraits, or circular emblems. `power-up aura effect` was a fully
+top-down radial burst. `aura rising from a foot-level glow` was the closest composition because it
+produced a vertical effect above a lower anchor, but the anchor became a hard platform and the
+effect remained too object-like. The endpoint's explicit low-top-down view and low-detail controls
+were insufficient to overcome those noun associations.
+
+Next test: remove `aura`, `character`, `standing point`, and physical anchor language. Compare
+minimal `VFX` descriptions under seed-locked low-top-down and side views to determine whether the
+camera field or the prompt noun is the stronger source of flat radial results.
+
+### Batch 2: VFX nouns and camera view
+
+Four seed-locked prompt pairs compared `view: low top-down` with `view: side`: `upward energy VFX`,
+`rising power VFX`, `vertical magic VFX`, and `power-up VFX`. Other controls matched Batch 1.
+
+The entire batch failed by producing humanoid combatants rather than isolated effects. This
+happened in both camera views, so changing `low top-down` to `side` did not solve subject leakage.
+The shared `VFX` wording, combined with energy/power/magic language, appears to invoke a character
+or action-subject prior in Pixen. The failure was stronger than the direct-aura batch: none of the
+eight results was usable as an effect layer.
+
+Next test: keep `view: side` to rule out flat top-down presentation, but remove `aura`, `VFX`,
+`character`, `power`, `magic`, and ground/base nouns. Describe only vertically arranged light or
+particle phenomena.
+
+### Batch 3: abstract light and particle phenomena
+
+This side-view, low-detail batch tested `ascending light particles`, `rising translucent wisps`,
+`vertical glowing streaks`, `upward flowing light`, `radiating vertical waves`, `pillar of soft
+light`, `upward spiral of light`, and `rising luminous haze`, all without prompt enhancement or
+fixed seeds. Two synchronous calls timed out without recoverable results; six returned images were
+reviewed.
+
+Removing aura/VFX/power/magic/character nouns successfully stopped character generation in all six
+observed results. It did not produce a player aura: the outputs became an arrow-like particle trail,
+smoke wisps, a spotlight/beam, an architectural light column, a flat spiral, and an isolated rising
+streak. `rising translucent wisps` was the most reusable effect fragment, but it lacked the broad
+behind-player coverage and lower surround needed for an aura.
+
+This establishes a useful boundary: abstract phenomenon wording prevents characters, while an
+unqualified phenomenon becomes a single object or trail rather than a surrounding layer. The next
+batch reintroduces `aura` while explicitly framing the result as an empty backdrop/layer around
+space, still using side view to prevent fully top-down circles.
+
+### Batch 4: empty aura backdrops and layers
+
+Eight side-view prompts combined aura/glow/radiance wording with `empty`, `backdrop`, `layer`,
+`behind`, `around`, or `semicircular`. No characters or humanoid silhouettes appeared, confirming
+that layer/backdrop framing is substantially safer than character/VFX/power-up wording.
+
+The batch was still unusable as a modular aura. `empty` strongly produced literal holes: ornate
+portals, framed voids, radial emblems, or a dark rectangular opening. `vertical glow around empty
+space` produced a top-down platform with a light column; it had usable under/behind depth cues but
+was too architectural and materially detailed. `empty vertical aura backdrop` came closest to a
+behind-player silhouette, but read as an elaborate portal arch rather than a natural effect.
+
+Next test: retain the successful compositional nouns `backdrop` and `layer`, remove `empty` and
+center-hole language, and compare minimal aura/glow/radiance/field variants. This tests whether
+backdrop/layer alone can suppress characters without forcing a portal.
+
+### Batch 5: backdrop/layer without empty-center wording
+
+Eight side-view prompts tested minimal combinations of vertical/upright/low-angle/surrounding with
+aura/energy/glow/radiance/power-field and backdrop/layer. Removing `empty` eliminated the repeated
+portal holes, but did not make the batch consistently subject-free. Three prompts generated a face
+or full character, while others became a rainbow arc, radial starburst, or ornate platform.
+
+`vertical aura backdrop` was the only promising result: it produced a free-standing vertical
+aurora-like mass with no character, emblem, hard object, or fully top-down presentation. It could
+sit behind a player, but it was tall, visually noisy, lacked a useful lower surround, and approached
+the canvas boundaries. This is the first Pixen wording in the search to satisfy the core semantic
+role, even though its composition and containment still need improvement.
+
+Next test: refine only the successful `vertical aura backdrop` family with `contained` and
+`compact`, plus close aura/glow and backdrop/background-layer variants. Keep side view and the
+endpoint's low-detail control unchanged so prompt effects remain attributable.
+
+### Batch 6: contained/compact backdrop refinements
+
+The apparent Batch 5 improvement did not reproduce. The eight contained/compact aura/glow
+backdrop/background-layer variants generated an energy doorway, patterned scene strips, a planet,
+a character, a framed character panel, dense decorative columns, a portrait emblem, and a flat
+galaxy disc. None was a reusable aura.
+
+This confirms the user's concern that results remain highly random and inconsistent. More
+importantly, `backdrop` and `background layer` are now rejected prompt nouns: Pixen often reads them
+as scenery, panels, or full environmental compositions. `contained` and `compact` constrain the
+result's framing but do not preserve its semantic type. Flat top-down discs also remain possible
+despite `view: side`, so the camera field is weak guidance rather than a guarantee.
+
+Next test: remove all scene/environment language and avoid circle/ring/radial cues. Use `sprite` as
+the asset noun with minimal vertical/upright/contained/surrounding aura variants. A useful wording
+must reproduce across multiple calls; one lucky output is not sufficient evidence.
+
+### Batch 7: aura sprite wording
+
+All eight side-view `aura sprite`/`glow sprite` variants failed. Seven generated explicit humanoid
+characters or character portraits; the remaining result was a flame sitting in a decorative bowl.
+`sprite` is therefore rejected as an asset noun for Pixen aura generation: the model strongly
+associates it with a complete game subject rather than a reusable effect layer. Modifiers including
+vertical, upright, contained, rising, surrounding, low-angle, and symmetrical did not overcome that
+prior.
+
+Next test: avoid `sprite`, `aura`, scene nouns, and geometry nouns. Use `game effect layer` or `game
+overlay` followed by only vertical/upright light phenomena. Include spell/status/combat/power
+variants to see whether any game-context noun gives Pixen an effect-only semantic class without
+invoking a character.
+
+### Batch 8: game effect layer and overlay wording
+
+The eight game-effect/overlay prompts remained inconsistent and mostly unusable. Four produced
+explicit characters or character groups; three became a tile-mounted flame, radial emblem, or
+ornate mask/totem. `game overlay, vertical radiance` avoided characters and produced a narrow
+vertical diamond of light, but it was a single centered streak rather than an aura surrounding the
+future player position.
+
+`game effect layer` did not reliably mean a compositing layer to Pixen. Spell/status/combat/power
+context increased character and emblem generation. The only effect-only result came from the more
+neutral `game overlay`, but it lacked aura coverage.
+
+The search has exhausted positive-only asset nouns without finding consistency. Because generated
+characters are an absolute failure, the next controlled batch adds the shortest explicit exclusion
+inside each description: `effect only, no character`. This tests whether Pixen can obey the
+required subject boundary without adding a new scene, portal, or object prior.
+
+### Batch 9: explicit no-character clauses
+
+All eight prompts containing `effect only, no character` generated humanoid characters. The
+exclusion did not merely fail occasionally; it correlated with the strongest all-character batch
+in the search. This repeats the earlier Pro observation that mentioning the forbidden subject can
+reinforce it. Explicit no-character wording is therefore rejected for Pixen.
+
+The prompt search also changed several endpoint controls at once relative to the first Pixen test:
+`detail: low detail`, `outline: lineless`, and `view: side` or `low top-down`. Before drawing a
+strong conclusion that wording alone is the blocker, the next batch performs a seed-locked control
+ablation using the original best Pro description. It compares omission or inclusion of detail,
+view, and outline controls. This determines whether an endpoint control is pushing Pixen toward
+characters, icons, or flat discs.
+
+### Batch 10: endpoint-control ablation
+
+Eight seed-locked calls used the original best Pro description while varying omission or inclusion
+of `detail: low detail`, `outline: lineless`, `view: side`, and `view: low top-down`. Every result
+remained the same semantic family: a dense circular orb/emblem with spikes and a lower ring. Some
+controls changed styling or the ring projection, but none converted the emblem into a modular
+behind-player aura.
+
+This shows that the prompt and seed dominate composition more strongly than Pixen's detail, outline,
+and view controls for this case. The controls are not the primary cause of characters or flat
+effects. It also confirms that `view: side` cannot rescue a prompt/seed already committed to a
+radial emblem.
+
+The first four-theme Pixen comparison produced its only near-aura from the water-themed version of
+the original prompt. The next batch repeats that exact water description eight times with random
+seeds and no view/detail/outline overrides. This measures whether the success was a reproducible
+wording effect or a lucky seed before attempting further refinements.
+
+### Batch 11: water-prompt reproducibility
+
+Eight random-seed calls repeated `fully contained symmetrical water aura with vertical power spikes
+and a bottom energy ring` with no view/detail/outline overrides. All eight were subject-free,
+contained, vertically presented, and compositionally related. This is the first prompt family to
+remain consistent across random seeds. Several results had a credible lower ring plus rising energy
+that could sit under and behind a separate player sprite.
+
+The family is not yet acceptable as a general aura. Most results read as ornate magical objects:
+crowns, lotus forms, crystalline cages, fountains, or decorative crests. The output is also strongly
+water-colored and highly detailed. Still, the consistency proves that the original structured
+prompt can work in Pixen when an elemental modifier supplies a coherent visual process.
+
+The likely object/fanciness drivers are now `power spikes`, `energy ring`, and possibly
+`symmetrical`; the likely consistency driver is `water` or its implied flowing organization. The
+next batch removes those ornate geometry nouns incrementally and tests whether neutral `flowing`
+can replace the water element while retaining an effect-only vertical composition.
+
+### Batch 12: removing ornate geometry nouns
+
+Eight one-off variants removed the full `power spikes`/`energy ring` structure or replaced `water`
+with `flowing`. The outputs were all subject-free but reverted to standalone motifs: a wave cone,
+snowflake, spiked orb, bowl, sphere, isolated arc, spiral emblem, and narrow portal. None provided
+the broad under-and-behind coverage of Batch 11.
+
+This falsifies the simple hypothesis that removing `power spikes` and `energy ring` would preserve
+the useful composition while reducing ornament. In Pixen, the full combination of contained,
+symmetrical, vertical spikes, and a lower ring appears to create the consistent multi-depth layout;
+removing those anchors causes the model to collapse the aura into one central object. `flowing`
+alone does not reproduce the organizing effect of `water`.
+
+Next test: preserve the successful complete sentence structure but soften only the ornate nouns.
+Compare water and flowing families using vertical energy/flow/rising wisps plus bottom/foot-level/
+lower glow. This keeps both upper and lower compositional clauses while avoiding literal spikes and
+rings.
+
+### Batch 13: softened upper and lower clauses
+
+All eight water/flowing variants with vertical energy, vertical flow, rising energy, or upward
+wisps plus a lower glow remained subject-free. However, every result became a centered ornamental
+symbol, plant, flame, or crest. None formed a broad modular layer around a future player position.
+
+The softer nouns reduced literal ring-and-spike imagery but also removed the only reliable depth
+layout. The successful Batch 11 sentence must remain intact for now. Prompt-only simplification is
+not reducing ornament without losing aura structure.
+
+Next test: return to the exact Batch 11 prompt and use Pixen's real style controls rather than more
+noun substitutions. Four random calls use only `detail: low detail`; four use low detail plus
+`outline: lineless` and `view: side`. This measures whether the consistent water composition can be
+made simpler and less object-like without changing its semantic structure.
+
+### Batch 14: simplifying the successful water family with controls
+
+The first four results used only `detail: low detail`. Two were credible modular aura candidates:
+a lower elliptical energy ring with tall water-like spikes rising behind and partly around the
+future player position. One was fully top-down, and one became a cage-like object. This is the best
+quality/concision tradeoff observed so far, but its approximate 50% success rate is not yet
+consistent enough.
+
+The last four added `view: side` and `outline: lineless`. All four became more object-like: lotus,
+emblem, crown, or bowl forms. Those controls are counterproductive for this prompt family and are
+rejected. In particular, the side-view field does not reliably create a gameplay-facing aura and
+may encourage a standalone side-profile object.
+
+Next test: retain the successful low-detail-only setup and the full bottom energy ring clause, but
+replace only `vertical power spikes` with less ornamental rising phenomena. This isolates whether
+`power spikes` is responsible for crown/cage forms while preserving the lower depth anchor that was
+lost in Batch 12.
+
+### Batch 15: softer vertical phenomena with the ring retained
+
+All eight low-detail results were subject-free, contained, vertical rather than fully top-down, and
+visibly connected to a lower elliptical ring. This is the strongest batch so far. Replacing `power
+spikes` while keeping the complete sentence and `bottom energy ring` preserved the useful depth
+layout and substantially reduced crowns, cages, characters, and radial emblems.
+
+`vertical wisps` produced the most natural conventional aura: a broad lower ring with a tapered
+vertical mass that could sit behind a player. `vertical currents` produced the second-best result:
+a broader splash/fountain-like aura with a clear ring and under/behind depth. `vertical waves` was
+also viable but slightly more bowl-like. `rising aura`, `upward energy`, `rising streams`, and
+`vertical light` drifted toward wings, crystals, fountains, or ornate crests.
+
+Next test: repeat the two winners four times each at random seeds. The candidate wording is not
+accepted until it proves that the effect-only, gameplay-facing composition is reproducible rather
+than another one-seed success.
+
+### Batch 16: reproducibility of wisps and currents
+
+Neither Batch 15 winner reproduced consistently enough. Four `vertical wisps` calls produced an
+ornate crest, a narrow light column, a fountain/bowl, and a bright orb. Four `vertical currents`
+calls produced two plausible aura layers, one ornate tree/crest, and one platform with a central
+spike. All remained character-free and generally non-top-down, but only about half were usable even
+under a generous acceptance threshold.
+
+The lower ring plus vertical-clause structure is robust at preventing characters, but water-based
+vertical nouns still drift toward fountains, plants, crystals, and ritual objects. The next batch
+removes `water` while retaining the successful grammatical structure and low-detail control. It
+tests non-material vertical phenomena—particles, sparks, haze, shimmer, trails, pulses, mist, and
+glow—to find a less object-like organizing word.
+
+### Batch 17: non-material vertical phenomena without water
+
+All eight prompts produced centered emblems or ritual objects: ornate trees, compass-like stars,
+crystals, framed orbs, floral symbols, and pedestals. None was a reusable aura. Removing `water`
+while keeping the ring structure therefore lost the one theme token that had been suppressing hard
+emblem geometry. Particles, sparks, haze, shimmer, trails, pulses, mist, and glow did not act as
+equivalent organizing words.
+
+The evidence now suggests Pixen needs an elemental/material modifier to interpret the structured
+sentence as a coherent effect rather than an icon, but water is not necessarily unique. The next
+batch restores the exact successful sentence and compares eight theme tokens under the same
+low-detail setup: water as control, then fire, lightning, wind, smoke, mist, shadow, and spirit.
+This tests whether another theme yields a softer aura while preserving the repeatable layout.
+
+### Batch 18: theme-token comparison
+
+Water, lightning, and wind were the only promising themes. Water produced a clean lower ring with
+a vertical energy mass. Lightning produced a tall, narrow, ring-anchored effect, although it risked
+reading as a spear or crystal. Wind produced stacked lower rings and vertical arcs, but was more
+ornamental. Fire reverted to a fully top-down radial burst. Smoke and mist became rock/tree objects;
+shadow and spirit became orb/star emblems.
+
+The theme token materially controls both view and semantic type even though the surrounding prompt
+is identical. This means a single arbitrary theme variable cannot currently guarantee a usable
+Pixen aura. Water remains the best control, while lightning and wind are plausible alternatives
+that need random-seed reproduction. The next batch runs three lightning, three wind, and two water
+calls with identical low-detail settings to compare their failure rates directly.
+
+### Batch 19: water, lightning, and wind reproduction
+
+The three themes had similar low success rates. One of three lightning results was a plausible
+ring-anchored vertical effect; the others were a star emblem and a rigid ring/spike object. One of
+three wind results was a plausible compact aura; the others were ring sculptures. One of two water
+results was a good flame-shaped aura with a lower ring; the other was a diamond emblem.
+
+No tested elemental noun reliably exceeds seed randomness. However, the successful wind and water
+results independently converged on a simple upright flame-like silhouette above a lower ring. That
+shape may be a stronger Pixen prior than abstract aura wording. The next batch tests flame as the
+explicit vertical organizer while retaining low detail and the bottom energy ring. Although this
+narrows visual behavior, the current Pixen search prioritizes finding a reliable modular effect;
+theme flexibility can be evaluated only after a stable base composition exists.
+
+### Batch 20: flame as the vertical organizer
+
+The batch was far more semantically consistent than abstract or arbitrary-theme tests: every result
+was a contained orange flame/light effect, and none contained a character or fully top-down scene.
+However, several still became portals, suns, campfire piles, flowers, or orb pedestals.
+
+`fully contained vertical flame aura with a bottom energy ring` was the best prompt. Its result was
+a simple vertical flame mass rising from an elliptical lower ring, with enough open surrounding
+space to composite beneath and behind a separate player. It was less ornate and less object-like
+than the water/power-spike family. A close variant, `fully contained flame aura rising from a bottom
+energy ring`, was also usable but slightly more like a standalone flame.
+
+Next test: repeat the best prompt eight times with low detail and random seeds. This directly tests
+whether the first genuinely simple Pixen aura wording is robust enough to recommend.
+
+### Batch 21: reproducibility of the vertical flame aura
+
+Eight random-seed calls repeated:
+
+> fully contained vertical flame aura with a bottom energy ring
+
+with `detail: low detail`, `image_size: 64x64`, `no_background: true`, no explicit view or outline,
+and no prompt enhancement. All eight results passed the hard subject and view gates: no characters,
+humanoid silhouettes, emblems, scenery, or fully top-down compositions appeared. Every result was
+a contained upright flame mass connected to an elliptical lower ring. The family is visually much
+simpler and more consistent than every earlier Pixen prompt family tested.
+
+This is the most reproducible Pixen prompt so far, but it is not a finished modular aura. It solved
+characters, view, containment, and noise, yet placed a flame element inside the ring. Several seeds
+read as a campfire or narrow flame column rather than energy distributed around the ring's edge.
+That center-subject composition fails the original Pro goal: the ring should organize the aura
+around the future player position, not hold a standalone elemental object.
+
+## Current Pixen Recommendation
+
+Closest baseline:
+
+> fully contained vertical flame aura with a bottom energy ring
+
+with Pixen `detail: low detail`, `64x64`, transparent background, no prompt enhancement, and no
+explicit `view` or `outline`. It is a research baseline, not the final recommendation. Do not add
+`character`, `sprite`, `VFX`, `backdrop`, `background`,
+`empty`, or an explicit no-character clause; live tests showed those words increase characters,
+scenery, portals, or emblems. Do not add `view: side` plus `outline: lineless`; that combination made
+the successful water family more object-like.
+
+Treat this as a stable flame-aura baseline, not proof that arbitrary theme substitution is safe.
+Water is the best runner-up theme, but its tested success rate remained seed-dependent and its
+outputs frequently became fountains, crowns, crystals, or ritual objects.
+
+### Batch 22 direction: move energy from center to circumference
+
+The next batch preserves the stable vertical-flame and low-detail signals but changes the spatial
+relationship to the lower ring. It compares `along`, `around`, `surrounding`, `distributed around`,
+`rim`, and `perimeter` wording. Acceptance now requires the vertical effect to originate around the
+ring's circumference, especially its back and side arcs, without becoming a central flame subject,
+portal wall, or fully top-down ring.
+
+### Batch 22: circumference relationship wording
+
+None of the eight variants fully passed. `along`, `rising along`, `rising around`, and `rim` still
+placed one dominant flame in the center. `from the perimeter` became a campfire pile. `around the
+perimeter` became a vertical portal ring. `surrounding` added some perimeter flames but retained a
+large central flame.
+
+`distributed around` was the only phrase that clearly moved the effect out of the center and onto
+the lower ring's circumference. Its failure was discreteness: it produced several separate flame
+objects rather than one continuous aura. This is useful causal evidence—distribution language
+controls location, while the singular flame prior still controls objecthood.
+
+Future batches are capped at three generations to limit cost. The next three prompts combine the
+successful perimeter relationship with `continuous`, `all sides`, or `entire` to test whether Pixen
+can join the distributed flames into one aura around the ring instead of a central object or a set
+of separate flames.
+
+### Batch 23: continuous/all-sides/entire wording
+
+All three prompts failed identically: one narrow flame column occupied the center of a lower ring.
+`continuous`, `rising from all sides`, and `rising along the entire` did not distribute the flame.
+These phrases were weaker than the singular `vertical flame aura` prior and added no visible
+perimeter coverage.
+
+The next batch returns to the one proven location phrase, `distributed around`, but replaces the
+singular flame subject with plural `flame wisps`. It tests `connected`, `spaced around`, and
+`distributed along` variants. The goal is to retain the perimeter placement from Batch 22 while
+reducing the appearance of independent flame objects.
