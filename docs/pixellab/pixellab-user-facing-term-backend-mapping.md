@@ -87,7 +87,7 @@ Current MCP tool families:
 - Objects and map objects: `create_map_object`, `get_map_object`, `create_1_direction_object`, `create_8_direction_object`, `get_object`, `list_objects`, `animate_object`, `create_object_state`, `delete_object`, `select_object_frames`, `dismiss_review`.
 - UI assets: `create_ui_asset`, `get_ui_asset`, `list_ui_assets`, `delete_ui_asset`.
 - Platform helpers: `get_balance`, `list_projects`, `chat_*`, `sandbox_*`, `agent_*`, `agent_feedback`, `agent_help`.
-- Raw image (no managed asset): `create_image`, `get_image`, `edit_image`, `inpaint_image`, `animate_image`.
+- Raw image (no managed asset): `create_image_pixflux`, `create_image_pixen`, `create_image_pro`, `get_image`, `edit_image`, `inpaint_image`, `animate_image`.
 - Path tiles and building kits (share the tiles-pro get/list/delete tools): `create_path_tiles`, `create_building_kit`.
 
 As of the 2026-07-26 refresh, MCP `edit_image` and `inpaint_image` cover `edit-image` and `inpaint` directly. MCP still does not document equivalents for `edit-images-v2` (multi-source combine), `resize`, or `remove-background`; route those to REST v2 unless actual MCP tools are visible in a client.

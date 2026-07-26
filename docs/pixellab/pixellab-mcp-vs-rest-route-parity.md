@@ -2,7 +2,9 @@
 
 Last reviewed: 2026-07-26.
 
-> 2026-07-26 refresh: MCP added 7 tools closing most of the former "MCP has no raw-image primitive" gap: `create_image`+`get_image` (generic text-to-image, ◐ partial vs the model-split REST image routes), `edit_image` (= full parity with `edit-image`), `inpaint_image` (= full parity with `inpaint`), `animate_image` (= full parity with `animate-with-text-v3`, ◐ partial vs `interpolation-v2` — tier unconfirmed), and `create_path_tiles`/`create_building_kit` (= full parity, siblings of `create_tiles_pro` sharing its get/list/delete tools; REST folds all three into `create-tiles-pro` via `tile_feature: "roads"/"tileset"/"building"`). None of these are new REST surface — REST already had `edit-image`, `inpaint`, `animate-with-text-v3`, and the `tile_feature`/`building_*` fields on `create-tiles-pro`; MCP simply exposes them now. Counts below reflect the new state (REST-only 30→27, MCP tool count 62→69, MCP-only still 17).
+> 2026-07-26 21:03 follow-up: within the same day, MCP replaced the brand-new generic `create_image` with three model-specific tools matching REST's own image-model split: `create_image_pixflux` (= full parity with `create-image-pixflux`), `create_image_pixen` (= full parity with `create-image-pixen`), and `create_image_pro` (= full parity with `generate-image-v2`, via matching `reference_images`/`style_image_base64`/`style_copy` fields — but not `generate-with-style-v2`, whose `style_images` array + `style_description` shape it does not match). `get_image` is unchanged (shared getter, now documented as returning `create_image_pixflux` results too). This closes 3 more of the 7 "Raw image generation" gaps outright (bitforge, `generate-with-style-v2`, and `generate-ui-v2` remain REST-only). Counts below reflect the new state (REST-only 27→24, MCP tool count 69→71, ◐ 9→8 — `create-image-pixflux` graduates from ◐ to `=`).
+>
+> 2026-07-26 refresh: MCP added 7 tools closing most of the former "MCP has no raw-image primitive" gap: `create_image`+`get_image` (generic text-to-image, ◐ partial vs the model-split REST image routes — see the 21:03 follow-up above, this tool was replaced within the hour), `edit_image` (= full parity with `edit-image`), `inpaint_image` (= full parity with `inpaint`), `animate_image` (= full parity with `animate-with-text-v3`, ◐ partial vs `interpolation-v2` — tier unconfirmed), and `create_path_tiles`/`create_building_kit` (= full parity, siblings of `create_tiles_pro` sharing its get/list/delete tools; REST folds all three into `create-tiles-pro` via `tile_feature: "roads"/"tileset"/"building"`). None of these are new REST surface — REST already had `edit-image`, `inpaint`, `animate-with-text-v3`, and the `tile_feature`/`building_*` fields on `create-tiles-pro`; MCP simply exposes them now. Counts at the time reflected REST-only 30→27, MCP tool count 62→69, MCP-only still 17.
 >
 > 2026-07-19 refresh: REST v2 added `DELETE` routes for tilesets, sidescroller tilesets, isometric tiles, tiles-pro, and managed character animations, plus `GET` list routes for sidescroller tilesets and tiles-pro — closing the seven "MCP-only delete/list helper" gaps this doc previously listed. MCP added `update_character_tags` / `update_object_tags`, closing the two `PATCH .../tags` "REST-only" gaps. Counts below reflect the new state (REST-only 32→30, MCP-only 24→17).
 
@@ -29,20 +31,22 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 
 **Matching basis:** counterparts are judged by **functional capability, not tool name** — a REST endpoint counts as "covered" if any MCP tool or documented MCP parameter does the same job, even under a different name or bundled into a broader tool (and the reverse for MCP tools). A scoped or partial overlap (for example, an MCP capability that works only on a managed asset) is marked partial (◐), not dropped.
 
-**On both surfaces — full functional parity, so they live in the [Coverage Matrix](#coverage-matrix) below, not in the gap lists:** characters (4/8-direction, v3, pro, state, animate, list/get/delete), **portrait ↔ character conversion** (`portrait-character-pro` ↔ `create_portrait_character`), objects (1/8-direction, state, animate, review, list/get/delete), map objects, top-down / sidescroller / isometric / pro tilesets & tiles, **path/road tiles and building kits** (`create-tiles-pro` `tile_feature` ↔ `create_path_tiles`/`create_building_kit`), structured UI assets, **pixel font Pro** (`generate-font-pro` ↔ `create_font`), balance, **tag setting** (`PATCH .../tags` ↔ `update_character_tags` / `update_object_tags`), **arbitrary-image edit** (`edit-image` ↔ `edit_image`), **arbitrary-image inpaint** (`inpaint` ↔ `inpaint_image`), and **raw text-driven animation** (`animate-with-text-v3` ↔ `animate_image`). There is no vocal / voice / lip-sync / audio animation capability on either surface as of these snapshots.
+**On both surfaces — full functional parity, so they live in the [Coverage Matrix](#coverage-matrix) below, not in the gap lists:** characters (4/8-direction, v3, pro, state, animate, list/get/delete), **portrait ↔ character conversion** (`portrait-character-pro` ↔ `create_portrait_character`), objects (1/8-direction, state, animate, review, list/get/delete), map objects, top-down / sidescroller / isometric / pro tilesets & tiles, **path/road tiles and building kits** (`create-tiles-pro` `tile_feature` ↔ `create_path_tiles`/`create_building_kit`), structured UI assets, **pixel font Pro** (`generate-font-pro` ↔ `create_font`), balance, **tag setting** (`PATCH .../tags` ↔ `update_character_tags` / `update_object_tags`), **raw text-to-image on PixFlux and Pixen** (`create-image-pixflux`/`create-image-pixen` ↔ `create_image_pixflux`/`create_image_pixen`), **Pro image generation with labelled/style references** (`generate-image-v2` ↔ `create_image_pro`), **arbitrary-image edit** (`edit-image` ↔ `edit_image`), **arbitrary-image inpaint** (`inpaint` ↔ `inpaint_image`), and **raw text-driven animation** (`animate-with-text-v3` ↔ `animate_image`). There is no vocal / voice / lip-sync / audio animation capability on either surface as of these snapshots.
 
-**Missing from MCP — REST v2 has it, no dedicated MCP tool (27 endpoints; ◐ = partial overlap via a broader tool).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
+**Missing from MCP — REST v2 has it, no dedicated MCP tool (24 endpoints; ◐ = partial overlap via a broader tool).** See [REST v2 Endpoints With No MCP Counterpart](#rest-v2-endpoints-with-no-mcp-counterpart).
 
 | Category | # | REST v2 endpoints |
 |---|---|---|
-| Raw image generation | 7 | `create-image-pixen`, `create-image-pixflux` (◐), `create-image-pixflux-background` (◐), `create-image-bitforge`, `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2` |
+| Raw image generation | 4 | `create-image-pixflux-background` (◐), `create-image-bitforge`, `generate-with-style-v2`, `generate-ui-v2` |
 | Image edit / convert / resize | 5 | `edit-images-v2`, `image-to-pixelart`, `image-to-pixelart-pro`, `resize`, `remove-background` |
 | Inpaint | 1 | `inpaint-v3` (◐) |
 | Raw animation / rotation / skeleton | 10 | `animate-with-text`, `animate-with-text-v2`, `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `rotate` |
 | Prompt enhancement | 3 | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt` |
 | Managed-asset ZIP export | 1 | `characters/{id}/zip` (the two `.../tags` PATCH routes now have MCP `update_character_tags` / `update_object_tags`) |
 
-◐ **Partial overlap** (9 of the 27 — no *dedicated, tier-matched* MCP tool, but a broader or tier-unconfirmed MCP tool covers a scoped version). `inpaint-v3`'s Pro tier is unconfirmed against the untagged `inpaint_image`; `create-image-pixflux` and `create-image-pixflux-background` fold into generic MCP `create_image` (same `init_image_base64`/`color_image_base64` controls, but no model selection — `create_image` is one model, not a `pixflux` switch); the `animate-with-text`/`-v2` family and `interpolation-v2` fold into MCP `animate_character`/`animate_object` via `mode` and the `custom_start_frame_base64`/`end_frame_base64` frame anchors, and `interpolation-v2` additionally overlaps raw (non-managed) `animate_image` via its `last_frame_base64` anchor — tier parity with the Pro `interpolation-v2` model is unconfirmed either way; `generate-8-rotations-v2`/`-v3` → `create_8_direction_object`/`create_character` 8-direction output; `characters/{id}/zip` → `get_character` download link. (`generate-ui-v2` is **not** here — MCP's `create_ui_asset` is a structured panel builder, not a freeform UI generator; see the UI note in the Coverage Matrix.) Per-endpoint notes are below.
+`create-image-pixen`, `create-image-pixflux`, and `generate-image-v2` are no longer in this list — they graduated to full `=` parity via `create_image_pixen`/`create_image_pixflux`/`create_image_pro` (2026-07-26 21:03 follow-up) and now live in the "full parity" prose above and the Coverage Matrix.
+
+◐ **Partial overlap** (8 of the 24 — no *dedicated, tier-matched* MCP tool, but a broader or tier-unconfirmed MCP tool covers a scoped version). `create-image-pixflux-background` folds into MCP `create_image_pixflux(no_background=false)` — same tool as the now-fully-matched `create-image-pixflux`, but this is a background-removal-complexity variant, not a separate model, so it stays partial rather than graduating; `inpaint-v3`'s Pro tier is unconfirmed against the untagged `inpaint_image`; the `animate-with-text`/`-v2` family and `interpolation-v2` fold into MCP `animate_character`/`animate_object` via `mode` and the `custom_start_frame_base64`/`end_frame_base64` frame anchors, and `interpolation-v2` additionally overlaps raw (non-managed) `animate_image` via its `last_frame_base64` anchor — tier parity with the Pro `interpolation-v2` model is unconfirmed either way; `generate-8-rotations-v2`/`-v3` → `create_8_direction_object`/`create_character` 8-direction output; `characters/{id}/zip` → `get_character` download link. (`generate-with-style-v2` and `generate-ui-v2` are **not** here — `create_image_pro`'s single `style_image_base64`+`style_copy` does not match `generate-with-style-v2`'s multi-image `style_images`+`style_description` shape, and MCP's only UI tool, `create_ui_asset`, is a structured panel builder, not a freeform UI generator; see the UI note in the Coverage Matrix.) Per-endpoint notes are below.
 
 **Missing from REST v2 — MCP has it, no REST endpoint (17 tools).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
 
@@ -56,14 +60,14 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 
 ## Practical Picking Rule
 
-MCP is a managed-asset tool layer inside an agent that, as of the 2026-07-26 refresh, also exposes five raw-image primitives (`create_image`/`get_image`, `edit_image`, `inpaint_image`, `animate_image`) needing no managed asset ID; REST v2 remains the complete HTTP API with the fuller model/version choice.
+MCP is a managed-asset tool layer inside an agent that, as of the 2026-07-26 refresh, also exposes six raw-image primitives needing no managed asset ID: `create_image_pixflux`, `create_image_pixen`, `create_image_pro` (each a dedicated model, not one generic tool), plus `get_image`, `edit_image`, `inpaint_image`, `animate_image`. REST v2 remains the complete HTTP API for the remaining model/version choices and code control.
 
 | Use MCP when | Use REST v2 when |
 |---|---|
-| You're in an MCP-enabled agent and want a managed asset (character, object, tileset, tile, isometric, tiles-pro, font, portrait, UI panel, map object) with IDs, polling, and list/get/delete helpers, **or** a generic raw-image generate/edit/inpaint/animate on a supplied image with no model choice needed | You need a specific image model (Pixen/PixFlux/BitForge/Pro), batch/code/backend control or exact schemas, or any of the 27 REST-only operations (multi-source edit, image-to-pixelart, resize, background removal, most raw animation/rotation/skeleton, prompt enhancement, ZIP export) |
+| You're in an MCP-enabled agent and want a managed asset (character, object, tileset, tile, isometric, tiles-pro, font, portrait, UI panel, map object) with IDs, polling, and list/get/delete helpers, **or** raw PixFlux/Pixen/Pro image generate, edit, inpaint, or animate on a supplied image | You need BitForge (`coverage_percentage`), multi-image style reference (`generate-with-style-v2`), batch/code/backend control or exact schemas, or any of the 24 REST-only operations (multi-source edit, image-to-pixelart, resize, background removal, most raw animation/rotation/skeleton, prompt enhancement, ZIP export) |
 | You need the platform layer — projects, chat, sandbox, deployed agents (MCP-only) | You need a freeform UI image (`generate-ui-v2`) or any capability with no MCP tool |
 
-One line: **MCP is the convenient managed-asset path inside an agent, plus a no-frills raw-image primitive set; REST v2 is the complete API with full model/version choice, code control, and the remaining REST-only operations.**
+One line: **MCP is the convenient managed-asset path inside an agent, plus PixFlux/Pixen/Pro raw-image generate/edit/inpaint/animate; REST v2 remains the complete API for BitForge, multi-image style reference, code control, and the remaining REST-only operations.**
 
 ## Coverage Matrix
 
@@ -128,16 +132,16 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 
 ### Create Image (raw generation)
 
-As of the 2026-07-26 refresh, MCP `create_image` + `get_image` is a generic text-to-image tool that needs no managed asset — but it is one general-purpose model (with `init_image_base64`/`init_image_strength` and `color_image_base64` controls matching PixFlux's unique fields), not a switch between Pixen/PixFlux/BitForge/Pro. So it partially closes the PixFlux-shaped rows below; the model-specific and Pro rows remain REST-only. (Freeform UI generation `generate-ui-v2` is grouped with the structured UI endpoint in *Fonts, UI, Account* above.)
+MCP briefly shipped a single generic `create_image` tool on 2026-07-26, then replaced it the same day (21:03 follow-up) with three model-specific tools mirroring REST's own split: `create_image_pixflux`, `create_image_pixen`, `create_image_pro` — each needs no managed asset and shares `get_image` as its getter. Field-for-field, `create_image_pixflux` matches `CreateImagePixfluxRequest` (`init_image`↔`init_image_base64`, `color_image`↔`color_image_base64`, `view`/`direction`/`isometric`/`outline`/`shading`/`detail`/`text_guidance_scale`/`no_background`/`seed`); `create_image_pixen` matches `CreateImagePixenRequest` (`view`/`direction`/`outline`/`detail`/`no_background`/`seed`); `create_image_pro` matches `GenerateImageV2Request` (`reference_images`↔`reference_images`, `style_image`↔`style_image_base64`, `style_options`↔`style_copy`, `image_size`↔`width`+`height`). REST-only extras on each (`background_removal_task`, deprecated `negative_description`, `enhance_prompt`) are minor and don't block full parity. (Freeform UI generation `generate-ui-v2` is grouped with the structured UI endpoint in *Fonts, UI, Account* above.)
 
 | REST v2 | MCP functional counterpart | Parity |
 |---|---|---|
-| `POST /create-image-pixen` | — (`create_image` is not Pixen's tight-framing/high-detail model) | none |
-| `POST /create-image-pixflux` | `create_image` + `get_image` (same `init_image`/`color_image` controls, no model switch to prove exact PixFlux equivalence) | ◐ |
-| `POST /create-image-pixflux-background` | `create_image(no_background=false)` + `get_image` | ◐ |
+| `POST /create-image-pixen` | `create_image_pixen` + `get_image` | = |
+| `POST /create-image-pixflux` | `create_image_pixflux` + `get_image` | = |
+| `POST /create-image-pixflux-background` | `create_image_pixflux(no_background=false)` + `get_image` | ◐ |
 | `POST /create-image-bitforge` (pose-guided via `skeleton_keypoints`) | — | none |
-| `POST /generate-image-v2` (Pro) | — | none |
-| `POST /generate-with-style-v2` (Pro, style ref) | `style_images` on `create_1/8_direction_object`, `create_tiles_pro` (managed only, different output) | none |
+| `POST /generate-image-v2` (Pro) | `create_image_pro` + `get_image` | = |
+| `POST /generate-with-style-v2` (Pro, style ref) | `create_image_pro`'s single `style_image_base64`+`style_copy` is a narrower shape than this endpoint's multi-image `style_images`(1-4)+`style_description`; `style_images` also appears on `create_1/8_direction_object`, `create_tiles_pro` (managed only, different output) | none |
 
 ### Image Edit, Convert, Resize
 
@@ -198,16 +202,16 @@ As of the 2026-07-26 refresh, MCP `animate_image` is a standalone raw-animation 
 
 This is the core deliverable. As of the snapshots above, these REST v2 endpoints have no documented MCP tool. Route them to REST v2; do not wait for or invent an MCP equivalent. Grouped by why the gap exists.
 
-### 1. Raw image generation (7) — MCP has one generic model, not the full model/version split
+### 1. Raw image generation (4) — MCP now has PixFlux, Pixen, and Pro; BitForge and multi-image style remain gaps
 
-Since 2026-07-26, MCP `create_image` + `get_image` generates a freeform image with no managed asset — but it is one general-purpose model (no Pixen/PixFlux/BitForge/Pro switch):
+MCP briefly shipped one generic `create_image` tool on 2026-07-26, then split it the same day (21:03 follow-up) into `create_image_pixflux`, `create_image_pixen`, and `create_image_pro`, each needing no managed asset and matching its REST counterpart field-for-field — closing three of the seven rows below outright:
 
-- `POST /create-image-pixen` — none: `create_image` is not Pixen's tight-framing/high-detail model
-- `POST /create-image-pixflux` — ◐ partial: `create_image` shares PixFlux's unique `init_image`/`color_image` controls, but there is no model switch to prove exact equivalence
-- `POST /create-image-pixflux-background` — ◐ partial: `create_image(no_background=false)` produces full-bleed images too
-- `POST /create-image-bitforge` — none: `create_image` has no `coverage_percentage` (BitForge's one unique control) or `skeleton_keypoints` pose guidance
-- `POST /generate-image-v2` (Pro) — none
-- `POST /generate-with-style-v2` (Pro, style reference) — none: MCP exposes style-guided generation only as `style_images` on managed object/tile creation, not as arbitrary styled-image output
+- `POST /create-image-pixen` — = full parity: `create_image_pixen` + `get_image`
+- `POST /create-image-pixflux` — = full parity: `create_image_pixflux` + `get_image`
+- `POST /create-image-pixflux-background` — ◐ partial: `create_image_pixflux(no_background=false)` produces full-bleed images too, but this is a background-removal-complexity variant of the same tool, not a separate model
+- `POST /create-image-bitforge` — none: no MCP tool has `coverage_percentage` (BitForge's one unique control) or `skeleton_keypoints` pose guidance
+- `POST /generate-image-v2` (Pro) — = full parity: `create_image_pro` + `get_image` (`reference_images`, `style_image_base64`↔`style_image`, `style_copy`↔`style_options` all match)
+- `POST /generate-with-style-v2` (Pro, style reference) — none: `create_image_pro`'s single `style_image_base64`+`style_copy` doesn't match this endpoint's multi-image `style_images`(1-4)+`style_description` shape
 - `POST /generate-ui-v2` (freeform UI image; no `pieces`/`elements`) — none: MCP's only UI tool, `create_ui_asset`, is a structured panel builder (its REST twin is `create-ui-asset`), not a freeform generator, and lacks `concept_image`; MCP has no `generate-ui-v2` equivalent
 
 ### 2. Image edit / convert / resize (5) — MCP now edits arbitrary images, but not multi-source or convert/resize
@@ -266,11 +270,11 @@ MCP covers the asset lifecycle except a full-bundle ZIP export:
 - `GET /background-jobs/{job_id}` — REST's generic async poll. MCP deliberately uses per-resource `get_*` tools instead, so this is a different async model, not a missing capability.
 - `GET /llms.txt` — the docs index itself, not an asset operation.
 
-**Total: 27 asset/management REST v2 endpoints with no *dedicated, tier-matched* MCP counterpart** (7 image gen + 5 edit + 1 inpaint + 10 animation/rotation + 3 prompt enhance + 1 ZIP export). Of these, 9 have partial overlap via a broader or tier-unconfirmed MCP tool (◐): `create-image-pixflux`, `create-image-pixflux-background`, `inpaint-v3`, the `animate-with-text` family (`animate-with-text`, `-v2`), `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, and `characters/{id}/zip`.
+**Total: 24 asset/management REST v2 endpoints with no *dedicated, tier-matched* MCP counterpart** (4 image gen + 5 edit + 1 inpaint + 10 animation/rotation + 3 prompt enhance + 1 ZIP export). Of these, 8 have partial overlap via a broader or tier-unconfirmed MCP tool (◐): `create-image-pixflux-background`, `inpaint-v3`, the `animate-with-text` family (`animate-with-text`, `-v2`), `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, and `characters/{id}/zip`.
 
 ## MCP Tools With No REST v2 Counterpart
 
-The mirror of the gap list above: MCP tools with no public REST v2 endpoint. Grouped by why the gap exists. Of the 69 MCP tools in the snapshot, 17 have no REST v2 counterpart — all in the platform layer. (Before 2026-07-19 there were also 7 `delete`/`list` lifecycle helpers here; REST v2 has since added matching routes, and MCP added `update_character_tags` / `update_object_tags`.)
+The mirror of the gap list above: MCP tools with no public REST v2 endpoint. Grouped by why the gap exists. Of the 71 MCP tools in the snapshot, 17 have no REST v2 counterpart — all in the platform layer. (Before 2026-07-19 there were also 7 `delete`/`list` lifecycle helpers here; REST v2 has since added matching routes, and MCP added `update_character_tags` / `update_object_tags`.)
 
 ### Platform, agent, sandbox, chat (17) — genuinely MCP-only
 
@@ -293,7 +297,7 @@ The 2026-07-19 snapshot added REST routes for the `delete` / `list` lifecycle he
 - Per-resource `get_*` tools map to a dedicated REST GET where one exists — `GET /generate-font-pro/{job_id}` (`get_font`), `GET /map-objects/{id}` (`get_map_object`), `GET /portrait-character-pro/{job_id}` (`get_portrait_character`), `GET /tilesets-sidescroller/{id}` (`get_sidescroller_tileset`) — and otherwise to the generic `GET /background-jobs/{job_id}` async poll. Either way they are not gaps.
 - `pixellab://docs/...` resources (Godot/Unity/Python/Wang/sidescroller/isometric/overview integration guides) are MCP-only, but they are documentation, not an API surface.
 
-**Total: 17 MCP tools with no REST v2 counterpart** — all in the platform layer. (The 7 `delete`/`list` lifecycle helpers counted here before 2026-07-19 now have REST routes.) The 2026-07-26 refresh added 7 MCP tools (62→69 total in the snapshot), but all 7 have a REST counterpart, so this platform-only count is unchanged.
+**Total: 17 MCP tools with no REST v2 counterpart** — all in the platform layer. (The 7 `delete`/`list` lifecycle helpers counted here before 2026-07-19 now have REST routes.) The 2026-07-26 refresh and its same-day 21:03 follow-up together added 9 net MCP tools (62→71 total in the snapshot: +7 raw-image/tile-kit tools, then -1 `create_image` +3 `create_image_pixflux`/`create_image_pixen`/`create_image_pro`), but every one of them has a REST counterpart, so this platform-only count is unchanged.
 
 ## Routing Implications
 
