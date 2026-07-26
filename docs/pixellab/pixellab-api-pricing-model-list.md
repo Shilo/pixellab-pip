@@ -38,6 +38,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Tool label | Endpoint | Model/tool family | Useful for | Estimated price |
 |---|---|---|---|---|
 | Create M-XL image (new) | `POST /v2/create-image-pixflux` | Pixflux | General image generation, larger image understanding, init images, forced palettes, transparent background | `64x64 $0.00793`; `128x128 $0.00793`; `320x320 $0.0101`; `400x400 $0.0132`; transparent `64x64 $0.0084`; transparent `128x128 $0.00848` |
+| Create M-XL image, background | `POST /v2/create-image-pixflux-background` | Pixflux | Background-oriented pixflux generation; shares the identical `CreateImagePixfluxRequest` schema with the row above | no separate USD row found on the public pricing page — same request schema as `create-image-pixflux`, so likely priced identically; verify with a balance-before/after check before treating this as confirmed |
 | Create image S-XL (new) | `POST /v2/create-image-pixen` | Pixen | Text-to-image sprites, outline/detail controls, view/direction, transparent background | `32x32 $0.007`; `64x64 $0.00718`; `128x128 $0.00793`; `256x256 $0.0089`; `512x512 $0.0169` |
 | Generate S-M image (style) | `POST /v2/create-image-bitforge` | Bitforge | Small/medium text-to-image, style image, inpainting, init image, forced palette, transparent background | `32x32 $0.0071`; `64x64 $0.00716`; `128x128 $0.00797`; `200x200 $0.01122`; transparent `32x32 $0.00734`; transparent `64x64 $0.00738`; transparent `128x128 $0.00821`; transparent `200x200 $0.01285` |
 | Create S-XL image (Pro) | `POST /v2/generate-image-v2` | Pro image generation | Multiple candidates, reference images, style image, higher-cost candidate selection | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
@@ -50,6 +51,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Tool label | Endpoint | Useful for | Estimated price |
 |---|---|---|---|
 | Convert image to pixel art | `POST /v2/image-to-pixelart` | Regular image to pixel art | `64x64 $0.006`; `128x128 $0.00666`; `256x256 $0.01164` |
+| Convert image to pixel art (Pro) | `POST /v2/image-to-pixelart-pro` | Pro image-to-pixel-art conversion, exact-size flexibility beyond the base route's limits | no separate USD row found on the public pricing page — treat as Pro-tier cost (comparable to the other `up to 256x256 $0.095`/`341x341 $0.125`/`512x512 $0.185` Pro rows above) until confirmed |
 | Resize | `POST /v2/resize` | Pixel-art-aware resizing | `64x64 $0.01788`; `128x128 $0.01777` |
 | Remove background | `POST /v2/remove-background` | Transparent PNG foreground extraction | `64x64 $0.00554`; `128x128 $0.00554`; `256x256 $0.00593` |
 | Inpaint | `POST /v2/inpaint` | Non-Pro inpainting/editing | `64x64 $0.00716`; `128x128 $0.00797`; `200x200 $0.01122`; transparent `64x64 $0.00738`; transparent `128x128 $0.00821`; transparent `200x200 $0.01285` |
@@ -92,7 +94,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Create 8 directional objects | `POST /v2/create-8-direction-object` | 8-direction object | up to `84x84 $0.095`; up to `112x112 $0.125`; up to `168x168 $0.185` |
 | Animate object | `POST /v2/objects/{object_id}/animations` | Object animation, per direction | v3 4 frames `64x64 $0.0129`, `128x128 $0.0144`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create object state | `POST /v2/objects/{object_id}/states` | Object variant/state | single-direction up to `168x168 $0.095`; 8-direction up to `84x84 $0.095`, up to `112x112 $0.125`, up to `168x168 $0.185` |
-| Create tiles (Pro) | `POST /v2/create-tiles-pro` | Multiple tile variations | tile up to `42x42 $0.095`; up to `56x56 $0.125`; up to `85x85 $0.185` |
+| Create tiles (Pro) | `POST /v2/create-tiles-pro` | Multiple tile variations; also the shared endpoint behind MCP's `create_path_tiles` (`tile_feature: "roads"`) and `create_building_kit` (`tile_feature: "building"`), which have no REST route or pricing row of their own | tile up to `42x42 $0.095`; up to `56x56 $0.125`; up to `85x85 $0.185`; MCP `create_path_tiles`/`create_building_kit` likely bill on this same Pro rung — unconfirmed, no separate USD row exists to check against |
 | Generate pixel font (Pro) | `POST /v2/generate-font-pro` | Pro bitmap font generation | Generate a font atlas / pixel font from description and font controls | current public pricing page has no USD row; verify current usage before cost-sensitive calls |
 
 ## Prompt Enhancement

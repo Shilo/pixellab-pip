@@ -16,8 +16,8 @@ Checked against official REST v2 OpenAPI and MCP docs on 2026-07-04:
 - 1/8-direction object creation (MCP and REST): Pro Tools, 20-40 generations per call.
 - Map objects (`create_map_object` / `POST /map-objects`): documented separately from object Pro Tools; cost is not labeled — report or measure it rather than assuming.
 - `create-ui-asset` (MCP and REST): Pro, 20-40 generations.
-- Pro-labeled REST summaries: `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `image-to-pixelart-pro`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `inpaint-v3`, `edit-images-v2`, `generate-8-rotations-v2`. Treat as higher-cost even without exact counts.
-- Non-Pro-labeled image routes: `create-image-pixen`, `create-image-pixflux`, `create-image-pixflux-background`, `create-image-bitforge`. `animate-with-text-v3` and `generate-8-rotations-v3` are the cheap v3 animation/rotation family.
+- Pro-labeled REST summaries: `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `image-to-pixelart-pro`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `inpaint-v3`, `edit-images-v2`, `generate-8-rotations-v2`. Treat as higher-cost even without exact counts. MCP `edit_image` and `inpaint_image` are these same Pro routes (`edit-images-v2`/`inpaint-v3`, confirmed by field-level schema match, not the base `edit-image`/`inpaint`) — treat them as Pro-cost even when called via MCP; MCP `create_image_pro` is likewise `generate-image-v2`.
+- Non-Pro-labeled image routes: `create-image-pixen`/`create_image_pixen`, `create-image-pixflux`/`create_image_pixflux` (`-background` is a second URL for the identical PixFlux schema, same tier), `create-image-bitforge` (REST-only, no MCP tool). `animate-with-text-v3`/MCP `animate_image` and `generate-8-rotations-v3` are the cheap v3 animation/rotation family.
 - Do not lower `frame_count` as a cost optimization unless docs or a verified pricing response show frame count changes cost. Change documented cost drivers instead: route family, mode, direction count, candidate count, enhancement use, size.
 
 If exact current costs matter, refresh official docs or run a small balance-before/after test with explicit approval. Do not invent prices for routes whose docs only show a label.
@@ -26,14 +26,14 @@ If exact current costs matter, refresh official docs or run a small balance-befo
 
 | Asset | Cheap default | Use Pro only when |
 |---|---|---|
-| General images | `create-image-pixen` (small/single/icon iteration, outline/detail/view controls) or `create-image-pixflux` (general/background style) | Style-reference generation or high-quality sheet output is required and approved |
+| General images | `create-image-pixen`/`create_image_pixen` (small/single/icon iteration, outline/detail/view controls) or `create-image-pixflux`/`create_image_pixflux` (general/background style) | Style-reference generation or high-quality sheet output is required and approved |
 | Icon sheets | Propose a non-Pro/Pixen comparison or a smaller test first; ask whether quality or savings wins | User approves the Pro sheet after the tradeoff is named |
 | Characters | Standard mode or v3 | User accepts 20-40 generations for `pro` |
 | Character animation | Template mode when a template fits; else v3 custom; one direction first | User approves Pro cost |
 | Objects | For standalone visuals that don't need managed object IDs: a general-image/Pixen/PixFlux or isometric-tile route, labeled as not creating a managed object; map-object route when a map object is specifically needed (measure cost) | User accepts Pro Tools 20-40 generations |
 | Object animation | `mode='v3'` (documented default) | User explicitly approves Pro |
-| UI | Non-Pro general-image route for loose UI images (explain weaker structure); `generate-ui-v2` only if its cost is acceptable | Structured `create-ui-asset` is required and approved |
+| UI | Non-Pro general-image route for loose UI images (explain weaker structure); `generate-ui-v2` only if its cost is acceptable | Structured `create_ui_asset`/`create-ui-asset` is required and approved |
 | Image-to-pixel-art | `image-to-pixelart` when the size fits its limits | Pro needed and approved |
-| Inpaint/edit | Base `inpaint` / non-Pro edit routes | Pro capabilities required and cost accepted |
+| Inpaint/edit | Base `inpaint` / non-Pro `edit-image` **via REST** — MCP's `edit_image`/`inpaint_image` are Pro-tier only (`edit-images-v2`/`inpaint-v3`), so there is no cheap MCP path for this | Pro capabilities required and cost accepted, or MCP-first with no REST fallback available |
 
 When choosing a cheap route, name the tradeoff plainly (lower cost, possibly less candidate variety or weaker Pro-quality detail) and follow `usage-reporting.md` for cost reporting.

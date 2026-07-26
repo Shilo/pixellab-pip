@@ -42,8 +42,8 @@ Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` retu
 | Managed dressed state | MCP `create_character_state`; REST `create-character-state` | New managed character variant across rotations | Useful for dressed previews, not reusable isolated layers. |
 | Managed character animation | MCP `animate_character`; REST `characters/animations` / `animate-character` | Managed animation frames by direction | Good for base animation; template output may still introduce style drift. |
 | Single image edit | REST `edit-image` | One edited composite image | Best low-complexity base for single-frame layer extraction. |
-| Pro/multi image edit | REST `edit-images-v2` | One or more edited composite images | Useful for small batches or consistent edits, still composite-only. |
-| Inpaint | REST `inpaint` / `inpaint-v3`; website/editor Inpaint | Edited/inpainted composite image | Better when a mask can restrict the weapon/body region. |
+| Pro/multi image edit | REST `edit-images-v2`; MCP `edit_image` (matches this Pro/batch route, not base `edit-image`) | One or more edited composite images | Useful for small batches or consistent edits, still composite-only. |
+| Inpaint | REST `inpaint` / `inpaint-v3`; MCP `inpaint_image` (matches `inpaint-v3`, has `crop_to_mask`); website/editor Inpaint | Edited/inpainted composite image | Better when a mask can restrict the weapon/body region. |
 | Edit animation | REST `edit-animation-v2` | Edited/composited frames | Useful for adding equipment to 2-16 frames, then extracting per-frame layers. |
 | Transfer outfit | REST `transfer-outfit-v2` | Outfit-transferred/composited frames | Good for clothing/armor reskins, but not equipment layers. |
 | Estimate skeleton | REST `estimate-skeleton` | Keypoints with labels and z-index-like data | Useful to infer hardpoints and body regions. |
@@ -53,7 +53,7 @@ Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` retu
 Important official-doc nuance:
 
 - `edit-image`, `edit-images-v2`, `inpaint-v3`, `edit-animation-v2`, and `transfer-outfit-v2` are documented as returning edited images or frames, not native layer files.
-- MCP docs currently list managed character/state/animation tools, object/tile/UI helpers, and related utilities, but not generic image-edit or inpaint equivalents.
+- MCP now exposes generic raw-image tools alongside the managed character/state/animation/object/tile/UI helpers: `create_image_pixflux`/`create_image_pixen`/`create_image_pro` (+ `get_image`), `edit_image` (Pro, matches REST `edit-images-v2`), `inpaint_image` (Pro, matches REST `inpaint-v3`), and `animate_image` (matches REST `animate-with-text-v3`, no managed asset needed). MCP still has no equivalent for `edit-animation-v2`, `transfer-outfit-v2`, `estimate-skeleton`, or `animate-with-skeleton`.
 - `animate-with-skeleton` defaults are side/east in the public schema; RPG paperdoll workflows should set `view` and `direction` explicitly.
 
 ## Aseprite Changes-Only Layer Findings

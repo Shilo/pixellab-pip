@@ -22,7 +22,7 @@ For exact current schemas and tool lists, verify against the official [REST v2 d
 
 ## Service Boundaries
 
-The same asset type can appear across multiple surfaces. A character, object, tile, UI asset, font, or portrait-character conversion may have:
+The same asset type can appear across multiple surfaces. A character, object, tile, path tile, building kit, UI asset, font, portrait-character conversion, or raw image (generate/edit/inpaint/animate) may have:
 
 - A hosted MCP tool name.
 - A REST v2 endpoint path.

@@ -48,9 +48,9 @@ Sidescroller MCP `create_sidescroller_tileset` route:
 Isometric MCP `create_isometric_tile` route:
 
 - Required content field: `description`.
-- Primary shape field: `tile_shape`; use `thin` for floor slabs, `thick` for raised platforms, and `block` for cubes, chunky objects, or full-height terrain blocks.
+- Primary shape field: `tile_shape`; use `thin tile` for floor slabs, `thick tile` for raised platforms, and `block` for cubes, chunky objects, or full-height terrain blocks (default `block`) — same three values as REST, not shortened on MCP.
 - Other common controls include `size`, `outline`, `shading`, `detail`, `text_guidance_scale`, and `seed`.
-- REST `create-isometric-tile` uses different field names for the same ideas: `image_size`, `isometric_tile_size`, and `isometric_tile_shape` with values `thin tile`, `thick tile`, or `block`.
+- REST `create-isometric-tile` uses different field *names* for the same ideas: `image_size`, `isometric_tile_size`, and `isometric_tile_shape`, with the identical values `thin tile`, `thick tile`, or `block`.
 
 Path/road and building-kit MCP routes:
 
@@ -67,8 +67,8 @@ These labels are not symmetric with the MCP parameter names:
 |---|---|---|---|
 | `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. Not the same as `transition_size`. |
 | `Center tile description`, `Center Tile`, `platform center` | `create_sidescroller_tileset` | `lower_description` | Sidescroller MCP calls this the platform material/body. |
-| `thin floor`, `floor slab`, `flat tile` | `create_isometric_tile` | `tile_shape: "thin"` | REST uses `isometric_tile_shape: "thin tile"`. |
-| `thick platform`, `raised platform` | `create_isometric_tile` | `tile_shape: "thick"` | REST uses `isometric_tile_shape: "thick tile"`. |
+| `thin floor`, `floor slab`, `flat tile` | `create_isometric_tile` | `tile_shape: "thin tile"` | Same value on REST `isometric_tile_shape: "thin tile"` — only the field name differs. |
+| `thick platform`, `raised platform` | `create_isometric_tile` | `tile_shape: "thick tile"` | Same value on REST `isometric_tile_shape: "thick tile"`. |
 | `block`, `cube`, `full-height tile` | `create_isometric_tile` | `tile_shape: "block"` | Same value on REST `isometric_tile_shape`. |
 | `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
@@ -98,8 +98,8 @@ Tileset generators do not reliably enforce strict 1-bit black-and-white output f
 - Top-down terrain transitions are more reliable than sidescroller generation for full connected-shape white outlines. Do not burn repeated sidescroller prompt-only attempts on that outline goal without a new control route or user-approved post-process.
 - For exact niche constraints (strict palettes, monochrome, single-pixel rims, whole-shape sidescroller outlines), run a small proof test before batching. On a miss, suggest post-processing, reference/control routes, another PixelLab image route, or human-authored assets.
 
-## Fetching Results (top-down REST)
+## Fetching Results (top-down)
 
-After generation completes, fetch both result surfaces: poll `GET /background-jobs/{background_job_id}` for preview fields, then use `GET /tilesets/{tileset_id}` for the actual tile set, metadata, and generation parameters. The final user-facing tileset for a 16-tile result is the dual-grid 15-tileset 4x4 sheet assembled from `tileset.tiles[].image` in the exact order returned by `GET /tilesets/{tileset_id}`; name it plainly, such as `tileset.png` or `tileset-4x4.png`. Do not sort the tiles by `wang_N`, `original_position`, corner pattern, or any other inferred index, because those layouts can scramble the usable 16-tile sheet. Decode the returned tile PNGs in memory for this sheet; do not save separate per-tile PNG files unless the user asks for individual tiles or a package.
+On the MCP route, poll `get_topdown_tileset(tileset_id)` — it returns status, tile data, download links, and base tile IDs directly, with no separate preview-vs-final split. On the REST route, fetch both result surfaces: poll `GET /background-jobs/{background_job_id}` for preview fields, then use `GET /tilesets/{tileset_id}` for the actual tile set, metadata, and generation parameters. The final user-facing tileset for a 16-tile result is the dual-grid 15-tileset 4x4 sheet assembled from the tiles' `image` data in the exact order returned by the getter (`get_topdown_tileset` or `GET /tilesets/{tileset_id}`); name it plainly, such as `tileset.png` or `tileset-4x4.png`. Do not sort the tiles by `wang_N`, `original_position`, corner pattern, or any other inferred index, because those layouts can scramble the usable 16-tile sheet. Decode the returned tile PNGs in memory for this sheet; do not save separate per-tile PNG files unless the user asks for individual tiles or a package.
 
 The background job `last_response` may include full-sheet `image` and `quantized_image` fields; treat these as previews, not the final sheet. Save/show `image` as the primary preview (more likely to match the final tiles) and `quantized_image` as secondary. These fields may be base64 raw RGBA buffers rather than PNG, so decode and convert before writing PNGs. Public REST docs expose no tileset ZIP/export endpoint for Wang, dual-grid 15-tileset, or 3x3 formats; use the returned tile PNGs for local packaging only when the user asks.

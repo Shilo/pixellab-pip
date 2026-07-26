@@ -72,8 +72,8 @@ Local tooling may not synthesize missing equipment art or repaint broken pixels 
 | User need | First route | Fallbacks | Output label |
 |---|---|---|---|
 | Fast AI-generated armed/dressed animation | Generate or edit a full character spritesheet with equipment baked in | Asset-combiner workflow; first-frame video-to-sheet; managed state plus animation | `baked equipment composite`, not reusable layer |
-| Single-frame fitted weapon/accessory layer | REST `edit-image` or `edit-images-v2`, then diff extraction | `inpaint-v3` with mask; Aseprite changes-only layer; second remove-character edit | `client-extracted layer` if QA passes |
-| Short animated equipment layer | REST `edit-animation-v2`, then per-frame diff extraction | Per-frame `edit-images-v2`; masked per-frame inpaint; editor cleanup | `client-extracted animation layer` if temporal QA passes |
+| Single-frame fitted weapon/accessory layer | REST `edit-image` or `edit-images-v2` (MCP `edit_image` matches `edit-images-v2`), then diff extraction | `inpaint-v3` with mask (MCP `inpaint_image`); Aseprite changes-only layer; second remove-character edit | `client-extracted layer` if QA passes |
+| Short animated equipment layer | REST `edit-animation-v2` (no MCP equivalent), then per-frame diff extraction | Per-frame `edit-images-v2`/MCP `edit_image`; masked per-frame inpaint (`inpaint-v3`/MCP `inpaint_image`); editor cleanup | `client-extracted animation layer` if temporal QA passes |
 | Outfit/armor over animation | REST `transfer-outfit-v2`, then extraction only if needed | `edit-animation-v2`; managed state; composite-only | Usually `composited frames`; layer only if QA passes |
 | Dressed preview/state | MCP `create_character_state` or REST `create-character-state` | Image edit routes | `managed character variant` or `composite` |
 | Managed base animation | MCP `animate_character`; REST `characters/animations` | REST v3/pro custom animation | `base animation frames` |

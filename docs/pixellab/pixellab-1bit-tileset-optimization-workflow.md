@@ -43,7 +43,7 @@ If the user needs a production-ready strict 1-bit tileset, prefer one of these r
 
 PixelLab publicly documents `Create Tileset` as a tool that generates tilesets from textures or text descriptions and can export to Wang, dual-grid 15-tileset, and 3x3 layouts. Its top-down mode asks for inner/outer terrain descriptions, while sidescroller mode uses center/top tile descriptions.
 
-Current MCP docs describe top-down tilesets as 16 corner-combination Wang tilesets, with `transition_size` values such as `0`, `0.25`, and `0.5`. They describe sidescroller tilesets as 16 transparent platform tiles, where `lower_description` is the platform material and `transition_description` is the decorative top layer.
+Current MCP docs describe top-down tilesets as 16 corner-combination Wang tilesets (25 at `transition_size: 1.0`), with `transition_size` values `0.0`, `0.25`, `0.5`, or `1.0`. They describe sidescroller tilesets as 16 transparent platform tiles, where `lower_description` is the platform material and `transition_description` is the decorative top layer.
 
 Current REST v2 schema exposes the same core fields and also exposes reference and palette controls that MCP may not expose: `lower_reference_image`, `upper_reference_image`, `transition_reference_image`, and `color_image`. Those controls are useful later, but they change the experiment from text-only MCP prompt testing.
 

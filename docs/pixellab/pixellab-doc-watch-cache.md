@@ -154,6 +154,7 @@ Recommended flow:
 
 Common files to update:
 
+- `docs/pixellab/pixellab-mcp-vs-rest-route-parity.md` — reconcile any MCP tool add/remove/rename here first; it is the authoritative MCP-vs-REST parity map the other files below should agree with
 - `skills/pixellab-pip/SKILL.md`
 - `skills/pixellab-pip/references/official-pixellab-documentation.md`
 - `skills/pixellab-pip/references/prompt-limits.md`
@@ -211,6 +212,7 @@ Rules:
 - Preserve existing repo style and avoid redundant docs.
 
 Likely files to inspect/update:
+- docs/pixellab/pixellab-mcp-vs-rest-route-parity.md — reconcile MCP tool/REST endpoint drift here first
 - skills/pixellab-pip/SKILL.md
 - skills/pixellab-pip/references/official-pixellab-documentation.md
 - skills/pixellab-pip/references/prompt-limits.md

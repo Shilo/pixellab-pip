@@ -8,8 +8,8 @@ Sources reviewed:
 
 - [ClawHub PixelLab AI Skill page](https://clawhub.ai/uncmatteth/skills/pixellab-ai) and [package](https://clawhub.ai/api/v1/packages/pixellab-ai) / [version](https://clawhub.ai/api/v1/packages/pixellab-ai/versions) metadata.
 - A full download of the v1.5.5 package (all 60 files), unpacked for side-by-side reference at the sibling folder `pixellab-ai-skill/` next to this repository (not part of this repo).
-- Live checks of `https://api.pixellab.ai/v2/openapi.json` (68 paths) and `https://api.pixellab.ai/v1/openapi.json` (8 paths) on 2026-07-04.
-- The full current Pip repository: `skills/pixellab-pip/SKILL.md`, all 23 runtime references, bundled `assets/` helpers and `blueprints/` examples, `dev-tools/`, `tests/`, and `docs/`.
+- Live checks of `https://api.pixellab.ai/v2/openapi.json` (68 paths) and `https://api.pixellab.ai/v1/openapi.json` (8 paths) on 2026-07-04. (As of the 2026-07-26 cache refresh, the v2 OpenAPI has 74 paths — some of that growth is the 2026-07-19 DELETE/list additions described below; the 2026-07-26 MCP tool wave itself added MCP tools only, no new REST paths. The exact path-by-path reconciliation from 68→74 has not been re-verified here — re-diff the cached `openapi.json` before citing an exact count.)
+- The full current Pip repository: `skills/pixellab-pip/SKILL.md`, all 29 runtime references, bundled `assets/` helpers and `blueprints/` examples, `dev-tools/`, `tests/`, and `docs/`.
 
 ## Summary
 
@@ -238,4 +238,4 @@ Every feature from [When To Use PixelLab AI Skill Instead](#when-to-use-pixellab
 
 ## Runtime Reference Decision
 
-A new runtime reference is added only when Pip gains a repeated workflow that cannot fit the existing files, never to match PixelLab AI Skill's reference count. That trigger fired once since the prior review: `references/blueprint.md` (the 23rd reference) for the replayable/shareable generation workflow, with a `blueprints/` folder. Pip's 23 runtime references cover its scope more deeply than the sibling in every shared area (routing, prompting, cost, jobs, layering, reporting, localization, credentials, blueprints). Remaining standing examples for a future reference or bundled tool are a real manifest runner or a dedicated local asset validator.
+A new runtime reference is added only when Pip gains a repeated workflow that cannot fit the existing files, never to match PixelLab AI Skill's reference count. That trigger fired once since the prior review: `references/blueprint.md` (the 23rd reference at the time) for the replayable/shareable generation workflow, with a `blueprints/` folder. Pip now has 29 runtime references — it covers its scope more deeply than the sibling in every shared area (routing, prompting, cost, jobs, layering, reporting, localization, credentials, blueprints). Remaining standing examples for a future reference or bundled tool are a real manifest runner or a dedicated local asset validator.

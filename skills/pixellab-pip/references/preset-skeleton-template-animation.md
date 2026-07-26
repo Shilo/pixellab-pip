@@ -6,7 +6,7 @@ SKILL.md holds the global rules this file does not restate: MCP-first routing wi
 
 Two families: managed preset/template animation on an existing character, and raw skeleton/keypoint animation. Custom skeleton authoring beyond estimated/exported keypoints is future-facing; route keypoint work to the documented REST endpoints below.
 
-PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the skeleton-based routes below — both preset/template ids and raw keypoints — because the skeleton model is older and text animation is simpler with better results. Default to `animate-with-text-v3` (see `animation.md`); use the skeleton routes when the user explicitly wants a named preset motion or to own/edit keypoints.
+PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the skeleton-based routes below — both preset/template ids and raw keypoints — because the skeleton model is older and text animation is simpler with better results. Default to v3 text animation (see `animation.md`) — MCP `animate_character(mode="v3", action_description=...)` for a managed character, MCP `animate_image` for a raw frame, REST `animate-with-text-v3` as the fallback; use the skeleton routes when the user explicitly wants a named preset motion or to own/edit keypoints.
 
 ## Core Distinction
 
@@ -17,9 +17,9 @@ PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the 
 
 ## MCP vs REST v2 Field Coverage
 
-MCP `animate_character` handles normal managed-character template work when its visible schema exposes template mode, v3 custom mode, explicit `directions`, and `frame_count` (v3). When the visible schema exposes pro mode with cost confirmation, it can route pro animation. Inspect the visible schema before relying on `mode`, `frame_count`, `ai_freedom`, `custom_start_frame`, `end_frame`, `keep_first_frame`, `pro`, `confirm_cost`, cost reporting, or any raw-skeleton support.
+MCP `animate_character` covers managed-character template, v3 custom, and pro modes: `mode`, `template_animation_id`, `directions`, `frame_count` (v3 only), `ai_freedom` (template only), `custom_start_frame_base64`/`_url`, `end_frame_base64`/`_url`, `keep_first_frame`, `animation_group_id`, and `confirm_cost` (pro) are all in the current tool schema — re-check the visible schema only when a call rejects a field. It has no raw-skeleton support at all.
 
-It is not field-for-field equivalent to REST `/characters/animations`. REST exposes extra exact-control fields: `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, v3-only `custom_start_frame`/`end_frame`, and inline `enhance_prompt` (v3 mode). Use REST when those fields matter, for integration code, or to validate exact API behavior.
+It is not field-for-field equivalent to REST `/characters/animations`. REST exposes extra exact-control fields MCP lacks: `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` (v3 mode). Use REST when those fields matter, for integration code, or to validate exact API behavior.
 
 ## Managed Preset Animation (MCP)
 
@@ -43,7 +43,7 @@ animate_character(
 )
 ```
 
-To turn a reference image or GIF frame into a managed character first, use REST `create-character-v3` with required `description`, `reference_image`, `template_id="mannequin"`, and the appropriate `view`/`no_background`, then animate the returned `character_id` with MCP once the character completes (verified for a horse-headed biped from a source GIF frame).
+To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only mode that accepts a reference sprite, always outputs 8 directions, and prefers the URL form over inline base64 (MCP clients truncate large inline base64) — then animate the returned `character_id` with MCP once the character completes (verified for a horse-headed biped from a source GIF frame). Fall back to REST `create-character-v3` (`description`, `reference_image`, `template_id="mannequin"`, `view`/`no_background`) when MCP is unavailable or `template_id`/`no_background`/`enhance_prompt` matter.
 
 For a newly created quadruped:
 
@@ -83,6 +83,8 @@ GET  https://api.pixellab.ai/v2/background-jobs/{job_id}
 GET  https://api.pixellab.ai/v2/characters/{character_id}
 GET  https://api.pixellab.ai/v2/characters/{character_id}/zip
 ```
+
+MCP `get_character` returns a download link but not the full ZIP bundle — use the REST `/zip` route above when a packaged archive is required.
 
 Request shape:
 
@@ -214,7 +216,7 @@ Programmatic steps:
 3. Call `POST /v2/animate-with-skeleton` with `image_size`, `reference_image`, `skeleton_keypoints`, and explicit `view`/`direction`.
 4. Add `init_images`, `inpainting_images`, `mask_images`, or `color_image` when the user supplied those roles or the route requires them.
 
-`estimate-skeleton` returns a skeleton for one pose; it does not invent a walk/run sequence. `animate-with-skeleton` needs a keypoint sequence, so with only one estimated pose either ask for/create more poses, author a sequence in Aseprite, use managed template animation (built-in walk/idle/jump), or use REST custom text animation (motion without skeleton ownership).
+`estimate-skeleton` returns a skeleton for one pose; it does not invent a walk/run sequence. `animate-with-skeleton` needs a keypoint sequence, so with only one estimated pose either ask for/create more poses, author a sequence in Aseprite, use managed template animation (built-in walk/idle/jump), or use v3 custom text animation (motion without skeleton ownership) — MCP `animate_character(mode="v3")`/`animate_image`, REST `animate-with-text-v3` as fallback.
 
 ### View/Direction Trap And Defaults
 

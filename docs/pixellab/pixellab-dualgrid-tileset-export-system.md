@@ -81,7 +81,7 @@ Observed compact PixelLab tilesets usually include:
 - `pattern_system.terrain_encoding.upper: 1`
 - `pattern_system.terrain_encoding.wildcard: 255`
 
-Top-down exports are not always compact across every PixelLab surface. Current MCP docs describe `transition_size` as a float with `0`, `0.25`, and `0.5` as guidepost values; REST schema and local live findings also include expanded behavior for `transition_size: 1.0`. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
+Top-down exports are not always compact across every PixelLab surface. Current MCP docs describe `transition_size` as a float with `0.0`, `0.25`, `0.5`, or `1.0` (full-tile transition) as guidepost values — matching REST's own documented range. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
 
 Each returned tile may include:
 
@@ -107,6 +107,8 @@ MCP routes:
 - `get_sidescroller_tileset`
 - `create_tiles_pro`
 - `get_tiles_pro`
+- `create_path_tiles` — connectable path/road tile set (18 configs); no REST endpoint of its own, shares `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro`
+- `create_building_kit` — floor + connectable walls/doorways/pillar/stairs; also no dedicated REST endpoint, same shared getter
 
 REST v2 routes:
 
@@ -125,7 +127,7 @@ Current MCP `create_topdown_tileset` docs expose the main descriptions, transiti
 
 REST sidescroller tileset creation uses `CreateTilesetSidescrollerRequest`. It uses `lower_description` for the platform body and `transition_description` for the top/surface layer. REST exposes `lower_reference_image`, `transition_reference_image`, and `color_image`. Current MCP sidescroller docs expose the main descriptions, tile size, style controls, guidance/adherence controls, `base_tile_id`, and seed, but not the REST reference or palette image fields.
 
-`create_tiles_pro` and `POST /v2/create-tiles-pro` are for independent shaped tile variants, not a connected Wang/DualGrid terrain tileset.
+`create_tiles_pro` and `POST /v2/create-tiles-pro` are for independent shaped tile variants, not a connected Wang/DualGrid terrain tileset. `create_path_tiles` is the connectable member of this family (path/road overlays) and `create_building_kit` produces connectable walls — neither is a Wang terrain tileset, and neither has a REST endpoint of its own (REST folds all three into `create-tiles-pro` via `tile_feature`).
 
 ## Website And Aseprite Boundaries
 

@@ -130,6 +130,6 @@ has somewhere to go. Options, cheap→robust:
    stitch into one 16-frame loop. Distinct endpoints force real turning; equal per-segment frame
    counts give constant speed; ending on S closes the loop. This also directly serves the
    16-direction ambition (interpolate between 8 anchors → 16 in-betweens).
-3. **`generate-8-rotations` alone** if 8 discrete directions (no smooth in-betweens) is acceptable.
+3. **`generate-8-rotations-v2`/`-v3` alone** if 8 discrete directions (no smooth in-betweens) is acceptable.
 
 The `360-scoresheet.html` still lets you manually confirm the negative result per-phrase.

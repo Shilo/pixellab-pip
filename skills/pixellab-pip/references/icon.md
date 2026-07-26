@@ -6,9 +6,9 @@ Use this reference for skill/ability/spell/action-bar/hotbar icons, inventory it
 
 Route by icon size first:
 
-- **`16–31px` single icon → `create-image-pixen` (the "new" / Pixen model); Pro is unreliable for a clean icon below `32px`.** Confirm the route before generating unless the user named the Pixen model (route only — cost-routing and batch-approval still apply). Recipe: `detail: low detail`, `outline: single color black outline`, `view` to suit the subject, `no_background: true`. Pixen returns one image per call, so one item per job. Optional: clamp the palette to ~16–32 colors (`aseprite-cli.md`). Never use `create-image-bitforge` for icons.
-- **`16–31px` sheet or large set → assemble locally; never generate the sheet in one call.** No route honors sub-32px cell math; the sheet comes back with fewer, larger cells on its own grid, and the missing cells make it unrepairable locally. Pixen one-item-per-job then assemble locally (clean; N paid jobs, get batch approval per SKILL.md), or a guardrailed Pro `generate-image-v2` batch (~64 candidates per job) then cull the muddy ones. State the tradeoff and let the user choose.
-- **`32px+` icon or sheet → `generate-image-v2` (Pro).** Guardrail the prompt: bold single-color black outline, low detail, limited palette, no gradients/noise/stray pixels. On a cheap/budget request, read `cost-routing.md` and offer a Pixen comparison or smaller test first. Use `create-image-pixen` here when the user wants a cheap attempt, exact `detail`/`outline`/`view` controls, or fast iteration over variety; verify its output reads as the requested icon type.
+- **`16–31px` single icon → MCP `create_image_pixen`/`create-image-pixen` (the "new" / Pixen model); Pro is unreliable for a clean icon below `32px`.** Confirm the route before generating unless the user named the Pixen model (route only — cost-routing and batch-approval still apply). Recipe: `detail: low detail`, `outline: single color black outline`, `view` to suit the subject, `no_background: true`. Pixen returns one image per call, so one item per job. Optional: clamp the palette to ~16–32 colors (`aseprite-cli.md`). Never use `create-image-bitforge` for icons (no MCP equivalent either).
+- **`16–31px` sheet or large set → assemble locally; never generate the sheet in one call.** No route honors sub-32px cell math; the sheet comes back with fewer, larger cells on its own grid, and the missing cells make it unrepairable locally. Pixen one-item-per-job then assemble locally (clean; N paid jobs, get batch approval per SKILL.md), or a guardrailed Pro `create_image_pro`/`generate-image-v2` batch (~64 candidates per job) then cull the muddy ones. State the tradeoff and let the user choose.
+- **`32px+` icon or sheet → MCP `create_image_pro`/`generate-image-v2` (Pro).** Guardrail the prompt: bold single-color black outline, low detail, limited palette, no gradients/noise/stray pixels. On a cheap/budget request, read `cost-routing.md` and offer a Pixen comparison or smaller test first. Use `create_image_pixen`/`create-image-pixen` here when the user wants a cheap attempt, exact `detail`/`outline`/`view` controls, or fast iteration over variety; verify its output reads as the requested icon type.
 
 Do not default to object generation (`create_1_direction_object` / `create-1-direction-object`), `create_tiles_pro`, `generate-ui-v2`, or `create-ui-asset` for icons. Object routes produced noisy/downscaled-looking icons with broken contours and weak 32px clarity in testing — avoid them for any icon request, even when the subject is a weapon, potion, or prop. Use UI routes only when the user asks for the slot, button, panel, frame, or container UI itself.
 
@@ -66,6 +66,8 @@ Item-icon specifics:
   "no_background": false
 }
 ```
+
+MCP `create_image_pro`/`create_image_pixen` take flat `width`/`height` integers instead of a nested `image_size` object; same values, different shape.
 
 Set `no_background: true` for item icons and requested-transparent skill icons.
 
