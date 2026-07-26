@@ -1274,3 +1274,34 @@ The strongest prior lead remains Batch 32's `glow rising around an entire bottom
 the earlier plural-wisp layouts, not any of these five long prompts. A next iteration should be
 medium-length: preserve `glow rising around` as the spatial relation, avoid every player/compositing
 term, and describe the low viewing angle without detailed ring geometry.
+
+### Reassessment of Batch 37
+
+Batch 37 was visually the most promising long-prompt family despite failing the reusable-layer
+constraint. Its character references did two things at once: they caused Pixen to draw a character,
+but they also gave the surrounding glow a clear scale, upright orientation, and rear/side/front
+relationship. The shell composition should therefore remain the branch under test. The next two
+batches remove the character references while retaining its shallow angle, elliptical glow, upright
+surrounding form, and asymmetric height from back to front.
+
+### Batch 38: Batch 37 without character cues
+
+All three requests failed. One became a decorated translucent dome, one became a tiny landscape
+inside a capsule, and one became an oval artifact on a stand. Removing `character`, `player`, and
+`footprint` did prevent literal people, but `upright aura shell` was no longer anchored to a status
+effect and became a physical enclosing object. The useful composition from Batch 37 did not survive
+simple deletion of its character cues.
+
+### Batch 39: corona substitution
+
+All three requests failed as reusable auras. They produced an upright portal, an ornate cylindrical
+cage/platform, and a radiant mirror-like object. Replacing `shell` with `translucent corona` avoided
+characters but strengthened the upright object/portal interpretation. The flat oval base survived,
+yet the vertical energy stood on it as a separate object instead of wrapping naturally around it.
+
+The combined result changes the earlier conclusion: character wording was not merely contamination
+in Batch 37; it was the spatial anchor that made the energy read as an aura. Deleting it removes the
+figure but also removes the aura relationship. `Shell` and `corona` cannot independently carry that
+relationship in Pixen. The next useful experiment should not keep substituting aura nouns. It should
+test a non-character scale anchor or an explicit empty status-effect slot while retaining Batch 37's
+successful rear/side/front composition.
