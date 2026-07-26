@@ -10,7 +10,7 @@ Last reviewed: 2026-07-15.
 
 GUI icons are the small pictorial marks a game shows outside the inventory grid: emojis, chat and social reactions, status and buff markers, map pins, and toolbar glyphs. This page covers those. Inventory, equipment, loot, and pickup icons live in [item-icons.md](item-icons.md); ability and hotbar icons live in [skill-icons.md](skill-icons.md); the panels, frames, and slots that contain icons live in [gameplay-gui.md](gameplay-gui.md).
 
-The animal-face emoji set is the first showcased example and the page's smallest-canvas workflow: 25 individually generated `16x16` emojis, each quantized to 8 colors, assembled into one `80x80` sheet. It is also the clearest demonstration of the `16px` Pixen route, which is the only image route that generates at `16x16` at all.
+The animal-face emoji set is the first showcased example and the page's smallest-canvas workflow: 25 individually generated `16x16` emojis, each quantized to 8 colors, assembled into one `80x80` sheet. It is also the clearest demonstration of the `16px` Pixen route for clean, individually controlled icons.
 
 ## Contents
 
@@ -35,7 +35,7 @@ Source inputs: text-only request. No reference images, style images, masks, or p
 
 Route: PixelLab REST v2 `create-image-pixen`, one call per animal. Pixen returns a single image per call, so a 25-emoji set is 25 jobs rather than one sheet generation. That is the deliberate tradeoff at this size: the alternative — a `generate-image-v2` batch culled down to 25 — is unreliable for clean icons below `32px`.
 
-Pixen is also the route that makes `16x16` possible. Its `image_size` accepts a per-axis minimum of `16` with both axes divisible by `4`, and `16x16` clears its `32x32` area floor. `create-image-pixflux` shares the same area wording but rejects `16x16` outright, and REST `create-character-v3` and `create-character-pro` floor at `32`. See [../pixellab/pixellab-image-size-limits.md](../pixellab/pixellab-image-size-limits.md).
+Pixen's `image_size` accepts a per-axis minimum of `16` with both axes divisible by `4`, and `16x16` clears its `32x32` area floor. Pro and BitForge also accept `16x16`, but Pro lacks Pixen's detail/outline controls and BitForge tested substantially worse; `create-image-pixflux` rejects `16x16` outright. REST `create-character-v3` and `create-character-pro` floor at `32`. See [../pixellab/pixellab-image-size-limits.md](../pixellab/pixellab-image-size-limits.md).
 
 Prompt preparation: agent-optimized. Each `description` names one animal and its own palette, then closes with a shared style clause — `flat shading, hard edges, simple geometry, few colors, thick chunky pixels` — so the 25 separate jobs land in one style. The per-image style controls Pixen exposes natively (`detail`, `outline`, `view`, `direction`) carry the rest of the intent, so the prompt does not restate it.
 
@@ -176,7 +176,7 @@ Findings:
 
 ## Findings
 
-REST `create-image-pixen` is the best route currently showcased for `16px` GUI icons and emojis. It is the only image route that generates at `16x16`, and its native `detail`, `outline`, `view`, and `direction` controls hold a flat readable style at a size where `generate-image-v2` adds detail the canvas cannot carry.
+REST `create-image-pixen` is the best route currently showcased for `16px` GUI icons and emojis. Its native `detail`, `outline`, `view`, and `direction` controls hold a flat readable style at a size where `generate-image-v2` adds detail the canvas cannot carry.
 
 One emoji per call is the cost shape to plan around. Pixen returns a single image per call, so a set of N emojis is N jobs — cheap individually (~`$0.008` at `16x16`) but worth approving as a batch before starting. In exchange, every icon gets its own prompt, its own palette, and its own seed, which is what makes a set of individually distinct emojis possible at all.
 

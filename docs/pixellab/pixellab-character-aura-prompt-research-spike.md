@@ -1539,3 +1539,218 @@ bobbed. Separate per-cell animation worked technically but did not satisfy the r
 sheet workflow. The blueprint's current low-invention flicker/pulse action is the least aggressive
 tested wording, not a proven visual solution. Always report technical frame validity separately from
 visual acceptability.
+
+## Next Pro Static-Aura Test Plan
+
+The next phase returns to Create Image Pro and tests static images only. Animation is out of scope
+until a static prompt family is reliable.
+
+### Why one universal prompt is the wrong target
+
+The current blueprint hard-codes one successful morphology:
+
+> fully contained symmetrical {{aura theme | default: energy}} aura with vertical power spikes and a bottom energy ring
+
+`Vertical power spikes` is doing two jobs: it establishes an upright, gameplay-facing silhouette and
+it dictates a narrow flame/crystal/lightning-like shape language. Removing it without replacing its
+orientation role caused central objects, top-down disks, and lost aura identity in earlier tests.
+
+The desired expansion also contains three incompatible compositing contracts:
+
+1. **Rear-wall aura:** upright energy sits behind and around the future character. Its center may
+   contain natural aura energy; a forced hole is undesirable.
+2. **Ground-only aura:** a ring, circle, or textured status effect lies on the ground. It has no
+   upright wall or emitted spikes.
+3. **Foreground-overlay aura:** a thick power-up border renders in front of the character while its
+   center stays transparent so the character remains visible.
+
+A single loose phrase cannot state all three without contradiction. The research target is one
+reliable minimal prompt per family, followed later by one blueprint mode selector that resolves to
+the tested full prompt. The theme remains a separate literal scalar. Do not change the production
+blueprint until a new prompt survives an unseeded repeat.
+
+### Terminology taken from external references
+
+- Pixel-art aura packs describe status effects as appearing **around or under units**, using glowing
+  circles, pulsing energy, or animated elements. That supports separating upright/around effects
+  from ground-only effects instead of treating them as one prompt family. See [Aura - Effect Pixel
+  Art](https://sanctumpixel.itch.io/aura-effect-pixel-art).
+- Effekseer treats a ring as its own circular renderer with independently shaped inner and outer
+  rings. Applying an image to the ring is specifically presented as useful for shock waves and
+  auras. This supports testing `textured energy ring` as a ground-only noun rather than adding
+  `filled`, `wide`, or `flat`, which failed in Pro. See [Effekseer circular-particle
+  tutorial](https://effekseer.github.io/Help_Tool/en/ToolTutorial/06.html).
+- Ragnarok Online describes its classic aura as energy condensed around the character. This is a
+  useful reminder that an aura does not require tall spikes or a violent emission. See the
+  [Ragnarok Aura overview](https://ragnarok.fandom.com/wiki/Aura).
+- The supplied [RPG Maker MV Super Warrior
+  Aura](https://manugamingcreations.itch.io/rpg-maker-mv-super-warrior-aura-loop) and [RPG Maker MZ
+  Effekseer version](https://manugamingcreations.itch.io/rpg-maker-mz-effekseer-animation-super-warrior-aura-loop)
+  are marketed as looping visual-state effects. Visual inspection shows a distinct foreground
+  contract: a thick teardrop/capsule-shaped luminous border, an open center that reveals the
+  character, and a strong lower-front flare. This is not the same composition as the current
+  rear-wall ring aura.
+
+These sources provide vocabulary and composition hypotheses, not prompt guarantees. Earlier Pixen
+research showed that production terminology can turn into literal objects; every term below must be
+validated visually in Pro.
+
+### Fixed test controls
+
+Use these controls for every discovery call so prompt wording remains the principal variable:
+
+| Field | Test value |
+|---|---|
+| Route | `POST /v2/generate-image-v2` |
+| Size | `64x64` |
+| Background | `no_background: true` |
+| Theme | `energy` during structural discovery |
+| Seed | omitted |
+| Style/reference images | none |
+| Prompt enhancement | none |
+| Expected response | sixteen native-size candidates; verify the actual response |
+| Observed usage baseline | twenty generations per call |
+
+Do not seed-lock the broad discovery prompts. Seed had a large effect in the prior Pro tests, so a
+prompt must work across fresh random seeds rather than win only a same-seed comparison. Use a
+same-seed A/B only later to attribute one narrow wording change after a viable family exists.
+
+Do not add a long negative clause. Pro has no `negative_description` field, and inline exclusions
+previously leaked unwanted `object`, `emblem`, `character`, and `empty-center` concepts into the
+composition. The foreground family is the one exception in intent: transparent central space is a
+required positive part of that asset, so it must be stated and its portal risk measured.
+
+### Discovery matrix
+
+Run the two primary prompts in each family first. They are intentionally different semantic tests,
+not minor synonym variations. Run the fallback only when both primary prompts fail that family.
+
+#### A. Rear-wall aura
+
+The test must preserve the current prompt's orientation and ring anchor while removing its spike
+morphology.
+
+| ID | Prompt | What it isolates | Principal risk |
+|---|---|---|---|
+| `RW-A` | `fully contained symmetrical energy aura rising around a bottom energy ring` | A spatial relationship replaces the spike noun while retaining upright distribution around the ring. | `rising` may still bias flame-like motion or concentrate energy in the center. |
+| `RW-B` | `fully contained symmetrical upright energy aura with a bottom energy ring` | `upright` supplies orientation without prescribing spikes, wisps, flames, or particles. | The unconstrained aura may become an emblem, column, or top-down ring. |
+| `RW-C` fallback | `fully contained symmetrical energy aura as an upright backdrop above a bottom energy ring` | Explicitly tests a rear-wall/depth category rather than a morphology. | `backdrop` may become a scene panel or detach the ring from the aura. |
+
+The existing `vertical power spikes` prompt is the historical control and does not require another
+paid call in discovery. A new rear-wall prompt must beat its rigidity without losing its reliability.
+
+#### B. Ground-only aura
+
+The desired result is a simple ring, circle, or textured status layer on the ground, closer to the
+foot-focused readability associated with Ragnarok-style auras. Upright emissions are a failure in
+this family.
+
+| ID | Prompt | What it isolates | Principal risk |
+|---|---|---|---|
+| `GR-A` | `fully contained energy ground aura ring` | The shortest direct category test: ground aura plus ring, without spike or emission language. | It may become a hard platform or a thin empty outline. |
+| `GR-B` | `fully contained textured energy ring in low top-down view` | Effekseer-derived textured-ring language tests visual richness without `filled`, `wide`, or `flat`. | Texture may become material, runes, or a discrete object. |
+| `GR-C` fallback | `fully contained circular energy status aura on the ground plane` | Status-effect vocabulary tests whether Pro produces a readable gameplay indicator rather than an object. | `circular` and `ground plane` may create an AoE disk, emblem, or environment patch. |
+
+Fully top-down presentation is valid here, unlike the rear-wall family. The result still fails when
+it becomes a physical platform, portal, emblem, scenery patch, or discrete object in the center.
+
+#### C. Foreground-overlay power-up aura
+
+This family targets the supplied Super Warrior reference: a luminous foreground border around
+transparent character space. It deliberately reverses the prior rule against empty centers, but
+only for this mode.
+
+| ID | Prompt | What it isolates | Principal risk |
+|---|---|---|---|
+| `FO-A` | `fully contained symmetrical energy power-up aura outline with a transparent center` | Functional power-up vocabulary plus an outline tests the simplest foreground shell. | `power-up` may imply a fighter silhouette; `transparent center` may become a portal. |
+| `FO-B` | `fully contained symmetrical teardrop energy aura border around transparent space` | The reference's visible silhouette is specified without mentioning a player or character. | `teardrop` may become a gem, shield, or rigid frame. |
+| `FO-C` fallback | `fully contained symmetrical foreground energy aura shell with an open center` | Compositing/depth vocabulary tests a layer intended to sit above the character. | `foreground`, `shell`, and `open center` may create a capsule, doorway, or scene. |
+
+Do not mention `fighter`, `player`, `body`, `character`, or `silhouette` in the PixelLab description.
+Those words supplied useful scale in Pixen but repeatedly generated the forbidden subject. Judge
+the open center from alpha and visual structure rather than prompting for a missing person.
+
+### Candidate scoring
+
+Score every returned candidate individually before comparing prompts. A candidate passes the global
+gate only when it is:
+
+- a valid transparent `64x64` image;
+- an isolated aura asset rather than a character, scene, platform, emblem, portal, or central object;
+- contained at the top and sides, with bottom contact accepted only when it belongs to the intended
+  lower ring or ground effect;
+- free of text and label-like marks; and
+- visually readable as a modular game effect at native size.
+
+Then apply the family gate:
+
+| Family | Required composition |
+|---|---|
+| Rear wall | Upright front/low-top-down presentation; energy occupies the rear and may continue along the sides or as restrained front accents; the center is natural aura, not a forced hole. |
+| Ground only | All meaningful effect structure lies on the ground plane; the center may be transparent or effect-textured but contains no discrete object; no upright wall, column, or emitted spikes. |
+| Foreground overlay | A continuous luminous border surrounds visibly transparent central space; a lower-front flare or arc is allowed; the border reads as energy rather than a rigid frame or portal. |
+
+Use these prompt-level thresholds:
+
+- **Promising:** at least `8/16` candidates pass the family gate and the failures are varied rather
+  than one systematic wrong interpretation.
+- **Blueprint-worthy:** at least `12/16` candidates pass on each of two independent unseeded calls,
+  with no recurring character generation and no dominant scene/platform/portal failure.
+- **Flexible:** after reliability passes, a broad theme stress call preserves the family contract in
+  at least `8/16` candidates and produces at least three materially different effect morphologies.
+
+Pixel hashes, dimensions, and transparency do not establish composition. The numbered review sheet
+and human visual scoring remain authoritative.
+
+### Staged call and generation budget
+
+At `64x64`, the prior observed cost was twenty generations and sixteen candidates per Pro call.
+Keep every stage behind its own approval gate and stop early when evidence resolves the question.
+
+| Stage | Calls | Generation budget | Purpose and stop rule |
+|---|---:|---:|---|
+| Existing control review | `0` | `0` | Reuse the documented current-best Pro sheets; do not pay to rediscover the spike baseline. |
+| Primary discovery | `6` | `120` | Run `A` and `B` for all three families. Stop a family if neither is promising until its fallback is approved. |
+| Conditional fallbacks | `0-3` | `0-60` | Run only `C` for families whose two primary prompts failed. Do not add more coarse synonyms after this. |
+| Reliability repeats | `0-3` | `0-60` | Repeat the best prompt once, unseeded, for each promising family. Drop any family that cannot reproduce. |
+| Theme-flexibility stress | `0-3` | `0-60` | One call per reproducible family using a diverse literal theme phrase. Do not require one-to-one theme assignment. |
+
+The initial commitment is therefore **six calls / 120 generations / 96 candidates**. The maximum
+pre-refinement search is **fifteen calls / 300 generations**, reached only if every fallback and
+every family remains viable. Using the historical approximately `$0.095` Pro call estimate, those
+two bounds are roughly `$0.57` and `$1.43`; verify current pricing and balance before execution.
+
+For the theme-flexibility call, replace only `energy` with this one literal scalar:
+
+> fire, water, lightning, nature, bone, ghost, smoke, and sand
+
+This deliberately spans emissive, fluid, electric, organic, rigid, intangible, gaseous, and granular
+shape priors. It is not a request to assign one named theme to each candidate. The question is
+whether the chosen structural sentence permits varied morphology without collapsing into objects or
+losing its family composition.
+
+### Refinement rule after discovery
+
+Do not pre-plan a cloud of minor variants. After review, identify the single dominant failure of a
+promising prompt and change one phrase that directly targets it. Examples:
+
+- rear wall too flat: change only the depth relation, not the theme and ring noun together;
+- ground ring too thin: test one texture/band noun, not `filled`, `wide`, and `flat` together;
+- foreground border becomes a portal: change only the border/shell noun while keeping the open-center
+  requirement and silhouette geometry fixed.
+
+Budget at most **two refinement calls per surviving family**: one single-change candidate and one
+unseeded reproduction if it wins. This optional refinement budget is separate from the fifteen-call
+discovery/reliability ceiling and requires a new approval.
+
+### Blueprint decision after testing
+
+Keep the current `vertical power spikes` prompt as the production default until another rear-wall
+prompt reaches the blueprint-worthy threshold. Ground-only and foreground-overlay prompts should not
+replace it; they are additional aura modes.
+
+If all three families succeed, keep one portable blueprint but resolve an `aura mode` such as
+`rear wall`, `ground ring`, or `foreground overlay` to one of three tested full descriptions. Keep
+`aura theme` and `aura size` independent. Do not expose a free-form `effect shape` fragment in the
+middle of one universal sentence: that would restore the ambiguity this test plan is designed to
+remove.

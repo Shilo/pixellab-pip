@@ -567,7 +567,7 @@ Four causes, in rough order of leverage. The first is route selection; the rest 
 
 ## BitForge At 16x16: The Mid-Grey Mechanism (Live Test 2026-07-15)
 
-Follow-up to the full-bleed animal-emoji rejection above. **Context: BitForge is already the measured worst model across the board** — it placed last or near-last in every category of the [model benchmark](../pixellab-image-model-benchmark-results.md), which recommends it *only* for its unique controls (`init_image`, `mask_image`, `color_image`, `coverage_percentage`, `style_image`) and never as a quality pick. This section does not re-discover that; it explains **why** it fails specifically at `16px`, and finds that even its `coverage_percentage` justification does not hold at this size.
+Follow-up to the full-bleed animal-emoji rejection above. **Context: BitForge is already the measured worst model across the board** — it placed last or near-last in every category of the [model benchmark](../pixellab-image-model-benchmark-results.md), which recommends it only when its direct `coverage_percentage` subject-fill control is required, never as a quality pick. This section does not re-discover that; it explains **why** it fails specifically at `16px`, and finds that even its `coverage_percentage` justification does not hold at this size.
 
 Six single-fox `16x16` probes, seed `715642`, `no_background: true`, `detail: low detail`, `outline: lineless`, `view: side`; the requester ranked them without seeing the metrics. **The ranking maps 1:1 to route** — all four pixen probes beat both bitforge probes.
 
@@ -662,7 +662,7 @@ Local run outputs in the `pixellab-pip-generations/fantasy-pro-vs-pixen-16-32/` 
 
 Combining live results, metrics, and reviewer judgment — high-confidence conclusions only:
 
-- **`16px` Pixen — the viable `16px` route.** Consistent outlines (100% coverage), readable, clean shapes. Effectively the only production route at `16px`. Recommended polish: clamp the palette to roughly 16–32 colors (it ships ~54); that reads as more authentic pixel art. This is a local post-process, not a generation control.
+- **`16px` Pixen — the strongest tested per-icon `16px` route.** Consistent outlines (100% coverage), readable, clean shapes. Recommended polish: clamp the palette to roughly 16–32 colors (it ships ~54); that reads as more authentic pixel art. This is a local post-process, not a generation control.
 - **`16px` Pro — not viable for a clean single icon.** Inconsistent outline (62%), baked shadows, and orphan pixels; muddier than Pixen. Nuance: it is not *entirely* unreadable — some items read (swords, potions, keys) — and a guardrailed Pro `16px` batch is usable as a cheap variety source to cull, but it is unreliable for a clean, finished single `16px` icon.
 - **`32px` Pixen — usable but over-shaded.** Consistent pixels and outline, but ~283 colors is far more than clean pixel art needs, so it looks over-shaded/painterly for `32px`. Nuance: it is still readable at native scale; the real problem is the color/shading load, not legibility. Clamping to ~16–32 colors is the fix — `detail: low detail` alone did not limit colors at `32px`.
 - **`32px` Pro (guardrailed) — best of the four.** Clean, strongly-outlined (96%), varied, essentially production-ready with minor touch-ups. This is Pro's sweet spot.
