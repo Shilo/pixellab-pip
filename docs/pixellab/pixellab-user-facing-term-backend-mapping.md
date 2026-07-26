@@ -1,6 +1,6 @@
 # PixelLab User-Facing Term To Backend Mapping
 
-Last reviewed: 2026-07-01.
+Last reviewed: 2026-07-26.
 
 Purpose: map PixelLab user-facing labels to backend surfaces without treating website, editor, or Aseprite integration routes as public API contracts. This production reference is intentionally conservative: public means documented in REST v2 OpenAPI/llms/API pages or MCP docs; observed means visible in first-party website/editor surfaces or Aseprite source and is used only for terminology/surface awareness; inferred means the capability matches but the exact backend branch is not exposed.
 
@@ -87,8 +87,10 @@ Current MCP tool families:
 - Objects and map objects: `create_map_object`, `get_map_object`, `create_1_direction_object`, `create_8_direction_object`, `get_object`, `list_objects`, `animate_object`, `create_object_state`, `delete_object`, `select_object_frames`, `dismiss_review`.
 - UI assets: `create_ui_asset`, `get_ui_asset`, `list_ui_assets`, `delete_ui_asset`.
 - Platform helpers: `get_balance`, `list_projects`, `chat_*`, `sandbox_*`, `agent_*`, `agent_feedback`, `agent_help`.
+- Raw image (no managed asset): `create_image`, `get_image`, `edit_image`, `inpaint_image`, `animate_image`.
+- Path tiles and building kits (share the tiles-pro get/list/delete tools): `create_path_tiles`, `create_building_kit`.
 
-MCP does not currently document raw image-editing equivalents for every REST v2 image route, such as `edit-image`, `edit-images-v2`, `inpaint`, `resize`, or `remove-background`. Route those to REST v2 unless actual MCP tools are visible in a client.
+As of the 2026-07-26 refresh, MCP `edit_image` and `inpaint_image` cover `edit-image` and `inpaint` directly. MCP still does not document equivalents for `edit-images-v2` (multi-source combine), `resize`, or `remove-background`; route those to REST v2 unless actual MCP tools are visible in a client.
 
 ## Term Matrix
 

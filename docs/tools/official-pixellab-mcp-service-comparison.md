@@ -1,6 +1,6 @@
 # Official PixelLab MCP Service Comparison
 
-Last reviewed: 2026-07-01.
+Last reviewed: 2026-07-26.
 
 This compares PixelLab Pip with the official [PixelLab MCP service](https://api.pixellab.ai/mcp/docs). The goal is to define the technical boundary between the service that executes PixelLab work and the skill that helps an agent choose, configure, and use the right PixelLab surface.
 
@@ -30,9 +30,9 @@ Use the official MCP service when the assistant already has PixelLab MCP tools a
 | Supported apps | The setup page lists multiple MCP clients such as Claude Code, VS Code, Cursor, Gemini CLI, Codex CLI, and other MCP clients. | Distributed as a plugin/skill intended to work across agents that support skills, plugin invocation, or explicit prompt instructions. |
 | Invocation | User asks their MCP-enabled assistant for PixelLab work; the assistant calls visible MCP tools. | User invokes `/pixellab-pip`, `@pixellab-pip`, `$pixellab-pip`, or asks a PixelLab-specific question/task that triggers the skill. |
 | Tool schema | MCP tools expose structured tool parameters when the assistant has the server configured. | Maintains routing tables and warnings; refreshes official docs when exact current schemas matter. |
-| Main asset coverage | Characters, portrait-character conversion, fonts, character states, animations, top-down tilesets, sidescroller tilesets, isometric tiles, tile variants, UI assets, objects, map objects, balance, projects, chat, sandbox, and agent helper tools documented by MCP. | Covers MCP assets plus REST v2, website/editor-only flows, Aseprite, Pixelorama, SDK/API questions, and legacy v1 compatibility. |
+| Main asset coverage | Characters, portrait-character conversion, fonts, character states, animations, top-down tilesets, sidescroller tilesets, isometric tiles, tile variants, path/road tile sets, building kits, UI assets, objects, map objects, raw image generate/edit/inpaint/animate (no managed asset needed), balance, projects, chat, sandbox, and agent helper tools documented by MCP. | Covers MCP assets plus REST v2, website/editor-only flows, Aseprite, Pixelorama, SDK/API questions, and legacy v1 compatibility. |
 | Async workflow | Creation tools return IDs immediately; corresponding `get_*` tools poll status and provide result/download data. | Teaches the same non-blocking pattern, reports IDs/status/output details, and routes REST async jobs separately from MCP managed assets. |
-| REST v2 fallback | MCP docs point users to REST v2 when writing code or needing API surfaces not exposed through MCP. | Explicitly chooses REST v2 for scripts, batch jobs, exact endpoint control, generic images, UI, edits, resizing, background removal, and other REST-only tasks. |
+| REST v2 fallback | MCP docs point users to REST v2 when writing code or needing API surfaces not exposed through MCP. | Explicitly chooses REST v2 for scripts, batch jobs, exact endpoint control, specific image models (Pixen/PixFlux/BitForge/Pro), freeform UI, multi-source edit, resizing, background removal, and other REST-only tasks. |
 | Website/editor boundary | Notes that web interfaces, editor plugins, API v1, and API v2 are different PixelLab interfaces. | Adds stricter boundaries for website/editor automation, Aseprite, Pixelorama, copied session tokens, and undocumented endpoints. |
 | Credential handling | Requires bearer auth in MCP client configuration. Official examples use generic bearer-token placeholders. | Standardizes user-facing setup on `PIXELLAB_SECRET`, avoids asking for tokens in chat, avoids broad `.env*` inspection, and previews config without literal secrets. |
 | Beginner setup experience | Official setup page provides app-specific commands/config snippets and links to external client docs. | Adds a beginner-oriented setup wizard contract: recommend MCP first, ask MCP/API/both/manual, explain the next step, and write only after approval. |
@@ -57,7 +57,7 @@ These are capabilities Pip provides that the official MCP service does not try t
 | Prompt and parameter preparation | MCP docs describe parameters and examples. They do not standardize how agents rewrite rough user text. | Pip converts vague asset requests into PixelLab-ready English parameter values unless the user opts out. |
 | Supplied-image role classification | MCP tools accept tool-specific image inputs. | Pip classifies attachments as identity, style, target, mask, palette, source frame, reference, or other endpoint-specific roles before choosing a route. |
 | Unsupported-flow warnings | MCP docs warn not to treat MCP tools as REST endpoints. | Pip also warns against undocumented internal endpoints used by first-party surfaces, copied browser/session tokens, SDK parity assumptions, and website-only/editor-only flows. |
-| REST v2 fallback policy | MCP docs mention REST v2 as another interface. | Pip defines when to leave MCP for REST v2: scripts, backends, batch jobs, exact endpoint control, generic image/UI/edit/remove-background tasks, and SDK/API integration. |
+| REST v2 fallback policy | MCP docs mention REST v2 as another interface. | Pip defines when to leave MCP for REST v2: scripts, backends, batch jobs, exact endpoint control, specific image models/Pro tier, freeform UI, multi-source edit, resize/remove-background tasks, and SDK/API integration. |
 | Output reporting contract | MCP returns tool results. | Pip tells the agent what to report after live calls: surface, tool/endpoint, final parameters, IDs, URLs/paths, polling status, usage when exposed, and verification state. |
 
 ## Recommended Relationship

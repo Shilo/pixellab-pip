@@ -4,7 +4,7 @@ Read this for raw animation, managed character/object animation, interpolation, 
 
 ## Route Choice
 
-Use MCP `animate_character`/`animate_object` for managed MCP assets. For direct files, exact REST schemas, skeletons, interpolation, outfit transfer, raw frame editing, or rotation, use the REST v2 routes (`animate-with-text-v3`, `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`).
+Use MCP `animate_character`/`animate_object` for managed MCP assets. For a raw supplied image with no managed asset, use MCP `animate_image` (`first_frame_base64`+`action`, optional `last_frame_base64` for a tween) when MCP-first, or REST `animate-with-text-v3`/`interpolation-v2` otherwise — the idle-loop, atlas, and pixel-budget risks below were characterized against the REST endpoint and are not yet re-verified against `animate_image`, but both draw on the same underlying generation. For exact REST schemas, skeletons, outfit transfer, raw frame editing, or rotation, use the REST v2 routes (`animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2`, `transfer-outfit-v2`, `rotate`, `generate-8-rotations-v2/v3`).
 
 Classify supplied frame images (first frame vs last frame vs style/edit reference vs managed asset ID) per the Goal Router in `image-input-roles.md`; ask before a credit-spending call when the role would change the endpoint, field, or output.
 

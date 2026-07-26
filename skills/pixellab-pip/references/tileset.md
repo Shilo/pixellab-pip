@@ -8,6 +8,8 @@ Read this for terrain tilesets, platformer tilesets, isometric tiles, tile varia
 - Platformer/sidescroller tileset.
 - Individual tile variants such as hex, octagon, square, or isometric.
 - One isometric tile/block.
+- A connectable path/road tile set.
+- A building kit (floor, connectable walls, doorways, pillar, stairs).
 - Packed texture sheet/image grid via Create Image Pro.
 - Manual website Create Tileset Pro.
 
@@ -49,6 +51,11 @@ Isometric MCP `create_isometric_tile` route:
 - Primary shape field: `tile_shape`; use `thin` for floor slabs, `thick` for raised platforms, and `block` for cubes, chunky objects, or full-height terrain blocks.
 - Other common controls include `size`, `outline`, `shading`, `detail`, `text_guidance_scale`, and `seed`.
 - REST `create-isometric-tile` uses different field names for the same ideas: `image_size`, `isometric_tile_size`, and `isometric_tile_shape` with values `thin tile`, `thick tile`, or `block`.
+
+Path/road and building-kit MCP routes:
+
+- `create_path_tiles` (18-config connectable path/road set) and `create_building_kit` (floor, connectable walls, doorways, pillar, stairs) are siblings of `create_tiles_pro`, not `create_topdown_tileset` — all three share `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro`; there is no separate getter/lister/deleter for path tiles or a building kit.
+- REST folds all three into `create-tiles-pro` via `tile_feature`: `"roads"` (path tiles), `"tileset"` (the connectable terrain transition `create_tiles_pro` itself can produce), or `"building"` (building kit, with the `building_*` fields).
 
 ## Human Label To API Mapping
 
