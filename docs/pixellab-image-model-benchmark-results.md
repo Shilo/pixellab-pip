@@ -22,14 +22,14 @@ Intent → model quality order, and the best-**value** pick (folds in Pro's ~12�
 | Style-consistent set / reference-driven | Pro > BitForge | **Pro** |
 | Isolated reusable VFX / effect sprite | Pro > Pixen *(focused aura comparison only)* | **Pro** |
 
-Model → tools. In the REST/MCP layer, model choice is a **REST-v2 decision** (MCP has no raw image-model selector — it wraps models inside `create_character`/`create_object`/…). The **Aseprite extension**, however, exposes each model as a named *Create … image* command:
+Model → tools. As of the 2026-07-26 PixelLab MCP refresh, model choice is **also** a direct MCP decision — MCP exposes `create_image_pixflux`, `create_image_pixen`, and `create_image_pro` as three model-specific tools (confirmed field-for-field matches to their REST request schemas in [`pixellab-mcp-vs-rest-route-parity.md`](pixellab/pixellab-mcp-vs-rest-route-parity.md)), not one generic tool wrapping models inside `create_character`/`create_object`/…. This benchmark's conclusions are surface-independent (the same underlying model runs either way); the table below now includes the MCP tool so a routing agent doesn't have to fall back to REST just to pick a model. The **Aseprite extension** separately exposes each model as a named *Create … image* command:
 
-| Model | REST v2 endpoint | Aseprite extension command (verbatim UI label) |
-|---|---|---|
-| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async) | **Create M-XL image** (window title: "Create medium-extra large image (pixflux V3)") |
-| Pixen | `create-image-pixen` | **Create Image S-XL (New, Pixen)** |
-| Pro | `generate-image-v2` (async, returns candidates) | **Create S-XL image (pro)**; style → **Create image from style reference (pro)** (`generate-with-style-v2`) |
-| BitForge | `create-image-bitforge` | **Create S-M image** (window title: "Create small-medium image (bitforge)") |
+| Model | REST v2 endpoint | MCP tool | Aseprite extension command (verbatim UI label) |
+|---|---|---|---|
+| PixFlux | `create-image-pixflux` (+ `create-image-pixflux-background`, async — byte-identical request schema, not a distinct model) | `create_image_pixflux` + `get_image` | **Create M-XL image** (window title: "Create medium-extra large image (pixflux V3)") |
+| Pixen | `create-image-pixen` | `create_image_pixen` + `get_image` | **Create Image S-XL (New, Pixen)** |
+| Pro | `generate-image-v2` (async, returns candidates) | `create_image_pro` + `get_image` — covers `generate-image-v2`'s candidate/reference/style-copy shape only, **not** `generate-with-style-v2` (below) | **Create S-XL image (pro)**; style → **Create image from style reference (pro)** (`generate-with-style-v2`, REST-only — no MCP tool matches its multi-image `style_images`+`style_description` shape) |
+| BitForge | `create-image-bitforge` | none — no MCP tool exposes `coverage_percentage` or BitForge's other unique controls | **Create S-M image** (window title: "Create small-medium image (bitforge)") |
 
 The Aseprite size abbreviations (`S-XL`/`M-XL`/`S-M`) are part of the command name, **not** a standalone model selector — two `S-XL` commands exist, disambiguated by the parenthetical `(pro)` vs `(New, Pixen)`. The version wording overlaps and is unreliable: both PixFlux (window title "pixflux V3") and Pixen ("New, Pixen") carry V3/New-series labels, so don't treat "New / Pixen / V3" as a dependable version signal.
 
