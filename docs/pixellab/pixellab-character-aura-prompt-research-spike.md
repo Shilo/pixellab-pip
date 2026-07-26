@@ -1,6 +1,6 @@
 # PixelLab Character Aura Prompt Research Spike
 
-Last reviewed: 2026-07-25.
+Last reviewed: 2026-07-26.
 
 Purpose: record live Create Image prompt experiments for static `64x64` transparent character-aura effects. The target is an isolated, front-facing aura that can sit behind and around a standing character without generating the character itself. This is developer research, not the canonical runtime contract.
 
@@ -19,6 +19,12 @@ The runner-up is:
 It also consistently produced contained, front-facing aura effects. Its vertical spikes appeared mainly on the back side of the ring, leaving the sides and front comparatively empty. That separation may be useful when the entire aura should render behind a character and avoid foreground overlap. The tradeoff is weaker visual integration: concentrating the energy on one depth plane makes the result look flatter and more static, like background energy attached to a separate ring.
 
 Touching the bottom canvas edge is acceptable when the touching pixels belong to the lower energy ring. It is not the same failure as spikes or ambient energy bleeding through the top or side boundaries.
+
+Model-level conclusion: Create Image Pro (`POST /v2/generate-image-v2`) is the production route for
+this asset. It repeatedly returned coherent batches of modular, character-free, front-facing aura
+candidates from the best prompt. Pixen occasionally produced useful cells—most notably Batch 40
+request 2 and Batch 42 request 2—but never produced the target reliably across repeated calls or
+across all cells at acceptable quality. Pixen remains research-only for this aura family.
 
 ## Target Composition
 
@@ -507,7 +513,7 @@ The result exposes a real tradeoff. `Vertical power spikes` narrows style toward
 The user review confirms that neither broad replacement is consistent enough for production. Both
 prompts were too permissive, and both frequently placed a discrete object in the center instead of
 distributing an effect around the character space. The blueprint therefore retains `vertical power
-spikes` and makes only the spike theme configurable. This preserves the strongest known composition
+spikes` and makes the aura theme configurable. This preserves the strongest known composition
 constraint while allowing elemental and non-elemental variation.
 
 ### Configurable Blueprint Decision
@@ -515,25 +521,20 @@ constraint while allowing elemental and non-elemental variation.
 Bundled blueprint: [`aura.blueprint.json`](../../skills/pixellab-pip/blueprints/aura.blueprint.json)
 
 ```text
-fully contained symmetrical energy aura with vertical {{power spike theme | default: ''}} power spikes and a bottom energy ring
+fully contained symmetrical {{aura theme | default: energy}} aura with vertical power spikes and a bottom energy ring
 ```
 
-`Power spike theme` is preferred over `elements`. It is singular, precisely scopes the value to the
-emitted spikes, and accepts broader concepts such as `fire`, `lightning`, `shadow`, `floral`, or
-`cosmic`. Calling the variable `element` would imply a narrower classical-element vocabulary;
-calling it only `effect` would be too ambiguous about which part of the composition changes.
+The final variable is `aura theme`, not `elements` or `power spike theme`. It replaces the first
+`energy` in `energy aura`, so neutral input resolves to the proven `energy aura`, `fire` resolves to
+`fire aura`, and a phrase such as `fire, water, ice` is inserted once as one literal scalar. The
+blueprint explicitly forbids splitting a comma-separated theme into multiple calls or assigning
+themes to individual candidates; Pro infers variation inside its single returned candidate set.
 
-The canonical empty default is `{{power spike theme | default: ''}}`. The proposed `{elements : }`
-form is not Pip blueprint syntax and cannot be relied on for portable replay. With no supplied value,
-literal substitution produces two adjacent spaces between `vertical` and `power`; with `fire`, it
-produces `vertical fire power spikes`. The extra whitespace is a presentational blemish rather than a
-prompt concept. The current blueprint grammar has no conditional-space operator, and adding one only
-for this sentence would make the recipe more complex and less portable than leaving the benign space.
-
-The blank default also does not create thematic variety by itself. It deliberately reproduces the
-current best neutral prompt. A caller must supply a theme to move the spikes away from the baseline
-raw-energy tendency, and each new theme remains subject to full-batch candidate review because it
-may introduce its own object or material prior.
+The default is `energy`, not an empty string. Earlier empty-default syntax was valid and the
+blueprint reader still resolves both `''` and `""` as empty strings, but an empty theme would leave
+an awkward generic `aura` phrase and no longer reproduce the proven neutral prompt. The current
+placement provides the requested thematic flexibility without producing constructions such as
+`fire energy aura` or changing the number of paid calls.
 
 The blueprint accepts a configurable `aura size`, defaulting to `64x64`. Candidate count is derived
 from the completed Pro response because changing native size changes how many images the route may
@@ -548,19 +549,22 @@ animation request. This preserves one-file sharing, canonical request-field fide
 authority for the additional paid call without adding a conditional-step schema.
 After the static sheet is presented, the agent asks whether to run one additional
 `animate-with-text-v3` job and explains that V3 treats the sheet as one canvas, applying simultaneous
-motion across its cells rather than producing an independent animation sequence per candidate. The
-theme-neutral action is:
+motion across its cells rather than producing an independent animation sequence per candidate.
+
+The current animation action is deliberately theme-neutral and motion-light:
 
 ```text
-all {{power spike theme | default: ''}} aura effects pulse in place as their vertical power spikes rise and fall around their bottom energy rings, each remaining fully contained within its original cell
+all aura effects flicker and pulse simultaneously in place with subtle brightness variation
 ```
 
-The repeated theme variable gives V3 the same semantic subject used for static generation without
-introducing another choice: `fire` resolves to `all fire aura effects`, while the empty default
-retains neutral aura wording. The action remains broad about motion but strict about cell containment
-and layout. The optional branch uses eight
-generated frames because a 256x256 sheet reaches V3's documented
-`width × height × frame_count ≤ 524288` budget at that count.
+Earlier actions that named vertical spikes rising and falling, perimeter ripples, edge shimmer, or
+layered spike-only motion produced cell crossing, center glow, drifting elements, frozen regions, or
+visible seams. Animating cells separately preserved isolation but was rejected because the desired
+workflow animates the sheet as one job. The simplified action reduces semantic invention, but V3
+still treats the sheet as one canvas and cannot guarantee independent cell motion. The blueprint
+therefore warns before approval and verifies visual cell isolation separately from technical frame
+validity. Eight generated frames are used because a `256x256` sheet reaches V3's documented
+`width × height × frame_count <= 524288` budget at that count.
 
 ## Phrase-Level Findings
 
@@ -994,7 +998,7 @@ read as a campfire or narrow flame column rather than energy distributed around 
 That center-subject composition fails the original Pro goal: the ring should organize the aura
 around the future player position, not hold a standalone elemental object.
 
-## Current Pixen Recommendation
+## Interim Pixen Recommendation After Batch 21
 
 Closest baseline:
 
@@ -1312,6 +1316,26 @@ Two additional `256x256` Pixen generations requested a complete `4x4` atlas in o
 generating isolated `64x64` images. This changes the model context materially: Pixen sees a family
 of related VFX cells and can repeat a shared visual grammar across the sheet.
 
+### Packed 8x8 player-aura atlas
+
+The `512x512` request produced sixty-four cleanly separated `64x64` cells, but almost every cell was
+a fully top-down ring, radial icon, emblem, stone disc, or portal. The broad theme list changed color
+and material while preserving the same incorrect icon grammar. Sheet size and repetition alone do
+not create the desired low-angle aura; `circular and elliptical energy auras`, `centered`, and
+`negative space` strongly reinforced top-down icon composition.
+
+Evidence: [`player-auras-8x8-20260726`](../../pixellab-pip-generations/player-auras-8x8-20260726/).
+
+### Side-scroller player-aura atlas
+
+The strict side-view request generated a humanoid silhouette in nearly every cell, usually with an
+effect wrapped around or attached to the body. Repeated `player`, `feet`, `body`, `humanoid`, and
+`absent` wording made the excluded subject salient rather than reserving empty compositing space.
+This is stronger evidence than the isolated tests that character vocabulary cannot be safely used
+as a scale anchor in Pixen.
+
+Evidence: [`player-auras-4x4-sidescroller-20260726`](../../pixellab-pip-generations/player-auras-4x4-sidescroller-20260726/).
+
 ### Low-detail player-aura atlas
 
 The low-detail atlas is closer to the modular target than the later isolated-image batches. It
@@ -1381,3 +1405,137 @@ with geometric perimeter anatomy. For Pixen, request a full low-detail atlas and
 whole sheet when it lands in the wrong compositional mode. The character-removal pipeline was not
 run in this round because Batch 40 produced a direct, character-free text-to-image success and the
 edit would no longer target the active blocker.
+
+### Batch 42: high-detail structural atlas
+
+Three requests repeated Batch 40's exact prompt and changed only Pixen's `detail` field from `low
+detail` to `highly detailed`. This clean ablation produced one strong high-quality sheet, one
+borderline sheet, and one ornate failure.
+
+The strongest sheet contains roughly twelve useful cells with crisp elliptical rings and tall thin
+spikes distributed around them. Four cells collapse into fully top-down radial discs, so the sheet
+is not uniformly valid, but its successful cells are materially more polished than Batch 40's
+low-detail winner. The borderline sheet preserves upright ring-and-column compositions throughout
+but often reads as glowing pedestals. The failed sheet contains ornate emblems and central objects.
+
+High detail therefore does not destroy the structural prompt, but it increases both polish and
+ornament risk. The same atlas-level wording remains the best prompt family; production should treat
+the returned sheet as candidates rather than expecting all sixteen cells to pass.
+
+### Batch 43: high-detail continuous atlas
+
+All three requests failed consistently. They produced repeated stone or metallic platforms with
+upright rectangular pillars, arches, and cage-like light walls. Increasing detail made Batch 41's
+constructed-enclosure interpretation stronger and more uniform rather than more aura-like.
+
+This confirms that quality was not the main blocker in the continuous prompt. Its geometric
+`perimeter`, rear/side/front, and integrated-base description defines an architectural object for
+Pixen. The continuous family should be retired at both detail levels.
+
+## Continuation Checkpoint
+
+This section is the restart point for future work.
+
+### Production decision
+
+Use Create Image Pro, not Pixen, for modular character-aura candidates. Pro reliably returns a
+reviewable candidate set at `64x64`; Pixen returns only one generated image per call and never found
+a prompt/control combination that reliably satisfied composition, modularity, subject exclusion,
+view, and quality together. After forty-three numbered Pixen batches plus the user-supplied atlas
+experiments, further Pixen prompt-only synonym search is not justified without a new model control,
+reference mechanism, or generation strategy.
+
+This is an evidence-based production decision, not a claim that Pixen can never emit a good cell.
+Batch 40 request 2 produced sixteen simple modular ring-and-spike effects, and Batch 42 request 2
+produced roughly twelve polished useful cells. Both were surrounded by failed repetitions using the
+same prompt, so neither establishes a reliable workflow.
+
+### Pro prompt hierarchy
+
+1. Immersive default:
+
+   > fully contained symmetrical energy aura with vertical power spikes and a bottom energy ring
+
+   This is the most reliable complete composition. Energy occupies the rear, sides, and front of
+   the ring, creating surrounding depth. Use an unseeded call and review the returned candidates.
+
+2. Layering-safe runner-up:
+
+   > fully contained symmetrical energy aura with vertical power spikes and an energy ring at the base
+
+   Its fuller Ragnarok-like ring is aesthetically strong, but most vertical energy sits behind the
+   ring. It is flatter and less immersive while reducing foreground overlap.
+
+3. Pre-ring structural baseline:
+
+   > fully contained symmetrical energy aura with vertical power spikes
+
+   This reliably establishes upright containment but leaves an unnatural triangular termination at
+   the bottom.
+
+The current blueprint generalizes only the theme token:
+
+> fully contained symmetrical {{aura theme | default: energy}} aura with vertical power spikes and a bottom energy ring
+
+A comma-separated or multiword theme is one literal value and one Pro call. Candidate count comes
+from the resolved size and response; it is never inferred from the number of supplied theme words.
+
+### Pro controls and seed findings
+
+- Default route: `POST /v2/generate-image-v2`, `64x64`, transparent background, no style or subject
+  reference, prompt enhancement omitted, seed omitted.
+- At `64x64`, Pro returned sixteen candidates and reported twenty generations per tested call.
+- Seed `1379246801` repeatedly drove central objects and emblems across nearby prompts. Do not reuse
+  it for this family.
+- Seed `2057719043` produced favorable ring batches but later still showed motifs; retain it only as
+  a historical comparison seed, not a production guarantee.
+- Resolved seed `1734275022` produced the cleanest unseeded validation: sixteen front-facing ring
+  auras without discrete central objects. Production should still omit the seed because seed quality
+  did not generalize.
+- Same-seed comparisons proved that prompt vocabulary matters in addition to RNG: `bottom energy
+  field` retained central-object drift under a seed that worked for `bottom energy ring`.
+
+### Locked phrase findings
+
+- Keep `fully contained`; it is the strongest positive top/side containment cue.
+- Keep the word order `energy aura with vertical power spikes`. Moving `vertical` onto `energy aura`
+  allowed radial and top-down results.
+- Keep `bottom energy ring`; `field`, `glow`, and `circle` collapse toward central assets or top-down
+  disks, while `aura ring` weakens the lower scaffold.
+- Do not require an empty or hollow center. The aura naturally exists behind the future sprite;
+  explicit holes encourage portals, disks, icons, and top-down negative space.
+- Do not use `grounded base`, `flat`, `wide`, or `surrounding` to refine the lower feature. They
+  encouraged hard platforms, central objects, or volumetric constructed rings.
+- `filled`, `complete`, and `continuous` did not reliably make the lower ring fuller.
+- Broad replacements for `vertical power spikes` increased thematic variety but lost aura identity
+  and produced trees, crystals, machinery, fountains, wings, pillars, and portals.
+- Bottom-edge contact by the energy ring is acceptable; top/side bleed or spike contact is not.
+
+### Pixen findings to retain
+
+- Short prompts were highly stochastic and commonly produced characters, scenes, emblems, portals,
+  central elemental objects, or fully top-down effects.
+- Long prompts improved repetition but over-specified physical geometry: footprint/boundary/overlay
+  language became platforms; shell/corona/cloud/emission became capsules, portals, or center objects.
+- Character/player wording sometimes supplied useful aura scale and depth but also caused literal
+  characters. Removing it removed both the character and the useful spatial anchor.
+- Explicit `view` and `outline` controls were weak guidance and did not rescue an incorrect prompt
+  family. Low detail reduced ornament; high detail improved polish while increasing emblems,
+  platforms, and top-down radial failures.
+- Elemental themes acted as morphology priors rather than safe palette substitutions. Water, wind,
+  and lightning occasionally organized vertical effects; fire was the most reproducible upright
+  family but became a central flame or campfire rather than a perimeter aura.
+- A full `4x4` atlas gave Pixen a stronger repeated VFX grammar than isolated `64x64` calls. The Pro
+  structural sentence was the only atlas prompt to produce a full directly useful sheet, and it did
+  so in only one of three low-detail calls. High detail produced one partially useful sheet in three.
+- The continuous-perimeter atlas wording failed at both detail levels and should remain retired.
+
+### Animation caution
+
+The static Pro candidate sheet is reliable; V3 whole-sheet animation is not. V3 treats the sheet as
+one canvas, so text cannot guarantee cell isolation. Spike motion crossed boundaries, center glow
+was invented, selective/layered motion left seams or frozen regions, and some candidates drifted or
+bobbed. Separate per-cell animation worked technically but did not satisfy the requested one-job
+sheet workflow. The blueprint's current low-invention flicker/pulse action is the least aggressive
+tested wording, not a proven visual solution. Always report technical frame validity separately from
+visual acceptability.
