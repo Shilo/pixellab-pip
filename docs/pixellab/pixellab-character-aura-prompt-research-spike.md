@@ -1047,3 +1047,71 @@ The next batch returns to the one proven location phrase, `distributed around`, 
 singular flame subject with plural `flame wisps`. It tests `connected`, `spaced around`, and
 `distributed along` variants. The goal is to retain the perimeter placement from Batch 22 while
 reducing the appearance of independent flame objects.
+
+### Batch 24: plural flame wisps
+
+Plural/location wording controlled placement more reliably. `connected flame wisps distributed
+around` produced separate blue flame droplets outside a small ring. `vertical flame wisps spaced
+around` produced several orange flames on the ring and was the closest result, but each flame still
+read as an independent object. `vertical flame aura distributed along` collapsed back into one
+central flame.
+
+The useful signal is now precise: plural `wisps` plus `spaced/distributed around` moves content onto
+the circumference; singular `aura` pulls it back to the center. The remaining objecthood likely
+comes from `flame`. The next batch preserves plural perimeter wisps but replaces flame with energy,
+aura, or no material noun, testing whether the distributed marks can read as one surrounding field
+instead of small elemental objects.
+
+### Batch 25: non-flame perimeter wisps
+
+This batch produced the first two results that satisfy the corrected composition. `vertical energy
+wisps spaced around a bottom energy ring` created a low elliptical ring with irregular wisps rising
+from its circumference; the center remained available for a separately composited player and no
+single object dominated it. `vertical aura wisps distributed around a bottom energy ring` produced
+the same spatial logic with shorter multicolored spikes around the rim. Both were contained,
+non-top-down, subject-free, and materially simpler than the flame baseline.
+
+`connected vertical wisps around` failed by turning the wisps into pearl-like nodes and a decorative
+fan. `connected` is therefore rejected; it encourages literal linkage and ornament rather than a
+continuous field.
+
+The current best Pixen prompt candidate is:
+
+> fully contained vertical energy wisps spaced around a bottom energy ring
+
+The next three-call batch repeats that candidate twice and the aura-wisps runner-up once. This is a
+limited-cost reproducibility check before promoting either wording.
+
+### Batch 26: perimeter-wisp reproducibility
+
+Both repeats of `vertical energy wisps spaced around a bottom energy ring` preserved the desired
+layout: the wisps rose from the ring's circumference and left the center free of a dominant object.
+One seed made the wisps somewhat rigid like narrow posts, but neither collapsed into a central
+element, character, emblem, scene, or fully top-down effect. The `vertical aura wisps distributed
+around` runner-up also reproduced successfully with a denser blue aura around the lower ring.
+
+The successful Pixen wording and the proven Pro prompt share three anchors: `fully contained`, a
+vertical upper effect, and `bottom energy ring`. Pro uses `symmetrical {{aura theme}} aura with
+vertical power spikes`; Pixen currently succeeds by using plural `vertical energy wisps` and the
+explicit spatial relationship `spaced around`.
+
+The next three controlled hybrids test whether Pro's useful `symmetrical energy aura` prefix can be
+restored without losing Pixen's perimeter placement. They compare: the full hybrid, the hybrid
+without `symmetrical`, and perimeter wisps with `symmetrical` but without the singular `aura` noun.
+
+### Batch 27: Pro/Pixen structural hybrids
+
+All three hybrids failed. Restoring `energy aura`—with or without `symmetrical`—produced a large
+central orb/emblem above a decorative base. Keeping `symmetrical` while removing `aura` produced a
+central spear/portal-like form. The explicit `spaced around` phrase could not overcome those stronger
+central-object priors.
+
+For Pixen, Pro's `symmetrical` and singular `aura` language are not portable even though the
+containment, vertical, and bottom-ring anchors are portable. The current best therefore remains:
+
+> fully contained vertical energy wisps spaced around a bottom energy ring
+
+The likely Pixen blueprint shape places the theme directly before plural `wisps`, not before
+`energy aura`: `fully contained vertical {{aura theme}} wisps spaced around a bottom energy ring`.
+The next three-call batch tests that shape with energy as control, then fire and water, to determine
+whether theme substitution preserves perimeter placement.
