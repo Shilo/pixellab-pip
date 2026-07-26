@@ -1305,3 +1305,79 @@ figure but also removes the aura relationship. `Shell` and `corona` cannot indep
 relationship in Pixen. The next useful experiment should not keep substituting aura nouns. It should
 test a non-character scale anchor or an explicit empty status-effect slot while retaining Batch 37's
 successful rear/side/front composition.
+
+## User-supplied Pixen atlas attempts
+
+Two additional `256x256` Pixen generations requested a complete `4x4` atlas in one call rather than
+generating isolated `64x64` images. This changes the model context materially: Pixen sees a family
+of related VFX cells and can repeat a shared visual grammar across the sheet.
+
+### Low-detail player-aura atlas
+
+The low-detail atlas is closer to the modular target than the later isolated-image batches. It
+contains sixteen distinct transparent cells, no characters, and mostly shallow elliptical bases
+with upright energy. Several cells approach the desired under/behind structure. Its systematic
+failure is central placement: fire, ice, lightning, and other theme tokens usually become the main
+element standing inside the ellipse rather than an aura distributed around its rim.
+
+The likely useful drivers are the sheet-level `player aura VFX effects` context, repetition across
+sixteen cells, `low detail`, and explicit shallow-camera description. The likely central-subject
+driver is the long list of elemental themes: each theme becomes a drawable object or column. The
+negative list also names many unwanted concepts, so it is not a clean causal control and should not
+be carried into the next prompt.
+
+### Clean high-detail player-aura atlas
+
+The second atlas is a clear regression: almost every cell is a top-down icon, portal, solid disc,
+platform, or ornate ring. It also fails its requested empty-center constraint. `Completely empty
+transparent center`, `ground-hugging`, `smooth layered bands`, the long exclusion list, and `highly
+detailed` collectively encourage bounded circular designs rather than an upright surrounding aura.
+
+This is not a clean low-versus-high detail ablation because both the prompt and detail setting
+changed. Still, it proves the complete high-detail recipe is unsuitable. It also confirms the
+user's earlier correction that an empty center is the wrong target: it produces holes, discs, and
+icon-like rings instead of natural aura energy behind the eventual sprite.
+
+### New direction from the atlas comparison
+
+The next prompt-only experiment should use one `256x256` atlas request, `low detail`, and the proven
+Pro structural sentence, without an elemental theme list, character/absent-player language, empty-
+center language, or a negative description. This tests whether sheet-level repetition supplies the
+missing spatial anchor while the Pro wording supplies the ring-plus-upright-aura structure.
+
+A separate, higher-confidence pipeline experiment is to preserve the useful character-anchored
+composition from Batch 37 and remove only the generated figure with a PixelLab mask edit. That is
+not a pure Pixen text-to-image solution, but it directly separates two tasks Pixen has struggled to
+satisfy simultaneously: arranging an aura around a body-sized volume and delivering the aura alone.
+
+### Batch 40: Pro structure inside a low-detail Pixen atlas
+
+Three random requests used one `256x256` Pixen atlas prompt built from the successful Pro structural
+sentence. One of the three sheets is the closest Pixen result found in the entire search. All sixteen
+cells are character-free, scene-free, low-angle, and modular. Each uses an elliptical lower ring
+with contained vertical spikes distributed around it; there is no dominant object occupying the
+center. The expected `64x64` grid inspection also shows that the effects remain inside their cells.
+
+The other two sheets failed in different ways: one produced narrow beams, platforms, and pedestal
+objects; the other produced ornate repeated ring objects with central flames or crystals. The
+prompt therefore has a strong successful mode but is seed-sensitive, approximately one successful
+sheet in three in this small sample.
+
+This is the first evidence that the Pro sentence transfers successfully to Pixen when it is framed
+as a repeated atlas rather than sixteen isolated requests. Sheet-level repetition supplies the
+missing structural prior: once Pixen chooses the correct interpretation, it repeats that grammar
+consistently across all cells.
+
+### Batch 41: continuous perimeter atlas
+
+The continuous-atlas alternative failed all three requests. One sheet produced upright rectangular
+light columns on oval bases, one produced circular portal/platform objects, and one produced cage-
+like rectangular frames around small bases. The explicit rear/side/front perimeter prose again
+encouraged constructed enclosures rather than organic aura forms.
+
+The result rejects the continuous-description family and elevates Batch 40's exact structural
+wording as the Pixen recommendation. Do not replace `vertical power spikes and a bottom energy ring`
+with geometric perimeter anatomy. For Pixen, request a full low-detail atlas and review/retry the
+whole sheet when it lands in the wrong compositional mode. The character-removal pipeline was not
+run in this round because Batch 40 produced a direct, character-free text-to-image success and the
+edit would no longer target the active blocker.
