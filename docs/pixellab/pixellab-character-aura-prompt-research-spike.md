@@ -1115,3 +1115,162 @@ The likely Pixen blueprint shape places the theme directly before plural `wisps`
 `energy aura`: `fully contained vertical {{aura theme}} wisps spaced around a bottom energy ring`.
 The next three-call batch tests that shape with energy as control, then fire and water, to determine
 whether theme substitution preserves perimeter placement.
+
+### Batch 28: theme directly modifies wisps
+
+All three themes preserved the corrected perimeter layout and avoided a central subject. Energy
+produced several tall blue wisps around an elliptical ring and was a direct success. Fire produced
+small discrete flames around the ring; water produced droplets/splashes around it. Those two were
+spatially correct but still read as collections of elemental objects more than a unified aura.
+
+This is nevertheless the first successful theme substitution test: changing the theme before
+plural `wisps` changes material appearance without reverting to a central emblem, character, scene,
+or fully top-down view. To make elemental variants more aura-like, the next batch inserts the stable
+noun `energy` after the optional theme: default `energy wisps`, fire `fire energy wisps`, and water
+`water energy wisps`. This also supports an empty-default blueprint variable without producing
+`energy energy`.
+
+### Batch 29: theme plus energy wisps
+
+Adding `energy` changed the elemental results but did not solve continuity. The default energy
+result formed many narrow vertical streaks around the ring and was spatially close, but still read
+as separate spikes. Fire collapsed back into one central flame, while water produced repeated
+wave-shaped curls around the ring.
+
+The user's correction is decisive: `wisps` is a discrete plural noun, so even successful placement
+naturally yields separate marks rather than a fully enclosed aura around the ring. It is rejected as
+the final composition noun. The next batch retains the proven containment/vertical/lower-ring
+anchors but tests continuous media—`energy field`, `energy curtain`, and `energy veil`—each
+explicitly surrounding the ring.
+
+### Batch 30: continuous media nouns
+
+`Energy field`, `energy curtain`, and `energy veil` all failed. Field became an ornate vertical
+portal/object; curtain became one narrow central beam inside a ring; veil became a dense scenic or
+architectural column. These nouns imply a bounded surface or environmental layer, not the soft
+continuous aura surrounding the ring.
+
+### Online terminology research
+
+Ragnarok Online sources describe the original level-99 aura as cyan energy **condensed around the
+character**; later versions expanded it into a **spherical cloud**. The useful compositional terms
+are therefore `condensed` and `cloud`, not spikes or discrete wisps. The player remains absent from
+the generation prompt because it is composited separately. See the [Ragnarok Aura overview](https://ragnarok.fandom.com/wiki/Aura).
+
+Contemporary game-VFX descriptions commonly separate the effect into a glowing circular zone below
+the player plus rising energy. One asset description uses a ground circle, rising energy rings,
+subtle particle emission, and a **continuous flow of energy** to communicate buffs and status
+effects. The continuous-flow wording is more relevant than the asset's implementation details. See
+[Energy Rings Effect](https://www.fab.com/listings/4eaf13b8-b476-422a-bc15-7a59accafd56).
+
+Ragnarok customization communities use `aura style`, `effects surrounding your character`, and
+ring-oriented names such as Flower Ring or Music Ring. This reinforces an attached perimeter effect
+rather than a spell projectile or standalone element. See the [rAthena aura-style guide](https://rathena.org/board/topic/132752-guide-add-new-hateffect-aura-style/page/2/)
+and [Ragnarok magic-aura discussion](https://forum.forsaken-ro.net/topic/31413-magic-auras/).
+
+The next three source-derived prompts test `condensed aura cloud`, `continuous rising energy flow`,
+and `continuous energy emission` around the proven bottom energy ring. They avoid player/character,
+portal, backdrop, wall, curtain, veil, object, and discrete-wisp wording.
+
+### Batch 31: source-derived cloud/flow/emission terminology
+
+All three failed by creating a central subject. `Condensed aura cloud` became a jeweled cloud/tree
+object; `continuous rising energy flow` became a narrow helix; `continuous energy emission` became
+a central blue flame on a stone-like base. The online terms accurately describe completed game VFX
+but are not sufficient Pixen prompt nouns: cloud, flow, and emission each became the thing depicted
+inside the ring.
+
+The useful part of the source language may be the relationship, not the nouns: energy is continuous,
+rises, and surrounds the entire lower ring. The next batch removes cloud/flow/emission entirely and
+tests the bare continuous predicates `glow rising`, `aura rising`, and `energy rising around an
+entire bottom energy ring`. This is the smallest wording that directly states the desired enclosure
+without introducing a new drawable subject.
+
+### Batch 32: bare continuous predicates
+
+`Continuous glow rising around an entire bottom energy ring` was the only prompt to distribute a
+connected effect around the circumference. It left the center substantially open and avoided a
+single central element, but the result was noisy and wreath-like. `Continuous aura rising` became a
+central helix on a platform; `continuous energy rising` became one thin central beam.
+
+This isolates `glow rising around an entire ... ring` as the useful relationship. `Aura` and
+`energy` are stronger central-subject nouns in this construction, while `glow` can behave as a
+property spread over the ring. The next batch keeps that exact relationship and tests whether
+removing `continuous`, or adding only `simple` or `soft`, reduces the ornate wreath appearance while
+preserving enclosure.
+
+## Long-form Pixen prompt phase
+
+The short-prompt search did not reliably control a specific standalone game effect. Pixen often
+treated one strong noun as the subject and improvised an emblem, prop, portal, or environment around
+it. For this aura target, longer prompts are justified when every clause fixes a visible spatial
+relationship: shallow gameplay angle, elliptical footprint, energy around the perimeter, rear/side/
+front depth, and a center reserved for later character compositing.
+
+### Batch 33: explicit spatial anatomy
+
+All three requests failed. They consistently produced polished circular objects viewed from above:
+a decorated basin, a mechanical platform with a central crystal, and a metallic device. The terms
+`anchors the player position`, `footprint`, `complete circumference`, and `compositing area` did not
+make Pixen treat the image as an overlay; instead, the detailed ring anatomy strongly reinforced a
+physical platform. Two results also inserted a central object. This prompt is consistent, but
+consistently wrong: too much geometric ring specification converts the aura into a manufactured
+object and pulls the camera toward full top-down.
+
+### Batch 34: Ragnarok-style condensed cloud
+
+All three requests failed more severely as compositable auras. Every result placed a dominant
+subject in the center: an ornate fire emblem, a clustered orb/tree object, and a blue elemental
+mass. `Condensed luminous energy cloud` behaved as a drawable central object, while `max-level` and
+`classic Ragnarok-style` encouraged ornate rarity/status decoration. The prompt did produce some
+rear/side/front layering, but around the unwanted subjects rather than around an empty player
+position. Genre and prestige language adds detail and symbolism without solving the spatial target.
+
+### Batch 35: production compositing vocabulary
+
+All three requests became constructed platforms or arena-like objects. The center stayed relatively
+available, but only because Pixen rendered it as a physical floor. `Overlay`, `ground-plane ellipse`,
+`footprint`, `full boundary`, and explicit rear/side/front layering were interpreted as production
+geometry rather than atmospheric energy. The repeated vertical marks also became fence posts or
+pillars. This family is spatially consistent but unusable: technical compositing language does not
+translate into the intended pixels and strengthens the top-down platform failure mode.
+
+### Batch 36: continuous perimeter emission
+
+All three requests failed, with high variation. Two became mostly top-down spell circles with a
+single central peak; one generated a literal character despite the intended separately rendered
+player. `Emission follows the ellipse's full perimeter` did not overcome Pixen's tendency to
+collapse energy toward the center. Referring to the player—even only as a spatial position—is also
+unsafe because Pixen may render that subject. This prompt neither preserved an empty center nor a
+front/low-top-down aura silhouette.
+
+### Batch 37: layered aura shell
+
+All three requests generated characters or character-like central subjects inside oval capsules.
+`Character aura layer`, `player position`, and `wraps around the complete footprint` made the
+missing character salient enough for Pixen to supply it. The soft shell/glow wording also enclosed
+the entire composition as a bubble rather than forming energy around a lower ring. This is the
+clearest evidence in the long-prompt set that mentioning the eventual character—even to describe
+compositing—must be avoided in the image description.
+
+### Five-prompt comparison
+
+Fifteen requests were run: three requests for each of five distinct long prompts. None met the full
+target. Batch 33 was the most visually consistent but consistently produced top-down manufactured
+platforms. Batch 35 was the runner-up only in the narrow sense that it usually kept the middle
+available, but it also produced physical arena floors and fences. Batch 34 centered ornate elemental
+objects, batch 36 centered spell emissions and once generated a character, and batch 37 generated
+characters in every request.
+
+Longer Pixen prompts improved repeatability but not semantic accuracy. The failed clauses cluster
+into three causes:
+
+- geometric/compositing terms (`footprint`, `ground-plane`, `boundary`, `overlay`) become platforms;
+- character/player references cause a character to appear even when described as separate;
+- atmospheric subject nouns (`cloud`, `shell`, `emission`) become a central object or enclosing
+  capsule.
+
+The strongest prior lead remains Batch 32's `glow rising around an entire bottom energy ring` and
+the earlier plural-wisp layouts, not any of these five long prompts. A next iteration should be
+medium-length: preserve `glow rising around` as the spatial relation, avoid every player/compositing
+term, and describe the low viewing angle without detailed ring geometry.
