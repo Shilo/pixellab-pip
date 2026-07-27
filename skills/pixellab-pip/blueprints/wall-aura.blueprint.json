@@ -5,7 +5,7 @@
       "output_directory": "pixellab-pip-generations/wall-aura-run",
       "output_collision_policy": "create_unique"
     },
-    "_comment": "Transparent wall-aura candidates that rise behind a future character.",
+    "_comment": "Transparent combined ground-and-wall aura candidates that rise behind a future character.",
     "TASK": {
       "instruction": "Resolve variables. Treat the supplied aura theme, including comma-separated text, as one value and one generation call. Apply one requested size to both dimensions or split WIDTHxHEIGHT. Require explicit run approval and an authenticated PixelLab MCP connection, then create the declared unique empty output directory.",
       "verify": "The request is approved, MCP is authenticated, and the output directory is new and empty."
@@ -13,7 +13,7 @@
   },
   {
     "MCP create_image_pro": {
-      "description": "fully contained symmetrical {{aura theme | default: energy}} aura rising behind a flat floor-level glow",
+      "description": "fully contained broad {{aura theme | default: energy}} aura rising along the rear edge of a round ground aura",
       "width": "{{aura width | default: 64}}",
       "height": "{{aura height | default: 64}}",
       "no_background": true
