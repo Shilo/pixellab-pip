@@ -2022,3 +2022,132 @@ If all three families succeed, keep one portable blueprint but resolve an `aura 
 `aura theme` and `aura size` independent. Do not expose a free-form `effect shape` fragment in the
 middle of one universal sentence: that would restore the ambiguity this test plan is designed to
 remove.
+
+## Four-Family MVP Results — 2026-07-26
+
+This section supersedes the three-family blueprint conclusion immediately above. The user review
+established four useful categories: wall aura, filled ground aura, transparent-center overlay aura,
+and background-area aura. Eight unseeded `64x64` Create Image Pro calls tested two prompts per
+category. Each call returned sixteen transparent candidates.
+
+| Folder | Exact prompt | Provisional agent rating | Result |
+|---|---|---:|---|
+| `wall-aura-flat-base-a/` | `fully contained symmetrical energy aura rising behind a flat floor-level glow` | `4/10` | Some wall-aura candidates, but many portals, pedestals, tornadoes, or emblems. |
+| `wall-aura-shallow-base-b/` | `fully contained symmetrical energy aura spanning the rear of a shallow ground glow` | `2/10` | `Spanning the rear` did not preserve an upright wall; objects and elemental subjects dominated. |
+| `ground-aura-near-side-a/` | `fully contained shallow filled energy aura spread across the floor in a near-side view` | `0/10` | Straight-down patches, disks, cracks, and objects; the near-side camera instruction failed. |
+| `ground-aura-slight-recede-b/` | `fully contained flat filled energy glow receding slightly across the ground` | `0/10` | Mostly GUI-like symbols. Removing `aura` weakened the intended subject, and the perspective cue failed. |
+| `overlay-aura-symmetrical-open-a/` | `fully contained symmetrical energy power-up aura surrounding transparent center space` | `4/10` | Strong transparent centers and surface effects, but a new circular portal/ring shape lock replaced the pointed egg. |
+| `overlay-aura-flexible-open-b/` | `fully contained energy power-up aura surrounding transparent center space` | `3/10` | Removing symmetry did not materially loosen the circular composition. |
+| `background-aura-wide-oval-control/` | `fully contained wide horizontal oval energy aura at ground level` | `1/10` | The exact attempt-15 prompt failed to reproduce its prior batch and mostly generated discrete circular objects. |
+| `background-aura-broad-low-variant/` | `fully contained broad low energy aura spread at ground level` | `7/10` | Strongest new result: varied horizontal modular effects, with only a minority becoming objects or material clusters. |
+
+The user's next review supersedes these provisional ratings.
+
+### Merged findings after generation
+
+- Changing `ring` to `glow` did not by itself prevent platforms, pedestals, and central objects.
+- `Near-side view` and `receding slightly` did not solve the ground perspective. Pro continued to
+  interpret floor/ground effects as straight-down patches or unrelated symbols.
+- Removing `aura` was actively harmful in the second ground prompt; retain the asset identity even
+  when changing its footprint or perspective language.
+- `Surrounding transparent center space` reliably opened the middle but strongly implied a circular
+  ring. Shape freedom therefore requires changing the spatial relation, not merely dropping
+  `symmetrical`.
+- The exact attempt-15 prompt is unseeded and unreliable: its excellent earlier batch was not
+  reproduced. It remains useful evidence, not a validated control.
+- `Broad low ... spread at ground level` is the clearest new positive phrase. It produced modular
+  background-area effects without specifying an oval, ring, border, or elemental behavior.
+- A candidate may still cross categories. In particular, circular overlay failures may be useful as
+  ground rings, while low horizontal background candidates may become the basis of a filled ground
+  prompt.
+
+### Next single-change prompts
+
+These require a new approval before paid testing:
+
+| Target | Exact prompt | Single change under test |
+|---|---|---|
+| Wall | `fully contained symmetrical energy aura rising vertically behind a flat ground glow` | Add only an explicit vertical relation to Wall A. |
+| Ground | `fully contained broad low filled energy aura spread at floor level` | Adapt the winning broad-low background structure by adding fill and changing only the placement noun. |
+| Overlay | `fully contained energy power-up aura rising along both sides of open central space` | Replace circular `surrounding` with lateral side placement. |
+| Background reliability | `fully contained broad low energy aura spread at ground level` | Repeat the strongest prompt unseeded. |
+
+## Authoritative Review of the Four-Family MVP — 2026-07-27
+
+The user's visual review supersedes the provisional agent ratings and corrects the category assigned
+to the broad-low result.
+
+| # | Folder | User rating | Merged conclusion |
+|---:|---|---:|---|
+| 1 | `wall-aura-flat-base-a/` | `7/10` | Best wall-aura batch so far and the new variety leader. It produced exceptional fire, water, and dark examples plus several other usable layouts. Lower platform depth and central objects are the two systemic failures. |
+| 2 | `wall-aura-shallow-base-b/` | `5/10` | Strong status, battle, and level-up effect prompt rather than a persistent-aura prompt. High variety is a feature; edge bleed requires later reliability work. |
+| 3 | `ground-aura-near-side-a/` | `2/10` | Attractive effects, but excessive bleed and a camera that remains too steep. |
+| 4 | `ground-aura-slight-recede-b/` | `0/10` | Failed perspective, shape, consistency, and shading. `Flat` affected rendering style rather than ground orientation. |
+| 5 | `overlay-aura-symmetrical-open-a/` | `2/10` | Excellent potential ground-effect treatments trapped in an unusable straight-down perspective. |
+| 6 | `overlay-aura-flexible-open-b/` | `3/10` | Similar ground-effect potential, with more filled centers. Natural effect-related fill is preferable to a solid color. |
+| 7 | `background-aura-wide-oval-control/` | `1/10` | `Oval` altered shape but did not move the camera away from straight-down view. |
+| 8 | `background-aura-broad-low-variant/` | `7/10` | First successful low-top-down ground-aura prompt. Most candidates have the correct shallow gameplay perspective and little wall effect. Some retain center depth; one bleeds and loses the circular footprint. |
+
+### Wall-aura candidate evidence
+
+- Candidate 1 is a `9/10` fire aura and candidate 4 a `9/10` water aura. Both clearly fill the back
+  and sides, retain a filled lower portion, and avoid covering the character's front. Their only
+  shared defect is platform-like depth at the bottom.
+- Candidate 6 is a `9/10` dark aura and directly usable. Candidates 8, 11, and 13 are also usable.
+- Candidate 9 has a strong layout but an unusually pixelated style; this is candidate-level variety,
+  not yet evidence of a prompt failure.
+- Candidate 14 is too narrow and tall and clips the canvas. Candidate 2 reads as a bubble, candidate
+  5 as a deep ice platform, candidate 7 disconnects its lightning from the circle edge, candidate 12
+  places its wall in front, and candidates 10, 15, and 16 contain central objects.
+
+The earlier `vertical power spikes and a bottom energy ring` prompt remains the **consistency
+leader**. `Rising behind a flat floor-level glow` is now the **variety and peak-quality leader**.
+Neither supersedes the other until an unseeded reliability repeat and a lower-depth refinement show
+whether the new prompt can retain its best compositions consistently.
+
+### Status-effect candidate evidence
+
+Candidate 7 is a `10/10` level-up effect whose slight edge contact successfully uses nearly the full
+cell. Candidate 13 also reads strongly as a level-up or status effect. This means containment should
+not be scored as a blind no-contact rule for this family: deliberate near-edge scale may be useful,
+while uncontrolled clipping or lost pixels still fails.
+
+### Ground and overlay corrections
+
+- `Broad low energy aura spread at ground level` is a **ground-aura** winner, not merely a
+  background-area result. Candidates 1, 3, 7, 8, and 13 retain unwanted depth near the character
+  area; candidate 12 bleeds and loses the desired footprint. The other candidates establish the
+  correct low-top-down perspective.
+- The circular effects from attempts 5 and 6 are not successful overlays, but their surface
+  treatments are valuable ground-aura references. Perspective is their primary failure. Attempt 6
+  also shows that fill must belong naturally to the effect rather than becoming a solid color patch.
+- Bare `flat` is retired as a perspective-control adjective. It changed shading and detail in
+  attempt 4 instead of reliably flattening the effect against the ground.
+- `Oval` is also retired as a camera-control word. It changes outline geometry, not view.
+
+### Blueprint and next-test decisions
+
+Three new static, portable blueprints preserve the exact winning structures with independent theme
+and size variables:
+
+- `wall-aura.blueprint.json`: `fully contained symmetrical {{aura theme | default: energy}} aura
+  rising behind a flat floor-level glow`
+- `status-effect.blueprint.json`: `fully contained symmetrical {{effect theme | default: energy}}
+  aura spanning the rear of a shallow ground glow`
+- `ground-aura.blueprint.json`: `fully contained broad low {{aura theme | default: energy}} aura
+  spread at ground level`
+
+Keep the original `aura.blueprint.json` unchanged as the consistency-oriented option.
+
+The next paid tests should be limited to four distinct calls:
+
+1. Exact unseeded wall-aura repeat.
+2. Exact unseeded ground-aura repeat.
+3. Wall depth refinement: `fully contained symmetrical energy aura rising behind a thin
+   floor-level glow`. This changes only `flat` to `thin`, targeting physical thickness without the
+   shading ambiguity.
+4. Overlay composition refinement: `fully contained energy power-up aura rising along both sides
+   of open central space`. This replaces the circular `surrounding` relation with lateral placement.
+
+Repeat the exact status-effect prompt later when that separate effect family becomes the active
+research target; do not spend the aura-research budget refining it now.

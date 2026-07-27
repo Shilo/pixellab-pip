@@ -1,0 +1,37 @@
+[
+  {
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/wall-aura-run",
+      "output_collision_policy": "create_unique"
+    },
+    "_comment": "Configurable transparent wall-aura candidates with the effect rising behind a future character and a floor-level lower portion.",
+    "_comment_prompt": "/pixellab-pip create the wall aura blueprint",
+    "TASK": {
+      "instruction": "Resolve all blueprint variables from the current request, confidently inferred context, or their defaults. Treat the entire user-supplied aura theme wording, including a comma-separated list, as one literal scalar value and substitute it once without expanding the workflow into multiple calls. Resolve aura size as an image_size object with positive integer width and height accepted by generate-image-v2; interpret a single size such as 64 as {\"width\": 64, \"height\": 64}. Before the PixelLab call, validate the resolved request, require explicit current-user approval, confirm PIXELLAB_SECRET exists without exposing its value, and create the declared output directory or the lowest available numeric-suffixed variant as a new empty directory.",
+      "verify": "The resolved request is valid, approval and credential presence are confirmed, and the output directory is new, empty, and writable."
+    }
+  },
+  {
+    "POST /v2/generate-image-v2": {
+      "description": "fully contained symmetrical {{aura theme | default: energy}} aura rising behind a flat floor-level glow",
+      "image_size": "{{aura size | default: {\"width\": 64, \"height\": 64}}}",
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Persist the background_job_id returned by the immediately preceding PixelLab call and poll GET /v2/background-jobs/{background_job_id} gently with backoff until the result completes or fails. Never resubmit the paid generation. On completion, save every returned image unchanged in response order as candidate-1.png through candidate-N.png, deriving N from the response. Assemble every candidate once in row-major order into candidates.png with ceiling(square root of N) columns and enough rows, leaving unused trailing cells transparent, with no resizing, repainting, margins, or spacing. Present every numbered candidate for review without selecting one automatically.",
+      "outputs": [
+        "candidates.png"
+      ],
+      "verify": "The saved candidate count equals the returned image count; every candidate matches the resolved size and preserves transparency; candidates.png contains every candidate exactly once at native size and each cell matches its source pixel-for-pixel."
+    }
+  }
+]

@@ -1,6 +1,7 @@
 # PixelLab MCP New-Tools Verification — Plan
 
-Status: plan only, not yet executed. Companion: `../pixellab/pixellab-mcp-vs-rest-route-parity.md`
+Status: executed 2026-07-27. Results: `../pixellab/pixellab-mcp-new-tools-test-results.md`. Companion:
+`../pixellab/pixellab-mcp-vs-rest-route-parity.md`
 (the schema-verified parity source every comparison below is drawn from) and
 `../pixellab/pixellab-doc-watch-cache.md` (the refresh mechanism that surfaced these tools).
 
@@ -59,7 +60,9 @@ rather than tested in isolation, plus one dedicated error-path check.
   Stability metrics below for that pair.
 - **Error-path test**: 1-2 deliberately invalid calls per tool (bad id, out-of-range field, malformed
   mask) to confirm the tool fails with a clear, documented error rather than hanging, silently
-  succeeding, or returning a malformed response.
+  succeeding, or returning a malformed response. If a paid request reaches a job and fails, record
+  the balance before submission, at failure, and after a 60-second recheck; report the charge as
+  refunded, not refunded, or still pending.
 
 ## Performance & Stability Comparison
 
@@ -143,15 +146,16 @@ skipped, say so explicitly in the report rather than silently omitting the row.
 | `create_image_pixflux` smoke + live + REST-equivalence pair ×3 (performance repeat count) | ~8 |
 | `create_image_pixen` smoke + live + REST-equivalence pair ×3 (performance repeat count) | ~8-10 |
 | `create_image_pro` full smoke/live/coverage/REST matrix (20-40 each call) | ~160 |
-| `edit_image` full smoke/live/coverage/REST matrix (20-40 each accepted call) | ~140 |
+| `edit_image` full smoke/live/coverage/REST matrix | ~180 observed across 7 MCP calls plus 1 REST Pro call |
 | `inpaint_image` full smoke/live/coverage/REST matrix (20-40 each accepted call) | ~160 |
 | `animate_image` full smoke/live/coverage/REST matrix | ~11 |
 | `create_path_tiles` full smoke/live/coverage/REST matrix | ~80-160 |
 | `create_building_kit` full smoke/live/coverage/REST matrix | ~100-200 |
 | `update_character_tags` / `update_object_tags` | 0 (free) |
 
-Budget roughly **700-900 generations** for the complete matrix, including accepted calls in cases
-that were expected to reject. The 2026-07-27 verification run consumed 858 subscription generations.
+Budget roughly **1,000-1,100 generations** for the complete matrix, including accepted calls in cases
+that were expected to reject. The completed 2026-07-27 verification run consumed 1,063 subscription
+generations.
 `create_image_pro`, edit/inpaint, and the tile kits dominate the budget — consider running Pro's smoke test at the smallest legal
 canvas (16×16) to keep even the "cheap" check inside the 64-candidate bucket, and treat its
 REST-equivalence call as optional/skippable if budget is tight, since `generate-image-v2` parity is

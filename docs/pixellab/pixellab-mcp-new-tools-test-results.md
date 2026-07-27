@@ -5,28 +5,55 @@ Run ID: `20260727T040152Z`
 Plan: `docs/plans/pixellab-mcp-new-tools-test-plan.md`
 
 The live MCP connection exposed all 11 scoped tools, `PIXELLAB_SECRET` was present for REST calls,
-and the downloaded OpenAPI document contained 74 paths. The run began with 7,132 subscription
-generations remaining and ended with 6,274: **858 generations consumed**. Cash credits remained
-unchanged at $10.79. The original plan budget materially understated full-matrix cost; the plan has
-been corrected to a 700-900-generation estimate. All recoverable artifacts are in the gitignored
-`.local/mcp-tool-verification/20260727T040152Z/` folder: 153 verified PNGs, six verified tile ZIPs,
-REST request/response records, fixtures, and inspection aids.
+and the downloaded OpenAPI document contained 74 paths. The full run began with 7,132 subscription
+generations and ended with 6,069: **1,063 generations consumed**. Cash credits remained unchanged at
+$10.79. All recoverable artifacts are in the gitignored
+`.local/mcp-tool-verification/20260727T040152Z/` folder: verified PNGs and tile ZIPs, REST
+request/response records, fixtures, and inspection aids.
+
+## PixelLab Developer Fix List
+
+### High priority
+
+- **MCP `inpaint_image` — mask correctness:** MCP and REST changed pixels outside the mask or left
+  the masked region unchanged. `crop_to_mask` made no visible difference, and MCP silently accepted
+  an out-of-bounds rectangle.
+- **MCP `create_image_pixen` — validation and billing:** MCP accepted a 17px-wide request, then the
+  job failed with an HTTP 500 server error. REST rejected it immediately with an HTTP 422 validation
+  response. The repeat failure was refunded by terminal status: balance stayed at 6,089 immediately
+  after failure and after 60 seconds.
+
+### Medium priority
+
+- **MCP `edit_image` — input transport:** a valid inline PNG was truncated at 40,020 base64
+  characters. File-based REST avoided the problem; an MCP URL/file input would remove this
+  client-size risk.
+- **MCP `create_image_pro` — style controls:** style-copy and combined reference+style outputs did
+  not visibly adopt the supplied gray-green palette.
+
+### Low priority
+
+- **MCP `get_image` / `get_tiles_pro` — status reporting:** jobs sometimes remained `processing` at
+  95-100%. REST building remained `processing` for about 30 seconds after `last_response` contained
+  the finished result.
+- **MCP `create_building_kit` — naming:** the name and `layout` values do not clearly say that this
+  generates architectural floor, wall, doorway, pillar, and stair tiles for constructing buildings.
+- **MCP `create_building_kit` — intermittent failure:** the first `layout="grid"` job failed with
+  only `Generation failed`; an exact reproduction later completed 58 valid tiles. The original
+  failure's refund status cannot be reconstructed.
+- **MCP `create_image_pixflux` — documented size limit:** 16×16 is rejected because the live minimum
+  area is 1,024 pixels, despite the declared 16px per-axis minimum.
 
 ## Execution Completeness
 
-The matrix was attempted end to end, but this run does **not** strictly close every plan assertion:
-
-- One of the three PixFlux equivalence repeats lost its MCP job handle after the local orchestration
-  timed out, leaving two usable paired measurements.
-- Reference-mode `edit_image` was verified with a refining description, but the optional-description
-  path was not called with `description` omitted.
-- The animation tween used same-size generated anchors and verified end-frame convergence, but they
-  were not literal open/closed chest images as specified by the example.
-- REST animation equivalence covered the first-frame-only smoke case, not the live last-frame tween.
-- Some early outputs were verified live but could not be included in the later bulk download because
-  their complete job IDs were no longer available.
-
-Closing these gaps requires new paid calls; none were silently rerun during this report pass.
+All functional assertions in the test matrix are complete. The completion pass supplied the third PixFlux measurement, tested
+reference-mode `edit_image` with `description` omitted, compared MCP and REST animation using literal
+open/closed chest anchors, isolated the Pixen failure refund, and reproduced
+`create_building_kit(layout="grid")` successfully. The reproduction cost 20 generations: balance
+changed from 6,089 to 6,069 at completion and remained 6,069 after 60 seconds. The original failed
+job was not bracketed by snapshots, so its refund status cannot be reconstructed. Some early outputs
+lack archived copies because their full job IDs were lost after live inspection; no functional
+assertion remains open.
 
 Timing is submission-to-first-observed terminal `completed` status. Because polling was intentionally
 spaced, async values are upper bounds within one polling interval; generation queue time dominates.
@@ -40,14 +67,14 @@ connection was established.
 |---|---:|---:|---:|---:|---|---|---|
 | `update_character_tags` | 1 | 1 | 0.899 s (n=3) | 0.717 s (n=3) | None | No; 21 tags returned a tool error envelope | N/A |
 | `update_object_tags` | 1 | 1 | 0.817 s (n=3) | 0.737 s (n=3) | None | No; 21 tags returned a tool error envelope | N/A |
-| `create_image_pixflux` | 4 | 2 | ~28 s (n=2 usable) | 20.691 s (n=3) | First variance orchestration timed out after submission and lost the MCP job handle; no resubmit | Yes for declared width bounds | No; a 400×400, 37,916-character input arrived intact |
-| `create_image_pixen` | 3 | 2 | ~49 s (n=3) | 40.123 s (n=3) | 17×20 MCP request was charged, then failed as a background 500; REST returned 422 before generation | No | N/A |
+| `create_image_pixflux` | 4 | 2 | ~30 s (n=3) | 20.691 s (n=3) | First variance orchestration lost its job handle; replacement completed without retrying that job | Yes for declared width bounds | No; a 400×400, 37,916-character input arrived intact |
+| `create_image_pixen` | 3 | 2 | ~49 s (n=3) | 40.123 s (n=3) | 17×20 MCP job failed with HTTP 500; REST returned HTTP 422; isolated repeat caused no net charge | No | N/A |
 | `create_image_pro` | 5 | 5 | ~91 s | ~92 s | No retry; style-copy fidelity misses recorded | No; the five-reference JSON is validated inside the tool | N/A |
-| `edit_image` | 5 | 4 | ~91 s | ~62 s | A 40,020-character inline PNG was truncated before decode; a compact same-dimension PNG succeeded without a paid retry | Yes for 513px dimensions; no for frame-count rule | **Yes** |
+| `edit_image` | 5 | 4 | ~91 s | ~62 s | Large inline PNG truncated; description-free reference mode passed; no billing discrepancy after reconciliation | Yes for 513px dimensions; no for frame-count rule | **Yes** |
 | `inpaint_image` | 4 | 4 | ~61 s | ~62 s | Both surfaces completed but violated mask semantics; out-of-bounds MCP rectangle was charged and silently accepted | No | No; compact 512×512 image plus mask arrived intact |
-| `animate_image` | 6 | 5 | ~121 s | ~92 s | No generation failure; ETA moved backward during processing | No; odd/pixel-budget rules return tool error envelopes | No; 256×256 boundary input arrived intact |
+| `animate_image` | 4 | 5 | ~62 s (literal tween) | ~93 s (literal tween) | No generation failure; MCP again lagged at high progress before completion | No; odd/pixel-budget rules return tool error envelopes | No; 256×256 boundary input arrived intact |
 | `create_path_tiles` | 6 | 4 | ~106 s | ~62 s | No retry; initial MCP ETA was ~459 s | No | N/A |
-| `create_building_kit` | 9 | 8 | ~211 s | ~151 s | Explicit `grid` job failed with only `Generation failed`; REST result was ready about 30 s before top-level status became `completed` | Yes for `wall_tiles=4`; no for projection-specific size | N/A |
+| `create_building_kit` | 9 | 8 | ~211 s | ~151 s | First explicit `grid` job failed generically; exact reproduction completed 58 tiles and cost 20 generations; REST result was ready about 30 s before top-level status became `completed` | Yes for `wall_tiles=4`; no for projection-specific size | N/A |
 | `get_image` | 1 per poll | 1 per poll | 0.8-1.1 s per read | 0.7-2.7 s per read | MCP showed 95%/100% status lag; REST building showed `message_done` while top-level remained `processing` | No | N/A |
 
 The cheap PixFlux and Pixen REST routes return their image synchronously, so the broad premise that
@@ -97,6 +124,8 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
   but REST returned the PNG synchronously in one request while MCP needed a job plus getter. One
   MCP handle was orphaned by the local orchestration timeout; it was not resubmitted or double-charged.
 - Large-inline check — **PASS** at 400×400/37,916 base64 characters; no corruption observed.
+- Performance repeat — **PASS**: the replacement third MCP measurement completed at 64×64, closing
+  the planned three-pair variance sample.
 
 ## `create_image_pixen`
 
@@ -105,10 +134,11 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
 - Coverage: transparent sprite — **PASS**.
 - Coverage: 16×16 minimum — **PASS**.
 - Coverage: 512×512 maximum — **PASS**.
-- Error: width 17 — **FAIL**: MCP accepted and charged the request, then the job failed with internal
-  500 (`Height and width must be equal for small generations`). REST rejected the same payload with
-  422 because width must be a multiple of four. This is a **PixelLab-side MCP validation bug** to
-  report upstream; it is now documented in the parity map and was not routed around.
+- Error: width 17 — **FAIL**: MCP accepted the request, then the job failed with an HTTP 500 server
+  error (`Height and width must be equal for small generations`). REST rejected the same payload
+  with an HTTP 422 validation response because width must be a multiple of four. The isolated repeat
+  caused no net charge: balance was 6,089 before submission, at failure, and after 60 seconds. This
+  is a **PixelLab-side MCP validation bug**; refund behavior passed.
 - REST equivalence — **MCP worse** for malformed dimensions; the three valid repeated pairs were
   functionally equivalent, but REST returned synchronously and rejected invalid dimensions earlier.
 
@@ -137,6 +167,8 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
 - Smoke — **PASS**: one 32×32 text edit completed.
 - Live reference mode — **PASS**: response explicitly switched to `mode: reference` and returned
   two distinct 64×64 outputs.
+- Coverage: reference mode with `description` omitted — **PASS**: the 32×32 output visibly adopted
+  the supplied stone texture, confirming that the description is genuinely optional.
 - Live multi-frame consistency path — **PASS**: two frames received the same reference edit.
 - Coverage: 16 frames at ≤64px — **PASS**: all 16 returned.
 - Coverage: one frame above 128px — **PASS**: compact 512×512 input returned one 512×512 output.
@@ -146,6 +178,11 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
   edit completed on both surfaces at 20 generations with two 32×32 outputs. An unquantized valid PNG
   was truncated to 40,020 base64 characters in the MCP client path; the file-based REST script has no
   analogous inline argument risk. A compact PNG at the same dimensions succeeded.
+- Billing — **PASS**: six original MCP calls cost 140 generations (five at 20, one 512px call at 40)
+  and the matched REST Pro call cost 20. The later completion pass added one 20-generation MCP edit
+  and five one-generation calls. Together, 160 from the original edit matrix plus 25 from completion
+  exactly explains the observed 185-generation balance change. The sparse snapshots cannot establish
+  when individual charges became visible, so no billing-timing claim is made.
 
 ## `inpaint_image`
 
@@ -176,6 +213,9 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
 - REST equivalence — **Equivalent**: both returned five images for the matched four-frame request;
   frame 0 was visibly pixel-identical to the input (only arbitrary RGB values under fully transparent
   pixels differed).
+- REST last-frame equivalence — **Equivalent**: literal open/closed chest anchors produced seven
+  64×64 images on both surfaces. Frame 0 matched the open anchor and frame 6 matched the closed anchor
+  exactly; the inspected middle frames were visually equivalent.
 - Large-inline check — **PASS**: exact 256×256 boundary input arrived intact.
 
 ## `create_path_tiles`
@@ -194,10 +234,11 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
 - Smoke — **PASS**: 58-piece isometric kit with floor, walls, doorways, pillar, stairs, and composed
   placement rules.
 - Live — **PASS**: 56-piece 64px oblique kit with three-tile walls and the requested roof material.
-- Coverage: explicit `layout=grid` — **FAIL**: background job ended with only `Generation failed`.
-- Coverage: explicit `layout=materials` — **PASS**: 56-piece set completed. Because `grid` failed, the
-  intended visual difference could not be compared. This is a **PixelLab-side generation failure**;
-  no paid retry was made.
+- Coverage: explicit `layout=grid` — **PASS with an intermittent incident**: the first background job
+  ended with only `Generation failed`; an exact reproduction completed 58 valid pieces. The
+  reproduction cost 20 generations immediately and the balance was unchanged after 60 seconds.
+- Coverage: explicit `layout=materials` — **PASS**: 56-piece set completed. The successful `grid`
+  reproduction also confirmed the two layout paths produce different piece sets.
 - Error: `wall_tiles=4` — **PASS**: client-side max-three rejection.
 - Error: 16px isometric — **PASS**: clear 32-96 projection-specific rejection.
 - REST equivalence — **Equivalent**: matching smoke request returned the same building roles and
@@ -221,7 +262,8 @@ async edit/inpaint/animation/tile/Pro family: requests are shorter, bearer heade
 and final tile rules arrive through purpose-specific getters. It did **not** consistently reduce the
 measured number of calls or wall-clock time: queue time dominated, MCP often required as many or more
 polls, and synchronous REST PixFlux/Pixen were materially simpler. Incident counts were not lower on
-MCP in this run—the Pixen validation gap caused a charged 500 and large inline edit base64 was
-truncated—while REST’s main surface-specific incident was terminal status lag. Practical conclusion:
-MCP lowers agent-side authoring complexity for async jobs, but that advantage does not yet translate
-into uniformly fewer operational steps or failures across this tool family.
+MCP in this run—the Pixen validation gap caused a refunded HTTP 500 and large inline edit base64 was
+truncated—while REST’s main surface-specific incident was terminal status lag. Pro edit billing
+reconciled to the documented 20/40-generation size tiers. Practical conclusion: MCP lowers agent-side
+authoring complexity for async jobs, but that advantage does not yet translate into uniformly fewer
+operational steps or failures across this tool family.

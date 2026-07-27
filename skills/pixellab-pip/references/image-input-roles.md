@@ -62,8 +62,9 @@ These are REST v2 routes; MCP `edit_image`/`inpaint_image`/`animate_image` cover
 
 For animation frame anchors (`first_frame`, `last_frame`) and idle-loop risk, see `animation.md`.
 
-For inpainting, verify that pixels outside the mask stayed unchanged and the requested region changed.
-On failure, report it; do not retry or repair silently.
+Exact-mask edits: avoid MCP `inpaint_image` and REST `inpaint-v3` until fixed; live tests changed
+pixels outside the mask or ignored the masked region. For other inpainting, verify both regions and
+report failures without retrying or repairing silently.
 
 ## Clarify When Ambiguous
 
