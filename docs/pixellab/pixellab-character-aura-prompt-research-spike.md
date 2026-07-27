@@ -2039,7 +2039,7 @@ category. Each call returned sixteen transparent candidates.
 | `overlay-aura-symmetrical-open-a/` | `fully contained symmetrical energy power-up aura surrounding transparent center space` | `4/10` | Strong transparent centers and surface effects, but a new circular portal/ring shape lock replaced the pointed egg. |
 | `overlay-aura-flexible-open-b/` | `fully contained energy power-up aura surrounding transparent center space` | `3/10` | Removing symmetry did not materially loosen the circular composition. |
 | `background-aura-wide-oval-control/` | `fully contained wide horizontal oval energy aura at ground level` | `1/10` | The exact attempt-15 prompt failed to reproduce its prior batch and mostly generated discrete circular objects. |
-| `background-aura-broad-low-variant/` | `fully contained broad low energy aura spread at ground level` | `7/10` | Strongest new result: varied horizontal modular effects, with only a minority becoming objects or material clusters. |
+| `background-aura-broad-low-variant/` | `fully contained broad low energy aura spread at ground level` | `7/10` | Failed its intended background-aura role by producing ground-plane effects, but accidentally discovered a strong low-top-down ground-aura composition. |
 
 The user's next review supersedes these provisional ratings.
 
@@ -2055,11 +2055,12 @@ The user's next review supersedes these provisional ratings.
   `symmetrical`.
 - The exact attempt-15 prompt is unseeded and unreliable: its excellent earlier batch was not
   reproduced. It remains useful evidence, not a validated control.
-- `Broad low ... spread at ground level` is the clearest new positive phrase. It produced modular
-  background-area effects without specifying an oval, ring, border, or elemental behavior.
-- A candidate may still cross categories. In particular, circular overlay failures may be useful as
-  ground rings, while low horizontal background candidates may become the basis of a filled ground
-  prompt.
+- `Broad low ... spread at ground level` did not solve the intended background-aura target. It
+  pulled the batch onto the ground plane, where it unexpectedly became the clearest ground-aura
+  success.
+- Cross-category usefulness must be recorded separately from intended-role success. A failed
+  overlay that resembles a ground ring remains an overlay failure; an intended background batch
+  that yields excellent ground effects remains a background failure plus a new ground hypothesis.
 
 ### Next single-change prompts
 
@@ -2083,10 +2084,10 @@ to the broad-low result.
 | 2 | `wall-aura-shallow-base-b/` | `5/10` | Strong status, battle, and level-up effect prompt rather than a persistent-aura prompt. High variety is a feature; edge bleed requires later reliability work. |
 | 3 | `ground-aura-near-side-a/` | `2/10` | Attractive effects, but excessive bleed and a camera that remains too steep. |
 | 4 | `ground-aura-slight-recede-b/` | `0/10` | Failed perspective, shape, consistency, and shading. `Flat` affected rendering style rather than ground orientation. |
-| 5 | `overlay-aura-symmetrical-open-a/` | `2/10` | Excellent potential ground-effect treatments trapped in an unusable straight-down perspective. |
-| 6 | `overlay-aura-flexible-open-b/` | `3/10` | Similar ground-effect potential, with more filled centers. Natural effect-related fill is preferable to a solid color. |
-| 7 | `background-aura-wide-oval-control/` | `1/10` | `Oval` altered shape but did not move the camera away from straight-down view. |
-| 8 | `background-aura-broad-low-variant/` | `7/10` | First successful low-top-down ground-aura prompt. Most candidates have the correct shallow gameplay perspective and little wall effect. Some retain center depth; one bleeds and loses the circular footprint. |
+| 5 | `overlay-aura-symmetrical-open-a/` | `2/10` before category correction | Failed as an overlay because every result is circular/top-down rather than a flexible upright effect around visible character space. Its accidental resemblance to ground effects is not evidence for the overlay target. |
+| 6 | `overlay-aura-flexible-open-b/` | `3/10` before category correction | Failed as an overlay for the same circular/top-down shape lock. Removing symmetry did not fix the composition. |
+| 7 | `background-aura-wide-oval-control/` | `1/10` | Failed as a background wall because almost every result reads as a top-down ground effect. Candidate 10 is the usable exception: a fire aura at the correct background angle. |
+| 8 | `background-aura-broad-low-variant/` | `7/10 as an accidental ground result` | Failed its intended background-aura role but unexpectedly became the first successful low-top-down ground-aura prompt. Some candidates retain center depth; one bleeds and loses the desired footprint. |
 
 ### Wall-aura candidate evidence
 
@@ -2112,18 +2113,28 @@ cell. Candidate 13 also reads strongly as a level-up or status effect. This mean
 not be scored as a blind no-contact rule for this family: deliberate near-edge scale may be useful,
 while uncontrolled clipping or lost pixels still fails.
 
-### Ground and overlay corrections
+### Intended-role and cross-category corrections
 
-- `Broad low energy aura spread at ground level` is a **ground-aura** winner, not merely a
-  background-area result. Candidates 1, 3, 7, 8, and 13 retain unwanted depth near the character
-  area; candidate 12 bleeds and loses the desired footprint. The other candidates establish the
-  correct low-top-down perspective.
-- The circular effects from attempts 5 and 6 are not successful overlays, but their surface
-  treatments are valuable ground-aura references. Perspective is their primary failure. Attempt 6
-  also shows that fill must belong naturally to the effect rather than becoming a solid color patch.
+- Attempts 5 and 6 were overlay tests. They failed because their shapes collapsed into circles and
+  straight-down compositions instead of flexible upright effects around a visible character. Their
+  resemblance to ground effects was a review-category mistake and must not drive ground prompting.
+- Attempt 7 was a background-wall test. It failed because `oval` produced top-down ground-like
+  shapes rather than an upright rear layer. Candidate 10 is the lone useful background result and
+  demonstrates that the batch's fire treatment can work when the model chooses the correct angle.
+- Attempt 8 was also intended as a background aura. It failed that goal, but its accidental result
+  is valuable enough to repurpose deliberately as a **ground-aura** winner. Candidates 1, 3, 7, 8,
+  and 13 retain unwanted depth near the character area; candidate 12 bleeds and loses the desired
+  footprint. The other candidates establish the correct low-top-down ground perspective.
 - Bare `flat` is retired as a perspective-control adjective. It changed shading and detail in
   attempt 4 instead of reliably flattening the effect against the ground.
 - `Oval` is also retired as a camera-control word. It changes outline geometry, not view.
+
+From this point forward, every batch receives two separate judgments when applicable:
+
+1. **Intended-role result:** whether it satisfies the family named before generation.
+2. **Cross-category salvage:** whether the failed output suggests a different useful family.
+
+Cross-category salvage never retroactively validates the original prompt.
 
 ### Blueprint and next-test decisions
 
@@ -2135,14 +2146,15 @@ and size variables:
 - `status-effect.blueprint.json`: `fully contained symmetrical {{effect theme | default: energy}}
   aura spanning the rear of a shallow ground glow`
 - `ground-aura.blueprint.json`: `fully contained broad low {{aura theme | default: energy}} aura
-  spread at ground level`
+  spread at ground level`, deliberately repurposed from attempt 8's accidental ground result
 
 Keep the original `aura.blueprint.json` unchanged as the consistency-oriented option.
 
 The next paid tests should be limited to four distinct calls:
 
 1. Exact unseeded wall-aura repeat.
-2. Exact unseeded ground-aura repeat.
+2. Exact unseeded ground-aura repeat, now explicitly testing the repurposed ground role rather than
+   the original background role.
 3. Wall depth refinement: `fully contained symmetrical energy aura rising behind a thin
    floor-level glow`. This changes only `flat` to `thin`, targeting physical thickness without the
    shading ambiguity.
@@ -2151,3 +2163,7 @@ The next paid tests should be limited to four distinct calls:
 
 Repeat the exact status-effect prompt later when that separate effect family becomes the active
 research target; do not spend the aura-research budget refining it now.
+
+Background-aura research remains unresolved: attempts 7 and 8 both failed their intended background
+roles. Do not treat either prompt as a validated background blueprint. Recover that family with an
+explicitly upright rear-layer prompt in a later, separately planned test.
