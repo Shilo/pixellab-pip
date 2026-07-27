@@ -26,7 +26,7 @@ Shared MCP controls currently visible on both routes:
 - `detail`: `low detail`, `medium detail`, `highly detailed`.
 - `shading`: `flat shading`, `basic shading`, `medium shading`, `detailed shading`, `highly detailed shading`.
 - `outline`: `single color outline`, `selective outline`, `lineless`.
-- `text_guidance_scale`, `tile_strength`, `tileset_adherence`, `tileset_adherence_freedom`, `seed`: generation controls.
+- `text_guidance_scale`, `tile_strength`, `tileset_adherence`, `tileset_adherence_freedom`: generation controls.
 
 Top-down MCP `create_topdown_tileset` route:
 
@@ -35,13 +35,15 @@ Top-down MCP `create_topdown_tileset` route:
 - Base tile fields for chaining: `lower_base_tile_id`, `upper_base_tile_id`.
 - Route-only fields: `mode` (`standard` or `pro`) and `view` (`low top-down` or `high top-down`).
 - Pro-only shape fields: `spread_x`, `slope_size`, `raggedness`.
+- No `seed`: the MCP top-down route exposes none, so route reproducible top-down runs to REST `create-tileset`, which does.
 - `transition_size` controls terrain blending/height behavior for top-down tiles; documented examples include 0.0, 0.25, 0.5, and 1.0.
 
 Sidescroller MCP `create_sidescroller_tileset` route:
 
 - Required platform body field: `lower_description`.
 - Required platform surface/top field: `transition_description`.
-- Base tile field for chaining: `base_tile_id`.
+- Base tile field for chaining: `base_tile_id` (REST `create-tileset-sidescroller` names it `lower_base_tile_id`).
+- Route-only field: `seed`.
 - No `upper_description`, `view`, `mode`, or Pro-only shape fields are exposed by the current MCP sidescroller tool.
 - `transition_size` controls how much of the surface/top layer appears on the platform tile; documented examples include 0.0, 0.25, and 0.5.
 

@@ -66,7 +66,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Animate with text | `POST /v2/animate-with-text` | Base text animation | 64x64 text animation with init/inpainting/palette options | `64x64`, 4 frames: `$0.01565` |
 | Animate with text (new) | `POST /v2/animate-with-text-v3` | v3 text animation | First-frame animation, optional last-frame guidance, 4-16 frames, up to 256x256 | `32x32`, 4 frames: `$0.0221`; `256x256`, 8 frames: `$0.0302`; `128x128`, 16 frames: `$0.0424` |
 | Animate with text (Pro) | `POST /v2/animate-with-text-v2` | Pro text animation | Reference-image animation, 4/9/16 frames, view and direction controls | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
-| Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 128x128 | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
+| Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 256x256 (endpoint prose lists 16/32/64/128/256; priced rows below stop at 128x128) | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
 | Estimate skeleton | `POST /v2/estimate-skeleton` | Skeleton helper | Skeleton extraction for skeleton animation | `16x16 $0.00511`; `64x64 $0.00513`; `256x256 $0.00516` |
 | Edit animation (Pro) | `POST /v2/edit-animation-v2` | Pro animation editing | Apply edits consistently across 2-16 frames | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Interpolate (Pro) | `POST /v2/interpolation-v2` | Pro interpolation | Generate in-between frames | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |

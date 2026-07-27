@@ -19,7 +19,7 @@ This note does not link to the generated candidate frames; they live in the giti
 - **Frame count.** `frame_count` is 4–16, must be even, default 8. `frame_count=16` returned **17 images**: image 0 is the input `first_frame` echoed back (pixel-identical or a negligible re-encode difference — see the testing note), images 1–16 are the generated motion. Budget on 16 to minimize job count — but the pixel budget below allows 16 only at ≤128px; a 256×256 canvas caps a job at 8 frames.
 - **Image fields are objects, not raw strings.** `first_frame`/`last_frame` are `Base64Image` = `{"type":"base64","base64":"…","format":"png"}`. Passing a bare base64 string 422s (before any charge).
 - **No `image_size`.** Output canvas equals the `first_frame` canvas (max 256×256). A 128×128 canvas left room for the subject plus a second object to move around; the subject was kept small on purpose.
-- **`action` caps at 500 characters** (hard). Over-length 422s before charge; still cheaper to check length locally before POST.
+- **`action` caps at 1000 characters** (hard; `AnimateWithTextV3Request.action` `maxLength`. 500 is the *v2* cap — do not carry it over). Over-length 422s before charge; still cheaper to check length locally before POST.
 - **`no_background: true`** preserved transparency when the input frame was already transparent; every output frame kept a real alpha channel (extrema 0–255).
 - **`seed`.** `0` = random; a fixed non-zero seed per job made runs reproducible and gave a lever for re-rolls.
 - **`enhance_prompt`** was not used; hand-authored near-max actions already carried the intended motion, and enabling it would expand/rewrite the action text.

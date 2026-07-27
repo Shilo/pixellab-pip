@@ -109,7 +109,7 @@ Key reads:
   risk in `../../skills/pixellab-pip/references/animation.md`).
 - `loop_closure` = 1.0 and `palette_stability` ≈ 0.99 everywhere — trivially true because the
   frames barely change; not evidence of a good turntable.
-- Background: outputs came back **opaque with a uniform mauve background** (no `remove_background`
+- Background: outputs came back **opaque with a uniform mauve background** (no `no_background`
   set). Uniform, so it does not affect the comparison; a winner would get a transparent re-run.
 
 **So the minimal-phrase question is moot for this exact configuration** — the identical-anchor

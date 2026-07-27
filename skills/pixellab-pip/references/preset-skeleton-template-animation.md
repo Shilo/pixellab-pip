@@ -173,7 +173,7 @@ POST /v2/animate-with-skeleton
 ```text
 image_size
 reference_image
-skeleton_keypoints
+skeleton_keypoints  (exactly 3 frames)
 view
 direction
 guidance_scale
@@ -216,7 +216,7 @@ Programmatic steps:
 3. Call `POST /v2/animate-with-skeleton` with `image_size`, `reference_image`, `skeleton_keypoints`, and explicit `view`/`direction`.
 4. Add `init_images`, `inpainting_images`, `mask_images`, or `color_image` when the user supplied those roles or the route requires them.
 
-`estimate-skeleton` returns a skeleton for one pose; it does not invent a walk/run sequence. `animate-with-skeleton` needs a keypoint sequence, so with only one estimated pose either ask for/create more poses, author a sequence in Aseprite, use managed template animation (built-in walk/idle/jump), or use v3 custom text animation (motion without skeleton ownership) — MCP `animate_character(mode="v3")`/`animate_image`, REST `animate-with-text-v3` as fallback.
+`estimate-skeleton` returns a skeleton for one pose; it does not invent a walk/run sequence. `animate-with-skeleton` requires exactly 3 keypoint frames (any other count returns 422), so with only one estimated pose either ask for/create the two missing poses, author a sequence in Aseprite, use managed template animation (built-in walk/idle/jump), or use v3 custom text animation (motion without skeleton ownership) — MCP `animate_character(mode="v3")`/`animate_image`, REST `animate-with-text-v3` as fallback.
 
 ### View/Direction Trap And Defaults
 

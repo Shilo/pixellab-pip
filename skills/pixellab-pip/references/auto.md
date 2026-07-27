@@ -67,9 +67,9 @@ Filled example:
 >
 > 1. **`create_character`** · MCP · v3 · ~2 gen
 >    - `description`: "stout dwarf blacksmith, flat pixel art, leather apron" *(enhanced)*
->    - `size`: 48×48 · `n_directions`: 4 · `no_background`: true
+>    - `size`: 48 · `view`: side · `detail`: high detail
 > 2. **`animate_character`** · MCP · ~1 gen
->    - `action`: "walk" · `direction`: south · `template_animation_id`: `walking-8-frames`
+>    - `action_description`: "walk" · `directions`: ["south"] · `template_animation_id`: `walking-8-frames`
 >
 > Reply **yes / no**, or say what to **change**.
 > *Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*
