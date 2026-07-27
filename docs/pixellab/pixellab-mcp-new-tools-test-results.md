@@ -5,9 +5,8 @@ Run ID: `20260727T040152Z`
 Plan: `docs/plans/pixellab-mcp-new-tools-test-plan.md`
 
 The live MCP connection exposed all 11 scoped tools, `PIXELLAB_SECRET` was present for REST calls,
-and the downloaded OpenAPI document contained 74 paths. The full run began with 7,132 subscription
-generations and ended with 6,069: **1,063 generations consumed**. Cash credits remained unchanged at
-$10.79. All recoverable artifacts are in the gitignored
+and the downloaded OpenAPI document contained 74 paths. The full run consumed **1,063 generations**;
+cash credits were unchanged. All recoverable artifacts are in the gitignored
 `.local/mcp-tool-verification/20260727T040152Z/` folder: verified PNGs and tile ZIPs, REST
 request/response records, fixtures, and inspection aids.
 
@@ -20,8 +19,8 @@ request/response records, fixtures, and inspection aids.
   an out-of-bounds rectangle.
 - **MCP `create_image_pixen` — validation and billing:** MCP accepted a 17px-wide request, then the
   job failed with an HTTP 500 server error. REST rejected it immediately with an HTTP 422 validation
-  response. The repeat failure was refunded by terminal status: balance stayed at 6,089 immediately
-  after failure and after 60 seconds.
+  response. The repeat failure was refunded: the balance was unchanged immediately after failure and
+  at the 60-second recheck.
 
 ### Medium priority
 
@@ -49,8 +48,8 @@ request/response records, fixtures, and inspection aids.
 All functional assertions in the test matrix are complete. The completion pass supplied the third PixFlux measurement, tested
 reference-mode `edit_image` with `description` omitted, compared MCP and REST animation using literal
 open/closed chest anchors, isolated the Pixen failure refund, and reproduced
-`create_building_kit(layout="grid")` successfully. The reproduction cost 20 generations: balance
-changed from 6,089 to 6,069 at completion and remained 6,069 after 60 seconds. The original failed
+`create_building_kit(layout="grid")` successfully. The reproduction cost 20 generations; the
+balance changed by exactly that amount at completion and remained unchanged after 60 seconds. The original failed
 job was not bracketed by snapshots, so its refund status cannot be reconstructed. Some early outputs
 lack archived copies because their full job IDs were lost after live inspection; no functional
 assertion remains open.
@@ -137,7 +136,7 @@ seconds; MCP getters also lagged at 95% and once reported `processing 100%` befo
 - Error: width 17 — **FAIL**: MCP accepted the request, then the job failed with an HTTP 500 server
   error (`Height and width must be equal for small generations`). REST rejected the same payload
   with an HTTP 422 validation response because width must be a multiple of four. The isolated repeat
-  caused no net charge: balance was 6,089 before submission, at failure, and after 60 seconds. This
+  caused no net charge: the balance was unchanged before submission, at failure, and after 60 seconds. This
   is a **PixelLab-side MCP validation bug**; refund behavior passed.
 - REST equivalence — **MCP worse** for malformed dimensions; the three valid repeated pairs were
   functionally equivalent, but REST returned synchronously and rejected invalid dimensions earlier.
