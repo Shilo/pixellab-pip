@@ -2206,3 +2206,125 @@ Controls remain the exact winning or diagnostic prompts:
 
 The first paid round should use the five recommended prompts, not the controls. Repeat a control only
 when a new prompt must be compared for reliability or the new prompt loses the defining composition.
+
+## Five-Family MCP Test Results — 2026-07-27
+
+The approved round used five unseeded `64x64` MCP `create_image_pro` calls. Each returned sixteen
+transparent candidates. The run is saved under
+`pixellab-pip-generations/pro-aura-five-family-mvp-20260727/`. These provisional agent ratings are
+evidence for the next prompt round; the user's review takes precedence.
+
+| # | Folder | Exact prompt | Provisional rating | Intended-role result |
+|---:|---|---|---:|---|
+| 1 | `wall-aura-thin-floor-glow/` | `fully contained symmetrical energy aura rising behind a thin floor-level glow` | `1/10` | Mostly isolated flames, columns, emblems, and centered objects. Upright orientation survived, but the enclosing rear-wall composition did not. |
+| 2 | `ground-aura-flush-ground/` | `fully contained broad low energy aura spread flush with the ground` | `3/10` | Some floor patches and rings, but most are straight-down, raised, material-like, or contain a central substance. |
+| 3 | `overlay-aura-open-sides/` | `fully contained energy power-up aura rising along both sides of open central space` | `5/10` | Several transparent bilateral effects avoid the former circle lock. Other candidates still become a centered object or closed ring. |
+| 4 | `background-aura-upright-rear/` | `fully contained broad energy aura forming an upright rear layer` | `2/10` | Mostly portals, emblems, crystals, and discrete vertical objects rather than a character-relative background area. |
+| 5 | `status-effect-shallow-glow/` | `fully contained symmetrical energy status effect spanning the rear of a shallow ground glow` | `7/10` | Strong and varied status/level-up motifs, but explicit status wording favors icons and emblems rather than persistent auras. |
+
+### Merged findings
+
+- Replacing `flat` with `thin` did not act as a clean depth correction. The batch lost most of the
+  original prompt's successful enclosing wall composition, so the original wall blueprint remains
+  the stronger production choice. Because both runs were unseeded, this is evidence of poor
+  reliability rather than proof that `thin` alone caused every difference.
+- `Flush with the ground` is not a dependable low-top-down camera cue. It produced several
+  straight-down or raised material effects and failed to reproduce the accidental ground winner
+  consistently. Another planar adjective is unlikely to solve perspective by itself.
+- `Rising along both sides of open central space` is the best new overlay relation so far. It
+  produced multiple bilateral transparent-center candidates and loosened the circular shape lock
+  created by `surrounding`. The next overlay refinement should preserve `along both sides`.
+- `Upright rear layer` is too abstract. Without a concrete lower anchor or character-relative
+  lateral extent, Pro turns the requested layer into a self-contained portal, emblem, crystal, or
+  other object.
+- Explicit `status effect` validates the separate status/level-up family, but also explains its
+  increased icon and emblem behavior. Do not use it as a generic persistent-aura replacement.
+- The round strengthens the distinction between peak candidate quality and prompt reliability.
+  The original wall winner and accidental ground winner remain valuable, but neither has yet
+  reproduced its best batch reliably under a nearby wording change.
+
+## Authoritative Review and Ground-Perspective Correction — 2026-07-27
+
+The user's review supersedes the provisional five-family ratings where they conflict.
+
+| # | Folder | Authoritative finding |
+|---:|---|---|
+| 1 | `wall-aura-thin-floor-glow/` | The candidates are close to a side-scroller presentation but remain usable for a top-down RPG. `Thin` or the compound `thin floor-level` may be responsible for this near-side view. |
+| 2 | `ground-aura-flush-ground/` | Better perspective and a useful range of effects. Four candidates contain bleeding backgrounds. |
+| 3 | `overlay-aura-open-sides/` | Best overlay batch so far. Roughly seven candidates work as transparent front overlays, four flame candidates work as background overlays, and about two additional candidates work as other background overlays. The systemic failure is bottom-edge clipping instead of a natural lower termination. |
+| 4 | `background-aura-upright-rear/` | Candidate 1 is the strongest filled-center background aura so far and closely resembles the target Super Warrior composition. The batch is less useful than attempt 3 because symbols and objects dominate, and bottom-edge clipping recurs. |
+| 5 | `status-effect-shallow-glow/` | Another excellent status-effect runner-up. Its lower rings use a near-side character/object perspective rather than the flatter ground-plane treatment common in tile-based RPG maps. |
+
+The exact attempt-3 prompt is now bundled as `overlay-aura.blueprint.json`. The exact attempt-4
+prompt is preserved as the explicitly provisional `background-aura.blueprint.json`. Neither
+blueprint includes an untested bottom-edge repair; the clipping defect remains a documented next
+refinement rather than being silently changed in the validated prompt.
+
+### Correct terminology for the map ground
+
+The earlier requirement that every ground aura use a `low top-down` foreshortened ellipse was too
+broad. It correctly described many character and upright-object sprites, but it does not describe
+the ground plane used by many traditional 2D tilemap RPGs.
+
+The official RPG Maker mapping tutorial describes the standard 2D top-down RPG view as a parallel
+projection that removes ordinary foreshortening, then deliberately stretches floors and walls so
+their detail remains readable. Duality's tilemap documentation calls the typical retro RPG Maker
+scene an **oblique projection** and distinguishes flat ground tiles from vertical wall tiles. These
+are compatible descriptions of a stylized parallel-projection convention, not evidence of one
+physically consistent camera. Sources: [official RPG Maker mapping tutorial](https://dl.komodo.jp/rpgmakerweb/tutorials/RPGMakerVXAceTutorial2.pdf),
+[Duality tilemap documentation](https://adamslair.github.io/duality-docs/pages/v4/Tilemaps.html).
+
+For aura work, use role-specific terminology:
+
+- **Characters and upright effects:** front-oblique or low-top-down sprite presentation remains a
+  useful description.
+- **Ground-only effects:** use `overhead map-plane`, `top-down map floor`, or `round ground decal in
+  a retro RPG tilemap projection`. Do not inherit the character sprite's near-side camera.
+- **Whole scene:** `retro RPG oblique/parallel projection` is the most useful umbrella term, while
+  acknowledging that the floor and upright sprites are intentionally treated differently.
+
+### How tall should a ground circle be?
+
+There is no universal ellipse ratio without a specific projection. Under a physically consistent
+orthographic camera, a circle on a tilted plane becomes an ellipse. If the viewing direction is
+elevated `theta` above the ground plane, the minor-to-major axis ratio is `sin(theta)`. Thus a
+30-degree camera elevation gives `0.50`, 45 degrees gives `0.71`, 60 degrees gives `0.87`, and a
+straight-down 90-degree view gives `1.00`. The equivalent tilted-circle relationship is the setup used in this
+[MIT machine-vision exercise](https://ocw.mit.edu/courses/6-801-machine-vision-fall-2020/44cf7a39fd1de47fc359dc801be9c9fc_MIT6_801F20_hw1.pdf).
+
+Traditional RPG Maker-style ground art is not obligated to that physical compression because the
+floor is intentionally stretched. The correct default for a circular ground aura is therefore a
+**near-round screen-space footprint**: begin at a `1.0` height-to-width ratio, or roughly
+`0.85-1.0` when a small amount of artistic compression better matches the target tileset. For
+example, a 48-pixel-wide circle should usually be about 41-48 pixels tall in this convention, not
+the 16-24 pixel height implied by the earlier shallow-ellipse direction. This ratio is an inferred
+production recommendation from the projection research, not a universal RPG Maker engine rule.
+
+The target map remains the authority. Measure an existing round floor mark, rug, shadow, or magic
+circle in that tileset and match its height-to-width ratio. Use a thinner `0.5-0.7` ellipse only
+when the map itself visibly compresses ground-plane circles that much.
+
+### Prompt consequences
+
+Retire `low top-down`, `near-side`, `shallow`, `foreshortened`, and `elliptical` as default words
+for **ground-only** aura prompts. They remain valid for upright sprites or a project whose actual
+map establishes that compression. The next ground discovery round should contrast these two
+map-plane prompts before changing the bundled ground blueprint:
+
+1. `fully contained round energy aura spread across the overhead map floor`
+2. `fully contained circular energy aura texture on the map ground plane`
+
+The existing `ground-aura.blueprint.json` remains provisional until a map-plane prompt proves more
+reliable. Its comment now requires comparison against the target map rather than claiming that a
+broad-low perspective is universally correct.
+
+For the other two active refinements, retain the successful structural cores and change only the
+known defect in future paid tests:
+
+- Overlay control: `fully contained energy power-up aura rising along both sides of open central space`
+- Background control: `fully contained broad energy aura forming an upright rear layer`
+- Overlay bottom candidate: `fully contained energy power-up aura rising along both sides of open central space with a natural lower edge`
+- Background bottom candidate: `fully contained broad energy aura forming an upright rear layer with a natural lower edge`
+
+The `natural lower edge` variants are hypotheses only. They must not replace the bundled controls
+until generation shows that they reduce clipping without introducing platforms, frames, or symbols.

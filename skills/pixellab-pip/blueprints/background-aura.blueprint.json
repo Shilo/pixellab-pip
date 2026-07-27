@@ -2,10 +2,10 @@
   {
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/ground-aura-run",
+      "output_directory": "pixellab-pip-generations/background-aura-run",
       "output_collision_policy": "create_unique"
     },
-    "_comment": "Provisional transparent ground-aura candidates; match the result against the target map's ground-plane projection.",
+    "_comment": "Provisional transparent background-aura candidates; the prompt can also produce symbols and bottom-edge clipping.",
     "TASK": {
       "instruction": "Resolve variables. Treat the supplied aura theme, including comma-separated text, as one value and one generation call. Apply one requested size to both dimensions or split WIDTHxHEIGHT. Require explicit run approval and an authenticated PixelLab MCP connection, then create the declared unique empty output directory.",
       "verify": "The request is approved, MCP is authenticated, and the output directory is new and empty."
@@ -13,7 +13,7 @@
   },
   {
     "MCP create_image_pro": {
-      "description": "fully contained broad low {{aura theme | default: energy}} aura spread at ground level",
+      "description": "fully contained broad {{aura theme | default: energy}} aura forming an upright rear layer",
       "width": "{{aura width | default: 64}}",
       "height": "{{aura height | default: 64}}",
       "no_background": true
