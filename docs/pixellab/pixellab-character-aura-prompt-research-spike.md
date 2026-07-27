@@ -2590,3 +2590,362 @@ Do not alter the winning status wording yet. The next call is a strict canvas-on
 height still leaves motifs inconsistently positioned, the smallest later prompt variant is
 `fully contained symmetrical energy status effect centered above a round ground aura`; do not test
 that wording in the same round because it would confound the size result.
+
+## Status 64x94 Canvas Test Results — 2026-07-27
+
+One approved unseeded MCP `create_image_pro` call tested the winning prompt unchanged at `64x94`:
+
+`fully contained symmetrical energy status effect above a round ground aura`
+
+The run is stored under
+`pixellab-pip-generations/status-effect-64x94-mvp-20260727/` and returned four transparent
+candidates.
+
+### Findings
+
+- All four candidates are immediately readable as status or level-up effects.
+- Every base remains roundish, flat, and correctly projected.
+- No candidate visibly bleeds outside the canvas.
+- The extra height creates real vertical separation while preserving the coherent relationship
+  between the upper motif and its ground aura.
+- The prompt does not need positioning language. The canvas-only change addresses the earlier
+  spacing concern cleanly.
+
+The current prompt remains the best status-effect prompt. The `64x94` test validates the taller
+composition, but it changes Pro's output tier: the call returns four candidates instead of the
+sixteen returned at `64x64` because one dimension exceeds 85 pixels. The user accepted all four
+candidates and confirmed that the prompt has no composition problem. `64x94` is now the bundled
+status blueprint default; the lower candidate count is accepted in exchange for extra vertical
+room.
+
+## Next MVP Test Results — Second Projection Round — 2026-07-27
+
+The prior **Next MVP Prompt Plan After Projection Review** remains intact above as the exact test
+plan. Five approved unseeded MCP `create_image_pro` calls executed it under
+`pixellab-pip-generations/pro-aura-next-mvp-20260727/`: four `64x64` calls and one `64x94` call.
+
+### `ground-high-topdown`
+
+Prompt: `fully contained round energy ground aura in high top-down view`
+
+The exact PixelLab UI term `high top-down` did not produce the desired angled ground projection.
+The batch remains straight-down and is dominated by sigils, disks, and material objects. This is
+strong evidence that Pro does not reliably follow either plain `top-down` or `high top-down` for
+this isolated ground-aura wording. The ground components generated incidentally by combined prompts
+remain a better visual control.
+
+### `overlay-enclosed-center`
+
+Prompt: `fully contained energy power-up aura enclosing open central space`
+
+`Enclosing` reliably produces contained effects with transparent centers, but it collapses the
+silhouette into a circular ring. This is a useful newly identified **front-ring overlay** family,
+not a replacement for the desired upright power-up overlay. The earlier connected-top upright
+results remain the relevant control.
+
+### `background-power-up-rear-layer`
+
+Prompt: `fully contained broad energy power-up aura forming an upright rear layer`
+
+The batch has attractive elemental variety but mostly produces isolated flames, emblems, wings,
+webs, and radial objects. Adding `power-up` does not make `upright rear layer` reliable. The best
+historical single background candidates still outperform the batch as modular rear effects.
+
+### `ground-wall-connected-rear`
+
+Prompt: `fully contained upright energy aura rising from the rear of a round ground aura`
+
+`Rising from` improves physical connection compared with `behind`, and the ground portions remain
+strong, flat, and correctly projected. The upright component is still usually a centered column,
+tornado, emblem, or object rather than a broad rear wall. The relation is improved, but the
+combined wall-aura goal remains unresolved.
+
+### `status-level-up-64x94`
+
+Prompt: `fully contained symmetrical level up status effect above a round ground aura`
+
+All four candidates preserve the successful flat bases, containment, and vertical separation. All
+four also render literal `LEVEL UP` text. This confirms that the accepted status structure is
+already optimized: substituting `level up` changes the semantic content rather than improving the
+composition. Keep `energy` as the generic blueprint default. Use `level up` only when visible text
+is explicitly desired.
+
+### Current conclusions
+
+- **Status effect:** effectively solved. Best prompt:
+  `fully contained symmetrical energy status effect above a round ground aura`, default `64x94`.
+- **Ground only:** camera vocabulary alone is exhausted for the current noun phrase; the next idea
+  must borrow the successful ground component from a combined composition rather than add another
+  view synonym.
+- **Front overlay:** `enclosing open central space` discovers a reliable circular overlay subtype,
+  but the upright enclosed silhouette still needs a different shape cue.
+- **Background:** broad/rear/power-up wording remains too abstract and object-prone.
+- **Ground plus wall:** component connection improved, but distribution around player space did not.
+
+### User review of the second projection round
+
+All candidates are retained by default; do not ask for per-batch keep selection again.
+
+- `ground-high-topdown`: rejected. The entire batch is straight-down despite the exact
+  `high top-down` wording.
+- `overlay-enclosed-center`: candidates 1 and 6 are strong effects, but the family is uniformly too
+  circular to satisfy the upright overlay goal.
+- `background-power-up-rear-layer`: candidates 1, 2, 3, 4, 8, and 13 are strong; candidates 1 and 3
+  most closely match the desired background effect. Candidate 12 is disqualified by its sphere
+  shape. Bottom clipping remains the systemic defect.
+- `ground-wall-connected-rear`: the ground component is now effectively solved. It is flat and
+  produces both filled and unfilled variants. The remaining failure is exclusively the upright
+  component, which does not distribute around the outer edge of the ground effect.
+- `status-level-up-64x94`: rejected as a generic recipe because literal `LEVEL UP` text appears in
+  every result. A gameplay level-up effect should communicate power growth symbolically through
+  motifs such as wings and radiant light.
+
+## Symbolic Ascension Status Test — 2026-07-27
+
+Create Image Pro has no `negative_description` field, so a blueprint cannot add a separate negative
+prompt without becoming invalid. The chosen positive-language MVP removes the literal phrase
+`level up` entirely:
+
+`fully contained symmetrical symbolic ascension status effect above a round ground aura`
+
+One approved unseeded `64x64` MCP `create_image_pro` call returned sixteen transparent candidates
+under `pixellab-pip-generations/status-symbolic-ascension-64x64-20260727/`. All are retained.
+
+### Findings
+
+- No candidate renders the literal `LEVEL UP` label.
+- Wings, stars, radiant crests, upward light, and ceremonial motifs communicate power growth much
+  more successfully than the literal prompt.
+- Flat round ground components remain consistent.
+- Restoring `64x64` returns sixteen candidates but compresses vertical separation compared with
+  `64x94`.
+- Candidates 8 and 15 still contain rune- or interface-like marks. `Symbolic` strongly reduces
+  literal text but does not guarantee a completely UI-free batch.
+- Several candidates become altars, pedestals, or discrete objects. This is acceptable variety for
+  the status family, but it is not evidence to replace the proven generic `energy` prompt.
+
+### Prompt decision
+
+Keep the bundled generic blueprint at:
+
+`fully contained symmetrical {{effect theme | default: energy}} status effect above a round ground aura`
+
+The best specialized symbolic level-up prompt is currently:
+
+`fully contained symmetrical symbolic ascension status effect above a round ground aura`
+
+If the remaining rune/UI contamination matters, the next smallest test is:
+
+`fully contained symmetrical wordless symbolic ascension status effect above a round ground aura`
+
+Do not add `wordless` or change the bundled blueprint until that exact refinement is tested.
+
+## Next MVP Prompt Plan After Symbolic Ascension Review — 2026-07-27
+
+The user review isolates two different prompt biases in the specialized status test:
+
+- `ascension` pushes the effect toward vertical rising spikes.
+- `symbolic` discourages literal `LEVEL UP` text, but also invites emblems, buildings, altars, and
+  other discrete symbols.
+
+Neither word belongs in the reusable status blueprint. The next minimal constraint is `wordless`,
+which describes presentation without prescribing the effect's shape or subject. The proposed
+blueprint formula is:
+
+`fully contained symmetrical wordless {{effect theme | default: energy}} status effect above a round ground aura`
+
+It resolves to `wordless energy` by default and to `wordless level up` when the user supplies
+`level up` as the single theme value. This preserves literal variable substitution and one Pro
+generation call. MCP `create_image_pro` has no separate negative-description field, so this must be
+tested as positive description wording. Keep the current blueprint unchanged until the exact
+`wordless level up` substitution succeeds. `Textless` is the one-word fallback only if `wordless`
+does not suppress visible writing.
+
+### Comparison and next test by effect family
+
+All tests remain unseeded MCP `create_image_pro` calls. Ground, overlay, background, and combined
+effects remain `64x64`; the next status test is also `64x64` to restore sixteen candidates.
+
+1. **Ground aura**
+   - Previous: `fully contained round energy ground aura in high top-down view`
+   - Best control: the ground component from `fully contained upright energy aura rising from the rear of a round ground aura`
+   - Next: `fully contained round energy ground aura beneath open vertical space`
+   - Reason: explicit camera labels repeatedly force straight-down compositions. This borrows the
+     spatial relationship that produced the correct ground projection without generating a wall or
+     character.
+
+2. **Foreground overlay aura**
+   - Previous: `fully contained energy power-up aura enclosing open central space`
+   - Best control: `fully contained energy power-up aura rising along both sides of open central space`
+   - Next: `fully contained upright energy power-up aura enclosing open central space`
+   - Reason: add only `upright` to the reliably enclosed, transparent-center prompt to test whether
+     orientation can break its circular bias without reopening the top.
+
+3. **Background aura**
+   - Previous/best batch: `fully contained broad energy power-up aura forming an upright rear layer`
+   - Next: `fully contained centered broad energy power-up aura forming an upright rear layer`
+   - Reason: add only `centered` to test whether the useful upright effects naturally terminate
+     inside the lower canvas instead of clipping. Avoid edge/bottom prose that previously changed
+     the effect into a jelly-like object.
+
+4. **Combined ground-and-wall aura**
+   - Previous: `fully contained upright energy aura rising from the rear of a round ground aura`
+   - Best control: the flat ground component from that prompt; the wall distribution remains unsolved.
+   - Next: `fully contained broad energy aura rising along the rear edge of a round ground aura`
+   - Reason: `along the rear edge` targets distribution across the ground effect's perimeter, while
+     `broad` discourages another centered column or emblem.
+
+5. **Status effect**
+   - Previous: `fully contained symmetrical symbolic ascension status effect above a round ground aura`
+   - Best generic: `fully contained symmetrical energy status effect above a round ground aura`
+   - Next: `fully contained symmetrical wordless level up status effect above a round ground aura`
+   - Fallback only if needed: `fully contained symmetrical textless level up status effect above a round ground aura`
+   - Reason: remove both shape-driving `ascension` and object-driving `symbolic`; test one
+     presentation constraint while exercising the exact future blueprint substitution.
+
+## Five-Family 64x64 MVP Results — 2026-07-27
+
+Five approved, unseeded MCP `create_image_pro` calls each returned sixteen transparent `64x64`
+candidates under `pixellab-pip-generations/pro-aura-mvp-wordless-20260727/`. Every candidate is
+retained.
+
+### `ground-beneath-open-space/`
+
+Prompt: `fully contained round energy ground aura beneath open vertical space`
+
+**Rating: 0/10 for the intended ground projection.** Every result is a straight-down circle,
+portal, sigil, or disk. The model ignored the implied empty upright volume. Spatial wording without
+an actually depicted upright component does not recreate the useful ground projection from the
+combined-aura batches. Do not continue iterating `top-down`, `high top-down`, or `beneath open
+vertical space` on this noun phrase.
+
+### `overlay-upright-enclosed/`
+
+Prompt: `fully contained upright energy power-up aura enclosing open central space`
+
+**Rating: 1/10.** `Enclosing open central space` dominates `upright`: the complete batch becomes
+circular rings, portals, and radial borders. This confirms that `enclosing` is a reliable circular
+overlay cue but unsuitable for the desired tall power-up overlay. Return to the successful
+bilateral upright control and add a top-connection cue without using `enclosing` alone.
+
+### `background-centered-rear-layer/`
+
+Prompt: `fully contained centered broad energy power-up aura forming an upright rear layer`
+
+**Rating: 3/10.** Several candidates are useful upright flames or broad effects, but most are
+discrete stars, rings, emblems, gears, crystals, or elemental objects. `Centered` improves neither
+the rear-area interpretation nor flexible containment enough to justify keeping it. `Rear layer`
+remains too abstract for reliable composition.
+
+### `combined-rear-edge/`
+
+Prompt: `fully contained broad energy aura rising along the rear edge of a round ground aura`
+
+**Rating: 7/10 and the strongest result in this round.** Many candidates finally distribute the
+upright effect across the far/rear portion of a ground component instead of placing one object in
+the center. The batch contains useful fire, ice, water, arcane, spectral, and plant-like variants.
+Remaining failures are material/platform depth, occasional centered objects, and a few overly
+straight-down compositions. `Along the rear edge` is therefore validated; the next refinement
+should keep that relation and change only the physical-looking ground noun.
+
+### `status-wordless-level-up/`
+
+Prompt: `fully contained symmetrical wordless level up status effect above a round ground aura`
+
+**Rating: 7/10 for the status family.** No candidate contains `LEVEL UP` or other readable text.
+The results communicate level-up through beams, wings, trees, crystals, flowers, lightning, and
+other motifs. Several are discrete objects or emblems, but that is content variation caused by the
+`level up` theme rather than a failure of `wordless`. The test validates `wordless` as the minimal
+blueprint constraint. The bundled status blueprint now uses:
+
+`fully contained symmetrical wordless {{effect theme | default: energy}} status effect above a round ground aura`
+
+Its defaults are restored to `64x64`, returning sixteen candidates per Pro call.
+
+## Revised MVP Prompt Plan After Five-Family Review
+
+Keep each next test to one changed composition idea and `64x64`.
+
+1. **Ground aura**
+   - Previous: `fully contained round energy ground aura beneath open vertical space`
+   - Best visual control: the ground components from `fully contained broad energy aura rising along the rear edge of a round ground aura`
+   - Next: `fully contained shallow elliptical energy aura on the ground beneath empty standing space`
+   - Test: replace the ignored camera implication with explicit projected geometry while preserving
+     empty player space.
+
+2. **Foreground overlay aura**
+   - Previous: `fully contained upright energy power-up aura enclosing open central space`
+   - Best control: `fully contained energy power-up aura rising along both sides of open central space`
+   - Next: `fully contained energy power-up aura rising along both sides and connecting above tall open central space`
+   - Test: preserve the successful bilateral wall, close its top for a complete overlay, and use
+     `tall` to resist circular portal collapse.
+
+3. **Background aura**
+   - Previous: `fully contained centered broad energy power-up aura forming an upright rear layer`
+   - Best control: `fully contained broad energy aura forming an upright rear layer`
+   - Next: `fully contained broad energy power-up aura filling the upright rear area`
+   - Test: replace the abstract `layer` noun with an occupied area while removing the ineffective
+     `centered` constraint.
+
+4. **Combined ground-and-wall aura**
+   - Previous/best: `fully contained broad energy aura rising along the rear edge of a round ground aura`
+   - Next: `fully contained broad energy aura rising along the rear edge of a flat ground glow`
+   - Test: preserve the newly successful rear-edge distribution and change only the ground component
+     from a physical-looking round aura to the historically flatter `ground glow`.
+
+5. **Status effect**
+   - Previous specialized: `fully contained symmetrical wordless level up status effect above a round ground aura`
+   - Best reusable formula: `fully contained symmetrical wordless {{effect theme | default: energy}} status effect above a round ground aura`
+   - Next: no prompt refinement is justified. Test new themes through the blueprint; do not alter the
+     solved structure unless readable text reappears or a theme exposes a repeatable composition
+     failure.
+
+## User Review of the Five-Family 64x64 Round — 2026-07-27
+
+The user's visual review supersedes the preliminary ratings above.
+
+1. **Ground (`ground-beneath-open-space/`)**: the first eight candidates have the desired angled
+   footprint; the last eight are unacceptable straight-down effects. This is a mixed success, not a
+   zero. It is less consistent than a blueprint-worthy prompt, but it proves `beneath open vertical
+   space` can influence roughly half a batch. Compare it against the accidental ground control
+   `fully contained broad low energy aura spread at ground level` before choosing the next prompt.
+2. **Overlay (`overlay-upright-enclosed/`)**: rejected. The batch remains circular; `enclosing`
+   overwhelms `upright`.
+3. **Background (`background-centered-rear-layer/`)**: candidates 1 and 8 are strong but clip at the
+   bottom; 9 and 12 are usable. Most others bleed or collapse into circles. A background aura needs
+   the same flexible upright family as an overlay, but may have a filled center.
+4. **Ground plus wall (`combined-rear-edge/`)**: new best prompt for this family. All sixteen are at
+   least technically usable, the bases are flat and correctly projected, every result has an
+   upright effect on the rear wall, and elemental variety is excellent. This replaces
+   `fully contained symmetrical energy aura rising behind a flat floor-level glow` as the best
+   combined control.
+5. **Status (`status-wordless-level-up/`)**: projection, flat ground, containment, and absence of
+   text are successful. Candidate 8's building and material ring are forgivable outliers. The main
+   failure is semantic: most candidates read as arbitrary status effects rather than level-up.
+
+### Why `level up` became generic
+
+`Level up` is a gameplay-state label, not a visual description. In the earlier run, the model used
+literal `LEVEL UP` text as its easiest depiction. Adding `wordless` successfully removed that path,
+but left no visual language for how increased power should appear. The remaining phrase `status
+effect` is broad, so Pro sampled its general status-effect vocabulary: plants, crystals, pillars,
+weather, elements, emblems, and ground circles.
+
+This is not evidence that `wordless` failed. It did exactly one job: remove readable text. The theme
+value itself needs to be visual rather than categorical. For a specialized level-up test, replace
+the literal theme value `level up` with `triumphant power increase`:
+
+`fully contained symmetrical wordless triumphant power increase status effect above a round ground aura`
+
+This keeps the successful blueprint structure, avoids the vertical-shape bias of `ascension`, and
+adds a positive emotional/power cue without naming fixed motifs such as wings, arrows, beams, or
+holy light. The generic blueprint should retain `energy` as its default and accept arbitrary visual
+theme text; it should not hard-code level-up semantics for every status effect.
+
+### Revised priority
+
+- **Solved enough for use:** ground plus wall; status structure and presentation.
+- **Promising but inconsistent:** ground only; specialized level-up meaning.
+- **Primary unresolved families:** transparent-center upright overlay and flexible filled-center
+  upright background. Future paid rounds should prioritize these two rather than spend equal calls
+  on already-usable families.
