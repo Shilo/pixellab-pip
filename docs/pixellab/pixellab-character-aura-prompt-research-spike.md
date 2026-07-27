@@ -1540,7 +1540,84 @@ sheet workflow. The blueprint's current low-invention flicker/pulse action is th
 tested wording, not a proven visual solution. Always report technical frame validity separately from
 visual acceptability.
 
-## Next Pro Static-Aura Test Plan
+## Post-test User Review and Revised Direction
+
+The user's ratings supersede the initial agent pass counts when deciding what is useful. The agent
+scores remain evidence about consistency; they are not the product decision.
+
+| # | Folder | User rating | Combined finding |
+|---:|---|---:|---|
+| 1 | `RW-A/` | `6/10` | Correct perspective and good variety. The ring has excessive depth and material character; effects often sit on one side instead of wrapping the perimeter. |
+| 2 | `RW-B/` | `2/10` | Correct perspective, but central elements replace the aura, effects do not surround the ring, and the ring is too material. |
+| 3 | `GR-A/` | `0/10` | Attractive effects, unusable straight-down perspective. |
+| 4 | `GR-B/` | `0/10` | Attractive effects, unusable straight-down perspective, with unwanted ring depth. |
+| 5 | `FO-A/` | `4/10` | More promising than the agent first judged: roughly five candidates read as side-view power-up auras. Transparent centers can overlay a character; filled centers can work behind one. Failures are straight-down, full-bleed, or non-effect shapes. |
+| 6 | `FO-B/` | `3/10` | Consistent and varied in surface treatment, but overconstrained to the same pointed-egg outline. Candidates 3 and 8 are the main usable results. |
+| 7 | `RW-A-repeat/` | `6/10` | Promising variety like attempt 1. Excessive ring depth/material, central objects, and weak aura wrapping remain; candidate 5 is most aura-like and 1–3 are decent. |
+| 8 | `GR-A-repeat/` | `0/10` | The rings are visually flat, but the camera is still straight down. |
+| 9 | `FO-B-repeat/` | `2/10` | Better effect textures than attempt 6, especially candidates 1, 2, 3, 4, 6, 8, 11, 12, 13, and 14, but the pointed-egg/GUI-frame structure ruins them. |
+| 10 | `RW-theme/` | `1/10` | High effect variety, but every candidate contains a discrete central object. |
+| 11 | `FO-theme/` | `7/10` | Some of the best effects in the study, but the pointed-egg silhouette is too consistent. The effect language is worth preserving while loosening the shape. |
+| 12 | `GR-Corrected-A/` | `2/10` | Flat ground effects, but the camera is straight-down or oddly isometric rather than low top-down. |
+| 13 | `GR-Corrected-B/` | `3/10` | Closer, but still too steep/high-top-down. Every center is transparent, while a ground-only aura needs a filled center. |
+| 14 | `GR-Final-A/` | `0/10` | Too material, too deep, skewed, and still the wrong perspective. The phrase `three-quarter top-down view` is retired for this target. |
+| 15 | `GR-Final-B/` | `7/10` | Reclassified from failed ground test to strong **background-area aura**. Nearly every filled or transparent oval is usable behind a character, and semi-transparent rendering can also support overlays. |
+
+### Revised aura categories
+
+1. **Wall aura:** a low-top-down ground component plus an upright effect behind the character. The
+   ground portion stays flat while only the rear wall rises. Filled or transparent ground centers
+   are acceptable. Avoid deep, rigid, or material rings.
+2. **Ground aura:** a filled, immaterial effect lying on a low-top-down ground plane. Straight-down,
+   steep high-top-down, isometric-skewed, hollow-center, and material-ring results fail.
+3. **Overlay aura:** a transparent central space with a flexible surrounding effect so the character
+   remains visible. Rounded forms are acceptable, but one fixed pointed-egg or GUI-frame silhouette
+   across the batch is not.
+4. **Background-area aura:** a filled or transparent effect behind the character. Shape freedom is
+   high; attempt 15 establishes that broad oval fields are useful even when they fail the ground-only
+   perspective contract.
+
+### Next MVP prompt candidates
+
+These are agent-optimized hypotheses, not verbatim restatements of the review. Run them as distinct
+tests before making minor variations:
+
+| Category | Prompt | Intended improvement |
+|---|---|---|
+| Wall A | `fully contained symmetrical energy aura rising behind a thin flat ground glow` | Retain the successful rear-wall composition while replacing the deep material ring with an immaterial flat base. |
+| Wall B | `fully contained symmetrical energy aura spread behind a shallow floor-level glow` | Test a broader, less flame-biased wall while keeping the floor portion flat. |
+| Ground A | `fully contained filled energy aura lying flat at floor level in a low front view` | Make fill and physical orientation primary while avoiding `ring`, `ellipse`, and steep camera terminology. |
+| Ground B | `fully contained shallow filled energy glow seen from a low front angle` | Test a softer effect noun and a camera closer to side view without asking for a material object. |
+| Overlay A | `fully contained symmetrical energy aura surrounding transparent space` | Preserve open compositing space without `outline`, `border`, or `teardrop` shape locks. |
+| Overlay B | `fully contained energy power-up aura surrounding transparent space` | Reuse attempt 5's promising power-up behavior while replacing its static outline wording. |
+| Background control | `fully contained wide horizontal oval energy aura at ground level` | Reproduce attempt 15 in its correct category. |
+| Background variant | `fully contained broad energy aura at ground level` | Relax the oval constraint to test shape variety while preserving the useful filled-area behavior. |
+
+Do not use `three-quarter top-down` for the ground target: in this study it produced a steeper,
+Tibia-like oblique view with depth and material rings, not the desired camera close to side view.
+
+
+## Pro Static-Aura Test Plan and Results
+
+### Folder and prompt index
+
+| Folder | Exact prompt |
+|---|---|
+| `RW-A/` | `fully contained symmetrical energy aura rising around a bottom energy ring` |
+| `RW-B/` | `fully contained symmetrical upright energy aura with a bottom energy ring` |
+| `GR-A/` | `fully contained energy ground aura ring` |
+| `GR-B/` | `fully contained textured energy ring in low top-down view` |
+| `FO-A/` | `fully contained symmetrical energy power-up aura outline with a transparent center` |
+| `FO-B/` | `fully contained symmetrical teardrop energy aura border around transparent space` |
+| `RW-A-repeat/` | `fully contained symmetrical energy aura rising around a bottom energy ring` |
+| `GR-A-repeat/` | `fully contained energy ground aura ring` |
+| `FO-B-repeat/` | `fully contained symmetrical teardrop energy aura border around transparent space` |
+| `RW-theme/` | `fully contained symmetrical fire, water, lightning, nature, bone, ghost, smoke, and sand aura rising around a bottom energy ring` |
+| `FO-theme/` | `fully contained symmetrical teardrop fire, water, lightning, nature, bone, ghost, smoke, and sand aura border around transparent space` |
+| `GR-Corrected-A/` | `fully contained foreshortened elliptical energy aura in low top-down view` |
+| `GR-Corrected-B/` | `fully contained wide shallow energy aura ring on a receding ground plane` |
+| `GR-Final-A/` | `fully contained energy aura ring lying flat in three-quarter top-down view` |
+| `GR-Final-B/` | `fully contained wide horizontal oval energy aura at ground level` |
 
 The next phase returns to Create Image Pro and tests static images only. Animation is out of scope
 until a static prompt family is reliable.
@@ -1559,8 +1636,9 @@ The desired expansion also contains three incompatible compositing contracts:
 
 1. **Rear-wall aura:** upright energy sits behind and around the future character. Its center may
    contain natural aura energy; a forced hole is undesirable.
-2. **Ground-only aura:** a ring, circle, or textured status effect lies on the ground. It has no
-   upright wall or emitted spikes.
+2. **Ground-only aura:** a ring, circle, or textured status effect lies on the ground in the same
+   low-top-down gameplay perspective as the rear-wall aura. It has no upright wall or emitted
+   spikes; a straight-down circle is the wrong view.
 3. **Foreground-overlay aura:** a thick power-up border renders in front of the character while its
    center stays transparent so the character remains visible.
 
@@ -1580,6 +1658,10 @@ blueprint until a new prompt survives an unseeded repeat.
   auras. This supports testing `textured energy ring` as a ground-only noun rather than adding
   `filled`, `wide`, or `flat`, which failed in Pro. See [Effekseer circular-particle
   tutorial](https://effekseer.github.io/Help_Tool/en/ToolTutorial/06.html).
+- Effekseer's ring reference distinguishes a camera-facing billboard from a ring fixed to its
+  particle orientation. A ground aura must behave like the latter: the gameplay camera sees the
+  ground-plane circle foreshortened, rather than seeing a billboarded circle face-on. See
+  [Effekseer ring configuration](https://effekseer.github.io/Helps/17x/Tool/en/ToolReference/rendererRing.html).
 - Ragnarok Online describes its classic aura as energy condensed around the character. This is a
   useful reminder that an aura does not require tall spikes or a violent emission. See the
   [Ragnarok Aura overview](https://ragnarok.fandom.com/wiki/Aura).
@@ -1683,8 +1765,9 @@ this family.
 | `GR-B` | `fully contained textured energy ring in low top-down view` | Effekseer-derived textured-ring language tests visual richness without `filled`, `wide`, or `flat`. | Texture may become material, runes, or a discrete object. |
 | `GR-C` fallback | `fully contained circular energy status aura on the ground plane` | Status-effect vocabulary tests whether Pro produces a readable gameplay indicator rather than an object. | `circular` and `ground plane` may create an AoE disk, emblem, or environment patch. |
 
-Fully top-down presentation is valid here, unlike the rear-wall family. The result still fails when
-it becomes a physical platform, portal, emblem, scenery patch, or discrete object in the center.
+Straight-down presentation is invalid here. The ground effect must read as a foreshortened ellipse
+on the same low-top-down gameplay plane as the rear-wall aura's bottom ring. It also fails when it
+becomes a physical platform, portal, emblem, scenery patch, or discrete object in the center.
 
 #### C. Foreground-overlay power-up aura
 
@@ -1701,6 +1784,124 @@ only for this mode.
 Do not mention `fighter`, `player`, `body`, `character`, or `silhouette` in the PixelLab description.
 Those words supplied useful scale in Pixen but repeatedly generated the forbidden subject. Judge
 the open center from alpha and visual structure rather than prompting for a missing person.
+
+### Primary discovery results — 2026-07-26
+
+The six primary calls ran through MCP `create_image_pro`. Every call returned sixteen transparent
+`64x64` candidates and charged twenty generations, for 120 generations total. Outputs and the
+candidate-level review are in
+`pixellab-pip-generations/pro-aura-three-family-tests-20260726/`.
+
+| ID | Exact prompt | Passing candidates | Score | Decision |
+|---|---|---|---:|---|
+| `RW-A` | `fully contained symmetrical energy aura rising around a bottom energy ring` | 1, 2, 3, 4, 5, 8, 9, 11, 12, 13, 14 | `11/16` | Promising; repeat |
+| `RW-B` | `fully contained symmetrical upright energy aura with a bottom energy ring` | 9, 12 | `2/16` | Reject |
+| `GR-A` | `fully contained energy ground aura ring` | none under the corrected perspective gate | `0/16` | Reject: straight-down view |
+| `GR-B` | `fully contained textured energy ring in low top-down view` | none under the corrected perspective gate | `0/16` | Reject: straight-down view |
+| `FO-A` | `fully contained symmetrical energy power-up aura outline with a transparent center` | 8 | `1/16` | Reject |
+| `FO-B` | `fully contained symmetrical teardrop energy aura border around transparent space` | 1, 2, 3, 4, 5, 7, 9, 11, 12, 13, 14, 16 | `12/16` | Promising; repeat |
+
+Observed wording effects:
+
+- `rising around` preserved the rear-wall/low-top-down composition while allowing flames, smoke,
+  crystals, light columns, and other shapes. Its failures were portals, central orbs, architecture,
+  or ground-only rings.
+- `upright` described the generated subject rather than the aura's orientation. It produced pillars,
+  gems, emblems, hourglasses, and other central objects.
+- `ground aura ring` produced circular effects but interpreted the camera as straight down. Its
+  earlier `11/16` shape-only score is invalid for the required low-top-down game perspective.
+- `textured energy ring in low top-down view` also ignored the intended perspective and remained
+  straight down. `textured` additionally increased literal material rings, runes, and donut-like
+  objects. Its earlier `9/16` shape-only score is likewise superseded.
+- `power-up aura outline` did not establish a foreground shell. It mostly produced symbols, text,
+  isolated bolts, emblems, or incomplete side contours.
+- `teardrop energy aura border around transparent space` was the strongest foreground-overlay
+  wording. It reliably created open player space; failures were filled vortices or ornate physical
+  frames.
+
+The original scoring incorrectly advanced `GR-A`; the perspective correction below supersedes that
+decision. No original ground prompt qualifies for reliability or flexibility testing. The valid
+reliability repeats are `RW-A` and `FO-B`.
+
+### Reliability-repeat results — 2026-07-26
+
+The three unseeded repeats returned sixteen transparent `64x64` candidates each and charged twenty
+generations each.
+
+| ID | Exact prompt | Passing candidates | Score | Decision |
+|---|---|---|---:|---|
+| `RW-A` repeat | `fully contained symmetrical energy aura rising around a bottom energy ring` | 1, 2, 3, 5, 7, 8, 12, 13 | `8/16` | Reproduced promising threshold; not blueprint-worthy |
+| `GR-A` repeat | `fully contained energy ground aura ring` | none under the corrected perspective gate | `0/16` | Invalid repeat: straight-down view |
+| `FO-B` repeat | `fully contained symmetrical teardrop energy aura border around transparent space` | 1, 2, 3, 4, 5, 6, 8, 13, 15 | `9/16` | Reproduced promising threshold; not blueprint-worthy |
+
+`RW-A` remained an aura in half the batch, but central suns, vortices, cubes, monuments, and
+fountain-like objects reduced reliability. `GR-A` repeated the same incorrect straight-down camera;
+its apparent shape consistency does not make it usable. `FO-B` consistently reserved open
+compositing space, but the repeat increased ornate physical frames and opaque filled centers.
+
+`RW-A` and `FO-B` reproduced the plan's promising threshold and qualified for the theme-flexibility
+stress stage. `GR-A` did not. Neither valid family reached the blueprint-worthy requirement of at
+least `12/16` passing candidates on both independent calls, so neither should replace or expand the
+production blueprint yet.
+
+### Ground-perspective correction and next prompts
+
+The ground family must not be evaluated as a straight-down VFX icon. In the target 2D RPG camera, a
+circle lying on the ground appears as a wide, shallow, foreshortened ellipse beneath the future
+character. This is also why the bottom rings in successful rear-wall candidates have the right
+depth: the upright aura supplies camera context. Effekseer exposes the same conceptual difference
+between camera-facing and fixed-orientation rings, while top-down pixel-art guidance uses flattened
+ground shadows to establish depth below characters.
+
+Two distinct replacement tests are justified:
+
+1. `fully contained foreshortened elliptical energy aura in low top-down view`
+2. `fully contained wide shallow energy aura ring on a receding ground plane`
+
+The first makes the projected geometry explicit without saying `ground ring`, which dominated the
+failed prompts. The second tests a ground-plane relationship with different wording. Both remain
+text-only, unseeded, transparent `64x64` Pro calls. They must fail if the result is a straight-down
+circle, even when it is otherwise attractive.
+
+Both replacements failed the corrected gate:
+
+| Exact prompt | Passing candidates | Score | Result |
+|---|---|---:|---|
+| `fully contained foreshortened elliptical energy aura in low top-down view` | none | `0/16` | Straight-down disks and circles |
+| `fully contained wide shallow energy aura ring on a receding ground plane` | none | `0/16` | Straight-down rings |
+
+`foreshortened elliptical`, `wide shallow`, and `receding ground plane` did not override the
+face-on circular-aura prior. The next distinct test should describe physical orientation rather than
+projected geometry: a ring `lying flat` in `three-quarter top-down view`. A second geometry-first
+test can remove `ring` entirely and lead with `wide horizontal oval`.
+
+The final comparison confirmed that hypothesis:
+
+| Exact prompt | Passing candidates | Score | Result |
+|---|---|---:|---|
+| `fully contained energy aura ring lying flat in three-quarter top-down view` | 1, 2, 3, 4, 5, 6, 7, 9, 10, 12, 13, 14, 16 | `13/16` | Correct low-top-down perspective; first-call blueprint threshold |
+| `fully contained wide horizontal oval energy aura at ground level` | none | `0/16` | Upright oval disks and elemental objects |
+
+`lying flat in three-quarter top-down view` controlled the ring's physical orientation instead of
+merely describing its projected shape. It consistently produced shallow ellipses matching the
+rear-wall aura's gameplay camera; only rigid rune or material rings failed the aura gate. In
+contrast, `wide horizontal oval at ground level` described an upright subject silhouette and
+produced egg-shaped disks. This is the strongest ground-only prompt found, but it still needs one
+independent unseeded repeat before the two-call blueprint-worthy requirement is satisfied.
+
+### Theme-flexibility results — 2026-07-26
+
+The invalid ground prompt was not run again. The two valid families used these exact descriptions:
+
+| Family | Exact prompt | Passing candidates | Score | Result |
+|---|---|---|---:|---|
+| Rear wall | `fully contained symmetrical fire, water, lightning, nature, bone, ghost, smoke, and sand aura rising around a bottom energy ring` | 1, 5, 6, 11, 13, 14, 15 | `7/16` | Failed flexibility threshold |
+| Foreground overlay | `fully contained symmetrical teardrop fire, water, lightning, nature, bone, ghost, smoke, and sand aura border around transparent space` | 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14 | `12/16` | Passed flexibility threshold |
+
+The theme catalog exposed a weakness in `rising around`: several candidates became literal trees,
+flowers, skeletons, skulls, fountains, waves, or sand sculptures instead of modular auras. The same
+catalog worked substantially better with the teardrop border because that explicit silhouette kept
+fire, water, lightning, nature, ghost, and smoke variations organized around transparent space.
 
 ### Candidate scoring
 
@@ -1719,7 +1920,7 @@ Then apply the family gate:
 | Family | Required composition |
 |---|---|
 | Rear wall | Upright front/low-top-down presentation; energy occupies the rear and may continue along the sides or as restrained front accents; the center is natural aura, not a forced hole. |
-| Ground only | All meaningful effect structure lies on the ground plane; the center may be transparent or effect-textured but contains no discrete object; no upright wall, column, or emitted spikes. |
+| Ground only | All meaningful effect structure lies as a wide, shallow, foreshortened ellipse on the low-top-down gameplay plane; the center may be transparent or effect-textured but contains no discrete object; no straight-down circle, upright wall, column, or emitted spikes. |
 | Foreground overlay | A continuous luminous border surrounds visibly transparent central space; a lower-front flare or arc is allowed; the border reads as energy rather than a rigid frame or portal. |
 
 Use these prompt-level thresholds:
@@ -1739,24 +1940,23 @@ and human visual scoring remain authoritative.
 ### Staged call and generation budget
 
 At `64x64`, REST previously reported twenty generations and returned sixteen candidates per Pro
-call. The refreshed MCP documentation promises several candidates but does not guarantee that count
-or expose a fixed usage amount. Treat the generation and candidate figures below as historical
-planning estimates, then record the actual MCP result and usage. Keep every stage behind its own
-approval gate and stop early when evidence resolves the question.
+call. The refreshed MCP tool guarantees sixteen candidates at this size and currently estimates
+twenty to forty generations per call. Treat the exact charge as unresolved until the result reports
+usage or the balance delta is measured. Keep every stage behind its own approval gate and stop early
+when evidence resolves the question.
 
 | Stage | Calls | Generation budget | Purpose and stop rule |
 |---|---:|---:|---|
 | Existing control review | `0` | `0` | Reuse the documented current-best Pro sheets; do not pay to rediscover the spike baseline. |
-| Primary discovery | `6` | `120` | Run `A` and `B` for all three families. Stop a family if neither is promising until its fallback is approved. |
-| Conditional fallbacks | `0-3` | `0-60` | Run only `C` for families whose two primary prompts failed. Do not add more coarse synonyms after this. |
-| Reliability repeats | `0-3` | `0-60` | Repeat the best prompt once, unseeded, for each promising family. Drop any family that cannot reproduce. |
-| Theme-flexibility stress | `0-3` | `0-60` | One call per reproducible family using a diverse literal theme phrase. Do not require one-to-one theme assignment. |
+| Primary discovery | `6` | `120-240` | Run `A` and `B` for all three families. Stop a family if neither is promising until its fallback is approved. |
+| Conditional fallbacks | `0-3` | `0-120` | Run only `C` for families whose two primary prompts failed. Do not add more coarse synonyms after this. |
+| Reliability repeats | `0-3` | `0-120` | Repeat the best prompt once, unseeded, for each promising family. Drop any family that cannot reproduce. |
+| Theme-flexibility stress | `0-3` | `0-120` | One call per reproducible family using a diverse literal theme phrase. Do not require one-to-one theme assignment. |
 
-The initial commitment is therefore **six paid Pro calls**, historically about **120 generations / 96
-candidates**. The maximum pre-refinement search is **fifteen paid Pro calls**, historically about
-**300 generations**, reached only if every fallback and every family remains viable. Using the
-historical approximately `$0.095` Pro call estimate, those two bounds are roughly `$0.57` and
-`$1.43`; verify current pricing and balance before execution.
+The initial commitment is therefore **six paid Pro calls / 120-240 generations / 96 candidates**.
+The maximum pre-refinement search is **fifteen paid Pro calls / 300-600 generations**, reached only
+if every fallback and every family remains viable. Measure actual usage rather than converting the
+historical REST estimate into a current dollar figure.
 
 For the theme-flexibility call, replace only `energy` with this one literal scalar:
 
