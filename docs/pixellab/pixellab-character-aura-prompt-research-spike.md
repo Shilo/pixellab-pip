@@ -2328,3 +2328,75 @@ known defect in future paid tests:
 
 The `natural lower edge` variants are hypotheses only. They must not replace the bundled controls
 until generation shows that they reduce clipping without introducing platforms, frames, or symbols.
+
+## PixelLab View Vocabulary and Next Projection MVPs — 2026-07-27
+
+The supplied PixelLab direction menu clarifies the product's view vocabulary:
+
+- `high top-down` is approximately 35 degrees above horizontal;
+- `low top-down` is approximately 20 degrees above horizontal;
+- `sidescroller` is edge-level.
+
+Current official PixelLab API documentation uses the same character/animation meanings: low
+top-down is the classic RPG character view at roughly 20 degrees and high top-down is roughly 35
+degrees. The tile tools distinguish those from `top-down`, which means no tile depth, and expose a
+continuous angle where 0 is side and 90 is top-down. This confirms that the screenshot describes
+**upright subject viewing angles**, not a universal projection for marks painted on a map floor.
+Source: [PixelLab API documentation](https://api.pixellab.ai/v2/docs).
+
+### Projection decision by effect role
+
+| Effect role | Agent-facing acceptance perspective | PixelLab-facing prompt strategy |
+|---|---|---|
+| Ground only | Top-down/no-depth map plane. The footprint is near-round in screen space and matches the target floor tiles, not the character sprite angle. | Say `top-down` once and describe a round ground aura. Do not use `low top-down`, `shallow`, `foreshortened`, or a rectangular canvas to force the shape. |
+| Front overlay | Upright effect aligned to the character sprite. Open central space remains visible, and the lower edge ends inside the cell. | Preserve the proven `rising along both sides of open central space` relation. A camera label is unnecessary unless results regress. |
+| Back overlay/background | Upright effect aligned to the character sprite. A filled center is allowed; the lower edge still ends inside the cell. | Use `broad upright aura`; avoid abstract `layer` wording in the refinement because the last batch turned it into symbols and portals. |
+| Status/level-up | Upright subject-space effect. A ground component, when present, must still read as a round map-plane footprint. | Use a simple relation such as `above a round ground aura`; do not name two camera angles. |
+| Ground plus upright wall | Deliberately mixed retro-RPG projection: round map-plane base plus upright character-space aura. | Describe the two visual roles (`upright ... behind a round ground aura`) without assigning separate projection labels. Verify each component after generation. |
+
+This resolves the split-projection concern: the **acceptance criteria** distinguish the planes, but
+the **generation prompt** uses concrete spatial roles instead of asking the model to reconcile
+`top-down` and `low top-down` in one sentence. That matches the stylized retro-RPG convention and is
+more likely to align with image-model training language.
+
+### Canvas and footprint decision
+
+Keep every discovery call at `64x64`. Create Image Pro returns sixteen candidates at this size, and
+changing the canvas to a short rectangle would confound camera, composition, containment, and
+comparison with earlier batches. Perspective belongs to the content inside the square canvas.
+
+- Ground-only aura: target a near-round footprint with roughly 4-8 pixels of breathing room. Treat
+  `0.85-1.0` height-to-width as the default acceptance band, with `1.0` as the clean control.
+- Upright overlay/background/status effect: retain the square canvas and require a visible natural
+  lower termination rather than bottom-edge truncation.
+- Combined ground-plus-upright aura: retain the square canvas; the round base occupies the lower
+  region while the upright effect uses the remaining height. Do not encode exact pixel dimensions
+  in the prompt during discovery.
+
+### Next five distinct MVP tests
+
+Run one unseeded `64x64` MCP `create_image_pro` call per prompt. These are deliberately distinct
+composition tests; do not add negative descriptions or combine them into a catalog request.
+
+| Family | Exact MVP prompt | What it tests |
+|---|---|---|
+| Ground only | `fully contained round energy ground aura in top-down view` | Uses PixelLab's no-depth/top-down vocabulary and tests whether a round map-plane aura can avoid the former shallow character-angle bias. |
+| Front/back overlay | `fully contained energy power-up aura rising along both sides of open central space with a natural lower edge` | Preserves the best overlay structure and changes only the systemic bottom clipping. Filled-center results remain valid background-overlay salvage. |
+| Background | `fully contained broad upright energy aura with a natural lower edge` | Removes abstract `rear layer` wording that encouraged symbols while retaining broad upright composition and adding the bottom constraint. |
+| Ground plus upright wall | `fully contained upright energy aura behind a round ground aura` | Encodes the mixed RPG projection through roles rather than two camera labels. |
+| Status/level-up | `fully contained symmetrical energy status effect above a round ground aura` | Preserves upright status variety while testing a map-plane base instead of a shallow near-side ring. |
+
+### Blueprint decision
+
+Do not replace validated executable prompts with these untested MVPs yet.
+
+- Keep `overlay-aura.blueprint.json` as the strongest proven overlay control.
+- Keep `background-aura.blueprint.json` as a clearly provisional control because candidate 1 is
+  uniquely valuable despite poor batch consistency.
+- Keep `wall-aura.blueprint.json` and `status-effect.blueprint.json` as historical controls while
+  the mixed-projection and round-base variants are tested.
+- Keep `ground-aura.blueprint.json` provisional. Replace its `broad low` prompt only if the new
+  top-down ground MVP wins under the corrected map-plane acceptance criteria.
+
+This preserves replayability and prevents a research hypothesis from silently becoming the
+production recipe.

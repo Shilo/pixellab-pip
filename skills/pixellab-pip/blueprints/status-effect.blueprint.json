@@ -5,7 +5,7 @@
       "output_directory": "pixellab-pip-generations/status-effect-run",
       "output_collision_policy": "create_unique"
     },
-    "_comment": "Transparent status, battle, and level-up effect candidates.",
+    "_comment": "Transparent status, battle, and level-up effect candidates; the current control can produce near-side ground bases.",
     "TASK": {
       "instruction": "Resolve variables. Treat the supplied effect theme, including comma-separated text, as one value and one generation call. Apply one requested size to both dimensions or split WIDTHxHEIGHT. Require explicit run approval and an authenticated PixelLab MCP connection, then create the declared unique empty output directory.",
       "verify": "The request is approved, MCP is authenticated, and the output directory is new and empty."
