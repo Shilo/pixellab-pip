@@ -1,6 +1,20 @@
 # PixelLab MCP vs REST v2 Route Parity
 
-Last reviewed: 2026-07-26.
+Last reviewed: 2026-07-27.
+
+> 2026-07-27 live behavior verification: the endpoint/tool shapes remain mapped as below, but equal
+> request-schema coverage does not guarantee equal validation timing or successful semantics.
+> `create_image_pixen` accepts 17px width through MCP, charges/submits the job, then fails it with an
+> internal 500; REST rejects the same request synchronously with 422 because its schema enforces a
+> multiple-of-four dimension. `create_image_pixflux` rejects 16×16 through both surfaces because the
+> live service also requires at least 1,024 total pixels. MCP and REST `inpaint-v3` produced the same
+> faulty mask behavior in this run (the requested white region stayed unchanged while outside pixels
+> changed), so they are mutually equivalent but both violate the documented mask contract. REST
+> building generation also exposed a roughly 30-second top-level-status lag after
+> `last_response.type=message_done`; MCP getters separately showed progress/ETA lag, including
+> `processing 100%`. Pro reference-image composition worked, while partial and combined style-copy
+> outputs did not visibly adopt the supplied gray-green palette; that is an output-fidelity finding,
+> not a field-parity difference. See `pixellab-mcp-new-tools-test-results.md` for the full matrix.
 
 > 2026-07-26 live re-verification (post-split): every REST path in this doc re-checked against a freshly fetched `openapi.json` (74 paths) and every MCP tool name re-checked against a live reconnected MCP session (71 tools). The `create_image` → `create_image_pixflux`/`create_image_pixen`/`create_image_pro` split is confirmed live, and all counts below (23 REST-only, 8 ◐, 17 MCP-only, 71 MCP tools) hold. Two corrections, both misattributed field provenance rather than upstream drift: (1) `AnimateWithTextV3Request` carries its **own** optional `last_frame` ("Optional last frame to guide the animation endpoint"), so `animate_image` matches `animate-with-text-v3` field-complete (`first_frame`/`last_frame`/`action`/`frame_count`/`seed`/`no_background`; REST-only extra `enhance_prompt`) — and the `interpolation-v2` ◐ rests on *that v3 field*, not on an MCP capability beyond v3. It stays ◐, now for a confirmed reason rather than an unconfirmed one: the Pro `interpolation-v2` model itself is still unmatched. (2) `create_8_direction_object` takes a *single* `style_image`, not the plural `style_images` array — that array is on `create_1_direction_object` and `create_tiles_pro` only. Spot-confirmed unchanged and exact: `create-image-pixflux-background` still resolves to the identical `CreateImagePixfluxRequest`; `crop_to_mask` still exists only on `InpaintV3Request`; `EditImagesV2Request` still has `edit_images`+`method`+`reference_image` while base `EditImageRequest` has single `image`+`color_image`+`text_guidance_scale`; `usage_description` still present on `generate_image_v2`'s `ReferenceImage`; `StyleOptions` is still the four booleans matching `style_copy`; `tile_feature` is still `roads`/`tileset`/`building` on REST while MCP's `create_tiles_pro` accepts only `"tileset"`.
 >

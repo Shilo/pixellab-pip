@@ -45,4 +45,6 @@ After generation, verify:
 - Transparency was preserved in unused padded areas.
 - Visible content remains at the reference-relative footprint and scale.
 - For sheet outputs, rows, columns, and cell occupancy match the requested structure.
+- Requested palette, outline, detail, and shading visibly match the reference; accepted options alone
+  do not prove adherence.
 - The generated subject does not copy a style-only reference subject when the user prohibited it.

@@ -10,8 +10,11 @@ Verify that every MCP tool added across the last 3 doc-watch refreshes that dete
 changes (`2026-07-19`, `2026-07-26T19:55Z`, `2026-07-26T21:03Z`) actually works: callable with valid
 inputs, rejects invalid inputs sanely, returns the documented output shape, and — for every tool with
 a documented REST counterpart — produces output **equivalent or better** than calling that REST
-endpoint directly. This is a functional/regression check, not a prompt-quality or art-direction
-review.
+endpoint directly, **including on performance and stability**, not just output correctness (see
+Performance & Stability Comparison below) — REST calls require the agent to author a script per call
+plus a manual poll loop, while MCP tools are typed direct calls with a matching getter; this plan
+makes that operational difference measurable rather than assumed. This is a functional/regression and
+operational-overhead check, not a prompt-quality or art-direction review.
 
 ## Scope — the 11 net-new tools
 
@@ -52,10 +55,67 @@ rather than tested in isolation, plus one dedicated error-path check.
   count, format) and — visually — that both are plausible renders of the same prompt. Exact
   pixel-identical output is **not** the bar (generation is not guaranteed deterministic across
   surfaces even at the same seed, per `docs/pixellab/pixellab-mcp-vs-rest-route-parity.md`); shape
-  fidelity and comparable visual quality are.
+  fidelity and comparable visual quality are. Every equivalence check also captures the Performance &
+  Stability metrics below for that pair.
 - **Error-path test**: 1-2 deliberately invalid calls per tool (bad id, out-of-range field, malformed
   mask) to confirm the tool fails with a clear, documented error rather than hanging, silently
   succeeding, or returning a malformed response.
+
+## Performance & Stability Comparison
+
+The open question driving this section: REST requires the agent to author a script for every call (a
+curl/python invocation with a hand-built auth header and JSON body), then run a separate manual poll
+loop against `GET /background-jobs/{job_id}`. MCP tools are called directly with typed, schema-checked
+arguments and their own matching `get_*` getter. **Both surfaces are still asynchronous — MCP does not
+eliminate polling, it only removes the script-authoring and request-serialization step around each
+call.** This section makes that difference measurable instead of asserting it.
+
+Capture these per surface, for every REST-equivalence pair already in the per-tool matrix below (not
+a separate round of calls — instrument the same calls the plan already makes):
+
+1. **Steps to completion**: count of distinct agent actions (tool calls / script executions) from
+   issuing the request to having a verified, saved output in hand. REST: authoring+running the submit
+   script, then one action per poll, then a decode/save step. MCP: one tool call, then one action per
+   `get_*` poll. Record the raw count on both sides for the same request — this is the concrete version
+   of "REST requires the agent to create scripts and poll constantly."
+2. **Wall-clock time to completion**: timestamp at submission and at the poll that first reports
+   `completed`, for both surfaces, on the same request content. Report the two durations side by side,
+   not just "MCP was faster/slower" — generation queue time can dominate and swamp any surface-level
+   overhead, so call out when that's the case rather than over-crediting either surface.
+3. **Poll count and status-lag**: how many polls each surface needed, and whether the status lagged the
+   actual ready result on either surface — `references/job-lifecycle.md` documents this as a known REST
+   behavior under load ("the top-level `status` can briefly lag the ready result"); check whether MCP's
+   `get_*` tools show the same lag or report readiness more promptly.
+4. **Failure/retry incidents**: any transient error, timeout, malformed response, or required retry on
+   either surface during the run, with what caused it. This is the core stability signal — a surface
+   that needs zero retries across the run is more stable than one that needed several, independent of
+   whether either one is ever unavailable outright.
+5. **Malformed-call rejection**: for a deliberately invalid payload (already planned as an error-path
+   test for most tools), note whether MCP's schema validation rejects it client-side before any network
+   call, versus REST where a hand-authored script can send a malformed request all the way to
+   PixelLab's server before it's rejected. This is a real structural difference worth confirming
+   empirically, not just asserting.
+6. **Inline-base64 truncation risk (MCP-specific)**: several MCP tools (`create_character`'s
+   `reference_image_base64`, and by extension the base64 image inputs on `create_image_pixflux`,
+   `edit_image`, `inpaint_image`, `animate_image`) are already documented elsewhere in this skill as
+   at risk of MCP-client truncation on large inline base64 ("MCP clients routinely truncate large
+   inline base64"). For each of those tools' live tests, use one deliberately large input image
+   (near the tool's own max dimensions) and confirm the tool either handles it intact or fails
+   cleanly — a silently corrupted/truncated image accepted as if valid would be a real MCP-specific
+   stability defect. REST has no equivalent risk for file-based script input, so this check has no
+   REST-side counterpart to compare against — it is purely an MCP risk surface.
+7. **Auth/session overhead (structural note, not a live measurement)**: REST requires the bearer token
+   to be present in every individual script/call; MCP authenticates once at the client/connection
+   level. Record this as a design-level stability factor in the final report (fewer places per call to
+   mis-load, leak, or omit a token) rather than trying to time it.
+
+**Repeat-count budget**: run steps 1-4 three times each for the free/cheap tools (`update_character_tags`/
+`update_object_tags`, `create_image_pixflux`, `create_image_pixen`) to get a variance signal, not just
+one data point. For the pricier tools (`edit_image`, `inpaint_image`, `animate_image`,
+`create_path_tiles`, `create_building_kit`), run once — repeating three times would roughly triple
+their already-nontrivial cost for a metric that matters less at that price point. `create_image_pro`
+gets performance metrics only if its REST-equivalence call isn't skipped for cost (see Cost budget); if
+skipped, say so explicitly in the report rather than silently omitting the row.
 
 ## Prerequisites
 
@@ -66,8 +126,8 @@ rather than tested in isolation, plus one dedicated error-path check.
   test — just prerequisites for the tag tools, which need an existing `character_id`/`object_id`):
   - one `create_character(description="test dummy", mode="standard")` call (~1 generation) for
     `update_character_tags`.
-  - one `create_1_direction_object(description="test cube", size=32)` call (~1 generation, single
-    candidate since `size≤42`) for `update_object_tags`.
+  - one `create_1_direction_object(description="test cube", size=32)` call (~20 generations; the
+    live route returns a review pack even at this size) for `update_object_tags`.
 - Output folder: `.local/mcp-tool-verification/<run-id>/` (gitignored, throwaway QA artifacts — this
   is a functional check, not a user asset request, so it does not belong in
   `pixellab-pip-generations/` or get a blueprint/manifest per `SKILL.md`'s Asset Integrity section).
@@ -75,22 +135,24 @@ rather than tested in isolation, plus one dedicated error-path check.
   predicted call list and total below, get approval once, then run smoke+live+equivalence+error tests
   per tool without re-asking per call.
 
-## Cost budget (rough floor, smallest-legal configs; live/equivalence tests add more)
+## Cost budget (full matrix estimate)
 
 | Group | Generations (approx) |
 |---|---|
-| Fixtures (1 character + 1 object) | ~2 |
-| `create_image_pixflux` smoke + live + REST equivalence | ~3 |
-| `create_image_pixen` smoke + live + REST equivalence | ~3 |
-| `create_image_pro` smoke + live + REST equivalence (20-40 each call) | ~60-120 |
-| `edit_image` smoke + live + REST equivalence | ~3-6 |
-| `inpaint_image` smoke + live + REST equivalence | ~3-6 |
-| `animate_image` smoke + live + REST equivalence | ~6-12 |
-| `create_path_tiles` smoke + live + REST equivalence | Pro tile cost ×2 |
-| `create_building_kit` smoke + live + REST equivalence | Pro tile cost ×2 |
+| Fixtures (1 character + 1 object) | ~21 |
+| `create_image_pixflux` smoke + live + REST-equivalence pair ×3 (performance repeat count) | ~8 |
+| `create_image_pixen` smoke + live + REST-equivalence pair ×3 (performance repeat count) | ~8-10 |
+| `create_image_pro` full smoke/live/coverage/REST matrix (20-40 each call) | ~160 |
+| `edit_image` full smoke/live/coverage/REST matrix (20-40 each accepted call) | ~140 |
+| `inpaint_image` full smoke/live/coverage/REST matrix (20-40 each accepted call) | ~160 |
+| `animate_image` full smoke/live/coverage/REST matrix | ~11 |
+| `create_path_tiles` full smoke/live/coverage/REST matrix | ~80-160 |
+| `create_building_kit` full smoke/live/coverage/REST matrix | ~100-200 |
 | `update_character_tags` / `update_object_tags` | 0 (free) |
 
-`create_image_pro` dominates the budget — consider running its smoke test at the smallest legal
+Budget roughly **700-900 generations** for the complete matrix, including accepted calls in cases
+that were expected to reject. The 2026-07-27 verification run consumed 858 subscription generations.
+`create_image_pro`, edit/inpaint, and the tile kits dominate the budget — consider running Pro's smoke test at the smallest legal
 canvas (16×16) to keep even the "cheap" check inside the 64-candidate bucket, and treat its
 REST-equivalence call as optional/skippable if budget is tight, since `generate-image-v2` parity is
 already the most exhaustively re-verified row in the parity map.
@@ -117,8 +179,9 @@ already the most exhaustively re-verified row in the parity map.
   call exercising `init_image_base64`+`init_image_strength=150` (img2img edit) on the first call's
   output. Verify output PNG dimensions match request, transparency present.
 - **Coverage**: `color_image_base64` forced-palette path; `isometric=true`; each `direction` enum
-  value at least once (spot check 2, not all 8); boundary sizes 16×16 (min) and 400×400 (max, total
-  area ≤160,000 — pair with a smaller partner dimension to stay in bounds).
+  value at least once (spot check 2, not all 8); 32×32 (smallest legal square under the live
+  1,024-pixel minimum-area check) and 400×400 (max, total area ≤160,000). Also send 16×16 and expect
+  the live server to reject its 256-pixel area even though each side meets the declared 16px minimum.
 - **Error path**: `width=15` (below min) and `width=401` (above max) — expect validation errors, not
   silently clamped output.
 - **REST equivalence**: `POST /create-image-pixflux` with identical `description`/size/`seed`; compare
@@ -274,3 +337,13 @@ and re-run the relevant `dev-tools/qa.py`). "Equivalent or better" is the pass b
 that only partially matches its REST counterpart's documented capability (there are none in this
 11-tool set per the parity map — all are `=`) would need that gap called out explicitly rather than
 silently marked PASS.
+
+Add one cross-tool **Performance & Stability Summary** table before the per-tool detail, columns:
+tool | MCP steps-to-completion | REST steps-to-completion | MCP time (median if repeated) | REST time
+(median if repeated) | failure/retry incidents (either surface) | malformed-call rejected client-side?
+(MCP y/n) | base64-truncation risk observed? (y/n, MCP-only). Close the results file with one paragraph
+answering the practical question this section exists to answer: for this tool family, does MCP's
+typed-call-plus-getter pattern reduce agent-side operational overhead (fewer steps, fewer
+script-authoring failure points) compared to REST's script-plus-manual-poll pattern, and does that
+translate into measurably fewer incidents — separate from whether generation itself is faster, since
+queue time is expected to dominate wall-clock and isn't a surface-level property.

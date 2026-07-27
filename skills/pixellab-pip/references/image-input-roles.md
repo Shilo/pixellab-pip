@@ -10,6 +10,11 @@ When images are visible, inspect them and write task-relevant facts into the cho
 
 For style-reference generation, also read `style-reference.md`.
 
+## MCP Inline Image Transport
+
+Large base64-only MCP inputs can be truncated by the client. When exact pixels matter and no URL field
+exists, use the equivalent REST route; never silently shrink or quantize a user image.
+
 ## Goal Router
 
 | User goal | Use this role | Meaning | Common fields/endpoints |
@@ -56,6 +61,9 @@ These are REST v2 routes; MCP `edit_image`/`inpaint_image`/`animate_image` cover
   - Fixed size outside those limits: warn that Pro cannot guarantee exact dimensions before spending credits; if the user proceeds, use Pro, verify dimensions, then ask before PixelLab `resize` or local resize/pad/crop.
 
 For animation frame anchors (`first_frame`, `last_frame`) and idle-loop risk, see `animation.md`.
+
+For inpainting, verify that pixels outside the mask stayed unchanged and the requested region changed.
+On failure, report it; do not retry or repair silently.
 
 ## Clarify When Ambiguous
 

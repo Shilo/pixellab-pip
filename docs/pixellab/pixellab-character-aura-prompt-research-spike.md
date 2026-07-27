@@ -1563,6 +1563,29 @@ scores remain evidence about consistency; they are not the product decision.
 | 14 | `GR-Final-A/` | `0/10` | Too material, too deep, skewed, and still the wrong perspective. The phrase `three-quarter top-down view` is retired for this target. |
 | 15 | `GR-Final-B/` | `7/10` | Reclassified from failed ground test to strong **background-area aura**. Nearly every filled or transparent oval is usable behind a character, and semi-transparent rendering can also support overlays. |
 
+### Merged prompt findings
+
+- Composition must be expressed as a spatial relationship. `Rising behind`, `spread across the
+  floor`, and `surrounding transparent center space` describe where the aura belongs without fixing
+  its elemental appearance.
+- `Ring`, `ellipse`, `outline`, `border`, and `teardrop` repeatedly became physical geometry or a
+  single locked silhouette. Retain none of them in the exploratory wall, ground, or overlay prompts.
+  Attempt 15 remains a deliberate oval control because that exact shape was unusually useful as a
+  background-area aura.
+- Camera labels were less reliable than scene-relative language. `Low top-down` often became
+  straight-down; `three-quarter top-down` became steep, oblique, and dimensional. The next ground
+  tests instead describe a shallow floor effect from a near-side view or as receding only slightly.
+- `Filled` could not overcome the hollow meaning of `ring`. The next ground prompts remove the ring
+  noun before testing whether `filled` can control the center.
+- `Power-up aura` produced several promising side-facing results in attempt 5. The themed version in
+  attempt 11 produced the strongest surface effects, but its `teardrop ... border` locked the whole
+  batch to a pointed egg. Preserve `power-up aura`; remove the shape lock. Test theme flexibility
+  only after the composition works, because the multi-theme wall test created central objects.
+- `Fully contained` remains useful but is not a guarantee against full bleed. Containment, center
+  occupancy, perspective, physical-material appearance, and shape diversity all remain visual gates.
+- Attempt 15 proves that a result can fail as a ground-only aura yet succeed as a background-area
+  aura. Evaluate every candidate against all four categories before rejecting it outright.
+
 ### Revised aura categories
 
 1. **Wall aura:** a low-top-down ground component plus an upright effect behind the character. The
@@ -1577,21 +1600,23 @@ scores remain evidence about consistency; they are not the product decision.
    high; attempt 15 establishes that broad oval fields are useful even when they fail the ground-only
    perspective contract.
 
-### Next MVP prompt candidates
+### Next MVP prompt attempts
 
-These are agent-optimized hypotheses, not verbatim restatements of the review. Run them as distinct
-tests before making minor variations:
+These are agent-optimized hypotheses that merge the user's visual review with the observed prompt
+behavior. They intentionally avoid negative prompting and do not restate the user's wording
+verbatim. Use `energy` as the neutral control theme, `64x64`, transparent background, and no fixed
+seed. Each folder represents one independent Create Image Pro call.
 
-| Category | Prompt | Intended improvement |
-|---|---|---|
-| Wall A | `fully contained symmetrical energy aura rising behind a thin flat ground glow` | Retain the successful rear-wall composition while replacing the deep material ring with an immaterial flat base. |
-| Wall B | `fully contained symmetrical energy aura spread behind a shallow floor-level glow` | Test a broader, less flame-biased wall while keeping the floor portion flat. |
-| Ground A | `fully contained filled energy aura lying flat at floor level in a low front view` | Make fill and physical orientation primary while avoiding `ring`, `ellipse`, and steep camera terminology. |
-| Ground B | `fully contained shallow filled energy glow seen from a low front angle` | Test a softer effect noun and a camera closer to side view without asking for a material object. |
-| Overlay A | `fully contained symmetrical energy aura surrounding transparent space` | Preserve open compositing space without `outline`, `border`, or `teardrop` shape locks. |
-| Overlay B | `fully contained energy power-up aura surrounding transparent space` | Reuse attempt 5's promising power-up behavior while replacing its static outline wording. |
-| Background control | `fully contained wide horizontal oval energy aura at ground level` | Reproduce attempt 15 in its correct category. |
-| Background variant | `fully contained broad energy aura at ground level` | Relax the oval constraint to test shape variety while preserving the useful filled-area behavior. |
+| Category | Planned folder | Exact prompt | What it isolates |
+|---|---|---|---|
+| Wall A | `wall-aura-flat-base-a/` | `fully contained symmetrical energy aura rising behind a flat floor-level glow` | Keeps the successful rear-wall relationship while replacing the material ring with an immaterial base. |
+| Wall B | `wall-aura-shallow-base-b/` | `fully contained symmetrical energy aura spanning the rear of a shallow ground glow` | Tests a wider rear wall and explicitly separates the rising rear portion from the flat lower portion. |
+| Ground A | `ground-aura-near-side-a/` | `fully contained shallow filled energy aura spread across the floor in a near-side view` | Removes hollow geometry and tests a filled floor effect with a camera closer to side view. |
+| Ground B | `ground-aura-slight-recede-b/` | `fully contained flat filled energy glow receding slightly across the ground` | Encodes shallow perspective through limited recession instead of an unreliable camera label. |
+| Overlay A | `overlay-aura-symmetrical-open-a/` | `fully contained symmetrical energy power-up aura surrounding transparent center space` | Retains attempt 5's promising power-up identity without an outline, border, or prescribed silhouette. |
+| Overlay B | `overlay-aura-flexible-open-b/` | `fully contained energy power-up aura surrounding transparent center space` | Removes symmetry as the remaining shape constraint and measures whether variety improves without losing the open center. |
+| Background control | `background-aura-wide-oval-control/` | `fully contained wide horizontal oval energy aura at ground level` | Repeats the successful attempt 15 prompt in its correct category. |
+| Background variant | `background-aura-broad-low-variant/` | `fully contained broad low energy aura spread at ground level` | Removes the oval lock while retaining its broad, low, background-friendly footprint. |
 
 Do not use `three-quarter top-down` for the ground target: in this study it produced a steeper,
 Tibia-like oblique view with depth and material rings, not the desired camera close to side view.
