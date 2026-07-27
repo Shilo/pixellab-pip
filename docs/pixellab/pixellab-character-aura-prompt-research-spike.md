@@ -1595,21 +1595,53 @@ These sources provide vocabulary and composition hypotheses, not prompt guarante
 research showed that production terminology can turn into literal objects; every term below must be
 validated visually in Pro.
 
+### Refreshed MCP routing
+
+The last meaningful MCP cache refresh replaced the generic raw-image creator with the
+model-specific `create_image_pixen`, `create_image_pixflux`, and `create_image_pro` tools, backed by
+`get_image` for completed results. The next two cache refreshes changed raw documentation bytes but
+made no normalized tool or schema change.
+
+Use MCP `create_image_pro`, followed by `get_image`, as the preferred execution surface when those
+tools are callable. It targets the same Pro model family selected by this research and accepts the
+controls needed here: description, width, height, transparent background, optional references,
+optional style transfer, and seed. The first `RW-A` request doubles as the MCP lifecycle smoke test,
+so this routing check adds no paid call. An MCP transport or result-retrieval failure is not evidence
+against the prompt; determine whether the job spent before considering an exact REST retry.
+
+Do not route these text-only tests to REST `generate-with-style-v2`: that endpoint requires one to
+four style images. If later testing uses no style image or one style image, keep MCP
+`create_image_pro`; use `generate-with-style-v2` only to blend multiple style images or when its
+separate `style_description` control is required alongside those images.
+
+The other new MCP tools do not belong in the discovery matrix:
+
+- `create_image_pixen` and `create_image_pixflux` select models already ruled out for this production
+  target;
+- `edit_image` and `inpaint_image` could repair a chosen candidate later, but would confound prompt
+  reliability and add a separate paid operation; and
+- `animate_image` is irrelevant while the plan is explicitly static-only.
+
+Use REST `POST /v2/generate-image-v2` plus `GET /v2/background-jobs/{id}` only when the MCP tools are
+unavailable or an exact REST replay is required. Do not submit the same discovery prompt through
+both surfaces as if they were separate prompt tests.
+
 ### Fixed test controls
 
 Use these controls for every discovery call so prompt wording remains the principal variable:
 
 | Field | Test value |
 |---|---|
-| Route | `POST /v2/generate-image-v2` |
-| Size | `64x64` |
+| Preferred surface | MCP `create_image_pro`, then `get_image` |
+| REST fallback | `POST /v2/generate-image-v2`, then `GET /v2/background-jobs/{id}` |
+| Size | MCP `width: 64`, `height: 64`; REST `image_size.width: 64`, `image_size.height: 64` |
 | Background | `no_background: true` |
 | Theme | `energy` during structural discovery |
 | Seed | omitted |
 | Style/reference images | none |
-| Prompt enhancement | none |
-| Expected response | sixteen native-size candidates; verify the actual response |
-| Observed usage baseline | twenty generations per call |
+| Prompt enhancement | unavailable in MCP; omit it in REST |
+| Expected response | derive the candidate count from the completed result; MCP promises several candidates |
+| Historical REST baseline | sixteen native-size candidates and twenty generations per call |
 
 Do not seed-lock the broad discovery prompts. Seed had a large effect in the prior Pro tests, so a
 prompt must work across fresh random seeds rather than win only a same-seed comparison. Use a
@@ -1692,20 +1724,25 @@ Then apply the family gate:
 
 Use these prompt-level thresholds:
 
-- **Promising:** at least `8/16` candidates pass the family gate and the failures are varied rather
-  than one systematic wrong interpretation.
-- **Blueprint-worthy:** at least `12/16` candidates pass on each of two independent unseeded calls,
-  with no recurring character generation and no dominant scene/platform/portal failure.
+- **Promising:** at least half of the returned candidates pass the family gate and the failures are
+  varied rather than one systematic wrong interpretation (`8/16` on the historical REST result).
+- **Blueprint-worthy:** at least three quarters pass on each of two independent unseeded calls
+  (`12/16` on the historical REST result), with no recurring character generation and no dominant
+  scene/platform/portal failure.
 - **Flexible:** after reliability passes, a broad theme stress call preserves the family contract in
-  at least `8/16` candidates and produces at least three materially different effect morphologies.
+  at least half of the candidates and produces at least three materially different effect
+  morphologies.
 
 Pixel hashes, dimensions, and transparency do not establish composition. The numbered review sheet
 and human visual scoring remain authoritative.
 
 ### Staged call and generation budget
 
-At `64x64`, the prior observed cost was twenty generations and sixteen candidates per Pro call.
-Keep every stage behind its own approval gate and stop early when evidence resolves the question.
+At `64x64`, REST previously reported twenty generations and returned sixteen candidates per Pro
+call. The refreshed MCP documentation promises several candidates but does not guarantee that count
+or expose a fixed usage amount. Treat the generation and candidate figures below as historical
+planning estimates, then record the actual MCP result and usage. Keep every stage behind its own
+approval gate and stop early when evidence resolves the question.
 
 | Stage | Calls | Generation budget | Purpose and stop rule |
 |---|---:|---:|---|
@@ -1715,10 +1752,11 @@ Keep every stage behind its own approval gate and stop early when evidence resol
 | Reliability repeats | `0-3` | `0-60` | Repeat the best prompt once, unseeded, for each promising family. Drop any family that cannot reproduce. |
 | Theme-flexibility stress | `0-3` | `0-60` | One call per reproducible family using a diverse literal theme phrase. Do not require one-to-one theme assignment. |
 
-The initial commitment is therefore **six calls / 120 generations / 96 candidates**. The maximum
-pre-refinement search is **fifteen calls / 300 generations**, reached only if every fallback and
-every family remains viable. Using the historical approximately `$0.095` Pro call estimate, those
-two bounds are roughly `$0.57` and `$1.43`; verify current pricing and balance before execution.
+The initial commitment is therefore **six paid Pro calls**, historically about **120 generations / 96
+candidates**. The maximum pre-refinement search is **fifteen paid Pro calls**, historically about
+**300 generations**, reached only if every fallback and every family remains viable. Using the
+historical approximately `$0.095` Pro call estimate, those two bounds are roughly `$0.57` and
+`$1.43`; verify current pricing and balance before execution.
 
 For the theme-flexibility call, replace only `energy` with this one literal scalar:
 
@@ -1748,6 +1786,11 @@ discovery/reliability ceiling and requires a new approval.
 Keep the current `vertical power spikes` prompt as the production default until another rear-wall
 prompt reaches the blueprint-worthy threshold. Ground-only and foreground-overlay prompts should not
 replace it; they are additional aura modes.
+
+Do not migrate the current portable blueprint merely because MCP now exposes Pro. Its recorded REST
+route remains an exact standalone replay path, while interactive prompt discovery should use the
+repository skill's MCP-first routing. Reconsider the blueprint transport only after the prompt
+families are validated; transport migration and prompt research are separate decisions.
 
 If all three families succeed, keep one portable blueprint but resolve an `aura mode` such as
 `rear wall`, `ground ring`, or `foreground overlay` to one of three tested full descriptions. Keep
