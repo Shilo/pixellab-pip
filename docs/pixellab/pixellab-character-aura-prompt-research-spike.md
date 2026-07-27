@@ -2400,3 +2400,39 @@ Do not replace validated executable prompts with these untested MVPs yet.
 
 This preserves replayability and prevents a research hypothesis from silently becoming the
 production recipe.
+
+## Prompt Comparison Contract and UI-Vocabulary Hypothesis — 2026-07-27
+
+The Aseprite PixelLab direction menu is evidence that `high top-down`, `low top-down`, and
+`sidescroller` are intentional PixelLab product terms. It is **not** evidence that the underlying
+image model was trained on those exact strings or that repeating them in a Pro description will
+control composition. Preserve the exact UI terms as optional controlled prompt vocabulary, but do
+not assume privileged model behavior without generation evidence.
+
+If a composition remains ambiguous after the current MVP round, a later vocabulary-only test may
+append one exact UI term while keeping everything else fixed. Do not add those variants to the
+current paid round or use multiple view terms in one prompt.
+
+From this point forward, every proposed MVP prompt must be reported with:
+
+1. the immediately previous tested prompt for that family;
+2. the best-known control prompt for that family;
+3. the next exact MVP prompt.
+
+When the previous prompt is also the best control, show it in both positions instead of silently
+omitting one. This keeps prompt changes and evidence visible to the user.
+
+### Current three-way comparisons
+
+| Family | Previous tested prompt | Best-known control | Next MVP prompt |
+|---|---|---|---|
+| Ground only | `fully contained broad low energy aura spread flush with the ground` | `fully contained broad low energy aura spread at ground level` *(provisional under the corrected ground-plane gate)* | `fully contained round energy ground aura in top-down view` |
+| Front/back overlay | `fully contained energy power-up aura rising along both sides of open central space` | `fully contained energy power-up aura rising along both sides of open central space` | `fully contained energy power-up aura rising along both sides of open central space with a natural lower edge` |
+| Background | `fully contained broad energy aura forming an upright rear layer` | `fully contained broad energy aura forming an upright rear layer` *(best single candidate, inconsistent batch)* | `fully contained broad upright energy aura with a natural lower edge` |
+| Ground plus upright wall | `fully contained symmetrical energy aura rising behind a thin floor-level glow` | `fully contained symmetrical energy aura rising behind a flat floor-level glow` *(best flexible wall control)* | `fully contained upright energy aura behind a round ground aura` |
+| Status/level-up | `fully contained symmetrical energy status effect spanning the rear of a shallow ground glow` | `fully contained symmetrical energy aura spanning the rear of a shallow ground glow` | `fully contained symmetrical energy status effect above a round ground aura` |
+
+The older `fully contained symmetrical energy aura with vertical power spikes and a bottom energy
+ring` remains the consistency leader for the constrained spike-and-ring family. It is not the best
+control for the current flexible-wall comparison because `vertical power spikes` is precisely the
+shape lock this research is trying to remove.
