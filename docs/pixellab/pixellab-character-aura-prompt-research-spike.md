@@ -2278,8 +2278,10 @@ For aura work, use role-specific terminology:
 
 - **Characters and upright effects:** front-oblique or low-top-down sprite presentation remains a
   useful description.
-- **Ground-only effects:** use `overhead map-plane`, `top-down map floor`, or `round ground decal in
-  a retro RPG tilemap projection`. Do not inherit the character sprite's near-side camera.
+- **Ground-only effects:** use an angled map-plane presentation consistent with the target retro RPG
+  map. The tested phrase `top-down view` is now rejected because Pro interpreted it as straight
+  overhead. `High top-down` is the next PixelLab vocabulary candidate; the successful flat bases
+  from `ground-plus-upright-wall/` are the current visual control.
 - **Whole scene:** `retro RPG oblique/parallel projection` is the most useful umbrella term, while
   acknowledging that the floor and upright sprites are intentionally treated differently.
 
@@ -2292,27 +2294,22 @@ elevated `theta` above the ground plane, the minor-to-major axis ratio is `sin(t
 straight-down 90-degree view gives `1.00`. The equivalent tilted-circle relationship is the setup used in this
 [MIT machine-vision exercise](https://ocw.mit.edu/courses/6-801-machine-vision-fall-2020/44cf7a39fd1de47fc359dc801be9c9fc_MIT6_801F20_hw1.pdf).
 
-Traditional RPG Maker-style ground art is not obligated to that physical compression because the
-floor is intentionally stretched. The correct default for a circular ground aura is therefore a
-**near-round screen-space footprint**: begin at a `1.0` height-to-width ratio, or roughly
-`0.85-1.0` when a small amount of artistic compression better matches the target tileset. For
-example, a 48-pixel-wide circle should usually be about 41-48 pixels tall in this convention, not
-the 16-24 pixel height implied by the earlier shallow-ellipse direction. This ratio is an inferred
-production recommendation from the projection research, not a universal RPG Maker engine rule.
+Traditional RPG Maker-style ground art is not obligated to physically exact compression because
+the floor is intentionally stylized. Generation evidence nevertheless rejects a perfectly round
+straight-overhead footprint for this target. Do not prescribe a universal ratio yet: use a visibly
+angled, moderately compressed ground footprint and compare it with the target tileset. The flat
+bases in `ground-plus-upright-wall/` are a better empirical guide than the earlier untested
+`0.85-1.0` recommendation.
 
 The target map remains the authority. Measure an existing round floor mark, rug, shadow, or magic
-circle in that tileset and match its height-to-width ratio. Use a thinner `0.5-0.7` ellipse only
-when the map itself visibly compresses ground-plane circles that much.
+circle in that tileset and match its height-to-width ratio.
 
 ### Prompt consequences
 
-Retire `low top-down`, `near-side`, `shallow`, `foreshortened`, and `elliptical` as default words
-for **ground-only** aura prompts. They remain valid for upright sprites or a project whose actual
-map establishes that compression. The next ground discovery round should contrast these two
-map-plane prompts before changing the bundled ground blueprint:
-
-1. `fully contained round energy aura spread across the overhead map floor`
-2. `fully contained circular energy aura texture on the map ground plane`
+Retire plain `top-down view` for **ground-only** aura prompts because the paid test produced a
+straight-overhead result. `Low top-down` remains too close to character/side presentation for the
+target. Test the exact PixelLab term `high top-down` next, while keeping the successful flat ground
+components from `ground-plus-upright-wall/` as the visual control.
 
 The existing `ground-aura.blueprint.json` remains provisional until a map-plane prompt proves more
 reliable. Its comment now requires comparison against the target map rather than claiming that a
@@ -2348,7 +2345,7 @@ Source: [PixelLab API documentation](https://api.pixellab.ai/v2/docs).
 
 | Effect role | Agent-facing acceptance perspective | PixelLab-facing prompt strategy |
 |---|---|---|
-| Ground only | Top-down/no-depth map plane. The footprint is near-round in screen space and matches the target floor tiles, not the character sprite angle. | Say `top-down` once and describe a round ground aura. Do not use `low top-down`, `shallow`, `foreshortened`, or a rectangular canvas to force the shape. |
+| Ground only | Angled map plane: higher than character perspective but not straight overhead. Match the target floor tiles. | Test the exact term `high top-down`; reject plain `top-down view`, which produced a 100% overhead footprint. |
 | Front overlay | Upright effect aligned to the character sprite. Open central space remains visible, and the lower edge ends inside the cell. | Preserve the proven `rising along both sides of open central space` relation. A camera label is unnecessary unless results regress. |
 | Back overlay/background | Upright effect aligned to the character sprite. A filled center is allowed; the lower edge still ends inside the cell. | Use `broad upright aura`; avoid abstract `layer` wording in the refinement because the last batch turned it into symbols and portals. |
 | Status/level-up | Upright subject-space effect. A ground component, when present, must still read as a round map-plane footprint. | Use a simple relation such as `above a round ground aura`; do not name two camera angles. |
@@ -2365,8 +2362,8 @@ Keep every discovery call at `64x64`. Create Image Pro returns sixteen candidate
 changing the canvas to a short rectangle would confound camera, composition, containment, and
 comparison with earlier batches. Perspective belongs to the content inside the square canvas.
 
-- Ground-only aura: target a near-round footprint with roughly 4-8 pixels of breathing room. Treat
-  `0.85-1.0` height-to-width as the default acceptance band, with `1.0` as the clean control.
+- Ground-only aura: target a contained, moderately compressed footprint with roughly 4-8 pixels of
+  breathing room. Do not lock a numeric ratio until it is measured against the target tileset.
 - Upright overlay/background/status effect: retain the square canvas and require a visible natural
   lower termination rather than bottom-edge truncation.
 - Combined ground-plus-upright aura: retain the square canvas; the round base occupies the lower
@@ -2436,3 +2433,160 @@ The older `fully contained symmetrical energy aura with vertical power spikes an
 ring` remains the consistency leader for the constrained spike-and-ring family. It is not the best
 control for the current flexible-wall comparison because `vertical power spikes` is precisely the
 shape lock this research is trying to remove.
+
+## Projection MVP Results — 2026-07-27
+
+Five approved unseeded MCP `create_image_pro` calls produced sixteen transparent `64x64`
+candidates each. The complete local run is under
+`pixellab-pip-generations/pro-aura-projection-mvp-20260727/`. Ratings below are provisional agent
+judgments; the user's review supersedes them.
+
+### 1. `ground-topdown-round`
+
+Prompt: `fully contained round energy ground aura in top-down view`
+
+User-derived score: **1/10**. `Top-down view` produced a straight-down footprint rather than the
+required angled map projection. Effect quality varies and may partly be seed randomness, but the
+perspective failure is batch-wide. This falsifies the plain-`top-down` hypothesis; `high top-down`
+is the next controlled PixelLab vocabulary candidate.
+
+### 2. `overlay-natural-lower-edge`
+
+Prompt: `fully contained energy power-up aura rising along both sides of open central space with a natural lower edge`
+
+User-derived score: **2/10**. The repeated U shape is structurally wrong, and most candidates still
+bleed at the bottom. Connecting only below the player area makes the lower portion read as ground.
+The preferred power-up overlay is enclosed on every side, connects above the player space, and
+keeps a transparent central opening. The supplied yellow reference demonstrates that stronger
+silhouette; the previous connected-top attempts remain better controls.
+
+### 3. `background-upright-natural-lower-edge`
+
+Prompt: `fully contained broad upright energy aura with a natural lower edge`
+
+User-derived score: **2/10**. Most results read as jelly, plateau, curtain, or three-dimensional
+objects, with the wrong presentation for an effect behind a character. Removing `rear layer` did
+not remove object bias and also discarded a useful spatial cue from the earlier control.
+
+### 4. `ground-plus-upright-wall`
+
+Prompt: `fully contained upright energy aura behind a round ground aura`
+
+User-derived score: **6/10**. The prompt fails as a combined wall aura because the floating upright
+emblems are disconnected from the base. Its bases are nevertheless excellent flat ground effects
+and the closest new results to the standalone ground target. Preserve this batch as the current
+ground visual control and isolate that successful component in the next ground prompt.
+
+### 5. `status-above-round-ground`
+
+Prompt: `fully contained symmetrical energy status effect above a round ground aura`
+
+User-derived score: **9/10**. This is an excellent status-effect batch with consistently flat
+ground components; candidate 5 is a particularly strong level-up effect. Some position and depth
+variation is acceptable rather than a prompt failure. Symbol-to-base spacing is not a prompt
+defect; it is the expected consequence of fitting both components into `64x64`. A later `64x94`
+test should evaluate the added room without changing the successful prompt core.
+
+### Merged findings
+
+- Plain `top-down view` produces an unacceptable straight-overhead footprint. It is rejected for
+  this target; `high top-down` is the next exact UI-vocabulary test.
+- `Natural lower edge` did not consistently stop bottom bleeding and created a ground-like U-frame.
+  The overlay needs an enclosed outer silhouette connected above the player space, with a
+  transparent center and a natural termination on every side.
+- A round ground component can coexist with an upright component without naming two projections.
+  `Behind` did not connect the wall to the base, but the resulting bases are the best current ground
+  effects. `Above` produced the strongest status batch.
+- `broad upright energy aura` is too underspecified for backgrounds: Pro fills the ambiguity with
+  portals, columns, and material forms.
+- Status vocabulary legitimately invites icons and symbols. This is valuable for status/level-up
+  work; the current remaining problem is primarily insufficient vertical room at `64x64`, not a
+  defective prompt.
+
+### Next comparisons after user review
+
+The user review below selects the current status prompt and supplies the next controlled tests. The
+other families retain the three-way comparison contract: preserve the overlay's open center while
+closing its upper silhouette, restore a rear-layer cue for backgrounds, isolate the successful
+ground component, and connect the combined wall physically to its ground component.
+
+### Status-effect control comparison
+
+Previous best status control:
+`fully contained symmetrical energy aura spanning the rear of a shallow ground glow`
+
+Current status prompt:
+`fully contained symmetrical energy status effect above a round ground aura`
+
+The previous control, stored under
+`pixellab-pip-generations/pro-aura-four-family-mvp-20260726/wall-aura-shallow-base-b/`, gives its
+status motifs little consistency. Its bases vary in perspective, are not always circular, and
+frequently bleed. Its apparent extra vertical separation is a consequence of the incorrect shallow
+base rather than a composition advantage; additional canvas height is the correct way to create
+room.
+
+The current batch, stored under
+`pixellab-pip-generations/pro-aura-projection-mvp-20260727/status-above-round-ground/`, is more
+coherent and has substantially better flat ground components. Candidate 5 is the strongest clear
+level-up result, the motifs are immediately readable as status effects, the bases are consistently
+roundish and correctly projected, and the batch has no bleeding.
+
+The current prompt is therefore the near-perfect status-effect leader at **9/10**. The bundled
+`status-effect.blueprint.json` now uses it. The former blueprint prompt is retained as the runner-up
+in this research record. The next status experiment is a canvas-only `64x94` comparison so added
+vertical room can be evaluated without confounding prompt wording.
+
+## Next MVP Prompt Plan After Projection Review — 2026-07-27
+
+All non-status calls remain unseeded transparent `64x64` MCP `create_image_pro` tests. The status
+call alone uses `64x94`. Each next prompt changes one structural idea and avoids negative prompting.
+
+### Ground only — `64x64`
+
+- Previous tested: `fully contained round energy ground aura in top-down view`
+- Best visual control: the ground components from
+  `fully contained upright energy aura behind a round ground aura`
+- Next exact MVP: `fully contained round energy ground aura in high top-down view`
+
+This keeps the successful `round ground aura` noun phrase and changes only the rejected
+straight-overhead view term to PixelLab's exact `high top-down` vocabulary.
+
+### Front overlay — `64x64`
+
+- Previous tested: `fully contained energy power-up aura rising along both sides of open central space with a natural lower edge`
+- Best-known control: `fully contained energy power-up aura rising along both sides of open central space`
+- Next exact MVP: `fully contained energy power-up aura enclosing open central space`
+
+`Enclosing` targets the supplied reference's connected upper silhouette and transparent center.
+It removes the U-producing `along both sides` relation and the failed `natural lower edge` phrase.
+
+### Background — `64x64`
+
+- Previous tested: `fully contained broad upright energy aura with a natural lower edge`
+- Best-known control: `fully contained broad energy aura forming an upright rear layer`
+- Next exact MVP: `fully contained broad energy power-up aura forming an upright rear layer`
+
+This restores the successful rear-layer relation and borrows only `power-up aura` from the stronger
+overlay family. It does not constrain the center to remain transparent because filled centers are
+valid background effects.
+
+### Ground plus upright wall — `64x64`
+
+- Previous tested: `fully contained upright energy aura behind a round ground aura`
+- Best-known flexible control: `fully contained symmetrical energy aura rising behind a flat floor-level glow`
+- Next exact MVP: `fully contained upright energy aura rising from the rear of a round ground aura`
+
+`Rising from the rear` tests the missing physical connection while preserving correct back-layer
+placement. It changes the failed loose relation `behind` without introducing material-ring wording.
+
+### Status / level-up — `64x94`
+
+- Previous tested: `fully contained symmetrical energy status effect above a round ground aura` at `64x64`
+- Best-known control: `fully contained symmetrical energy status effect above a round ground aura` at `64x64`
+- Runner-up: `fully contained symmetrical energy aura spanning the rear of a shallow ground glow`
+- Next exact MVP: `fully contained symmetrical energy status effect above a round ground aura` at `64x94`
+
+Do not alter the winning status wording yet. The next call is a strict canvas-only test. If added
+height still leaves motifs inconsistently positioned, the smallest later prompt variant is
+`fully contained symmetrical energy status effect centered above a round ground aura`; do not test
+that wording in the same round because it would confound the size result.
