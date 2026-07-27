@@ -2167,3 +2167,42 @@ research target; do not spend the aura-research budget refining it now.
 Background-aura research remains unresolved: attempts 7 and 8 both failed their intended background
 roles. Do not treat either prompt as a validated background blueprint. Recover that family with an
 explicitly upright rear-layer prompt in a later, separately planned test.
+
+## MCP Blueprint Routing and Recommended MVP Prompts — 2026-07-27
+
+The three new effect blueprints now record `MCP create_image_pro` and poll `MCP get_image`. This
+matches the surface used during discovery and the preferred MCP-first direction. Their REST base URL
+was removed and their size object was mapped to the MCP tool's separate `width` and `height` fields.
+
+The bearer-token metadata remains intentionally. An already connected MCP client handles auth and
+does not expose or pass `PIXELLAB_SECRET` in the executable tool arguments, but a portable blueprint
+still needs enough information to configure PixelLab MCP when the connection is absent. The metadata
+names the local secret source; it never contains or authorizes reading the secret value.
+
+Do not bulk-convert older REST blueprints merely because a similarly named MCP tool exists. Migrate
+one workflow at a time after verifying field parity and every dependent step. In particular, the
+older `aura` blueprint couples static Pro generation to an optional whole-sheet animation whose
+visual behavior remains unresolved; migrate that workflow separately rather than conflating prompt
+research with transport changes.
+
+### Next MVP prompt set
+
+Each prompt changes one structural idea from the closest evidence. Run one unseeded `64x64` Pro call
+per prompt only after approval; do not combine them into one catalog request.
+
+| Effect family | Recommended prompt | Improvement under test |
+|---|---|---|
+| Wall aura | `fully contained symmetrical energy aura rising behind a thin floor-level glow` | Preserve the winning `rising behind` composition while replacing shading-ambiguous `flat` with physical thinness to reduce platform depth. |
+| Ground aura | `fully contained broad low energy aura spread flush with the ground` | Preserve the accidental ground winner while testing a coplanar relation intended to reduce raised center depth. |
+| Overlay aura | `fully contained energy power-up aura rising along both sides of open central space` | Replace circle-locking `surrounding` with lateral placement while keeping the character area visible. |
+| Background aura | `fully contained broad energy aura forming an upright rear layer` | Remove `oval` and ground-spread language; directly test an upright background composition without requiring a hollow center. |
+| Status / level-up effect | `fully contained symmetrical energy status effect spanning the rear of a shallow ground glow` | Preserve the high-variety composition while testing whether explicit status identity improves level-up and battle-effect consistency. |
+
+Controls remain the exact winning or diagnostic prompts:
+
+- wall reliability: `fully contained symmetrical energy aura rising behind a flat floor-level glow`;
+- ground reliability: `fully contained broad low energy aura spread at ground level`;
+- status reliability: `fully contained symmetrical energy aura spanning the rear of a shallow ground glow`.
+
+The first paid round should use the five recommended prompts, not the controls. Repeat a control only
+when a new prompt must be compared for reliability or the new prompt loses the defining composition.
