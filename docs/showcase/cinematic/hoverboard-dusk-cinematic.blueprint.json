@@ -1,0 +1,181 @@
+[
+  {
+    "_comment": "9.7s chained pixel-art cinematic: a teenage boy rides a hovering board through a small-town square at dusk, launches off a curb and lands, then rides away into the sunset. 256x128 widescreen, 6 chained animate_image jobs at 16 frames each, played at 100ms/frame. Two camera systems ended up in play rather than by plan: the opening still returned side-on while all three seed-locked keyframes returned low and close on a street receding toward the clock tower, so shot 1 was re-cut to perform that camera change deliberately as a tween. Free-run jobs drift scale badly on a receding street - the subject shrinks down the road no matter how the action is worded - so every beat that must hold scale is anchored with last_frame, and only the closing ride-off is left free-run because receding is the intended motion there. Wording a held object as 'grab the edge of the board' makes the model rotate the board itself to vertical; describe the board as staying flat underfoot instead. Known residual artifact: shot 1 asks for 'glowing dust streaming from the board's underside' and that dust persists down the chain as white smoke blobs, which every later beat's exclusion list fails to suppress - drop the glowing-dust request from shot 1 if a clean cut matters.",
+    "_comment_prompt": "/pixellab-pip create a 10 second cinematic of Marty McFly (from back to the future) on a hoverboard. PixelLab probably wont understand the movie reference so please describe the character, hoveboard and scene",
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/hoverboard-dusk-cinematic",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "TASK": {
+      "instruction": "Confirm the current user explicitly asked to run this blueprint and that the PixelLab MCP connection is authenticated, then create the empty output directory. This blueprint makes 4 paid Pixen calls and 6 paid animation calls; stop and ask if either condition is unmet.",
+      "verify": "Run authority and connection are confirmed and the output directory exists and is empty."
+    }
+  },
+  {
+    "_comment": "Opening frame. The three keyframes that follow repeat this call verbatim except for the pose clause, sharing the same seed so the square, palette and costume hold across all four.",
+    "MCP create_image_pixen": {
+      "description": "side view, small-town square at dusk, row of two-storey storefronts with lit yellow windows, a clock tower, cast-iron lamp posts and parked cars along the street, warm orange sky; a teenage boy with short auburn hair in a red padded sleeveless vest over a blue denim jacket, blue jeans and white high-top sneakers, on a flat pink hovering board with a teal underside and a small rear fin floating a hand's width above the road, riding at the left of frame; flat pixel art, chunky low-resolution pixels, limited palette, hard edges",
+      "width": 256,
+      "height": 128,
+      "no_background": false,
+      "view": "side",
+      "detail": "medium detail",
+      "outline": "selective outline",
+      "seed": 738291
+    }
+  },
+  {
+    "_comment": "Keyframe A - the anchor shot 1 tweens into. Seed-locked to the opening so the square, palette and outfit hold.",
+    "MCP create_image_pixen": {
+      "description": "side view, small-town square at dusk, row of two-storey storefronts with lit yellow windows, a clock tower, cast-iron lamp posts and parked cars along the street, warm orange sky; a teenage boy with short auburn hair in a red padded sleeveless vest over a blue denim jacket, blue jeans and white high-top sneakers, on a flat pink hovering board with a teal underside and a small rear fin floating a hand's width above the road, crouched low over the board at the centre of the street; flat pixel art, chunky low-resolution pixels, limited palette, hard edges",
+      "width": 256,
+      "height": 128,
+      "no_background": false,
+      "view": "side",
+      "detail": "medium detail",
+      "outline": "selective outline",
+      "seed": 738291
+    }
+  },
+  {
+    "_comment": "Keyframe B - the airborne anchor for shot 3.",
+    "MCP create_image_pixen": {
+      "description": "side view, small-town square at dusk, row of two-storey storefronts with lit yellow windows, a clock tower, cast-iron lamp posts and parked cars along the street, warm orange sky; a teenage boy with short auburn hair in a red padded sleeveless vest over a blue denim jacket, blue jeans and white high-top sneakers, on a flat pink hovering board with a teal underside and a small rear fin, airborne above a parked car with arms spread wide; flat pixel art, chunky low-resolution pixels, limited palette, hard edges",
+      "width": 256,
+      "height": 128,
+      "no_background": false,
+      "view": "side",
+      "detail": "medium detail",
+      "outline": "selective outline",
+      "seed": 738291
+    }
+  },
+  {
+    "_comment": "Keyframe C - the landing anchor for shot 5.",
+    "MCP create_image_pixen": {
+      "description": "side view, small-town square at dusk, row of two-storey storefronts with lit yellow windows, a clock tower, cast-iron lamp posts and parked cars along the street, warm orange sky; a teenage boy with short auburn hair in a red padded sleeveless vest over a blue denim jacket, blue jeans and white high-top sneakers, on a flat pink hovering board with a teal underside and a small rear fin floating a hand's width above the road, riding upright away toward the right of frame silhouetted against the orange sky; flat pixel art, chunky low-resolution pixels, limited palette, hard edges",
+      "width": 256,
+      "height": 128,
+      "no_background": false,
+      "view": "side",
+      "detail": "medium detail",
+      "outline": "selective outline",
+      "seed": 738291
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with each of the four job ids returned by the preceding create_image_pixen calls until completed, then download and save each result under the names below, in the order the calls appear.",
+      "outputs": ["00_opening.png", "key_A_crouch.png", "key_B_airborne.png", "key_C_rideaway.png"],
+      "verify": "All four files decode as PNGs with identical width and height, each showing the same town square, palette and character outfit."
+    }
+  },
+  {
+    "_comment": "Shot 1 - tween from the side-on opening into keyframe A. This is where the camera swings from side-on to over-the-shoulder; giving the turn its own anchored job stops it drifting mid-chain.",
+    "MCP animate_image": {
+      "first_frame_base64": "00_opening.png",
+      "last_frame_base64": "key_A_crouch.png",
+      "action": "The boy pushes off and accelerates away down the street as the camera swings in behind him; he crouches low over the pink hoverboard, arms out for balance, glowing dust streaming from the board's underside, the storefronts and parked cars sliding past on both sides. Steady rhythmic forward motion. No other people, no hands, no glowing orbs, sparkles, magic glints or lens flare.",
+      "frame_count": 16,
+      "seed": 738291
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the job id returned by the preceding animate_image call until completed, then download all 17 returned images in order as shot1_00.png through shot1_16.png. Image 0 is the supplied first frame echoed back.",
+      "outputs": ["shot1_00.png", "shot1_01.png", "shot1_02.png", "shot1_03.png", "shot1_04.png", "shot1_05.png", "shot1_06.png", "shot1_07.png", "shot1_08.png", "shot1_09.png", "shot1_10.png", "shot1_11.png", "shot1_12.png", "shot1_13.png", "shot1_14.png", "shot1_15.png", "shot1_16.png"],
+      "verify": "17 files, all the same width and height as the opening frame; shot1_16.png shows the boy crouched low with the street receding to the clock tower."
+    }
+  },
+  {
+    "_comment": "Shot 2 - free-run weave. The scale-pinning sentence is load-bearing: without it the subject rides away down the street and shrinks to a speck.",
+    "MCP animate_image": {
+      "first_frame_base64": "shot1_16.png",
+      "action": "The camera tracks alongside at a constant distance so he stays exactly the same size in frame: he weaves down the middle of the street, the pink board tipping left then right beneath his crouched body as he swerves between the parked cars, shoulders counterbalancing, the storefronts and lamp posts sliding past on both sides. Steady rhythmic weaving, side to side across the frame — he does NOT ride away into the distance and does NOT shrink or get smaller. No white puffs, clouds, smoke or dust blobs. No other people, no glowing orbs, sparkles, magic glints or lens flare.",
+      "frame_count": 16
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the job id returned by the preceding animate_image call until completed, then download all 17 returned images in order as shot2_00.png through shot2_16.png.",
+      "outputs": ["shot2_00.png", "shot2_01.png", "shot2_02.png", "shot2_03.png", "shot2_04.png", "shot2_05.png", "shot2_06.png", "shot2_07.png", "shot2_08.png", "shot2_09.png", "shot2_10.png", "shot2_11.png", "shot2_12.png", "shot2_13.png", "shot2_14.png", "shot2_15.png", "shot2_16.png"],
+      "verify": "The subject occupies roughly the same pixel height in shot2_16.png as in shot2_01.png."
+    }
+  },
+  {
+    "_comment": "Shot 3 - the launch, tweened into keyframe B. This job also carries the camera from the high down-the-street angle to the low close angle.",
+    "MCP animate_image": {
+      "first_frame_base64": "shot2_16.png",
+      "last_frame_base64": "key_B_airborne.png",
+      "action": "He drives down through his knees and launches off the curb, board and rider rising together into the air above the parked cars, arms spreading wide for balance as the camera swings round to his side. Bold deliberate upward motion — a clean powerful jump, NOT a fall, a stumble or a crash. No white puffs, clouds, smoke or dust blobs. No other people, no glowing orbs, sparkles, magic glints or lens flare.",
+      "frame_count": 16
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the job id returned by the preceding animate_image call until completed, then download all 17 returned images in order as shot3_00.png through shot3_16.png.",
+      "outputs": ["shot3_00.png", "shot3_01.png", "shot3_02.png", "shot3_03.png", "shot3_04.png", "shot3_05.png", "shot3_06.png", "shot3_07.png", "shot3_08.png", "shot3_09.png", "shot3_10.png", "shot3_11.png", "shot3_12.png", "shot3_13.png", "shot3_14.png", "shot3_15.png", "shot3_16.png"],
+      "verify": "shot3_16.png shows the rider airborne with arms spread, matching keyframe B's staging."
+    }
+  },
+  {
+    "_comment": "Shot 4 - free-run apex glide. Do not describe reaching for or grabbing the board: that wording rotates the board itself up to vertical and detaches the rider from it. Pin position, size and horizon explicitly.",
+    "MCP animate_image": {
+      "first_frame_base64": "shot3_16.png",
+      "action": "He sails through the air at the peak of the jump — the pink board held flat and level under his feet, arms out wide for balance, his body rising slightly then just beginning to fall. He stays on the RIGHT side of the frame at exactly the same size throughout: the camera does not move, the horizon line stays fixed, and he does not drift toward the centre, does not grow, shrink or come closer. The board stays flat and horizontal under his feet and never tilts onto its edge or turns vertical. No white puffs, clouds, smoke or dust blobs. No other people, no glowing orbs, sparkles, magic glints or lens flare.",
+      "frame_count": 16
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the job id returned by the preceding animate_image call until completed, then download all 17 returned images in order as shot4_00.png through shot4_16.png.",
+      "outputs": ["shot4_00.png", "shot4_01.png", "shot4_02.png", "shot4_03.png", "shot4_04.png", "shot4_05.png", "shot4_06.png", "shot4_07.png", "shot4_08.png", "shot4_09.png", "shot4_10.png", "shot4_11.png", "shot4_12.png", "shot4_13.png", "shot4_14.png", "shot4_15.png", "shot4_16.png"],
+      "verify": "The board remains flat and horizontal under the rider's feet in every frame, and the rider's pixel height is unchanged from first to last."
+    }
+  },
+  {
+    "_comment": "Shot 5 - descent and landing, tweened into keyframe C. Anchoring this beat is what stops the rider shrinking away down the road during the descent; a free-run version of this shot loses scale badly.",
+    "MCP animate_image": {
+      "first_frame_base64": "shot4_16.png",
+      "last_frame_base64": "key_C_rideaway.png",
+      "action": "He drops down out of the air and lands on the road, the board settling flat beneath him and his knees compressing to absorb the impact, then he straightens up into an upright riding stance. Steady deliberate downward motion into a clean landing — NOT a crash, a fall or a stumble. He stays exactly the same size throughout and does not shrink or recede down the street. The board stays flat and horizontal under his feet and never tilts onto its edge or turns vertical. No white puffs, clouds, smoke or dust blobs. No other people, no glowing orbs, sparkles, magic glints or lens flare.",
+      "frame_count": 16
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the job id returned by the preceding animate_image call until completed, then download all 17 returned images in order as shot5_00.png through shot5_16.png.",
+      "outputs": ["shot5_00.png", "shot5_01.png", "shot5_02.png", "shot5_03.png", "shot5_04.png", "shot5_05.png", "shot5_06.png", "shot5_07.png", "shot5_08.png", "shot5_09.png", "shot5_10.png", "shot5_11.png", "shot5_12.png", "shot5_13.png", "shot5_14.png", "shot5_15.png", "shot5_16.png"],
+      "verify": "shot5_16.png shows the rider upright on the board at road level, at the same scale as shot5_01.png."
+    }
+  },
+  {
+    "_comment": "Shot 6 - the closing ride-off, deliberately left free-run: receding into the distance is the intended motion here, so the drift that had to be suppressed everywhere else is what sells the ending.",
+    "MCP animate_image": {
+      "first_frame_base64": "shot5_16.png",
+      "action": "He rides on down the street away from the camera into the sunset, the pink board gliding steadily and level beneath his feet, his figure growing smaller as the distance opens up ahead of him, the storefronts and lamp posts sliding past on both sides toward the clock tower. Steady rhythmic forward motion. The board stays flat and horizontal under his feet and never tilts onto its edge or turns vertical. No white puffs, clouds, smoke or dust blobs. No other people, no glowing orbs, sparkles, magic glints or lens flare.",
+      "frame_count": 16
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the job id returned by the preceding animate_image call until completed, then download all 17 returned images in order as shot6_00.png through shot6_16.png.",
+      "outputs": ["shot6_00.png", "shot6_01.png", "shot6_02.png", "shot6_03.png", "shot6_04.png", "shot6_05.png", "shot6_06.png", "shot6_07.png", "shot6_08.png", "shot6_09.png", "shot6_10.png", "shot6_11.png", "shot6_12.png", "shot6_13.png", "shot6_14.png", "shot6_15.png", "shot6_16.png"],
+      "verify": "The rider recedes down the street and is smaller in shot6_16.png than in shot6_01.png."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Assemble the finished cut. Concatenate shot1_00 through shot1_16, then frames 01 through 16 only of shots 2, 3, 4, 5 and 6 in that order, dropping each later shot's frame 00 because it is a duplicate of the previous shot's handoff frame. Copy the frames unchanged into a numbered sequence, then build a looping GIF at 100ms per frame with animation settings placed before the inputs, and a spritesheet laid out as a 10 by 10 grid of cells matching the frame dimensions with any trailing empty cells left transparent. Do not resize, repaint, pad or letterbox any frame.",
+      "outputs": ["hoverboard-dusk-cinematic.gif", "hoverboard-dusk-cinematic-spritesheet.png"],
+      "verify": "The sequence is 97 frames, every frame has identical width and height with no border, the GIF reports 97 frames with a non-undefined disposal method, coalescing the GIF back to PNGs yields zero absolute-error difference against every source frame, and the spritesheet divides exactly into 100 cells of the frame's width and height."
+    }
+  }
+]
