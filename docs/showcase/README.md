@@ -71,22 +71,22 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <a href="gui-icons.md"><img src="gui-icons/animal-face-emoji-5x5-16px.png" alt="16px animal-face emoji sheet"></a>
 </td>
 <td width="50%" valign="top">
-<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
-<details>
-<summary>Prompt</summary>
-<p><code>pip create a 64px character based on .pip-mascot.md</code></p>
-</details>
-<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
 <h3><a href="cinematic.md">Cinematic</a></h3>
 <details>
 <summary>Prompt</summary>
 <p><code>/pixellab-pip create a 10 second cinematic of Marty McFly (from back to the future) on a hoverboard. PixelLab probably wont understand the movie reference so please describe the character, hoveboard and scene</code></p>
 </details>
 <a href="cinematic.md"><img src="cinematic/hoverboard-dusk-cinematic.gif" alt="Ten-second pixel-art cinematic of a boy riding a hovering board through a small-town square at dusk"></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="pip-mascot.md">Pip Mascot</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>pip create a 64px character based on .pip-mascot.md</code></p>
+</details>
+<a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
 </td>
 <td width="50%" valign="top">
 </td>
