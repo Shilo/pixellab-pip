@@ -1,0 +1,65 @@
+[
+  {
+    "_pixellab": {
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/rpg-maker-character-run",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "Generate, review, animate, and package a configurable character for a verified RPG Maker PC field-character format. RPG Maker MZ is the default; RPG Maker Unite must be selected explicitly.",
+    "_comment_prompt": "/pixellab-pip run the RPG Maker character blueprint for {{RPG Maker version | default: MZ}} using {{character | default: adult male human chibi base character, non-explicit doll-like anatomy, no clothing or equipment}}",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint and confirm PIXELLAB_SECRET is available without printing or storing its value. Resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Resolve {{RPG Maker version | default: MZ}} case-insensitively to exactly one profile: 2000/2K, 2003/2K3, XP, VX, VX Ace/VXAce, MV, MZ, or Unite. Reject RPG Maker 95, console editions, unsupported versions, and ambiguous names instead of guessing because they lack the verified portable external field-character import contract this blueprint requires. Create the resolved directory empty. Before spending, apply the cost-approval gate: plan one create_character call plus four directional walking-4-frames animation jobs, approximately five generations total. With auto-approve off, render `💳 **Approve this PixelLab run?** — **~5 generations**`, then a numbered list containing each tool, exact material inputs, and cost, followed by `Reply **yes**, **no**, or tell me what to change.` With auto-approve on, render the same complete plan headed by `⚡ **Auto-approved PixelLab run** — **~5 generations**` and continue. Stop before spending if any precondition or required approval fails.",
+      "verify": "Run authority and credential presence are confirmed; the version resolves to one verified profile; the output directory is new, empty, writable, and inside the current project; and the full paid chain was disclosed and approved according to the active auto-approval setting."
+    }
+  },
+  {
+    "MCP create_character": {
+      "body_type": "humanoid",
+      "description": "{{character | default: adult male human chibi base character, non-explicit doll-like anatomy, no clothing or equipment}}, readable four-direction map sprite designed for RPG Maker {{RPG Maker version | default: MZ}}, clean silhouette, consistent identity and proportions, flat pixel art, limited palette, hard edges",
+      "detail": "low detail",
+      "mode": "standard",
+      "n_directions": 4,
+      "outline": "selective outline",
+      "proportions": "{\"type\": \"preset\", \"name\": \"chibi\"}",
+      "shading": "flat shading",
+      "size": 32,
+      "text_guidance_scale": 10,
+      "view": "low top-down"
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Use the fresh character ID returned by the immediately preceding create_character call with PixelLab get_character. Poll without resubmitting until completed or failed. Save the completed south, west, east, and north rotation PNGs unchanged. Build a separate labeled contact sheet for review without altering the saved rotations. Do not start animation yet.",
+      "verify": "Exactly four readable transparent rotations exist, their direction labels resolve unambiguously to south, west, east, and north, and the contact sheet displays the same pixels."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Display the four-direction contact sheet and render this checkpoint exactly as a readable Markdown choice: `🎭 **Character ready — choose the next step**\n\n1. **Continue animating** — create the engine-appropriate walk frames for all four directions.\n2. **Regenerate character** — describe what to change; this adds another paid character generation and will be cost-gated.\n3. **Stop here** — keep the four directional base sprites without creating an animated engine sheet.\n\nReply **1 / 2 / 3**, or describe the changes you want.` Wait for the user's choice. On Continue, proceed to the animation TASK; the four animation jobs were already included in the approved chain, so do not ask for a second spend approval. On Regenerate, collect the requested changes, disclose and cost-gate one additional create_character call under the active auto-approval setting, never delete or overwrite the prior character, submit the revised description with every other create_character field unchanged, poll the replacement's fresh ID, save and show its four rotations, then repeat this checkpoint. If the paid plan or material inputs change beyond that disclosed extra creation, re-plan and re-approve before spending. On Stop, make no animation call and stop successfully after reporting the saved rotation files are not an engine-ready animated sheet.",
+      "verify": "No animation starts before an explicit Continue choice; every regeneration receives its own paid-call disclosure or auto-approval record and uses a fresh ID; Stop incurs no later paid calls."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Execute only after the checkpoint's Continue choice. Call PixelLab animate_character once for the currently approved fresh character ID with mode=template, template_animation_id=walking-4-frames, animation_name=RPG Maker walk source, directions=[south, west, east, north], and ai_freedom=150. This queues the four paid directional jobs already disclosed in the initial plan. Poll get_character until all four animations complete or one fails; never retry automatically. Save every returned frame unchanged and preserve PixelLab's order.",
+      "verify": "The current reviewed character has four ordered four-frame directional walk animations; every frame within a direction has identical dimensions and is labeled south, west, east, or north."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Execute only after successful animation. Package the saved PixelLab pixels for the resolved {{RPG Maker version | default: MZ}} profile without repainting. For 2000/2003, proportionally nearest-neighbor resize and pad each selected frame to 24x32, bottom-center it, arrange columns as first stride/base rotation/opposing stride and rows as north/east/south/west in the first 72x128 character block of a 288x256 eight-character sheet, fill every otherwise-unused pixel with one key color absent from the character art, export an 8-bit indexed PNG with exactly 256 palette entries and that key color at palette index 0 as rpg-maker-character.png, and report that the key color must be selected as transparent during import because alpha is not the compatibility mechanism. For XP, normalize to conventional 32x48 cells and arrange all four PixelLab frames as four columns with rows south/west/east/north in a 128x192 transparent PNG named rpg-maker-character.png. For VX/VX Ace, normalize to conventional 32x32 cells and arrange first stride/base rotation/opposing stride with rows south/west/east/north in a 96x128 transparent PNG named $rpg-maker-character.png. For MV/MZ, use the same three-column selection and row order at the documented normal 48x48 cell size in a 144x192 transparent PNG named $rpg-maker-character.png. For Unite, preserve each direction's runtime visible frame size and all four PixelLab frames; place a one-pixel transparent border outside each visible frame so adjacent frames have exactly two transparent pixels between them; export horizontal strips named rpg-maker-character_down_4.png, rpg-maker-character_left_4.png, rpg-maker-character_right_4.png, and rpg-maker-character_up_4.png. Any resize must preserve aspect ratio, use nearest-neighbor sampling, and add only padding appropriate to the target profile. Create a separate inspection-grid PNG for every delivered sheet or strip, marking expected cell boundaries without altering the deliverable.",
+      "verify": "The delivered files match the resolved profile: 2000/2003 is 288x256, 8-bit indexed with exactly 256 entries, index 0 is the absent-from-art import key, and its 24x32 cells use up/right/down/left rows; XP is 128x192 with 32x48 cells, four frames, and down/left/right/up rows; VX/VX Ace is 96x128 with 32x32 cells, three frames, down/left/right/up rows, and a `$` single-character filename; MV/MZ is 144x192 with 48x48 cells and the same layout and prefix; Unite has four direction-named strips, four visible frames per strip, a one-pixel outside border, and two transparent pixels between visible frames. Every packaged cell remains pixel-equivalent to its normalized source plus profile-required padding, and inspection grids are separate aids rather than proof of alignment."
+    }
+  }
+]
