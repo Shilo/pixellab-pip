@@ -309,7 +309,7 @@ Use `.claude/skills/pixellab-pip` or `.cursor/skills/pixellab-pip` instead if th
 
 ### Claude Code On The Web
 
-Cloud sessions at [claude.ai/code](https://claude.ai/code) have no plugin manager: `/plugin` is terminal-only, and plugins installed in the CLI or desktop app do not carry over. A plugin reaches a cloud session only when the repository you work in declares it. Use either route below, then start a **new** cloud session — both take effect at session start.
+Cloud sessions at [claude.ai/code](https://claude.ai/code) have no plugin manager: `/plugin` does not run there, and plugins installed in the CLI or desktop app do not carry over. Pip reaches a cloud session only when the repository you work in declares it, or when the skill is enabled on your claude.ai account. Read [Cloud limits](#cloud-limits) before spending credits from a cloud session.
 
 #### Agent-Assisted Install (Recommended)
 
@@ -327,11 +327,16 @@ shown there into this repository's `.claude/settings.json`, preserving existing
 keys, and commit it. If this repository cannot take a committed settings file, or
 the plugin does not load in a fresh session, use the skill route instead: copy the
 whole `skills/pixellab-pip/` folder — not just `SKILL.md` — to
-`.claude/skills/pixellab-pip/` in this repository and commit that. Then tell me
-which route you used, that I need to start a new cloud session for it to load, and
-how to invoke it. Warn me before I put a PixelLab token anywhere: cloud
-environments have no secrets store, and PixelLab MCP is unavailable unless this
-repository commits an `.mcp.json` for it.
+`.claude/skills/pixellab-pip/` in this repository and commit that. Either way,
+get that commit onto the branch my future cloud sessions start from — a cloud
+session can only push to its own working branch, so open a pull request if that
+is the default branch. Then tell me which route you used, that I need to start a
+new cloud session for it to load, and how to invoke it. Finally, warn me about
+the cloud limits before I spend any credits: `api.pixellab.ai` and
+`www.pixellab.ai` are not on the default network allowlist, so no live PixelLab
+call works until I add them; a PixelLab token can only live in this environment's
+plaintext variables; and PixelLab MCP needs a committed `.mcp.json` in this
+repository.
 ```
 
 #### Manual Install
@@ -349,11 +354,26 @@ Plugin route (updates from this repo automatically) — commit this to your proj
 }
 ```
 
-Invoke it as `/pixellab-pip:pixellab-pip <prompt>`. If a component count shows `0 skills`, that counter reads only a plugin's `commands/` folder — Pip ships `skills/`, so invoke it and see.
+Start a new cloud session — the plugin installs at session start — then invoke it as `/pixellab-pip:pixellab-pip <prompt>`, or as plain `/pixellab-pip <prompt>` unless another command already claims that name.
 
-Skill route (no marketplace) — copy `skills/pixellab-pip/` into your project's `.claude/skills/pixellab-pip/` as in [Manual Skill Install](#manual-skill-install) and commit it. Invoke it as `/pixellab-pip <prompt>`.
+Skill route (no marketplace) — copy `skills/pixellab-pip/` into your project's `.claude/skills/pixellab-pip/` as in [Manual Skill Install](#manual-skill-install) and commit it. Invoke it as `/pixellab-pip <prompt>`. It loads mid-session when `.claude/skills/` already existed when the session started; if you created that directory just now, start a new session.
 
-Either way, run `/pixellab-pip setup` in the new session. Two cloud limits to plan around: PixelLab MCP is unavailable unless your repo commits an `.mcp.json` for it, and cloud environments have no secrets store — anyone using the environment can read its variables, so treat the PixelLab Secret accordingly. Guidance, routing, and docs work with no token at all.
+Account route (no repository changes) — zip the skill folder so `pixellab-pip/SKILL.md` sits at the zip root, then upload it under **Customize → Skills** on claude.ai with code execution enabled. Cloud sessions load the skills enabled on your account, in every repository. Use this when you cannot commit to the repository you work in.
+
+Either way, a cloud session pushes only to its own working branch, so merge the commit into the branch your future sessions start from.
+
+#### Cloud Limits
+
+Then run `/pixellab-pip setup` in the new session, and plan around these — the first one blocks every paid call:
+
+- **Network.** `api.pixellab.ai` and `www.pixellab.ai` are not on the cloud default **Trusted** allowlist, so live generation, PixelLab MCP, balance checks, and doc lookups all fail until you open the environment selector at claude.ai/code, set **Network access** to **Custom**, add both hosts, and keep *Also include default list of common package managers* ticked. `github.com` is on Trusted, so installing Pip itself works untouched.
+- **Secret.** A cloud environment has no secrets store, so `PIXELLAB_SECRET` can only go in its variables field — plaintext, readable by anyone using that environment, every member if it is org-shared, and applied only to sessions started afterwards. Ignore the OS dialog, `setx`, and shell-profile advice the setup wizard gives for local machines.
+- **MCP.** Commit a project-scope `.mcp.json` that references `${PIXELLAB_SECRET}` rather than a literal token, and approve it when the session prompts. A user-scope `claude mcp add -s user` never reaches the cloud. This repository gitignores its own `.mcp.json`, so cloning it does not hand you one.
+- **Output.** The session VM is reclaimed when the session ends and `pixellab-pip-generations/` is gitignored by default, so commit and push anything you paid for before you leave.
+- **Update and uninstall.** `/pixellab-pip update` and `/pixellab-pip uninstall` drive the plugin manager, which cloud sessions lack. The plugin route already re-installs from the marketplace at every session start; to remove Pip, drop the entries from `.claude/settings.json` or delete `.claude/skills/pixellab-pip/`.
+- **Missing local tools.** ImageMagick is not pre-installed — add `apt install -y imagemagick` to the environment's setup script for spritesheets and preview GIFs. Aseprite, Pixelorama, and the website editor are unreachable, the bark sound cannot play on a headless VM, and the `bark` and `auto` toggles reset each session.
+
+Guidance, routing, prompt preparation, and docs work with no token and no allowlist change at all.
 
 ## Usage
 
