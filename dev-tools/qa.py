@@ -498,9 +498,11 @@ def run_unit_tests() -> None:
 # it scans text files only (.md/.py/.json). The AUTHORITATIVE scan is the pinned SkillSpector step in
 # the security/release workflows. These regexes are a hand-derived subset of two rules from
 # SkillSpector commit dde36f258729b5aec7c835295a9556e64a2def0c (the pin in security-scan.yml /
-# release-skill.yml) — malware.yar `backdoor_persistence` and agent_snooping `AS1`; re-check them
-# when that pin is bumped. Not guarded: the project's accepted by-design findings (documented
-# api.pixellab.ai URLs, bearer-token-handling rules, the bark.py subprocess), intentionally kept.
+# release-skill.yml) — malware.yar `backdoor_persistence`, agent_snooping `AS1`, and
+# excessive_agency `EA4`; re-check them when that pin is bumped. Not guarded: the project's accepted
+# by-design findings (documented api.pixellab.ai URLs, bearer-token-handling rules, the bark.py
+# subprocess), intentionally kept — including `EA2`, whose "never ask the user to paste a token"
+# phrasing is load-bearing safety prose that must not be reworded to dodge a regex.
 SECURITY_TRIGGER_PATTERNS = [
     (r"echo\s+.*>>?\s*.*\.bashrc", "backdoor_persistence: echo-append to .bashrc"),
     (r"echo\s+.*>>?\s*.*\.profile", "backdoor_persistence: echo-append to .profile"),
@@ -511,6 +513,10 @@ SECURITY_TRIGGER_PATTERNS = [
     (
         r"~?/\.(?:claude|codex|gemini|continue)/(?:config|settings?|credentials?|preferences?)",
         "AS1: agent-config-directory path (name just the file, e.g. `config.toml`, not `~/.codex/config...`)",
+    ),
+    (
+        r"(?:loop|iterate|repeat)\s+(?:indefinitely|forever|infinitely|endlessly)",
+        "EA4: reads as unbounded looping (e.g. say `infinite looping` for a GIF loop flag)",
     ),
 ]
 SECURITY_TRIGGER_REGEXES = [(re.compile(rx, re.IGNORECASE), label) for rx, label in SECURITY_TRIGGER_PATTERNS]

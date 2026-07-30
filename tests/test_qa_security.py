@@ -37,6 +37,7 @@ class SecurityTriggerPatternTests(unittest.TestCase):
             "export LD_PRELOAD=/tmp/x.so",
             "a crontab entry that runs curl",
             "Codex config lives at ~/.codex/config.toml",
+            "loop forever, and explicit disposal",
         ):
             self.assertTrue(self._hit(bad), f"should flag: {bad!r}")
 
@@ -47,6 +48,8 @@ class SecurityTriggerPatternTests(unittest.TestCase):
             "add the export line to your shell profile (`~/.zshrc` on macOS, `~/.bashrc` on Linux)",
             "Never print, echo, log a token value",
             "Codex writes a global user `config.toml`",
+            "infinite looping, and explicit disposal",
+            "Never ask users to paste the PixelLab bearer token into chat",
         ):
             self.assertFalse(self._hit(ok), f"should NOT flag: {ok!r}")
 
