@@ -78,6 +78,8 @@ about any blockers, whether I need to restart or reload first, and when it is
 ready to use.
 ```
 
+On [Claude Code on the web](#claude-code-on-the-web)? Cloud sessions have no plugin manager, so use the cloud prompt there instead.
+
 ### Upgrading from a pre-v1.0 install
 
 Pre-v1.0 used the `pixellab-pip` marketplace; v1.0 uses `pixellab-pip-plugins`. Do a one-time clean reinstall (a normal update won't switch marketplaces). Easiest: re-run the [Agent-Assisted Install](#agent-assisted-install-recommended) above. Or manually — remove the old, install the new:
@@ -304,6 +306,54 @@ cp -R skills/pixellab-pip/. .agents/skills/pixellab-pip/
 ```
 
 Use `.claude/skills/pixellab-pip` or `.cursor/skills/pixellab-pip` instead if that is the skill directory your assistant reads.
+
+### Claude Code On The Web
+
+Cloud sessions at [claude.ai/code](https://claude.ai/code) have no plugin manager: `/plugin` is terminal-only, and plugins installed in the CLI or desktop app do not carry over. A plugin reaches a cloud session only when the repository you work in declares it. Use either route below, then start a **new** cloud session — both take effect at session start.
+
+#### Agent-Assisted Install (Recommended)
+
+Easiest — paste this into a cloud session and let it set itself up:
+
+```text
+You are running in a Claude Code cloud session (claude.ai/code), so the plugin
+manager is unavailable — do not try `/plugin`, `claude plugin`, or anything that
+assumes a local install. Set up PixelLab Pip from
+https://github.com/Shilo/pixellab-pip the way cloud sessions support instead.
+First read the install steps at
+https://github.com/Shilo/pixellab-pip#claude-code-on-the-web, then use the plugin
+route: create or merge the `extraKnownMarketplaces` and `enabledPlugins` entries
+shown there into this repository's `.claude/settings.json`, preserving existing
+keys, and commit it. If this repository cannot take a committed settings file, or
+the plugin does not load in a fresh session, use the skill route instead: copy the
+whole `skills/pixellab-pip/` folder — not just `SKILL.md` — to
+`.claude/skills/pixellab-pip/` in this repository and commit that. Then tell me
+which route you used, that I need to start a new cloud session for it to load, and
+how to invoke it. Warn me before I put a PixelLab token anywhere: cloud
+environments have no secrets store, and PixelLab MCP is unavailable unless this
+repository commits an `.mcp.json` for it.
+```
+
+#### Manual Install
+
+Plugin route (updates from this repo automatically) — commit this to your project's `.claude/settings.json`, merging with any keys already there:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "pixellab-pip-plugins": {
+      "source": { "source": "github", "repo": "Shilo/pixellab-pip" }
+    }
+  },
+  "enabledPlugins": { "pixellab-pip@pixellab-pip-plugins": true }
+}
+```
+
+Invoke it as `/pixellab-pip:pixellab-pip <prompt>`. If a component count shows `0 skills`, that counter reads only a plugin's `commands/` folder — Pip ships `skills/`, so invoke it and see.
+
+Skill route (no marketplace) — copy `skills/pixellab-pip/` into your project's `.claude/skills/pixellab-pip/` as in [Manual Skill Install](#manual-skill-install) and commit it. Invoke it as `/pixellab-pip <prompt>`.
+
+Either way, run `/pixellab-pip setup` in the new session. Two cloud limits to plan around: PixelLab MCP is unavailable unless your repo commits an `.mcp.json` for it, and cloud environments have no secrets store — anyone using the environment can read its variables, so treat the PixelLab Secret accordingly. Guidance, routing, and docs work with no token at all.
 
 ## Usage
 
