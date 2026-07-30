@@ -110,7 +110,9 @@ Which two survive is not arbitrary. `walking-4-frames` assigns a stable pose to 
 
 The evidence for that mapping is visual rather than numeric, and deliberately so. Five candidate pixel metrics were tested against all 56 rows — foot-region width, sprite height, foot-centroid displacement, interior leg gap, and pairwise frame difference — and every one of them inverts on some rows, the best still at roughly a 7% error rate. Rendered contact sheets of all fourteen runs settle it without ambiguity where the metrics cannot.
 
-On the strength of that sweep the blueprint now pins the selection: column 1 takes frame `02` and column 3 takes frame `04`, with no per-run judgement call, so a replay is reproducible rather than dependent on an agent's reading of a contact sheet. The check survives as a guard rather than as the selection mechanism — PixelLab documents the template's frame count but not its phase-index mapping, so if a future template shifts its phases the packaging step stops and reports instead of silently shipping two near-identical standing poses. Details of the sweep, including which metrics fail to discriminate, are in [RPG Maker map-character sheet formats](../pixellab/rpg-maker-character-sheet-formats.md).
+On the strength of that sweep the blueprint now pins the selection: column 1 takes frame `02` and column 3 takes frame `04`, with no per-run judgement call, so a replay is reproducible rather than dependent on an agent's reading of a contact sheet. The check survives as a guard rather than as the selection mechanism — PixelLab documents the template's frame count but not its phase-index mapping, so if a future template shifts its phases the packaging step stops and reports instead of silently shipping two near-identical standing poses.
+
+The guard also has to admit defeat gracefully. A later run across all five engine profiles found characters whose legs are entirely hidden — a knee-length dress, a floor-length cloak — leaving the check unanswerable, while a character in high-contrast boots was trivially readable at the same size. Occlusion decides legibility, not resolution, so an inconclusive check proceeds with the pinned mapping rather than guessing. Details of the sweep, including which metrics fail to discriminate, are in [RPG Maker map-character sheet formats](../pixellab/rpg-maker-character-sheet-formats.md).
 
 Poses are normalized only after selection. Each delivered pose is cropped to its `alpha > 0` bounds, the cropped poses in a row are aligned to one bottom-center origin, and a single nearest-neighbor scale of `min(1, cell / maxW, cell / maxH)` is applied across every delivered pose so the rows stay consistent with each other. In all three runs the largest row union fit inside the cell (`32x48` for MZ, `28x47` for MV, `21x31` for VX Ace), so the scale resolved to `1.0` and no pixels were resampled at all.
 
@@ -178,7 +180,7 @@ Each is the shipped `rpg-maker-character` recipe with the version pinned, so the
 | Transparency | preserved end to end; sheets and GIFs are transparent |
 | File format | PNG, which MV and MZ require and VX Ace supports with alpha |
 | Scaling | nearest-neighbor only, and unused in all three runs |
-| GIF timing | 12 centiseconds per frame, infinite loop, explicit disposal |
+| GIF timing | 12 centiseconds per frame, infinite loop, disposal method 2 |
 
 No seed was sent, so the three characters are independent draws rather than variations of one seeded result.
 
@@ -188,7 +190,7 @@ Sheet assembly, playback GIF encoding, and the inspection grid are local steps r
 
 The playback GIF is cut from the finished sheet, not from the raw frames. Each GIF frame is one unscaled full-height sheet column — 48 or 32 pixels wide by the full sheet height — carrying all four direction cells stacked Down/Left/Right/Up, played in engine order 2 → 1 → 2 → 3. Building it this way means the GIF cannot drift from the PNG: it is the same pixels, re-ordered.
 
-Each run also writes an inspection grid beside the sheet, an unscaled copy at identical pixel dimensions with contrasting one-pixel lines drawn only on interior cell boundaries. It is a review aid for confirming that every pose sits inside its cell on a shared baseline; the delivered sheet is never modified.
+Each run also writes an inspection grid beside the sheet, an unscaled copy at identical pixel dimensions with one-pixel magenta lines drawn only on interior cell boundaries. It is a review aid for confirming that every pose sits inside its cell on a shared baseline; the delivered sheet is never modified.
 
 ## Validation
 

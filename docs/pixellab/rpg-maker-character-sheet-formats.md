@@ -42,7 +42,7 @@ The resolved version is never interpolated into `create_character.description`. 
 
 PixelLab's MCP `create_character.size` is **character size**, not a guaranteed PNG canvas size. The current MCP documentation says the canvas is about 40% larger to leave room for animation and gives **48px character → about 68px canvas** as its example. A local decode of completed MCP artifacts confirmed that behavior: a standard-mode request with the default 48px character produced **68x68 RGBA** direction PNGs. Separate v3 requests at size 48 produced **84x84** and **92x92** canvases, demonstrating why an observed canvas dimension must not become a replay requirement.
 
-The blueprint maps `create_character.size` to 32 for VX/VX Ace and 48 for XP/MV/MZ, records each returned canvas only as run evidence, removes only fully transparent margins, and packages from nonzero-alpha content bounds into the fixed profile cell. Returned padding may vary between images: packaging bottom-centers the cropped poses, computes one global nearest-neighbor scale from the maximum row-union width and height, never upscales, and adds only transparent padding to reach the exact RPG Maker cell.
+The blueprint maps `create_character.size` to 32 for VX/VX Ace and 48 for XP/MV/MZ, records each returned canvas only as run evidence, removes only fully transparent margins, and packages from nonzero-alpha content bounds into the fixed profile cell. Returned padding may vary between images: packaging bottom-centers the cropped poses, computes one global nearest-neighbor scale from the greatest cropped pose width and height across the delivered poses, never upscales, and adds only transparent padding to reach the exact RPG Maker cell.
 
 ## Other blueprint decisions
 
@@ -82,7 +82,9 @@ Visual confirmation is unambiguous in both view types. Side views show frames 1 
 
 An inversion rate around 7% on the best of these is far too high to serve as an automated guard, and a run that trips it is far more likely to be metric noise than an actual phase shift. The mapping itself is not in doubt — rendered side-view and front-view contact sheets of all fourteen runs show it without ambiguity — but establishing it took direct inspection, not a threshold.
 
-That asymmetry is the reason the blueprint pins the indices instead of computing them. The three-column profiles take returned frame 02 for column 1 and 04 for column 3 and discard 01 and 03, so a replay reproduces the same sheet rather than re-deriving the pair. The remaining check is a qualitative guard, deliberately not a numeric one: it asks whether the two frames show opposite legs leading, judged where that is legible. When it fails, packaging stops and reports that the phases may have moved; it never substitutes another pair on its own.
+That asymmetry is the reason the blueprint pins the indices instead of computing them. The three-column profiles take returned frame 02 for column 1 and 04 for column 3 and discard 01 and 03, so a replay reproduces the same sheet rather than re-deriving the pair. The remaining check is a qualitative guard, deliberately not a numeric one: it asks whether the two frames show opposite legs leading.
+
+That guard has to tolerate being unable to answer. A five-profile test run found the legs completely hidden by a knee-length dress on one character and a floor-length cloak on another, so the check could not be performed at all — while a third character's high-contrast boots made it trivial at the same 32px size. Occlusion, not sprite size, is what decides legibility. The guard therefore records an inconclusive result and proceeds with the pinned mapping; only a clear reversal in both the west and east frames stops packaging, and it never substitutes another pair on its own.
 
 ## Sources
 
