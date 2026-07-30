@@ -1,0 +1,119 @@
+[
+  {
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/rpg-maker-vx-ace-character",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "Generate, review, animate, and package a four-direction character sheet for RPG Maker VX Ace. This is the general rpg-maker-character blueprint with the version pinned to VX Ace.",
+    "_comment_prompt": "vx ace, male with spiky red hair, brown eyes. wearing black kimono with only one katana attached to his back",
+    "TASK": {
+      "instruction": "Follow this JSON array in order; no external instructions are required. Require an explicit current-user request to run this paid recipe and callable PixelLab MCP create_character, get_character, and animate_character tools. If MCP is unavailable or unconfigured, stop and show https://www.pixellab.ai/mcp; do not substitute REST. Create the declared output directory empty, or append the lowest free suffix beginning at -2; never overwrite a run. Before spending, show the create_character body and planned animate_character arguments below, identifying character_id as the fresh ID of the ultimately approved candidate. Disclose approximately 6 generations total (about 2 for the v3 character plus 4 directional animation jobs) and wait for explicit approval. This approval covers one animation of the ultimately approved candidate. Every regeneration needs separate approval for one additional v3 character generation at approximately 2 generations; never retry a paid call automatically. Never put the RPG Maker version in the PixelLab description.",
+      "verify": "The MCP tools are callable, the output directory is new and empty, and the user approved the resolved paid chain."
+    }
+  },
+  {
+    "MCP create_character": {
+      "body_type": "humanoid",
+      "description": "male with spiky red hair, brown eyes. wearing black kimono with only one katana attached to his back",
+      "detail": "high detail",
+      "mode": "v3",
+      "size": 32,
+      "view": "low top-down"
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_character with the fresh ID returned by create_character no more than once every 10 seconds for up to 15 minutes; never resubmit automatically. If it is still nonterminal at 15 minutes, stop and report the character ID and last status. v3 returns eight rotations; map only from explicit direction labels after trimming and case-insensitive comparison, never from array or response order. Require exactly one south, west, east, and north rotation, ignore the four explicitly labeled diagonals for this four-direction recipe, and stop on any missing, duplicate, or ambiguous required cardinal label. Save each cardinal rotation unchanged at the path below and build the contact sheet only as a review aid. Inspect the contact sheet against the character description and report every visible mismatch; never call a mismatched candidate compliant. Do not animate yet. A regeneration uses the next unused candidate directory (02, 03, and so on) and never overwrites a prior candidate.",
+      "outputs": [
+        "candidates/01/rotations/south.png",
+        "candidates/01/rotations/west.png",
+        "candidates/01/rotations/east.png",
+        "candidates/01/rotations/north.png",
+        "candidates/01/contact-sheet.png"
+      ],
+      "verify": "The saved south, west, east, and north rotations are readable transparent PNGs with identical canvas dimensions, retain their returned pixels, appear correctly labeled in the contact sheet, and were visually assessed against the character description."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Display the contact sheet from its full absolute path and offer three choices: continue animating, regenerate the character, or stop with only the base rotations. Wait for the answer. Continue uses the already-approved animation call without another approval. Regenerate collects changes, shows and waits for approval of one additional create_character call (about 2 generations), changes only the description, then repeats the complete preceding polling and review procedure with the fresh ID under the next unused candidate directory. Stop makes no animation call and reports that the saved rotations are not an engine-ready animated sheet.",
+      "verify": "Animation starts only after the user chooses to continue; each regeneration is separately approved and uses a fresh ID."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Only after the user chooses to continue, copy the reviewed rotations unchanged to approved/rotations, then issue the animate_character call below on that fresh character ID.",
+      "verify": "approved/rotations holds the four reviewed cardinal rotations unchanged."
+    }
+  },
+  {
+    "MCP animate_character": {
+      "character_id": "<id returned by create_character for the approved candidate>",
+      "mode": "template",
+      "template_animation_id": "walking-4-frames",
+      "animation_name": "four-direction walk",
+      "directions": ["south", "west", "east", "north"],
+      "ai_freedom": 0
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_character no more than once every 10 seconds for up to 15 minutes until all four direction jobs complete or one fails; never retry automatically. If any job remains nonterminal at 15 minutes, stop and report the character ID, animation group or job IDs, and last statuses. Map jobs and frames only from explicit direction labels after trimming and case-insensitive comparison; never infer direction from response order. Require exactly one south, west, east, and north result and stop on any missing, duplicate, or ambiguous required label. Save each direction's four returned frames unchanged and in returned order as 01.png through 04.png. Before packaging, inspect every animation frame against the approved rotations and the character description. Stop and report the mismatch if any frame adds, drops, swaps, or materially changes identity, anatomy, clothing, equipment, palette, or other defining features beyond normal directional occlusion; never repair or silently package a failed animation.",
+      "outputs": [
+        "approved/rotations/south.png",
+        "approved/rotations/west.png",
+        "approved/rotations/east.png",
+        "approved/rotations/north.png",
+        "approved/walk/south/01.png",
+        "approved/walk/south/02.png",
+        "approved/walk/south/03.png",
+        "approved/walk/south/04.png",
+        "approved/walk/west/01.png",
+        "approved/walk/west/02.png",
+        "approved/walk/west/03.png",
+        "approved/walk/west/04.png",
+        "approved/walk/east/01.png",
+        "approved/walk/east/02.png",
+        "approved/walk/east/03.png",
+        "approved/walk/east/04.png",
+        "approved/walk/north/01.png",
+        "approved/walk/north/02.png",
+        "approved/walk/north/03.png",
+        "approved/walk/north/04.png"
+      ],
+      "verify": "South, west, east, and north each have exactly four readable transparent frames saved unchanged in returned order, and every frame preserves the approved character's identity and defining features beyond normal directional occlusion."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "After successful animation, create every declared output directly in the resolved run directory, never in a subdirectory, and package the approved pixels for RPG Maker VX Ace without repainting. Rows are fixed: south=1 Down, west=2 Left, east=3 Right, north=4 Up. VX Ace uses the reviewed static rotation in column 2 and a visually verified, chronologically ordered pair of distinct opposing strides from the four walk frames in columns 1 and 3, matching playback 2-1-2-3; stop if the pair is ambiguous, duplicated, or jumps against standing. Cells are 32x32 at 3x4, so the sheet is 96x128 and the filename keeps the single-character `$` prefix. Then normalize only those delivered poses: find each pose's alpha>0 bounds, reject empty poses, and remove only fully transparent margins. Within each row, align the cropped poses to one bottom-center origin and compute their union. Let maxW and maxH be the maximum row-union width and height; apply one nearest-neighbor scale min(1, 32/maxW, 32/maxH) to every delivered pose. Set each scaled dimension to max(1, floor(original dimension times scale)); never round up. Bottom-center each scaled pose in an exact 32x32 cell at x=floor((32-scaled width)/2), y=32-scaled height, so an odd horizontal remainder leaves the extra transparent pixel on the right. PixelLab's requested size and returned canvas dimensions are not export dimensions. Never crop alpha>0 pixels, upscale, or fit poses independently. Create looping rpg-maker-character-engine-playback.gif directly from unscaled full-height sheet columns: every GIF frame is exactly 32 pixels wide by the sheet height and contains all four direction cells stacked Down/Left/Right/Up, in sheet column order 2-1-2-3. Use 12 centiseconds per frame, loop forever, and explicit disposal. Before encoding, check whether the source columns' RGBA colors and alpha states are exactly GIF-representable. When they are, require every coalesced GIF frame to compare pixel-for-pixel with its source sheet column. When they are not, create the closest visually faithful palette preview, report that GIF cannot preserve the source RGBA exactly, and never present the GIF as pixel-exact; the PNG sheet remains authoritative. Create rpg-maker-character-inspection-grid.png as an unscaled copy of the final sheet with identical pixel dimensions, adding only contrasting one-pixel grid lines at interior cell boundaries; boundary pixels may change color and alpha as needed for visibility, but the final sheet remains untouched. Never add a title canvas, margins, or scaling.",
+      "inputs": [
+        "approved/rotations/south.png",
+        "approved/rotations/west.png",
+        "approved/rotations/east.png",
+        "approved/rotations/north.png",
+        "approved/walk/south/02.png",
+        "approved/walk/south/04.png",
+        "approved/walk/west/02.png",
+        "approved/walk/west/04.png",
+        "approved/walk/east/02.png",
+        "approved/walk/east/04.png",
+        "approved/walk/north/02.png",
+        "approved/walk/north/04.png"
+      ],
+      "outputs": [
+        "$rpg-maker-character.png",
+        "rpg-maker-character-engine-playback.gif",
+        "rpg-maker-character-inspection-grid.png"
+      ],
+      "verify": "All declared outputs exist directly in the resolved run directory. The sheet is 96x128 with 32x32 cells, a `$` prefix, Down/Left/Right/Up rows, and movement/standing/movement columns. The looping playback GIF and separate grid decode. Every GIF frame is one unscaled full-height sheet column with width 32 and the sheet height, delay 12 centiseconds, infinite looping, and explicit disposal. When the source columns are GIF-representable, every coalesced frame compares pixel-for-pixel to its required source column; otherwise the report identifies the palette/alpha limitation and treats only the PNG sheet as authoritative. The grid has exactly the sheet's pixel dimensions and differs only at its one-pixel interior cell-boundary overlay, with no title canvas, margins, or scaling; the final sheet is unchanged. Every delivered pose preserves the approved character's identity and defining features beyond normal directional occlusion. Only delivered poses affect scaling; scaled dimensions and bottom-center placement use the declared floor rules; every alpha>0 pixel stays in its cell; transparency is preserved; and artifact inspection finds no scale, center, baseline, seam, or standing-pose jitter."
+    }
+  }
+]

@@ -1,6 +1,6 @@
 # Showcase
 
-Last reviewed: 2026-07-29.
+Last reviewed: 2026-07-30.
 
 Real PixelLab Pip example workflows, including prompts, selected routes, outputs, and validation notes.
 
@@ -23,6 +23,24 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <p><code>/pixellab-pip create a complete fantasy backgrounded skill icons. 32x32 icons only. consistent theme, illustrated backgrounds. all unique skill icons. each icon must be in a structured grid with no overlapping. no borders, no frames, no decorations, no corner radius.</code></p>
 </details>
 <a href="skill-icons.md"><img src="skill-icons/create-image-pro-rich-background-8x8-32px.png" alt="Fantasy RPG skill icon sheet"></a>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<h3><a href="visual-effects.md">Visual Effects</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>/pixellab-pip create aura blueprint with energy, fire, water, ice, lightning, wind, nature, poison, darkness, holy, arcane, blood, bone, ghost, smoke, sand</code></p>
+</details>
+<a href="visual-effects.md"><img src="visual-effects/fantasy-aura-effects.gif" alt="Sixteen separately animated fantasy aura effects"></a>
+</td>
+<td width="50%" valign="top">
+<h3><a href="cinematic.md">Cinematic</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>/pixellab-pip create a 10 second cinematic of Marty McFly (from back to the future) on a hoverboard. PixelLab probably wont understand the movie reference so please describe the character, hoveboard and scene</code></p>
+</details>
+<a href="cinematic.md"><img src="cinematic/hoverboard-dusk-cinematic.gif" alt="Ten-second pixel-art cinematic of a boy riding a hovering board through a small-town square at dusk"></a>
 </td>
 </tr>
 <tr>
@@ -53,16 +71,6 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <a href="gameplay-gui.md"><img src="gameplay-gui/modular-mmorpg-gui-textless-688x384.png" alt="Textless modular fantasy MMORPG GUI kit" width="256"></a>
 </td>
 <td width="50%" valign="top">
-<h3><a href="visual-effects.md">Visual Effects</a></h3>
-<details>
-<summary>Prompt</summary>
-<p><code>/pixellab-pip create aura blueprint with energy, fire, water, ice, lightning, wind, nature, poison, darkness, holy, arcane, blood, bone, ghost, smoke, sand</code></p>
-</details>
-<a href="visual-effects.md"><img src="visual-effects/fantasy-aura-effects.gif" alt="Sixteen separately animated fantasy aura effects"></a>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
 <h3><a href="gui-icons.md">GUI Icons</a></h3>
 <details>
 <summary>Prompt</summary>
@@ -70,16 +78,16 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 </details>
 <a href="gui-icons.md"><img src="gui-icons/animal-face-emoji-5x5-16px.png" alt="16px animal-face emoji sheet"></a>
 </td>
-<td width="50%" valign="top">
-<h3><a href="cinematic.md">Cinematic</a></h3>
-<details>
-<summary>Prompt</summary>
-<p><code>/pixellab-pip create a 10 second cinematic of Marty McFly (from back to the future) on a hoverboard. PixelLab probably wont understand the movie reference so please describe the character, hoveboard and scene</code></p>
-</details>
-<a href="cinematic.md"><img src="cinematic/hoverboard-dusk-cinematic.gif" alt="Ten-second pixel-art cinematic of a boy riding a hovering board through a small-town square at dusk"></a>
-</td>
 </tr>
 <tr>
+<td width="50%" valign="top">
+<h3><a href="rpg-maker-characters.md">RPG Maker Characters</a></h3>
+<details>
+<summary>Prompt</summary>
+<p><code>@rpg-maker-character.blueprint.json mz, male with spiky red hair, brown eyes. wearing black kimono with only one katana attached to his back.</code></p>
+</details>
+<a href="rpg-maker-characters.md"><img src="rpg-maker-characters/rpg-maker-mz-character.png" alt="RPG Maker MZ walk spritesheet"></a>
+</td>
 <td width="50%" valign="top">
 <h3><a href="pip-mascot.md">Pip Mascot</a></h3>
 <details>
@@ -87,8 +95,6 @@ Real PixelLab Pip example workflows, including prompts, selected routes, outputs
 <p><code>pip create a 64px character based on .pip-mascot.md</code></p>
 </details>
 <a href="pip-mascot.md"><img src="pip/pip.gif" alt="Pip mascot idle animation"></a>
-</td>
-<td width="50%" valign="top">
 </td>
 </tr>
 </table>

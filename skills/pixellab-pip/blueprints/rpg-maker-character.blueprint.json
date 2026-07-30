@@ -2,7 +2,7 @@
   {
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/rpg-maker-character-run",
+      "output_directory": "pixellab-pip-generations/rpg-maker-character",
       "output_collision_policy": "create_unique",
       "mcp_server": {
         "name": "PixelLab",
