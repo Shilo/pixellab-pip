@@ -180,7 +180,7 @@ Each is the shipped `rpg-maker-character` recipe with the version pinned, so the
 | Transparency | preserved end to end; sheets and GIFs are transparent |
 | File format | PNG, which MV and MZ require and VX Ace supports with alpha |
 | Scaling | nearest-neighbor only, and unused in all three runs |
-| GIF timing | 12 centiseconds per frame, infinite loop, disposal method 2 |
+| GIF timing | 25 centiseconds per frame (1 s per cycle), infinite loop, disposal method 2 |
 
 No seed was sent, so the three characters are independent draws rather than variations of one seeded result.
 
@@ -197,7 +197,7 @@ Each run also writes an inspection grid beside the sheet, an unscaled copy at id
 - Sheet dimensions match each engine profile exactly: `144x192` with `48x48` cells for MZ and MV, `96x128` with `32x32` cells for VX Ace.
 - All twelve cells in each sheet are occupied; no empty pose passed through.
 - Every source column uses strictly binary alpha (`0` or `255`) and stays within the GIF palette limit (118, 80, and 67 opaque colors), so each playback GIF is genuinely pixel-exact rather than a visual approximation. All four coalesced frames of all three GIFs compare identically to their source sheet columns, with zero mismatched pixels.
-- GIF timing decodes as 12 centiseconds per frame with infinite looping in all three files.
+- GIF timing decodes as 25 centiseconds per frame with infinite looping in all three files, one second per walk cycle.
 - Every walk frame was inspected against the approved rotations before packaging. The MV run failed that gate on the first attempt: the north walk dropped the katana in three of its four frames, which cannot be directional occlusion since a back-mounted sword is most visible from behind. Packaging stopped, the north direction alone was deleted and regenerated with the same template call, and the replacement frames carry the sword throughout. The other three directions were untouched. The blueprint forbids repairing frames by hand or packaging a failed animation, so the sheet on this page is the post-retry result.
 - Wording mismatches were reported rather than papered over, and they differ per run because the three characters are independent draws. "Spiky red hair" landed cleanly in MZ, which has sharp distinct spikes; MV read it as tousled and rounded, and VX Ace sits between the two with a soft spiked fringe. "Brown eyes" did not survive anywhere. MZ renders a legible eye, but it is pale grey rather than brown, so that run contradicts the description rather than merely failing to show it. MV's eye is a dark cluster too small to assign a hue, and VX Ace's is a single light highlight pixel. Anyone reproducing this should expect eye color below roughly 48px to be either unrenderable or unreliable, not simply invisible.
 
