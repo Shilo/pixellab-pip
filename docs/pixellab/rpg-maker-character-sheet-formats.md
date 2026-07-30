@@ -48,10 +48,41 @@ The blueprint maps `create_character.size` to 32 for VX/VX Ace and 48 for XP/MV/
 
 - PixelLab creates four cardinal rotations first. A user checkpoint then offers **Continue animating**, **Regenerate character**, or **Stop here**. Regeneration is an additional paid creation and therefore gets its own cost gate; continuing uses the already-approved animation jobs.
 - PixelLab directions map explicitly to XP–MZ engine rows: south→Down row 1, west→Left row 2, east→Right row 3, north→Up row 4.
-- XP retains the four returned walk frames in columns 1–4. For the three-frame engines, column 2 is the reviewed static rotation/standing pose and columns 1 and 3 are a visually verified pair of opposing stride poses kept in chronological order.
-- XP packaging verifies that the returned four-frame animation remains a clean loop across the 4→1 seam. PixelLab documents the template frame count but not the gait phase assigned to each returned index. The three-column engines therefore deliver only two of the four returned frames per direction and discard the other two; the surviving pair is chosen by per-direction inspection rather than by a pinned index. Observed evidence, not a contract: across three `walking-4-frames` runs at sizes 32 and 48 (MZ, MV, and VX Ace), all twelve direction-rows selected returned frames 2 and 4 as the opposing strides and dropped 1 and 3. Measurement of those runs also shows which signal separates the pairs and which does not. Foot-region bounding-box **width** does not discriminate: averaged over each run, frames 1 and 3 span 20.1, 15.6, and 11.5 pixels against 20.6, 17.2, and 11.9 for frames 2 and 4, so a width heuristic would select close to arbitrarily. Foot-region **horizontal centroid displacement** does: between frames 1 and 3 the centroid moves 0.2 to 1.9 pixels in ten of twelve rows, meaning the weight never crosses sides, while between frames 2 and 4 it moves 4.1 to 6.9 pixels at size 48. That separation is scale-dependent and degrades badly at size 32, where the 2-to-4 displacement falls to 0.9 to 3.3 pixels and one row (VX Ace north, -0.9) scores marginally below its own 1-to-3 pair at -1.3. A numeric threshold is therefore not a safe substitute for the visual check at small sizes. Pinning the indices in the blueprint would convert an observation into a rule and would remove the check that catches a duplicated or near-standing pair if the template's phase order differs.
+- XP retains the four returned walk frames in columns 1–4. For the three-frame engines, column 2 is the reviewed static rotation/standing pose and columns 1 and 3 are returned walk frames 02 and 04, pinned rather than rediscovered per run; see the phase-to-index mapping below.
+- XP packaging verifies that the returned four-frame animation remains a clean loop across the 4→1 seam. Because returned frames 01 and 03 share the neutral phase, XP columns 1 and 3 legitimately resemble each other; the XP duplicate check targets a stalled gait between adjacent frames, not that similarity.
 - Normalization uses a shared crop, one global nearest-neighbor scale, a stable horizontal center, and a common foot baseline; fitting each frame independently would introduce visible jitter.
 - VX through MZ receive the `$` single-character form because it is smaller and unambiguous. `!` is not added because a normal walking character should keep the engine's usual vertical offset and bush behavior.
+
+## `walking-4-frames` phase-to-index mapping
+
+The `walking-4-frames` template assigns a **stable pose phase to each returned frame index**, verified across every local run of this blueprint that reached the animation step: 14 runs, 56 direction-rows, character sizes 32 and 48, many different characters. PixelLab documents the template's frame count but not this mapping, so it is an observed property of the current template, not a published contract.
+
+The sample is mixed in `create_character` mode. Seven of the fourteen runs record `standard` and one records `v3`; the remaining six record no mode. That is worth stating because the blueprint now emits only `v3`. It does not undermine the mapping: frame phase is a property of the `animate_character` template call, and every manifest that records one records `walking-4-frames` with `ai_freedom: 0`.
+
+| Returned index | Saved file | Pose |
+|---|---|---|
+| 0 | `01.png` | legs together, neutral standing |
+| 1 | `02.png` | stride extreme A |
+| 2 | `03.png` | legs together, neutral standing |
+| 3 | `04.png` | stride extreme B, opposite leg |
+
+The template therefore already matches the three-column RPG Maker layout one-to-one: **movement, standing, movement** corresponds to frames 2, (1 or 3), 4. The two discarded frames are the two neutral poses, which is why discarding them costs no gait information.
+
+Visual confirmation is unambiguous in both view types. Side views show frames 1 and 3 with feet together and frames 2 and 4 mid-stride; front and back views show frames 1 and 3 square-stanced and frames 2 and 4 leaning with one leg crossing.
+
+**The evidence is visual, and no cheap pixel metric reproduces it reliably.** Five were tried against all 56 rows and every one of them inverts on some rows:
+
+| Metric | Result |
+|---|---|
+| Foot-region bounding-box width | No discrimination. Per-run averages 20.1 / 15.6 / 11.5 px for frames 1 and 3 against 20.6 / 17.2 / 11.9 for 2 and 4. |
+| Sprite height | No discrimination. Differences 0–3 px; 22 of 56 rows tie outright. |
+| Foot-centroid horizontal displacement | Too noisy. 50 of 56 rows separate the candidate pairs by under 1 px. |
+| Interior leg gap between the feet | Strong in most side rows but not general. Inverts where a prop hangs between the legs — a katana scabbard cost one run its signal — and inverts by construction in front and back views, where a square stance leaves a gap that a stride closes by projection overlap. |
+| Pairwise frame difference, `d(02,04) > d(01,03)` | Holds in 26 of 28 side rows and 27 of 28 front rows, but run-7 west inverts at a ratio of 0.92 and several rows sit within 5% of the boundary. |
+
+An inversion rate around 7% on the best of these is far too high to serve as an automated guard, and a run that trips it is far more likely to be metric noise than an actual phase shift. The mapping itself is not in doubt — rendered side-view and front-view contact sheets of all fourteen runs show it without ambiguity — but establishing it took direct inspection, not a threshold.
+
+That asymmetry is the reason the blueprint pins the indices instead of computing them. The three-column profiles take returned frame 02 for column 1 and 04 for column 3 and discard 01 and 03, so a replay reproduces the same sheet rather than re-deriving the pair. The remaining check is a qualitative guard, deliberately not a numeric one: it asks whether the two frames show opposite legs leading, judged where that is legible. When it fails, packaging stops and reports that the phases may have moved; it never substitutes another pair on its own.
 
 ## Sources
 
