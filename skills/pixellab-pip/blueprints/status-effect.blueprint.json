@@ -2,7 +2,7 @@
   {
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/status-effect-run",
+      "output_directory": "pixellab-pip-generations/status-effect",
       "output_collision_policy": "create_unique"
     },
     "_comment": "Transparent wordless status, battle, and level-up effect candidates with a round ground component.",

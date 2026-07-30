@@ -2,7 +2,7 @@
   {
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/overlay-aura-run",
+      "output_directory": "pixellab-pip-generations/overlay-aura",
       "output_collision_policy": "create_unique"
     },
     "_comment": "Transparent front- or background-layer power-up aura candidates around open player space.",

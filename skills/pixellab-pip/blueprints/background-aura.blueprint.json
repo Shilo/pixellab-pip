@@ -2,7 +2,7 @@
   {
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/background-aura-run",
+      "output_directory": "pixellab-pip-generations/background-aura",
       "output_collision_policy": "create_unique"
     },
     "_comment": "Provisional transparent background-aura candidates; the prompt can also produce symbols and bottom-edge clipping.",
