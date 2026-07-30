@@ -367,8 +367,21 @@ Either way, a cloud session pushes only to its own working branch, so merge the 
 Then run `/pixellab-pip setup` in the new session, and plan around these — the first one blocks every paid call:
 
 - **Network.** `api.pixellab.ai` and `www.pixellab.ai` are not on the cloud default **Trusted** allowlist, so live generation, PixelLab MCP, balance checks, and doc lookups all fail until you open the environment selector at claude.ai/code, set **Network access** to **Custom**, add both hosts, and keep *Also include default list of common package managers* ticked. `github.com` is on Trusted, so installing Pip itself works untouched.
-- **Secret.** A cloud environment has no secrets store, so `PIXELLAB_SECRET` can only go in its variables field — plaintext, readable by anyone using that environment, every member if it is org-shared, and applied only to sessions started afterwards. Ignore the OS dialog, `setx`, and shell-profile advice the setup wizard gives for local machines.
-- **MCP.** Commit a project-scope `.mcp.json` that references `${PIXELLAB_SECRET}` rather than a literal token, and approve it when the session prompts. A user-scope `claude mcp add -s user` never reaches the cloud. This repository gitignores its own `.mcp.json`, so cloning it does not hand you one.
+- **MCP.** Commit a project-scope `.mcp.json` to your own repository — a user-scope `claude mcp add -s user` never reaches the cloud — and approve the server when the session prompts. Reference the token by name, never as a literal value, because this file is committed. This repository gitignores its own `.mcp.json`, so cloning it does not hand you one.
+
+  ```json
+  {
+    "mcpServers": {
+      "pixellab": {
+        "type": "http",
+        "url": "https://api.pixellab.ai/mcp",
+        "headers": { "Authorization": "Bearer ${PIXELLAB_SECRET}" }
+      }
+    }
+  }
+  ```
+
+- **Secret.** A cloud environment has no secrets store, so `PIXELLAB_SECRET` can only go in its variables field — plaintext, readable by anyone using that environment, every member if it is org-shared, and applied only to sessions started afterwards. Ignore the OS dialog, `setx`, and shell-profile advice the setup wizard gives for local machines. Use a personal environment rather than a shared one, and rotate the Secret on your PixelLab account when you are done with it. If that exposure is not acceptable, do not run PixelLab from a cloud session at all: either keep cloud sessions token-free — routing, planning, prompt preparation, and blueprint authoring all work without one — or drive a session on your own machine from the same claude.ai/code interface with [Remote Control](https://code.claude.com/docs/en/remote-control), where your existing `.mcp.json` and local `PIXELLAB_SECRET` work untouched and no allowlist change is needed.
 - **Output.** The session VM is reclaimed when the session ends and `pixellab-pip-generations/` is gitignored by default, so commit and push anything you paid for before you leave.
 - **Update and uninstall.** `/pixellab-pip update` and `/pixellab-pip uninstall` drive the plugin manager, which cloud sessions lack. The plugin route already re-installs from the marketplace at every session start; to remove Pip, drop the entries from `.claude/settings.json` or delete `.claude/skills/pixellab-pip/`.
 - **Missing local tools.** ImageMagick is not pre-installed — add `apt install -y imagemagick` to the environment's setup script for spritesheets and preview GIFs. Aseprite, Pixelorama, and the website editor are unreachable, the bark sound cannot play on a headless VM, and the `bark` and `auto` toggles reset each session.
