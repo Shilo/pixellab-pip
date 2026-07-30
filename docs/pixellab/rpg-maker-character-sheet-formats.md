@@ -22,7 +22,7 @@ The executable blueprint deliberately supports **XP, VX, VX Ace, MV, and MZ only
 The blueprint exposes two user-facing variables:
 
 - `RPG Maker version`, with no default. If the version was not supplied or confidently inferred from the current request and relevant context, the agent asks the user to choose XP, VX, VX Ace, MV, or MZ. This validated export-profile enum is not image-prompt text; it selects cell defaults plus the engine's sheet geometry, frame semantics, and filename rules.
-- `character`, default **bald unisex chibi doll, smooth unclothed body**. The description stays intentionally minimal; v3 handles direction generation and visual treatment.
+- `character`, default **bald unisex chibi base character, plain skin-tone body**. The description stays intentionally minimal; v3 handles direction generation and visual treatment.
 
 No global enum or expression system is required. The MCP `size` field contains one self-describing `map` modifier, and the standalone preflight TASK defines its semantics: normalize the version, accept only the map keys, and substitute the mapped JSON number. The same TASK derives the fixed export profile:
 
