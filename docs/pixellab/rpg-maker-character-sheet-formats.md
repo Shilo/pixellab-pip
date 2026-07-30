@@ -22,7 +22,7 @@ The executable blueprint deliberately supports **XP, VX, VX Ace, MV, and MZ only
 The blueprint exposes two user-facing variables:
 
 - `RPG Maker version`, with no default. If the version was not supplied or confidently inferred from the current request and relevant context, the agent asks the user to choose XP, VX, VX Ace, MV, or MZ. This validated export-profile enum is not image-prompt text; it selects cell defaults plus the engine's sheet geometry, frame semantics, and filename rules.
-- `character`, default **adult male-proportioned chibi jointed wooden artist mannequin with uniform tan wood material and no clothing or equipment**. Live raw-blueprint testing found that human-skin wording repeatedly produced dark lower-body garments; the explicit artist-mannequin material produced a reliable non-explicit unclothed base.
+- `character`, default **bald unisex chibi doll, smooth unclothed body**. The description stays intentionally minimal; v3 handles direction generation and visual treatment.
 
 No global enum or expression system is required. The MCP `size` field contains one self-describing `map` modifier, and the standalone preflight TASK defines its semantics: normalize the version, accept only the map keys, and substitute the mapped JSON number. The same TASK derives the fixed export profile:
 
@@ -36,7 +36,7 @@ No global enum or expression system is required. The MCP `size` field contains o
 
 Version cannot collapse into size alone: it also controls column count, playback, standing-frame treatment, and filename. The technical sizes are therefore derived and never requested from the user.
 
-The resolved version is never interpolated into `create_character.description`. PixelLab receives only visual guidance: the configurable character, four-direction top-down map-sprite readability, silhouette, identity, proportions, and pixel-art treatment. Engine-specific knowledge remains entirely in deterministic packaging TASKs.
+The resolved version is never interpolated into `create_character.description`. That field is exactly the resolved `character` value; engine-specific knowledge remains entirely in deterministic packaging TASKs.
 
 ## PixelLab source canvas versus RPG Maker cell size
 
