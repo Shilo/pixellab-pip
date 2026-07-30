@@ -19,23 +19,22 @@ Research checked July 30, 2026. This document covers the Windows RPG Maker map-c
 
 The executable blueprint deliberately supports **XP, VX, VX Ace, MV, and MZ only**. RPG Maker 2000/2003 remain research-only because their fixed 24x32 indexed-palette CharSet pipeline would add palette conversion and different direction ordering for an exceptionally unlikely target. Unite remains research-only because it requires four separate direction files, explicit gutters, and per-direction import metadata rather than the single-sheet deliverable shared by XP–MZ.
 
-The blueprint exposes three variables:
+The blueprint exposes two user-facing variables:
 
 - `RPG Maker version`, default **MZ**. This is a validated export-profile enum, not image-prompt text. It selects cell defaults plus the engine's sheet geometry, frame semantics, and filename rules.
 - `character`, default **adult male human chibi base character with non-explicit doll-like anatomy and no clothing or equipment**.
-- `character cell size`, default **engine conventional**. An override accepts one positive integer for a square cell or `WIDTHxHEIGHT` for a rectangular cell. This controls export geometry only; it does not change PixelLab's generated subject size.
 
-The current blueprint variable grammar resolves literal values; it does not need a dependent-expression extension. Its preflight `TASK` validates the version enum and maps it to primitive target dimensions when `character cell size` is `engine conventional`:
+No global enum or expression system is required. The MCP `size` field contains one self-describing `map` modifier, and the standalone preflight TASK defines its semantics: normalize the version, accept only the map keys, and substitute the mapped JSON number. The same TASK derives the fixed export profile:
 
-| Resolved version | `CW` | `CH` | Output formula |
+| Resolved version | PixelLab `size` | Export cell | Output |
 |---|---:|---:|---|
-| XP | 32 | 48 | `4*CW` by `4*CH` = 128x192 |
-| VX | 32 | 32 | `3*CW` by `4*CH` = 96x128 |
-| VX Ace / VXAce | 32 | 32 | `3*CW` by `4*CH` = 96x128 |
-| MV | 48 | 48 | `3*CW` by `4*CH` = 144x192 |
-| MZ | 48 | 48 | `3*CW` by `4*CH` = 144x192 |
+| XP | 48 | 32x48 | 4x4 = 128x192 |
+| VX | 32 | 32x32 | 3x4 = 96x128 |
+| VX Ace / VXAce | 32 | 32x32 | 3x4 = 96x128 |
+| MV | 48 | 48x48 | 3x4 = 144x192 |
+| MZ | 48 | 48x48 | 3x4 = 144x192 |
 
-An explicit cell-size override replaces `CW` and `CH` while retaining the selected engine's row count, column count, frame semantics, and filename rules. This is why version cannot collapse into size alone: XP and VX-family exports differ even when their conventional dimensions overlap. If the override is larger than the native subject bounds, the workflow adds transparent padding because it never upscales; requesting a larger generated subject is a separate override of PixelLab's generation `size`. Keeping the version mapping in the blueprint-specific TASK avoids adding a general-purpose expression language that every blueprint reader would then need to parse and validate.
+Version cannot collapse into size alone: it also controls column count, playback, standing-frame treatment, and filename. The technical sizes are therefore derived and never requested from the user.
 
 The resolved version is never interpolated into `create_character.description`. PixelLab receives only visual guidance: the configurable character, four-direction top-down map-sprite readability, silhouette, identity, proportions, and pixel-art treatment. Engine-specific knowledge remains entirely in deterministic packaging TASKs.
 
@@ -43,7 +42,7 @@ The resolved version is never interpolated into `create_character.description`. 
 
 PixelLab's MCP `create_character.size` is **character size**, not a guaranteed PNG canvas size. The current MCP documentation says the canvas is about 40% larger to leave room for animation and gives **48px character → about 68px canvas** as its example. A local decode of completed MCP artifacts confirmed that behavior: a standard-mode request with the default 48px character produced **68x68 RGBA** direction PNGs. Separate v3 requests at size 48 produced **84x84** and **92x92** canvases, demonstrating why an observed canvas dimension must not become a replay requirement.
 
-The blueprint therefore keeps `create_character.size=48` as the MZ-optimized PixelLab master request, records the actual returned canvas only as run evidence, removes only fully transparent margins, and packages from nonzero-alpha content bounds into the independently resolved `CW` x `CH` target. It requires one consistent returned source canvas across the approved rotations and animation frames, computes one global nearest-neighbor scale from the maximum union width and maximum union height, never upscales, and adds only transparent padding to reach the exact RPG Maker cell. A larger PixelLab canvas is accepted; mismatched source dimensions stop packaging instead of silently producing a misaligned sheet.
+The blueprint maps `create_character.size` to 32 for VX/VX Ace and 48 for XP/MV/MZ, records each returned canvas only as run evidence, removes only fully transparent margins, and packages from nonzero-alpha content bounds into the fixed profile cell. Returned padding may vary between images: packaging bottom-centers the cropped poses, computes one global nearest-neighbor scale from the maximum row-union width and height, never upscales, and adds only transparent padding to reach the exact RPG Maker cell.
 
 ## Other blueprint decisions
 
