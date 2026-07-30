@@ -43,7 +43,7 @@ connection metadata:
     "required_before_calls": true
   },
   "paid_call_policy": "explicit_user_run_request_required",
-  "output_directory": "pixellab-pip-generations/example-run",
+  "output_directory": "pixellab-pip-generations/example",
   "output_collision_policy": "create_unique",
   "mcp_server": {
     "name": "PixelLab",

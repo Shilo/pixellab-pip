@@ -8,7 +8,7 @@
         "required_before_calls": true
       },
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/paired-sprites-run",
+      "output_directory": "pixellab-pip-generations/paired-sprites",
       "output_collision_policy": "create_unique"
     },
     "_comment": "Generate two configurable transparent sprites and assemble a native-size comparison.",
