@@ -12,7 +12,7 @@
       }
     },
     "_comment": "Generate, review, animate, and package a configurable four-direction character for RPG Maker XP, VX, VX Ace, MV, or MZ. The RPG Maker version is required.",
-    "_comment_prompt": "Create an RPG Maker character spritesheet; ask which supported RPG Maker version to target, and default the character to an adult male human chibi base character with non-explicit doll-like anatomy and no clothing or equipment.",
+    "_comment_prompt": "Create an RPG Maker character spritesheet; ask which supported RPG Maker version to target, and default the character to an adult male-proportioned chibi jointed wooden artist mannequin with no clothing or equipment.",
     "TASK": {
       "instruction": "Follow this JSON array in order; no external instructions are required. Resolve every `{{...}}` placeholder before a call. Use a declared default silently when the user supplied no value, but never default RPG Maker version: if it was not supplied or confidently inferred from the current request and relevant conversation context, ask the user once to choose XP, VX, VX Ace, MV, or MZ. Resolve that version case-insensitively, strip an optional `RPG Maker` prefix, normalize VXAce to VX Ace, and accept only those five values. A `map` modifier means: resolve the named variable first, replace the whole placeholder with the mapped JSON value, and stop if no key matches. Thus the map on create_character.size is also the version enum; never ask the user for a technical size. Derive export cells separately: XP=32x48, VX/VX Ace=32x32, MV/MZ=48x48. Never put the version in the PixelLab description. Require an explicit current-user request to run this paid recipe and callable PixelLab MCP create_character, get_character, and animate_character tools. If MCP is unavailable or unconfigured, stop and show https://www.pixellab.ai/mcp; do not substitute REST. Create the declared output directory empty, or append the lowest free suffix beginning at -2; never overwrite a run. Before spending, show the resolved create_character body and planned animate_character arguments, identifying character_id as the fresh ID of the ultimately approved candidate. Disclose approximately 5 generations total (one character generation plus four directional animation jobs) and wait for explicit approval. This approval covers one animation of the ultimately approved candidate. Every regeneration needs separate approval for one additional character generation; never retry a paid call automatically.",
       "verify": "Both user-facing variables and the inline size map resolve; the version came from the current user or relevant context rather than a default; the version is supported; the MCP tools are callable; the output directory is new and empty; and the user approved the resolved paid chain."
@@ -21,7 +21,7 @@
   {
     "MCP create_character": {
       "body_type": "humanoid",
-      "description": "{{character | default: adult male human chibi base character, non-explicit doll-like anatomy, no clothing or equipment}}, readable four-direction top-down map sprite, clean silhouette, consistent identity and proportions, flat pixel art, limited palette, hard edges",
+      "description": "{{character | default: adult male-proportioned chibi jointed wooden artist mannequin, non-explicit doll anatomy, head, torso, hips, arms, hands, legs, and feet all made from the same uniform tan wood material, no clothing, equipment, pants, shoes, boots, or dark garments}}, readable four-direction top-down map sprite, clean silhouette, consistent identity and proportions, flat pixel art, limited palette, hard edges",
       "detail": "low detail",
       "mode": "standard",
       "n_directions": 4,
@@ -35,7 +35,7 @@
   },
   {
     "TASK": {
-      "instruction": "Poll get_character with the fresh ID returned by create_character; never resubmit automatically. Save each completed rotation unchanged at the path below and build the contact sheet only as a review aid. Do not animate yet. A regeneration uses the next unused candidate directory (02, 03, and so on) and never overwrites a prior candidate.",
+      "instruction": "Poll get_character with the fresh ID returned by create_character; never resubmit automatically. Save each completed rotation unchanged at the path below and build the contact sheet only as a review aid. Inspect the contact sheet against the resolved character description and report every visible mismatch; never call a mismatched candidate compliant. Do not animate yet. A regeneration uses the next unused candidate directory (02, 03, and so on) and never overwrites a prior candidate.",
       "outputs": [
         "candidates/01/rotations/south.png",
         "candidates/01/rotations/west.png",
@@ -43,7 +43,7 @@
         "candidates/01/rotations/north.png",
         "candidates/01/contact-sheet.png"
       ],
-      "verify": "The saved south, west, east, and north rotations are readable transparent PNGs, retain their returned pixels, and appear correctly labeled in the contact sheet."
+      "verify": "The saved south, west, east, and north rotations are readable transparent PNGs, retain their returned pixels, appear correctly labeled in the contact sheet, and were visually assessed against the resolved character description."
     }
   },
   {
@@ -54,7 +54,7 @@
   },
   {
     "TASK": {
-      "instruction": "Only after Continue, copy the reviewed rotations unchanged to approved/rotations. Call animate_character once on that fresh character ID with mode=template, template_animation_id=walking-4-frames, animation_name=four-direction walk, directions=[south, west, east, north], and ai_freedom=0. Poll get_character until all four direction jobs complete or one fails; never retry automatically. Save each direction's four returned frames unchanged and in returned order as 01.png through 04.png.",
+      "instruction": "Only after Continue, copy the reviewed rotations unchanged to approved/rotations. Call animate_character once on that fresh character ID with mode=template, template_animation_id=walking-4-frames, animation_name=four-direction walk, directions=[south, west, east, north], and ai_freedom=0. Poll get_character until all four direction jobs complete or one fails; never retry automatically. Save each direction's four returned frames unchanged and in returned order as 01.png through 04.png. Before packaging, inspect every animation frame against the approved rotations and resolved character description. Stop and report the mismatch if any frame adds, drops, swaps, or materially changes identity, anatomy, clothing, equipment, palette, or other defining features beyond normal directional occlusion; never repair or silently package a failed animation.",
       "outputs": [
         "approved/rotations/south.png",
         "approved/rotations/west.png",
@@ -77,12 +77,12 @@
         "approved/walk/north/03.png",
         "approved/walk/north/04.png"
       ],
-      "verify": "South, west, east, and north each have exactly four readable transparent frames saved unchanged in returned order."
+      "verify": "South, west, east, and north each have exactly four readable transparent frames saved unchanged in returned order, and every frame preserves the approved character's identity and defining features beyond normal directional occlusion."
     }
   },
   {
     "TASK": {
-      "instruction": "After successful animation, package the approved pixels for {{RPG Maker version}} without repainting. Rows are fixed: south=1 Down, west=2 Left, east=3 Right, north=4 Up. First select only the poses the profile will deliver. XP uses all four returned walk frames in columns 1,2,3,4, matching playback 1→2→3→4, and never uses the static rotation; output rpg-maker-character.png with 32x48 cells at 4x4 (128x192). VX/VX Ace/MV/MZ use the reviewed static rotation in column 2 and a visually verified, chronologically ordered pair of distinct opposing strides from the four walk frames in columns 1 and 3, matching playback 2→1→2→3; stop if the pair is ambiguous, duplicated, or jumps against standing. Output $rpg-maker-character.png at 3x4: VX/VX Ace use 32x32 cells (96x128), and MV/MZ use 48x48 cells (144x192). Then normalize only those delivered poses: find each pose's alpha>0 bounds, reject empty poses, and remove only fully transparent margins. Within each row, align the cropped poses to one bottom-center origin and compute their union. Let maxW and maxH be the maximum row-union width and height; apply one nearest-neighbor scale min(1, CW/maxW, CH/maxH) to every delivered pose, then bottom-center each in an exact CWxCH cell using only transparent padding. PixelLab's resolved size and returned canvas dimensions are not export dimensions. Never crop alpha>0 pixels, upscale, or fit poses independently. Create a looping rpg-maker-character-engine-playback.gif using the engine order and explicit frame disposal, then verify its coalesced frames. Create a separate rpg-maker-character-inspection-grid.png labeled `Inspection aid — expected grid overlay`; the grid never alters the sheet.",
+      "instruction": "After successful animation, create every declared output directly in the resolved run directory, never in a subdirectory, and package the approved pixels for {{RPG Maker version}} without repainting. Rows are fixed: south=1 Down, west=2 Left, east=3 Right, north=4 Up. First select only the poses the profile will deliver. XP uses all four returned walk frames in columns 1,2,3,4, matching playback 1→2→3→4, and never uses the static rotation; output rpg-maker-character.png with 32x48 cells at 4x4 (128x192). VX/VX Ace/MV/MZ use the reviewed static rotation in column 2 and a visually verified, chronologically ordered pair of distinct opposing strides from the four walk frames in columns 1 and 3, matching playback 2→1→2→3; stop if the pair is ambiguous, duplicated, or jumps against standing. Output $rpg-maker-character.png at 3x4: VX/VX Ace use 32x32 cells (96x128), and MV/MZ use 48x48 cells (144x192). Then normalize only those delivered poses: find each pose's alpha>0 bounds, reject empty poses, and remove only fully transparent margins. Within each row, align the cropped poses to one bottom-center origin and compute their union. Let maxW and maxH be the maximum row-union width and height; apply one nearest-neighbor scale min(1, CW/maxW, CH/maxH) to every delivered pose, then bottom-center each in an exact CWxCH cell using only transparent padding. PixelLab's resolved size and returned canvas dimensions are not export dimensions. Never crop alpha>0 pixels, upscale, or fit poses independently. Create looping rpg-maker-character-engine-playback.gif directly from unscaled full-height sheet columns: every GIF frame is exactly CW pixels wide by the sheet height and contains all four direction cells stacked Down/Left/Right/Up. XP uses sheet columns 1→2→3→4; VX/VX Ace/MV/MZ use columns 2→1→2→3. Use explicit frame disposal and verify each coalesced GIF frame pixel-for-pixel against its source sheet column. Create rpg-maker-character-inspection-grid.png as an unscaled copy of the final sheet with identical pixel dimensions and transparency, adding only contrasting one-pixel grid lines at interior cell boundaries; never add a title canvas, margins, or scaling. Label it `Inspection aid — expected grid overlay` only when shown or reported; the grid never alters the sheet.",
       "inputs": [
         "approved/rotations/south.png",
         "approved/rotations/west.png",
@@ -105,7 +105,12 @@
         "approved/walk/north/03.png",
         "approved/walk/north/04.png"
       ],
-      "verify": "The sheet, looping playback GIF, and separate grid decode; the GIF has explicit disposal and coalesces faithfully. XP is 128x192 with 32x48 cells, no `$`, and clean 1→2→3→4→1 playback. VX/VX Ace is 96x128 with 32x32 cells; MV/MZ is 144x192 with 48x48 cells; VX through MZ use `$`, Down/Left/Right/Up rows, and movement/standing/movement columns. Only delivered poses affect scaling; every alpha>0 pixel stays in its cell; transparency is preserved; and previews show no scale, center, baseline, seam, or standing-pose jitter."
+      "outputs": [
+        "{{RPG Maker version | map: {\"XP\": \"rpg-maker-character.png\", \"VX\": \"$rpg-maker-character.png\", \"VX Ace\": \"$rpg-maker-character.png\", \"MV\": \"$rpg-maker-character.png\", \"MZ\": \"$rpg-maker-character.png\"}}}",
+        "rpg-maker-character-engine-playback.gif",
+        "rpg-maker-character-inspection-grid.png"
+      ],
+      "verify": "All declared outputs exist directly in the resolved run directory. The sheet, looping playback GIF, and separate grid decode. Every GIF frame is one unscaled full-height sheet column, has width CW and the sheet height, uses explicit disposal, and coalesces pixel-for-pixel to the required source column. The grid has exactly the sheet's pixel dimensions and differs only by its one-pixel interior cell-boundary overlay, with no title canvas, margins, or scaling. XP is 128x192 with 32x48 cells, no `$`, and clean 1→2→3→4→1 playback. VX/VX Ace is 96x128 with 32x32 cells; MV/MZ is 144x192 with 48x48 cells; VX through MZ use `$`, Down/Left/Right/Up rows, and movement/standing/movement columns. Every delivered pose preserves the approved character's identity and defining features beyond normal directional occlusion. Only delivered poses affect scaling; every alpha>0 pixel stays in its cell; transparency is preserved; and previews show no scale, center, baseline, seam, or standing-pose jitter."
     }
   }
 ]
