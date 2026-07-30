@@ -1,11 +1,6 @@
 [
   {
     "_pixellab": {
-      "auth": {
-        "type": "bearer",
-        "env": "PIXELLAB_SECRET",
-        "required_before_calls": true
-      },
       "paid_call_policy": "explicit_user_run_request_required",
       "output_directory": "pixellab-pip-generations/rpg-maker-character-run",
       "output_collision_policy": "create_unique",
@@ -17,10 +12,10 @@
       }
     },
     "_comment": "Generate, review, animate, and package a configurable character for RPG Maker XP, VX, VX Ace, MV, or MZ. RPG Maker MZ is the default.",
-    "_comment_prompt": "/pixellab-pip run the RPG Maker character blueprint for {{RPG Maker version | default: MZ}} using {{character | default: adult male human chibi base character, non-explicit doll-like anatomy, no clothing or equipment}}",
+    "_comment_prompt": "/pixellab-pip create an RPG Maker character spritesheet with RPG Maker version and character variables; default to MZ and an adult male human chibi base character with non-explicit doll-like anatomy and no clothing or equipment",
     "TASK": {
-      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint and confirm PIXELLAB_SECRET is available without printing or storing its value. Resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Resolve {{RPG Maker version | default: MZ}} case-insensitively to exactly one profile: XP, VX, VX Ace/VXAce, MV, or MZ. Reject unsupported versions and ambiguous names instead of guessing. Create the resolved directory empty. Before spending, apply the cost-approval gate: plan one create_character call plus four directional walking-4-frames animation jobs, approximately five generations total. With auto-approve off, render `💳 **Approve this PixelLab run?** — **~5 generations**`, then a numbered list containing each tool, exact material inputs, and cost, followed by `Reply **yes**, **no**, or tell me what to change.` With auto-approve on, render the same complete plan headed by `⚡ **Auto-approved PixelLab run** — **~5 generations**` and continue. Stop before spending if any precondition or required approval fails.",
-      "verify": "Run authority and credential presence are confirmed; the version resolves to one verified profile; the output directory is new, empty, writable, and inside the current project; and the full paid chain was disclosed and approved according to the active auto-approval setting."
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint and confirm callable PixelLab MCP create_character, get_character, and animate_character tools are visible. If PixelLab MCP is unavailable or unconfigured, stop before spending and show the setup link https://www.pixellab.ai/mcp; do not silently substitute a REST call. Resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Resolve {{RPG Maker version | default: MZ}} case-insensitively to exactly one profile: XP, VX, VX Ace/VXAce, MV, or MZ. Reject unsupported versions and ambiguous names instead of guessing. Create the resolved directory empty. Read the auto setting once immediately before spending. The paid plan has two MCP calls: (1) create_character in standard mode for approximately 1 generation, listing the fully resolved description plus body_type, detail, n_directions, outline, proportions, shading, size, text_guidance_scale, and view; (2) animate_character in template mode for approximately 4 generations total, listing template_animation_id=walking-4-frames, animation_name=RPG Maker walk source, directions=[south, west, east, north], and ai_freedom=0. With auto off, render the exact auto.md framing: `💳 **Approve this PixelLab run?** — **~5 generations** *(or credits)*.`, the two numbered call blocks, `Reply **yes / no**, or say what to **change**.`, and `*Tip: reply `auto` (or `/pixellab-pip auto`) to run future jobs without this check.*`; wait for approval. With auto on, render `⚡ **Auto is on — running PixelLab job(s)** — **~5 generations** *(or credits)*.`, the same two call blocks, and `*Disable auto with `/pixellab-pip auto`.*`, then continue without pausing. Stop before spending if any precondition or required approval fails.",
+      "verify": "Current-user run authority and PixelLab MCP availability are confirmed; the version resolves to one verified profile; the output directory is new, empty, writable, and inside the current project; and the full paid chain was disclosed and approved according to the active auto-approval setting."
     }
   },
   {
@@ -33,14 +28,21 @@
       "outline": "selective outline",
       "proportions": "{\"type\": \"preset\", \"name\": \"chibi\"}",
       "shading": "flat shading",
-      "size": 32,
+      "size": 48,
       "text_guidance_scale": 10,
       "view": "low top-down"
     }
   },
   {
     "TASK": {
-      "instruction": "Use the fresh character ID returned by the immediately preceding create_character call with PixelLab get_character. Poll without resubmitting until completed or failed. Save the completed south, west, east, and north rotation PNGs unchanged. Build a separate labeled contact sheet for review without altering the saved rotations. Do not start animation yet.",
+      "instruction": "Use the fresh character ID returned by the immediately preceding create_character call with PixelLab get_character. Poll without resubmitting until completed or failed. Save the completed rotations unchanged as candidates/01/rotations/south.png, candidates/01/rotations/west.png, candidates/01/rotations/east.png, and candidates/01/rotations/north.png. Build candidates/01/contact-sheet.png as a separate labeled review aid without altering the saved rotations. Do not start animation yet. For each regeneration, allocate the next unused two-digit candidate directory (02, 03, and so on) and never overwrite an earlier candidate.",
+      "outputs": [
+        "candidates/01/rotations/south.png",
+        "candidates/01/rotations/west.png",
+        "candidates/01/rotations/east.png",
+        "candidates/01/rotations/north.png",
+        "candidates/01/contact-sheet.png"
+      ],
       "verify": "Exactly four readable transparent rotations exist, their direction labels resolve unambiguously to south, west, east, and north, and the contact sheet displays the same pixels."
     }
   },
@@ -52,14 +54,62 @@
   },
   {
     "TASK": {
-      "instruction": "Execute only after the checkpoint's Continue choice. Call PixelLab animate_character once for the currently approved fresh character ID with mode=template, template_animation_id=walking-4-frames, animation_name=RPG Maker walk source, directions=[south, west, east, north], and ai_freedom=150. This queues the four paid directional jobs already disclosed in the initial plan. Poll get_character until all four animations complete or one fails; never retry automatically. Save every returned frame unchanged and preserve PixelLab's order.",
-      "verify": "The current reviewed character has four ordered four-frame directional walk animations; every frame within a direction has identical dimensions and is labeled south, west, east, or north."
+      "instruction": "Execute only after the checkpoint's Continue choice. Copy the current reviewed candidate's rotations unchanged to approved/rotations/south.png, approved/rotations/west.png, approved/rotations/east.png, and approved/rotations/north.png. Call PixelLab animate_character once for the currently approved fresh character ID with mode=template, template_animation_id=walking-4-frames, animation_name=RPG Maker walk source, directions=[south, west, east, north], and ai_freedom=0. This queues the four paid directional jobs already disclosed in the initial plan. Poll get_character until all four animations complete or one fails; never retry automatically. Save every returned frame unchanged and in returned order as approved/walk/<direction>/01.png through 04.png. For each direction, create approved/walk/<direction>/source-order-preview.gif as a separate looping preview with a non-undefined disposal method.",
+      "outputs": [
+        "approved/rotations/south.png",
+        "approved/rotations/west.png",
+        "approved/rotations/east.png",
+        "approved/rotations/north.png",
+        "approved/walk/south/01.png",
+        "approved/walk/south/02.png",
+        "approved/walk/south/03.png",
+        "approved/walk/south/04.png",
+        "approved/walk/south/source-order-preview.gif",
+        "approved/walk/west/01.png",
+        "approved/walk/west/02.png",
+        "approved/walk/west/03.png",
+        "approved/walk/west/04.png",
+        "approved/walk/west/source-order-preview.gif",
+        "approved/walk/east/01.png",
+        "approved/walk/east/02.png",
+        "approved/walk/east/03.png",
+        "approved/walk/east/04.png",
+        "approved/walk/east/source-order-preview.gif",
+        "approved/walk/north/01.png",
+        "approved/walk/north/02.png",
+        "approved/walk/north/03.png",
+        "approved/walk/north/04.png",
+        "approved/walk/north/source-order-preview.gif"
+      ],
+      "verify": "The current reviewed character has four ordered four-frame directional walk animations; every frame within a direction has identical dimensions and is labeled south, west, east, or north. Each source-order preview has four frames in the same order, loops, uses an explicit disposal method, and coalesces back to the source frames without unexpected pixel differences."
     }
   },
   {
     "TASK": {
-      "instruction": "Execute only after successful animation. Package the saved PixelLab pixels for the resolved {{RPG Maker version | default: MZ}} profile without repainting. For XP, normalize to conventional 32x48 cells and arrange all four PixelLab frames as four columns with rows south/west/east/north in a 128x192 transparent PNG named rpg-maker-character.png. For VX/VX Ace, normalize to conventional 32x32 cells and arrange first stride/base rotation/opposing stride with rows south/west/east/north in a 96x128 transparent PNG named $rpg-maker-character.png. For MV/MZ, use the same three-column selection and row order at the documented normal 48x48 cell size in a 144x192 transparent PNG named $rpg-maker-character.png. Any resize must preserve aspect ratio, use nearest-neighbor sampling, and add only transparent padding appropriate to the target profile. Create a separate inspection-grid PNG for the delivered sheet, marking expected cell boundaries without altering the deliverable.",
-      "verify": "The delivered file matches the resolved profile: XP is 128x192 with 32x48 cells, four frames, and down/left/right/up rows; VX/VX Ace is 96x128 with 32x32 cells, three frames, down/left/right/up rows, and a `$` single-character filename; MV/MZ is 144x192 with 48x48 cells and the same layout and prefix. Every packaged cell remains pixel-equivalent to its normalized source plus transparent padding, and the inspection grid is a separate aid rather than proof of alignment."
+      "instruction": "Execute only after successful animation. Package the approved PixelLab pixels for the resolved {{RPG Maker version | default: MZ}} profile without repainting. Map PixelLab directions to rows exactly: south is row 1 (Down), west is row 2 (Left), east is row 3 (Right), and north is row 4 (Up). For every direction, compute one union of the opaque bounds across all poses used in that row, crop the same union rectangle from every pose in that row, then compute one global nearest-neighbor scale from the largest row union and apply that identical scale to every delivered pose. Downscale only when necessary, never upscale, preserve aspect ratio, keep a shared horizontal center and bottom/foot baseline within each row, and add only transparent padding. Never fit frames independently. For XP, use conventional 32x48 cells in a 128x192 transparent PNG named rpg-maker-character.png; columns 1, 2, 3, and 4 are PixelLab walk frames 1, 2, 3, and 4 in unchanged returned order, matching XP playback 1→2→3→4. Do not insert the static rotation into XP's four animation columns. Create rpg-maker-character-engine-playback.gif as a four-row preview that animates all direction rows in parallel using 1→2→3→4 and visually verify the 4→1 seam; stop if the gait is not a clean cycle. For VX/VX Ace, use conventional 32x32 cells in a 96x128 transparent PNG named $rpg-maker-character.png. For MV/MZ, use the documented normal 48x48 cells in a 144x192 transparent PNG named $rpg-maker-character.png. In every VX/VX Ace/MV/MZ row, column 1 is the earlier of two visually verified opposing stride poses selected from the four returned frames, column 2 is that direction's reviewed static rotation/standing pose, and column 3 is the later opposing stride pose; this matches engine playback 2→1→2→3. Preserve chronological order between the selected stride poses. Create rpg-maker-character-engine-playback.gif as a four-row preview that animates all direction rows in parallel using 2→1→2→3. If two opposing stride poses cannot be verified, either selected stride is a duplicate, or the standing pose visibly jumps against the walk frames for any direction, stop instead of guessing or fabricating a frame. Create a separate rpg-maker-character-inspection-grid.png with the exact cell boundaries and label it `Inspection aid — expected grid overlay`; never alter the delivered sheet.",
+      "inputs": [
+        "approved/rotations/south.png",
+        "approved/rotations/west.png",
+        "approved/rotations/east.png",
+        "approved/rotations/north.png",
+        "approved/walk/south/01.png",
+        "approved/walk/south/02.png",
+        "approved/walk/south/03.png",
+        "approved/walk/south/04.png",
+        "approved/walk/west/01.png",
+        "approved/walk/west/02.png",
+        "approved/walk/west/03.png",
+        "approved/walk/west/04.png",
+        "approved/walk/east/01.png",
+        "approved/walk/east/02.png",
+        "approved/walk/east/03.png",
+        "approved/walk/east/04.png",
+        "approved/walk/north/01.png",
+        "approved/walk/north/02.png",
+        "approved/walk/north/03.png",
+        "approved/walk/north/04.png"
+      ],
+      "verify": "The original delivered PNG, engine-order playback preview, and separate inspection grid all decode. XP is exactly 128x192, divides into 4 columns by 4 rows of 32x48, maps rows Down/Left/Right/Up, maps columns to returned frames 1/2/3/4, and loops cleanly across 4→1. VX/VX Ace is exactly 96x128, divides into 3 columns by 4 rows of 32x32, uses a leading `$`, maps rows Down/Left/Right/Up, and has movement/standing/movement in columns 1/2/3 with opposing stride phases. MV/MZ is exactly 144x192, divides into 3 columns by 4 rows of 48x48, uses a leading `$`, and has the same row and column semantics. The engine-order preview uses the target engine's actual column sequence and shows no scale, center, foot-baseline, or standing-pose jitter. Every source direction appears in exactly one correct row; every opaque pixel stays inside its cell; all poses use one global scale; no pose is upscaled or repainted; transparent padding remains transparent; and the inspection grid is not treated as proof of content alignment."
     }
   }
 ]

@@ -55,17 +55,17 @@ connection metadata:
 ```
 
 The API base combines with relative `POST /v2/...` step keys, and `mcp_server` identifies and locates
-the MCP integration that owns the tool. `auth.env` is only the name of a local bearer-secret source
-shared by API and MCP; the blueprint never
-contains the secret value or an authorization header, and the metadata does not authorize accessing
-or spending with it. The explicit paid-call policy means the file itself is never approval; the
+the MCP integration that owns the tool. `auth.env` applies only to runner-managed REST authentication;
+an MCP client owns its connection authentication. The blueprint never contains a secret value or an
+authorization header, and the metadata does not authorize accessing or spending with one. The explicit paid-call policy means the file itself is never approval; the
 current user must explicitly ask to run it. That request covers each recorded call once, not retries
-or adjacent generations. REST-only recipes omit `mcp_server`; MCP-only recipes omit only `api_base_url`.
+or adjacent generations. REST-only recipes omit `mcp_server`; MCP-only recipes omit both `api_base_url`
+and `auth`.
 `output_directory` gives a safe project-relative destination. With `create_unique`, the reader uses
 that directory when available or appends the lowest available suffix beginning with `-2`, then creates
 the resolved directory empty. Existing runs are never overwritten or mixed; relative task outputs go
 there unless the current user explicitly chooses a different new destination.
-A portable paid template uses an initial `TASK` to perform those authority, credential-presence, and
+A portable paid template uses an initial `TASK` to perform those authority, authenticated-surface, and
 empty-folder checks before its first PixelLab call, so a no-skill reader cannot accidentally check
 for collisions only after spending.
 
