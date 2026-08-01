@@ -1,6 +1,6 @@
 # PixelLab Asset Routing
 
-Last reviewed: 2026-07-26.
+Last reviewed: 2026-08-01.
 
 Purpose: map plain-language asset requests to the PixelLab workflow family most likely to satisfy the user without asking them to know PixelLab's internal product vocabulary.
 
@@ -12,7 +12,7 @@ Use this as routing guidance, not as a frozen schema. Refresh official docs for 
 
 | User intent | Preferred route | Notes |
 |---|---|---|
-| Character, player, NPC, enemy, creature | MCP character tools when configured; REST v2 character endpoints for code or exact control. | Character workflows often involve identity, directions, states, animations, and managed asset IDs. |
+| Character, player, NPC, enemy, creature | MCP character tools when configured; REST v2 character endpoints for code or exact control. | Character workflows often involve identity, directions, states, animations, and managed asset IDs. Do not treat Create Image S-XL (new)/Pixen as equivalent to managed Character Creator v3: Pixen/new is useful for cheap single-sprite experiments but showed frequent isometric/3/4 drift and apparent no-op `view`/`direction` controls in focused tests. For a static south-facing frame, prefer Create Image Pro (`create_image_pro`/`generate-image-v2`) when the higher cost and different, broader character style are acceptable; visually verify it. |
 | Portrait to character or character to portrait | MCP portrait-character tools when configured; REST v2 `portrait-character-pro` for code or exact control. | This is an image conversion workflow. Use `portrait_to_character` for a bust portrait source and `character_to_portrait` for a full-body character source. |
 | Character state or outfit/layer change | MCP character-state tools when available; REST v2 state/edit routes when exact control is needed. | Clarify whether the output should preserve identity, change pose/state, or generate a new design. |
 | Character animation | MCP animation tools for managed characters; REST v2 animation endpoints for direct API use. | For existing multi-direction characters, default unspecified animation direction to `south` (down-facing) for one preview candidate. Ask or confirm before animating all directions, and do not silently choose a diagonal such as north-west. Ask only when animation type, direction, frame count, or source asset is unclear. |

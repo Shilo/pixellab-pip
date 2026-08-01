@@ -38,3 +38,5 @@ If exact current costs matter, refresh official docs or run a small balance-befo
 | Inpaint/edit | Base `inpaint` / non-Pro `edit-image` **via REST** — MCP's `edit_image`/`inpaint_image` are Pro-tier only (`edit-images-v2`/`inpaint-v3`), so there is no cheap MCP path for this | Pro capabilities required and cost accepted, or MCP-first with no REST fallback available |
 
 When choosing a cheap route, name the tradeoff plainly (lower cost, possibly less candidate variety or weaker Pro-quality detail) and follow `usage-reporting.md` for cost reporting.
+
+Pixen/new has isometric bias despite `view`/`direction`; prefer Pro for static south-facing when higher cost and different character style is acceptable.
