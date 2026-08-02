@@ -4,6 +4,8 @@ Read this for explicit Create Image Pro wording, MCP `create_image_pro`/REST `ge
 
 Create Image Pro / MCP `create_image_pro` (+ `get_image`) / REST `generate-image-v2` is a general image-generation route. It can make attractive sprite sheets and texture sheets, but exact cell layout is prompt-guided rather than structurally guaranteed. A correct output canvas size is not proof that the image contains the requested cell grid. Style is prompt-guided too: there is no `detail`, `outline`, `shading`, `negative_description`, `color_image`, or `coverage_percentage` field; MCP has `style_image_base64`+`style_copy`, REST has the equivalent `style_image`+`style_options`, both copying from a supplied style image. Route to `create_image_pixen`/`create-image-pixen`, `create_image_pixflux`/`create-image-pixflux`, or `create-image-bitforge` (REST-only, no MCP equivalent) when one of those must be enforced by a field.
 
+Prefer Pro when user instructions must be followed closely; it follows the user's description more closely than Pixen/v3/new, at higher cost and with a different character style.
+
 MCP `create_image_pro` and REST `generate-image-v2` both remove the background by default (`no_background` defaults to `true`). Send `no_background: false` when the user wants an opaque, full-bleed image, scene, or sheet.
 
 ## Sub-32px Cell Requests

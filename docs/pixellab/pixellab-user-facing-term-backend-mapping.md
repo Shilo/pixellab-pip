@@ -217,7 +217,7 @@ Public REST paths below are relative to `https://api.pixellab.ai/v2`. Website/in
 2. `S-XL`, `M-XL`, `S-M`, `M-L`
    - These are user-facing size/tool labels.
    - They do not appear as public REST endpoint slugs.
-   - `S-XL` collides between Pixen/new and Pro image generation.
+   - `S-XL` collides between Pixen/v3/new and Pro image generation.
    - `M-L` currently points to PixPatch v2 inpaint in docs/Aseprite but has no exact public v2 path found.
 
 3. Website root routes vs public REST v2 paths
@@ -314,7 +314,7 @@ Recommended lookup flow:
 
 For automation and code, route to REST v2 or MCP first:
 
-- Pixen/new S-XL image -> `POST /v2/create-image-pixen`.
+- Pixen/v3/new S-XL image -> `POST /v2/create-image-pixen`.
 - PixFlux/M-XL image -> `POST /v2/create-image-pixflux`.
 - Pro S-XL image -> `POST /v2/generate-image-v2`.
 - BitForge/S-M image -> `POST /v2/create-image-bitforge`.

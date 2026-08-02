@@ -29,7 +29,7 @@ If exact current costs matter, refresh official docs or run a small balance-befo
 |---|---|---|
 | General images | `create-image-pixen`/`create_image_pixen` (small/single/icon iteration, outline/detail/view controls) or `create-image-pixflux`/`create_image_pixflux` (general/background style) | Style-reference generation or high-quality sheet output is required and approved |
 | Icon sheets | Propose a non-Pro/Pixen comparison or a smaller test first; ask whether quality or savings wins | User approves the Pro sheet after the tradeoff is named |
-| Characters | Standard mode or v3 | User accepts 20-40 generations for `pro` |
+| Characters | Standard mode or v3 | User accepts 20-40 generations for `pro`; use it when user instructions must be followed closely because Pixen/v3/new may underweight them |
 | Character animation | Template mode when a template fits; else v3 custom; one direction first | User approves Pro cost |
 | Objects | For standalone visuals that don't need managed object IDs: a general-image/Pixen/PixFlux or isometric-tile route, labeled as not creating a managed object; map-object route when a map object is specifically needed (measure cost) | User accepts Pro Tools 20-40 generations |
 | Object animation | `mode='v3'` (documented default) | User explicitly approves Pro |
@@ -39,4 +39,4 @@ If exact current costs matter, refresh official docs or run a small balance-befo
 
 When choosing a cheap route, name the tradeoff plainly (lower cost, possibly less candidate variety or weaker Pro-quality detail) and follow `usage-reporting.md` for cost reporting.
 
-Pixen/new has isometric bias despite `view`/`direction`; prefer Pro for static south-facing when higher cost and different character style is acceptable.
+Pixen/v3/new may underweight user instructions and has isometric bias despite `view`/`direction`; prefer Pro when the user's instructions or static south-facing view matter and higher cost and different character style are acceptable.

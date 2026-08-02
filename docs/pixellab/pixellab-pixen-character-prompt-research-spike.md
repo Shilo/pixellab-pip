@@ -171,7 +171,9 @@ For a backgroundless result, add `no_background: true` to the request. Omitting 
 
 ### Route-selection caveat from the comparison work
 
-This spike establishes the best prompt found for raw Pixen; it does not make Pixen the best model for every character request. In the focused comparison, Create Image Pro (`create_image_pro`/`generate-image-v2`) was the better observed route for a single static south-facing character candidate. Pro costs substantially more and produces a different, broader character style, so it should be selected only when orientation is more important than Pixen's cheaper, tighter style. Use managed Character Creator v3 when the deliverable needs persistent identity, eight directions, states, or animation.
+This spike establishes the best prompt found for raw Pixen; it does not make Pixen the best model for every character request. Prefer Create Image Pro (`create_image_pro`/`generate-image-v2`) when user instructions must be followed closely, including static south-facing output or explicit shape/feature descriptions: it follows user instructions more closely than Pixen/v3/new, but costs substantially more and produces a different, broader character style. Use managed Character Creator v3 for persistent identity, eight directions, states, or animation.
+
+A later non-humanoid slime test reinforced this routing: Pro produced a limbless gumdrop-like form, while `create_character` v3 produced a humanoid form with limbs. This is one example of the broader issue: Pixen/v3/new can underweight user instructions, while Pro follows them more closely. Use v3 for managed character workflows, not arbitrary non-humanoid shapes.
 
 Verify the full body first, then front/south orientation, then idle pose and low top-down framing. Do not judge hair, clothing, katana, color, or detail until the composition passes.
 
@@ -242,7 +244,7 @@ The public prompt-enhancement contracts reinforce the route distinction: Pixen e
 
 ### Investigation conclusion
 
-The humanoid hypothesis is directionally credible but the missing behavior is not recoverable by adding the word `humanoid` to a Pixen description. No authorized source exposed a hidden system prompt, and neither the installed extension nor the public schemas expose a switch that would activate one. The most defensible explanation is that Character Creator v3 has route-level character conditioning—possibly selected by its UI body-type state and `mannequin` template—while standalone Pixen remains a general image model with weak camera controls.
+The Character Creator humanoid-conditioning hypothesis is directionally credible, but the exact behavior is not recoverable by adding extra words to a Pixen description. No authorized source exposed a hidden system prompt, and neither the installed extension nor the public schemas expose a switch that would activate one. The most defensible explanation is route/model conditioning: Character Creator v3 may apply route-level conditioning, while standalone Pixen can underweight user instructions, including camera or shape requirements. Pro/v2 follows user instructions more closely. The exact internal cause remains unknown.
 
 This changes the recommended engineering direction:
 

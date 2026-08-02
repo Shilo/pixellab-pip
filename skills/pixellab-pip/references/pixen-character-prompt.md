@@ -8,6 +8,6 @@ full-body front-facing south-facing idle game character sprite, low top-down vie
 
 Use `view: "low top-down"` and `direction: "south"`. Omit `small` and other optional settings unless requested. Set `no_background: true` when transparency is required.
 
-Pixen has isometric bias despite `view`/`direction`; prefer Pro for static south-facing when higher cost and different character style is acceptable.
+Pixen/v3/new may underweight user instructions such as `view`/`direction` and has isometric bias; prefer Pro when the user's instructions or static south-facing view matter and higher cost and different character style are acceptable.
 
 Reject results that are not full-body, front/south-facing, idle, and low top-down, or that are isometric, rear-facing, portrait-like, or action-like.
