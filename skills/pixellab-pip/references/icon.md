@@ -48,6 +48,8 @@ Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns a
 
 Adapt theme, subject list, and palette; keep the sheet-layout, per-cell-size, no-text, and no-border clauses.
 
+For an action-focused ability, use one concrete visible pose when it communicates the mechanic better than an abstract symbol.
+
 Anchors for known failure modes (use only the ones that apply): `Pictorial symbols only`; `rich full-bleed illustrated miniature background` / `Fully opaque, every pixel painted` (backgrounded only); `No borders, frames, UI slots, rounded corners, dividers, watermark`; `No black outlines around icon square edges`.
 
 Avoid positive mentions of `rune`, `glyph`, `sigil`, `spellbook labels`, `UI slot`, `button`, `frame`, `border`, or `card` unless requested — they create text-like marks or slot styling. Use them only in negative clauses. For sheets, avoid `one icon per image` / `standalone icon` phrasing — it pushes isolated symbols on flat backgrounds.
