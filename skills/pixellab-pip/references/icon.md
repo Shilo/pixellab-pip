@@ -48,7 +48,7 @@ Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns a
 
 Adapt theme, subject list, and palette; keep the sheet-layout, per-cell-size, no-text, and no-border clauses.
 
-For an action-focused ability, use one concrete visible pose when it communicates the mechanic better than an abstract symbol.
+For an action-focused ability, use one concrete visible pose instead of the `Pictorial symbols only` anchor when it communicates the mechanic better.
 
 Anchors for known failure modes (use only the ones that apply): `Pictorial symbols only`; `rich full-bleed illustrated miniature background` / `Fully opaque, every pixel painted` (backgrounded only); `No borders, frames, UI slots, rounded corners, dividers, watermark`; `No black outlines around icon square edges`.
 
