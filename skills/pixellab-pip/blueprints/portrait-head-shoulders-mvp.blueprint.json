@@ -1,0 +1,37 @@
+[
+  {
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/portrait-head-shoulders-mvp",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "Configurable Pixen recipe for a consistent head-and-shoulders portrait; defaults to south-east and 128x128.",
+    "_comment_prompt": "Create a reusable configurable Pixen head-and-shoulders portrait blueprint.",
+    "TASK": {
+      "instruction": "Before the paid call, require an explicit current-user request to run this blueprint, confirm the callable PixelLab MCP create_image_pixen and get_image tools are available, and resolve output_directory by using the declared path when empty or appending the lowest available suffix starting at -2 when it is not empty. Create the resolved directory empty and stop before spending if any precondition fails.",
+      "verify": "The user authorized this paid run, the two required MCP tools are callable, and the resolved output directory is new, empty, writable, and project-relative."
+    }
+  },
+  {
+    "MCP create_image_pixen": {
+      "description": "Classic head-and-shoulders pixel art portrait of {{subject | default: a young adult human male warrior with short brown hair, light leather-and-steel armor, and a simple dark cloak}}; directly facing {{portrait direction | default: south-east}}, face square to the selected direction, both eyes visible; top of head to upper chest, both shoulders fully visible; medium, consistent portrait scale, head about half the canvas height, clear margin above the head, no head-only close-up, no waist-up or full body. Flat, solid-color dark muted background with no gradient.",
+      "width": "{{portrait width | default: 128}}",
+      "height": "{{portrait height | default: 128}}",
+      "direction": "{{portrait direction | default: south-east}}",
+      "no_background": false
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll get_image with the fresh job ID returned by the immediately preceding MCP call until a completed image result is present; do not resubmit automatically. Save the returned PNG unchanged as portrait.png.",
+      "outputs": ["portrait.png"],
+      "verify": "portrait.png is a readable PNG whose dimensions match the resolved portrait width and height and whose pixels match the returned PixelLab image; visual review confirms the face is directly oriented in the resolved direction, straight-on when the resolved direction is south, with both eyes visible, both shoulders and upper chest visible, clear space above the head, and no head-only, waist-up, or full-body crop."
+    }
+  }
+]
