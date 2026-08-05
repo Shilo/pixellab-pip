@@ -25,6 +25,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 - [PixelLab Surfaces And Services](pixellab/pixellab-surfaces-and-services.md) - where MCP, REST v2, website/editor, Aseprite, Pixelorama, SDKs, and legacy v1 fit.
 - [PixelLab Asset Routing](pixellab/pixellab-asset-routing.md) - how common requests map to PixelLab tools, endpoints, and workflows.
+- [PixelLab Background And Wallpaper Model Research Spike](pixellab/pixellab-background-wallpaper-model-research-spike.md) - applied comparison of Pro, Pixen, PixFlux, and BitForge for wide environmental backgrounds and wallpapers, including the conditional BitForge finding.
 - [PixelLab UI Generation Surfaces Research](pixellab/pixellab-ui-generation-surfaces-research.md) - current UI-specific matrix for MCP `create_ui_asset`, REST `/create-ui-asset`, REST `/generate-ui-v2`, shape pieces, elements, and website/editor boundaries.
 - [PixelLab User-Facing Term To Backend Mapping](pixellab/pixellab-user-facing-term-backend-mapping.md) - production mapping of user-facing labels across REST v2, MCP, website/editor, Pixelorama, and Aseprite to endpoints, tools, and model/product terms.
 - [PixelLab MCP vs REST v2 Route Parity](pixellab/pixellab-mcp-vs-rest-route-parity.md) - endpoint-level MCP/REST coverage matrix and the full inventory of missing features both ways: REST v2 endpoints with no MCP tool, and MCP tools with no REST v2 endpoint.
