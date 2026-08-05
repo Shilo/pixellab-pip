@@ -20,7 +20,7 @@
   },
   {
     "MCP create_image_pixen": {
-      "description": "Classic head-and-shoulders pixel art portrait of {{subject | default: a young adult human male warrior with short brown hair, light leather-and-steel armor, and a simple dark cloak}}; directly facing {{portrait direction | default: south-east}}, face square to the selected direction, both eyes visible; top of head to upper chest, both shoulders fully visible; medium, consistent portrait scale, head about half the canvas height, clear margin above the head, no head-only close-up, no waist-up or full body. Flat, solid-color dark muted background with no gradient.",
+      "description": "Classic head-and-shoulders pixel art portrait of {{subject | default: a young adult human RPG adventurer with short brown hair and a plain high-collar tunic visible only at the neck and shoulders}}; directly facing {{portrait direction | default: south-east}}, face square to the selected direction, both eyes visible; top of head to upper chest, both shoulders fully visible; medium, consistent portrait scale, head about half the canvas height, clear margin above the head, no head-only close-up, no waist-up or full body. Flat, solid-color dark muted background with no gradient.",
       "width": "{{portrait width | default: 128}}",
       "height": "{{portrait height | default: 128}}",
       "direction": "{{portrait direction | default: south-east}}",
