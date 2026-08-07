@@ -163,10 +163,14 @@ Implement only accepted findings, using the smallest complete correction. Then r
 
 ## 9. Report Completion
 
-Report:
+Lead the final response with a concise section titled **What Changed In PixelLab's Public Backend Contract**. This is the user-facing outcome of the refresh, not a summary of repository edits. Organize it as `Added`, `Removed`, and `Changed`; explicitly say `None` for an empty category. Include exact REST paths and MCP tool names, before/after inventory counts, and material schema, validation, cost, lifecycle, availability, or surface-parity changes. Separate report-only website/build churn from backend-contract changes.
+
+Describe only what the refreshed public REST/MCP/SDK/setup contracts prove. Unless independently verified, say “the public contract/documentation added, removed, or changed” rather than claiming PixelLab's private implementation or deployment changed. If there is no meaningful public-contract drift, lead with that result explicitly. Do not bury this section beneath files changed, tests, cache mechanics, or reviewer details.
+
+Then report:
 
 1. Refresh completeness, exit interpretation, and the exact official sources that meaningfully changed or failed.
-2. The upstream public-contract changes, including report-only signals that were intentionally not applied.
+2. The evidence and routing consequences behind the leading backend-contract summary, including report-only signals that were intentionally not applied.
 3. Every related project file reviewed and whether it was updated, verified unaffected, or intentionally unchanged.
 4. Files changed and why each change belongs in that canonical location.
 5. Validation commands and results.
