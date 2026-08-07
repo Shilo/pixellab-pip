@@ -48,7 +48,7 @@ If local assembly produced a sheet/GIF/package, state that PixelLab produced the
 
 For cost, prefer per-call `usage` totals for the whole flow. If only balance is available, use `get_balance` / `GET /balance` before and after (no extra permission needed once live work is approved) and report the delta — but if other PixelLab jobs may have run concurrently, label the delta as an overlapping observation rather than the cost of this job. Never derive cost from the number of calls or images — one call is not one generation, and `pro`/quality tiers and multi-output jobs cost several; take the figure from `usage.generations` in the response or the measured balance delta, not a guessed count. If neither is exposed, say `Cost: not exposed by the tool/API` rather than inventing a number.
 
-Never write a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair into a blueprint, manifest, or repo file; chat is fine. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude.
+Never write a balance figure (`credits.usd`, `subscription.generations`, `subscription.total`) or a `before -> after` pair into a blueprint, manifest, or repo file; chat is fine. `usage.generations` is charged, `subscription.generations` is remaining: the parent key decides, not the magnitude. Always label generation counts as charged, used, remaining, or total allowance; never call a bare count a total or balance.
 
 ## Manifest
 
