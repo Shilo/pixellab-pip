@@ -1,6 +1,6 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-07-15 (live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
+Last reviewed: 2026-08-06 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
 
 > **All maxima in this document were measured on a Tier 2 ("Pixel Artisan") subscription.** PixelLab gates max image *size* by plan tier (a soft limit under the hard schema caps). See [Tier / Plan Size Gating](#tier--plan-size-gating-soft-limits) — lower tiers cap several endpoints below the numbers below.
 
@@ -109,7 +109,7 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 | Endpoint | Field | Min (per axis) | Max (per axis) | Additional prose rules |
 |---|---|---|---|---|
 | `generate-image-v2` | `image_size` | 16×16 | width 792, height 688 | Effective max is aspect-dependent: square 512×512, 16:9 688×384; long axis up to 792 at extreme ratios. `style_image` sets pixel size. **`no_background` defaults to `true` → transparent sky + side bars unless you set `no_background: false` (then opaque full-bleed; verified 0 bars at 688×384).** See empirical subsection below. |
-| `create-image-pixen` | `image_size` | 16×16 | 768×768 | Area 32×32 to **512×512**; width and height **divisible by 4**. (768 per axis only reachable at extreme aspect where area ≤ 512×512.) |
+| `create-image-pixen` | `image_size` | 16×16 | 768×768 | Total area at most **512×512**; width and height **divisible by 4**; width must equal height whenever either side is below 32. (768 per axis only reachable at extreme aspect where area ≤ 512×512.) |
 | `create-image-pixflux` | `image_size` | 16 per axis, but **area floor rejects `16×16`** | 400×400 | Area 32×32 to 400×400 — **enforced at generation: `16×16` → `422 "Canvas must be size 32x32 area or larger"` (probe-confirmed 2026-07-15), despite the schema's `minimum: 16`. Unlike `create-image-pixen`, which shares the same "Area 32×32" prose yet does generate at `16×16`** (see line below). Transparent background blanks area over 200×200. |
 | `create-image-pixflux-background` | `image_size` | 16×16 | 400×400 | Area 32×32 to 400×400. `no_background` defaults to `false` (keeps the scene); alternative for opaque edge-to-edge backgrounds ≤400×400 (verified 0px bars, 0% transparency at 400×224, ~$0.0065). |
 | `create-image-bitforge` | `image_size` | 16×16 | 200×200 | Max area 200×200. Skeleton keypoints best at 16/32/64. |
@@ -259,8 +259,9 @@ An in-between size (48, 96, 150) is **accepted at validation** — untested whet
 |---|---|---|---|---|
 | `create-ui-asset` | `image_size` | **192×192** | 688×688 | Default 256×256; max per axis aspect-dependent (square 512, tall/wide 688). Highest minimum in the API. |
 | `generate-ui-v2` | `image_size` | 16×16 | width 792, height 688 | Default 256×256; 16 to aspect-ratio max. |
-| `generate-font-pro` | `image_size` | `enum ['1K', '2K']` | | Resolution/pricing tier, not pixel dims. |
 | `generate-font-pro` | `glyph_px` | `enum [8, 16, 32, 64]`, default 16 | | **Only field in the API that accepts `8`** — 8px generates a rough-but-usable glyph atlas (tested). Native bitmap size per glyph. |
+| `characters/{id}/portrait` | image | 16×16 | 256×256 | Non-square portrait attachment is centered on a transparent square canvas. |
+| `vocal-animation` raw portrait input | image | Not documented | 256×256 | The current contract publishes only the maximum; do not infer the attachment minimum. |
 | `map-objects` | `image_size` | 32×32 | 400×400 | Default 128×128. Basic mode max area 400×400; inpainting mode max area 192×192. |
 
 ## MCP Tools
@@ -278,15 +279,15 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_tiles_pro` | `tile_size` | 32 | **16–128** | Stricter than REST's `16–256` schema, but matches REST's own prose. Do not route to REST to exceed 128 — untested; see the REST row. `tile_height` 16–256 on both |
 | `create_ui_asset` | `width` / `height` | 256 | 192–688 | matches |
 | `create_portrait_character` | `result_size` | 64 | enum 16/32/48/64/128/160 | matches |
-| `create_font` | `image_size` / `glyph_px` | `1K` / 16 | glyph_px enum 8/16/32/64 | matches |
+| `create_font` | `glyph_px` | 16 | enum 8/16/32/64 | matches; retired `image_size` is absent on both surfaces |
 | `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 32–256 / 32–168 | matches |
 | `create_map_object` | `width` / `height` | **`null`** — mandatory in basic mode, auto-detected from `background_image` | 32–400 | bound matches; **default diverges** — REST `map-objects` defaults `image_size` to 128×128, MCP has none. MCP prose also carries the mode split REST omits: basic max 400×400, inpainting max 192×192 |
-| `create_image_pixflux` | `width` / `height` | 128 / 128 (or `init_image_base64`'s size) | 16–400 | Matches REST `create-image-pixflux`'s `image_size` (16–400). MCP prose adds a total-area rule REST omits: 32×32 to 400×400 |
-| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`, but REST also declares `multipleOf: 4` and MCP does not. Live MCP verification on 2026-07-27 accepted and charged 17×20, then failed the background job with internal 500; REST rejected the same dimension synchronously with 422. Both cap total area at 512×512 (prose) |
+| `create_image_pixflux` | `width` / `height` | 128 / 128 (or the init image's size) | 16–400 | Matches REST `create-image-pixflux`'s `image_size`; init images may use URL or base64. MCP prose adds a total-area rule REST omits: 32×32 to 400×400 |
+| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, while only REST documents the square requirement whenever either side is below 32. Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose) |
 | `create_image_pro` | `width` / `height` | 128 / 128 | 16–**no maximum declared**; prose: "Max depends on aspect ratio (512x512 square, 688x384 for 16:9)" | Prose gives only two aspect buckets; REST `generate-image-v2` declares width ≤ 792 / height ≤ 688 — verify against REST if an aspect outside square/16:9 is needed |
-| `edit_image` | `images_base64` (per image) | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` (16–400) — confirms the Pro-tier mapping |
-| `inpaint_image` | `image_base64` | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` (16–200) — confirms the Pro-tier mapping |
-| `animate_image` | `first_frame_base64` | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
+| `edit_image` | each target image URL/base64 | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` |
+| `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
+| `animate_image` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
 | `create_path_tiles` | `tile_size` | 32 | `square_topdown`: exactly **32**; `isometric`: **48–96** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "roads"` — check that schema's bounds if exact REST-side limits matter) |
 | `create_building_kit` | `tile_size` / `wall_tiles` | 32 / 2 | `isometric`: **32–96**; `square_topdown`/`oblique`: **16–96**; `wall_tiles`: **1–3** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "building"`) |
 
@@ -316,10 +317,10 @@ Conclusion for the goal:
 
 Every generation-time rule left open was probed; all resolved, almost all via free validation errors.
 
-- **`create-image-pixen` generation-time rules (validation-enforced, free `422`):** width/height must be a **multiple of 4** (`18×18` → `multiple_of 4`), and total **area `32×32` to `512×512`** (`600×600` → "Canvas must be size 512x512 area or smaller"). It *does* generate at `16×16` (HTTP 200, ~$0.0082) — `16` clears the area floor and is ÷4. So pixen's valid range is per-axis 16–768, **÷4**, area 32×32–512×512. (In the 16×16 test `no_background` worked with a short single-subject prompt; the earlier ~91%-opaque came from overloading the canvas with a 64-item list. Coins can hollow out when their center matches the removed background color — a background-removal artifact fixed by local edge-flood removal, not a limit. See the Pixen Single-Subject section of the [16px item spike](pixellab-16px-item-sprite-generation-spike.md).)
+- **`create-image-pixen` generation-time rules (validation-enforced, free `422`):** width/height must be a **multiple of 4**, and if either side is below 32 the canvas must be square. Total area is capped at `512×512`; `16×16` remains valid and generated in the live probe. Thus `16×64` is no longer schema-valid even though each axis independently fits the old range.
 - **`create-image-pixflux` at `16×16`: rejected** — `422` "Canvas must be size 32x32 area or larger". Pixflux's real floor is a **32×32 area**, *unlike* pixen (16); the per-axis schema min 16 is overridden by the area rule at validation.
 - **`generate-image-v2` aspect max is enforced:** `600×600` → `400` "image_size must be between 16x16 and 512x512 for this aspect ratio". The square max is `512×512` (the per-axis `792`/`688` apply only at extreme aspect ratios).
-- **`glyph_px: 8` fonts: generate** (HTTP 200, ~$0.095) a real **TTF font** (`ttf_base64`) plus a glyph-atlas preview image. Rendered as actual text, the 8px font is **partially legible but rough** — some words read, but several glyphs are broken/malformed and the API flagged 2 as `suspect_glyphs`. Experimental, not production-clean; judge a font by rendering text with the TTF, not by the atlas grid. This is the only 8px-native path in the API. (`weight: Bold` or `image_size: 2K` may improve small-glyph legibility; untested.)
+- **`glyph_px: 8` fonts: generate** a real **TTF font** plus a glyph-atlas preview image. The historical live call cost about `$0.095`; current documented pricing is fixed at 25 generations or at least `$0.125`. The 8px output was partially legible but rough. The retired `image_size: 2K` control is no longer available.
 - **`remove-background` at `8×8`: works** (HTTP 200, ~$0.005) — cleanly removed a solid background and kept the foreground at 8×8; the `1×1` floor is real.
 - **`16px` non-tile item/icon semantic quality** is a quality question (not a limit), characterized in the [16px item spike](pixellab-16px-item-sprite-generation-spike.md), which also has a palette-clamp demo (over-shaded pixel art clamps cleanly to ~16–24 colors while keeping shape).
 

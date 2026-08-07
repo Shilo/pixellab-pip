@@ -1,6 +1,6 @@
 # Official PixelLab MCP Service Comparison
 
-Last reviewed: 2026-07-26.
+Last reviewed: 2026-08-06.
 
 This compares PixelLab Pip with the official [PixelLab MCP service](https://api.pixellab.ai/mcp/docs). The goal is to define the technical boundary between the service that executes PixelLab work and the skill that helps an agent choose, configure, and use the right PixelLab surface.
 
@@ -30,7 +30,7 @@ Use the official MCP service when the assistant already has PixelLab MCP tools a
 | Supported apps | The setup page lists multiple MCP clients such as Claude Code, VS Code, Cursor, Gemini CLI, Codex CLI, and other MCP clients. | Distributed as a plugin/skill intended to work across agents that support skills, plugin invocation, or explicit prompt instructions. |
 | Invocation | User asks their MCP-enabled assistant for PixelLab work; the assistant calls visible MCP tools. | User invokes `/pixellab-pip`, `@pixellab-pip`, `$pixellab-pip`, or asks a PixelLab-specific question/task that triggers the skill. |
 | Tool schema | MCP tools expose structured tool parameters when the assistant has the server configured. | Maintains routing tables and warnings; refreshes official docs when exact current schemas matter. |
-| Main asset coverage | Characters, portrait-character conversion, fonts, character states, animations, top-down tilesets, sidescroller tilesets, isometric tiles, tile variants, path/road tile sets, building kits, UI assets, objects, map objects, raw image generate/edit/inpaint/animate (no managed asset needed), balance, projects, chat, sandbox, and agent helper tools documented by MCP. | Covers MCP assets plus REST v2, website/editor-only flows, Aseprite, Pixelorama, SDK/API questions, and legacy v1 compatibility. |
+| Main asset coverage | Characters, portrait-character conversion, stored portraits, vocal visemes, talking GIFs, lip-sync plans, fonts, character states, animations, tiles and tilesets, UI assets, objects, map objects, raw image generate/edit/inpaint/animate, balance, projects, chat, sandbox, and agent helpers. | Covers MCP assets plus REST v2, including stateless lip sync, website/editor-only flows, Aseprite, Pixelorama, SDK/API questions, and legacy v1 compatibility. |
 | Async workflow | Creation tools return IDs immediately; corresponding `get_*` tools poll status and provide result/download data. | Teaches the same non-blocking pattern, reports IDs/status/output details, and routes REST async jobs separately from MCP managed assets. |
 | REST v2 fallback | MCP docs point users to REST v2 when writing code or needing API surfaces not exposed through MCP. | Explicitly chooses REST v2 for scripts, batch jobs, exact endpoint control, specific image models (Pixen/PixFlux/BitForge/Pro), freeform UI, multi-source edit, resizing, background removal, and other REST-only tasks. |
 | Website/editor boundary | Notes that web interfaces, editor plugins, API v1, and API v2 are different PixelLab interfaces. | Adds stricter boundaries for website/editor automation, Aseprite, Pixelorama, copied session tokens, and undocumented endpoints. |

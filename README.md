@@ -65,6 +65,7 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 | Feature | What it does |
 |---|---|
 | Preset and custom animation | Describe an action and Pip sends it to PixelLab's text animation, its recommended default. Name a stock motion (walk, run, idle, jump, and more — for humanoids, dogs, cats, horses, bears, and lions) and Pip picks the matching PixelLab preset. Pip can also rig a sprite from its skeleton when you want control over the joints. It previews one direction before animating the rest, and keeps frames in the order PixelLab returned them. |
+| Talking portraits and lip sync | Pip can attach a portrait to a character, generate mood-specific mouth shapes, render a talking GIF from dialogue, or return a frame-by-frame lip-sync plan for a game. |
 | Multi-shot cinematics and seamless loops | PixelLab animates one short clip at a time. For a longer or seamlessly looping scene, Pip decides between one looped clip and a chain of shots, plans the beats, checks each one, and stops dead at the budget it asks for up front — starting from a frame you supply or from scratch. |
 | Paperdoll and layered characters | Pip fits hair, armor, hats, weapons, and accessories to an existing character, delivering the base, one transparent PNG per layer, and the finished composite, or Aseprite layers. It checks each layer holds only the new part, without pretending PixelLab returns layers where it does not. |
 
@@ -82,7 +83,7 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 | Feature | What it does |
 |---|---|
 | Answer PixelLab questions | Pip explains setup, sign-in, docs, code libraries, troubleshooting, and confusing labels such as `Pro`, `v3`, `new`, `create tiles` vs `create tileset`, `Pixen`, `PixFlux`, `BitForge`, and `PixPatch`. It re-checks official docs when a needed fact is missing or unclear, and flags anything it cannot verify. |
-| Any language | Talk to Pip in any language and it replies in yours. PixelLab only understands English, so Pip translates your request to English before sending it — and shows you both the English and your own wording so you can check it. |
+| Any language | Talk to Pip in any language and it replies in yours. Pip translates visual prompts to English and shows you both the English and your own wording so you can check it. Pip keeps spoken dialogue exactly as written when it uses the supported Latin alphabet; for other scripts, it asks before transliterating. |
 | Bark completion sound | Pip plays a sound when a PixelLab generation, edit, or animation job succeeds. On by default, with an on/off toggle. |
 | Agent-agnostic | Pip works from any agent that supports Agent Skills. |
 

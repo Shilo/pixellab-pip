@@ -58,6 +58,7 @@ Path/road and building-kit MCP routes:
 
 - `create_path_tiles` (18-config connectable path/road set) and `create_building_kit` (floor, connectable walls, doorways, pillar, stairs) are siblings of `create_tiles_pro`, not `create_topdown_tileset` — all three share `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro`; there is no separate getter/lister/deleter for path tiles or a building kit.
 - REST folds all three into `create-tiles-pro` via `tile_feature`: `"roads"` (path tiles), `"tileset"` (the connectable terrain transition `create_tiles_pro` itself can produce), or `"building"` (building kit, with the `building_*` fields).
+- On REST isometric `create-tiles-pro` requests, `tile_flat_top_px` controls the top/bottom cap: `2` is classic and `4` is modern. It is ignored for non-isometric `tile_type` values.
 
 ## Human Label To API Mapping
 

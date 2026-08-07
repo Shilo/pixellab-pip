@@ -1,6 +1,6 @@
 # PixelLab Font Generation Spike
 
-Last reviewed: 2026-07-11.
+Last reviewed: 2026-08-06 (current schema); live test 2026-07-11.
 
 Purpose: capture live findings for PixelLab font generation via REST `generate-font-pro`, starting with the first `glyph_px: 8` test. This is a research spike for route behavior, response shape, and quality expectations. It is not a canonical agent instruction contract.
 
@@ -9,11 +9,10 @@ Purpose: capture live findings for PixelLab font generation via REST `generate-f
 - REST `POST /v2/generate-font-pro` (Pro). **Asynchronous** — the create call returns HTTP `202` with a `background_job_id`; poll `GET /v2/background-jobs/{id}` until `status: completed`.
 - Required fields: `description`, `weight` (`enum ["Bold", "Regular"]`).
 - Optional fields:
-  - `image_size` (`enum ["1K", "2K"]`) — the **generation-resolution / pricing tier**, not pixel dimensions. `1K` costs fewer generations than `2K`.
   - `glyph_px` (`enum [8, 16, 32, 64]`, default 16) — the **real bitmap size per glyph** in the output atlas/TTF.
   - `seed`, `font_name` (defaults to `"{description} {weight}"`).
 
-`image_size` and `glyph_px` are independent: the first sets how much compute the generation uses, the second sets the actual glyph resolution.
+The former `image_size: "1K" | "2K"` field has been removed from both REST and MCP. Current pricing is fixed at 25 subscription generations, or at least `$0.125` when billed to credits.
 
 ## Response Shape
 
@@ -27,7 +26,9 @@ The completed job's `last_response` holds:
 
 Key lesson learned the hard way: **judge a generated font by rendering strings with the TTF**, not by eyeballing the atlas grid.
 
-## First Test: glyph_px 8, Regular, 1K
+## Historical First Test: glyph_px 8, Regular, 1K
+
+This request records the 2026-07-11 live probe. It includes the now-retired `image_size` field and must not be copied into a current request.
 
 Request:
 
@@ -55,9 +56,8 @@ Local run outputs (not committed showcase assets) are in the `pixellab-pip-gener
 ## Open / Untested
 
 - `weight: "Bold"` — thicker strokes may survive `8px` better.
-- `image_size: "2K"` — higher generation resolution may clean up small glyphs.
 - `glyph_px: 16` and up — expected to be clearly legible; not yet tested.
-- MCP `create_font` (which also exposes `image_size` and `glyph_px`) versus REST parity — not compared.
+- MCP `create_font` versus REST parity — not live-compared; current documented fields agree on `glyph_px` and no longer include `image_size`.
 - Whether re-rolling the `seed` or adjusting the description reduces `suspect_glyphs` at `8px`.
 
 ## Verification Guidance

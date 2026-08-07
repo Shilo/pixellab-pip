@@ -2,7 +2,7 @@
 
 Read this when a PixelLab REST v2 call rejects a natural-language field for length, when writing exact API code, or when preparing unusually long prompts.
 
-These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-07-26. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
+These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-08-06. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
 
 ## Pattern
 
@@ -33,6 +33,10 @@ These are the rows that do not follow the tier you would guess from the field na
 | `POST /create-ui-asset` | `color_palette` | 200 |
 | `POST /generate-ui-v2` | `color_palette` | 200 |
 | `POST /generate-font-pro` | `font_name` | 200 |
+| `POST /create-character-state` | `state_name` | 100 |
+| `POST /objects/{object_id}/states` | `state_name` | 100 |
+| `POST /talking-gif` | `text` | 500 |
+| `POST /lip-sync` | `text` | 500 |
 
 ## No Declared Max Length
 

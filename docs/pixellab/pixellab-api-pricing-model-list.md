@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-08-01.
+Last reviewed: 2026-08-06.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -71,6 +71,9 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Edit animation (Pro) | `POST /v2/edit-animation-v2` | Pro animation editing | Apply edits consistently across 2-16 frames | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Interpolate (Pro) | `POST /v2/interpolation-v2` | Pro interpolation | Generate in-between frames | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Transfer outfit (Pro) | `POST /v2/transfer-outfit-v2` | Pro animation transfer | Apply outfit/appearance to animation frames | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
+| Generate vocal animation | `POST /v2/vocal-animation` | Talking portrait / visemes | Generate one mood's mouth-shape set from a managed character portrait or raw portrait | Paid-plan generation; exact public unit/USD estimate not found, so verify current usage before a cost-sensitive call |
+| Render talking GIF | `POST /v2/talking-gif` | Talking portrait renderer | Render stored or supplied visemes against dialogue | Free and synchronous |
+| Create lip-sync plan | `POST /v2/lip-sync` | Talking portrait timing | Return viseme columns and durations for dialogue | Free and synchronous |
 
 ## Rotation, Tiles, Maps, Characters, and Objects
 
@@ -88,6 +91,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Create character (Pro) | `POST /v2/create-character-pro` | Pro 8-direction character | up to `85x85 $0.095`; up to `113x113 $0.125`; up to `168x168 $0.185` |
 | Create character v3 | `POST /v2/create-character-v3` | v3 8-direction character | `64x64 $0.041`; `128x128 $0.042`; `168x168 $0.045` |
 | Portrait to character / character to portrait (Pro) | `POST /v2/portrait-character-pro` | Pro portrait-character conversion | Convert a portrait image to a full-body character or the reverse | current public pricing page has no USD row; verify current usage before cost-sensitive calls |
+| Set character portrait | `POST /v2/characters/{character_id}/portrait` | Managed portrait attachment | Attach or replace the portrait used by vocal animation | Free and synchronous; replacing an existing portrait is destructive |
 | Animate character | `POST /v2/animate-character` | Character animation, per direction | template `64x64 $0.0323`, `128x128 $0.0956`; v3 4 frames `64x64 $0.0129`, `128x128 $0.0145`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create character state | `POST /v2/create-character-state` | Character state/variant | up to `84x84 $0.095`; up to `112x112 $0.125`; up to `168x168 $0.185` |
 | Create single direction objects | `POST /v2/create-1-direction-object` | Style-consistent object candidates | up to `168x168 $0.095` |
@@ -95,7 +99,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Animate object | `POST /v2/objects/{object_id}/animations` | Object animation, per direction | v3 4 frames `64x64 $0.0129`, `128x128 $0.0144`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create object state | `POST /v2/objects/{object_id}/states` | Object variant/state | single-direction up to `168x168 $0.095`; 8-direction up to `84x84 $0.095`, up to `112x112 $0.125`, up to `168x168 $0.185` |
 | Create tiles (Pro) | `POST /v2/create-tiles-pro` | Multiple tile variations; also the shared endpoint behind MCP's `create_path_tiles` (`tile_feature: "roads"`) and `create_building_kit` (`tile_feature: "building"`), which have no REST route or pricing row of their own | tile up to `42x42 $0.095`; up to `56x56 $0.125`; up to `85x85 $0.185`; MCP `create_path_tiles`/`create_building_kit` likely bill on this same Pro rung — unconfirmed, no separate USD row exists to check against |
-| Generate pixel font (Pro) | `POST /v2/generate-font-pro` | Pro bitmap font generation | Generate a font atlas / pixel font from description and font controls | current public pricing page has no USD row; verify current usage before cost-sensitive calls |
+| Generate pixel font (Pro) | `POST /v2/generate-font-pro` | Pro bitmap font generation | Generate a font atlas / pixel font from description and font controls | fixed 25 subscription generations, or at least `$0.125` when billed to credits |
 
 ## Prompt Enhancement
 

@@ -37,6 +37,8 @@ Never add inferred style labels such as `chibi`, `super-deformed`, `RPG Maker`, 
 
 State when the supplied image is only a style/layout reference and not a subject/identity reference. If the user says not to recreate the reference subject, include a concise negative subject constraint in `description`.
 
+For managed 8-direction assets, MCP `create_character(mode="pro", style_character_id=...)` / REST `create-character-pro.style_character_id` and MCP `create_8_direction_object(style_object_id=...)` / REST `create-8-direction-object.style_object_id` can reuse an existing completed character or object as the style source. The requested output size must fit the visible reference sprite. Character style-ID mode is incompatible with `rotate_character`; object style-ID mode uses the styled object's south view as the center reference unless an explicit reference/style image overrides it.
+
 ## Verification
 
 After generation, verify:

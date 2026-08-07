@@ -4,7 +4,7 @@ Read this for live PixelLab calls that return a job, asset ID, managed MCP asset
 
 ## Polling
 
-REST v2 async jobs use `GET /background-jobs/{job_id}` when the create response returns a background job ID. MCP managed assets use the matching `get_*` tool, not REST background-job polling.
+REST v2 async jobs normally use `GET /background-jobs/{job_id}` when the create response returns a background job ID. Vocal animation is the explicit exception: poll `GET /vocal-animation/{job_id}`. MCP managed assets use the matching `get_*` tool, not REST background-job polling.
 
 MCP tilesets (`create_topdown_tileset` → `get_topdown_tileset`) have no such 423/404 window — the getter reports progress directly. For REST `POST /v2/tilesets`, the create response can contain both `background_job_id` and `tileset_id` while the status is still `processing`. Poll `GET /background-jobs/{background_job_id}` first. `GET /tilesets/{tileset_id}` may return `423` while the tileset is still being generated, or `404` until the background job has completed and the tileset object has been persisted; treat those as early lifecycle lookups while the background job is still processing.
 
@@ -31,6 +31,7 @@ MCP creation tools return asset IDs quickly. Use the matching getter to inspect 
 - Map objects: `get_map_object`.
 - Fonts: `get_font`.
 - Portrait-character conversions: `get_portrait_character`.
+- Vocal animations: `get_vocal_animation`; partial visemes may appear before completion, so wait for the terminal result.
 - Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `inpaint_image`, `animate_image` — none need a managed asset): `get_image`, the one shared getter for the whole family.
 - UI assets, tilesets, tiles, projects, or helpers: use the visible matching MCP getter when exposed.
 
