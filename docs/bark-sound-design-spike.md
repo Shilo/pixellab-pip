@@ -74,7 +74,7 @@ From [Brewster, Wright & Edwards (HCI'95)](https://www.dcs.gla.ac.uk/~stephen/pa
 
 Psychoacoustic thresholds:
 
-- **Sharpness**: `S = 1.75 acum` is the threshold below which sharpness contributes nothing to Zwicker psychoacoustic annoyance. Design below it ([INTER-NOISE 2019](https://www.sea-acustica.es/INTERNOISE_2019/Fchrs/Proceedings/1503.pdf)).
+- **Sharpness**: `S = 1.75 acum` is the threshold below which sharpness contributes nothing to Zwicker psychoacoustic annoyance. Design below it ([NASA technical memorandum](https://ntrs.nasa.gov/api/citations/20240003202/downloads/NASA-TM-20240003202June.pdf)).
 - **Roughness**: peaks at **~70 Hz** modulation rate; the roughness band is **~15–300 Hz**. No amplitude modulation, vibrato, or tremolo anywhere in that band. A strictly harmonic series at F0 ~450 Hz is roughness-safe by construction, because adjacent partials are spaced far wider than a critical band below 2 kHz.
 - **Ear sensitivity**: ear-canal resonance ~2.5 kHz amplifies by 10–15 dB; peak sensitivity 3.5–4 kHz. Energy in **2–5 kHz** buys perceived loudness and annoyance together.
 - **Accessibility**: presbycusis and noise-induced loss hit hardest at **2–4 kHz**. Guidance is to keep meaningful tones under ~2.5 kHz and never rely on content above 8 kHz.

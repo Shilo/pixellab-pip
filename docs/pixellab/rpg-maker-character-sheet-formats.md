@@ -92,7 +92,7 @@ That guard has to tolerate being unable to answer. A five-profile test run found
 - [Makerpendium CharSet geometry, direction order, and standing column](https://makerpendium.de/wiki/CharSet)
 - [RPG Maker XP material standards](https://rpgmakerofficial.com/product/products/rpgxp/material/index.html)
 - [RPG Maker VX material standards](https://rpgmakerofficial.com/product/products/rpgvx/material/index.html)
-- [RPG Maker VX Ace help: resource standards](https://www.rpgmaker.fixato.org/Manual/RPGVXAce/rpgvxace/6100_resource.html)
+- [RPG Maker VX Ace help: resource standards (archived)](https://web.archive.org/web/20250710042541/https://rpgmaker.fixato.org/Manual/RPGVXAce/rpgvxace/6100_resource.html)
 - [RPG Maker MV feature comparison: VX Ace 32x32 to MV 48x48](https://rpgmakerofficial.com/product/mv/new_function/02.html)
 - [RPG Maker MV help: asset standards](https://rpgmakerofficial.com/product/MV_Help/page/01_11_01.html)
 - [RPG Maker MZ help: asset standards](https://rpgmakerofficial.com/product/MZ_help-en/01_11_01.html)
