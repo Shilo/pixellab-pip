@@ -40,7 +40,7 @@ python -m pip install -r requirements-dev.txt
 
 ## Security Checks
 
-The user-facing security story lives in the [README](../README.md#security): the SkillSpector skill audit (Code Scanning tab), the ClawHub independent registry audit, the VirusTotal malware scan, and the Sigstore build-provenance attestation. `SECURITY.md` holds the vulnerability-reporting policy.
+The user-facing security story lives in [Security And Trust](security.md): the SkillSpector skill audit (Code Scanning tab), the ClawHub independent registry audit, the VirusTotal malware scan, and the Sigstore build-provenance attestation. The README keeps a short trust summary, while `SECURITY.md` holds the vulnerability-reporting policy.
 
 ### OpenSSF Scorecard (maintainer-only)
 

@@ -126,8 +126,8 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 | Third-party registry security scan with public result | ✅ — ClawHub/SkillSpector "Security audit: Pass" badge on the skill page | 🟡 — CI SkillSpector audit on public Code Scanning (weekly, risk-score gate) plus Sigstore build-provenance attestations; the release workflow also auto-publishes to ClawHub for its independent audit once a `CLAWHUB_TOKEN` secret is set |
 | Declared permissions manifest (env vars, network hosts, filesystem scope, commands) in SKILL.md frontmatter | ✅ | ✅ — lean, honest scope (`env: PIXELLAB_SECRET`, `commands: python`); no network declared because the skill's own code makes no calls |
 | Machine-readable `requires_api_key` metadata | ✅ — `true` | ✅ — and more accurate: `false` with a note, since guidance/setup/routing need no key |
-| Skill card (use case, known risks and mitigations, license, output types) | ✅ — `skill-card.md` | 🟡 — README Security section covers access, risks, and expected findings; no separate card file |
-| Security-scan disclosure section (explains expected scanner findings) | ✅ | ✅ — README Security section pre-discloses expected SkillSpector findings |
+| Skill card (use case, known risks and mitigations, license, output types) | ✅ — `skill-card.md` | 🟡 — [Security And Trust](../security.md) covers access, risks, and expected findings; no separate card file |
+| Security-scan disclosure section (explains expected scanner findings) | ✅ | ✅ — [Security And Trust](../security.md) pre-discloses expected SkillSpector findings |
 | Permissive license | ✅ — MIT-0 | ✅ — MIT |
 
 ### Distribution And Invocation
@@ -167,7 +167,7 @@ The complete list of features PixelLab AI Skill has that Pip does not, in one pl
 9. ClawHub distribution: one-command install, registry versioning, and the ClawHub/SkillSpector security-scan badge. (Now addressed — Pip's release workflow auto-publishes to ClawHub once a token is set; see verdicts.)
 10. OpenClaw skill metadata and config examples. (Deliberately not matched — Pip stays agent-agnostic.)
 11. Declared permissions frontmatter and machine-readable `requires_api_key` metadata. (Now addressed in Pip's SKILL.md frontmatter.)
-12. `skill-card.md` risk/mitigation disclosure and a security-scan-notes section. (Now addressed by Pip's README Security section.)
+12. `skill-card.md` risk/mitigation disclosure and a security-scan-notes section. (Now addressed by Pip's [Security And Trust](../security.md) guide.)
 13. Distilled community knowledge — Discord workflow/tutorial references and two official-YouTube indexes with tuning starting points.
 14. 38 offline endpoint example payload JSON files.
 15. Explicit `--env-file` loading and a `--allow-custom-base` escape hatch for test endpoints.
@@ -223,7 +223,7 @@ Notable `pixellab_workflow.py` commands: `list-recipes`, `plan`, `run`, `budget`
 Every feature from [When To Use PixelLab AI Skill Instead](#when-to-use-pixellab-ai-skill-instead), with an adopt/defer/skip judgment under Pip's KISS/YAGNI rules:
 
 - **Adopt: batch plan preview.** The one genuinely transferable behavior from the manifest pipeline: before an approved multi-asset batch, present a short per-item plan (route plus cost category) and record it in the run manifest. Pip already asks before batches and records IDs/seeds; a written plan is one contract line, not tooling.
-- **Adopt: trust and disclosure metadata.** Done 2026-07-05: CI SkillSpector scanning with public Code Scanning results, release build-provenance attestations, optional VirusTotal release scanning, OpenSSF Scorecard, declared permissions frontmatter, an accurate `requires_api_key: false` note, and a README Security section that doubles as the risk/mitigation and expected-findings disclosure. A separate `skill-card.md` file is intentionally not added — the README covers the same facts in one place.
+- **Adopt: trust and disclosure metadata.** Done 2026-07-05: CI SkillSpector scanning with public Code Scanning results, release build-provenance attestations, optional VirusTotal release scanning, OpenSSF Scorecard, declared permissions frontmatter, an accurate `requires_api_key: false` note, and a [Security And Trust](../security.md) guide that doubles as the risk/mitigation and expected-findings disclosure. A separate `skill-card.md` file is intentionally not added because the guide covers the same facts in one place.
 - **Adopt (distribution decision): ClawHub publishing.** Done 2026-07-05: the release workflow auto-publishes the skill folder to ClawHub (headless `clawhub skill publish` with GitHub source provenance) once a `CLAWHUB_TOKEN` secret is set, which triggers ClawHub's independent audit and badge. The skill folder stays agent-agnostic — no OpenClaw files are added. One-time user setup: a ClawHub account and token.
 - **Adopt (micro): seed-reuse-for-near-variants clause.** One sentence in the seed rules: reuse the recorded seed when the user wants a near-variant of an approved result; vary it for fresh candidates. Complements the existing vary-across-retries rule.
 - **Defer: sprite-layer validator tool.** The paperdolling checklist covers the same checks manually, and `AGENTS.md` already names "a dedicated local asset validator" as the trigger. Add it when layered-pack work recurs.

@@ -13,7 +13,7 @@ Report suspected vulnerabilities privately through GitHub's [private vulnerabili
 - **Malware scan** — each release links a public [VirusTotal](https://www.virustotal.com/) report of the exact download in its release notes.
 - **Build provenance** — every release zip carries a cryptographic proof-of-origin (a Sigstore build-provenance attestation) that GitHub built it from this repo, unaltered. Verify one: `gh attestation verify pixellab-pip-<version>.zip --repo Shilo/pixellab-pip`.
 
-Some scanner findings are expected and disclosed by design — the skill legitimately documents PixelLab bearer-token handling, `api.pixellab.ai` documentation URLs, and a local sound-playback helper — so instruction scanners report those as informational findings. See the [README Security section](README.md#security) for the line-by-line disclosure.
+Some scanner findings are expected and disclosed by design — the skill legitimately documents PixelLab bearer-token handling, `api.pixellab.ai` documentation URLs, and a local sound-playback helper — so instruction scanners report those as informational findings. See [Security And Trust](docs/security.md#expected-scanner-disclosures) for the public disclosure and audit links.
 
 ## Supported versions
 

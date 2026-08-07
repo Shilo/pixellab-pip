@@ -1,12 +1,20 @@
 # More Documentation
 
-Last reviewed: 2026-07-25.
+Last reviewed: 2026-08-06.
 
-These docs explain PixelLab tools, workflows, terminology, SDK boundaries, and auth rules that Pip needs in order to automate PixelLab correctly. They supplement the repository README; install, update, and plugin metadata stay there.
+These docs contain PixelLab Pip's user guides, developer material, research, and technical background. The repository README is the short front door; detailed installation, usage, and security material lives here.
 
-This folder is developer-facing. Use it for research spikes, test notes, findings, audits, comparisons, terminology background, and maintainer QA policy. Do not treat `docs/` files as the canonical agent instruction contract.
+Research and developer sections are maintainer-facing. Do not treat `docs/` files as the canonical agent instruction contract.
 
 Agent-facing routing and operational instructions belong in `../skills/pixellab-pip/references/`, with `../skills/pixellab-pip/SKILL.md` as the core router. When research here changes agent behavior, update the matching reference file instead of expecting agents to load developer notes.
+
+## User Guides
+
+- [Installation](install.md) - marketplaces, extensions, cross-agent and manual installs, upgrades, migration, and Claude Code cloud sessions.
+- [Usage And Setup](usage.md) - invocation, commands, PixelLab MCP/API modes, and token safety.
+- [Security And Trust](security.md) - access boundaries, public audits, release provenance, and scanner disclosures.
+- [Blueprints](blueprint.md) - create, validate, share, and replay reusable workflows.
+- [Resources](resources.md) - official PixelLab, Agent Skill, and project links.
 
 ## Showcase
 
