@@ -1,6 +1,8 @@
 # PixelLab MCP vs REST v2 Route Parity
 
-Last reviewed: 2026-08-06.
+Last reviewed: 2026-08-07.
+
+> 2026-08-07 REST OpenAPI refresh: the inventory stayed at 79 REST paths and 76 MCP tools, but `GenerateWithStyleV2Request` changed. `image_size` is no longer required and remains only as an optional deprecated schema property; the endpoint now documents a square output derived from the largest dimension across its 1–4 `style_images` (bounded to 16–512). MCP had no corresponding schema change; its raw documentation changed only in the generated timestamp.
 
 > 2026-08-06 refresh: REST v2 grew from 74 to 79 paths and MCP from 71 to 76 tools. Both surfaces now support attaching a portrait to a managed character, generating mood-specific vocal visemes, rendering a talking GIF, and producing a lip-sync timing plan. REST `POST /lip-sync` additionally supports stateless plans via `viseme_count`, while MCP `get_lip_sync` requires a managed character, so that row is partial. Counts are now 24 REST-only/partial endpoints (9 ◐), 17 MCP-only tools, and 76 total MCP tools. This refresh also added URL alternatives to the MCP raw-image tools, managed character/object style IDs on both surfaces, shared `state_name` fields, `drift_threshold` on REST animation v3, and removed the retired font `image_size` field.
 
@@ -35,8 +37,8 @@ Purpose: a route-level comparison of PixelLab's hosted MCP tool surface against 
 
 Parity is a moving target because both surfaces ship independently. This review compares:
 
-- **REST v2 index:** `https://api.pixellab.ai/v2/llms.txt`, cross-checked against `https://api.pixellab.ai/v2/openapi.json`, cached snapshot 2026-08-06. `llms.txt` is the curated published index; OpenAPI is the fuller machine-readable schema. Where both agree a route is absent, it is treated as genuinely absent, not an index abbreviation.
-- **MCP inventory:** `https://api.pixellab.ai/mcp/docs`, auto-generated snapshot 2026-08-06 (cached locally). This is the authoritative public MCP tool list; the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` is not.
+- **REST v2 index:** `https://api.pixellab.ai/v2/llms.txt`, cross-checked against `https://api.pixellab.ai/v2/openapi.json`, cached snapshot 2026-08-07. `llms.txt` is the curated published index; OpenAPI is the fuller machine-readable schema. Where both agree a route is absent, it is treated as genuinely absent, not an index abbreviation.
+- **MCP inventory:** `https://api.pixellab.ai/mcp/docs`, auto-generated snapshot 2026-08-07 (cached locally). This is the authoritative public MCP tool list; the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` is not.
 
 Absence from a snapshot is not proof of absence from the live API. When a route or tool matters for code, re-verify against current OpenAPI/MCP docs (SKILL.md → Current Docs Refresh).
 
@@ -168,7 +170,7 @@ MCP's three model-specific raw-image tools mirror REST's PixFlux, Pixen, and Pro
 | `POST /create-image-pixflux-background` | `create_image_pixflux` + `get_image` — byte-identical request schema (`CreateImagePixfluxRequest`) to the row above | = |
 | `POST /create-image-bitforge` (`coverage_percentage`, `skeleton_keypoints`/`skeleton_guidance_scale` pose guidance, `inpainting_image`/`mask_image`, `style_image`/`style_strength`) | — no MCP tool combines any of BitForge's unique controls | none |
 | `POST /generate-image-v2` (Pro) | `create_image_pro` + `get_image` | = |
-| `POST /generate-with-style-v2` (Pro, style ref) | `create_image_pro`'s single style image (URL or base64) plus `style_copy` is narrower than this endpoint's required multi-image `style_images`+`style_description` shape | none |
+| `POST /generate-with-style-v2` (Pro, style ref) | `create_image_pro`'s single style image (URL or base64) plus `style_copy` is narrower than this endpoint's required 1–4-image `style_images` array with optional `style_description`; REST derives a square output size from the style images rather than accepting a supported `image_size` control | none |
 
 ### Image Edit, Convert, Resize
 
@@ -238,7 +240,7 @@ MCP briefly shipped one generic `create_image` tool on 2026-07-26, then split it
 - `POST /create-image-pixflux-background` — = full parity: same tool, same schema (`CreateImagePixfluxRequest`) — this is a second URL for the identical operation, not a distinct model
 - `POST /create-image-bitforge` — none: no MCP tool has `coverage_percentage` (BitForge's one unique control), `skeleton_keypoints`/`skeleton_guidance_scale` pose guidance, or its `inpainting_image`/`mask_image`/`style_image`/`style_strength` combination
 - `POST /generate-image-v2` (Pro) — = functional parity: `create_image_pro` + `get_image`; MCP also accepts reference/style URLs
-- `POST /generate-with-style-v2` (Pro, style reference) — none: `create_image_pro` takes one style image (URL or base64), not this route's required multi-image `style_images`+`style_description` shape
+- `POST /generate-with-style-v2` (Pro, style reference) — none: `create_image_pro` takes one style image (URL or base64), not this route's required 1–4-image `style_images` array; REST derives the square output size from those images and exposes no supported `image_size` control
 - `POST /generate-ui-v2` (freeform UI image; no `pieces`/`elements`) — none: MCP's only UI tool, `create_ui_asset`, is a structured panel builder (its REST twin is `create-ui-asset`), not a freeform generator, and lacks `concept_image`; MCP has no `generate-ui-v2` equivalent
 
 ### 2. Image edit / convert / resize (5) — MCP's edit tool is Pro-tier (edit-images-v2), not base edit-image
@@ -340,7 +342,7 @@ These follow from the gaps above and are already encoded in SKILL.md's Intent Ro
 
 ## Caveats
 
-- Snapshot-bound: both the MCP inventory and the REST index/OpenAPI are the 2026-08-06 cached snapshots. Both can drift; the doc-watch cache workflow ([`pixellab-doc-watch-cache.md`](pixellab-doc-watch-cache.md)) is how drift is detected.
+- Snapshot-bound: both the MCP inventory and the REST index/OpenAPI are the 2026-08-07 cached snapshots. Both can drift; the doc-watch cache workflow ([`pixellab-doc-watch-cache.md`](pixellab-doc-watch-cache.md)) is how drift is detected.
 - MCP↔REST are not guaranteed pixel-identical for the same prompt/seed even where parity is `=`; treat them as one workflow family with overlapping controls, REST generally exposing the fuller documented schema.
 - Re-audit correction: `create_character`'s `mode` is now documented as `Literal["standard", "pro", "v3"]` with per-value cost and behavior text (this doc previously said the MCP snapshot didn't enumerate `v3`/`pro` — that was stale). `create-character-v3` ↔ `create_character(mode="v3")` is now `=`: fields match (`description`, `detail`, `outline`, `view`, `reference_image_base64`/`reference_image`, `size`/`image_size`, `name`, `seed`), and MCP docs explicitly say v3 "is the only mode that accepts `reference_image_base64` (rotate an existing sprite)" — the exact REST v3 capability. `create-character-pro` ↔ `create_character(mode="pro")` is only `◐`: REST's `method` (`create_with_style`/`create_from_concept`/`rotate_character`), `concept_image`, and `style_description` have no MCP counterpart, and MCP's `mode="pro"` rejects `reference_image_base64` (v3-only) — so REST pro's `rotate_character`/`create_from_concept` methods are REST-only. SKILL.md's default of `create_character` to `mode="v3"` is well-supported by this.
 - This spike compares only public REST v2 and public MCP. Website/Map Workshop, Pixelorama/editor, Aseprite-extension, and legacy v1 routes are out of scope here; see [User-Facing Term To Backend Mapping](pixellab-user-facing-term-backend-mapping.md) for those surfaces.

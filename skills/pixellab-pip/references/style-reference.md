@@ -2,28 +2,27 @@
 
 Read this for `generate-with-style-v2`, website/Aseprite "Create image from style reference (pro)", or any request where a supplied image should define visual style, pixel size, palette, rendering, or sheet layout without preserving the exact subject identity.
 
-## Aseprite-Equivalent Size Handling
+## REST `generate-with-style-v2` Size Handling
 
-When the user supplies style image(s) and does not explicitly request a different output size, derive the request size from the style reference rather than choosing a larger canvas for batching or convenience.
+For REST `POST /generate-with-style-v2`, do not send `image_size`. The current schema retains it only as an optional deprecated property marked as removed; it is not a supported output-size control. The endpoint always derives a square output from the supplied style images:
 
-Prepare style-reference requests this way:
-- Inspect all style images and find the largest referenced width and height.
-- Set `target_size` to `max(largest_width, largest_height)`, clamped to the endpoint's allowed range.
-- Use a square `image_size` of `target_size x target_size`.
-- If a style image is non-square, pad it to `target_size x target_size` with transparent pixels and keep the original pixels centered. Do not scale, stretch, crop, or redraw the style image.
-- If the desired asset occupies a non-square region inside the square canvas, state that usable region in the prompt and require the remaining area to stay transparent.
-- Use a larger square only when the user asks for a larger output, the supplied references require it, or the requested content cannot fit at the reference-relative size and the user approves that tradeoff.
+- Inspect all style images and use the largest dimension across them as the effective output size, bounded to `16`–`512` pixels.
+- Non-square style images are centered on the square output canvas. Do not scale, stretch, crop, or redraw them to choose a different output size.
+- If the desired asset occupies a non-square region inside the square output, state that usable region in the prompt and require the remaining area to stay transparent.
+- If the user asks for an output size that differs from the style images, this endpoint cannot honor an independent size; preserve the supplied references and choose a route with an explicit size control, or ask for replacement references at the desired scale.
+
+For website/Aseprite workflows, or a local preparation task that explicitly requires a square style image, pad a copy of each non-square reference to its native largest dimension with transparent pixels and keep the original pixels centered. This local preparation rule does not create a REST `image_size` field.
 
 ## Reference Count And Batch Size
 
 Do not maximize the number of generated subjects by enlarging the canvas. For style fidelity, preserve the style reference's scale first.
 
-For `generate-with-style-v2`, output count is tied to square size buckets in the public docs:
+For `generate-with-style-v2`, output count is tied to the deduced square size buckets in the public docs:
 
-- `16-32`: 64 images
-- `33-64`: 16 images
-- `65-128`: 4 images
-- `129-512`: 1 image
+- `16-42`: 64 images
+- `43-85`: 16 images
+- `86-170`: 4 images
+- `171-512`: 1 image
 
 When the style reference's target size yields one image, generate one output asset, or one requested sheet/atlas, per request unless the user explicitly accepts a packed multi-asset atlas. A packed atlas competes with scale, layout, and style fidelity.
 
@@ -43,7 +42,7 @@ For managed 8-direction assets, MCP `create_character(mode="pro", style_characte
 
 After generation, verify:
 
-- Output dimensions equal the square `image_size`.
+- REST output dimensions equal the square size deduced from the style images, not a separately requested `image_size`.
 - Transparency was preserved in unused padded areas.
 - Visible content remains at the reference-relative footprint and scale.
 - For sheet outputs, rows, columns, and cell occupancy match the requested structure.

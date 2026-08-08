@@ -215,7 +215,7 @@ already the most exhaustively re-verified row in the parity map.
   `color_palette`/`outline`/`detail`/`shading`, not all four, to confirm partial-copy actually
   narrows what's copied); confirm `style_image_base64` takes exactly **one** image, not an array —
   this is the tool's documented boundary against REST's separate `generate-with-style-v2` endpoint
-  (required 1-4 blended `style_images` + free-text `style_description`), which has no MCP tool and is
+  (required 1-4 blended `style_images` + optional free-text `style_description`), which has no MCP tool and is
   intentionally out of scope for this plan; combine `reference_images` (subject) with
   `style_image_base64` (style) in one call and confirm both apply independently — the output should
   match the reference's subject *and* the style image's look, since they are documented as separate

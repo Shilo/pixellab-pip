@@ -154,7 +154,7 @@ For an ordered workflow, array position supplies the sequencing:
     "_comment": "Mossy-well style and glow workflow with a user-reviewed candidate and before/after inspection.",
     "_comment_prompt": "/pixellab-pip make a mossy stone well in this style, add a magical glow, and show me the before and after",
     "TASK": {
-      "instruction": "Pad the supplied style image to a square transparent canvas without resizing or repainting it.",
+      "instruction": "Pad the supplied style image to a 64x64 square transparent canvas without resizing or repainting it.",
       "inputs": ["style-source.png"],
       "outputs": ["style-reference.png"],
       "verify": "The source pixels are unchanged and centered on a transparent square canvas."
@@ -162,7 +162,13 @@ For an ordered workflow, array position supplies the sequencing:
   },
   {
     "POST /v2/generate-with-style-v2": {
-      "style_image": "style-reference.png",
+      "style_images": [
+        {
+          "image": "style-reference.png",
+          "width": 64,
+          "height": 64
+        }
+      ],
       "description": "a small mossy stone well, top-down"
     }
   },

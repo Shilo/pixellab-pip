@@ -1,6 +1,6 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-08-06 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
+Last reviewed: 2026-08-07 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
 
 > **All maxima in this document were measured on a Tier 2 ("Pixel Artisan") subscription.** PixelLab gates max image *size* by plan tier (a soft limit under the hard schema caps). See [Tier / Plan Size Gating](#tier--plan-size-gating-soft-limits) — lower tiers cap several endpoints below the numbers below.
 
@@ -8,7 +8,7 @@ Purpose: document the true minimum and maximum image-size hard limits for every 
 
 Motivating goal: support `8px` and `16px` icons, items, and tilesets if the tools allow it. The `32x32` minimum seen in some workflows prompted this review; that floor turned out to be a client-side editor limit, not an API limit.
 
-Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from the live tool schemas, not `https://api.pixellab.ai/mcp/docs`. Checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
+Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from the live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The `generate-with-style-v2` row was rechecked against the 2026-08-07 OpenAPI refresh; the other values below were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
 
 ## How To Read These Limits
 
@@ -113,7 +113,9 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 | `create-image-pixflux` | `image_size` | 16 per axis, but **area floor rejects `16×16`** | 400×400 | Area 32×32 to 400×400 — **enforced at generation: `16×16` → `422 "Canvas must be size 32x32 area or larger"` (probe-confirmed 2026-07-15), despite the schema's `minimum: 16`. Unlike `create-image-pixen`, which shares the same "Area 32×32" prose yet does generate at `16×16`** (see line below). Transparent background blanks area over 200×200. |
 | `create-image-pixflux-background` | `image_size` | 16×16 | 400×400 | Area 32×32 to 400×400. `no_background` defaults to `false` (keeps the scene); alternative for opaque edge-to-edge backgrounds ≤400×400 (verified 0px bars, 0% transparency at 400×224, ~$0.0065). |
 | `create-image-bitforge` | `image_size` | 16×16 | 200×200 | Max area 200×200. Skeleton keypoints best at 16/32/64. |
-| `generate-with-style-v2` | `image_size` | 16×16 | 512×512 | Square; non-standard sizes padded to nearest of {16, 32, 64, 128, 256, 512}. |
+| `generate-with-style-v2` | derived from `style_images` | 16×16 | 512×512 | Square output; the largest dimension across 1–4 style images determines the size. Non-square style images are centered. Output buckets: 16–42 → 64 images, 43–85 → 16, 86–170 → 4, 171–512 → 1. |
+
+`generate-with-style-v2` no longer has a supported output-size request field. The OpenAPI schema retains an optional deprecated `image_size` property marked as removed, but `style_images` and `description` are the only required request fields; do not use `image_size` to choose the result dimensions.
 
 ### `generate-image-v2` Effective Max Size By Aspect Ratio (Empirical, 2026-07-13)
 
