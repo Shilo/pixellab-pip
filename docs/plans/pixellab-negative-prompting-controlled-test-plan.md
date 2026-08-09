@@ -1,6 +1,6 @@
 # PixelLab Negative Prompting Controlled Test Plan
 
-Status: Phase 0 and Phase 0B executed 2026-08-08; endpoint-specific confirmation frozen.
+Status: Phase 0, Phase 0B, and Phase 1 executed 2026-08-08; 106-call static study complete.
 
 Last reviewed: 2026-08-08.
 
@@ -9,6 +9,10 @@ Companion research: `../pixellab/pixellab-negative-prompting-research-spike.md`.
 Phase 0 results: `../pixellab/pixellab-negative-prompting-calibration-results.md`.
 
 Phase 0B results: `../pixellab/pixellab-negative-prompting-phase0b-results.md`.
+
+Phase 1 results: `../pixellab/pixellab-negative-prompting-confirmation-results.md`.
+
+Complete attempt audit: `../pixellab/pixellab-negative-prompting-all-attempts.html`.
 
 The 180-call symmetric Phase 1 matrix is obsolete. Phase 0B found only one informative
 replacement family, and the initial calibration already contained one informative PixFlux
@@ -30,13 +34,14 @@ build. A conclusion is valid only for the endpoint, schema date, prompt families
 seed range tested. Static-image results must not be generalized to animation, inpaint,
 Pixen, or Create Image Pro without their own study.
 
-## Why Live Testing Is Required
+## Why Live Testing Was Required
 
-The repository and generation archive contain no same-endpoint, same-seed,
-same-positive-description pair where only `negative_description` changes. Historical
+Before this study, the repository and generation archive contained no same-endpoint,
+same-seed, same-positive-description pair where only `negative_description` changes. Historical
 outputs cannot identify causation. Current public documentation also does not publish
 controlled efficacy evidence. The only way to resolve the dispute is a pre-registered
-paired study that preserves every request and does not discard failures.
+paired study that preserves every request and does not discard failures. The completed
+study now supplies that record.
 
 ## Current Public Contract Frozen For This Study
 
@@ -232,11 +237,14 @@ After all accepted calls are captured:
 
 ## Phase 0B — Replacement-Family Calibration
 
-Status: frozen plan; not approved or executed.
+Status: executed 2026-08-08; 30/30 calls completed with 30 reported generations, zero
+errors, and zero retries.
 
 Phase 0 found that the original text and style baselines never clearly failed on either
-endpoint. The BitForge sword baseline also passed. The 180-call confirmation is blocked
-until replacement families demonstrate a usable baseline failure rate.
+endpoint. The BitForge sword baseline also passed. The then-proposed symmetric 180-call
+confirmation was withheld until replacement families demonstrated a usable baseline
+failure rate; Phase 0B retained only BitForge `TXT2`, enabling the smaller executed Phase
+1 matrix.
 
 Phase 0B tests three stronger natural priors without putting a literal contradiction in
 the positive description. It uses seed block 2 (`8382088`) and the same common 64×64,
@@ -347,8 +355,9 @@ Family-specific anchors:
 
 - `CNT`: failure means other than exactly two whole sword objects, including a third,
   detached duplicate, or fused extra blade.
-- `TXT`: failure means a human reviewer sees letter-like, number-like, word-like, rune-like,
-  or watermark-like marks. The single intended bottle pictogram is exempt.
+- `TXT`: failure means an independent visual reviewer sees letter-like, number-like,
+  word-like, rune-like, or watermark-like marks. The single intended bottle pictogram is
+  exempt.
 - `STY`: failure means smooth gradient rendering, photographic material response, or
   clearly 3D-rendered volume dominates over hard limited-color pixel construction.
 
@@ -368,7 +377,8 @@ replace blinded visual scoring.
 
 ## Phase 1 — Confirmatory Static Study
 
-Status: frozen; not approved or executed.
+Status: executed exactly as frozen; 46/46 calls completed with 46 reported generations,
+zero errors, and zero retries.
 
 The calibrations retain one informative family per endpoint:
 
@@ -387,7 +397,7 @@ Confirmation isolates the dedicated-field estimate and therefore uses `B0`, `N1`
 
 Every call keeps the applicable frozen description/negative text, 64×64 size,
 `text_guidance_scale: 8`, and `no_background: true`. `R0` is byte-identical to its
-same-seed `B0`. Phase 0 and Phase 0B approvals do not authorize Phase 1.
+same-seed `B0`. Phase 1 was separately approved before execution.
 
 The order below was frozen with deterministic shuffle seed `20260810`:
 
@@ -417,6 +427,26 @@ The order below was frozen with deterministic shuffle seed `20260810`:
 | 22 | `BF-TXT2-S3-N2` | 45 | `PF-CNT-S3-B0` |
 | 23 | `BF-TXT2-S7-N1` | 46 | `PF-CNT-S8-N2` |
 
+### Executed Result
+
+The frozen order, bodies, seeds, and call count were preserved. Two independent blind
+reviewers scored all 46 new candidates; a third blind reviewer adjudicated eight BitForge
+text disagreements. Combining the retained calibration seeds with Phase 1 produced 32
+paired negative-arm comparisons:
+
+| Classification | Count |
+|---|---:|
+| Helpful | 0 |
+| No observed effect | 25 |
+| Worse | 1 |
+| Adverse signal | 2 |
+| Inconclusive | 4 |
+
+PixFlux had no target-outcome discordances across either negative wording at eight seeds.
+BitForge never produced a clear text-free signpost; one pair crossed the material-quality
+harm threshold and two changed ambiguous baselines into clear failures. Full paired scores,
+limitations, repeat metrics, and the runtime decision are in the Phase 1 results document.
+
 Analyze each endpoint separately. The primary comparison is paired `N1` versus `B0` at
 the same endpoint, family, and seed. Report the paired failure-rate difference, exact or
 bootstrap 95% confidence interval, discordant-pair counts, and a paired test such as
@@ -440,6 +470,15 @@ For each endpoint:
 
 The bands are practical engineering thresholds, not claims about human perception in
 every context.
+
+Applied after execution, neither endpoint satisfies the formal benefit, harm, or
+equivalence band. PixFlux has zero observed target discordances but eight seeds leave the
+exact uncertainty wider than the ±10-point equivalence region. BitForge has target
+ambiguity in three of eight baselines (37.5%), above the 20% rule. The endpoint-level
+statistical declaration is therefore **inconclusive**, while the individual paired record
+still contains zero helpful results, mostly no observed effects, one quality harm, and two
+adverse signals. This distinction prevents “not formally equivalent” from being
+misreported as benefit or harm.
 
 ## Sequential Extension For A No-Effect Claim
 
@@ -478,6 +517,76 @@ approval:
 
 Static-image conclusions must not be promoted to these routes before their own evidence
 exists.
+
+## Post-Confirmation Testing Roadmap
+
+The 106-call study answered the immediate routing question: automatic negative insertion
+has no demonstrated benefit. Further testing should now distinguish three narrower claims
+rather than accumulate more unstructured examples.
+
+### Priority 1 — BitForge forbidden-noun induction probe
+
+Question: does placing an otherwise absent, visually salient object noun only in
+`negative_description` increase that object's appearance rate?
+
+Use two neutral prompt families with independently scoreable nouns, such as a red balloon
+and a black cat. Freeze each neutral scene so the target object is neither implied nor
+incompatible. For every family and seed, compare:
+
+| Arm | Positive description | `negative_description` | Role |
+|---|---|---|---|
+| `B0` | Neutral frozen scene | omitted | Spontaneous target rate. |
+| `I1` | Same as `B0` | Target noun only | Direct induction test. |
+| `Q1` | Same as `B0` | `blur, watermark` | Field-present control that does not name the target. |
+| `P1` | Same scene explicitly containing the target | omitted | Detectability/model-capability control; not part of the causal estimate. |
+
+Start with four seeds: 2 families × 4 seeds × 4 arms = **32 calls**. Continue to 16 total
+seeds only when both positive controls render the target in at least 75% of outputs and
+baseline target appearance stays below 25%. The extension adds 2 × 12 × 4 = **96 calls**,
+for a maximum of **128 calls**.
+
+Primary analysis is paired `I1` versus both `B0` and `Q1`. Declare an induction signal
+only if target appearance rises by at least 20 percentage points against both controls and
+the paired interval excludes zero. Score general quality separately. A noun appearing in
+one image is a counterexample to “this can never happen,” but is not enough to claim a
+mechanism.
+
+The exact nouns, positive descriptions, seeds, shuffled order, and expected cost must be
+frozen in an addendum before approval. Do not reuse the signpost family: its pseudo-writing
+prior makes noun induction hard to distinguish from ordinary generation behavior.
+
+### Priority 2 — Formal equivalence extension, only if needed
+
+If a formal PixFlux/BitForge no-effect interval is required, preserve the existing frozen
+confirmation wordings and add seed blocks only at registered boundaries:
+
+- 8→16 seeds: 2 endpoint-family pairs × 8 new seeds × 3 arms = **48 calls**, plus four
+  time-separated baseline anchors = **52 calls**.
+- 16→32 seeds: 2 pairs × 16 new seeds × 3 arms = **96 calls**, plus four anchors =
+  **100 calls**.
+
+Recompute only at each boundary. Stop when the paired target interval lies inside the
+pre-registered ±10-point equivalence band and paired quality stays inside ±0.5, or at 32
+seeds. This extension has lower practical priority than the induction probe because the
+current default already follows from zero observed wins and limited adverse evidence.
+
+### Priority 3 — Inline-negation generalization
+
+Test Pixen separately because it has no dedicated negative field. Use two scoreable
+families, eight seeds, and four arms: baseline, concise inline exclusion, long inline
+catalog, and positive structural rewrite. That is **64 calls**, with a four-call exact
+repeat subset for **68 calls** total. Analyze it as main-channel wording; never pool it
+with the dedicated-field estimate.
+
+Inpaint and animation remain later studies only when those routes are relevant to actual
+work. Each needs fixed source assets/anchors and its own artifact rubric; static-image
+results are not evidence about temporal artifacts or masked edits.
+
+### Approval boundary
+
+None of this roadmap authorizes calls. Each phase must show the exact frozen request matrix
+and predicted usage, then pass the PixelLab Pip paid-generation gate. Approval for one
+phase does not authorize the next.
 
 ## Artifact And Execution Contract
 

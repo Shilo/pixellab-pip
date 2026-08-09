@@ -10,7 +10,7 @@ tests support it.
 
 ## Executive Verdict
 
-The available evidence does **not** support either universal claim:
+The completed evidence does **not** support either universal claim:
 
 - "Negative prompting makes PixelLab outputs worse."
 - "Negative prompting helps PixelLab, or is harmless when it does not help."
@@ -23,23 +23,27 @@ The defensible conclusion is narrower:
    or any current public MCP tool.
 2. Inline exclusion wording such as `no text` is a different intervention from a separate
    negative field. The archive contains both apparent successes and apparent backfires.
-3. The archive contains no controlled same-route, same-seed, same-positive-description
-   comparison where only `negative_description` changes. Historical outputs therefore
-   cannot establish benefit, harm, or no-op behavior causally.
+3. The pre-study archive contains no controlled same-route, same-seed,
+   same-positive-description comparison where only `negative_description` changes.
+   Historical outputs cannot establish causality, but the later 106-call controlled study
+   now supplies 52 such negative-field attempts.
 4. The strongest current engineering default is positive structural wording plus real
    route controls. A short targeted exclusion can be a probabilistic guardrail, but it is
    not enforcement and should not be used to rescue a route-level failure.
 5. The question must be answered per endpoint and per use case. Pooling PixFlux,
    BitForge, Pixen, Pro, inpaint, and animation into one "PixelLab negative prompting"
    verdict would hide materially different schemas and model behavior.
-6. A later 30-call controlled calibration found BitForge's field behaviorally active and
-   PixFlux's field no-op or weak for the tested seed. It found no material quality harm or
-   clear benefit, while a positive structural rewrite fixed the only efficacy-informative
-   baseline failure. See `pixellab-negative-prompting-calibration-results.md`.
+6. The completed 106-call static study found zero helpful negative arms. In the retained
+   32-pair confirmation, 25 had no observed effect, one was worse, two produced adverse
+   signals, and four were ambiguous. BitForge's field is behaviorally active but did not
+   prevent the named failure; PixFlux's deprecated field was semantically weak/no-op on
+   the tested task. See `pixellab-negative-prompting-confirmation-results.md` and the
+   self-contained `pixellab-negative-prompting-all-attempts.html`.
 
-This conclusion challenges both the developers' reported blanket warning and the
-opposite intuition that negatives are always helpful or harmless. Neither has been
-demonstrated by the available controlled evidence.
+This challenges both the developers' reported blanket warning and the opposite intuition
+that negatives are helpful or necessarily harmless. The data support not adding negatives
+by default because no benefit was measured—not because every negative made every image
+worse.
 
 ## Terms Kept Separate
 
@@ -276,14 +280,12 @@ Archived Pixen attempts provide hard transport evidence:
 
 This is conclusive about request validity, not visual quality.
 
-## Interim Recommendation
-
-Until controlled tests finish:
+## Current Recommendation
 
 1. Inspect the selected live schema. Never create `negative_description` on a route that
    does not expose it.
 2. Omit PixFlux's deprecated negative field by default. Use it only for an exact user value
-   or an explicitly approved controlled experiment until behavior is characterized.
+   or an explicitly approved controlled experiment.
 3. Prefer positive structural wording and dedicated controls. Examples: `exactly one whole
    apple centered in empty space`, a closed named palette, `outline`, `detail`, `view`,
    `no_background`, masks, and references.
@@ -295,8 +297,9 @@ Until controlled tests finish:
 6. Treat exclusions as probabilistic. Verify the output and change route/control when the
    failure reflects a strong model prior, geometry problem, or missing input anchor.
 
-These are conservative engineering defaults, not a settled empirical claim that concise
-negatives improve results.
+These are now controlled-evidence-backed engineering defaults for the tested static
+routes. They are not a claim that all negatives are harmful or that results transfer to
+other routes.
 
 ## Live Phase 0 Calibration
 
@@ -329,6 +332,32 @@ pseudo-writing in baseline, concise-negative, long-negative, positive, and repea
 The field again changed BitForge pixels well beyond repeat variation without improving the
 named failure. The revised confirmation therefore uses only two endpoint-specific
 informative pairs: PixFlux crossed-sword count and BitForge signpost text.
+
+## Live Phase 1 Confirmation
+
+The frozen 46-call confirmation was executed on 2026-08-08. Combined with the two
+calibrations, the complete static study contains 106 successful calls, 106 validated PNGs,
+zero errors, and zero retries. Full results are in
+`pixellab-negative-prompting-confirmation-results.md`; every request and output is embedded
+in `pixellab-negative-prompting-all-attempts.html`.
+
+Across the retained eight-seed endpoint-family pairs:
+
+- PixFlux count: baseline, concise negative, and long negative had identical same-seed
+  sword-count outcomes in every block. Sixteen of sixteen negative comparisons had no
+  observed effect.
+- BitForge signpost text: no baseline or negative arm produced clear absence of
+  pseudo-writing. Of 16 negative comparisons, nine had no observed effect, one was worse
+  on quality, two changed an ambiguous baseline into clear failure, and four remained
+  ambiguous.
+- Combined: zero helpful, 25 no observed effect, one worse, two adverse signals, and four
+  inconclusive among 32 confirmation comparisons.
+
+Eight seeds cannot prove formal endpoint-wide equivalence, and only one retained prompt
+family was tested per endpoint. The result is nevertheless sufficient to reject automatic
+negative insertion as a useful default for these routes: the study measured no benefit,
+and BitForge supplied limited adverse counterexamples to the claim that negatives are
+always harmless.
 
 ## Controlled Test Plan
 
@@ -369,7 +398,7 @@ Use at least these visually scoreable families:
 1. **Count/duplication:** exactly one whole red apple; target extra or duplicate apples.
 2. **Unwanted subject:** an unoccupied moonlit forest clearing; target a salient animal.
 3. **Text contamination:** a pictorial shop sign or icon; target letters, words, numbers,
-   and watermark-like marks; use OCR plus human review.
+   and watermark-like marks; use OCR plus independent visual review.
 4. **Style conflict:** flat limited-palette pixel art; target glossy/3D/photo styling; score
    edge hardness, palette/ramp behavior, and blinded style judgment.
 5. **Background isolation:** one potion sprite; compare prompt exclusions against the real
@@ -381,33 +410,26 @@ Exact prompts must be frozen in a request matrix before the first paid call. Avo
 characters, living artists, copyrighted style imitation, ambiguous categories, or pairs
 where the positive and negative instructions literally conflict.
 
-### Phase 0 and Phase 1: calibrated dedicated-field study
+### Completed static dedicated-field study
 
 The exact prompts, request bodies, random seeds, shuffled dispatch order, scoring rubric,
 decision bands, and cost boundaries are frozen in
 `../plans/pixellab-negative-prompting-controlled-test-plan.md`. That plan is the canonical
 execution protocol; this spike retains the research rationale.
 
-The study starts with a 30-call PixFlux/BitForge calibration pilot: three prompt families,
-four comparison arms, one fixed seed, and one exact baseline repeat per endpoint/family.
-The pilot verifies that targets are scoreable, the field is accepted, and same-request
-variability is understood before purchasing a larger sample. It cannot by itself establish
-broad benefit, harm, or equivalence.
+The executed design used a 30-call initial calibration, a 30-call replacement-family
+calibration, and a 46-call endpoint-specific confirmation. Calibration stopped carrying
+families whose baselines did not exhibit a scoreable failure. Confirmation then expanded
+the retained PixFlux count and BitForge text pairs to eight total seeds with additional
+repeat controls. The complete 106-call record is published rather than dropping the
+uninformative or ugly outputs.
 
-If calibration passes, a separately approved 180-call confirmatory phase expands the same
-frozen design to eight total seeds and additional repeat controls. If the effect remains
-inconclusive only because the confidence interval is too wide, the protocol permits
-pre-registered batch extensions to at most 32 seeds. It must report `inconclusive` if the
-maximum sample still cannot support benefit, harm, or practical equivalence.
+If formal practical equivalence becomes a requirement, the frozen confirmation may be
+extended in pre-registered batches to 16 and at most 32 seeds. The eight-seed result does
+not meet the ±10-point equivalence band. Any extension needs a new approval gate and must
+report `inconclusive` if the maximum sample remains insufficient.
 
-### Phase 2: static confirmation
-
-If Phase 1 has a scoreable signal, expand to all six prompt families, eight independent
-seeds, and all six arms. Pre-register a maximum call count and do not drop ugly outputs.
-Run the confirmatory batch only after the analysis script and blinded score sheet pass on
-pilot data.
-
-### Phase 3: inline negation on no-field image routes
+### Remaining study: inline negation on no-field image routes
 
 Test Pixen separately with `B0`, an inline concise exclusion, an inline long exclusion,
 and `P1`. Use the route's actual structured controls identically in every arm. This tests
@@ -418,7 +440,7 @@ many candidates per call, but a call is Pro-priced and candidates from one call 
 independent seeds. Use a small pre-registered number of calls only after the Pixen/static
 studies justify the question.
 
-### Phase 4: animation and inpaint
+### Remaining study: animation and inpaint
 
 Do not generalize static-image results to animation or editing.
 
@@ -446,7 +468,7 @@ Secondary outcomes:
 - palette, edge, or gradient metrics where they actually correspond to the task; and
 - animation artifact count and frame coverage.
 
-Use two blinded human reviewers and adjudicate disagreements. Automated metrics are aids,
+Use two independent blinded reviewers and adjudicate disagreements. Automated metrics are aids,
 not substitutes for visual scoring. Analyze paired binary outcomes with a paired method
 such as McNemar's test and report effect size with confidence intervals. Analyze ordinal
 quality as paired data and report the distribution, not only an average.
@@ -474,7 +496,10 @@ pixellab-pip-generations/negative-prompt-study-YYYYMMDD/
   responses/
   images/
   blinded-index.json
-  scores.jsonl
+  scores-reviewer-a.jsonl
+  scores-reviewer-b.jsonl
+  adjudication.jsonl
+  automated-metrics.json
   analysis.json
   manifest.json
   negative-prompt-study.blueprint.json
@@ -486,10 +511,10 @@ exact output hashes but do not treat hash differences as semantic differences.
 
 ## Cost And Execution Gate
 
-No live PixelLab calls were made for this research review. The frozen Phase 0 calibration
-pilot is 30 calls and is expected to consume about 30 generations. Its separately approved
-Phase 1 confirmation is 180 more calls. Later extensions, Pixen, animation, inpaint, and
-especially Pro can cost substantially more.
+The approved static study is complete: 106 live calls reported 106 generations, with no
+errors or retries. That approval does not carry into a seed extension, induction probe,
+Pixen, animation, inpaint, or Pro study. Each later phase can cost substantially more and
+requires a new gate.
 
 Before execution, apply Pip's cost-approval gate with:
 
