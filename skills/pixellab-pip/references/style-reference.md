@@ -1,6 +1,6 @@
 # Style Reference Generation
 
-Read this for `generate-with-style-v2`, website/Aseprite "Create image from style reference (pro)", or any request where a supplied image should define visual style, pixel size, palette, rendering, or sheet layout without preserving the exact subject identity.
+Read this for MCP `create_image_pro` style-image input, REST `generate-with-style-v2`, website/Aseprite "Create image from style reference (pro)", or any request where a supplied image should define visual style, pixel size, palette, rendering, or sheet layout without preserving the exact subject identity.
 
 ## REST `generate-with-style-v2` Size Handling
 
@@ -50,33 +50,25 @@ After generation, verify:
   do not prove adherence.
 - The generated subject does not copy a style-only reference subject when the user prohibited it.
 
-## Hard top-down building projection
+## Hard projection or orientation requirements
 
-For a traditional screen-aligned south-facing building, use a neutral reference that visibly
-demonstrates the projection, bottom/south front facade, and entrance. A locally authored generic
-guide is an acceptable generation control when it is kept separate from final art. Do not use a
-previously generated specific house as the style reference when the next request requires novel
-geometry; the tested route preserved projection but converged on the reference-specific
-architecture.
+When a view or facing direction is a hard requirement, preserve the user's subject and category.
+Use the shortest useful description that names the requested subject and required view or
+orientation; do not substitute a familiar category or add unrequested details.
 
-In the current controlled building test, the neutral reference held the projection even when
-style_description was omitted. Start with the shortest useful description:
+If text-only output misses the requirement, use a neutral guide that visibly demonstrates the
+required view, facing cue, and framing. With MCP, pass it as `style_image_url` or
+`style_image_base64`; with REST, use `generate-image-v2` and its single `style_image` field. Use
+`generate-with-style-v2` only when multiple style images are actually needed. A guide can preserve
+the structural cue while pulling output toward its own geometry, so do not use a distinctive
+generated asset as a guide when novel geometry matters.
 
-    a new traditional 2D town-house sprite with a south-facing entrance and different geometry.
+Verify the hard requirement before judging style: requested subject/category; requested
+view/orientation and its defining cues (for example, a building's front facade and entrance on the
+requested side); one whole centered asset with expected size/transparency; no clear text or
+watermark; and no unwanted copy of a style-only reference. Change route after a structural failure
+instead of repeatedly adding prompt exclusions.
 
-Keep the structural review gate. This finding is specific to the tested building route and model
-state; it does not make text-only Pixen/PixFlux generation reliable. Reliability is currently
-bounded to town-house-like forms: shop and inn wording caused depth or signage failures in the
-repeat suite even with explicit front-facade language, so use a category-specific test before
-generalizing the route.
-
-For this building route, reject any candidate that fails a hard gate: shallow screen-aligned
-top-down projection; front facade and entrance on the south/bottom edge; one whole centered
-building with the expected size, transparency, and no clear text or watermark; and, when new
-geometry is requested, no distinctive copy of the style reference. Change route after a projection
-failure instead of repeatedly adding prompt exclusions.
-
-This control is building-specific. Do not reuse it for characters or create a combined
-building/character guide: roof, front-facade, and entrance cues encode architecture and can bias
-character silhouette or pose. Keep a character-specific reference separate, and create one only
-when character testing demonstrates a need.
+Keep guides role-specific when their visual cues could bias a different asset class. Do not reuse an
+architecture-specific building guide for characters; use a character-appropriate guide when a
+character's view or pose needs anchoring.
