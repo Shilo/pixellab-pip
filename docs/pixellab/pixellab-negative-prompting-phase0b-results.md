@@ -16,6 +16,11 @@ BitForge's dedicated field again changed images beyond repeat variation but did 
 clear pseudo-writing in the only informative replacement family; PixFlux's three
 replacement baselines did not clearly fail, so none can estimate negative-prompt benefit.
 
+This is a result for the deployed PixFlux/BitForge endpoint stacks, not an intrinsic claim
+about negative language. Model priors, routing, prompt-field weighting, and any hidden
+server-side conditioning remain inseparable moderators. Pixen, Create Image Pro, and
+v3/new workflows were not controlled in this phase.
+
 ## What Ran
 
 - REST PixFlux and BitForge

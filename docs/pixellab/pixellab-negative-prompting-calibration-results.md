@@ -16,6 +16,11 @@ active, while PixFlux's deprecated field produced no visible target change beyon
 repeat variation; neither endpoint yet shows controlled evidence that negatives are
 generally beneficial or materially harmful.
 
+All findings are conditional on the deployed PixFlux/BitForge endpoint stacks. Model
+priors, hidden routing, prompt parsing/weighting, and any server-side conditioning are part
+of the observed treatment and cannot be separated from the field through the public API.
+This phase did not test Pixen, Create Image Pro, or any v3/new workflow.
+
 ## What Ran
 
 - REST `POST /v2/create-image-pixflux`
