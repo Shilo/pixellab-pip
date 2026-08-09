@@ -269,14 +269,16 @@ for the exact requests, seeds, outputs, and candidate-level notes.
 
 ## Decision after the spike
 
-- **Prompt-only passes 5/5:** use the shortest passing prompt for this narrow building class, and
-  promote it to a single canonical reference only after documenting the live evidence.
-- **Prompt-only fails, style reference passes:** route hard-projection building requests through a
-  projection-anchored style reference and keep the prompt short; update the existing house spike
-  with the exact fixture and reproduction.
-- **Both fail:** report that no reliable prompt-only solution was found for the current model state;
-  test the schema-qualified managed object route or move to a user-owned reference/editor or
-  approved local assembly workflow. Do not claim that more prompt wording will solve the route.
+The observed branch is **prompt-only failed, style reference passed**. Route hard-projection
+town-house-like building requests through a neutral projection-anchored style reference, keep the
+variation prompt short, and reject candidates that fail the structural gates. The reliability suite
+also shows that this decision does not automatically extend to named categories such as shops or
+inns; those require their own reference and prompt test.
+
+If both prompt-only and style-reference tests fail after a bounded experiment, report that no
+reliable PixelLab solution was found for the current model state. Then test a schema-qualified
+managed-object route or move to a user-owned reference/editor or approved local assembly workflow.
+Do not claim that more prompt wording will solve a route-level projection failure.
 
 ## Related documentation
 

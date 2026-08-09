@@ -32,6 +32,10 @@ The defensible conclusion is narrower:
 5. The question must be answered per endpoint and per use case. Pooling PixFlux,
    BitForge, Pixen, Pro, inpaint, and animation into one "PixelLab negative prompting"
    verdict would hide materially different schemas and model behavior.
+6. A later 30-call controlled calibration found BitForge's field behaviorally active and
+   PixFlux's field no-op or weak for the tested seed. It found no material quality harm or
+   clear benefit, while a positive structural rewrite fixed the only efficacy-informative
+   baseline failure. See `pixellab-negative-prompting-calibration-results.md`.
 
 This conclusion challenges both the developers' reported blanket warning and the
 opposite intuition that negatives are always helpful or harmless. Neither has been
@@ -293,6 +297,38 @@ Until controlled tests finish:
 
 These are conservative engineering defaults, not a settled empirical claim that concise
 negatives improve results.
+
+## Live Phase 0 Calibration
+
+The frozen 30-call calibration was executed on 2026-08-08. Full results and limitations
+are recorded in `pixellab-negative-prompting-calibration-results.md`.
+
+The calibration adds three controlled findings to the historical review:
+
+1. BitForge's dedicated field is behaviorally active. Its negative arms changed same-seed
+   outputs substantially more than exact baseline repeats, especially in the sign family.
+2. PixFlux's deprecated field produced the same semantic target outcomes as baseline in
+   all three families, and its pixel differences were comparable to repeat variation. This
+   is evidence of no-op or weak behavior for the tested seed, not proof of equivalence.
+3. The only baseline failure that could test efficacy was PixFlux's crossed-sword prompt.
+   Concise and long negatives did not fix it; the constructive positive rewrite did.
+
+No negative arm produced a material overall-quality loss under the pre-registered band.
+BitForge's two text-negative images contained ambiguous glyph-like emblems while the
+baseline did not, but blind adjudication found no clearly readable text. This is a
+replication target, not a proven backfire.
+
+The text and style baselines never clearly failed on either endpoint, so they are not
+informative enough for confirmation. Per the frozen stopping rule, replace or harden those
+families and recalibrate them before purchasing the larger seed matrix.
+
+Phase 0B performed that replacement calibration. Its complete results are in
+`pixellab-negative-prompting-phase0b-results.md`. The unwanted-subject and projection
+baselines remained non-informative, but BitForge's stronger signpost prompt produced clear
+pseudo-writing in baseline, concise-negative, long-negative, positive, and repeat arms.
+The field again changed BitForge pixels well beyond repeat variation without improving the
+named failure. The revised confirmation therefore uses only two endpoint-specific
+informative pairs: PixFlux crossed-sword count and BitForge signpost text.
 
 ## Controlled Test Plan
 

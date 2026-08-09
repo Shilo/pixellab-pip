@@ -1,10 +1,19 @@
 # PixelLab Negative Prompting Controlled Test Plan
 
-Status: frozen calibration protocol; no paid calls executed.
+Status: Phase 0 and Phase 0B executed 2026-08-08; endpoint-specific confirmation frozen.
 
 Last reviewed: 2026-08-08.
 
 Companion research: `../pixellab/pixellab-negative-prompting-research-spike.md`.
+
+Phase 0 results: `../pixellab/pixellab-negative-prompting-calibration-results.md`.
+
+Phase 0B results: `../pixellab/pixellab-negative-prompting-phase0b-results.md`.
+
+The 180-call symmetric Phase 1 matrix is obsolete. Phase 0B found only one informative
+replacement family, and the initial calibration already contained one informative PixFlux
+family. The revised confirmation below tests those endpoint-specific pairs only. Both
+executed calibration matrices and results remain immutable.
 
 ## Decision This Plan Must Support
 
@@ -221,6 +230,93 @@ After all accepted calls are captured:
   identical, treat this only as pilot evidence of a no-op; confirmation is still required
   for a durable rule.
 
+## Phase 0B — Replacement-Family Calibration
+
+Status: frozen plan; not approved or executed.
+
+Phase 0 found that the original text and style baselines never clearly failed on either
+endpoint. The BitForge sword baseline also passed. The 180-call confirmation is blocked
+until replacement families demonstrate a usable baseline failure rate.
+
+Phase 0B tests three stronger natural priors without putting a literal contradiction in
+the positive description. It uses seed block 2 (`8382088`) and the same common 64×64,
+`text_guidance_scale: 8`, `no_background: true` payload. `B0`, `P1`, and `R0` omit
+`negative_description`; `N1` and `N2` add it. `R0` is byte-identical to `B0`.
+
+### `SUB` — unwanted subject
+
+Target: an unoccupied scene with no visible person or animal.
+
+- Base (`B0`, `N1`, `N2`, `R0`): `Moonlit forest campsite with a small campfire centered between dark pine trees.`
+- Concise negative (`N1`): `people, characters, animals`
+- Long negative (`N2`): `people, characters, animals, travelers, campers, human silhouettes, faces, hands, birds, wolves, deer, horses, text, watermark, blur, cropped objects`
+- Positive rewrite (`P1`): `Empty moonlit forest clearing centered on one unattended campfire between dark pine trees.`
+
+### `TXT2` — stronger text prior
+
+Target: three pictorial arrow boards without letter-like or number-like marks.
+
+- Base (`B0`, `N1`, `N2`, `R0`): `Wooden fantasy directional signpost with three arrow-shaped boards at a crossroads.`
+- Concise negative (`N1`): `text, letters, words, numbers`
+- Long negative (`N2`): `text, letters, words, numbers, writing, labels, signatures, watermarks, typography, runes, glyphs, slogans`
+- Positive rewrite (`P1`): `Wooden fantasy directional signpost with three arrow-shaped boards: one red sword pictogram, one blue potion pictogram, and one green tree pictogram, with each pictogram centered on its board.`
+
+### `PRJ` — projection prior
+
+Target: a straight front elevation with no visible side wall or diagonal depth.
+
+- Base (`B0`, `N1`, `N2`, `R0`): `Small wooden cottage with a red door and two windows, full building visible.`
+- Concise negative (`N1`): `isometric view, three-quarter view, visible side wall, diagonal perspective`
+- Long negative (`N2`): `isometric view, three-quarter view, visible side wall, diagonal perspective, aerial view, top-down view, tilted camera, vanishing point, corner-facing building, rear view, cropped building`
+- Positive rewrite (`P1`): `Straight front elevation of one small wooden cottage, facade parallel to the screen, one centered red door and two front windows, full rectangular building visible.`
+
+### Phase 0B call count and order
+
+- 2 endpoints × 3 replacement families × 4 comparison arms = 24 calls.
+- One exact repeat for every endpoint/family = 6 calls.
+- Total: **30 paid calls**, expected about **30 generations**.
+- Phase 0 approval does not authorize these calls.
+
+The order below was frozen with deterministic shuffle seed `20260809`:
+
+| Order | Request ID | Endpoint | Family | Arm |
+|---:|---|---|---|---|
+| 1 | `PF-TXT2-N2` | PixFlux | `TXT2` | `N2` |
+| 2 | `BF-SUB-N2` | BitForge | `SUB` | `N2` |
+| 3 | `BF-SUB-P1` | BitForge | `SUB` | `P1` |
+| 4 | `PF-TXT2-R0` | PixFlux | `TXT2` | `R0` |
+| 5 | `PF-SUB-N1` | PixFlux | `SUB` | `N1` |
+| 6 | `BF-TXT2-P1` | BitForge | `TXT2` | `P1` |
+| 7 | `PF-PRJ-B0` | PixFlux | `PRJ` | `B0` |
+| 8 | `PF-SUB-R0` | PixFlux | `SUB` | `R0` |
+| 9 | `PF-PRJ-P1` | PixFlux | `PRJ` | `P1` |
+| 10 | `BF-PRJ-N1` | BitForge | `PRJ` | `N1` |
+| 11 | `PF-TXT2-P1` | PixFlux | `TXT2` | `P1` |
+| 12 | `PF-PRJ-R0` | PixFlux | `PRJ` | `R0` |
+| 13 | `BF-PRJ-R0` | BitForge | `PRJ` | `R0` |
+| 14 | `BF-TXT2-N2` | BitForge | `TXT2` | `N2` |
+| 15 | `PF-TXT2-B0` | PixFlux | `TXT2` | `B0` |
+| 16 | `BF-TXT2-N1` | BitForge | `TXT2` | `N1` |
+| 17 | `BF-PRJ-P1` | BitForge | `PRJ` | `P1` |
+| 18 | `BF-TXT2-B0` | BitForge | `TXT2` | `B0` |
+| 19 | `BF-SUB-R0` | BitForge | `SUB` | `R0` |
+| 20 | `PF-PRJ-N1` | PixFlux | `PRJ` | `N1` |
+| 21 | `PF-TXT2-N1` | PixFlux | `TXT2` | `N1` |
+| 22 | `BF-PRJ-B0` | BitForge | `PRJ` | `B0` |
+| 23 | `BF-SUB-N1` | BitForge | `SUB` | `N1` |
+| 24 | `BF-TXT2-R0` | BitForge | `TXT2` | `R0` |
+| 25 | `BF-SUB-B0` | BitForge | `SUB` | `B0` |
+| 26 | `PF-SUB-P1` | PixFlux | `SUB` | `P1` |
+| 27 | `PF-SUB-B0` | PixFlux | `SUB` | `B0` |
+| 28 | `PF-PRJ-N2` | PixFlux | `PRJ` | `N2` |
+| 29 | `BF-PRJ-N2` | BitForge | `PRJ` | `N2` |
+| 30 | `PF-SUB-N2` | PixFlux | `SUB` | `N2` |
+
+Retain a replacement family for confirmation only if at least one endpoint's `B0` or
+`R0` clearly exhibits its target failure and blind reviewers can apply the rubric. A
+family may be retained for one endpoint and rejected for the other; confirmation does not
+need a falsely symmetric family set.
+
 ## Blinded Scoring Protocol
 
 Generate the blinded index only after all images in a phase are saved. Reviewers receive
@@ -272,17 +368,54 @@ replace blinded visual scoring.
 
 ## Phase 1 — Confirmatory Static Study
 
-Run only after Phase 0 passes and its scoring is locked.
+Status: frozen; not approved or executed.
 
-- Use seed blocks 2-8 for the same 2 endpoints, 3 retained families, and 4 comparison
-  arms: **168 calls**.
-- Add `R0` repeats of `B0` at seed blocks 2 and 3 for every endpoint/family:
-  **12 calls**.
-- Phase 1 total: **180 calls**, expected about **180 generations**.
-- Combined Phase 0 + Phase 1 total: **210 calls**, expected about **210 generations**.
+The calibrations retain one informative family per endpoint:
 
-Before Phase 1, materialize and freeze its full request matrix and shuffled dispatch order
-as a versioned addendum. Phase 0 approval does not authorize Phase 1.
+- PixFlux `CNT`, using the original crossed-swords prompt and its concise/long negatives.
+  Seed block 1 already exists; run blocks 2-8.
+- BitForge `TXT2`, using the replacement directional-signpost prompt and its
+  concise/long text negatives. Seed block 2 already exists; run blocks 1 and 3-8.
+
+Confirmation isolates the dedicated-field estimate and therefore uses `B0`, `N1`, and
+`N2`, not `P1`. Positive strategy remains a documented secondary result from calibration.
+
+- 2 endpoint-family pairs × 7 new seeds × 3 arms = **42 calls**.
+- Add two exact baseline repeats per endpoint-family = **4 calls**.
+- Phase 1 total: **46 calls**, expected about **46 generations**.
+- Combined Phase 0 + Phase 0B + Phase 1: **106 calls/generations**.
+
+Every call keeps the applicable frozen description/negative text, 64×64 size,
+`text_guidance_scale: 8`, and `no_background: true`. `R0` is byte-identical to its
+same-seed `B0`. Phase 0 and Phase 0B approvals do not authorize Phase 1.
+
+The order below was frozen with deterministic shuffle seed `20260810`:
+
+| Order | Request ID | Order | Request ID |
+|---:|---|---:|---|
+| 1 | `PF-CNT-S6-N1` | 24 | `PF-CNT-S7-B0` |
+| 2 | `BF-TXT2-S4-B0` | 25 | `PF-CNT-S8-B0` |
+| 3 | `BF-TXT2-S5-B0` | 26 | `PF-CNT-S8-N1` |
+| 4 | `BF-TXT2-S8-N2` | 27 | `PF-CNT-S7-N1` |
+| 5 | `BF-TXT2-S8-B0` | 28 | `PF-CNT-S2-R0` |
+| 6 | `PF-CNT-S2-N2` | 29 | `PF-CNT-S5-B0` |
+| 7 | `BF-TXT2-S5-N2` | 30 | `PF-CNT-S2-N1` |
+| 8 | `PF-CNT-S6-B0` | 31 | `BF-TXT2-S1-N2` |
+| 9 | `PF-CNT-S3-N1` | 32 | `PF-CNT-S7-N2` |
+| 10 | `PF-CNT-S3-N2` | 33 | `BF-TXT2-S1-N1` |
+| 11 | `BF-TXT2-S7-N2` | 34 | `PF-CNT-S4-N1` |
+| 12 | `PF-CNT-S5-N2` | 35 | `BF-TXT2-S6-N2` |
+| 13 | `BF-TXT2-S4-R0` | 36 | `BF-TXT2-S8-N1` |
+| 14 | `PF-CNT-S6-N2` | 37 | `PF-CNT-S4-B0` |
+| 15 | `PF-CNT-S4-N2` | 38 | `BF-TXT2-S3-B0` |
+| 16 | `BF-TXT2-S4-N2` | 39 | `BF-TXT2-S7-B0` |
+| 17 | `BF-TXT2-S3-N1` | 40 | `BF-TXT2-S6-N1` |
+| 18 | `BF-TXT2-S1-B0` | 41 | `BF-TXT2-S3-R0` |
+| 19 | `BF-TXT2-S5-N1` | 42 | `BF-TXT2-S4-N1` |
+| 20 | `PF-CNT-S5-N1` | 43 | `PF-CNT-S2-B0` |
+| 21 | `BF-TXT2-S6-B0` | 44 | `PF-CNT-S3-R0` |
+| 22 | `BF-TXT2-S3-N2` | 45 | `PF-CNT-S3-B0` |
+| 23 | `BF-TXT2-S7-N1` | 46 | `PF-CNT-S8-N2` |
 
 Analyze each endpoint separately. The primary comparison is paired `N1` versus `B0` at
 the same endpoint, family, and seed. Report the paired failure-rate difference, exact or
@@ -315,9 +448,9 @@ inconclusive only because intervals are too wide, extend the same frozen matrix 
 to 16 seeds and then at most 32 seeds. Recompute at the batch boundary; do not stop after
 an especially favorable individual image.
 
-Maximum dedicated-field study size at 32 seeds:
+Maximum dedicated-field confirmation size at 32 seeds:
 
-- 2 endpoints × 3 families × 4 arms × 32 seeds = **768 calls**;
+- 2 endpoint-family pairs × 3 causal arms × 32 seeds = **192 calls**;
 - plus the frozen repeat subset;
 - approval and cost accounting are required before every extension batch.
 
@@ -376,13 +509,14 @@ is resolved manually.
 
 ## Cost Gate
 
-No live generation is authorized by this document alone. Immediately before Phase 0:
+No live generation is authorized by this document alone. Phase 0 and Phase 0B were each
+approved and executed. Immediately before any later paid phase:
 
 1. read Pip's persistent auto-generation preference exactly once;
 2. verify the bearer token exists without revealing it;
-3. show all 30 exact paid calls, their prompts, endpoints, seeds, and predicted total;
+3. show every exact paid call, its prompt, endpoint, seed, and predicted total;
 4. if auto-generation is off, wait for explicit approval; and
-5. do not infer approval for Phase 1 or any later phase.
+5. do not infer approval from an earlier phase.
 
 ## Promotion Rule
 
