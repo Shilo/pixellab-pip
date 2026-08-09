@@ -1,0 +1,393 @@
+# PixelLab Negative Prompting Controlled Test Plan
+
+Status: frozen calibration protocol; no paid calls executed.
+
+Last reviewed: 2026-08-08.
+
+Companion research: `../pixellab/pixellab-negative-prompting-research-spike.md`.
+
+## Decision This Plan Must Support
+
+Determine, per tested PixelLab endpoint, whether a dedicated
+`negative_description` field:
+
+1. reduces a named, visually scoreable failure;
+2. has no practically meaningful effect;
+3. makes the named failure or general image quality worse; or
+4. cannot be classified with the collected evidence.
+
+This plan does not seek a universal law for every model, prompt, or future PixelLab
+build. A conclusion is valid only for the endpoint, schema date, prompt families, and
+seed range tested. Static-image results must not be generalized to animation, inpaint,
+Pixen, or Create Image Pro without their own study.
+
+## Why Live Testing Is Required
+
+The repository and generation archive contain no same-endpoint, same-seed,
+same-positive-description pair where only `negative_description` changes. Historical
+outputs cannot identify causation. Current public documentation also does not publish
+controlled efficacy evidence. The only way to resolve the dispute is a pre-registered
+paired study that preserves every request and does not discard failures.
+
+## Current Public Contract Frozen For This Study
+
+The live REST v2 OpenAPI schema was re-read on 2026-08-08 before freezing this plan.
+
+| Endpoint | Dedicated field | Status | Study role |
+|---|---|---|---|
+| `POST /v2/create-image-pixflux` | `negative_description` | Exposed but described as `(Deprecated)` | Test whether the field is accepted and behaviorally active despite deprecation. |
+| `POST /v2/create-image-bitforge` | `negative_description` | Exposed and described as text to avoid | Test the currently documented implementation. |
+
+Both routes accept the common fields used here: `description`, `image_size`,
+`text_guidance_scale`, `no_background`, and `seed`. The study omits endpoint-specific
+controls so the paired field comparison changes only `negative_description`.
+
+No current public MCP image tool exposes this field. Pixen and Create Image Pro are not
+surrogate tests for it and are intentionally excluded from the dedicated-field phase.
+
+## Pre-Registered Hypotheses
+
+- `H1 — concise benefit`: `N1` has fewer target failures than `B0` without a material
+  loss in blinded quality.
+- `H2 — concise harm`: `N1` has more target failures or materially lower quality than
+  `B0`.
+- `H3 — long-negative harm`: `N2` performs worse than `N1` on target compliance,
+  quality, or both.
+- `H4 — positive structure`: `P1` performs at least as well as the best negative arm.
+- `H5 — PixFlux no-op`: PixFlux `N1` and `N2` are behaviorally indistinguishable from
+  `B0`, after same-request repeat variability is measured.
+
+`N1` versus `B0` is the causal field ablation. `N2` versus `B0` tests broad negative
+lists. `P1` is a strategy comparison, not a one-variable causal ablation.
+
+## Fixed Arms
+
+| Arm | Positive description | `negative_description` |
+|---|---|---|
+| `B0` | Base prompt | Omitted |
+| `N1` | Byte-identical to `B0` | Concise target exclusion |
+| `N2` | Byte-identical to `B0` | Long target-plus-defect list |
+| `P1` | Constructive positive rewrite | Omitted |
+| `R0` | Byte-identical request body to `B0` | Omitted |
+
+`R0` is a second submission of the exact `B0` body. Request identifiers and timestamps
+are metadata outside the body and may differ.
+
+## Frozen Prompt Registry
+
+Punctuation and spelling below are literal. Do not enhance, translate, reorder, or add
+boilerplate after seeing an output. Any wording change creates a new protocol version.
+
+### `CNT` — object count
+
+Target: exactly two whole swords and no third or duplicated weapon.
+
+- Base (`B0`, `N1`, `N2`, `R0`): `Crossed silver swords emblem centered in empty space.`
+- Concise negative (`N1`): `extra swords, third sword, duplicate swords`
+- Long negative (`N2`): `extra swords, third sword, duplicate swords, extra blades, floating weapons, shields, banners, text, watermark, cropped objects, blur, gradients, photorealism, 3D render`
+- Positive rewrite (`P1`): `Exactly two whole silver swords crossing once in an X, both fully visible, centered with clear empty space on all sides.`
+
+### `TXT` — text contamination
+
+Target: a pictorial shop sign with no letter-like or number-like marks. The intended
+potion-bottle pictogram is not text.
+
+- Base (`B0`, `N1`, `N2`, `R0`): `Wooden fantasy potion-shop sign centered in empty space.`
+- Concise negative (`N1`): `text, letters, words, numbers`
+- Long negative (`N2`): `text, letters, words, numbers, writing, labels, logos, signatures, watermarks, typography, runes, glyphs, slogans`
+- Positive rewrite (`P1`): `Wooden fantasy shop sign with one centered red potion-bottle pictogram as the entire face design, a simple carved border, and a clear silhouette.`
+
+### `STY` — render style
+
+Target: limited-color hard-edged pixel art, without smooth, photographic, or 3D-render
+traits.
+
+- Base (`B0`, `N1`, `N2`, `R0`): `Small blue ceramic potion bottle centered in empty space.`
+- Concise negative (`N1`): `glossy, photorealistic, 3D render, smooth gradients`
+- Long negative (`N2`): `glossy, reflective, photorealistic, 3D render, smooth gradients, cinematic lighting, depth of field, bokeh, antialiasing, blur, plastic, subsurface scattering, painterly brushwork`
+- Positive rewrite (`P1`): `Small blue potion bottle using exactly three opaque colors: a dark navy outline, a medium-blue fill, and a pale-blue highlight, with hard stair-step pixel edges, centered in empty space.`
+
+## Fixed Request Body
+
+Every request uses:
+
+```json
+{
+  "description": "<literal prompt from the registry>",
+  "image_size": { "width": 64, "height": 64 },
+  "text_guidance_scale": 8,
+  "no_background": true,
+  "seed": 1178348305
+}
+```
+
+`N1` and `N2` add their literal `negative_description`. `B0`, `P1`, and `R0` omit the
+property rather than sending an empty string. All other optional fields are omitted.
+
+## Fixed Seed Registry
+
+Eight unique positive 31-bit seeds were generated once with a cryptographic random
+number generator and frozen before any output was produced:
+
+| Block | Seed | Use |
+|---:|---:|---|
+| 1 | `1178348305` | Calibration pilot and first repeat block |
+| 2 | `8382088` | Confirmation |
+| 3 | `1505276381` | Confirmation |
+| 4 | `1344908665` | Confirmation |
+| 5 | `1824521337` | Confirmation |
+| 6 | `338955590` | Confirmation |
+| 7 | `1696822838` | Confirmation |
+| 8 | `1156405294` | Confirmation |
+
+## Phase 0 — Calibration Pilot
+
+### Purpose
+
+Verify request acceptance, response capture, blinding, rubric usability, target failure
+frequency, and same-request reproducibility before purchasing a larger sample. The pilot
+is allowed to conclude that a prompt family is uninformative; it is not powered to
+declare broad benefit, harm, or equivalence.
+
+### Exact call count
+
+- 2 endpoints × 3 prompt families × 4 comparison arms = 24 calls.
+- One `R0` repeat for each endpoint/family baseline = 6 calls.
+- Total: **30 paid calls**, expected to consume about **30 generations** based on the
+  current non-Pro route tier and historical usage records. Preserve the returned usage
+  object because actual billing is authoritative.
+
+### Frozen dispatch order
+
+This order was shuffled before generation with deterministic shuffle seed `20260808`.
+Do not regroup calls by arm during execution.
+
+| Order | Request ID | Endpoint | Family | Arm |
+|---:|---|---|---|---|
+| 1 | `BF-STY-N1` | BitForge | `STY` | `N1` |
+| 2 | `PF-STY-B0` | PixFlux | `STY` | `B0` |
+| 3 | `PF-CNT-N2` | PixFlux | `CNT` | `N2` |
+| 4 | `BF-TXT-P1` | BitForge | `TXT` | `P1` |
+| 5 | `BF-CNT-P1` | BitForge | `CNT` | `P1` |
+| 6 | `PF-CNT-P1` | PixFlux | `CNT` | `P1` |
+| 7 | `PF-TXT-P1` | PixFlux | `TXT` | `P1` |
+| 8 | `BF-TXT-R0` | BitForge | `TXT` | `R0` |
+| 9 | `PF-TXT-B0` | PixFlux | `TXT` | `B0` |
+| 10 | `BF-STY-R0` | BitForge | `STY` | `R0` |
+| 11 | `BF-STY-P1` | BitForge | `STY` | `P1` |
+| 12 | `PF-TXT-R0` | PixFlux | `TXT` | `R0` |
+| 13 | `PF-STY-P1` | PixFlux | `STY` | `P1` |
+| 14 | `PF-STY-N2` | PixFlux | `STY` | `N2` |
+| 15 | `BF-CNT-N1` | BitForge | `CNT` | `N1` |
+| 16 | `BF-TXT-N2` | BitForge | `TXT` | `N2` |
+| 17 | `PF-STY-R0` | PixFlux | `STY` | `R0` |
+| 18 | `BF-STY-N2` | BitForge | `STY` | `N2` |
+| 19 | `PF-TXT-N1` | PixFlux | `TXT` | `N1` |
+| 20 | `BF-CNT-B0` | BitForge | `CNT` | `B0` |
+| 21 | `PF-TXT-N2` | PixFlux | `TXT` | `N2` |
+| 22 | `PF-CNT-B0` | PixFlux | `CNT` | `B0` |
+| 23 | `PF-CNT-R0` | PixFlux | `CNT` | `R0` |
+| 24 | `BF-CNT-R0` | BitForge | `CNT` | `R0` |
+| 25 | `BF-TXT-N1` | BitForge | `TXT` | `N1` |
+| 26 | `PF-STY-N1` | PixFlux | `STY` | `N1` |
+| 27 | `BF-STY-B0` | BitForge | `STY` | `B0` |
+| 28 | `PF-CNT-N1` | PixFlux | `CNT` | `N1` |
+| 29 | `BF-CNT-N2` | BitForge | `CNT` | `N2` |
+| 30 | `BF-TXT-B0` | BitForge | `TXT` | `B0` |
+
+### Pilot acceptance and stopping rules
+
+Stop the pilot immediately if any of these occurs:
+
+- authentication fails;
+- a route rejects the documented payload shape;
+- an endpoint reports an unexpected charge above 1 generation per image;
+- three consecutive transient server failures occur after bounded backoff; or
+- saved image bytes, request records, or usage records cannot be verified.
+
+Do not silently retry a request after an uncertain timeout. Mark it `submission-unknown`
+so a retry cannot double-charge or create an untracked duplicate.
+
+After all accepted calls are captured:
+
+- If `B0` never exhibits the target failure for a family on either endpoint, that family
+  is non-informative for efficacy. Replace it only in a new protocol revision and rerun
+  calibration; do not tune it inside this dataset.
+- If reviewers cannot apply the target rubric consistently, revise the rubric in a new
+  protocol version before confirmation.
+- If PixFlux rejects the deprecated field, record a schema/implementation defect and do
+  not resubmit alternate negative syntax.
+- If the field-bearing image bytes are identical to baseline while `B0` and `R0` are also
+  identical, treat this only as pilot evidence of a no-op; confirmation is still required
+  for a durable rule.
+
+## Blinded Scoring Protocol
+
+Generate the blinded index only after all images in a phase are saved. Reviewers receive
+opaque candidate IDs and shuffled images, with endpoint, family, arm, prompt, seed, and
+filename concealed. Reviewers must score independently before adjudication. Do not use
+PixelLab employee opinions or archived manifest judgments as labels.
+
+Use two independent blinded reviewers, with a third reviewer adjudicating only disputed
+primary outcomes. Triangulate visual judgments with deterministic measurements; no one
+human or model review is treated as unquestionable ground truth.
+
+### Primary outcome
+
+Target-failure severity:
+
+| Score | Meaning |
+|---:|---|
+| 0 | Clearly absent |
+| 1 | Ambiguous or too unclear to decide |
+| 2 | Clearly present |
+| 3 | Present and visually dominant |
+
+The binary primary outcome is `failure = true` for scores 2-3. Score 1 remains missing
+for the primary analysis and is reported separately; it must not be forced into the arm's
+favored category.
+
+Family-specific anchors:
+
+- `CNT`: failure means other than exactly two whole sword objects, including a third,
+  detached duplicate, or fused extra blade.
+- `TXT`: failure means a human reviewer sees letter-like, number-like, word-like, rune-like,
+  or watermark-like marks. The single intended bottle pictogram is exempt.
+- `STY`: failure means smooth gradient rendering, photographic material response, or
+  clearly 3D-rendered volume dominates over hard limited-color pixel construction.
+
+### Secondary outcomes
+
+Score each from 1 (worst) to 5 (best):
+
+- overall visual quality;
+- compliance with the intended object/composition;
+- silhouette/readability at native 64×64 size; and
+- artifact freedom.
+
+Also record a short defect tag list. For `TXT`, OCR is a secondary flag only because OCR
+at 64×64 can miss invented glyphs. For `STY`, record opaque unique-color count, alpha
+coverage, and a gradient/edge-softness metric. Automated metrics support but do not
+replace blinded visual scoring.
+
+## Phase 1 — Confirmatory Static Study
+
+Run only after Phase 0 passes and its scoring is locked.
+
+- Use seed blocks 2-8 for the same 2 endpoints, 3 retained families, and 4 comparison
+  arms: **168 calls**.
+- Add `R0` repeats of `B0` at seed blocks 2 and 3 for every endpoint/family:
+  **12 calls**.
+- Phase 1 total: **180 calls**, expected about **180 generations**.
+- Combined Phase 0 + Phase 1 total: **210 calls**, expected about **210 generations**.
+
+Before Phase 1, materialize and freeze its full request matrix and shuffled dispatch order
+as a versioned addendum. Phase 0 approval does not authorize Phase 1.
+
+Analyze each endpoint separately. The primary comparison is paired `N1` versus `B0` at
+the same endpoint, family, and seed. Report the paired failure-rate difference, exact or
+bootstrap 95% confidence interval, discordant-pair counts, and a paired test such as
+McNemar's test. Analyze ordinal quality as paired data and publish its full distribution.
+Report family-stratified results even when an endpoint-level summary is shown.
+
+### Practical decision bands
+
+For each endpoint:
+
+- **Benefit:** the negative arm reduces primary failures by at least 20 percentage points,
+  its uncertainty does not include zero, and median quality is not more than 0.5 points
+  lower.
+- **Harm:** primary failures increase by at least 20 percentage points, or median quality
+  drops by at least 1 point with degradation in at least 25% of paired outputs.
+- **No meaningful effect:** the 95% interval for the paired failure-rate difference lies
+  wholly inside -10 to +10 percentage points and paired quality change lies wholly inside
+  -0.5 to +0.5 points.
+- **Inconclusive:** none of the above, baseline failures are too rare, repeat variability is
+  too high, or reviewer ambiguity exceeds 20%.
+
+The bands are practical engineering thresholds, not claims about human perception in
+every context.
+
+## Sequential Extension For A No-Effect Claim
+
+Eight seeds can detect a large effect but may not support equivalence. If Phase 1 is
+inconclusive only because intervals are too wide, extend the same frozen matrix in batches
+to 16 seeds and then at most 32 seeds. Recompute at the batch boundary; do not stop after
+an especially favorable individual image.
+
+Maximum dedicated-field study size at 32 seeds:
+
+- 2 endpoints × 3 families × 4 arms × 32 seeds = **768 calls**;
+- plus the frozen repeat subset;
+- approval and cost accounting are required before every extension batch.
+
+If the maximum still cannot classify an endpoint, publish `inconclusive`. Do not convert
+absence of proof into “negatives are harmless” or “negatives are harmful.”
+
+## Later Route-Specific Studies
+
+These phases answer different questions and require their own frozen addenda and paid-call
+approval:
+
+1. **Induction probe on dedicated-field routes:** compare a neutral baseline against an
+   unrelated but visually salient forbidden noun to test whether naming the noun makes it
+   appear. This is not mixed into the efficacy prompts.
+2. **Pixen inline negation:** compare baseline, concise inline exclusion, long inline
+   exclusion, and positive structure. This tests the main description channel, not a
+   dedicated field.
+3. **Create Image Pro inline negation:** a separate high-cost study; candidates returned by
+   one call are not independent seeds.
+4. **Base inpaint:** reuse one source and one mask within each seed block and compare only
+   the documented base endpoint that exposes `negative_description`.
+5. **Legacy animation:** test its separate field independently from modern v3 animation.
+6. **Modern v3 animation:** compare inline action wording only; the route has no separate
+   field.
+
+Static-image conclusions must not be promoted to these routes before their own evidence
+exists.
+
+## Artifact And Execution Contract
+
+Save the live study under:
+
+```text
+pixellab-pip-generations/negative-prompt-study-YYYYMMDD/
+  protocol.md
+  requests.jsonl
+  responses/
+  images/
+  blinded-index.json
+  scores-reviewer-a.jsonl
+  scores-reviewer-b.jsonl
+  adjudication.jsonl
+  analysis.json
+  manifest.json
+  negative-prompt-study.blueprint.json
+```
+
+For every request, persist the literal request body before submission, then record HTTP
+status, returned usage, image hash, dimensions, mode, alpha coverage, elapsed time, and
+any error. Never store or print the bearer token. Validate every decoded PNG before
+marking the call complete.
+
+The execution runner must be resumable and append-only. A completed request ID is never
+submitted again. An uncertain request remains quarantined until its charge/result status
+is resolved manually.
+
+## Cost Gate
+
+No live generation is authorized by this document alone. Immediately before Phase 0:
+
+1. read Pip's persistent auto-generation preference exactly once;
+2. verify the bearer token exists without revealing it;
+3. show all 30 exact paid calls, their prompts, endpoints, seeds, and predicted total;
+4. if auto-generation is off, wait for explicit approval; and
+5. do not infer approval for Phase 1 or any later phase.
+
+## Promotion Rule
+
+Change the runtime recommendation only after a phase has preserved requests and outputs,
+locked blinded scores, repeat controls, endpoint-specific effect estimates, and a declared
+decision under the bands above. Report counterexamples and failed prompts alongside
+successful ones. A developer statement, attractive anecdote, or single pair cannot
+override the controlled evidence.
