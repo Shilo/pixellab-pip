@@ -196,6 +196,14 @@ produce a reliable rescue. The full [reliability review](../../pixellab-pip-gene
 and [run manifest](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/run-manifest.json)
 are preserved with the generated candidates.
 
+## Reference scope decision
+
+The neutral guide is a building projection control, not a universal south-facing reference. Do not
+combine it with character guidance or create a shared building/character fixture: the building
+guide's roof, facade, and entrance encode architecture and can bias character silhouettes or poses.
+No separate character guide is justified by this building-only evidence; create one only after a
+character-specific test demonstrates a projection problem that needs visual anchoring.
+
 ## Related Documentation
 
 - [PixelLab Asset Routing](pixellab-asset-routing.md)
