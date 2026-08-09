@@ -118,3 +118,4 @@ Stop or change routes when projection fails. Polishing a structurally unusable c
 - [Style Reference Generation](../../skills/pixellab-pip/references/style-reference.md)
 - [Image Input Roles](../../skills/pixellab-pip/references/image-input-roles.md)
 - [Create Image Pro (`generate-image-v2`)](../../skills/pixellab-pip/references/create-image-pro.md)
+- [Traditional Top-Down South-Facing Building MVP Prompt Test Plan](../plans/pixellab-top-down-south-facing-building-prompt-plan.md)
