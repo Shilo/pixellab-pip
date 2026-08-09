@@ -1,6 +1,6 @@
 # PixelLab Traditional Top-Down South-Facing Building Prompt Test Plan
 
-Status: planned. Last reviewed: 2026-08-08.
+Status: complete. Last reviewed: 2026-08-08.
 
 ## Goal
 
@@ -117,8 +117,9 @@ Use the leading route from the existing house spike: REST `POST /generate-with-s
 
 1. Use one original, neutral `128x128` top-down house reference with a shallow roof, a visible
    south/bottom front facade and entrance, screen-aligned geometry, and no distinctive subject that
-   must be copied. Use a user-owned or PixelLab-generated fixture; do not use a copyrighted game
-   screenshot as the fixture.
+   must be copied. Use a user-owned, PixelLab-generated, or locally authored fixture; a locally
+   authored guide is acceptable when it is declared as a projection/style control and is not
+   treated as final art. Do not use a copyrighted game screenshot as the fixture.
 2. Treat the image as a style/projection reference, not an init/source image. Do not use the failed
    isometric house output as the reference.
 3. Because this route derives its square output from the largest style image, use a `128x128`
@@ -197,6 +198,74 @@ reason the route was selected so the existing research spike becomes reproducibl
 
 After a successful live run, follow the normal manifest and blueprint requirements in
 [SKILL.md](../../skills/pixellab-pip/SKILL.md) and its usage-reporting/blueprint references.
+
+## Execution record (2026-08-08)
+
+The plan was executed against the current PixelLab surfaces and model state:
+
+| Phase | Result |
+|---|---|
+| Pixen sentinel | 1/1 failed; the house remained visibly angled/isometric. |
+| PixFlux prompt ladder | 0/9 hard passes; P0, P1, and P2 all remained angled/isometric even with isometric: false. |
+| PixFlux confirmation | Not run because no discovery prompt passed all three seeds. |
+| REST style reference | 8/8 hard passes across two independent calls using a neutral locally authored 128x128 projection guide. |
+
+The smallest reliable MVP is therefore the style-reference route plus the short variation prompt
+in the [live review](../../pixellab-pip-generations/top-down-south-building-mvp-20260808/review.md).
+The style-reference route produced four candidates per 128x128 call; every candidate had a
+screen-aligned shallow top-down read and a south/bottom-facing front entrance. The reference
+changed projection behavior without being used as an init/source image.
+
+The run used 12 live calls and recorded 50 charged generations: 1 Pixen call and 9 PixFlux calls
+at the current one-generation route pricing, plus two REST style-reference calls reporting 20
+generations each. No additional raw Pro or managed-object comparison was needed.
+
+## Follow-up execution (2026-08-08)
+
+The follow-up isolated the projection reference from the wording:
+
+| Test | Result |
+|---|---|
+| Full description, no style_description | 4/4 hard passes. |
+| Short description with style_description | 4/4 hard passes. |
+| Short description with projection wording and style_description | 4/4 hard passes. |
+| Previously generated house used as reference | 4/4 structural passes, but 0/4 novelty passes; the outputs converged on the reference-specific architecture. |
+| Minimal description, no style_description | 4/4 hard passes. |
+| MCP create_image_pro style-image fallback | 4/4 hard passes in one call; useful fallback, not a new reliability sweep. |
+
+The final MVP prompt is:
+
+    a new traditional 2D town-house sprite with a south-facing entrance and different geometry.
+
+Use it with a neutral screen-aligned 128x128 projection guide, REST
+POST /generate-with-style-v2, no_background: true, and no image_size or style_description field.
+Keep the hard structural review. The projection guide is the essential control; the prompt should
+describe the desired variation without trying to force the camera through repeated negative wording.
+
+## Reliability suite (2026-08-08)
+
+The autonomous repeat suite tested whether the MVP generalized beyond one successful batch:
+
+| Test | Strict passes |
+|---|---:|
+| Town house, base neutral guide across three new seeds | 11/12 |
+| Town house, alternate neutral guide | 2/4 |
+| Shop, minimal wording | 2/4 |
+| Shop, explicit front-facade wording | 3/4 |
+| Shop, strict front/side-wall wording | 3/4 |
+| Inn, minimal wording | 2/4 |
+| Inn, explicit front-facade wording | 0/4 |
+| Inn, strict front/side-wall wording | 0/4 |
+
+The suite retained 40 candidates from 10 REST calls and recorded 200 charged generations. The
+base neutral guide plus the minimal prompt remains the strongest MVP, but the evidence bounds
+reliability to town-house-like buildings. Shop and inn category nouns can reintroduce depth,
+three-quarter views, or signage even after positive projection wording. Do not generalize this
+route to arbitrary building categories without a category-specific reference and test.
+
+See the [reliability review](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/review.md)
+and [run manifest](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/run-manifest.json)
+for the exact requests, seeds, outputs, and candidate-level notes.
 
 ## Decision after the spike
 

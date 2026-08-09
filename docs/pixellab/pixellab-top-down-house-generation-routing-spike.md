@@ -1,6 +1,6 @@
 # PixelLab Top-Down House Generation Routing Spike
 
-Last reviewed: 2026-07-10.
+Last reviewed: 2026-08-08.
 
 Purpose: record observed failures and the successful fallback when generating a south-facing, top-down house asset. This is a focused routing study, not a claim that every subject or future PixelLab model behaves the same way.
 
@@ -109,8 +109,92 @@ Stop or change routes when projection fails. Polishing a structurally unusable c
 - The 24 reviewed Create Image (New) / Pixen (`create-image-pixen`) outputs are not checked-in documentation fixtures.
 - The init-image, Create Image Pro (`generate-image-v2`), and successful Create Image from Style Reference (Pro) (`generate-with-style-v2`) tests were performed by the user outside the checked-in corpus.
 - No seed-controlled comparison was performed across routes.
-- The exact style-reference image, prompt, settings, and output should be captured in a future reproducible spike if the user wants this conclusion promoted into the runtime routing contract.
-- Re-test after meaningful PixelLab model or endpoint changes; this document records behavior observed on 2026-07-10.
+- The earlier 2026-07-10 style-reference test did not retain its exact fixture, prompt, settings, or output; the 2026-08-08 follow-up below captures a separate reproducible control and request.
+- Re-test after meaningful PixelLab model or endpoint changes; this document records historical behavior observed on 2026-07-10 and the follow-up observed on 2026-08-08.
+
+## Reproducible MVP follow-up (2026-08-08)
+
+The planned follow-up captured the previously missing fixture, request, seeds, outputs, and
+candidate-level review in
+[the top-down south-facing building MVP plan](../plans/pixellab-top-down-south-facing-building-prompt-plan.md)
+and its gitignored
+[run review](../../pixellab-pip-generations/top-down-south-building-mvp-20260808/review.md).
+
+The controlled test used a locally authored neutral 128x128 transparent projection guide at
+style-reference/projection-guide.png. The guide showed a simple screen-aligned shallow top-down
+building with a south/bottom front facade and entrance. It was sent as a style reference, not an
+init/source image, so its exact geometry was not meant to be copied.
+
+The exact REST request used for both independent calls was:
+
+    POST /v2/generate-with-style-v2
+    style_images: one 128x128 image from style-reference/projection-guide.png
+    description: one new town-house sprite with a different roof, windows, and facade materials; preserve the reference's shallow top-down, screen-aligned game-map projection, with the front facade and entrance on the south/bottom edge facing the camera/player; do not copy the reference's exact building geometry.
+    style_description: simple flat pixel-art reference with a screen-aligned shallow top-down building, rectangular footprint, visible roof, and south-facing front facade; match the projection and compact sprite framing, not the exact geometry.
+    no_background: true
+    image_size: omitted; output size was derived from the 128x128 reference
+
+Each call returned four 128x128 transparent candidates. All eight candidates passed the hard
+projection, south-facing front, screen-alignment, single-whole-asset, and output-integrity gates.
+Their roof shapes, windows, and facade materials varied from the guide, so the route preserved
+the projection without simply cloning the reference geometry.
+
+The same run also tested one Pixen sentinel and a 3x3 PixFlux prompt ladder. The sentinel failed,
+and all nine PixFlux candidates failed the projection/screen-alignment gates despite explicit
+low top-down, south, anti-isometric wording, and isometric: false. The prompt-only route should
+therefore remain a cheap probe rather than the reliable path for this building class.
+
+Routing conclusion for the current model state: for a hard screen-aligned top-down/south-facing
+building sprite, use REST generate-with-style-v2 with a neutral projection/style anchor and a
+short variation prompt, then reject any candidate that fails the structural gates. The result is
+strong operational evidence, not a guarantee across future model versions or arbitrary style
+references.
+
+## Minimal-prompt and surface follow-up (2026-08-08)
+
+A second controlled run separated the reference from prompt wording. With the same neutral
+128x128 projection guide:
+
+- The full canonical description with style_description omitted passed 4/4.
+- A shorter description with style_description passed 4/4.
+- A still shorter description with style_description passed 4/4.
+- The minimal description
+  a new traditional 2D town-house sprite with a south-facing entrance and different geometry.
+  with style_description omitted passed 4/4.
+
+This identifies the smallest tested prompt for the current route. The exact replay recipe and all
+candidate outputs are in the
+[follow-up run review](../../pixellab-pip-generations/top-down-south-building-mvp-followup-20260808/review.md).
+
+The follow-up also tested reference specificity. Replacing the neutral guide with a previously
+generated successful house preserved the top-down/south-facing structure but caused all four
+outputs to converge visually on that reference-specific architecture. The reference must
+therefore be generic when the requested building geometry must change.
+
+Finally, MCP create_image_pro with the neutral guide as style_image_base64 and all four style_copy
+aspects passed 4/4 structural gates in one call. It is a viable MCP fallback for this route, but
+the REST multi-image style-reference route remains the better-tested default.
+
+## Reliability suite and category boundary (2026-08-08)
+
+A bounded repeat suite ran 10 independent REST style-reference calls and retained 40 candidates.
+The base neutral projection guide with the minimal town-house prompt passed 11/12 hard gates
+across three new seeds. An alternate neutral guide passed 2/4, confirming that the guide itself
+materially affects reliability.
+
+Category probes showed a boundary rather than a universal building recipe:
+
+- shop: 2/4 with minimal wording, then 3/4 with explicit front-facade wording and 3/4 with
+  stricter side-wall exclusions;
+- inn: 2/4 with minimal wording, then 0/4 with either targeted prompt, because sign-like text
+  persisted and failed the output-integrity gate.
+
+The current operational conclusion is to keep the neutral guide plus minimal prompt as the MVP for
+town-house-like forms, but require a separate category-specific prompt/reference test for shops,
+inns, and other named building types. More adjectives and repeated negative wording did not
+produce a reliable rescue. The full [reliability review](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/review.md)
+and [run manifest](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/run-manifest.json)
+are preserved with the generated candidates.
 
 ## Related Documentation
 
