@@ -49,3 +49,34 @@ After generation, verify:
 - Requested palette, outline, detail, and shading visibly match the reference; accepted options alone
   do not prove adherence.
 - The generated subject does not copy a style-only reference subject when the user prohibited it.
+
+## Hard top-down building projection
+
+For a traditional screen-aligned south-facing building, use a neutral reference that visibly
+demonstrates the projection, bottom/south front facade, and entrance. A locally authored generic
+guide is an acceptable generation control when it is kept separate from final art. Do not use a
+previously generated specific house as the style reference when the next request requires novel
+geometry; the tested route preserved projection but converged on the reference-specific
+architecture.
+
+In the current controlled building test, the neutral reference held the projection even when
+style_description was omitted. Start with the shortest useful description:
+
+    a new traditional 2D town-house sprite with a south-facing entrance and different geometry.
+
+Keep the structural review gate. This finding is specific to the tested building route and model
+state; it does not make text-only Pixen/PixFlux generation reliable. Reliability is currently
+bounded to town-house-like forms: shop and inn wording caused depth or signage failures in the
+repeat suite even with explicit front-facade language, so use a category-specific test before
+generalizing the route.
+
+For this building route, reject any candidate that fails a hard gate: shallow screen-aligned
+top-down projection; front facade and entrance on the south/bottom edge; one whole centered
+building with the expected size, transparency, and no clear text or watermark; and, when new
+geometry is requested, no distinctive copy of the style reference. Change route after a projection
+failure instead of repeatedly adding prompt exclusions.
+
+This control is building-specific. Do not reuse it for characters or create a combined
+building/character guide: roof, front-facade, and entrance cues encode architecture and can bias
+character silhouette or pose. Keep a character-specific reference separate, and create one only
+when character testing demonstrates a need.
