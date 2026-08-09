@@ -58,10 +58,10 @@ orientation; do not substitute a familiar category or add unrequested details.
 
 If text-only output misses the requirement, use a neutral guide that visibly demonstrates the
 required view, facing cue, and framing. With MCP, pass it as `style_image_url` or
-`style_image_base64`; with REST, use `generate-image-v2` and its single `style_image` field. Use
-`generate-with-style-v2` only when multiple style images are actually needed. A guide can preserve
-the structural cue while pulling output toward its own geometry, so do not use a distinctive
-generated asset as a guide when novel geometry matters.
+`style_image_base64`; with REST, use `generate-image-v2` for a `style_image` or
+`generate-with-style-v2` for `style_images`. A guide can preserve the structural cue while
+pulling output toward its own geometry, so do not use a distinctive generated asset as a guide
+when novel geometry matters.
 
 Verify the hard requirement before judging style: requested subject/category; requested
 view/orientation and its defining cues (for example, a building's front facade and entrance on the
