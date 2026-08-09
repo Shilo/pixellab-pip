@@ -38,8 +38,7 @@ The defensible conclusion is narrower:
    32-pair confirmation, 25 had no observed effect, one was worse, two produced adverse
    signals, and four were ambiguous. BitForge's field is behaviorally active but did not
    prevent the named failure; PixFlux's deprecated field was semantically weak/no-op on
-   the tested task. See `pixellab-negative-prompting-confirmation-results.md` and the
-   self-contained `pixellab-negative-prompting-all-attempts.html`.
+   the tested task. See `pixellab-negative-prompting-confirmation-results.md`.
 
 This challenges both the developers' reported blanket warning and the opposite intuition
 that negatives are helpful or necessarily harmless. The data support not adding negatives
@@ -366,8 +365,8 @@ informative pairs: PixFlux crossed-sword count and BitForge signpost text.
 The frozen 46-call confirmation was executed on 2026-08-08. Combined with the two
 calibrations, the complete static study contains 106 successful calls, 106 validated PNGs,
 zero errors, and zero retries. Full results are in
-`pixellab-negative-prompting-confirmation-results.md`; every request and output is embedded
-in `pixellab-negative-prompting-all-attempts.html`.
+`pixellab-negative-prompting-confirmation-results.md`; private per-attempt audit artifacts
+remain under gitignored local storage rather than tracked documentation.
 
 Across the retained eight-seed endpoint-family pairs:
 

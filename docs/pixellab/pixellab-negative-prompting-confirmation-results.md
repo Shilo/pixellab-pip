@@ -6,7 +6,6 @@ Status: complete; 46-call confirmation and 106-call static study fully preserved
 
 Companions:
 
-- Complete self-contained audit: `pixellab-negative-prompting-all-attempts.html`
 - Research spike: `pixellab-negative-prompting-research-spike.md`
 - Controlled plan: `../plans/pixellab-negative-prompting-controlled-test-plan.md`
 - Phase 0 results: `pixellab-negative-prompting-calibration-results.md`
@@ -308,6 +307,6 @@ requests, decoded PNGs, sanitized response records, run events, hashes, blind in
 both reviewer files, third-reviewer adjudication, final adjudication, automated metrics,
 comparison sheets, manifest, and analysis.
 
-The tracked HTML companion embeds all 106 exact PNG byte streams and every persisted
-request/response/score record. It uses only repo-relative audit paths and contains no
-credential or machine-specific absolute path.
+The private local HTML audit embeds all 106 exact PNG byte streams and every persisted
+request/response/score record. It remains in gitignored local storage and is not a
+repository deliverable.

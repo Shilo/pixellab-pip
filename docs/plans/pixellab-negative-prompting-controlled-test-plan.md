@@ -12,8 +12,6 @@ Phase 0B results: `../pixellab/pixellab-negative-prompting-phase0b-results.md`.
 
 Phase 1 results: `../pixellab/pixellab-negative-prompting-confirmation-results.md`.
 
-Complete attempt audit: `../pixellab/pixellab-negative-prompting-all-attempts.html`.
-
 The 180-call symmetric Phase 1 matrix is obsolete. Phase 0B found only one informative
 replacement family, and the initial calibration already contained one informative PixFlux
 family. The revised confirmation below tests those endpoint-specific pairs only. Both
