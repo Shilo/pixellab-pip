@@ -2,6 +2,10 @@
 
 Status: Phase 0, Phase 0B, and Phase 1 executed 2026-08-08; 106-call static study complete.
 
+Scope: historical dedicated-field study on BitForge and deprecated PixFlux. It is not the
+primary current-model plan and receives zero weight in Pixen/v3/new or Create Image Pro/v2
+conclusions. See `pixellab-inline-negative-prompting-current-model-test-plan.md`.
+
 Last reviewed: 2026-08-08.
 
 Companion research: `../pixellab/pixellab-negative-prompting-research-spike.md`.

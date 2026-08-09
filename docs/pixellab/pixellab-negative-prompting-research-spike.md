@@ -10,6 +10,21 @@ tests support it.
 
 ## Executive Verdict
 
+**Scope correction:** the completed 106-call study below is historical evidence about a
+dedicated field on legacy BitForge and deprecated PixFlux. It receives zero weight in the
+primary current-model question. Inline negative wording on Pixen/v3/new and Create Image
+Pro/v2 is governed by the new research and plan in
+`pixellab-inline-negative-prompting-best-practices.md` and
+`../plans/pixellab-inline-negative-prompting-current-model-test-plan.md`.
+
+**Current-model result:** the 76-call inline study is now complete. Pro concise exclusions
+reduced pseudo-text failure from 7/8 to 1/8 candidates across two paid call blocks. Pixen
+showed the opposite risk in a direct induction sentinel: `No red balloon.` produced a red
+balloon in all four seeds and the exact repeat, while neutral and matched-negative
+controls produced none. Pixen view negatives were no-op; positive front-elevation wording
+worked in all three seeds. See
+`pixellab-inline-negative-prompting-current-model-results.md`.
+
 The completed evidence does **not** support either universal claim:
 
 - "Negative prompting makes PixelLab outputs worse."
@@ -34,7 +49,7 @@ The defensible conclusion is narrower:
    case. Pooling PixFlux, BitForge, Pixen, Pro, inpaint, and animation into one “PixelLab
    negative prompting” verdict would hide materially different schemas, model priors,
    routing, and prompt-processing behavior.
-6. The completed 106-call static study found zero helpful negative arms. In the retained
+6. The completed 106-call **legacy dedicated-field** study found zero helpful negative arms. In the retained
    32-pair confirmation, 25 had no observed effect, one was worse, two produced adverse
    signals, and four were ambiguous. BitForge's field is behaviorally active but did not
    prevent the named failure; PixFlux's deprecated field was semantically weak/no-op on
@@ -44,7 +59,29 @@ This challenges both the developers' reported blanket warning and the opposite i
 that negatives are helpful or necessarily harmless. The data support not adding negatives
 by default because no benefit was measured—not because every negative made every image
 worse. No controlled call used Pixen, Create Image Pro, character v3/new, modern v3
-animation, or Pro/v3 inpaint.
+animation, or Pro/v3 inpaint. It cannot decide the current Pixen/Pro inline question.
+
+## TODO: Deferred Pro Calls Cut For Cost
+
+The first current-model draft allocated 56 Create Image Pro calls. The approved Stage A
+keeps 16 and defers the following **40 calls** rather than silently deleting them from the
+research record:
+
+| Deferred block | Calls |
+|---|---:|
+| `CNT` and `TXT`: `L1` + `P1` at `S2` | 4 |
+| `CNT` and `TXT`: `B0` + `C1` + `L1` + `P1` at `S3` | 8 |
+| `CNT` and `TXT`: exact `S1/B0` + `S1/C1` repeats | 4 |
+| `PRJ`: all four arms at `S1`, `S2`, and `S3`, plus exact `S1/B0` + `S1/C1` repeats | 14 |
+| Induction sentinel: all four arms at `S2` and `S3`, plus exact `S1/B0` + `S1/I1` repeats | 10 |
+| **Total deferred** | **40** |
+
+At the documented Pro estimate, running all 40 would add roughly **800–1,600
+generations**. They are not authorized follow-up work. Reconsider only the smallest
+relevant block if the 16-call Pro calibration in
+`../plans/pixellab-inline-negative-prompting-current-model-test-plan.md` produces a
+scoreable, decision-changing signal; freeze a new exact manifest and pass a separate
+paid-call gate first.
 
 ## Terms Kept Separate
 

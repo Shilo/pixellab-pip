@@ -68,18 +68,42 @@ The successful style-reference inputs and outputs are not stored in this reposit
 
 ## Routing Recommendation
 
-For a top-down house asset where a specific projection is a hard requirement:
+For a hard front-facing/south-facing building projection, interpret front-facing as the front
+facade and entrance on the south/bottom edge of the image, not an isometric or three-quarter
+facade. The current practical route choice is:
 
-1. A text-only Create Image (New) / Pixen (`create-image-pixen`) attempt is reasonable as a cheap probe.
-2. Verify projection before judging style, detail, palette, or background.
-3. If the first candidate has the wrong projection, avoid a long sequence of prompt-only retries. One materially different retry can test whether the failure is incidental; repeated isometric reversion indicates a route mismatch.
-4. Do not assume Create Image Pro (`generate-image-v2`) will repair structural view adherence merely because it is Pro.
-5. Do not use an init image when the user wants freedom from the reference's exact geometry unless they accept the risk of literal shape transfer.
-6. Treat Create Image from Style Reference (Pro) (`generate-with-style-v2`), with a reference that clearly demonstrates the required top-down projection, as the leading candidate for the next attempt pending a checked-in reproduction.
-7. Describe the reference as a view/style anchor rather than the identity of the desired house. Use the prompt for architecture, materials, age, palette, and other variations.
-8. Verify that the generated house preserves the reference's projection without copying its distinctive subject geometry too closely.
+| Situation | Recommended route | Evidence and boundary |
+|---|---|---|
+| MCP, no input image | MCP `create_image_pro` text-only | Best bounded no-input result; the shortest tested prompt passed 4/4, but this is not a reliability guarantee. |
+| MCP, neutral projection guide | MCP `create_image_pro` with one `style_image_url` or `style_image_base64` | Native agent route; the bounded guide comparison passed 4/4 structural candidates, but the guide's architecture was copied more closely. |
+| REST, neutral projection guide | `POST /v2/generate-with-style-v2` with one `style_images` entry | Strongest repeat evidence: 11/12 hard-gate passes across the base-guide reliability suite. One guide is valid; this route is not limited to multi-image inputs. |
+| REST, no input image | `POST /v2/generate-image-v2` | Pro text-only fallback/probe only; the user-run text-only route did not reliably preserve the required projection. |
 
-This provisional recommendation applies to the tested house failure mode when view adherence is more important than minimizing cost. Extending it to other architecture is an untested hypothesis. Create Image from Style Reference (Pro) (`generate-with-style-v2`) is a paid route, so confirm the reference role and batch scope before generation.
+The MVP prompt for both text-only generation and a neutral guide is:
+
+    a new traditional 2D [requested building type] sprite with a south-facing entrance and different geometry.
+
+The tested town-house instance replaces `[requested building type]` with `town-house`; do not
+assume that category when the user has requested a shop, inn, or another building. The neutral
+guide supplies the projection cue, so the same short prompt is sufficient with the guide.
+
+For a slightly richer but still efficient variation request, add only the requested design axes:
+
+    a new traditional 2D [requested building type] sprite with a south-facing entrance and different geometry; vary the roof, windows, and facade materials.
+
+Use a neutral guide as a style/projection reference, not as an init/source image, when the new
+building should have novel geometry. Init-image guidance is appropriate only when preserving or
+editing the input geometry is acceptable; the tested PixFlux init matrix held projection in 8/9
+but failed the novel-geometry gate in 9/9. Do not use a specific previously generated building as
+the neutral guide, because outputs converged on that building's architecture.
+
+Make one paid call at the intended size, review every returned candidate against projection,
+south-facing entrance, screen alignment, novelty, and output integrity, and change route after a
+structural failure instead of repeatedly adding anti-isometric exclusions. This recommendation
+is strongest for town-house-like forms; named categories require their own prompt/reference test.
+See the [current Pro comparison](../../pixellab-pip-generations/top-down-south-building-pro-20260808/review.md),
+[MVP follow-up](../../pixellab-pip-generations/top-down-south-building-mvp-followup-20260808/review.md),
+and [reliability suite](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/review.md).
 
 ## Why Style Reference Fits Better
 
@@ -184,11 +208,12 @@ projection across 8/8 candidates, but their building-shaped guide encouraged con
 architecture.
 
 For an MCP-first agent generating a new town-house-like sprite, start with `create_image_pro` and
-the shortest prompt in the style-reference contract. Use the neutral guide only when projection
-needs visual anchoring or the user supplies it. Keep REST `generate-image-v2` for MCP unavailability
-with one guide, and use `generate-with-style-v2` only for REST-only multi-reference control. Its
-earlier 11/12 repeat result remains the stronger reliability sample, so this Pro finding is not a
-guarantee across model state or building categories.
+the shortest prompt. Use the neutral guide when projection is the priority; use text-only when
+novel building geometry is the priority and the user accepts lower reliability. For REST-only
+generation, use `generate-with-style-v2` with one neutral guide when projection is hard; keep
+`generate-image-v2` as the text-only Pro fallback. The earlier 11/12 repeat result remains the
+stronger reliability sample, so neither Pro finding is a guarantee across model state or building
+categories.
 
 ## Reliability suite and category boundary (2026-08-08)
 
@@ -210,6 +235,59 @@ inns, and other named building types. More adjectives and repeated negative word
 produce a reliable rescue. The full [reliability review](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/review.md)
 and [run manifest](../../pixellab-pip-generations/top-down-south-building-mvp-reliability-20260808/run-manifest.json)
 are preserved with the generated candidates.
+
+## Pixen and init-image follow-up (2026-08-08; revised)
+
+A controlled native-MCP run tested the no-input question with nine Pixen calls: three minimal
+prompts with `view=low top-down` and `direction=south`, three repetitions of the same minimal
+prompt with those controls omitted, and three longer structural prompts with the controls. All
+nine returned angled, isometric-like, or three-quarter building renders. The result was **0/9
+hard projection passes**.
+
+The earlier wording that Pixen has no init-image capability was too broad. The installed Aseprite
+extension exposes `Use init image` and `init_image_strength` on its Pixen dialog, copies the active
+canvas into an `init_image` request field, and sends it through the extension's internal
+`generate-image-pixen` operation. Two retained historical Pixen building requests confirm that
+this route has been used with `init_image=Yes`, `direction=south`, and `view=low top-down`:
+
+- One result was front-facade/south-facing leaning but still had angled roof/side planes; it did
+  not pass the hard screen-aligned projection gate.
+- The other result was clearly isometric-like and also failed.
+
+This proves an Aseprite Pixen init route exists, not that it is a reliable south-facing building
+route. It is an editor-specific/internal surface, not public MCP/REST parity. The current public
+MCP `create_image_pixen` schema and REST v2 `POST /create-image-pixen` schema expose no
+`init_image`, `init_image_strength`, or reference-image field; REST v1 has no Pixen endpoint.
+See the [public REST OpenAPI](https://api.pixellab.ai/v2/openapi.json), [MCP docs](https://api.pixellab.ai/mcp/docs),
+and the [Aseprite init-image guide](https://www.pixellab.ai/docs/getting-started) for the separate
+surface descriptions. Do not call the internal extension operation as a public API or invent an
+MCP field. For agent-native init-image work, use the documented PixFlux route; use the Aseprite
+Pixen control only when the user is explicitly working in Aseprite.
+
+The same run tested init-image guidance on MCP PixFlux, which does expose `init_image` and
+`init_image_strength`:
+
+- A colored projection guide at strengths `50`, `150`, and `300` held the requested projection in
+  3/3, but retained the guide's basic geometry and palette.
+- A grayscale conversion of that guide held the projection in 3/3 and removed the palette copy,
+  but retained the guide's geometry in all 3.
+- A plain grayscale projection-only guide at strengths `10`, `25`, and `50` held the projection
+  in 2/3. Strength `10` reverted to an angled render; strengths `25` and `50` retained the guide's
+  simple roof/front-facade shape.
+
+This gives **8/9 projection passes and 0/9 novelty passes** for the init-image matrix. Lowering
+init strength did not separate the view cue from the guide geometry. Treat init-image guidance as
+an image-to-image composition/geometry anchor, not as a neutral projection control when new
+building geometry is required. The [follow-up review](../../pixellab-pip-generations/top-down-south-building-pixen-init-20260808/review.md),
+[manifest](../../pixellab-pip-generations/top-down-south-building-pixen-init-20260808/run-manifest.json),
+and raw candidates are preserved in the gitignored run folder.
+
+The current route conclusion is unchanged but better bounded: public MCP Pixen is a cheap
+text-only probe, not a reliable hard-projection route; Aseprite Pixen has an init control but its
+internal route is not portable to MCP/REST; init-image guidance can hold projection on public
+PixFlux only by anchoring the supplied geometry; the best no-input result remains the bounded
+native Pro text-only test, while the strongest projection reliability remains the neutral
+style-reference Pro route.
 
 ## Reference scope decision
 

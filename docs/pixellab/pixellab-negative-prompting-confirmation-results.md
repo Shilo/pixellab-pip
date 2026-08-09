@@ -4,6 +4,10 @@ Executed: 2026-08-08.
 
 Status: complete; 46-call confirmation and 106-call static study fully preserved.
 
+Scope: secondary historical evidence for dedicated fields on BitForge and deprecated
+PixFlux. These results receive zero weight in the primary Pixen/v3/new and Create Image
+Pro/v2 inline-prompt study.
+
 Companions:
 
 - Research spike: `pixellab-negative-prompting-research-spike.md`
@@ -25,9 +29,10 @@ negative arms:
 | Adverse signal | 2 | 6.3% |
 | Inconclusive because of ambiguity | 4 | 12.5% |
 
-This result supports the operational default **do not automatically add negative
-prompting**. Prefer positive structural wording and real route controls, and use a concise
-negative only on a route that exposes the field when there is a specific, testable reason.
+This result supports not automatically populating a **dedicated legacy negative field**.
+It does not show that concise inline guardrails on routes without that field are invalid.
+Prefer positive structural wording and real route controls; use a concise negative only
+for a specific, testable visual exclusion and inspect the result.
 
 The study does **not** support the stronger claim that every negative prompt makes every
 image worse. Most tested pairs had no observed semantic effect, and only one crossed the
