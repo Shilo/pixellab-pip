@@ -34,18 +34,43 @@ build. A conclusion is valid only for the endpoint, schema date, prompt families
 seed range tested. Static-image results must not be generalized to animation, inpaint,
 Pixen, or Create Image Pro without their own study.
 
+## Causal Unit And Routing Bias
+
+The causal unit is not “negative prompting” detached from a model. It is the intervention
+as interpreted by one deployed PixelLab workflow stack. Model priors, endpoint selection,
+MCP/REST routing, prompt parsing, field weighting, prompt enhancement, any server-side or
+system instruction that may exist, safety conditioning, and post-processing can all
+moderate the observed effect.
+
+The public interfaces do not reveal enough internals to factor those components apart.
+Every analysis must therefore record and stratify by:
+
+- public surface and operation (`MCP tool` or exact REST path);
+- documented model/mode/workflow label, without inventing a provider identity;
+- schema snapshot date and a hash of the exact public schema used;
+- prompt-enhancement state and every visible request field;
+- execution window, so silent service-build drift is at least bounded;
+- task family and seed; and
+- output candidate clustering, especially for Pro calls returning many related images.
+
+Never pool estimates across route strata first. Report the route/task result, then compare
+strata as an interaction analysis. If MCP and REST expose different fields, they are not a
+clean surface-only ablation. Hidden routing remains a limitation even when all public
+inputs match.
+
 ## Why Live Testing Was Required
 
 Before this study, the repository and generation archive contained no same-endpoint,
-same-seed, same-positive-description pair where only `negative_description` changes. Historical
-outputs cannot identify causation. Current public documentation also does not publish
+same-seed, same-positive-description pair where only `negative_description` changes.
+Historical outputs cannot identify causation. Current public documentation also does not publish
 controlled efficacy evidence. The only way to resolve the dispute is a pre-registered
 paired study that preserves every request and does not discard failures. The completed
 study now supplies that record.
 
 ## Current Public Contract Frozen For This Study
 
-The live REST v2 OpenAPI schema was re-read on 2026-08-08 before freezing this plan.
+The live REST v2 OpenAPI schema was re-read on 2026-08-08 before freezing this plan and
+again after completion when checking current-model coverage.
 
 | Endpoint | Dedicated field | Status | Study role |
 |---|---|---|---|
@@ -58,6 +83,10 @@ controls so the paired field comparison changes only `negative_description`.
 
 No current public MCP image tool exposes this field. Pixen and Create Image Pro are not
 surrogate tests for it and are intentionally excluded from the dedicated-field phase.
+Current `create-image-pixen`, `generate-image-v2` (Create Image Pro),
+`create-character-v3`, `create-character-pro`, `animate-with-text-v3`, and `inpaint-v3`
+schemas also expose no separate negative field. They remain untested inline-wording
+strata, not missing replicas of the dedicated-field phase.
 
 ## Pre-Registered Hypotheses
 
@@ -570,17 +599,50 @@ pre-registered ±10-point equivalence band and paired quality stays inside ±0.5
 seeds. This extension has lower practical priority than the induction probe because the
 current default already follows from zero observed wins and limited adverse evidence.
 
-### Priority 3 — Inline-negation generalization
+### Priority 3 — Current Pixen inline-negation stratum
 
-Test Pixen separately because it has no dedicated negative field. Use two scoreable
-families, eight seeds, and four arms: baseline, concise inline exclusion, long inline
-catalog, and positive structural rewrite. That is **64 calls**, with a four-call exact
-repeat subset for **68 calls** total. Analyze it as main-channel wording; never pool it
-with the dedicated-field estimate.
+Pixen exposes no dedicated negative field. Use two scoreable families, eight seeds, and
+four arms: baseline, concise inline exclusion, long inline catalog, and positive
+structural rewrite. Keep REST `enhance_prompt: false`; otherwise prompt enhancement would
+be an additional routing transformation. This is **64 calls**, with a four-call exact
+repeat subset for **68 calls** total.
 
-Inpaint and animation remain later studies only when those routes are relevant to actual
-work. Each needs fixed source assets/anchors and its own artifact rubric; static-image
-results are not evidence about temporal artifacts or masked edits.
+Run REST and MCP as separate strata if both surfaces matter. A smaller surface-interaction
+pilot can use two families × four seeds × two wording arms (`B0`, concise inline) × two
+surfaces = **32 calls**. Even with matched core fields and seeds, label any difference as a
+surface/workflow interaction; public observation cannot identify which hidden router or
+model component caused it.
+
+### Priority 4 — Current Create Image Pro inline-negation stratum
+
+REST `generate-image-v2` and MCP `create_image_pro` expose no dedicated negative field.
+They therefore test inline wording, not `negative_description`. Start with two families ×
+two registered call blocks × four arms = **16 Pro calls**: baseline, concise inline
+exclusion, long inline catalog, and positive structural rewrite. Continue to eight total
+blocks only if baseline failures and target scoring are informative, adding **48 calls**
+for a maximum of **64 Pro calls**.
+
+Pro may return many same-prompt candidates from one small-size call. Those candidates are
+correlated and are not independent seeds: preserve every candidate, score all of them,
+and use the paid call—not each image—as the statistical cluster. REST and MCP remain
+separate route strata.
+
+### Priority 5 — Operation-specific v3/new studies
+
+`v3` and `new` do not name one universal current model. Character v3/new, Character Pro,
+modern animation v3, and Pro/v3 inpaint are separate workflows and expose no dedicated
+negative field. Test them only with an asset-specific question:
+
+- character v3/new versus Character Pro: fixed character briefs, view, and reference
+  state; analyze each route independently;
+- animation v3: fixed first/last frame anchors and inline `action` wording; score every
+  frame and temporal artifacts;
+- Pro/v3 inpaint: fixed source, mask, crop, and context; score masked-region compliance
+  and collateral change.
+
+Do not combine their estimates under a single “v3” result. Base inpaint and legacy
+animation, which do expose `negative_description`, require their own dedicated-field
+studies.
 
 ### Approval boundary
 

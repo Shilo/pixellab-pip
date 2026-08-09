@@ -30,9 +30,10 @@ The defensible conclusion is narrower:
 4. The strongest current engineering default is positive structural wording plus real
    route controls. A short targeted exclusion can be a probabilistic guardrail, but it is
    not enforcement and should not be used to rescue a route-level failure.
-5. The question must be answered per endpoint and per use case. Pooling PixFlux,
-   BitForge, Pixen, Pro, inpaint, and animation into one "PixelLab negative prompting"
-   verdict would hide materially different schemas and model behavior.
+5. The question must be answered per endpoint/model stack, surface, service build, and use
+   case. Pooling PixFlux, BitForge, Pixen, Pro, inpaint, and animation into one “PixelLab
+   negative prompting” verdict would hide materially different schemas, model priors,
+   routing, and prompt-processing behavior.
 6. The completed 106-call static study found zero helpful negative arms. In the retained
    32-pair confirmation, 25 had no observed effect, one was worse, two produced adverse
    signals, and four were ambiguous. BitForge's field is behaviorally active but did not
@@ -43,7 +44,8 @@ The defensible conclusion is narrower:
 This challenges both the developers' reported blanket warning and the opposite intuition
 that negatives are helpful or necessarily harmless. The data support not adding negatives
 by default because no benefit was measured—not because every negative made every image
-worse.
+worse. No controlled call used Pixen, Create Image Pro, character v3/new, modern v3
+animation, or Pro/v3 inpaint.
 
 ## Terms Kept Separate
 
@@ -55,6 +57,32 @@ worse.
 | Structured control | A real field such as `outline`, `detail`, `shading`, `view`, `no_background`, `color_image`, mask, or reference image. | It may target a failure mode more directly than prompt wording. |
 | No-op | The negative intervention produces no meaningful change beyond normal same-request variation. | Pixel identity alone is insufficient unless same-request reproducibility is first measured. |
 | Backfire | The forbidden feature becomes more frequent, more salient, or quality drops after the negative intervention. | A single changed-seed anecdote is suggestive, not proof. |
+
+## Causal Scope And Hidden-Stack Confounding
+
+“Negative prompting” is not one treatment independent of the system that receives it.
+For the controlled study, the actual treatment is adding `negative_description` to a
+specific public request while the rest of that endpoint's visible payload stays fixed.
+The observed response is jointly determined by the wording and the deployed stack:
+
+```text
+negative wording × endpoint/model family × model priors × routing × prompt processing
+× task × seed × service build
+```
+
+PixelLab does not publicly expose internal model identifiers for every call, field-weight
+implementation, hidden routing decisions, or any server-side/system prompt layer that may
+exist. Those components cannot be experimentally removed from black-box API testing.
+Same-endpoint, same-seed pairs reduce visible request confounding and short randomized run
+windows reduce time drift; neither identifies a model-independent “pure” negative-prompt
+effect.
+
+The defensible unit of inference is therefore the **tested endpoint/model stack on the
+tested build and tasks**. A weak or adverse result can reflect how that stack weights the
+field, a strong subject prior, a prompt parser, or their interaction. It must not be
+rewritten as “negative language is intrinsically bad.” The same caution works in the other
+direction: an attractive output cannot prove the negative caused it, and unobserved hidden
+routing cannot be invoked to claim a benefit the output did not show.
 
 ## Sources And Method
 

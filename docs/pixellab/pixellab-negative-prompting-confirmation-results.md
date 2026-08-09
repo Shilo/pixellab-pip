@@ -34,7 +34,55 @@ The study does **not** support the stronger claim that every negative prompt mak
 image worse. Most tested pairs had no observed semantic effect, and only one crossed the
 pre-registered material-quality harm threshold. The precise conclusion is: no confirmed
 benefit, frequent no observed effect, and a small number of adverse observations in the
-tested static endpoint-family pairs.
+tested static endpoint-family stacks.
+
+## Attribution Boundary: The Treatment Is Route-Conditional
+
+This experiment does not isolate an abstract, model-independent property called
+“negative prompting.” It estimates the effect of adding PixelLab's public
+`negative_description` field **through a particular deployed endpoint stack**. The
+observable treatment includes its interaction with:
+
+- the endpoint's selected model or model family;
+- model priors for the subject and composition;
+- PixelLab routing and version selection;
+- prompt parsing, tokenization, field weighting, and any server-side prompt transformation;
+- any undisclosed system instruction, safety conditioning, or quality wrapper, if present;
+- the public request controls, seed behavior, and output/post-processing path; and
+- the service build active on the execution date.
+
+The public API does not expose those internal components, so the study cannot separate
+“the negative field itself” from how PixFlux or BitForge consumed it. Same-endpoint,
+same-seed pairing controls the visible request and keeps the deployed stack approximately
+fixed within a block; it does not remove hidden routing or establish that another model
+would interpret the field the same way.
+
+Accordingly, every result should be read as an interaction:
+
+```text
+observed effect = negative wording × endpoint/model stack × task × seed × service build
+```
+
+“No observed benefit on this stack” is valid. “Negative prompting is intrinsically
+unhelpful” is not established. Conversely, hidden routing is a plausible moderator, not a
+post-hoc explanation that turns zero observed wins into evidence of benefit.
+
+## Tested And Untested Model/Route Families
+
+| Public workflow | Separate negative channel in current public schema | Controlled here? | What can be concluded |
+|---|---|---|---|
+| REST v2 `create-image-bitforge` | Yes | Yes | Dedicated-field result for the deployed BitForge stack and tested tasks. |
+| REST v2 `create-image-pixflux` | Yes, documented as deprecated | Yes | Dedicated-field result for the deployed PixFlux stack and tested tasks. |
+| Pixen: REST `create-image-pixen` / MCP `create_image_pixen` | No | No | Requires a separate inline-negation study; this result does not transfer. |
+| Create Image Pro: REST `generate-image-v2` / MCP `create_image_pro` | No | No | Requires a separate inline-negation study, analyzed at the call level because one Pro call may return multiple correlated candidates. |
+| Character `v3`/`new` and Character Pro | No separate negative field | No | Workflow-specific inline wording only; not covered by static BitForge/PixFlux results. |
+| Modern animation `animate-with-text-v3` / MCP `animate_image` | No | No | Requires a temporal inline-action study with fixed frame anchors. |
+| Pro/v3 inpaint `inpaint-v3` / MCP `inpaint_image` | No | No | Requires fixed source/mask inline-description testing. |
+| Base inpaint and legacy `animate-with-text` | Yes | No | Dedicated-field behavior remains untested on these older/base workflows. |
+
+`v2`, `v3`, `new`, and `Pro` are workflow or tier labels, not one global model lineage.
+In particular, REST `generate-image-v2` is the current Create Image Pro route despite
+“v2” appearing in its endpoint name; it exposes no `negative_description` field.
 
 ## What Ran
 
@@ -193,9 +241,9 @@ strategy as enforcement.
 
 ## What The Evidence Establishes
 
-1. **No measured benefit:** no dedicated negative arm removed a clear target failure
-   without material quality loss in 32 retained confirmation pairs or 52 total negative
-   attempts.
+1. **No measured benefit on the tested stacks:** no dedicated negative arm removed a
+   clear target failure without material quality loss in 32 retained confirmation pairs
+   or 52 total negative attempts.
 2. **PixFlux was semantically weak/no-op here:** concise and long negatives reproduced
    the same sword-count outcome as baseline at all eight seeds. Its public field is also
    documented as deprecated.
@@ -212,6 +260,9 @@ strategy as enforcement.
 
 ## Limits And Generalization
 
+- Model choice, hidden routing, server-side prompt handling, and any undisclosed system
+  conditioning are inseparable parts of the tested treatment. The results estimate the
+  deployed route's behavior, not a route-free property of negative prompting.
 - The confirmation has eight seeds but only one retained prompt family per endpoint. It
   can reject a large benefit for these tasks more confidently than it can establish a
   universal endpoint rule.
@@ -227,6 +278,9 @@ strategy as enforcement.
   limitation.
 - Static text-to-image findings do not transfer automatically to base inpaint, legacy
   animation, modern v3 inline action wording, Pixen inline exclusions, or Pro.
+- No controlled call used Pixen, Create Image Pro, character v3/new, Character Pro,
+  modern v3 animation, or Pro/v3 inpaint. Historical archive examples on some of those
+  routes are uncontrolled and cannot fill that gap.
 
 ## Decision And Next Test
 

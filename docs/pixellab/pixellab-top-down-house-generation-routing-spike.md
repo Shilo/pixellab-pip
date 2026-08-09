@@ -172,8 +172,23 @@ outputs to converge visually on that reference-specific architecture. The refere
 therefore be generic when the requested building geometry must change.
 
 Finally, MCP create_image_pro with the neutral guide as style_image_base64 and all four style_copy
-aspects passed 4/4 structural gates in one call. It is a viable MCP fallback for this route, but
-the REST multi-image style-reference route remains the better-tested default.
+aspects passed 4/4 structural gates in one call. It was a viable MCP fallback in this first
+comparison, but the native Pro route needed a broader text-only check before changing the default.
+
+## Native Pro follow-up (2026-08-08)
+
+A bounded native MCP `create_image_pro` comparison tested three text-only prompts and two calls
+with the same neutral guide. The shortest text-only prompt passed 4/4 candidates; longer structural
+wording passed 2/4 and handheld-RPG wording passed 3/4. The guide-assisted calls held the required
+projection across 8/8 candidates, but their building-shaped guide encouraged convergence on its
+architecture.
+
+For an MCP-first agent generating a new town-house-like sprite, start with `create_image_pro` and
+the shortest prompt in the style-reference contract. Use the neutral guide only when projection
+needs visual anchoring or the user supplies it. Keep REST `generate-image-v2` for MCP unavailability
+with one guide, and use `generate-with-style-v2` only for REST-only multi-reference control. Its
+earlier 11/12 repeat result remains the stronger reliability sample, so this Pro finding is not a
+guarantee across model state or building categories.
 
 ## Reliability suite and category boundary (2026-08-08)
 
