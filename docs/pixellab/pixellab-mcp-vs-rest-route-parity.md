@@ -1,6 +1,8 @@
 # PixelLab MCP vs REST v2 Route Parity
 
-Last reviewed: 2026-08-07.
+Last reviewed: 2026-08-09.
+
+> 2026-08-09 refresh: the inventory remains 79 REST paths and 76 MCP tools. `shape_style` was added to the shared top-down tileset request/tool (`POST /create-tileset` / `POST /tilesets` ↔ `create_topdown_tileset`): `square` or `round`, with continuous 0–1 `transition_size` and an extended 4x8 sheet above 0.5. REST additionally documents square 16px/32px support and limits an omitted-`shape_style` `transition_size` to 0, 0.25, 0.5, or 1.0; the MCP docs do not state those two constraints. This is a field-availability and behavior-parity change, not a new route or tool.
 
 > 2026-08-07 REST OpenAPI refresh: the inventory stayed at 79 REST paths and 76 MCP tools, but `GenerateWithStyleV2Request` changed. `image_size` is no longer required and remains only as an optional deprecated schema property; the endpoint now documents a square output derived from the largest dimension across its 1–4 `style_images` (bounded to 16–512). MCP had no corresponding schema change; its raw documentation changed only in the generated timestamp.
 
@@ -138,7 +140,7 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 
 | REST v2 | MCP tool | Parity |
 |---|---|---|
-| `POST /create-tileset`, `POST /tilesets`, `GET /tilesets`, `GET /tilesets/{id}`, `DELETE /tilesets/{id}` | `create_topdown_tileset`, `get_topdown_tileset`, `list_topdown_tilesets`, `delete_topdown_tileset` | = |
+| `POST /create-tileset`, `POST /tilesets`, `GET /tilesets`, `GET /tilesets/{id}`, `DELETE /tilesets/{id}` | `create_topdown_tileset`, `get_topdown_tileset`, `list_topdown_tilesets`, `delete_topdown_tileset` | = — creation exposes `shape_style` (`square`/`round`) with the same documented 0–1 shaped-transition behavior; REST-only size and omitted-field validation details are not attributed to MCP. |
 | `POST /create-tileset-sidescroller`, `POST /tilesets-sidescroller`, `GET /tilesets-sidescroller`, `GET /tilesets-sidescroller/{id}`, `DELETE /tilesets-sidescroller/{id}` | `create_sidescroller_tileset`, `get_sidescroller_tileset`, `list_sidescroller_tilesets`, `delete_sidescroller_tileset` | = |
 | `POST /create-isometric-tile`, `GET /isometric-tiles`, `GET /isometric-tiles/{id}`, `DELETE /isometric-tiles/{id}` | `create_isometric_tile`, `list_isometric_tiles`, `get_isometric_tile`, `delete_isometric_tile` | = |
 | `POST /create-tiles-pro`, `GET /tiles-pro`, `GET /tiles-pro/{id}`, `DELETE /tiles-pro/{id}` | `create_tiles_pro`, `get_tiles_pro`, `list_tiles_pro`, `delete_tiles_pro` | = |

@@ -180,6 +180,47 @@ class BarkConfigTests(unittest.TestCase):
 
 
 class HelperCliSmokeTests(unittest.TestCase):
+    def test_tileset_simulator_recognizes_shape_style_as_documented_but_unsupported(self) -> None:
+        request = {
+            "lower_description": "ocean",
+            "upper_description": "beach",
+            "shape_style": "round",
+            "transition_size": 0.25,
+        }
+        with self.assertRaisesRegex(SystemExit, "documented top-down shape_style request"):
+            tileset_sim.validate_request("create_topdown_tileset", request, 16, 16)
+
+    def test_tileset_simulator_reports_shaped_extended_layout_after_validation(self) -> None:
+        request = {
+            "lower_description": "ocean",
+            "upper_description": "beach",
+            "shape_style": "round",
+            "transition_size": 1.0,
+            "detail": "invalid",
+        }
+        with self.assertRaisesRegex(SystemExit, "detail must be"):
+            tileset_sim.validate_request("create_topdown_tileset", request, 16, 16)
+
+        request["detail"] = "low detail"
+        with self.assertRaisesRegex(SystemExit, "transition_size above 0.5 uses an expanded 4x8 sheet"):
+            tileset_sim.validate_request("create_topdown_tileset", request, 16, 16)
+
+    def test_tileset_simulator_handles_shaped_pro_requests_after_validation(self) -> None:
+        request = {
+            "lower_description": "ocean",
+            "upper_description": "beach",
+            "mode": "pro",
+            "shape_style": "round",
+            "transition_size": 0.5,
+            "detail": "invalid",
+        }
+        with self.assertRaisesRegex(SystemExit, "detail must be"):
+            tileset_sim.validate_request("create_topdown_tileset", request, 16, 16)
+
+        request["detail"] = "low detail"
+        with self.assertRaisesRegex(SystemExit, "documented top-down shape_style request"):
+            tileset_sim.validate_request("create_topdown_tileset", request, 16, 16)
+
     def run_help(self, script: Path) -> str:
         completed = subprocess.run(
             [sys.executable, str(script), "--help"],

@@ -1,6 +1,6 @@
 # PixelLab Top-Down Tileset Transition Findings
 
-Last reviewed: 2026-07-03.
+Last reviewed: 2026-08-09.
 
 This note records live-generation findings for PixelLab top-down Wang/autotile tilesets when using the hosted MCP `create_topdown_tileset` tool for grid-based graybox prototyping assets.
 
@@ -23,9 +23,13 @@ Pro `0.5` and `1.0` both showed the expanded-layout problem. The requested Pro `
 
 Pro mode was also materially more expensive in the live test. Four accepted Pro generations consumed 80 subscription generations, while a ten-generation Standard `0.5` batch consumed 40 subscription generations. Record this as observed run cost, not a permanent pricing guarantee.
 
-## Accepted Values
+## Current Public Contract And Historical Values
 
-The MCP tool currently validates `transition_size` as one of:
+The 2026-08-09 public REST/MCP refresh added optional `shape_style: "square" | "round"` to top-down tilesets. Both public surfaces document its 0–1 `transition_size` behavior and an extended 4x8 layout above 0.5. REST additionally says `shape_style` supports square 16px or 32px tiles and restricts omitted-`shape_style` `transition_size` to the four values below; MCP does not document those restrictions.
+
+The following is the historical validation result from the pre-`shape_style` live tests, not a claim about the new shaped-layout mode:
+
+The pre-`shape_style` live MCP tests used `transition_size` values of:
 
 - `0.0`
 - `0.25`

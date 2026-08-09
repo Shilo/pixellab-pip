@@ -118,6 +118,7 @@ MCP_TOOLS = {
             "detail",
             "view",
             "mode",
+            "shape_style",
             "tile_strength",
             "lower_base_tile_id",
             "upper_base_tile_id",
@@ -133,6 +134,7 @@ MCP_TOOLS = {
             "transition_description": None,
             "tile_size": {"width": 16, "height": 16},
             "mode": "standard",
+            "shape_style": None,
             "view": "high top-down",
             "transition_size": 0.0,
             "detail": None,
@@ -442,20 +444,18 @@ def validate_request(
             f"{tool} transition_size {raw_transition} is not one of PixelLab's documented guidepost values; "
             "the compact renderer uses the numeric value directly."
         )
-    if tool == "create_topdown_tileset" and raw_transition >= 1.0:
-        raise SystemExit(
-            "This is a valid top-down tileset request shape, but transition_size 1.0 can export an expanded "
-            "23-tile/4x8-style sheet that this compact simulator does not render."
-        )
     if tool == "create_topdown_tileset":
         mode = request_value(tool, request, "mode")
+        shape_style = request_value(tool, request, "shape_style")
         if mode not in {"standard", "pro"}:
             raise SystemExit("create_topdown_tileset mode must be standard or pro.")
+        if shape_style not in {None, "square", "round"}:
+            raise SystemExit("create_topdown_tileset shape_style must be square, round, or null.")
         if mode == "standard" and tile_width == 64:
             raise SystemExit("create_topdown_tileset standard mode supports 16x16 or 32x32; use pro for 64x64.")
         if request_value(tool, request, "view") not in {"low top-down", "high top-down"}:
             raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
-        if mode == "pro":
+        if mode == "pro" and shape_style is None:
             if raw_transition >= 0.5:
                 raise SystemExit(
                     "This is a valid top-down Pro request shape, but observed PixelLab Pro outputs can expand at "
@@ -480,6 +480,23 @@ def validate_request(
     outline = request_value(tool, request, "outline")
     if outline is not None and outline not in {"single color black outline", "single color outline", "selective outline", "lineless"}:
         raise SystemExit("outline must be single color black outline, single color outline, selective outline, or lineless.")
+    if tool == "create_topdown_tileset":
+        shape_style = request_value(tool, request, "shape_style")
+        if shape_style is not None:
+            if raw_transition > 0.5:
+                raise SystemExit(
+                    "This is a documented top-down shape_style request, but transition_size above 0.5 uses an expanded "
+                    "4x8 sheet that this compact simulator does not render."
+                )
+            raise SystemExit(
+                "This is a documented top-down shape_style request, but this compact simulator does not model square "
+                "or round boundary geometry."
+            )
+        if raw_transition >= 1.0:
+            raise SystemExit(
+                "This is a valid top-down tileset request shape, but transition_size 1.0 can export an expanded "
+                "23-tile/4x8-style sheet that this compact simulator does not render."
+            )
     return warnings
 
 

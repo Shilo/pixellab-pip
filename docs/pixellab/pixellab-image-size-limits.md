@@ -1,6 +1,6 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-08-07 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
+Last reviewed: 2026-08-09 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
 
 > **All maxima in this document were measured on a Tier 2 ("Pixel Artisan") subscription.** PixelLab gates max image *size* by plan tier (a soft limit under the hard schema caps). See [Tier / Plan Size Gating](#tier--plan-size-gating-soft-limits) — lower tiers cap several endpoints below the numbers below.
 
@@ -169,7 +169,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 
 | Endpoint | Field | Allowed values | Notes |
 |---|---|---|---|
-| `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 32, 64]`, default 16 | `standard` mode: 16/32. `pro` mode: 16/32/64 plus shape controls. |
+| `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 32, 64]`, default 16 | `standard` mode: 16/32. `pro` mode: 16/32/64 plus shape controls. Optional `shape_style` (`square`/`round`) supports 16/32 only. |
 | `create-tileset-sidescroller` / `tilesets-sidescroller` | `tile_size` (w/h) | `enum [16, 32]`, default 16 | No 64 option. |
 | `create-tiles-pro` | `tile_size` (int) | schema 16–**256**, prose 16–**128**, default 32 | **Conflict — treat 128 as the ceiling.** The field schema says `16-256` (257 → `422`), but the endpoint prose says "Supported tile sizes: 16-128px" and the MCP tool caps at 128. Passing validation ≠ generating; only ≤128 is corroborated by all three. 32 recommended. `tile_height` 16–256 for non-square; `style_images` override shape/size. |
 | `create-isometric-tile` | `image_size` | 16×16 to 64×64 | Sizes above 24×24 documented as better. `isometric_tile_size` default 16 (recommended 16 or 32). |

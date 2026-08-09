@@ -1,6 +1,6 @@
 # PixelLab DualGrid Tileset Export System
 
-Last reviewed: 2026-07-03.
+Last reviewed: 2026-08-09.
 
 Purpose: document the observed DualGrid/Wang export contract for PixelLab tilesets so local tools can simulate the deterministic parts of tileset assembly before spending generations.
 
@@ -81,7 +81,7 @@ Observed compact PixelLab tilesets usually include:
 - `pattern_system.terrain_encoding.upper: 1`
 - `pattern_system.terrain_encoding.wildcard: 255`
 
-Top-down exports are not always compact across every PixelLab surface. Current MCP docs describe `transition_size` as a float with `0.0`, `0.25`, `0.5`, or `1.0` (full-tile transition) as guidepost values — matching REST's own documented range. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
+Top-down exports are not always compact across every PixelLab surface. MCP documents `transition_size` as a float and cites `0.0`, `0.25`, `0.5`, or `1.0` (full-tile transition); with `shape_style`, it is continuous from 0 to 1 and values above 0.5 use a 4x8 sheet. REST additionally limits an omitted `shape_style` to those four values. Any tool that needs a strict 4x4 sheet must verify `total_tiles`, `spritesheet_grid`, `spritesheet_layout`, and downloaded PNG dimensions before treating the output as compact.
 
 Each returned tile may include:
 
@@ -121,9 +121,9 @@ REST v2 routes:
 - `POST /v2/create-tiles-pro`
 - `GET /v2/tiles-pro/{tile_id}`
 
-REST top-down tileset creation uses `CreateTilesetRequest`. Key fields are `lower_description`, `upper_description`, `transition_description`, `tile_size`, `mode`, `view`, `transition_size`, style controls, guidance/adherence controls, base tile IDs, reference images, `color_image`, and `seed`.
+REST top-down tileset creation uses `CreateTilesetRequest`. Key fields are `lower_description`, `upper_description`, `transition_description`, `tile_size`, `mode`, `view`, `shape_style`, `transition_size`, style controls, guidance/adherence controls, base tile IDs, reference images, `color_image`, and `seed`. `shape_style` is optional (`square` or `round`), supports square 16px or 32px tiles, and makes `transition_size` continuous from 0 to 1; values above 0.5 use an extended 4x8 layout.
 
-Current MCP `create_topdown_tileset` docs expose the main descriptions, transition size, tile size, mode, Pro shape controls, style controls, view, adherence/guidance controls, and base tile IDs. They do not expose the REST reference-image, palette-image, or seed fields.
+Current MCP `create_topdown_tileset` docs expose the main descriptions, transition size, tile size, mode, `shape_style`, Pro shape controls, style controls, view, adherence/guidance controls, and base tile IDs. They do not expose the REST reference-image, palette-image, or seed fields.
 
 REST sidescroller tileset creation uses `CreateTilesetSidescrollerRequest`. It uses `lower_description` for the platform body and `transition_description` for the top/surface layer. REST exposes `lower_reference_image`, `transition_reference_image`, and `color_image`. Current MCP sidescroller docs expose the main descriptions, tile size, style controls, guidance/adherence controls, `base_tile_id`, and seed, but not the REST reference or palette image fields.
 

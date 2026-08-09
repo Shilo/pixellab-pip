@@ -33,10 +33,10 @@ Top-down MCP `create_topdown_tileset` route:
 - Required terrain fields: `lower_description`, `upper_description`.
 - Optional transition field: `transition_description`.
 - Base tile fields for chaining: `lower_base_tile_id`, `upper_base_tile_id`.
-- Route-only fields: `mode` (`standard` or `pro`) and `view` (`low top-down` or `high top-down`).
+- Route-only fields: `mode` (`standard` or `pro`), `view` (`low top-down` or `high top-down`), and `shape_style` (`square` or `round`). Leave `shape_style` omitted unless the user explicitly requests one of those boundary geometries; it is a structured geometry control, not a prompt-style hint.
 - Pro-only shape fields: `spread_x`, `slope_size`, `raggedness`.
 - No `seed`: the MCP top-down route exposes none, so route reproducible top-down runs to REST `create-tileset`, which does.
-- `transition_size` controls terrain blending/height behavior for top-down tiles; documented examples include 0.0, 0.25, 0.5, and 1.0.
+- `transition_size` controls terrain blending/height behavior for top-down tiles. MCP documents it as a float and cites 0.0, 0.25, 0.5, and 1.0; with explicit `shape_style`, it is continuous from 0 to 1 and values above 0.5 use an extended 4x8 sheet. Verify the returned layout before treating it as a compact 4x4 atlas. REST-specific validation is stricter: without `shape_style`, it accepts only those four values; its `shape_style` description supports square 16px or 32px tiles.
 
 Sidescroller MCP `create_sidescroller_tileset` route:
 

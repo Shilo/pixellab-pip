@@ -64,7 +64,7 @@ Omitted optional fields use the documented MCP defaults for simulation only. The
 Common accepted MCP fields:
 
 - Sidescroller: `lower_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `tile_strength`, `base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`.
-- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`.
+- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `shape_style`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`.
 
 By default, it writes to:
 
@@ -196,7 +196,7 @@ For strict 1-bit prompt work, judge simulator runs by the shape question first: 
 
 The simulator validates only the MCP-facing request shape that matters for local simulation. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce expanded top-down transition sheets.
 
-Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0`. MCP documents `transition_size` as a float and describes `0`, `0.25`, and `0.5` as guidepost values; the simulator accepts compact standard-mode values below `1.0` and uses the numeric value directly. `1.0` can produce an expanded top-down sheet, so this compact simulator reports it as valid-but-unsupported instead of producing a misleading 4x4 PNG.
+Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and every explicit `shape_style`. MCP documents `transition_size` as a float and cites `0`, `0.25`, `0.5`, and `1.0`; this compact renderer keeps its existing numeric handling. With `shape_style: "square"` or `"round"`, MCP documents a 0–1 range and a 4x8 sheet above 0.5, but its procedural boundary geometry is outside this compact Wang renderer. The simulator reports those documented requests as unsupported instead of producing a misleading 4x4 PNG.
 
 Top-down `mode: "pro"` is also conservative: observed PixelLab Pro corpus outputs can expand at `transition_size: 0.5`, so the simulator refuses Pro requests at `0.5` or higher instead of pretending compact parity.
 
