@@ -1,17 +1,6 @@
 # Tilesets
 
-Read this for terrain tilesets, platformer tilesets, isometric tiles, tile variants, or ambiguous tile requests. SKILL.md holds model/mode label semantics.
-
-"Tiles" is ambiguous. If unclear, ask whether the user wants:
-
-- Top-down terrain/Wang/autotile tileset.
-- Platformer/sidescroller tileset.
-- Explicit hex, isometric, or oblique connectable terrain transition.
-- Individual tile variants such as hex, octagon, square, or isometric.
-- One isometric tile/block.
-- A connectable path/road tile set.
-- A building kit (floor, connectable walls, doorways, pillar, stairs).
-- Packed texture sheet/image grid via Create Image Pro.
+Read this for tilesets, isometric tiles, tile variants, and ambiguous tile requests.
 
 ## MCP Route Inputs
 
@@ -24,7 +13,7 @@ Multi-shape connectable terrain transition:
 - `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down requests, supplied per-terrain reference images and palette controls require REST `create-tileset`; the MCP top-down schema does not expose those inputs.
 - Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules.
 
-Shared MCP controls currently visible on both routes:
+Shared MCP controls on the top-down and sidescroller routes (not `create_tiles_pro`):
 
 - `tile_size`: tile dimensions; sidescroller supports 16 or 32, top-down supports 16 or 32 in `standard` mode and 64 in `pro` mode.
 - `transition_size`: amount of transition/top layer; use route-specific meaning below.
@@ -75,9 +64,6 @@ These labels are not symmetric with the MCP parameter names:
 |---|---|---|---|
 | `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. Not the same as `transition_size`. |
 | `Center tile description`, `Center Tile`, `platform center` | `create_sidescroller_tileset` | `lower_description` | Sidescroller MCP calls this the platform material/body. |
-| `thin floor`, `floor slab`, `flat tile` | `create_isometric_tile` | `tile_shape: "thin tile"` | Same value on REST `isometric_tile_shape: "thin tile"` — only the field name differs. |
-| `thick platform`, `raised platform` | `create_isometric_tile` | `tile_shape: "thick tile"` | Same value on REST `isometric_tile_shape: "thick tile"`. |
-| `block`, `cube`, `full-height tile` | `create_isometric_tile` | `tile_shape: "block"` | Same value on REST `isometric_tile_shape`. |
 | `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_tiles_pro`, `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
 Do not reinterpret `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, or `terrain pair` as sidescroller center/top layers without side-view intent. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as an autotile tileset just because the user says tiles.
@@ -88,7 +74,7 @@ Treat structured API fields as controls, not prompt text. Change a control only 
 
 Treat `outline`, `shading`, and `detail` as weak style controls, not deterministic placement controls: PixelLab docs say each "Weakly" controls its aspect, affecting taste, texture, color variation, and contour strength without guaranteeing exact edges, palette, or texture density. For placement or material changes, adjust terrain/transition descriptions and `transition_size` first.
 
-For any MCP or REST route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar wording.
+Exception to the rule above: for any MCP or REST route that exposes `transition_size`, use `transition_size: 0.5` when the user requests or implies a transition but does not specify its size. Do not infer `transition_size: 1.0` from `wall`, `dithered`, `textured`, `black and white`, `max text guidance`, or similar wording.
 
 For REST top-down tilesets, `lower_reference_image`, `upper_reference_image`, and `transition_reference_image` are stronger composition/style controls than `color_image`. Do not add them just because the user names a material, texture, wall, or floor; use them when the user supplies a reference, asks for one, or approves a retry after a miss. Treat `transition_reference_image` as a style reference, not a mask or stamp; keep `text_guidance_scale` at default unless the text matters more than the reference (high text guidance competes with it and worsens palette drift). Author a local reference in single-tile context at the requested `tile_size` — a 16x16 tileset uses a 16x16 reference, and at `transition_size: 0.5` place the pattern in the 8-pixel band, not scaled to the full 4x4 sheet.
 
@@ -108,6 +94,6 @@ Tileset generators do not reliably enforce strict 1-bit black-and-white output f
 
 ## Fetching Results (top-down)
 
-On the MCP route, poll `get_topdown_tileset(tileset_id)` — it returns status, tile data, download links, and base tile IDs directly, with no separate preview-vs-final split. On the REST route, fetch both result surfaces: poll `GET /background-jobs/{background_job_id}` for preview fields, then use `GET /tilesets/{tileset_id}` for the actual tile set, metadata, and generation parameters. The final user-facing tileset for a 16-tile result is the dual-grid 15-tileset 4x4 sheet assembled from the tiles' `image` data in the exact order returned by the getter (`get_topdown_tileset` or `GET /tilesets/{tileset_id}`); name it plainly, such as `tileset.png` or `tileset-4x4.png`. Do not sort the tiles by `wang_N`, `original_position`, corner pattern, or any other inferred index, because those layouts can scramble the usable 16-tile sheet. Decode the returned tile PNGs in memory for this sheet; do not save separate per-tile PNG files unless the user asks for individual tiles or a package.
+On the MCP route, poll `get_topdown_tileset(tileset_id)` — it returns status, tile data, download links, and base tile IDs directly, with no separate preview-vs-final split. On the REST route, fetch both result surfaces: poll `GET /background-jobs/{background_job_id}` for preview fields, then use `GET /tilesets/{tileset_id}` for the actual tile set, metadata, and generation parameters. The final user-facing tileset for a 16-tile result is the 4x4 sheet in the dual-grid (`15-tileset`) format, assembled from the tiles' `image` data in the exact order returned by the getter (`get_topdown_tileset` or `GET /tilesets/{tileset_id}`); name it plainly, such as `tileset.png` or `tileset-4x4.png`. A 25-tile result uses a 4x8 sheet in the same returned order; do not repack it as 4x4. Do not sort the tiles by `wang_N`, `original_position`, corner pattern, or any other inferred index, because those layouts can scramble the usable sheet. Decode the returned tile PNGs in memory for this sheet; do not save separate per-tile PNG files unless the user asks for individual tiles or a package.
 
 The background job `last_response` may include full-sheet `image` and `quantized_image` fields; treat these as previews, not the final sheet. Save/show `image` as the primary preview (more likely to match the final tiles) and `quantized_image` as secondary. These fields may be base64 raw RGBA buffers rather than PNG, so decode and convert before writing PNGs. Public REST docs expose no tileset ZIP/export endpoint for Wang, dual-grid 15-tileset, or 3x3 formats; use the returned tile PNGs for local packaging only when the user asks.

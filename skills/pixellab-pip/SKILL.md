@@ -23,7 +23,7 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
    `question | setup | update | uninstall | bark | auto | create asset | edit/transform | animate | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | aseprite_integration | blueprint/recipe`.
    A standalone `setup`, `update`, `uninstall`, `bark`, or `auto` word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent: for setup read `references/setup.md`, for update read `references/update.md`, for uninstall read `references/uninstall.md`, for bark read `references/bark.md`, for auto read `references/auto.md`.
 2. Classify the target:
-   `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | multi_shape_tileset | isometric_tile | tile_variants | animation | existing_image`.
+   `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | multi_shape_tileset | path_tiles | building_kit | isometric_tile | tile_variants | animation | existing_image`.
    Fitted visual additions to an existing character image, such as hair, facial features, wearables, accessories, or held gear, are `existing_image` paperdoll edits, not standalone `object` requests, unless the user explicitly wants a separate unattached prop.
 3. Choose the surface with Surface Rules, then the route with the Intent Router. When the user explicitly asks for Aseprite handling, read `references/aseprite-cli.md`; PixelLab MCP/REST generates, documented Aseprite CLI/Lua handles local workspace, import/export, packaging, and launch only.
 4. Use MCP only if PixelLab MCP tools are visible as callable tools, bare or prefixed such as `mcp__pixellab__create_character` (match by suffix). If the user explicitly asked for MCP, do not silently fall back; report that MCP is unavailable and offer setup or an approved REST v2 fallback. Otherwise, when MCP is unavailable, use the matching documented REST v2 endpoint. If both are unavailable or fail, explain why before any non-PixelLab fallback.
@@ -78,11 +78,11 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 | Pixel/bitmap font, font atlas | MCP `create_font` + `get_font` when visible. | `generate-font-pro` (Pro). |
 | Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, emoji, or icon sheet | Read `references/icon.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
 | Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/tags/review tools. An object group's `name` is shared; when the user names a new state, pass `state_name`, otherwise PixelLab derives it from the edit description. Object creation is Pro Tools (20-40 generations). | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
-| Unqualified tileset or terrain transition; square top-down tileset, Wang tileset, or autotile | Read `references/tileset.md`, then MCP `create_topdown_tileset`; this is the default for an unqualified tileset request. | `create-tileset`, `tilesets`. |
-| Explicit hex, isometric, or oblique connectable terrain transition; or explicitly requested tiles-pro tileset | Read `references/tileset.md`, then MCP `create_tiles_pro` with `tile_feature="tileset"`. | `create-tiles-pro` with `tile_feature: "tileset"`, then `tiles-pro/{tile_id}`. |
+| Tileset or terrain transition with no stated type or projection; square top-down, Wang, or autotile tileset | Read `references/tileset.md`, then MCP `create_topdown_tileset`; this is the default when no tileset type, projection, or route is specified. | `create-tileset`, `tilesets`. |
+| Explicit hex, isometric, or oblique connectable terrain transition; or explicit `create_tiles_pro`/`create-tiles-pro` tileset mode | Read `references/tileset.md`, then MCP `create_tiles_pro` with `tile_feature="tileset"`. | `create-tiles-pro` with `tile_feature: "tileset"`, then `tiles-pro/{tile_id}`. |
 | Sidescroller/platformer tileset | Read `references/tileset.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
 | Isometric tile/block/floor | MCP `create_isometric_tile`; map thickness wording to `tile_shape` (`thin tile`, `thick tile`, `block` — same values as REST, default `block`). | `create-isometric-tile` with `isometric_tile_shape` (`thin tile`, `thick tile`, `block`). |
-| Tile variants (hex, octagon, square, isometric singles) | MCP `create_tiles_pro`. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
+| Multiple independent tile variants (hex, octagon, square, or isometric) | MCP `create_tiles_pro` with no `tile_feature`. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
 | Connectable path/road tile set | MCP `create_path_tiles`; shares `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro` with `create_tiles_pro` — no dedicated getter. | `create-tiles-pro` with `tile_feature: "roads"`. |
 | Building kit (floor, connectable walls, doorways, pillar, stairs) | Read `references/tileset.md`, then MCP `create_building_kit`; shares `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro` with `create_tiles_pro` — no dedicated getter. | `create-tiles-pro` with `tile_feature: "building"` and `building_*` fields. |
 | Hard-projection top-down/south-facing building sprite | Read `references/style-reference.md`; use MCP `create_image_pro` or REST `generate-with-style-v2`; apply the reference's verification. | Do not route a single sprite to `create_building_kit`. |
@@ -114,7 +114,7 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 
 - "Presets": infer bundled blueprints from established blueprint context and preset/template
   animations from animation or motion context; ask which collection only when neither is clear.
-- "Tiles": terrain/autotile tileset, platformer tileset, individual tile variants, a connectable path/road set, or a building kit?
+- "Tiles": top-down/autotile tileset, platformer tileset, explicit-projection connectable set, independent variants, one isometric tile, path set, building kit, or packed texture sheet?
 - "Map": whole map, map object, map image, tileset, isometric tile, or tile variants?
 - "Isometric tileset": one tile, independent variants, or a connectable terrain set? Ask when unclear; only the connectable set uses `tile_feature="tileset"`.
 - "Object/character": infer character for people, NPCs, creatures, or identity/state animation; object for standalone props, pickups, furniture, weapons. Ask only if unclear.
@@ -182,7 +182,7 @@ Treat PixelLab model/provider language as product labels unless official docs di
 - `v3` and `new`: workflow/version labels scoped to a selected operation. Cheap-family hints, but check the endpoint — REST `inpaint-v3` is documented as Pro.
 - `standard`: a legacy generation mode, not a quality tier (the `standard`/`pro` split on characters, tilesets). Use it only when the user explicitly asks or a route reference directs it.
 - `S-XL`, `M-XL`, `S-M`, `M-L`: size/product labels, not asset intents.
-- `Gemini`: stale older website Create Tileset Pro wording; do not present it as current.
+- `Gemini`: a cost-tier label in current edit/inpaint schemas; its older website Create Tileset Pro usage is stale and must not be presented as current.
 
 ## Text Preparation
 
