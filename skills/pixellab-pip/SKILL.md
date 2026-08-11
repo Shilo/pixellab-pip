@@ -78,7 +78,8 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 | Pixel/bitmap font, font atlas | MCP `create_font` + `get_font` when visible. | `generate-font-pro` (Pro). |
 | Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, emoji, or icon sheet | Read `references/icon.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
 | Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/tags/review tools. An object group's `name` is shared; when the user names a new state, pass `state_name`, otherwise PixelLab derives it from the edit description. Object creation is Pro Tools (20-40 generations). | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
-| Top-down terrain/Wang/autotile tileset | Read `references/tileset.md`, then MCP `create_topdown_tileset`. | `create-tileset`, `tilesets`. |
+| Tiles-module connectable terrain transition (hex, isometric, oblique, or square top-down) | Read `references/tileset.md`, then MCP `create_tiles_pro` with `tile_feature="tileset"`; poll `get_tiles_pro`. | `create-tiles-pro` with `tile_feature: "tileset"`, then `tiles-pro/{tile_id}`. |
+| Dedicated top-down terrain/Wang/autotile tileset | Read `references/tileset.md`, then MCP `create_topdown_tileset`; prefer this over the Tiles-module route when square top-down needs transition width, per-terrain references, or style matching. | `create-tileset`, `tilesets`. |
 | Sidescroller/platformer tileset | Read `references/tileset.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
 | Isometric tile/block/floor | MCP `create_isometric_tile`; map thickness wording to `tile_shape` (`thin tile`, `thick tile`, `block` — same values as REST, default `block`). | `create-isometric-tile` with `isometric_tile_shape` (`thin tile`, `thick tile`, `block`). |
 | Tile variants (hex, octagon, square, isometric singles) | MCP `create_tiles_pro`. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
@@ -201,7 +202,6 @@ Use one enhancement path per call. Inline `enhance_prompt` flags exist on `creat
 - No undocumented internal endpoints used by first-party surfaces: root website routes, unversioned `https://api.pixellab.ai/` paths like `/tilesets/create`, or Aseprite extension operation URLs. Treat them as unsupported unless they appear in public REST v2 docs/OpenAPI or MCP docs.
 - Never ask users to paste the PixelLab bearer token into chat; direct them to the setup wizard, local `PIXELLAB_SECRET`, or app secret settings.
 - Never scrape browser session tokens or cookies. Website session tokens are not API bearer tokens; never use one for the other.
-- Do not confuse website Create Tileset Pro with public `create_tiles_pro` / `create-tiles-pro`; different flows.
 - Do not default to v1 or old SDK README examples for new work, and do not assume an installed SDK covers every current v2 endpoint — confirm the installed package or call REST v2 directly.
 
 ## Current Docs Refresh
