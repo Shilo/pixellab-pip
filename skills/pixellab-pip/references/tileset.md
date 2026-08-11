@@ -1,11 +1,11 @@
 # Tilesets
 
-Read this for terrain tilesets, platformer tilesets, isometric tiles, tile variants, or Tiles-module route ambiguity. SKILL.md holds the model/mode label semantics this file does not restate (including that Gemini wording is stale).
+Read this for terrain tilesets, platformer tilesets, isometric tiles, tile variants, or ambiguous tile requests. SKILL.md holds model/mode label semantics.
 
 "Tiles" is ambiguous. If unclear, ask whether the user wants:
 
 - Terrain/autotile tileset.
-- Tiles-module connectable terrain transition (hex, isometric, oblique, or square top-down).
+- Connectable terrain transition (hex, isometric, oblique, or square top-down).
 - Platformer/sidescroller tileset.
 - Individual tile variants such as hex, octagon, square, or isometric.
 - One isometric tile/block.
@@ -19,14 +19,14 @@ Capture tile size, route/view, terrain pair or platform body/surface description
 
 MCP `create_topdown_tileset` and `create_sidescroller_tileset` are sibling routes. Keep shared guidance shared, and separate route-specific instructions when a field means something different or only exists on one route.
 
-Tiles-module connectable terrain transition:
+Multi-shape connectable terrain transition:
 
-- The website's Tiles > Tileset flow has a public equivalent: MCP `create_tiles_pro` with `tile_feature="tileset"`, or REST v2 `POST /create-tiles-pro` with `tile_feature: "tileset"`. This is distinct from the older dedicated `create_topdown_tileset` / `create-tileset` route.
+- Use MCP `create_tiles_pro` or REST `POST /create-tiles-pro` with `tile_feature="tileset"`. This is distinct from the dedicated top-down route.
 - Put the ordered terrain pair in `description`, such as `grass to water`; the first terrain is the main terrain and the second surrounds it.
 - `tile_type` supports `hex`, `hex_pointy`, `isometric`, `oblique`, and `square_topdown` in tileset mode. Square top-down, isometric, and oblique return a 16-tile corner set; hex shapes return a 32-tile coastline set.
-- Map the website controls directly: tile shape -> `tile_type`, tile size -> `tile_size`, thickness -> `tile_depth_ratio`, view angle -> `tile_view_angle`, top/bottom pixels -> `tile_flat_top_px`, and No outline -> `outline_mode="segmentation"`. Use `oblique_lean` for oblique shear. Uneven boundary and terrain height have no current public fields; do not silently fold either into `tile_depth_ratio` or invent values for them.
+- Shape controls are `tile_size`, `tile_view_angle`, `tile_depth_ratio`, `tile_flat_top_px` (isometric), `oblique_lean` (oblique), and `outline_mode`. No public fields expose boundary raggedness or raised-terrain height; do not map them to another control.
 - `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down transitions needing transition width, per-terrain reference images, or style matching, use the dedicated `create_topdown_tileset` / `create-tileset` route instead.
-- Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules. `GET /background-jobs/active` is a first-party website session view, not the public polling contract.
+- Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules.
 
 Shared MCP controls currently visible on both routes:
 
