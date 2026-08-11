@@ -4,8 +4,7 @@ Read this for terrain tilesets, platformer tilesets, isometric tiles, tile varia
 
 "Tiles" is ambiguous. If unclear, ask whether the user wants:
 
-- Terrain/autotile tileset.
-- Connectable terrain transition (hex, isometric, oblique, or square top-down).
+- Top-down terrain/autotile/connectable transition (default: `create_tiles_pro` with `tile_feature="tileset"`).
 - Platformer/sidescroller tileset.
 - Individual tile variants such as hex, octagon, square, or isometric.
 - One isometric tile/block.
@@ -21,11 +20,11 @@ MCP `create_topdown_tileset` and `create_sidescroller_tileset` are sibling route
 
 Multi-shape connectable terrain transition:
 
-- Use MCP `create_tiles_pro` or REST `POST /create-tiles-pro` with `tile_feature="tileset"`. This is distinct from the dedicated top-down route.
+- Default every terrain/autotile tileset, including square top-down and Wang/autotile wording, to MCP `create_tiles_pro` or REST `POST /create-tiles-pro` with `tile_feature="tileset"`.
 - Put the ordered terrain pair in `description`, such as `grass to water`; the first terrain is the main terrain and the second surrounds it.
-- `tile_type` supports `hex`, `hex_pointy`, `isometric`, `oblique`, and `square_topdown` in tileset mode. Square top-down, isometric, and oblique return a 16-tile corner set; hex shapes return a 32-tile coastline set.
+- `tile_type` supports `square_topdown`, `isometric`, `hex`, `hex_pointy`, and `oblique` in tileset mode. Square top-down, isometric, and oblique return a 16-tile corner set; hex shapes return a 32-tile coastline set.
 - Shape controls are `tile_size`, `tile_view_angle`, `tile_depth_ratio`, `tile_flat_top_px` (isometric), `oblique_lean` (oblique), and `outline_mode`. No public fields expose boundary raggedness or raised-terrain height; do not map them to another control.
-- `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down transitions needing transition width, per-terrain reference images, or style matching, use the dedicated `create_topdown_tileset` / `create-tileset` route instead.
+- `style_images` cannot be combined with `tile_feature="tileset"`. Use the dedicated `create_topdown_tileset` / `create-tileset` route only when a square top-down request requires transition width, per-terrain reference images, or style matching.
 - Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules.
 
 Shared MCP controls currently visible on both routes:
@@ -82,9 +81,9 @@ These labels are not symmetric with the MCP parameter names:
 | `thin floor`, `floor slab`, `flat tile` | `create_isometric_tile` | `tile_shape: "thin tile"` | Same value on REST `isometric_tile_shape: "thin tile"` — only the field name differs. |
 | `thick platform`, `raised platform` | `create_isometric_tile` | `tile_shape: "thick tile"` | Same value on REST `isometric_tile_shape: "thick tile"`. |
 | `block`, `cube`, `full-height tile` | `create_isometric_tile` | `tile_shape: "block"` | Same value on REST `isometric_tile_shape`. |
-| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
+| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_tiles_pro`, `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
-Route top-down terrain/autotile wording to `create_topdown_tileset` unless the user explicitly asks for platformer/sidescroller/side-view tiles. Phrases such as `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, `Wang`, `autotile`, or `terrain pair` describe top-down structure absent side-view intent; do not reinterpret them as sidescroller center/top layers just because the words include floor or wall. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as a Wang/autotile tileset just because the user says tiles.
+Route generic top-down, terrain, transition, Wang, and autotile wording to `create_tiles_pro` with `tile_feature="tileset"`. Switch to `create_topdown_tileset` only for its dedicated controls named above. Do not reinterpret `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, or `terrain pair` as sidescroller center/top layers without side-view intent. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as an autotile tileset just because the user says tiles.
 
 ## Generation Controls
 
