@@ -2,9 +2,9 @@
 
 Read this for terrain tilesets, platformer tilesets, isometric tiles, tile variants, or ambiguous tile requests. SKILL.md holds model/mode label semantics.
 
-An unqualified "tileset" means a top-down Wang/autotile tileset. If "tiles" is ambiguous, ask whether the user wants:
+"Tiles" is ambiguous. If unclear, ask whether the user wants:
 
-- Top-down terrain/Wang/autotile tileset (default: `create_topdown_tileset`).
+- Top-down terrain/Wang/autotile tileset.
 - Platformer/sidescroller tileset.
 - Explicit hex, isometric, or oblique connectable terrain transition.
 - Individual tile variants such as hex, octagon, square, or isometric.
@@ -13,19 +13,15 @@ An unqualified "tileset" means a top-down Wang/autotile tileset. If "tiles" is a
 - A building kit (floor, connectable walls, doorways, pillar, stairs).
 - Packed texture sheet/image grid via Create Image Pro.
 
-Capture tile size, route/view, terrain pair or platform body/surface descriptions, transition description/size, base tile IDs, style/reference/palette images, and target engine/export convention when relevant.
-
 ## MCP Route Inputs
-
-MCP `create_topdown_tileset` and `create_sidescroller_tileset` are sibling routes. Keep shared guidance shared, and separate route-specific instructions when a field means something different or only exists on one route.
 
 Multi-shape connectable terrain transition:
 
-- Use MCP `create_tiles_pro` or REST `POST /create-tiles-pro` with `tile_feature="tileset"` only when the user explicitly requests a hex, isometric, or oblique connectable terrain transition, or explicitly names this route. Plain `create_tiles_pro` generates independent tile variations, not an autotiling tileset; never omit `tile_feature="tileset"` for a connectable-set request.
+- Use MCP `create_tiles_pro` or REST `POST /create-tiles-pro` with `tile_feature="tileset"` only when the user explicitly requests a hex, isometric, or oblique connectable terrain transition, or explicitly requests tiles-pro tileset mode. Plain `create_tiles_pro` generates independent tile variations, not an autotiling tileset; never omit `tile_feature="tileset"` for a connectable-set request.
 - Put the ordered terrain pair in `description`, such as `grass to water`; the first terrain is the main terrain and the second surrounds it.
 - `tile_type` supports `square_topdown`, `isometric`, `hex`, `hex_pointy`, and `oblique` in tileset mode. Square top-down, isometric, and oblique return a 16-tile corner set; hex shapes return a 32-tile coastline set.
-- Shape controls are `tile_size`, `tile_view_angle`, `tile_depth_ratio`, `tile_flat_top_px` (isometric), `oblique_lean` (oblique), and `outline_mode`. No public fields expose boundary raggedness or raised-terrain height; do not map them to another control.
-- `style_images` cannot be combined with `tile_feature="tileset"`. Route square top-down, Wang, autotile, and transition-width requests to `create_topdown_tileset` / `create-tileset` unless the user explicitly names the tiles-pro route. Supplied per-terrain reference images and palette controls require REST `create-tileset`; the MCP top-down schema does not expose those inputs.
+- Shape controls are `tile_size`, `tile_view_angle`, `tile_depth_ratio`, `tile_flat_top_px` (isometric), `oblique_lean` (oblique), and `outline_mode`. `create_tiles_pro` exposes no boundary-raggedness or raised-terrain-height fields; do not map those concepts to another tiles-pro control.
+- `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down requests, supplied per-terrain reference images and palette controls require REST `create-tileset`; the MCP top-down schema does not expose those inputs.
 - Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules.
 
 Shared MCP controls currently visible on both routes:
@@ -71,7 +67,7 @@ Path/road and building-kit MCP routes:
 
 ## Human Label To API Mapping
 
-Website, Aseprite, and MCP/REST labels sometimes differ. Map only non-obvious human-facing wording to the route's structured parameters before generating; do not duplicate fields whose names are already symmetric or directly inferable.
+Map only non-obvious request wording to structured parameters.
 
 These labels are not symmetric with the MCP parameter names:
 
@@ -84,7 +80,7 @@ These labels are not symmetric with the MCP parameter names:
 | `block`, `cube`, `full-height tile` | `create_isometric_tile` | `tile_shape: "block"` | Same value on REST `isometric_tile_shape`. |
 | `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_tiles_pro`, `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
-Route unqualified tileset, top-down, terrain transition, Wang, and autotile wording to `create_topdown_tileset`. Use `create_tiles_pro` with `tile_feature="tileset"` only for the explicit multi-shape cases above. Do not reinterpret `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, or `terrain pair` as sidescroller center/top layers without side-view intent. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as an autotile tileset just because the user says tiles.
+Do not reinterpret `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, or `terrain pair` as sidescroller center/top layers without side-view intent. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as an autotile tileset just because the user says tiles.
 
 ## Generation Controls
 

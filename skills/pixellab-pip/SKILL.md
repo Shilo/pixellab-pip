@@ -78,8 +78,8 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
 | Pixel/bitmap font, font atlas | MCP `create_font` + `get_font` when visible. | `generate-font-pro` (Pro). |
 | Skill/ability/spell/action-bar/hotbar icon, inventory item/equipment/loot/pickup icon, emoji, or icon sheet | Read `references/icon.md` before choosing an endpoint or generating. | The reference covers route choice, background defaults, sheet sizing, prompt wording, and verification. |
 | Standalone object, prop, pickup, weapon, furniture (not an icon) | MCP `create_1_direction_object`, `create_8_direction_object`, object state/animation/tags/review tools. An object group's `name` is shared; when the user names a new state, pass `state_name`, otherwise PixelLab derives it from the edit description. Object creation is Pro Tools (20-40 generations). | `create-1-direction-object`, `create-8-direction-object`, object state/animation/tags/list/get/delete endpoints. |
-| Tileset, top-down terrain transition, Wang tileset, or autotile | Read `references/tileset.md`, then MCP `create_topdown_tileset`; this is the default for an unqualified tileset request. | `create-tileset`, `tilesets`. |
-| Explicit hex, isometric, or oblique connectable terrain transition; or explicitly requested tiles-pro tileset | Read `references/tileset.md`, then MCP `create_tiles_pro` with `tile_feature="tileset"`; never omit `tile_feature`. | `create-tiles-pro` with `tile_feature: "tileset"`, then `tiles-pro/{tile_id}`. |
+| Unqualified tileset or terrain transition; square top-down tileset, Wang tileset, or autotile | Read `references/tileset.md`, then MCP `create_topdown_tileset`; this is the default for an unqualified tileset request. | `create-tileset`, `tilesets`. |
+| Explicit hex, isometric, or oblique connectable terrain transition; or explicitly requested tiles-pro tileset | Read `references/tileset.md`, then MCP `create_tiles_pro` with `tile_feature="tileset"`. | `create-tiles-pro` with `tile_feature: "tileset"`, then `tiles-pro/{tile_id}`. |
 | Sidescroller/platformer tileset | Read `references/tileset.md`, then MCP `create_sidescroller_tileset`. | `create-tileset-sidescroller`. |
 | Isometric tile/block/floor | MCP `create_isometric_tile`; map thickness wording to `tile_shape` (`thin tile`, `thick tile`, `block` — same values as REST, default `block`). | `create-isometric-tile` with `isometric_tile_shape` (`thin tile`, `thick tile`, `block`). |
 | Tile variants (hex, octagon, square, isometric singles) | MCP `create_tiles_pro`. | `create-tiles-pro`, `tiles-pro/{tile_id}`. |
@@ -116,7 +116,7 @@ For any atlas or spritesheet request with known or requested cell dimensions, al
   animations from animation or motion context; ask which collection only when neither is clear.
 - "Tiles": terrain/autotile tileset, platformer tileset, individual tile variants, a connectable path/road set, or a building kit?
 - "Map": whole map, map object, map image, tileset, isometric tile, or tile variants?
-- "Isometric tileset": one isometric tile or a connectable terrain set? Ask when unclear; route the set to `create_tiles_pro` with `tile_feature="tileset"`.
+- "Isometric tileset": one tile, independent variants, or a connectable terrain set? Ask when unclear; only the connectable set uses `tile_feature="tileset"`.
 - "Object/character": infer character for people, NPCs, creatures, or identity/state animation; object for standalone props, pickups, furniture, weapons. Ask only if unclear.
 - Animation direction on a multi-direction character: default to `south` for one preview candidate; ask only when `south` is unavailable, directions are unknown, or the user needs another gameplay-facing direction. Animate all directions only on explicit request or approval.
 - "Effect": static or animated? If a target image is supplied, infer a one-off edit; ask reusable-asset vs one-off only without a clear edit target.
@@ -238,7 +238,6 @@ When a live generation, edit, transform, conversion, background-removal, or anim
 | "Use the humanoid Walk (8 frames) template animation." | `references/preset-skeleton-template-animation.md`; MCP `animate_character` with `template_animation_id="walking-8-frames"`, REST `/characters/animations` fallback. |
 | "Auto-rig this sprite and animate from the skeleton." | `references/preset-skeleton-template-animation.md`; REST `estimate-skeleton`, then `animate-with-skeleton`. |
 | "Generate a mossy platformer tileset from code." | MCP `create_sidescroller_tileset`; REST v2 `create-tileset-sidescroller` for code/exact control or when MCP is unavailable. |
-| "Make hex terrain tiles." | MCP `create_tiles_pro` with `tile_feature="tileset"` and a hex `tile_type`; never use plain tile-variation mode for a connectable set. |
 | "Make a 512x256 UI panel with a portrait circle and three buttons." | MCP `create_ui_asset` with `pieces`/`elements`; REST v2 `create-ui-asset` when `style_image`/`project_id` is needed or MCP is unavailable. |
 | "Convert this image to pixel art and remove the background." | REST v2 `image-to-pixelart-pro`, then `remove-background`. |
 | "Add a wind dash effect to this runner sprite." | MCP `edit_image` (pro) when MCP-first, else REST v2 `edit-image`; the runner is the edit target, effect on the same canvas. |
