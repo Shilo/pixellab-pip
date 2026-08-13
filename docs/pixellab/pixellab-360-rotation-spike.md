@@ -133,3 +133,100 @@ has somewhere to go. Options, cheap→robust:
 3. **`generate-8-rotations-v2`/`-v3` alone** if 8 discrete directions (no smooth in-betweens) is acceptable.
 
 The `360-scoresheet.html` still lets you manually confirm the negative result per-phrase.
+
+## Results — Batch 2 (2026-07-21, seed 726361): first-frame-only probe + 8-rotations
+
+Two experiments against the Batch 1 negative. Artifacts: `batch2-2A-firstframeonly-grid.png`,
+`2B_generate-8-rotations/`, `batch2_jobs.json`.
+
+### 2A — first-frame-only (dropped `last_frame`), same 6 top phrases
+Removing the identical-anchor trap **unlocked motion** (inter-frame 0.034–0.057 vs Batch 1's
+0.005), and for the *turn-verb* phrases, **real partial rotation**:
+
+| phrase | inter-frame motion | visual result |
+|---|---|---|
+| `turnaround` | 0.034 | **turns ~180° to a back view** by frame 16 (hair back, no face, mask gone) |
+| `turning around` | 0.041 | **turns ~180° to back** by frame 16 — same as turnaround |
+| `rotate clockwise` | 0.049 | mostly front; slight sway, no clear turn |
+| `360 degree rotation` | 0.034 | mostly front; mask fades but stays front |
+| `turntable` | 0.057 | mostly front; highest wobble but no turn |
+| `spinning` | 0.044 | **hand particle artifact**, stays front — "spin" reads as an effect |
+
+Takeaways:
+- The verb matters more than any noun: **"turn around" rotates; "360 / turntable / spin / rotate"
+  do not.** "spin" actively harms (adds an effect artifact).
+- Even the winner only reaches ~180° (front→back) in 16 frames and does **not** return to front,
+  so it is not a seamless 360, and back-half frames carry mild physics/artifact risk.
+- `turn_signal` reads 0 for all because front and back are both mirror-symmetric; only side
+  profiles spike it — so the metric under-reports these front→back turns. Trust the grid.
+
+### 2B — `generate-8-rotations-v3` (descriptionless) — **the breakthrough**
+One call on the south frame returned **8 clean directional views forming a genuine, complete,
+identity-consistent 360 turntable.** The one-sided oni mask correctly sweeps around the head
+and occludes on the back views; horns, white hair, red/black/white outfit, colours, and chibi
+proportions all hold. Each view is a rigid rotated pose — **no subject movement** (no walk,
+no blink, no hair sim). This is exactly the "stiff rotation, no physics" the goal asks for.
+
+**Conclusion so far:** the clean 360 does **not** come from an `animate-with-text-v3` action
+phrase at all — it comes from `generate-8-rotations-v3`. The "MVP description" for rotation
+is effectively **none**: the dedicated rotation endpoint is the correct, subject-agnostic tool.
+The remaining question — how to make it *smooth* (more than 8 frames) and how minimal the
+per-tween action can be — moves to Batch 3.
+
+## Batch 3 (in progress) — smooth the 8 anchors into a many-frame 360
+
+Interpolate between *consecutive* 8-rotation anchors (endpoints now differ, so interpolation
+has somewhere to go) with the most minimal action that yields clean rigid in-betweens. Test a
+few minimal tween actions on one adjacent pair, pick the winner, then stitch all 8 segments
+into one constant-speed loop that closes on south.
+
+## Results — Batch 3 (2026-07-21, seed 726361): interpolate the anchors into a smooth 360
+
+### 3-i — tween action test (anchor S→SE, `frame_count`=4)
+`turn`, `rotate`, `turning` all interpolate the 45° step cleanly and rigidly (identity held, no
+physics). Empty action is rejected (`min_length` 1). Then the decisive control:
+**`x` (nonsense) and `jump` (contradictory) produced the *same* clean rotation as `turn`.**
+
+> **With two distinct rotation anchors as `first_frame`/`last_frame`, the interpolation is
+> geometrically constrained by the endpoints and the `action` text is inert.** "jump" did not
+> add a jump. The field is a required non-empty string, but its content does not affect the
+> result. Evidence: `tween_action_matters.png` (rows turn / x / jump are indistinguishable).
+
+### 3-ii — stitched 360 (`2C_smooth360_turn.gif`, `_sheet.png`)
+8 segments (each consecutive anchor pair, incl. wrap 7→0), `animate-with-text-v3`, `action="turn"`,
+`frame_count`=4, seed-locked; keep each segment's anchor + 3 in-betweens → **32-frame loop**.
+
+- Genuine continuous 360: front → right → back (hair back, no face, mask hidden) → left → front.
+- Identity consistent throughout (horns, one-sided mask sweeps correctly, hair, outfit, colours,
+  chibi proportions). No walking / arms / blink / hair-sim — rigid rotation.
+- **Constant speed:** per-step motion mean 0.056, std 0.011 (even; no jumps).
+- **Loop closes:** seam frame 31→0 = 0.052 ≈ mean step 0.056 — no visible jump at the loop.
+- Caveat: anchors (and thus the loop) carry `generate-8-rotations-v3`'s flat **grey background**
+  (opaque). Uniform → keyable; a transparent asset needs `remove-background` per frame or a
+  careful key. Not part of the rotation question.
+
+---
+
+## FINAL ANSWER — the MVP for a clean rigid 360 (any subject)
+
+**There is no "magic description."** `animate-with-text-v3` driven by an action phrase cannot make
+a subject rotate: identical anchors → zero motion (Batch 1); first-frame-only → only the *turn*
+verbs reach ~180° with artifacts (Batch 2A). The rotation must come from **distinct directional
+endpoints**, not text.
+
+**Subject-agnostic recipe (no character description needed for rotation):**
+1. `POST /v2/generate-8-rotations-v3` with the front sprite as `first_frame` → 8 identity-consistent
+   directional anchors (descriptionless; this is where rotation actually comes from).
+2. For each consecutive anchor pair (0→1 … 7→0), `POST /v2/animate-with-text-v3` with
+   `first_frame`=A_i, `last_frame`=A_{i+1}, **`action` = any non-empty string** (`"turn"` for
+   readability; content is inert), `frame_count`=4, a shared `seed`, `enhance_prompt`=false.
+3. Stitch: for each segment keep the anchor + `frame_count`−1 in-betweens (drop the echoed frame 0
+   and the trailing duplicate anchor) → a constant-speed 360 loop that closes on south.
+
+Notes:
+- Constant speed = equal `frame_count` per 45° segment. More frames/segment = smoother.
+- **16 directions** fall straight out of this: 8 anchors + 1 in-between each = 16 evenly-spaced views.
+- The only "minimal description" that survives is a **1-character placeholder** in the tween's
+  required `action` — proof that the description is not the lever; the endpoints are.
+- To keep the subject perfectly rigid, do not add motion verbs to the tween (they are inert here
+  anyway) and never give `animate-with-text-v3` an idle/loop action expecting a turn.
