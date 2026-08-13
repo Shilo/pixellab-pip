@@ -74,11 +74,55 @@ frozen regardless of seed, confirming the zero-motion is geometric, not a seed a
 seeded or seedless. Config A → 180° ceiling; config B → geometric freeze. The seed affected turn
 *strength*, not the *360 ceiling*.
 
+> ⚠️ **Corrected by Batch 4B.** This verdict only holds for *minimal* prompts. With a verbose
+> trajectory prompt, **config B does reach a full 360** — the "geometric freeze" applies to short
+> prompts, not to a prompt that describes the whole rotation path. The 180°/freeze ceiling was a
+> prompt-content limitation, not a hard limit of the endpoint.
+
 Open single-frame idea not yet tried (still obeys "input = only the south frame"): run TWO config-A
 jobs from the same south frame with opposite turn directions (e.g. `turn around clockwise` vs
 `turn around counter-clockwise`), then compose clipA(front→back) + reverse(clipB)(back→front) into a
 360. Requires (a) the model to honour turn direction and (b) both to reach a matching back view;
 frame-reversal is a playback manipulation to flag before shipping.
+
+## Batch 4B — MAJOR CORRECTION: a verbose prompt DOES give a true 360 from one frame (config B)
+
+The earlier "no single-frame prompt can rotate" conclusion was **wrong — it only tested *minimal*
+prompts.** The user produced a full 360 in Aseprite ("interpolate new" = `animate-with-text-v3`) from
+a single frame used as **both start and end**, with a long trajectory-describing prompt. Reproduced
+here through the REST API. Artifacts: `pixellab-pip-generations/frog-turkey-360-20260721/`.
+
+Setup: user's `frog-turkey-input-128px.png` as `first_frame` **and** `last_frame` (config B),
+`animate-with-text-v3`, `frame_count` 16, **no seed**. Metric: green-frog visibility (front = high,
+back ≈ 0); FULL-360 = drops to back **and** recovers to front.
+
+The winning prompt (774 chars, verbatim):
+> "The frog riding the turkey remains completely motionless in the same pose while the sprite view
+> rotates around them in a full turnaround. Treat this like a character turnaround sheet animated in
+> sequence: show the frog-and-turkey pair progressively from the current front-facing angle, to
+> three-quarter view, to side view, to back three-quarter view, to full back view, then around the
+> opposite side and back to the starting angle. The frog stays seated on the turkey the entire time,
+> and both the frog and the turkey keep the same pose, posture, and relative position. Do not animate
+> walking, flapping, bouncing, swaying, or extra movement. The only motion should be the viewing angle
+> changing smoothly around the frog riding the turkey, like a turntable character showcase."
+
+Results (25 runs, config B, seedless):
+- **Verbose prompt: 3/3 FULL-360** (green 223 → 0 → 223) — a clean, complete turntable, reproducible.
+- **All 22 MVP prompts: FAIL** (green barely dips) except "turning around" = one PARTIAL. The minimal
+  phrases that failed in every earlier batch fail here too.
+
+Corrected conclusions:
+1. **Config B (start == end == one frame) is NOT geometrically frozen.** It is frozen only for minimal
+   prompts. A prompt that explicitly narrates the whole path (front → ¾ → side → back → opposite side
+   → back to start) drives a full 360 even with identical anchors. The identical end frame is what
+   *closes the loop*; the prompt supplies the trajectory.
+2. **Aseprite was not the factor** — the public REST endpoint reproduces the 360 identically.
+3. **Seed was not the factor** either (seedless here; 3/3).
+4. **The factor is prompt content:** an explicit multi-view turntable description with a return-to-start
+   clause, framed as *the view/camera* rotating around a *motionless* subject.
+
+This overturns the headline "there is no MVP prompt". There IS — it is just not *minimal-keyword*; it
+is a *structured trajectory* prompt. Batch 4C searches for the shortest such prompt that still works.
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
@@ -280,6 +324,11 @@ physics). Empty action is rejected (`min_length` 1). Then the decisive control:
 ---
 
 ## FINAL ANSWER — the MVP for a clean rigid 360 (any subject)
+
+> ⚠️ **Superseded by Batch 4B (below).** This section concluded no single-frame prompt can rotate —
+> that was true only for *minimal* prompts. A verbose trajectory prompt DOES give a true 360 from one
+> frame in config B. The `generate-8-rotations`-based recipe here is still valid, but it is no longer
+> the *only* path. Read Batch 4B/4C for the corrected answer.
 
 **There is no "magic description."** `animate-with-text-v3` driven by an action phrase cannot make
 a subject rotate: identical anchors → zero motion (Batch 1); first-frame-only → only the *turn*
