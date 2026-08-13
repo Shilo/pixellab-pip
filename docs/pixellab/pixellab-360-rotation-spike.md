@@ -37,8 +37,48 @@ Valid configurations for the MVP-prompt search (tool = `animate-with-text-v3`, v
    - **Config B — start+end:** `first_frame` = south, `last_frame` = the same south frame.
 
 Success test for a "real 360" (not a morph): the one-sided red mask/horn x-centroid must sweep to
-the **opposite** side (~±20 px), as it does for the true `generate-8-rotations` loop (+10 → −18 →
-+10), not the ~8 px never-crossing wobble the seeded animate attempts produced.
+the **opposite** side (~±20 px) **and return to the front** (last-frame x back to ~+8), as the true
+`generate-8-rotations` loop does (start +8 → min −18 → last +10). A run that crosses to the back but
+**ends** at the back (last x ≈ −12) is a **180° turn, not a 360** — the one-sided mask is on the far
+side at 180° too, so "crossed to the far side" alone is not sufficient; the trajectory must come back.
+
+## Batch 4A — seedless repeat (2026-07-21): does removing the seed unlock a 360?
+
+Approved seedless rerun. 22 phrases × 2 valid single-south-frame configs (A start-only, B start+end),
+**no seed**, `animate-with-text-v3`, `frame_count` 16. Artifacts: `4A_seedless/`, `seedless_scores.json`.
+
+Results (44 runs, verdict = red-mask trajectory):
+
+| verdict | count | |
+|---|---|---|
+| PASS (true 360) | **0** | no run crossed to the back **and** returned to front |
+| HALF-180 | 2 | config A `turning around`, `turn all the way around` — clean ~180° to a back view |
+| PARTIAL | 5 | mostly config-A turn-family (partial/wobble) |
+| FAIL | 37 | frozen/minimal |
+
+Config A: 2 HALF-180, 4 PARTIAL, 16 FAIL. Config B: 21 FAIL + 1 marginal — identical anchors stay
+frozen regardless of seed, confirming the zero-motion is geometric, not a seed artifact.
+
+**Was the seed the blocker? Two-part answer:**
+- **Motion magnitude — yes, the seed dampened it.** Seedless `turning around` (config A) reached the
+  back cleanly: motion 0.054, x-sweep +9.5 → −13.0. The *seeded* equivalent (Batch 2A) was far weaker
+  (motion 0.016, turn_signal 0). So the fixed seed was suppressing rotation strength — the earlier
+  seeded batches understated what the prompt could do.
+- **The 360 itself — no.** Even seedless, every run caps at ~180° (front→back); none return to front.
+  Trajectory of the best run, A_17 `turning around`:
+  `+8 +8 +9 +9 +9 … +9 +2 −1 −8 −12 −13 −13` → holds front, then snaps to back and **stays** (180°,
+  back-loaded speed). "turn around" = "face the opposite way" = 180°, and a single 16-frame clip from
+  one frame has no anchor to rotate back to.
+
+**Verdict:** a single south frame + prompt cannot produce a true 360 on `animate-with-text-v3`,
+seeded or seedless. Config A → 180° ceiling; config B → geometric freeze. The seed affected turn
+*strength*, not the *360 ceiling*.
+
+Open single-frame idea not yet tried (still obeys "input = only the south frame"): run TWO config-A
+jobs from the same south frame with opposite turn directions (e.g. `turn around clockwise` vs
+`turn around counter-clockwise`), then compose clipA(front→back) + reverse(clipB)(back→front) into a
+360. Requires (a) the model to honour turn direction and (b) both to reach a matching back view;
+frame-reversal is a playback manipulation to flag before shipping.
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
