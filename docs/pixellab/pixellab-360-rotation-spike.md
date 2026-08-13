@@ -8,6 +8,38 @@ The endgame is a phrase so minimal it generalises to any character (then the cha
 description is appended). This spike isolates the phrase only; character wording is added
 later once a winner is found.
 
+## Scope correction (2026-07-21, from user) — read before trusting the batches below
+
+The user tightened the goal and flagged two methodology problems. These override earlier framing:
+
+1. **Fixed seed was a confound.** Batches 1–3E all used `seed: 726361` (to hold composition
+   constant across phrases). But a single fixed random draw can itself be a non-rotating one, so a
+   negative result does not prove "no phrase rotates" — only "not with this seed." **All repeat
+   tests must send NO seed** (PixelLab randomises), and each phrase should be sampled across
+   several seedless runs. For identical-anchor config the zero-motion is likely geometric, but it
+   is retested seedless anyway to be sure.
+
+2. **Only a single south frame is a valid input.** The goal is an MVP **prompt** that rotates from
+   one south frame — used *either* as start-only *or* as start+end (both = the same south frame).
+   Multiple jobs are allowed, but **every job's input images must be only that original south
+   frame** — nothing derived. This makes several earlier batches **out of scope** for the MVP-prompt
+   question (still valid as background, but not answers to it):
+   - **Batch 2B `generate-8-rotations-v3` and `/rotate`** — these ARE the rotation primitives we are
+     trying to *replicate*, not use.
+   - **Batch 3 (interpolate adjacent anchors)** — the rotation comes from two *distinct* directional
+     frames as first/last, i.e. it is driven by the visual endpoints, not the prompt, and those
+     anchors came from `generate-8-rotations-v3`. Invalid as a prompt test.
+   - **Batch 3D generalization** — uses freshly *generated* subjects (not the one south frame).
+   - **Batch 3E chain** — clip 2's input is clip 1's back frame (a derived input).
+
+Valid configurations for the MVP-prompt search (tool = `animate-with-text-v3`, v3, **no seed**):
+   - **Config A — start-only:** `first_frame` = south, no `last_frame`.
+   - **Config B — start+end:** `first_frame` = south, `last_frame` = the same south frame.
+
+Success test for a "real 360" (not a morph): the one-sided red mask/horn x-centroid must sweep to
+the **opposite** side (~±20 px), as it does for the true `generate-8-rotations` loop (+10 → −18 →
++10), not the ~8 px never-crossing wobble the seeded animate attempts produced.
+
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
 | Parameter | Value | Why |
