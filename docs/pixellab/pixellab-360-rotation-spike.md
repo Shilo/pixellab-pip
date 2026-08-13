@@ -230,3 +230,33 @@ Notes:
   required `action` — proof that the description is not the lever; the endpoints are.
 - To keep the subject perfectly rigid, do not add motion verbs to the tween (they are inert here
   anyway) and never give `animate-with-text-v3` an idle/loop action expecting a turn.
+
+## Generalization — the recipe is subject-agnostic (Batch 3D)
+
+Ran step 1 (`generate-8-rotations-v3`) on two subjects deliberately unlike the chibi, generated
+fresh via `create-image-pixflux` (128×128, `no_background`). Artifacts:
+`3D_generalization/` (`knight_front.png`, `fox_front.png`, `*_8rot/`, `generalization_8rot_montage.png`).
+
+| subject | type | result |
+|---|---|---|
+| silver-armor knight w/ sword + cape | hard-surface humanoid, asymmetric held item | clean coherent 360; sword & cape rotate correctly; proper cape-covered back view; armor consistent |
+| sitting orange fox | non-humanoid quadruped | clean coherent 360; tail/ears/markings consistent front→side→back→front |
+
+So identity + rotation quality hold across an anime chibi, an armored humanoid with a held weapon
+and cape, and a sitting animal — with **no description tuning**. `generate-8-rotations-v3` is the
+subject-agnostic rotation primitive; the MVP recipe above is not chibi-specific. (Both also return
+a flat grey background, same keyable caveat.)
+
+## Deliverables produced (chibi-oni)
+
+- `2C_smooth360_turn.gif` / `_sheet.png` — 32-frame smooth 360 loop (grey bg, as returned).
+- `2C_smooth360_transparent.gif` / `2C_smooth360_transparent_sheet.png` — same loop, background
+  removed per frame via `remove-background` (clean key, no halo).
+- `2E_16direction_transparent_sheet.png` — **16-direction character sheet** (every other loop
+  frame = 22.5° spacing), transparent — the stated end goal.
+- `2B_generate-8-rotations/` + `2B_8rotations_montage.png` — the 8 anchors.
+- `3D_generalization/` — knight + fox generalization proof.
+- `smooth-360-pipeline.blueprint.json` — the reproducible recipe.
+
+Background removal is PixelLab `remove-background` (no locally authored pixels); the grid
+composite over a checkerboard is an inspection aid only, not a shipped asset.
