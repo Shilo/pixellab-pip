@@ -260,3 +260,47 @@ a flat grey background, same keyable caveat.)
 
 Background removal is PixelLab `remove-background` (no locally authored pixels); the grid
 composite over a checkerboard is an inspection aid only, not a shipped asset.
+
+## Batch 3E — challenging the spike: can *description alone* give a true 360?
+
+Adversarial follow-up to the most promising lead (2A "turnaround" reaching ~180°) and to close
+gaps the earlier batches left. Artifacts: `3E_description_360/`, `3E_chain_full_montage.png`,
+`3E_chain_description360.gif`.
+
+### The `/rotate` endpoint — does it beat 8-rotations for granularity? No.
+`POST /rotate` (`from_image`/`from_view`/`from_direction` → `to_view`/`to_direction`, single view
+out) only supports the **same 8 compass directions**. It gives per-direction control but **not**
+finer-than-8 native granularity, so it is not a shortcut to 16 directions; interpolation remains
+the path to >8.
+
+### Single-clip "stronger phrase" attempts (first-frame-only, 16f)
+`turn all the way around` reaches ~180° (back), same as `turnaround`. `spin around once` and
+`360 degree spin all the way around` stay front (spin adds artifacts). `rotate a full circle back
+to the front` stays front — "back to the front" cancels the turn. **The model reads "turn around"
+as "face the opposite way" (=180°) and caps there;** no single 16-frame clip reaches 360.
+
+### The chain — front→back (`turn all the way around`) then back→front (`continue turning to face front`)
+Both halves complete (front→back→front, returns to the start pose, technically loops). Clip-2
+phrasing **does** matter here (`continue turning to face front` lands a cleaner front than
+`turn around`) — so the earlier "action is inert" claim holds only for small distinct-anchor gaps,
+**not** across a 180° ambiguous gap where the action steers the endpoint. That over-claim is now
+scoped.
+
+**But it is not a true 360 — proven by the red mask/horn x-centroid** (a one-sided feature must
+sweep to the *opposite* side in a real turn):
+
+| sequence | red-X sweep | crosses to far side? | what it actually is |
+|---|---|---|---|
+| real `generate-8-rotations` loop (2C) | +10.6 → **−17.6** → +10.3 (28 px) | **yes** | genuine 360 rotation |
+| pure-description chain (3E) | −0.1 → +8.2 (8 px) | **no** | front→back→front **morph** ("look behind"), plus uneven speed and softer identity |
+
+So the chain *looks* like it turns but the character never presents its true opposite side — the
+animate model morphs the front into a back and back again rather than rotating through the profiles.
+
+### Verdict on "is there promise for description-driven 360": **no.**
+Every description path tops out at a 180° morph. A **true** 360 (features sweeping fully to the far
+side, constant speed, crisp profiles, consistent identity) comes **only** from
+`generate-8-rotations-v3` anchors. This strengthens, not weakens, the MVP conclusion: the rotation
+primitive is the endpoint, and no prompt wording substitutes for it. Remaining upside is polish on
+that winning pipeline (more interpolation frames per segment; try `interpolation-v2`; `generate-8-
+rotations-v2` `view` for top-down/side games), not a new description trick.
