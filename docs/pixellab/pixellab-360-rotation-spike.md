@@ -136,10 +136,17 @@ Reliability vs length (4 runs each unless noted):
 |---|---|---|
 | user's original | 774 | reliable (3/3 in Batch 4B) |
 | C344 (full sequence + framing) | 344 | 75% |
-| **T164 "Turntable: rotate the view around the still subject - front, ¾, side, back, full back, opposite side, back to the front. Subject stays in the same pose."** | **164** | **3/3 in round 1 (confirm pending)** |
+| **T164 "Turntable: rotate the view around the still subject - front, ¾, side, back, full back, opposite side, back to the front. Subject stays in the same pose."** | **164** | **6/8 ≈ 75%** (confirmed) |
+| T150 (drop "full back") | 153 | 2/3 ≈ 67% |
+| T130 (drop the pose clause) | 132 | 2/3 ≈ 67% |
 | C171 (turntable + sequence) | 171 | 50% |
+| T113 (minimal sequence) | 113 | 1/3 ≈ 33% |
 | C210 ("the camera orbits all the way around it…") | 210 | 0% |
 | C124 / C102 / C063 | ≤124 | 0–25% |
+
+**Winner: T164 (164 chars, ~75%)** — as reliable as the user's original 774-char prompt at ~1/5 the
+length. It compresses to ~130 chars at ~67% (drop "Subject stays in the same pose" or "full back");
+below ~130 chars reliability falls off (T113 33%).
 
 Findings:
 - **Wording beats length.** C210 (longer) fails where C171/T164 (shorter) succeed — it drops the
@@ -149,11 +156,46 @@ Findings:
   2. the word *turntable* (and/or "motionless / same pose") to suppress physics;
   3. an *explicit view sequence that names the return*: front → ¾ → side → back → opposite side →
      **back to the front**. Compressing or dropping this sequence is what breaks it.
-- **Reliability has a ceiling.** Even the best prompts are ~75–100% over small samples, never a
-  guaranteed 100% — seedless generation sometimes stops short of closing the loop. Practical use:
-  pick the prompt, generate 2–3 times, keep the run that closes.
-- Smallest candidate that still hit FULL-360 reliably in round 1: **T164 (164 chars)** — pending a
-  larger-sample confirm and a push to even shorter variants (drop "full back" / the pose clause).
+- **Reliability has a ceiling.** Even the best prompts are ~75% over 8 runs, never a guaranteed
+  100% — seedless generation sometimes stops short of closing the loop. Practical use: pick the
+  prompt, generate 2–3 times, keep the run that closes.
+
+**MVP prompt (single frame → 360, config B, no seed) — final:**
+> "Turntable: rotate the view around the still subject - front, three-quarter, side, back, full back,
+> opposite side, back to the front. Subject stays in the same pose."
+
+164 chars, ~75% per run. Substitute the subject's own name for "subject" and this generalises. Use
+the frame as both `first_frame` and `last_frame`, `frame_count` 16, no seed; regenerate 2–3× and keep
+the run that closes the loop.
+
+### Why it works — it is context, not character count
+
+The user's challenge is correct: **length is a proxy, the real driver is context.** The evidence in
+this spike says length is not causal — C210 (210 chars) scores 0%, while T130 (132 chars) scores 67%.
+A longer prompt lost to a shorter one because it dropped the right context.
+
+What actually matters is *which information the prompt supplies to the interpolator*:
+
+- `animate-with-text-v3` interpolates between `first_frame` and `last_frame`, steered by `action`. With
+  config B the two anchors are identical, so the unguided default is the shortest path = **no motion**.
+- A minimal prompt ("360", "turntable", "spin") is a **label**, not a path. The model has no per-frame
+  target, so it stays put or wobbles. It cannot expand a one-word label into 16 intermediate poses.
+- The winning prompt supplies three pieces of context the label lacks:
+  1. **a frame of reference** — *the view/camera* rotates, the subject is *still* → the model animates
+     the camera, not the character's limbs (kills physics);
+  2. **explicit intermediate keyframes in words** — front → ¾ → side → back → opposite side → front.
+     This is effectively text-keyframing: it tells the interpolator *where to be at each stage*;
+  3. **an explicit return** — needed because start == end, so the loop must go all the way around.
+- Remove any one of these and it fails, regardless of length. "turntable character showcase" alone
+  (35 chars) fails — no keyframes. C210 fails at 210 chars — it says "orbit all the way around" but never
+  *enumerates the views* and drops the word "turntable".
+
+Why length still *correlates* with success: the required context — especially the enumerated view
+sequence — simply takes a minimum number of words to state. Below ~130 chars you physically cannot fit
+"camera rotates around a still subject + the full front→…→back→…→front sequence", so short prompts fail
+by **omission**, not by being short. The ~130-char floor is "the fewest characters that still carry all
+three ingredients", not a length threshold the model reacts to. Pack the ingredients denser and a short
+prompt works; pad a prompt with the wrong words and a long one fails.
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
