@@ -558,17 +558,25 @@ Round: 6 arms × 5 seedless runs (config B, `no_background: true`, `frame_count`
 "a frog sitting on top of a turkey, holding a sword in its right hand and a shield in its left hand; from
 behind, only their backs and the turkey's tail feathers show".
 
-Results — auto `full-360` rate + **AI visual scores** (1–5 per axis; user scores independently in the
-scoresheet, weighted above these):
+**Human scores (authoritative — user, per-output pass count out of 5).** Each axis = how many of the 5
+outputs passed. Round 2 is the source of truth:
 
-| rank | `<OBJECT>` | full-360 | rotation | stillness | stays-itself | visual notes |
+| rank | `<OBJECT>` | rotation | stillness | stays-itself | total | verdict |
 |---|---|---|---|---|---|---|
-| 1 | **figurine** | **5/5** | 5 | 4 | 5 | only arm clean **and** completes every time; props kept, minimal flapping |
-| 2 | inanimate object | 4/5 | 4 | 4 | 4 | a couple very clean runs; good identity |
-| 3 | statue | 4/5 | 4 | 4 | 4 | mixed — some clean, some wing-flap |
-| 4 | toy figure | 5/5 | 5 | 3 | 4 | completes every time but **most wing-flapping** (the feared toy/plastic dynamic bias) + one fire artifact |
-| 5 | display model | 4/5 | 4 | 3 | 4 | frequent white wing-flaps |
-| 6 | control (no object noun) | **1/5** | 1 | 3 | 4 | **fails to rotate 4/5** |
+| 1= | **figurine** | 4 | 4 | 3 | **11** | three-way tie — finalist |
+| 1= | **toy figure** | 4 | 4 | 3 | **11** | three-way tie — finalist |
+| 1= | **display model** | 4 | 4 | 3 | **11** | three-way tie — finalist |
+| 4 | statue | 2 | 4 | 2 | 8 | **out** — rotation 2/5, stays-itself 2/5 |
+| 5 | inanimate object | 2 | 2 | 3 | 7 | **out** |
+| 6 | control (no object noun) | 1 | 2 | 2 | 5 | **out** — baseline |
+
+**Reconciliation — my AI provisional was wrong in key places.** I had ranked figurine a clear #1 (5/4/5) and
+put statue and inanimate at 12 each. The human read is a **three-way tie at 11** (figurine = toy figure =
+display model), with **statue (8) and inanimate (7) clearly out** — I over-rated their rotation (the same
+full-360 over-counting) and their stays-itself. All three finalists score stays-itself **3/5** — i.e. ~2 of 5
+outputs fail identity, almost entirely the **white smoke/particle artifacts**, which hit the three about
+equally (consistent with the artifact being RNG/model-inherent, not arm-specific). My visual claim that "toy
+flaps most" did **not** translate to a worse human score — toy tied for the top.
 
 Findings:
 1. **The object noun triggers the rotation, not just the stillness.** The control — same description + "held
@@ -576,13 +584,15 @@ Findings:
    Every object-framed arm rotated 4–5/5. So "a solid figurine/statue/… depicting X" does double duty: it is
    the *stillness* cue **and** the *turntable-object* cue that makes the model orbit it. This is a new,
    important result — the object framing is load-bearing for the turn itself.
-2. **figurine is the winner** — the only arm to complete 5/5 while staying clean and on-model. The middle four
-   are a close, noisy cluster at 5 samples; the user's visual scores will settle their order.
+2. **No single winner — a three-way tie.** figurine, toy figure, and display model all score 11 (rotation
+   4/5, stillness 4/5, stays-itself 3/5). statue and inanimate fall a tier below. A **tie-breaker round
+   (Batch 4G)** runs just the three finalists to separate them.
 3. **The auto flail metric is unreliable when completion varies** — it scored figurine *worst* because it
-   penalizes the large area-change of a *full* rotation. Visual inspection (weighted above the metric)
-   reverses that. Human judgment is the arbiter for stillness/identity.
-4. **"toy" showed the predicted plastic/dynamic bias** — the most wing-flapping of any arm — validating the
-   caution about it. Material/effect words remain off the table.
+   penalizes the large area-change of a *full* rotation. Human judgment is the arbiter for stillness/identity.
+4. **The white-smoke/particle artifact is the dominant failure and appears arm-independent** — it costs every
+   finalist ~2/5 on stays-itself. My earlier visual impression that "toy flaps most" did **not** hold up in the
+   per-output human scoring (toy tied for the top). Material/effect words remain off the table regardless; the
+   likely real fix for the smoke is a `negative_description`, not more positive wording.
 5. **Low sample (5 runs/arm)** — figurine's #1 is solid (5/5 + cleanest), but the mid-pack ranking is
    provisional; a larger round would firm it up if needed.
 
@@ -596,7 +606,29 @@ though they are likely erasable by hand — so they lower "stays-itself", not ju
 appear across most arms, so they read as largely RNG/model-inherent on this subject rather than arm-specific;
 the tie-breaker round (below) measures which arm minimizes them most consistently.
 
-## Fixed setup (all tests identical — only the `action` phrase varies)
+## Batch 4G — tie-breaker of the three finalists (2026-08-14)
+
+The round-2 human scores tied **figurine = toy figure = display model** at 11. Tie-breaker: those three (plus
+statue, which was queued before the round-2 scores came in and is out of contention), 5 seedless runs each,
+same final template with the **updated back-view** ("from behind, only the turkey's back and tail feathers
+show"). Artifacts: `frog-turkey-360-20260721/stillness-tiebreak-20260814/`.
+
+Auto `full-360` (unreliable — for reference only): figurine 2/5, display model 1/5, statue 1/5, toy figure
+0/5. **My provisional visual read** (user scores in the scoresheet, weighted above this):
+
+| `<OBJECT>` | rotation (visual) | artifacts | note |
+|---|---|---|---|
+| display model | best (~4/5 turn) | moderate white feather puffs | strongest rotator this round |
+| figurine | ~3/5 turn | some **coloured** swirls (cyan/pink) in 2 runs + white | mid |
+| toy figure | weakest (~2/5 turn) | frequent white feather puffs | rotated least |
+| statue (out) | ~2/5 | — | confirms round-2 "out" |
+
+**It did not crisply separate the three** — all remain **artifact-limited**, and rotation success looked lower
+than round 2 (possibly the back-view wording change, possibly RNG; auto is too noisy to trust). Key takeaway:
+the **white-smoke/particle artifact is the real ceiling, and it is arm-independent** — no object-word choice
+removes it. Recommended next lever (a departure from pure positive prompting): add a **`negative_description`**
+(e.g. "smoke, particles, sparkles, motion blur, extra limbs") and A/B it on the top finalist(s). That targets
+the actual failure mode; more object-word tuning will not.
 
 | Parameter | Value | Why |
 |---|---|---|
