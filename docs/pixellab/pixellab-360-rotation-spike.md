@@ -28,13 +28,16 @@ closes the loop; swap "subject" for the subject's name to generalise):
 > 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to
 > front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
 
-**③ Maximum stillness (statue/figurine)** — append positive object-framing to keep the subject rigid like a
-figurine (winner: **"figurine"**, ~2.4× less flail than the plain MVP, still 3/3 full-360; see **Batch 4E**):
+**③ Best all-in-one — 360° rotation + maximum stillness (RECOMMENDED DEFAULT).** This folds the stillness
+winner into ①, so one `action` gives both a full turn and a rigid, figurine-still subject. The stillness word
+was **challenged, not assumed** (Batch 4E, 3 runs each): **"figurine"** won (flail 0.044, 3/3) over
+"collectible" (0.066), "inanimate" (0.081, 2/3), "stone statue" / "ice sculpture" (*worse* than doing
+nothing), and the plain MVP (0.106):
 > "Turntable: rotate the view around the figurine - front, three-quarter, side, back, full back, opposite
 > side, back to the front. It is a solid molded figurine on a rotating display stand, completely rigid,
 > holding one fixed pose."
 
-For a named subject: "…around the &lt;subject&gt; figurine - … It is a solid molded figurine…". **Avoid**
+For a named subject: "…around the <subject> figurine - … It is a solid molded figurine…". **Avoid**
 "ice sculpture / frozen" (adds ice VFX) and "stone statue" (material shimmer) — they *increase* movement.
 
 **The three essential ingredients** (present in every winner, absent in every failure — wording beats length):
@@ -385,7 +388,7 @@ Round 1 (10 framings, 1 run each) then a 3-run confirmation of the leaders:
 | framing (positive object clause) | full-360 | mean area_jerk (↓ stiller) | verdict |
 |---|---|---|---|
 | **"figurine"** — *solid molded figurine on a rotating display stand, completely rigid* | **3/3** | **0.044** | **winner — ~2.4× stiller than control** |
-| "inanimate subject" — *completely inanimate frozen object, one fixed pose* | 1/1* | 0.048 | strong (only 1 valid run — 2 hit the 20-job cap) |
+| "inanimate subject" — *completely inanimate frozen object, one fixed pose* | 2/3 | 0.081 | mediocre — the lone early run (0.048) was luck; the 3-run mean is worse than "collectible" |
 | "collectible figure" — *solid collectible display figure on a spinning base* | 3/3 | 0.066 | beats control |
 | "bronze sculpture" / "resin model" | 1/1 | 0.043 / 0.061 | moderate (single runs) |
 | control (plain T164, "still subject") | 3/3 | 0.106 | most flail (turkey tail/plumage flares) |
@@ -395,10 +398,13 @@ Round 1 (10 framings, 1 run each) then a 3-run confirmation of the leaders:
 | "statue figurine" (COMBO, many stillness words) | ✗ under-rotated | — | too many constraints suppressed the turn |
 
 Findings:
-1. **Positive object-framing works — but only the right words.** Framing the subject as a *figurine /
-   inanimate object / collectible* roughly halves the unwanted movement vs the plain MVP, with no negative
-   prompting. Visual check confirms it: the winner keeps the frog seated, sword + shield held constant, and
-   the turkey's feet/wings/tail locked, where the control's turkey tail visibly flares and shifts.
+1. **Positive object-framing works — but only the right word, and "figurine" specifically wins.** Framing
+   the subject as a *figurine* (best) or *collectible* roughly halves the unwanted movement vs the plain MVP,
+   with no negative prompting. Notably **"inanimate" is not it** — over 3 runs it fell to 2/3 completion and
+   only average stillness (0.081); its one strong early run was luck. Don't assume the most literal word wins;
+   "figurine" (a *manufactured object on a stand*) beat every other framing on both completion and stillness.
+   Visual check confirms the winner: the frog stays seated, sword + shield held constant, and the turkey's
+   feet/wings/tail locked, where the control's turkey tail visibly flares and shifts.
 2. **Material/effect words backfire.** "ice sculpture / frozen" makes the model render *ice effects* (blue
    swirls animating around the subject) — the opposite of still. "stone statue" adds texture shimmer. So the
    trick is to imply *a manufactured rigid object*, not a material with its own visual connotations.
@@ -409,7 +415,7 @@ Findings:
    > side, back to the front. It is a solid molded figurine on a rotating display stand, completely rigid,
    > holding one fixed pose."
 
-   Generalise by naming the subject: "…around the &lt;subject&gt; figurine - … It is a solid molded
+   Generalise by naming the subject: "…around the <subject> figurine - … It is a solid molded
    figurine on a rotating display stand, completely rigid, holding one fixed pose." Still ~75% completion
    (regenerate 2–3×), and it composes with the config choice from Batch 4D (config B for a seamless loop).
 
