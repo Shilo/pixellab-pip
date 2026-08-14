@@ -8,6 +8,52 @@ The endgame is a phrase so minimal it generalises to any character (then the cha
 description is appended). This spike isolates the phrase only; character wording is added
 later once a winner is found.
 
+---
+
+## TL;DR — conclusions and the prompts to use
+
+**A prompt CAN rotate a subject 360° from a single frame** (overturning this spike's original negative
+conclusion, which only held for *minimal keyword* prompts). The lever is an explicit **trajectory prompt**,
+not a magic keyword, and not the character description.
+
+**① General MVP prompt — 360° from one frame** (`animate-with-text-v3`, `frame_count` 16, no seed,
+`enhance_prompt` false; ~75% per run in config B, ~60% config A — regenerate 2–3× and keep the run that
+closes the loop; swap "subject" for the subject's name to generalise):
+> "Turntable: rotate the view around the still subject - front, three-quarter, side, back, full back,
+> opposite side, back to the front. Subject stays in the same pose."
+
+**② Constant-speed variant** (removes the end-slowdown; use **config A** = `first_frame` only, no
+`last_frame`; `no_background: true`):
+> "Turntable: the view orbits the motionless subject by an equal angle each frame, distributing the full
+> 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to
+> front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
+
+**③ Maximum stillness (statue/figurine)** — see **Batch 4E** below for the winning object-framing keyword.
+
+**The three essential ingredients** (present in every winner, absent in every failure — wording beats length):
+1. frame it as **the view/camera rotating around the subject**, not the subject moving;
+2. the word **"turntable"** (+ "still / motionless / same pose") to suppress physics;
+3. an **explicit view sequence that names the return**: front → ¾ → side → back → opposite side → **back to front**.
+
+**Config choice:**
+- **Config B** (frame as both `first_frame` and `last_frame`): best completion (~75%) and a seamless loop,
+  but decelerates into the fixed end frame.
+- **Config A** (start frame only): ~60% completion, no forced loop seam, but **even angular speed** (no
+  end-slowdown). Pick B for a looping GIF, A for an evenly-spaced sprite sheet.
+
+**Mandatory setup notes:**
+- **`no_background: true` on a transparent input** — otherwise `animate-with-text-v3` repaints the subject
+  (proven in `no-background-3way-20260813/`). Also yields a transparent output.
+- **No seed** (seedless is per-draw random; a fixed seed dampened rotation strength in early batches).
+- **Reliability ceiling ~75%** — regenerate 2–3× and keep the best draw.
+
+**Alternative (endpoint-driven, not prompt-based):** `generate-8-rotations-v3` produces 8 clean directional
+views with no prompt; interpolating between consecutive anchors gives a smooth, subject-agnostic 360 and a
+16-direction sheet (Batches 2B–3). Use this when you want guaranteed rigid rotation and don't need the
+single-frame/prompt-only path.
+
+---
+
 ## Scope correction (2026-07-21, from user) — read before trusting the batches below
 
 The user tightened the goal and flagged two methodology problems. These override earlier framing:
@@ -275,11 +321,15 @@ Wordings tested:
 1. **Enumerating evenly-spaced *degree* waypoints (S2/S2b) flattens the speed;** prose like "constant
    angular velocity" (S3) does not — S3 rotates fully but rushes the back and eases the ends (0.768).
    The model needs the even *keyframe targets*, not an adjective.
-2. **The end-slowdown is caused by config B's fixed `last_frame` anchor.** With start == end, the
-   interpolator eases *into* that identical closing frame — the last 2–3 per-frame diffs taper (e.g.
-   config-B S2b_r2 ends `…9.72, 7.5, 4.63`), which is exactly the deceleration the user saw (tail/head
-   ~0.6–0.9 on every config-B full-360). **Config A (drop `last_frame`) removes it:** there is no fixed
-   frame to ease into, so the tail no longer slows (config-A S2b ends `…15.08, 15.94`).
+2. **The end-slowdown tracks config B's fixed `last_frame` — observed, mechanism inferred.** Every
+   config-B full-360 decelerates at the end (last 2–3 per-frame diffs taper, e.g. config-B S2b_r2 ends
+   `…9.72, 7.5, 4.63`; tail/head ~0.6–0.9), and **config A does not** (config-A S2b ends `…15.08, 15.94`;
+   tail/head ~1.0–1.6). That config split is the hard evidence. The *reason* is an inference, not proven:
+   the most parsimonious explanation is that a fixed identical end anchor is a boundary condition the
+   trajectory must converge onto, so it slows as it arrives — the same way any interpolation settles onto a
+   fixed endpoint. **This is not a claim about PixelLab's internal pipeline or any deliberate "ease-out"** —
+   we have no visibility into their algorithm and cannot say they intentionally decelerate. All we can state
+   is the empirical config-dependent behavior and remove the anchor (config A) to avoid it.
 3. **Completion vs config flips with wording:**
    - **Config B:** view-sequence (M1) completes reliably (2/2) but times unevenly; degree-waypoints
      (S2/S2b) under-commit to the turn (1/6).
