@@ -36,12 +36,12 @@ side/back views. Template — the two variables are `<OBJECT>` (the framing noun
 > three-quarter, side, back, full back, opposite side, back to the front. The **`<OBJECT>`** itself never
 > moves; only the viewing angle changes."
 
-Winner across 3-way design review + two test rounds: **`<OBJECT>` = "figurine"** (Batch 4F: only arm to
-rotate **5/5** *and* stay clean and on-model). Example filled:
-> "Turntable: rotate the view around a solid figurine depicting a frog sitting on top of a turkey, holding a
-> sword in its right hand and a shield in its left hand; from behind, only their backs and the tail feathers
-> show - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself
-> never moves; only the viewing angle changes."
+Current leader: **`<OBJECT>` = "figurine"** (Batch 4I: 10/10 full rotation with a *minimal* description; round-2
+tied figurine = toy figure = display model, and figurine leads the simplified round — user scoring pending).
+**Keep `<subject_description>` minimal** — a long description degraded rotation (Batch 4H/4I). Example filled:
+> "Turntable: rotate the view around a solid figurine depicting a frog on top of a turkey - front,
+> three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves;
+> only the viewing angle changes."
 
 Design rules (all reviewer-agreed): use **`depicting`** to demote the description's verbs to a *depiction*
 (stops the model animating it); **one `<OBJECT>` variable, repeated verbatim**; **`solid` once** (not
@@ -638,7 +638,7 @@ control did so only on stillness, which is not success.
 - **Correlated axes (user):** when rotation fails, stillness/stays-itself drop too — a failed turn means the
   model morphs / adds artifacts instead of rotating cleanly. **Rotation is the linchpin;** fix it first.
 
-## Batch 4H — rotation-regression diagnostic (2026-08-14, in progress)
+## Batch 4H — rotation-regression diagnostic (2026-08-14)
 
 Controlled re-run to find the cause. All figurine, config B, seedless, 16f, 5 runs each; **one variable per
 arm.** Artifacts: `frog-turkey-360-20260721/diag-20260814/`.
@@ -651,12 +651,53 @@ arm.** Artifacts: `frog-turkey-360-20260721/diag-20260814/`.
 | **D_bg_nobgfalse** | round-2 prompt but the input has an **opaque grey background** and `no_background:false` — the user's smoke hypothesis. |
 | **E_strongrot** | round-2 prompt **+ "The camera makes one complete 360-degree orbit"** — does a stronger *view-orbit* cue help? |
 
-Reading: if **A rotates ~4–5/5 today** → the back-view wording caused the regression (revert it). If **A also
-fails ~1/5** → not the wording; suspect a same-day backend shift or the description (compare C). If **C rotates
-and is cleaner** → the description is the problem (smoke + rotation). If **D reduces smoke** → keep an opaque
-background + `no_background:false`. Also on the table (deferred): a **`negative_description`** ("smoke,
-particles, sparkles, motion blur, extra limbs") to attack the white smoke directly. Results appended on
-completion.
+**Results (auto full-360):** A_round2exact **5/5**, B_round3exact **3/5**, C_nodesc **5/5**, D_bg_nobgfalse
+**5/5**, E_strongrot **5/5**. Visual: all arms rotate cleanly; the white feather/sparkle artifacts persist in
+**every** arm (A, C, D alike).
+
+**Verdicts:**
+- **Rotation regression = RNG + a mildly-worse back-view wording, NOT a systematic break.** The exact round-2
+  prompt (A) rotates **5/5 again today** → backend/temporal shift ruled out; the seed was already ruled out.
+  The round-3 wording (B) scores 3/5 vs A's 5/5 → the tweak ("only the turkey's back and tail feathers show")
+  is genuinely a bit worse, but B's 3/5-now vs the tie-breaker's ~1/5 shows the catastrophic 1/5 was largely an
+  **unlucky RNG cluster** on 5 seedless samples. **Fix: revert to the round-2 back-view wording** (or drop the
+  back-view — C, with no description at all, also rotates 5/5), and **use more runs** so a bad RNG cluster
+  can't masquerade as a regression.
+- **The description does NOT degrade rotation** — C (no description) = 5/5, same as A.
+- **The white smoke is INHERENT, not prompt- or config-caused.** It appears in every arm regardless of the
+  description (C has it), the wording, or `no_background` (D — opaque bg + `no_background:false` — still has
+  it). It is the model animating the **turkey's wing/tail feathers** (plus occasional sparkle VFX) as it turns.
+  This **disproves both** user hypotheses ("the description causes the smoke" and "an opaque background +
+  `no_background:false` fixes it"). The remaining untested lever is a **`negative_description`** targeting
+  feathers/particles/sparkles; otherwise the artifacts are erasable in post.
+
+## Batch 4I — simplified description restores rotation (2026-08-14)
+
+Following Batch 4H (the full description + back-view was the mildly-worse bit for rotation), the
+`<subject_description>` was cut to just **"a frog on top of a turkey"** (no equipment, no back-view) and the
+three finalists (statue dropped — a tier below per round 2) were re-run at **10 runs each** to beat RNG.
+Artifacts: `frog-turkey-360-20260721/simple-desc-20260814/`.
+
+Results (auto full-360, 10 runs each):
+
+| `<OBJECT>` | full-360 |
+|---|---|
+| **figurine** | **10/10** |
+| toy figure | 9/10 |
+| display model | 8/10 |
+
+- **Rotation is restored and improved** — vs the tie-breaker's 0–2/5 and round 2's 4–5/5. This **confirms the
+  user's hypothesis**: the richer description ("…holding a sword…; from behind, only…") was causing context
+  confusion that degraded rotation. Leaner description = more reliable turn.
+- **figurine leads at 10/10** (visually confirmed — every run does a clean full turn).
+- **The white smoke is unchanged** — the turkey's feather/sparkle artifacts persist across the simplified runs,
+  exactly as Batch 4H found (inherent to the subject, not the description). Still the open item; lever remains a
+  `negative_description` or post-erase.
+
+Current best prompt (rotation-optimised) — swap the object noun to test, `<subject_description>` kept minimal:
+> "Turntable: rotate the view around a solid figurine depicting a frog on top of a turkey - front,
+> three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves;
+> only the viewing angle changes."
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
