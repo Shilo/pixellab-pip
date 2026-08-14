@@ -1,0 +1,39 @@
+[
+  {
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/rotate-16",
+      "output_collision_policy": "create_unique"
+    },
+    "_comment": "Seamless 16-frame 360 turntable from one supplied frame: the same image is sent as both anchors, and the prompt frames the subject as a rigid object so the model orbits it instead of animating it. The object word is load-bearing for the turn itself, not only for stillness; figurine is the tested winner, and toy figure or display model score the same if either reads better for the subject. Keep the subject description minimal and name only identity-bearing props (e.g. a held shield); decorative nouns get reinterpreted as new geometry on the unseen back. Loop closure is about 75% per draw even on the best prompt, so expect to run this 2-3 times and keep the draw that closes; each run spends credits and needs its own approval. A feathered or fringed subject may show inherent particle/feather artifacts during the turn regardless of prompt or no_background; erase in post or add a negative description.",
+    "_comment_prompt": "/pixellab-pip create the rotate-16 blueprint",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, confirm the supplied image resolves to one readable image, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty and copy the supplied image into it as subject.png; if any precondition fails, stop before spending.",
+      "outputs": ["subject.png"],
+      "verify": "Run authority and credential presence are confirmed, the output directory is new, empty, writable, and inside the current project, and subject.png matches the supplied image pixel-for-pixel."
+    }
+  },
+  {
+    "POST /v2/animate-with-text-v3": {
+      "first_frame": "{{attached or linked image}}",
+      "last_frame": "{{attached or linked image}}",
+      "action": "Turntable: rotate the view around a solid {{object | default: figurine}} depicting {{subject description}} - front, three-quarter, side, back, full back, opposite side, back to the front. The {{object | default: figurine}} itself never moves; only the viewing angle changes.",
+      "frame_count": 16,
+      "enhance_prompt": false,
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save every frame returned by the immediately preceding PixelLab call unchanged and in returned order as frame-00.png onward, then assemble those frames into rotate-16.gif as an infinitely looping animation at an even frame delay. The returned sequence echoes the sent anchor as its first frame and closes on the same anchor as its last frame, so drop that final duplicate frame from the GIF only; keep every saved PNG. Preserve transparency: clear each frame against the previous one so transparent pixels do not accumulate trails, and reserve a dedicated palette index for fully transparent pixels only - never mark index 0 transparent, because a real color sits there and every pixel using it is punched into a hole.",
+      "outputs": ["rotate-16.gif"],
+      "verify": "The saved PNG count matches the returned frame count, each PNG matches its returned frame pixel-for-pixel, rotate-16.gif has one fewer frame than the PNGs, loops forever, and renders every frame with the subject intact, no punched-out holes, no trails, and no baked-in background."
+    }
+  }
+]
