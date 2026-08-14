@@ -20,7 +20,8 @@ as *both* `first_frame` and `last_frame`.
 
 **1. Default — rigid object, seamless loop (Config B).** Best all-round. Uses **figurine** (the tested winner —
 swap the *figurine* word for *toy figure* or *display model* if it reads better for your subject). Keep
-`<subject_description>` minimal but name key props (e.g. a held shield). *(Batches 4F–4I)*
+`<subject_description>` minimal — name only **identity-bearing** props (e.g. a held shield), and omit
+incidental/decorative nouns (on the unseen back the model can reinterpret them as new geometry). *(Batches 4F–4I)*
 ```
 Turntable: rotate the view around a solid figurine depicting <subject_description> - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves; only the viewing angle changes.
 ```
@@ -50,7 +51,9 @@ Turntable: rotate the view around a solid figurine depicting <subject_descriptio
 ```
 
 **Avoid across all:** material/effect object words (using "stone / ice / bronze" instead of "figurine" adds
-shimmer or VFX, Batch 4E); a long `<subject_description>` (degrades rotation, Batch 4I). The white feather/particle smoke on feathered
+shimmer or VFX, Batch 4E); a long `<subject_description>` (degrades rotation, Batch 4I); and incidental/decorative
+nouns in the description (on the unseen side/back — which have no keyframe — the model can reinterpret them as
+new geometry, a likely source of spontaneous-object artifacts). The white feather/particle smoke on feathered
 subjects is inherent (Batch 4H) — fix in post or try a `negative_description`.
 
 ---
@@ -111,6 +114,11 @@ object noun rotated only 1/5 (Batch 4F control).
   (proven in `no-background-3way-20260813/`). Also yields a transparent output.
 - **No seed** (seedless is per-draw random; a fixed seed dampened rotation strength in early batches).
 - **Reliability ceiling ~75%** — regenerate 2–3× and keep the best draw.
+- **Diagnose structure before re-rolling the seed.** When a run fails, first decide whether it is *structural*
+  (config or wording — fixable) or just *RNG* (needs more samples); vary the seed/regenerate only once the
+  structure is sound. Worked example: Batch 4H — a scary "regression" (every arm 1/5) turned out to be RNG on
+  5 seedless samples **plus** a mildly-worse back-view wording, not a systematic break. The fix was structural
+  (revert the wording) + more samples, not seed roulette.
 
 **Alternative (endpoint-driven, not prompt-based):** `generate-8-rotations-v3` produces 8 clean directional
 views with no prompt; interpolating between consecutive anchors gives a smooth, subject-agnostic 360 and a
@@ -758,6 +766,17 @@ held up best (7/10). So the stays-itself deficit understates each arm's real cei
 balance:** the description must be **minimal enough not to hurt rotation** (Batch 4I) **yet name key props like
 the shield** so they stay consistent — e.g. "a frog with a shield on top of a turkey" rather than the verbose
 round-2 "…holding a sword in its right hand and a shield in its left hand; from behind…".
+
+**Mechanism (independently corroborated by an external prompt-cleaner review, 2026-08-13).** The side/back
+frames have **no keyframe**, so they are *prompt-governed* — the description alone decides what appears there.
+Two consequences, one rule: (a) an **identity-bearing** noun left out of the description (the shield) drifts
+because nothing pins it; (b) an **incidental/decorative** noun put *into* the description can be reinterpreted
+as **new back-side geometry** — a likely source of the "spontaneous object appearance/placements" seen in the
+tie-breaker. **Rule: in `<subject_description>`, name the identity-bearing features and nothing incidental.**
+(That same review independently reproduced our Batch 2A lexical split — "turnaround/turning around" rotate,
+"spin/turntable/360" fail, "spin" adds a particle artifact — and our Batch 3 anchor-dominance: good external
+validation. Its central premise, that rotation must come from `generate-8-rotations-v3` anchors, is superseded
+by Batches 4B–4I, which get a true 360 from a single frame via a trajectory prompt.)
 
 **Cross-round top-3 (normalized to /5; "figure"-family relations noted):**
 
