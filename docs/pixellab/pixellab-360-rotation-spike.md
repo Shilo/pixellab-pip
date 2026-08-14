@@ -96,6 +96,14 @@ Setup: user's `frog-turkey-input-128px.png` as `first_frame` **and** `last_frame
 `animate-with-text-v3`, `frame_count` 16, **no seed**. Metric: green-frog visibility (front = high,
 back ≈ 0); FULL-360 = drops to back **and** recovers to front.
 
+> Reference-file correction (2026-07-21): the user's true Aseprite success is `USER-aseprite-success.gif`
+> (green 468 → 0 → **436**, a clean full return to front — with an end frame). An earlier file used as
+> the reference, `USER-aseprite-startonly-flawed.gif` (green 468 → 2 → **124**), was a **start-only**
+> attempt that only partially returns — flawed, not a full 360. The two exports independently confirm the
+> config split: **with an end frame → clean 360; start-only → partial.** Conclusions are unchanged (the
+> API reproductions were scored independently and are genuine FULL-360s); only the displayed reference gif
+> was swapped to the correct one.
+
 The winning prompt (774 chars, verbatim):
 > "The frog riding the turkey remains completely motionless in the same pose while the sprite view
 > rotates around them in a full turnaround. Treat this like a character turnaround sheet animated in
@@ -167,6 +175,11 @@ Findings:
 164 chars, ~75% per run. Substitute the subject's own name for "subject" and this generalises. Use
 the frame as both `first_frame` and `last_frame`, `frame_count` 16, no seed; regenerate 2–3× and keep
 the run that closes the loop.
+
+**Start-only works too (config A).** Re-testing T164 with `first_frame` only (no `last_frame`) scored
+**3/5 ≈ 60%** FULL-360 — vs 6/8 ≈ 75% for config B. So the end frame *helps* reliability but is **not
+required**: a prompt that names the return ("back to the front") drives the loop closure on its own.
+The user's earlier flawed start-only Aseprite export was one unlucky draw, not a config-A ceiling.
 
 Reproduction request (config B — the frame is used as BOTH anchors):
 ```
