@@ -124,6 +124,37 @@ Corrected conclusions:
 This overturns the headline "there is no MVP prompt". There IS — it is just not *minimal-keyword*; it
 is a *structured trajectory* prompt. Batch 4C searches for the shortest such prompt that still works.
 
+## Batch 4C — smallest working prompt (config B, frog, seedless, success = green-frog FULL-360 rate)
+
+Seedless output is random per run, so candidates are scored by **success rate** over multiple runs,
+not a single binary. Artifacts: `ladder_scores.json`, `ladder2_scores.json`, `refine_jobs.json`,
+`refine2/`.
+
+Reliability vs length (4 runs each unless noted):
+
+| prompt (abbrev) | chars | FULL-360 rate |
+|---|---|---|
+| user's original | 774 | reliable (3/3 in Batch 4B) |
+| C344 (full sequence + framing) | 344 | 75% |
+| **T164 "Turntable: rotate the view around the still subject - front, ¾, side, back, full back, opposite side, back to the front. Subject stays in the same pose."** | **164** | **3/3 in round 1 (confirm pending)** |
+| C171 (turntable + sequence) | 171 | 50% |
+| C210 ("the camera orbits all the way around it…") | 210 | 0% |
+| C124 / C102 / C063 | ≤124 | 0–25% |
+
+Findings:
+- **Wording beats length.** C210 (longer) fails where C171/T164 (shorter) succeed — it drops the
+  "turntable" framing and the tight view sequence.
+- **The essential ingredients** (present in every winner, absent in every failure):
+  1. frame it as *the view/camera rotating around the subject* (not the subject moving);
+  2. the word *turntable* (and/or "motionless / same pose") to suppress physics;
+  3. an *explicit view sequence that names the return*: front → ¾ → side → back → opposite side →
+     **back to the front**. Compressing or dropping this sequence is what breaks it.
+- **Reliability has a ceiling.** Even the best prompts are ~75–100% over small samples, never a
+  guaranteed 100% — seedless generation sometimes stops short of closing the loop. Practical use:
+  pick the prompt, generate 2–3 times, keep the run that closes.
+- Smallest candidate that still hit FULL-360 reliably in round 1: **T164 (164 chars)** — pending a
+  larger-sample confirm and a push to even shorter variants (drop "full back" / the pose clause).
+
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
 | Parameter | Value | Why |
