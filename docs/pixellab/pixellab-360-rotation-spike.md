@@ -28,17 +28,27 @@ closes the loop; swap "subject" for the subject's name to generalise):
 > 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to
 > front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
 
-**③ Best all-in-one — 360° rotation + maximum stillness (RECOMMENDED DEFAULT).** This folds the stillness
-winner into ①, so one `action` gives both a full turn and a rigid, figurine-still subject. The stillness word
-was **challenged, not assumed** (Batch 4E, 3 runs each): **"figurine"** won (flail 0.044, 3/3) over
-"collectible" (0.066), "inanimate" (0.081, 2/3), "stone statue" / "ice sculpture" (*worse* than doing
-nothing), and the plain MVP (0.106):
-> "Turntable: rotate the view around the figurine - front, three-quarter, side, back, full back, opposite
-> side, back to the front. It is a solid molded figurine on a rotating display stand, completely rigid,
-> holding one fixed pose."
+**③ Best all-in-one — 360° rotation + maximum stillness + subject identity (RECOMMENDED DEFAULT).** One
+`action` gives a full turn, a rigid figurine-still subject, and (via the description) consistent invented
+side/back views. Template — the two variables are `<OBJECT>` (the framing noun, repeated verbatim) and
+`<subject_description>` (the subject; put any back-view detail inside it):
+> "Turntable: rotate the view around a solid **`<OBJECT>`** depicting **`<subject_description>`** - front,
+> three-quarter, side, back, full back, opposite side, back to the front. The **`<OBJECT>`** itself never
+> moves; only the viewing angle changes."
 
-For a named subject: "…around the <subject> figurine - … It is a solid molded figurine…". **Avoid**
-"ice sculpture / frozen" (adds ice VFX) and "stone statue" (material shimmer) — they *increase* movement.
+Winner across 3-way design review + two test rounds: **`<OBJECT>` = "figurine"** (Batch 4F: only arm to
+rotate **5/5** *and* stay clean and on-model). Example filled:
+> "Turntable: rotate the view around a solid figurine depicting a frog sitting on top of a turkey, holding a
+> sword in its right hand and a shield in its left hand; from behind, only their backs and the tail feathers
+> show - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself
+> never moves; only the viewing angle changes."
+
+Design rules (all reviewer-agreed): use **`depicting`** to demote the description's verbs to a *depiction*
+(stops the model animating it); **one `<OBJECT>` variable, repeated verbatim**; **`solid` once** (not
+repeated — protects held props); **no punctuation tricks** to demote the description (quotes/parens/brackets
+backfire in caption-trained models); **avoid material/effect words** ("stone", "bronze", "ice/frozen") — they
+add texture shimmer / VFX. **The object noun also *triggers* the rotation** — a plain description with no
+object noun rotated only 1/5 (Batch 4F control).
 
 **The three essential ingredients** (present in every winner, absent in every failure — wording beats length):
 1. frame it as **the view/camera rotating around the subject**, not the subject moving;
@@ -472,6 +482,63 @@ is kept **short and held constant across all five** so it does not confound the 
 `<OBJECT>` ∈ {a solid collectible display figure, a solid molded figurine, a solid statue, a hard plastic
 action figure, a completely inanimate figure}. Round: 5 keywords × 10 seedless runs, config B,
 `no_background: true`, `frame_count` 16; then re-score in the scoresheet (human-weighted) and decide.
+
+## Batch 4F — final stillness round with a subject-description template (2026-08-14)
+
+Built on a **3-way design review** (Claude + a subagent + Codex `gpt-5.6-sol`) that converged on a single
+blueprint before any jobs ran. Artifacts: `frog-turkey-360-20260721/stillness-round2-20260814/`,
+`.local/stillness-templates.md` (the blueprint + all arms), `.local/stillness-scoresheet.html` (every frame,
+human scoring).
+
+**Template (two variables):**
+> Turntable: rotate the view around a solid `<OBJECT>` depicting `<subject_description>` - front,
+> three-quarter, side, back, full back, opposite side, back to the front. The `<OBJECT>` itself never moves;
+> only the viewing angle changes.
+
+Agreed design decisions (each challenged by all three reviewers):
+- **`depicting`** recasts the description's verbs ("sitting/holding") as a *depiction* so the model rotates an
+  object instead of animating a live scene — the key fix for "will it animate the subject?".
+- **One `<OBJECT>` variable, repeated verbatim** ("a solid figurine … The figurine itself never moves") —
+  exact repetition is the strongest coreference signal; repeating a referring expression is *not* the
+  over-stacking failure (that is stacking multiple distinct motion-negations).
+- **`solid` appears once** (not repeated) — the noun already carries coreference; repeating "solid" risked a
+  fused/monolithic look that blurs held props (the sword/shield).
+- **No formatting to demote the description** — quotes/parens/brackets/colon all backfire in a caption-trained
+  model (`()` reads as an *attention boost*, `[]` as metadata syntax, `""` as literal/caption); `depicting`
+  is the real mechanism, and the slot is user-filled so baked punctuation is a maintenance trap.
+- **Back-view detail lives inside `<subject_description>`** (safe: the sequence's leading "front" re-anchors).
+
+Round: 6 arms × 5 seedless runs (config B, `no_background: true`, `frame_count` 16). `<subject_description>` =
+"a frog sitting on top of a turkey, holding a sword in its right hand and a shield in its left hand; from
+behind, only their backs and the turkey's tail feathers show".
+
+Results — auto `full-360` rate + **AI visual scores** (1–5 per axis; user scores independently in the
+scoresheet, weighted above these):
+
+| rank | `<OBJECT>` | full-360 | rotation | stillness | stays-itself | visual notes |
+|---|---|---|---|---|---|---|
+| 1 | **figurine** | **5/5** | 5 | 4 | 5 | only arm clean **and** completes every time; props kept, minimal flapping |
+| 2 | inanimate object | 4/5 | 4 | 4 | 4 | a couple very clean runs; good identity |
+| 3 | statue | 4/5 | 4 | 4 | 4 | mixed — some clean, some wing-flap |
+| 4 | toy figure | 5/5 | 5 | 3 | 4 | completes every time but **most wing-flapping** (the feared toy/plastic dynamic bias) + one fire artifact |
+| 5 | display model | 4/5 | 4 | 3 | 4 | frequent white wing-flaps |
+| 6 | control (no object noun) | **1/5** | 1 | 3 | 4 | **fails to rotate 4/5** |
+
+Findings:
+1. **The object noun triggers the rotation, not just the stillness.** The control — same description + "held
+   completely rigid" but **no object noun** — rotated only **1/5** (it holds front-facing and never turns).
+   Every object-framed arm rotated 4–5/5. So "a solid figurine/statue/… depicting X" does double duty: it is
+   the *stillness* cue **and** the *turntable-object* cue that makes the model orbit it. This is a new,
+   important result — the object framing is load-bearing for the turn itself.
+2. **figurine is the winner** — the only arm to complete 5/5 while staying clean and on-model. The middle four
+   are a close, noisy cluster at 5 samples; the user's visual scores will settle their order.
+3. **The auto flail metric is unreliable when completion varies** — it scored figurine *worst* because it
+   penalizes the large area-change of a *full* rotation. Visual inspection (weighted above the metric)
+   reverses that. Human judgment is the arbiter for stillness/identity.
+4. **"toy" showed the predicted plastic/dynamic bias** — the most wing-flapping of any arm — validating the
+   caution about it. Material/effect words remain off the table.
+5. **Low sample (5 runs/arm)** — figurine's #1 is solid (5/5 + cleanest), but the mid-pack ranking is
+   provisional; a larger round would firm it up if needed.
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
