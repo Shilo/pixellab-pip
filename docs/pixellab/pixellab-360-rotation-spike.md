@@ -460,9 +460,23 @@ does **not** penalize guessed side/back views (a missing-description side-effect
 belongs in the round, to separate "the object word helped" from "the description helped." Pending user call.
 
 **Round-1 human scores (recovered 2026-08-14; weighted above the auto metrics).** The user scored the 10
-round-1 arms by eye. Totals (rotation + stillness + stays-itself, /15): COLLECTIBLE 12, FIGURINE 11, STATUE
-11, COMBO 11, ACTIONFIGURE 10, RESIN3D 9, INANIMATE 8, FROZEN 8, control 6, SCULPTURE 6. Key human
-corrections to the auto read (stored at `.local/round1-human-scores.json`, seeded into the scoresheet):
+round-1 arms by eye (absolute quality on 1 run each — a *different* rule from round 2's per-output pass count).
+Full scores (each 1–5; stored at `.local/round1-human-scores.json`, seeded into the scoresheet):
+
+| arm | rotation | stillness | stays-itself | total | user's note (condensed) |
+|---|---|---|---|---|---|
+| COLLECTIBLE | 5 | 3 | 4 | **12** | all rotate; **bounce at the end**; equipment persistent — best rotation |
+| FIGURINE | 3 | 5 | 3 | **11** | failed 1/4 to rotate; very still (some eye-blink); equipment stretches/switches hands — **best stillness** |
+| STATUE | 3 | 4 | 4 | **11** | few tests; rotated fine, stiff, stays itself — retest |
+| COMBO | 4 | 4 | 3 | **11** | fully rotates but **double-sided** for no reason; bounces — retest |
+| ACTIONFIGURE | 3 | 4 | 3 | **10** | only 1 test; stiff — retest |
+| RESIN3D | 1 | 4 | 4 | **9** | doesn't fully rotate; niche word — not worth retesting |
+| INANIMATE | 1 | 3 | 4 | **8** | **none rotated**; low stillness; spontaneous details |
+| FROZEN | 2 | 4 | 2 | **8** | ice particle FX; not a full rotation; bouncing — drop |
+| control (B0) | 2 | 2 | 2 | **6** | failed 1/4 to rotate; constant micro-movement; morphs shield/feathers |
+| SCULPTURE | 1 | 3 | 2 | **6** | doesn't fully rotate; morphs + bounces — drop |
+
+Key human corrections to the auto read:
 - **INANIMATE did NOT rotate** in any round-1 run per the human — the auto metric over-counted "full-360"
   from the green dip; human rotation = 1. (The round-2 template later *did* get inanimate rotating 4/5, so the
   description + object framing fixed what round-1 could not.)
@@ -571,6 +585,16 @@ Findings:
    caution about it. Material/effect words remain off the table.
 5. **Low sample (5 runs/arm)** — figurine's #1 is solid (5/5 + cleanest), but the mid-pack ranking is
    provisional; a larger round would firm it up if needed.
+
+**Human scoring rule for round 2 (authoritative — this differs from round 1).** Each axis score `X/5` = the
+number of the 5 outputs that **passed** that axis (close-enough counts as a pass; a clear failure does not
+add to the count). It is *not* an absolute quality rating — "stillness 4/5" means 4 of 5 were passable, not
+that 4 were perfect. This applies to all three axes. **Round 2 is the source of truth for the MVP prompt;
+round 1 (absolute quality on 1 run each) is only suggestive guidance.** The user also counts the **spontaneous
+white "smoke"/particle artifacts** (which I earlier called wing-flaps) as a **stays-itself failure**, even
+though they are likely erasable by hand — so they lower "stays-itself", not just "stillness". These artifacts
+appear across most arms, so they read as largely RNG/model-inherent on this subject rather than arm-specific;
+the tie-breaker round (below) measures which arm minimizes them most consistently.
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
