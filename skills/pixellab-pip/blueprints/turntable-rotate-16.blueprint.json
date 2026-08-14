@@ -2,7 +2,7 @@
   {
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
-      "output_directory": "pixellab-pip-generations/rotate-16",
+      "output_directory": "pixellab-pip-generations/turntable-rotate-16",
       "output_collision_policy": "create_unique",
       "mcp_server": {
         "name": "PixelLab",
@@ -12,7 +12,7 @@
       }
     },
     "_comment": "Seamless 16-frame turntable from one supplied frame: the same image is sent as both anchors, and the prompt frames the subject as a rigid object so the model orbits it instead of animating it. The object word is load-bearing for the turn itself, not only for stillness; figurine is the tested winner, and toy figure or display model score the same if either reads better for the subject. Keep the subject description minimal and name only identity-bearing props (e.g. a held shield); decorative nouns get reinterpreted as new geometry on the unseen back. Loop closure is about 75% per draw even on the best prompt, so expect to run this 2-3 times and keep the draw that closes; each run spends credits and needs its own approval. A feathered or fringed subject may show inherent particle/feather artifacts during the turn regardless of prompt or no_background; erase in post or add a negative description.",
-    "_comment_prompt": "/pixellab-pip create the rotate-16 blueprint",
+    "_comment_prompt": "/pixellab-pip create the turntable-rotate-16 blueprint",
     "TASK": {
       "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, confirm the supplied image resolves to one readable frame whose width times height does not exceed 32768 pixels (so width times height times 16 stays within the 524288 budget; 128x128 is the tested size, ~181x181 the square maximum) and stop and report rather than shrinking it, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty; if any precondition fails, stop before spending.",
       "verify": "Run authority and an authenticated MCP connection are confirmed, the supplied image is a single readable frame within the 16-frame pixel budget (width times height at most 32768), and the output directory is new, empty, writable, and inside the current project."
@@ -29,9 +29,9 @@
   },
   {
     "TASK": {
-      "instruction": "Poll MCP get_image with the job_id returned by the immediately preceding call until it reports completed or failed; re-poll after transient errors and never resubmit the paid job; after a reasonable bounded wait, stop and report the saved job_id as the resume route. On completion, save every returned image unchanged and in order as frame-00.png onward. The first returned image is the supplied frame echoed back, so drop that echoed first image from the GIF only; keep every saved PNG. Assemble the remaining frames into rotate-16.gif as an infinitely looping animation at an even frame delay. Preserve transparency: set an explicit GIF disposal that restores the canvas between frames (dispose to background) so transparent pixels do not accumulate trails, and reserve a dedicated palette slot for fully transparent pixels only - never use palette index 0 for transparency, because a real color sits there and every pixel using it is punched into a hole. Then present rotate-16.gif and report whether its final frame returns to the supplied front view; if the loop does not close, say so and ask before running again, since each run is a separate paid job.",
-      "outputs": ["rotate-16.gif"],
-      "verify": "The saved PNG count matches the returned image count, each PNG matches its returned frame pixel-for-pixel, rotate-16.gif has one fewer frame than the PNGs, loops forever, and renders every frame with the subject intact, no punched-out holes, no trails, and no baked-in background."
+      "instruction": "Poll MCP get_image with the job_id returned by the immediately preceding call until it reports completed or failed; re-poll after transient errors and never resubmit the paid job; after a reasonable bounded wait, stop and report the saved job_id as the resume route. On completion, save every returned image unchanged and in order as frame-00.png onward. The first returned image is the supplied frame echoed back, so drop that echoed first image from the GIF only; keep every saved PNG. Assemble the remaining frames into turntable-rotate-16.gif as an infinitely looping animation at an even frame delay. Preserve transparency: set an explicit GIF disposal that restores the canvas between frames (dispose to background) so transparent pixels do not accumulate trails, and reserve a dedicated palette slot for fully transparent pixels only - never use palette index 0 for transparency, because a real color sits there and every pixel using it is punched into a hole. Then present turntable-rotate-16.gif and report whether its final frame returns to the supplied front view; if the loop does not close, say so and ask before running again, since each run is a separate paid job.",
+      "outputs": ["turntable-rotate-16.gif"],
+      "verify": "The saved PNG count matches the returned image count, each PNG matches its returned frame pixel-for-pixel, turntable-rotate-16.gif has one fewer frame than the PNGs, loops forever, and renders every frame with the subject intact, no punched-out holes, no trails, and no baked-in background."
     }
   }
 ]
