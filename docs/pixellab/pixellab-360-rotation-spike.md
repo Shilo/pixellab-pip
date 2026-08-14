@@ -613,23 +613,52 @@ The round-2 human scores tied **figurine = toy figure = display model** at 11. T
 template with the **updated back-view** ("from behind, only the turkey's back and tail feathers show").
 Artifacts: `frog-turkey-360-20260721/stillness-tiebreak-20260814/`.
 
-Auto `full-360` (unreliable — for reference only): figurine 2/5, display model 1/5, statue 1/5, toy figure
-0/5. **My provisional per-axis scores** (per-output pass count; user scores in the scoresheet override these —
-low confidence, since my round-2 provisional was wrong):
+**Human scores (authoritative) — HEAVY REGRESSION.** Every arm rotated only **1/5** (vs 4/5 in round 2):
 
-| `<OBJECT>` | rotation | stillness | stays-itself | total | note |
-|---|---|---|---|---|---|
-| display model | 4/5 | 3/5 | 3/5 | **10** | strongest rotator this round; moderate white puffs |
-| figurine | 3/5 | 3/5 | 3/5 | **9** | mid; **coloured** swirls (cyan/pink) in 2 runs |
-| toy figure | 2/5 | 3/5 | 3/5 | **8** | rotated least; frequent white puffs |
-| statue | 2/5 | 3/5 | 2/5 | **7** | kept as a contender; low again, ~matches its round-2 score |
+| `<OBJECT>` | rotation | stillness | stays-itself | total |
+|---|---|---|---|---|
+| display model | 1/5 | 3/5 | 2/5 | 6 |
+| figurine | 1/5 | 4/5 | 1/5 | 6 |
+| toy figure | 1/5 | 2/5 | 0/5 | 3 |
+| statue | 1/5 | 0/5 | 0/5 | 1 |
 
-**It did not crisply separate the three** — all remain **artifact-limited**, and rotation success looked lower
-than round 2 (possibly the back-view wording change, possibly RNG; auto is too noisy to trust). Key takeaway:
-the **white-smoke/particle artifact is the real ceiling, and it is arm-independent** — no object-word choice
-removes it. Recommended next lever (a departure from pure positive prompting): add a **`negative_description`**
-(e.g. "smoke, particles, sparkles, motion blur, extra limbs") and A/B it on the top finalist(s). That targets
-the actual failure mode; more object-word tuning will not.
+Auto `full-360` **agrees the regression is real** (not a scoring artifact): figurine 2/5, display 1/5, statue
+1/5, toy 0/5 — versus round-2 auto of 4–5/5. User's verdict: **this round was a failure**; the arm that beat
+control did so only on stillness, which is not success.
+
+**Regression investigation (non-destructive first):**
+- **Not a seed** — all three rounds are seedless (verified in the run scripts). Ruled out.
+- **The ONLY generation difference round-2 → round-3 was the back-view wording:** R2 "…from behind, only *their
+  backs and* the turkey's tail feathers show" vs R3 "…from behind, only *the turkey's back and* tail feathers
+  show". Input image, config B, `no_background:true`, seedless, 16f, and the rest of the prompt are identical.
+- So the cause is **either that wording tweak or a same-day PixelLab backend/temporal shift** — non-destructive
+  analysis cannot separate them. A further hypothesis: the subject **description itself** (added in round 2)
+  degrades rotation and adds the white smoke (round 1, which had no description, is recalled as cleaner).
+  **Batch 4H** resolves all of this by controlled re-run.
+- **Correlated axes (user):** when rotation fails, stillness/stays-itself drop too — a failed turn means the
+  model morphs / adds artifacts instead of rotating cleanly. **Rotation is the linchpin;** fix it first.
+
+## Batch 4H — rotation-regression diagnostic (2026-08-14, in progress)
+
+Controlled re-run to find the cause. All figurine, config B, seedless, 16f, 5 runs each; **one variable per
+arm.** Artifacts: `frog-turkey-360-20260721/diag-20260814/`.
+
+| arm | what it isolates |
+|---|---|
+| **A_round2exact** | the EXACT round-2 prompt (back-view "their backs…") — does round 2 rotate **again today**? Separates *wording* from a *same-day backend/temporal shift*. |
+| **B_round3exact** | the EXACT round-3 prompt — confirms the current regressed state. |
+| **C_nodesc** | round-1 style: NO subject description, NO back-view — does the **description** degrade rotation / add smoke? |
+| **D_bg_nobgfalse** | round-2 prompt but the input has an **opaque grey background** and `no_background:false` — the user's smoke hypothesis. |
+| **E_strongrot** | round-2 prompt **+ "The camera makes one complete 360-degree orbit"** — does a stronger *view-orbit* cue help? |
+
+Reading: if **A rotates ~4–5/5 today** → the back-view wording caused the regression (revert it). If **A also
+fails ~1/5** → not the wording; suspect a same-day backend shift or the description (compare C). If **C rotates
+and is cleaner** → the description is the problem (smoke + rotation). If **D reduces smoke** → keep an opaque
+background + `no_background:false`. Also on the table (deferred): a **`negative_description`** ("smoke,
+particles, sparkles, motion blur, extra limbs") to attack the white smoke directly. Results appended on
+completion.
+
+## Fixed setup (all tests identical — only the `action` phrase varies)
 
 | Parameter | Value | Why |
 |---|---|---|
