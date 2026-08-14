@@ -10,6 +10,51 @@ later once a winner is found.
 
 ---
 
+## Top 5 prompt templates (agreed: Claude + subagent + Codex gpt-5.6-sol)
+
+Reusable `action` templates — **the only variable is `<subject_description>`** (a short phrase like "a frog
+with a shield on top of a turkey"); the object word and everything else are literal. All use `animate-with-text-v3`,
+`frame_count` 16, **no seed**, and `no_background: true` for transparent inputs; regenerate 2–3× and keep the
+run that closes (per-draw reliability ~75%). **Config A** = `first_frame` only; **Config B** = the one frame
+as *both* `first_frame` and `last_frame`.
+
+**1. Default — rigid object, seamless loop (Config B).** Best all-round. Uses **figurine** (the tested winner —
+swap the *figurine* word for *toy figure* or *display model* if it reads better for your subject). Keep
+`<subject_description>` minimal but name key props (e.g. a held shield). *(Batches 4F–4I)*
+```
+Turntable: rotate the view around a solid figurine depicting <subject_description> - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves; only the viewing angle changes.
+```
+
+**2. Constant angular speed — sprite sheet (Config A).** Even per-frame steps, no end-slowdown; trades the
+pixel-perfect loop seam for flat speed. *(Batch 4D)*
+```
+Turntable: the view orbits the motionless <subject_description> by an equal angle each frame, distributing the full 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to front. Constant angular speed, no acceleration or deceleration. It stays in the same pose.
+```
+
+**3. Subject-agnostic fallback — no object framing (Config B).** When an object word like "figurine" would
+misread the subject (a vehicle, a building, an abstract prop). *(Batches 4B–4C, the T164 MVP)*
+```
+Turntable: rotate the view around <subject_description>, held still - front, three-quarter, side, back, full back, opposite side, back to the front. It stays in the same pose.
+```
+
+**4. Minimal — no description (Config B).** Quickest reliable turn when the sprite has no fiddly props to hold
+consistent; takes no `<subject_description>` at all. *(Batch 4H arm C: 5/5)*
+```
+Turntable: rotate the view around a solid figurine - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves; only the viewing angle changes.
+```
+
+**5. Under-rotation booster (Config B).** For stubborn subjects that stall at ~180° or hold front; adds one
+explicit orbit cue (a single reinforcement — does not over-stack). *(Batch 4H arm E: 5/5)*
+```
+Turntable: rotate the view around a solid figurine depicting <subject_description> - front, three-quarter, side, back, full back, opposite side, back to the front. The camera makes one complete 360-degree orbit. The figurine itself never moves; only the viewing angle changes.
+```
+
+**Avoid across all:** material/effect object words (using "stone / ice / bronze" instead of "figurine" adds
+shimmer or VFX, Batch 4E); a long `<subject_description>` (degrades rotation, Batch 4I). The white feather/particle smoke on feathered
+subjects is inherent (Batch 4H) — fix in post or try a `negative_description`.
+
+---
+
 ## TL;DR — conclusions and the prompts to use
 
 **A prompt CAN rotate a subject 360° from a single frame** (overturning this spike's original negative
