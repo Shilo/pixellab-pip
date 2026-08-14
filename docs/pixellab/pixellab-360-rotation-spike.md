@@ -608,20 +608,21 @@ the tie-breaker round (below) measures which arm minimizes them most consistentl
 
 ## Batch 4G — tie-breaker of the three finalists (2026-08-14)
 
-The round-2 human scores tied **figurine = toy figure = display model** at 11. Tie-breaker: those three (plus
-statue, which was queued before the round-2 scores came in and is out of contention), 5 seedless runs each,
-same final template with the **updated back-view** ("from behind, only the turkey's back and tail feathers
-show"). Artifacts: `frog-turkey-360-20260721/stillness-tiebreak-20260814/`.
+The round-2 human scores tied **figurine = toy figure = display model** at 11. Tie-breaker: those three plus
+**statue** (kept as a full contender since its runs were already generated), 5 seedless runs each, same final
+template with the **updated back-view** ("from behind, only the turkey's back and tail feathers show").
+Artifacts: `frog-turkey-360-20260721/stillness-tiebreak-20260814/`.
 
 Auto `full-360` (unreliable — for reference only): figurine 2/5, display model 1/5, statue 1/5, toy figure
-0/5. **My provisional visual read** (user scores in the scoresheet, weighted above this):
+0/5. **My provisional per-axis scores** (per-output pass count; user scores in the scoresheet override these —
+low confidence, since my round-2 provisional was wrong):
 
-| `<OBJECT>` | rotation (visual) | artifacts | note |
-|---|---|---|---|
-| display model | best (~4/5 turn) | moderate white feather puffs | strongest rotator this round |
-| figurine | ~3/5 turn | some **coloured** swirls (cyan/pink) in 2 runs + white | mid |
-| toy figure | weakest (~2/5 turn) | frequent white feather puffs | rotated least |
-| statue (out) | ~2/5 | — | confirms round-2 "out" |
+| `<OBJECT>` | rotation | stillness | stays-itself | total | note |
+|---|---|---|---|---|---|
+| display model | 4/5 | 3/5 | 3/5 | **10** | strongest rotator this round; moderate white puffs |
+| figurine | 3/5 | 3/5 | 3/5 | **9** | mid; **coloured** swirls (cyan/pink) in 2 runs |
+| toy figure | 2/5 | 3/5 | 3/5 | **8** | rotated least; frequent white puffs |
+| statue | 2/5 | 3/5 | 2/5 | **7** | kept as a contender; low again, ~matches its round-2 score |
 
 **It did not crisply separate the three** — all remain **artifact-limited**, and rotation success looked lower
 than round 2 (possibly the back-view wording change, possibly RNG; auto is too noisy to trust). Key takeaway:
