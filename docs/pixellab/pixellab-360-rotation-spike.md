@@ -168,6 +168,21 @@ Findings:
 the frame as both `first_frame` and `last_frame`, `frame_count` 16, no seed; regenerate 2–3× and keep
 the run that closes the loop.
 
+Reproduction request (config B — the frame is used as BOTH anchors):
+```
+POST /v2/animate-with-text-v3
+{
+  "first_frame":    { "type": "base64", "base64": "<subject front frame>", "format": "png" },
+  "last_frame":     { "type": "base64", "base64": "<the SAME frame>",      "format": "png" },
+  "action":         "Turntable: rotate the view around the still subject - front, three-quarter, side, back, full back, opposite side, back to the front. Subject stays in the same pose.",
+  "frame_count":    16,
+  "enhance_prompt": false
+}
+```
+(no `seed`.) The investigation also used two bare configs — Config A = start-only (omit `last_frame`),
+Config B = start+end (both anchors the same frame). Only config B + a trajectory prompt yields a true
+360; config A tops out at ~180°.
+
 ### Why it works — it is context, not character count
 
 The user's challenge is correct: **length is a proxy, the real driver is context.** The evidence in
