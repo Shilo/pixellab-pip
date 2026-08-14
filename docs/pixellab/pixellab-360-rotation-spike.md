@@ -694,10 +694,45 @@ Results (auto full-360, 10 runs each):
   exactly as Batch 4H found (inherent to the subject, not the description). Still the open item; lever remains a
   `negative_description` or post-erase.
 
-Current best prompt (rotation-optimised) — swap the object noun to test, `<subject_description>` kept minimal:
-> "Turntable: rotate the view around a solid figurine depicting a frog on top of a turkey - front,
-> three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves;
-> only the viewing angle changes."
+**Human scores (authoritative, per-output pass count out of 10) — figurine wins:**
+
+| `<OBJECT>` | rotation | stillness | stays-itself | normalized /5 |
+|---|---|---|---|---|
+| **figurine** | 8/10 | **9/10** | 7/10 | **4.0** |
+| toy figure | 7/10 | 8/10 | 7/10 | 3.67 |
+| display model | 7/10 | 7/10 | 4/10 | 3.0 |
+
+**figurine is the overall winner** — it leads the cleanest round (10 runs, minimal description) at **4.0/5**
+normalized with the **best stillness (9/10)**, and it was the top of the round-2 tie too. (Statue/inanimate
+are a clear tier below across rounds.)
+
+**Shield caveat — factored into the ranking.** The "stays-itself" scores are dragged down by **shield
+shape/placement drift**, because this round **removed the shield from `<subject_description>`**. That is a
+*fixable description problem, not an inherent flaw* — display model (stays 4/10) was hit hardest; figurine
+held up best (7/10). So the stays-itself deficit understates each arm's real ceiling. **The lesson is a
+balance:** the description must be **minimal enough not to hurt rotation** (Batch 4I) **yet name key props like
+the shield** so they stay consistent — e.g. "a frog with a shield on top of a turkey" rather than the verbose
+round-2 "…holding a sword in its right hand and a shield in its left hand; from behind…".
+
+**Cross-round top-3 (normalized to /5; "figure"-family relations noted):**
+
+| round | 1st | 2nd | 3rd |
+|---|---|---|---|
+| 1 (10 arms, 1 run) | collectible 4.0 | figurine 3.67 | statue 3.67 *(combo tie)* |
+| 2 (6 arms ×5) | figurine 3.67 | toy figure 3.67 | display model 3.67 *(3-way tie)* |
+| 3 tie-breaker *(RNG-corrupted)* | display model 2.0 | figurine 2.0 | statue 1.33 |
+| 4 simplified (×10) | **figurine 4.0** | toy figure 3.67 | display model 3.0 |
+
+**"figurine" is the only object word in the top tier of every clean round** (R1/R2/R4: 3.67, 3.67, 4.0; the
+RNG-corrupted round 3 tanked all arms). The **"figure" family** — action figure (R1) → its successor display
+model, and toy figure — tracks just below figurine. collectible peaked in R1 (best rotation) but was dropped
+for coin-ambiguity; statue faded after R1. **Verdict: figurine wins.**
+
+Current best prompt (rotation-optimised) — swap the object noun to test, `<subject_description>` minimal but
+naming the shield:
+> "Turntable: rotate the view around a solid figurine depicting a frog with a shield on top of a turkey -
+> front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never
+> moves; only the viewing angle changes."
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
