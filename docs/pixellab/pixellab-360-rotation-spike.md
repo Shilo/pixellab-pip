@@ -419,6 +419,60 @@ Findings:
    figurine on a rotating display stand, completely rigid, holding one fixed pose." Still ~75% completion
    (regenerate 2–3×), and it composes with the config choice from Batch 4D (config B for a seamless loop).
 
+### 4E follow-up (2026-08-13) — LOW SAMPLE, not a conclusion; larger round planned
+
+**Caveat (read first).** Batch 4E is **1 run per term** (round 1) plus ≤3 for the four confirmed terms —
+far too low to conclude; seedless RNG dominates at this scale. "Figurine wins" is a **lead, not a verdict.**
+A 10-run-per-keyword round is required before declaring a best keyword.
+
+**Interactive scoresheet:** `.local/stillness-scoresheet.html` — every output frame of every run, per keyword,
+with manual 1–5 scoring on three axes (**360 rotation / stillness / stays-itself**) and a live leaderboard.
+**Human visual scoring is weighted above the auto-metrics** — a person spots identity morphs, weapon
+duplication, and texture artifacts that the silhouette-jerk proxy cannot. The "stays-itself" axis explicitly
+does **not** penalize guessed side/back views (a missing-description side-effect, not an identity failure).
+
+**Keyword triage for the 10-run round (user's calls, validated):**
+
+| keyword | decision | reason |
+|---|---|---|
+| COLLECTIBLE | keep | clean object framing, low flail |
+| FIGURINE | keep | current lead |
+| STATUE | keep | retest — material wording softened to "a solid statue" (drop "stone/carved" that caused shimmer) |
+| ACTIONFIGURE | keep | plausible, retest |
+| INANIMATE | keep | retest — early lift (0.048) was luck; fell to 2/3 on confirm |
+| control (plain) | drop* | baseline only, no explicit framing |
+| SCULPTURE (bronze) | drop | material word → shine/detail artifacts |
+| RESIN3D | drop | niche jargon, weak model prior |
+| COMBO (stacked) | drop | double descriptions → under-rotated |
+| FROZEN (ice) | drop | adds literal blue ice-swirl VFX |
+
+*Pushback kept on record: a **description-only control** (subject described + rigid clause, no object noun)
+belongs in the round, to separate "the object word helped" from "the description helped." Pending user call.
+
+**Subject description added — the `<subject_description>` variable.** Earlier batches described no subject, so
+the model guessed side/back views. The next round adds a concise description. **Placement (challenged, chosen):
+bind the description to the object noun, inline, right after the rotation framing** —
+`rotate the view around a <object> of <subject_description> - <sequence>…`. Rationale: lead with the turntable
+framing (Batch 4C shows it is load-bearing); binding "`<object>` of `<subject>`" makes the model treat the
+described subject *as* the rigid object it rotates (identity + stillness fused in one noun phrase); keep the
+view sequence in its proven slot; put rigidity + a short back-hint at the tail. Rejected: description at the
+very front (dilutes the rotation trigger) and description-only-at-the-tail (weak influence on the invented
+intermediate frames).
+
+**Back-view hint (user idea — validated, with caution).** Describing the back constrains invented details
+(prevents a face on the back, duplicated weapons). Risk is length/dilution (over-stacking hurt COMBO), so it
+is kept **short and held constant across all five** so it does not confound the keyword comparison.
+
+**Proposed template (pending approval) — only `<OBJECT>` varies:**
+> Turntable: rotate the view around <OBJECT> of a frog sitting on top of a turkey, holding a sword in its
+> right hand and a shield in its left hand - front, three-quarter, side, back, full back, opposite side, back
+> to the front. It stays completely rigid in one fixed pose; only the viewing angle changes. From behind, only
+> the backs of the frog and turkey and the turkey's tail feathers are visible.
+
+`<OBJECT>` ∈ {a solid collectible display figure, a solid molded figurine, a solid statue, a hard plastic
+action figure, a completely inanimate figure}. Round: 5 keywords × 10 seedless runs, config B,
+`no_background: true`, `frame_count` 16; then re-score in the scoresheet (human-weighted) and decide.
+
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
 | Parameter | Value | Why |
