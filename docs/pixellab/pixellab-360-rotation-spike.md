@@ -28,7 +28,14 @@ closes the loop; swap "subject" for the subject's name to generalise):
 > 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to
 > front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
 
-**③ Maximum stillness (statue/figurine)** — see **Batch 4E** below for the winning object-framing keyword.
+**③ Maximum stillness (statue/figurine)** — append positive object-framing to keep the subject rigid like a
+figurine (winner: **"figurine"**, ~2.4× less flail than the plain MVP, still 3/3 full-360; see **Batch 4E**):
+> "Turntable: rotate the view around the figurine - front, three-quarter, side, back, full back, opposite
+> side, back to the front. It is a solid molded figurine on a rotating display stand, completely rigid,
+> holding one fixed pose."
+
+For a named subject: "…around the &lt;subject&gt; figurine - … It is a solid molded figurine…". **Avoid**
+"ice sculpture / frozen" (adds ice VFX) and "stone statue" (material shimmer) — they *increase* movement.
 
 **The three essential ingredients** (present in every winner, absent in every failure — wording beats length):
 1. frame it as **the view/camera rotating around the subject**, not the subject moving;
@@ -357,6 +364,54 @@ from a single 16-frame `animate-with-text-v3` clip:
 > "Turntable: the view orbits the motionless subject by an equal angle each frame, distributing the full
 > 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to
 > front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
+
+## Batch 4E — maximum stillness: make the subject a rigid "figurine" (2026-08-13)
+
+New goal from the user: not speed, but **stillness** — the subject should rotate like a statue/figurine
+with little-to-no movement in face, limbs, mouth, or weapons. Technique tested: keep the MVP turntable
+prompt but **positively frame the subject as a rigid object** (statue, figurine, inanimate, …) so the model
+never tries to animate it — positive prompting only, no "do not move" negatives. Artifacts:
+`frog-turkey-360-20260721/stillness-20260813/` (round 1, all 10) and `stillness-20260813/confirm/`
+(top-3 + control × 3). Base = T164 turntable + "back to the front"; only the subject noun + a one-sentence
+object clause vary. config B, `no_background: true`, seedless, `frame_count` 16.
+
+**Metric.** `area_jerk` = std of the second difference of the per-frame silhouette area (opaque-pixel count),
+normalised — a proxy for high-frequency flail (flapping wings, shifting limbs) on top of the smooth
+rotation. Lower = stiller. Backed by **visual montage inspection** (every-other-frame strips) because a pure
+metric can't fully separate wanted rotation from unwanted deformation.
+
+Round 1 (10 framings, 1 run each) then a 3-run confirmation of the leaders:
+
+| framing (positive object clause) | full-360 | mean area_jerk (↓ stiller) | verdict |
+|---|---|---|---|
+| **"figurine"** — *solid molded figurine on a rotating display stand, completely rigid* | **3/3** | **0.044** | **winner — ~2.4× stiller than control** |
+| "inanimate subject" — *completely inanimate frozen object, one fixed pose* | 1/1* | 0.048 | strong (only 1 valid run — 2 hit the 20-job cap) |
+| "collectible figure" — *solid collectible display figure on a spinning base* | 3/3 | 0.066 | beats control |
+| "bronze sculpture" / "resin model" | 1/1 | 0.043 / 0.061 | moderate (single runs) |
+| control (plain T164, "still subject") | 3/3 | 0.106 | most flail (turkey tail/plumage flares) |
+| "action figure" | 1/1 | 0.077 | ≈ control |
+| **"stone statue"** | 1/1 | 0.094 | **worse than control** — material shimmer |
+| **"ice sculpture / frozen"** | 1/1 | 0.160 | **worst — adds literal blue ice-swirl VFX** |
+| "statue figurine" (COMBO, many stillness words) | ✗ under-rotated | — | too many constraints suppressed the turn |
+
+Findings:
+1. **Positive object-framing works — but only the right words.** Framing the subject as a *figurine /
+   inanimate object / collectible* roughly halves the unwanted movement vs the plain MVP, with no negative
+   prompting. Visual check confirms it: the winner keeps the frog seated, sword + shield held constant, and
+   the turkey's feet/wings/tail locked, where the control's turkey tail visibly flares and shifts.
+2. **Material/effect words backfire.** "ice sculpture / frozen" makes the model render *ice effects* (blue
+   swirls animating around the subject) — the opposite of still. "stone statue" adds texture shimmer. So the
+   trick is to imply *a manufactured rigid object*, not a material with its own visual connotations.
+3. **Don't over-stack.** Piling many stillness clauses (COMBO) suppressed the rotation itself
+   (under-rotated). One clean object clause is enough.
+4. **Best is a single positive clause: "figurine".** Winner prompt (3/3 full-360, stillest):
+   > "Turntable: rotate the view around the figurine - front, three-quarter, side, back, full back, opposite
+   > side, back to the front. It is a solid molded figurine on a rotating display stand, completely rigid,
+   > holding one fixed pose."
+
+   Generalise by naming the subject: "…around the &lt;subject&gt; figurine - … It is a solid molded
+   figurine on a rotating display stand, completely rigid, holding one fixed pose." Still ~75% completion
+   (regenerate 2–3×), and it composes with the config choice from Batch 4D (config B for a seamless loop).
 
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
