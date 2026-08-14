@@ -225,6 +225,89 @@ by **omission**, not by being short. The ~130-char floor is "the fewest characte
 three ingredients", not a length threshold the model reacts to. Pack the ingredients denser and a short
 prompt works; pad a prompt with the wrong words and a long one fails.
 
+## Batch 4D — constant-speed investigation (2026-08-13): the turn slows near the end
+
+New question from the user: the winning turntables (T164 / the 774-char prompt) **decelerate near the
+end** — the rotation should be a constant angular speed between every frame. This batch isolates what
+controls per-frame speed. Artifacts: `frog-turkey-360-20260721/constant-speed-20260813/` (round 1 =
+folder root; rounds 2–4 = `nobg-true/`), `report.json`…`report4.json`.
+
+**Fidelity prerequisite — `no_background: true` is mandatory here.** The frog input is transparent, and
+on a transparent input `animate-with-text-v3` with `no_background` unset/`false` **repaints the subject**
+(the turkey wattle turns white) — proven in `no-background-3way-20260813/`. Round 1 omitted it (so those
+frames are compromised for fidelity); rounds 2–4 all send `no_background: true`, which both preserves the
+subject (front wattle-red = 1473 on every run) and returns a genuinely transparent background. The
+wattle-red dropping to ~870–1014 on the *completing* runs is the head genuinely turning away, not
+corruption — the under-rotating runs keep red ~1430 because they never present the back.
+
+**Metrics.** Per-frame motion = mean abs pixel diff to the previous frame. `cov` = its coefficient of
+variation (lower = more constant). `tail/head` = mean(last 4 diffs) ÷ mean(first 4 diffs): **<1 = slows
+at the end** (the reported problem), **>1 = speeds up at the end**, **≈1 = even**. `full360` = green-frog
+drops to the back (≤30% of front) **and** recovers (≥60%). Caveat: pixel-diff is not pure *angular*
+speed — the side↔back transition inherently changes more pixels per degree than the near-front views, so
+`cov` never reaches 0 for a genuine turn; `tail/head` is the cleaner read on the specific end-slowdown.
+
+Wordings tested:
+- **S2 (degree waypoints):** "…orbits the motionless subject by an equal angle each frame, distributing
+  the full 360 turn evenly - front 0, 45, 90 side, 135, 180 back, 225, 270 opposite side, 315, back to
+  front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
+  (**S2b** = same with "full 180 back view" + left/right side labels.)
+- **S3 (velocity prose):** "Turntable spinning at constant angular velocity … the same fixed number of
+  degrees every single frame …" — no enumerated waypoints.
+- **M1 (proven T164 view-sequence + even clause):** "Turntable: rotate the view around the still subject
+  by the same angle in every frame, an even constant speed all the way around - front, three-quarter,
+  side, back, full back, opposite side, back to the front. Subject stays in the same pose."
+
+### Results by round
+
+| round | config | wording | full-360 | cov (↓ even) | tail/head (≈1 even) |
+|---|---|---|---|---|---|
+| 1 | B (no nobg) | S2 degrees | near-miss | **0.216** | **1.013** |
+| 1 | B (no nobg) | S3 velocity prose | ✓ | 0.633 | 0.768 (slows) |
+| 1 | B (no nobg) | S1 T164+"no easing" | ✗ | 0.609 | 0.613 (slows worst) |
+| 2–3 | B, nobg:true | S2 / S2b degrees | **1/6** | ~0.17–0.36 | even *when* it lands |
+| 3 | B, nobg:true | M1 views+even | **2/2** | ~0.32 | 1.471 / 0.653 (inconsistent) |
+| 4 | **A**, nobg:true | **S2b degrees** | **2/2** | **0.21 / 0.24** | 1.47 / 1.59 (mild speed-up) |
+| 4 | A, nobg:true | M1 views | 0/2 (under-rotates) | 0.10 / 0.15 | ~1.0–1.3 |
+
+### What controls per-frame speed
+
+1. **Enumerating evenly-spaced *degree* waypoints (S2/S2b) flattens the speed;** prose like "constant
+   angular velocity" (S3) does not — S3 rotates fully but rushes the back and eases the ends (0.768).
+   The model needs the even *keyframe targets*, not an adjective.
+2. **The end-slowdown is caused by config B's fixed `last_frame` anchor.** With start == end, the
+   interpolator eases *into* that identical closing frame — the last 2–3 per-frame diffs taper (e.g.
+   config-B S2b_r2 ends `…9.72, 7.5, 4.63`), which is exactly the deceleration the user saw (tail/head
+   ~0.6–0.9 on every config-B full-360). **Config A (drop `last_frame`) removes it:** there is no fixed
+   frame to ease into, so the tail no longer slows (config-A S2b ends `…15.08, 15.94`).
+3. **Completion vs config flips with wording:**
+   - **Config B:** view-sequence (M1) completes reliably (2/2) but times unevenly; degree-waypoints
+     (S2/S2b) under-commit to the turn (1/6).
+   - **Config A:** degree-waypoints (S2b) complete reliably (2/2) *and* give the lowest `cov` of any
+     genuine full-360 (0.21–0.24); view-sequence (M1) under-rotates to ~½ (0/2).
+4. **Residual:** config A + S2b trades the *slowdown* for a mild *speed-up* at the very end
+   (tail/head ~1.5), but overall variation (`cov`) is the best measured and there is no dead, decelerating
+   tail — far less objectionable perceptually.
+
+### Recommendation (constant-speed 360)
+
+Pick by what you need — you cannot get both a pixel-perfect seamless loop **and** perfectly flat speed
+from a single 16-frame `animate-with-text-v3` clip:
+
+- **Evenest angular speed (sprite sheet / turntable):** **config A** (`first_frame` only, **no**
+  `last_frame`) + the **degree-waypoint prompt (S2b)** + `no_background: true`. Best `cov`, no
+  end-slowdown, reliable completion. Trade-off: the final frame lands *near* front but not pixel-identical,
+  so a perfect loop seam isn't guaranteed (fine for an evenly-spaced sheet).
+- **Seamless loop (looping GIF):** config B (frame as both anchors) + a trajectory prompt; accept the
+  mild ease-into-the-anchor at the end, and regenerate 2–3× keeping the evenest closing draw.
+- Either way: `no_background: true`, `frame_count` 16, no seed, `enhance_prompt` false; regenerate 2–3×
+  (seedless completion is ~per-draw, not guaranteed) and keep the run whose playback reads as even.
+
+**Constant-speed prompt (S2b) — verbatim:**
+> "Turntable: the view orbits the motionless subject by an equal angle each frame, distributing the full
+> 360 turn evenly - front 0, 45, 90 right side, 135, full 180 back view, 225, 270 left side, 315, back to
+> front. Constant angular speed, no acceleration or deceleration. Subject stays in the same pose."
+
 ## Fixed setup (all tests identical — only the `action` phrase varies)
 
 | Parameter | Value | Why |
