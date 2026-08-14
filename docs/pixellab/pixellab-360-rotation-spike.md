@@ -459,6 +459,38 @@ does **not** penalize guessed side/back views (a missing-description side-effect
 *Pushback kept on record: a **description-only control** (subject described + rigid clause, no object noun)
 belongs in the round, to separate "the object word helped" from "the description helped." Pending user call.
 
+**Round-1 human scores (recovered 2026-08-14; weighted above the auto metrics).** The user scored the 10
+round-1 arms by eye. Totals (rotation + stillness + stays-itself, /15): COLLECTIBLE 12, FIGURINE 11, STATUE
+11, COMBO 11, ACTIONFIGURE 10, RESIN3D 9, INANIMATE 8, FROZEN 8, control 6, SCULPTURE 6. Key human
+corrections to the auto read (stored at `.local/round1-human-scores.json`, seeded into the scoresheet):
+- **INANIMATE did NOT rotate** in any round-1 run per the human — the auto metric over-counted "full-360"
+  from the green dip; human rotation = 1. (The round-2 template later *did* get inanimate rotating 4/5, so the
+  description + object framing fixed what round-1 could not.)
+- **FIGURINE = best stillness** (5/5) but failed to rotate 1/4 and showed minor eye-blink; held equipment
+  sometimes **stretches or switches hands** — an identity issue the round-2 `<subject_description>` targets.
+- **COLLECTIBLE = best rotation** (all rotated) but has a **"bounce at the end"** — this is the config-B
+  end-anchor ease from Batch 4D, seen here by eye. The bounce and hand-switching recur across arms.
+
+**Self-challenge — where my metrics disagreed with the human, the human is right.** The user's scores expose
+concrete failures in my auto proxies, and they override my earlier auto-based claims:
+- **The `full-360` flag over-counts rotation.** It fires whenever the frog is occluded — which also happens on
+  a *partial* turn or a *morph*, not only a true 360. INANIMATE: my auto called it 2/3; the human saw **0/5
+  actually rotate**. So statements like "figurine wins on flail, 3/3" earlier in Batch 4E are **auto-only and
+  not trustworthy on their own** — read them as rough triage, not verdicts.
+- **The `area_jerk` "flail" metric is not a stillness measure.** It conflates legitimate rotation area-change
+  with unwanted motion, which is why it ranked figurine *worst* in Batch 4F while the eye ranked it
+  *cleanest*, and why it disagrees with the human's "figurine = best stillness."
+- **Neither proxy sees what the human sees:** eye-blinks, held-equipment switching hands / stretching, the
+  config-B end-bounce, or double-sided morphs. These decide the result and only a person catches them.
+- **My Batch 4F ranking is provisional** until the user scores round 2 in the scoresheet; where their pips
+  disagree with mine, theirs win.
+- **Control nuance:** the plain round-1 control (T164, no description) rotated 3/4, but the round-2 control
+  (full description + "held completely rigid", still no object noun) rotated only 1/5 — so "held rigid" can
+  *over-suppress* the turn, and the object noun is what compensates. Reinforces that the object noun is
+  load-bearing for the rotation, not just stillness.
+
+**Subject description added — the `<subject_description>` variable.** Earlier batches described no subject, so
+
 **Subject description added — the `<subject_description>` variable.** Earlier batches described no subject, so
 the model guessed side/back views. The next round adds a concise description. **Placement (challenged, chosen):
 bind the description to the object noun, inline, right after the rotation framing** —
