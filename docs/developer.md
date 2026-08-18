@@ -16,6 +16,7 @@ Last reviewed: 2026-07-05.
 - [Reference Files](#reference-files)
 - [Skill File Sizing](#skill-file-sizing)
 - [TODO ↗](developer/todo.md)
+- [Async Helper Plan ↗](developer/async-helper-plan.md)
 - [Publishing](#publishing)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)

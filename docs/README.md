@@ -28,6 +28,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 - [PixelLab Pip Skill Benchmark](pixellab-pip-benchmark.md) - reproducible agent-side context/token and routing-correctness comparison of the skill vs no skill vs the official mcp/docs injection.
 - [PixelLab Static-Image Model Benchmark](pixellab-image-model-benchmark-results.md) - blind quality comparison and current routing summary for Pixen, PixFlux, Create Image Pro, and BitForge, supplemented by focused evidence that Pro is reliable for isolated reusable VFX while Pixen is not.
+- [PixelLab Static-Image Model Style Fingerprint](pixellab-image-model-style-fingerprint.md) - blind style/failure-mode tagging of the benchmark's existing seed-7 outputs, used to validate the per-model profiles rather than re-rank them.
 
 ## Research
 
@@ -65,6 +66,37 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab Aseprite Extension Coverage Audit](tools/aseprite-extension-coverage-audit.md) - comparison of official Aseprite editor workflows with Pip's MCP/REST/editor routing.
 - [Aseprite CLI Integration Testing](tools/aseprite-cli-integration-testing.md) - maintainer QA policy for local Aseprite CLI workflow tests.
 - [PixelLab AI Skill vs Pip Skill](tools/pixellab-ai-skill-vs-pip-skill.md) - feature comparison between Pip and the unofficial PixelLab AI Skill.
+- [PixelLab 16px Chibi Character Generation Spike](pixellab/pixellab-16px-character-generation-spike.md) - smallest reliable prompt and route for a flat, low-detail 16px character with a cozy chibi read.
+- [PixelLab Pixen Full-Body Character Prompt Spike](pixellab/pixellab-pixen-character-prompt-research-spike.md) - smallest description that reliably makes Pixen produce a 64px south-facing full-body idle character at default settings.
+- [PixelLab Armless Character Prompt Research Spike](pixellab/pixellab-armless-character-prompt-research-spike.md) - whether `create_character` can produce a genuinely armless humanoid at 32px/eight directions, across long-to-minimal descriptions.
+- [PixelLab 360 Rotation Spike](pixellab/pixellab-360-rotation-spike.md) - shortest `animate-with-text-v3` action phrase that yields a clean, seamless, constant-speed turntable with a stiff body.
+- [PixelLab Idle Animation Artifact Research](pixellab/pixellab-idle-animation-artifact-research.md) - live findings on 9-frame idle loops from a small transparent frame, including the external effect marks that appear when `last_frame` is supplied.
+- [PixelLab Multi-Shot Cinematic Spike](pixellab/pixellab-cinematic-spike.md) - live findings from chaining many `animate-with-text-v3` jobs into a seamless-looping minute-long cinematic, with the failure/mitigation catalog.
+- [PixelLab Cinematic Inspiration And Technique](pixellab/pixellab-cinematic-inspiration.md) - composition and motion techniques for fixed-camera pixel-art cinematics, informing opening-frame prompts and per-shot action text.
+- [PixelLab Cinematic Support Test Plan And Results](pixellab-cinematic-testing.md) - smoke and live test coverage for the multi-shot cinematic workflow, with the scoring rubric and results.
+- [HD Region Edit / Animate Spike](pixellab/pixellab-hd-region-edit-animate-spike.md) - whether Pip should gain a selection-scoped workflow for editing or animating regions of images larger than the edit/animate size caps.
+- [AI-Image Downscale And Pixel-Grid Recovery Spike](pixellab/pixellab-ai-image-downscale-grid-recovery-spike.md) - code-and-literature findings on recovering a crisp low-resolution grid from upscaled AI "pixel art", and when to decline.
+- [PixelLab Skill Icon Generation Spike](pixellab/pixellab-skill-icon-generation-spike.md) - live findings and tested defaults for fantasy skill/ability/item icon sheet requests.
+- [PixelLab Top-Down House Generation Routing Spike](pixellab/pixellab-top-down-house-generation-routing-spike.md) - observed failures and the successful fallback for a south-facing, genuinely top-down building asset.
+- [PixelLab Credit Output Estimation Spike](pixellab/pixellab-credit-output-estimation-spike.md) - estimate of how many outputs 1 USD of credit buys per route, with the caveats that keep it an estimate.
+- [PixelLab MCP New-Tools Verification Results](pixellab/pixellab-mcp-new-tools-test-results.md) - live verification run over the newly exposed MCP tools against the REST OpenAPI document.
+- [Inline Negative Prompting Best Practices](pixellab/pixellab-inline-negative-prompting-best-practices.md) - current-model framing of negative prompting as anything telling the model what not to draw, whether in a dedicated field or the main description.
+- [Inline Negative Prompting Current-Model Results](pixellab/pixellab-inline-negative-prompting-current-model-results.md) - Stage A results for Pixen and Create Image Pro, blind-reviewed with adjudication.
+- [PixelLab Negative Prompting Research Spike](pixellab/pixellab-negative-prompting-research-spike.md) - what the repo, public docs, and the local generation archive actually establish about negative prompting.
+- [PixelLab Negative Prompting Calibration Results](pixellab/pixellab-negative-prompting-calibration-results.md) - Phase 0 calibration for the historical dedicated-field study.
+- [PixelLab Negative Prompting Phase 0B Results](pixellab/pixellab-negative-prompting-phase0b-results.md) - replacement-family calibration following Phase 0.
+- [PixelLab Negative Prompting Phase 1 Confirmation Results](pixellab/pixellab-negative-prompting-confirmation-results.md) - historical dedicated-field confirmation on BitForge and deprecated PixFlux; zero weight in the current-model study.
+- [RPG Maker Map-Character Sheet Formats](pixellab/rpg-maker-character-sheet-formats.md) - verified cell geometry, direction layout, and image-format rules from RPG Maker 2000 through MZ and Unite.
+- [PixelLab Pip Preview App Research Spike](pixellab-preview-app-research-spike.md) - evidence and rejected options behind the proposed folder-scoped pixel-art preview app.
+- [Pip Mascot](pip-mascot.md) - source design note for the Pip mascot's identity, silhouette, and production direction.
+
+## Plans
+
+- [Inline Negative Prompting Current-Model Test Plan](plans/pixellab-inline-negative-prompting-current-model-test-plan.md) - frozen protocol for the primary Pixen and Create Image Pro inline-prompt study.
+- [Negative Prompting Controlled Test Plan](plans/pixellab-negative-prompting-controlled-test-plan.md) - frozen protocol for the historical dedicated-field study on BitForge and deprecated PixFlux.
+- [MCP New-Tools Verification Plan](plans/pixellab-mcp-new-tools-test-plan.md) - scope and method for verifying newly exposed MCP tools against REST parity.
+- [PixelLab Pip Preview App Plan](plans/pixellab-preview-app-plan.md) - design proposal for the standalone browser-based, folder-scoped preview app.
+- [Top-Down South-Facing Building Prompt Plan](plans/pixellab-top-down-south-facing-building-prompt-plan.md) - protocol for finding the smallest prompt and lowest-cost route for a screen-aligned south-facing building sprite.
 
 ## Official PixelLab
 

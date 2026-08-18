@@ -12,9 +12,9 @@ change to the Pip skill or a new armless-character feature.
 
 ## Bottom line
 
-The tested `create_character` v3 humanoid route did not produce an armless
-character in any of the twelve prompt attempts. Every output had recognizable
-arms, hands, or arm-like side armor/limbs in the reviewed directions.
+Neither the tested `create_character` v3 humanoid route nor the Pixen freeform
+route produced an armless character. Across all seventeen prompt attempts,
+every output had recognizable arms, hands, or arm-like side armor/limbs.
 
 The second, concise-positive block removed wording that duplicates structured
 request fields. The shortest prompts did not solve the problem:
@@ -24,6 +24,10 @@ request fields. The shortest prompts did not solve the problem:
   clear arm-like side limbs; and
 - adding `warrior`, `mohawk`, or `chest armor` preserved the identity while
   retaining obvious arms or arm armor.
+
+Pixen did reliably honor the additional composition wording: all five Pixen
+outputs were single, full-body, south-facing, transparent `32x32px` images.
+That framing success did not remove the arms.
 
 The first block also found no benefit from long inline exclusions. That is a
 finding for this small exploratory sample, not a universal claim about
@@ -51,7 +55,7 @@ size, directions, body type, and view.
 
 ## Test design
 
-The test was split into two prompt blocks:
+The test was split into three prompt blocks:
 
 1. **Full prompt block (`U0`–`S1`)** — original wording, exact repeat,
    positive inventory, explicit positive geometry, concise exclusions, a long
@@ -59,6 +63,9 @@ The test was split into two prompt blocks:
 2. **Concise positive block (`A0`–`A4`)** — an identity ladder beginning with
    exactly `armless` and adding only the minimum identity nouns and clothing
    terms.
+3. **Pixen block (`P0`–`P4`)** — the same concise identity ladder, with
+   `full body` and `south-facing` explicitly included in each freeform image
+   description.
 
 No reference image, seed, or post-generation edit was used. The calls were
 exploratory and were not a same-seed statistical experiment; visual claims are
@@ -190,6 +197,71 @@ armless male human warrior with a mohawk and chest armor
 
 The [concise positive block run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/concise-positive-block/) contains the 40 original directional PNGs and its prompt map.
 
+## Block 3: Pixen freeform image prompts
+
+Pixen is not the character-creator route, so the description explicitly names
+`full body` and `south-facing`. The structured `direction="south"` field was
+also set, along with the target canvas and transparent background:
+
+```python
+create_image_pixen(
+    description="{{PROMPT}}",
+    width=32,
+    height=32,
+    no_background=True,
+    direction="south",
+    view="low top-down",
+)
+```
+
+`detail`, `outline`, and `seed` were omitted. Each call cost one generation and
+returned one image.
+
+| Arm | Job ID | Alpha bounds | Anatomy score |
+|---|---|---|---:|
+| `P0` | `fa2b5dad-e230-4344-a2ae-3aa9acdb4e7b` | `17x30+7+1` | 3 |
+| `P1` | `1e1350bc-2bd1-43b7-a3f1-3e4cc08ac66a` | `18x30+7+1` | 3 |
+| `P2` | `d0f520ca-8506-4bec-ba60-ff3d597abb93` | `18x29+7+1` | 3 |
+| `P3` | `d93c8644-78f6-4d39-ab85-7e651e97a382` | `18x30+7+1` | 3 |
+| `P4` | `bf19a1ec-093a-49e2-9acd-b0bf9eb3fe63` | `22x29+5+1` | 3 |
+
+### P0
+
+```text
+full body, south-facing, armless
+```
+
+### P1
+
+```text
+full body, south-facing, armless human
+```
+
+### P2
+
+```text
+full body, south-facing, armless human warrior
+```
+
+### P3
+
+```text
+full body, south-facing, armless male human warrior with a mohawk
+```
+
+### P4
+
+```text
+full body, south-facing, armless male human warrior with a mohawk and chest armor
+```
+
+### Pixen visual evidence
+
+![Pixen concise armless prompt comparison](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pixen-32x32-block/pixen-armless-32x32-contact-sheet.png)
+
+All five Pixen outputs read as full-body south-facing sprites, but every one
+still contains arms, hands, or arm-like side geometry. The [Pixen run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pixen-32x32-block/) contains the five raw `32x32` PNGs and its exact prompt map.
+
 ## Interpretation
 
 ### What this supports
@@ -199,10 +271,12 @@ The [concise positive block run folder](../../pixellab-pip-generations/armless-c
 2. A concise positive semantic label is worth testing before adding a long
    inline blacklist. The `armless human` result was the cleanest candidate in
    this run, even though it still failed.
-3. The `humanoid` v3 route has a strong conventional-human anatomy prior in
-   this task. Saying `armless` did not override that prior.
+3. Both the `humanoid` v3 route and Pixen had a strong conventional-human
+   anatomy prior in this task. Saying `armless` did not override that prior.
 4. The long exclusion list did not rescue the first block. Repeating more
    synonyms was not shown to be a productive next move.
+5. Pixen's freeform prompt was enough to establish the requested framing, but
+   framing control and anatomy control are separate problems.
 
 ### What this does not support
 
