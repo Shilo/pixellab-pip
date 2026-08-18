@@ -56,6 +56,83 @@ The following were omitted from every call: `outline`, `shading`, `detail`,
 negative field. The test intentionally relied on the structured fields for
 size, directions, body type, and view.
 
+## Research basis
+
+This spike combines the live outputs with the repository's route contracts and
+prior prompt research. The linked documents are evidence and guidance for the
+experiment; none is being promoted into a new runtime rule here.
+
+| Research source | Finding used in this spike |
+|---|---|
+| [Pixen character prompt reference](../../skills/pixellab-pip/references/pixen-character-prompt.md) | The empirical Pixen framing prefix is `full-body front-facing south-facing idle game character sprite, low top-down view. centered, neutral standing pose with arms at sides, full figure from head to feet.` The `arms at sides` phrase conflicted with this target, so the Q block kept the framing but removed that phrase. |
+| [Create Image Pro reference](../../skills/pixellab-pip/references/create-image-pro.md) | Pro follows descriptions more closely than Pixen/v3/new at higher cost; small canvases return many candidates. Candidate siblings are correlated alternatives, so the paid call—not each sibling—is the experimental unit. |
+| [Reviewable candidates reference](../../skills/pixellab-pip/references/reviewable-candidates.md) | All Pro candidates were reviewed, and the contact sheet uses user-facing labels `1`–`64`; the raw files retain the route's zero-based filenames. |
+| [Pixen full-body prompt spike](pixellab-pixen-character-prompt-research-spike.md) | Pixen can be improved by explicit full-body/front/south/idle framing, but `view` and `direction` remain weak guidance and the route has no exposed humanoid/body-type mode. |
+| [Inline negative prompting best practices](pixellab-inline-negative-prompting-best-practices.md) | Negative wording is route/model dependent. The useful hypotheses are concise guardrails, positive replacement/geometry, combined constraints, and long-list dilution—not a universal negative-prompt rule. |
+| [Current-model inline negative results](pixellab-inline-negative-prompting-current-model-results.md) | Pro and Pixen respond differently: concise inline exclusions helped some Pro pseudo-text tasks, while Pixen projection failures were fixed by positive structural wording rather than repeated negatives. This justified testing both positive and negative anatomy variants here. |
+| [16px character generation spike](pixellab-16px-character-generation-spike.md) | Pro's candidate sweep can be useful for small-silhouette exploration, while Pixen is a cheaper one-shot route; the result is target-specific and does not make Pro a universal winner. |
+| [Chibi base character findings](pixellab-chibi-base-character-findings.md) | Anatomy and proportion language is soft; over-explaining anatomy can degrade outputs, and stored outline/detail settings are not proof that the model honored them. This supported keeping the new prompts explicit but compact. |
+| [Official PixelLab documentation reference](../../skills/pixellab-pip/references/official-pixellab-documentation.md) | MCP and REST are overlapping but not identical surfaces. No undocumented humanoid switch, hidden system prompt, or unsupported negative field was assumed. |
+
+The related official links used by the repository research are [PixelLab camera
+options](https://www.pixellab.ai/docs/options/camera), the [v2 OpenAPI
+schema](https://api.pixellab.ai/v2/openapi.json), and the [MCP documentation
+inventory](https://api.pixellab.ai/mcp/docs).
+
+## Complete run accounting
+
+| Block | Calls | Returned output | Per-call usage reported | Review record |
+|---|---:|---|---:|---|
+| `U0`–`S1` | 7 | 56 expected character directions | v3 reported 2 generations | 55 direction frames reviewed; `C1-west` CDN download unavailable |
+| `A0`–`A4` | 5 | 40 character directions | v3 reported 2 generations | 40 direction frames reviewed |
+| `P0`–`P4` | 5 | 5 Pixen images | 1 generation | 5 images reviewed |
+| `Q0`–`Q4` | 5 | 5 Pixen images | 1 generation | 5 images reviewed |
+| `R0`–`R2` | 3 | 192 Pro candidates | 20 generations | 192 candidates reviewed |
+| **Total** | **25** | **96 character directions + 10 Pixen images + 192 Pro candidates** | route-specific | all available outputs reviewed; `C1-west` was unavailable |
+
+All live calls were made after the subscription generation pool was exhausted,
+so PixelLab billed them to account credits. Balance snapshots were used only as
+a paid-call safety check, not as an outcome measure; the service's concurrent
+usage accounting did not provide a reliable basis for inferring an exact total
+from balance deltas.
+
+The 192 Pro candidates are 64 correlated siblings from each of three paid
+calls, not 192 independent prompt experiments. The independent prompt units
+are the three Pro descriptions and the 25 total calls across all blocks.
+
+## Review and acceptance protocol
+
+Every result was checked at native `32x32` size and in a nearest-neighbor
+enlargement. The primary anatomy target was scored independently of visual
+quality:
+
+| Score | Meaning |
+|---:|---|
+| `0` | Pass: readable head, continuous torso/chest, two legs, two feet, no arm-like side geometry, and visible empty side silhouette. |
+| `1` | Ambiguous: crop, occlusion, tiny scale, or view prevents a reliable anatomy judgment. |
+| `2` | Fail: any recognizable arm, hand, sleeve, glove, gauntlet, shoulder pad, stump, side appendage, or missing required region. |
+| `3` | Severe fail: extra limbs are prominent, duplicated, or dominate the silhouette. |
+
+An apparent pass could not be credited if it depended on cropping, hiding the
+arms behind the torso, turning away, losing the requested identity, or treating
+the `32x32` canvas size alone as proof of armless anatomy. Transparency and
+canvas dimensions were verified separately from silhouette compliance. No
+secondary quality score was allowed to override a primary anatomy failure.
+
+## Route comparison
+
+| Route | Structured controls used | Prompt responsibilities | Observed result |
+|---|---|---|---|
+| `create_character` v3 | `body_type="humanoid"`, `mode="v3"`, `n_directions=8`, `size=32`, `view="low top-down"` | Subject identity and anatomy only; redundant size/direction/framing words were intentionally removed in Block 2. | Stable eight-direction character output, but all 12 jobs retained arms, hands, or arm-like armor. |
+| `create_image_pixen` | `width=32`, `height=32`, `no_background=true`, `direction="south"`, `view="low top-down"` | Full-body and south-facing wording, plus the anatomy hypothesis. | All 10 outputs honored the single-image framing well enough to read as full-body south-facing sprites, but all retained arms or side limbs. |
+| `create_image_pro` | `width=32`, `height=32`, `no_background=true` | Full-body, south-facing, low top-down, identity, and anatomy all had to be explicit because the MCP tool exposes no direction/view fields. | 192 candidates varied in palette, hair, clothing, and face, but none passed the armless anatomy target. |
+
+The comparison separates a framing problem from an anatomy problem: Pixen's
+explicit full-body/south-facing wording and structured selectors were enough to
+make the composition readable, while neither Pixen nor Pro could suppress the
+humanoid arm prior. Character Creator v3 supplied the strongest directional
+workflow, but its humanoid prior also remained dominant.
+
 ## Test design
 
 The test was split into three prompt blocks:
@@ -141,13 +218,13 @@ Male human warrior with mohawk. Create only head, chest, legs and feet. DO NOT G
 32px full-body front-facing south-facing idle game character sprite, low top-down view. Centered male human warrior with a bright red mohawk and torso-only dark chest armor, designed as an armless four-region character: head, chest/torso, legs, and feet. The final sprite has one head, one continuous chest/torso, two legs, and two feet. The torso tapers directly from the neck edge to the hips; both sides of the torso are open background; legs begin immediately below the torso; feet are the only horizontal projections. Clean flat pixel art, transparent background.
 ```
 
-### Block 1 visual evidence
+### Block 1 review record
 
-![Full prompt block sprite sheet](../../pixellab-pip-generations/armless-character-prompt-study-20260817/full-prompt-block/armless-32px-create-character-sprite-sheet.png)
-
-The `C1` west frame could not be fetched after repeated CDN `502`/`520`
-responses. The review sheet marks that one cell as missing; the other 55
-direction files are preserved in the [full prompt block run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/full-prompt-block/).
+The generated contact sheet and raw direction files were local-only run
+artifacts and are intentionally not linked from this repository document. The
+tables, exact prompts, IDs, alpha bounds, and scores above are the retained
+research record. The `C1` west frame could not be fetched after repeated CDN
+`502`/`520` responses, so it was excluded from visual scoring.
 
 ## Block 2: concise positive matrix
 
@@ -200,11 +277,11 @@ armless male human warrior with a mohawk
 armless male human warrior with a mohawk and chest armor
 ```
 
-### Block 2 visual evidence
+### Block 2 review record
 
-![Concise positive prompt sprite sheet](../../pixellab-pip-generations/armless-character-prompt-study-20260817/concise-positive-block/armless-32px-concise-positive-sprite-sheet.png)
-
-The [concise positive block run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/concise-positive-block/) contains the 40 original directional PNGs and its prompt map.
+The generated contact sheet and raw directional PNGs were local-only run
+artifacts and are intentionally not linked from this repository document. The
+exact prompts, IDs, alpha bounds, and scores above preserve the test result.
 
 ## Block 3: Pixen freeform image prompts
 
@@ -264,12 +341,13 @@ full body, south-facing, armless male human warrior with a mohawk
 full body, south-facing, armless male human warrior with a mohawk and chest armor
 ```
 
-### Pixen visual evidence
-
-![Pixen concise armless prompt comparison](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pixen-32x32-block/pixen-armless-32x32-contact-sheet.png)
+### Pixen review record
 
 All five Pixen outputs read as full-body south-facing sprites, but every one
-still contains arms, hands, or arm-like side geometry. The [Pixen run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pixen-32x32-block/) contains the five raw `32x32` PNGs and its exact prompt map.
+still contains arms, hands, or arm-like side geometry. The generated images and
+prompt map were local-only run artifacts and are intentionally not linked from
+this repository document; the exact prompts, IDs, alpha bounds, and scores are
+recorded above.
 
 ## Block 4: Pixen framing-first geometry prompts
 
@@ -316,13 +394,13 @@ full-body front-facing south-facing idle game character sprite, low top-down vie
 full-body front-facing south-facing idle game character sprite, low top-down view. centered, neutral standing pose, full figure from head to feet. arm-free male human warrior with a mohawk, head torso legs and feet only.
 ```
 
-### Framing-first visual evidence
-
-![Pixen framing-first armless prompt comparison](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pixen-framing-geometry-block/pixen-framing-geometry-contact-sheet.png)
+### Framing-first review record
 
 The stronger framing prefix improved composition consistency but did not change
 the anatomy outcome. All five still had recognizable arms, hands, or side
-limbs. The [framing-first run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pixen-framing-geometry-block/) contains the raw PNGs and exact prompt map.
+limbs. The generated images and prompt map were local-only run artifacts and
+are intentionally not linked from this repository document; the exact prompts,
+IDs, alpha bounds, and scores are recorded above.
 
 ## Block 5: Pro candidate sweep
 
@@ -368,14 +446,14 @@ full-body south-facing low top-down pixel-art game character sprite. Armless mal
 full-body south-facing low top-down pixel-art game character sprite. A deliberately arm-free male human warrior with a mohawk: head, broad torso, two legs, and two feet only. Empty background on both sides of the torso; legs start immediately below the torso; no arm-like shapes or equipment. Transparent background.
 ```
 
-### Pro visual evidence
-
-![Pro 32px armless candidate sweep](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pro-block/pro-32x32-armless-candidate-sweep.png)
+### Pro review record
 
 All 192 candidates were reviewed in nearest-neighbor enlarged form. Pro
 provided useful variation in faces, hair, palettes, and clothing, but every
 candidate still had conventional arms, hands, or arm-like side geometry. The
-[Pro run folder](../../pixellab-pip-generations/armless-character-prompt-study-20260817/pro-block/) contains all 192 raw candidate PNGs and the exact prompt map.
+generated candidates and prompt map were local-only run artifacts and are
+intentionally not linked from this repository document; the exact prompts, job
+IDs, candidate count, and result are recorded above.
 
 ## Interpretation
 
@@ -433,5 +511,5 @@ would add variation without testing a new representation or route.
 
 This spike adds no routing rule, schema support, prompt normalization, or
 armless-character feature to Pip. The tracked change is this research document;
-the generated review assets remain in the ignored
-`pixellab-pip-generations/armless-character-prompt-study-20260817/` folder.
+the generated review sheets and raw outputs were local-only artifacts and are
+intentionally not linked from this tracked document.
