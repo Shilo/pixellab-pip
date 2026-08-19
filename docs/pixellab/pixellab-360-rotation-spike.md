@@ -8,6 +8,32 @@ The endgame is a phrase so minimal it generalises to any character (then the cha
 description is appended). This spike isolates the phrase only; character wording is added
 later once a winner is found.
 
+> **Latest targeted result (Batch 5, 2026-08-18):** On a supplied 128×128 transparent
+> horned-undead character, the original turntable wording was not sufficient for the user's
+> desired 360° result. Keeping that wording verbatim and appending only a short explicit
+> 360°/return cue produced a visually complete turn in all three sampled variants; the
+> strongest endpoint closure came from Candidate 3. This is a one-subject, one-run-per-variant
+> validation, not yet a reliability benchmark. See Batch 5 at the end of this spike.
+
+## Current best description and possible append-only replacement
+
+The current best reusable description is the `action` template in
+[turntable-rotate-16.blueprint.json](../../skills/pixellab-pip/blueprints/turntable-rotate-16.blueprint.json):
+
+```text
+Turntable: rotate the view around a solid {{object | default: figurine}} depicting {{subject description}} - front, three-quarter, side, back, full back, opposite side, back to the front. The {{object | default: figurine}} itself never moves; only the viewing angle changes.
+```
+
+The possible append-only replacement keeps that description unchanged and adds the Candidate 3
+cue after it:
+
+```text
+Turntable: rotate the view around a solid {{object | default: figurine}} depicting {{subject description}} - front, three-quarter, side, back, full back, opposite side, back to the front. The {{object | default: figurine}} itself never moves; only the viewing angle changes. Quick 360-degree turntable. Quickly rotate the viewing angle once around the entire subject and return to the starting front view.
+```
+
+For a concrete figurine request, expand the variables to `figurine` and the subject description;
+do not rewrite the base wording before appending the cue.
+
 ---
 
 ## Top 5 prompt templates (agreed: Claude + subagent + Codex gpt-5.6-sol)
@@ -209,7 +235,7 @@ frame-reversal is a playback manipulation to flag before shipping.
 The earlier "no single-frame prompt can rotate" conclusion was **wrong — it only tested *minimal*
 prompts.** The user produced a full 360 in Aseprite ("interpolate new" = `animate-with-text-v3`) from
 a single frame used as **both start and end**, with a long trajectory-describing prompt. Reproduced
-here through the REST API. Artifacts: `pixellab-pip-generations/frog-turkey-360-20260721/`.
+here through the REST API.
 
 Setup: user's `frog-turkey-input-128px.png` as `first_frame` **and** `last_frame` (config B),
 `animate-with-text-v3`, `frame_count` 16, **no seed**. Metric: green-frog visibility (front = high,
@@ -488,8 +514,8 @@ Findings:
 far too low to conclude; seedless RNG dominates at this scale. "Figurine wins" is a **lead, not a verdict.**
 A 10-run-per-keyword round is required before declaring a best keyword.
 
-**Interactive scoresheet:** `.local/stillness-scoresheet.html` — every output frame of every run, per keyword,
-with manual 1–5 scoring on three axes (**360 rotation / stillness / stays-itself**) and a live leaderboard.
+**Interactive scoresheet:** every output frame of every run, per keyword, was reviewed with manual 1–5
+scoring on three axes (**360 rotation / stillness / stays-itself**) and a live leaderboard.
 **Human visual scoring is weighted above the auto-metrics** — a person spots identity morphs, weapon
 duplication, and texture artifacts that the silhouette-jerk proxy cannot. The "stays-itself" axis explicitly
 does **not** penalize guessed side/back views (a missing-description side-effect, not an identity failure).
@@ -514,7 +540,7 @@ belongs in the round, to separate "the object word helped" from "the description
 
 **Round-1 human scores (recovered 2026-08-14; weighted above the auto metrics).** The user scored the 10
 round-1 arms by eye (absolute quality on 1 run each — a *different* rule from round 2's per-output pass count).
-Full scores (each 1–5; stored at `.local/round1-human-scores.json`, seeded into the scoresheet):
+Full scores (each 1–5; retained in the working research record and seeded into the scoresheet):
 
 | arm | rotation | stillness | stays-itself | total | user's note (condensed) |
 |---|---|---|---|---|---|
@@ -585,9 +611,8 @@ action figure, a completely inanimate figure}. Round: 5 keywords × 10 seedless 
 ## Batch 4F — final stillness round with a subject-description template (2026-08-14)
 
 Built on a **3-way design review** (Claude + a subagent + Codex `gpt-5.6-sol`) that converged on a single
-blueprint before any jobs ran. Artifacts: `frog-turkey-360-20260721/stillness-round2-20260814/`,
-`.local/stillness-templates.md` (the blueprint + all arms), `.local/stillness-scoresheet.html` (every frame,
-human scoring).
+blueprint before any jobs ran. The blueprint, all arms, every frame, and human scoring were retained
+in the working research record.
 
 **Template (two variables):**
 > Turntable: rotate the view around a solid `<OBJECT>` depicting `<subject_description>` - front,
@@ -877,9 +902,8 @@ Human 1–5 per criterion, per animation:
 
 ## Results — Batch 1 (2026-07-21, seed 726361, 19/19 completed, 76 generations)
 
-Artifacts: `pixellab-pip-generations/chibi-oni-360-rotation-20260721/` — per-phrase GIFs +
-spritesheets, `360-compare-grid.png` (frames 0/4/8/12/16 for all 19), `auto_scores.json`,
-`360-scoresheet.html` (manual scoresheet).
+The per-phrase GIFs, spritesheets, frame comparison, automatic scores, and manual scoresheet were
+retained in the working research record.
 
 **Verdict: no phrase produced a rotation. The method itself is the blocker.**
 
@@ -1099,3 +1123,76 @@ side, constant speed, crisp profiles, consistent identity) comes **only** from
 primitive is the endpoint, and no prompt wording substitutes for it. Remaining upside is polish on
 that winning pipeline (more interpolation frames per segment; try `interpolation-v2`; `generate-8-
 rotations-v2` `view` for top-down/side games), not a new description trick.
+
+---
+
+## Batch 5 — append-only prompt validation on a supplied 8-direction GIF (2026-08-18)
+
+This follow-up tests the user's constraint directly: preserve the original turntable wording and
+make only the smallest approved additions. It is a targeted subject test, not a multi-seed
+reliability benchmark.
+
+### Setup
+
+- **Input:** only the first frame of the supplied 8-direction GIF, saved as a 128×128 RGBA PNG;
+  that same frame was sent as both `first_frame` and `last_frame`. The source GIF had 8 frames and
+  transparency, but no derived frame was used as an input.
+- **Route:** PixelLab MCP `animate_image`, polled with `get_image`.
+- **Settings:** `frame_count=16`, `no_background=true`, seed omitted; each call returned 17 PNGs
+  (frame 0 is the input echo and frames 1–16 are generated).
+- **Local assembly:** frames 1–16 were assembled into a 16-frame transparent GIF at 100 ms per
+  frame, loop forever, with explicit Background disposal. Coalescing the GIF reproduced every
+  source PNG's visible RGB and alpha exactly for all three variants.
+- **Cost:** 4 generations per call, 12 generations charged across the three approved variants.
+
+### Original control — run `turntable-rotate-16-2`
+
+The original attempt used the default rigid-figurine template without an explicit 360° or
+complete-orbit addition:
+
+```text
+Turntable: rotate the view around a solid figurine depicting a horned undead warrior with a skull-like face, dark jagged armor, and vivid green accents - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves; only the viewing angle changes.
+```
+
+The user judged this run as not properly rotating through the requested 360°. It had the same
+identical start/end anchors and 16-frame settings as the follow-up tests, so the failure is not
+explained by the input setup alone.
+
+### Three approved append-only variants
+
+The base wording above was unchanged in every call; only the final sentence(s) differed.
+
+| run | appended wording | endpoint finding |
+|---|---|---|
+| Candidate 1 — `turntable-rotate-16-3` | `Quick 360-degree rotation. Quickly rotate through one complete 360-degree orbit and return to the starting front view.` | Sampled front → side → back → opposite side → front. One opaque endpoint edge pixel differed from the supplied front (`1` alpha and `1` visible-RGB pixel). |
+| Candidate 2 — `turntable-rotate-16-4` | `Quick turntable. Quickly rotate exactly one complete 360-degree orbit and return to the starting front view.` | Same sampled full path. One opaque endpoint edge pixel differed from the supplied front (`1` alpha and `1` visible-RGB pixel). |
+| **Candidate 3 — `turntable-rotate-16-5`** | **`Quick 360-degree turntable. Quickly rotate the viewing angle once around the entire subject and return to the starting front view.`** | **Sampled front → side → back → opposite side → front; endpoint matched the supplied front with `0` alpha and `0` visible-RGB differences.** |
+
+The exact full action sent for the winning run was:
+
+```text
+Turntable: rotate the view around a solid figurine depicting a horned undead warrior with a skull-like face, dark jagged armor, and vivid green accents - front, three-quarter, side, back, full back, opposite side, back to the front. The figurine itself never moves; only the viewing angle changes. Quick 360-degree turntable. Quickly rotate the viewing angle once around the entire subject and return to the starting front view.
+```
+
+The exact actions, job IDs, returned frames, assembly settings, and verification results remain in
+the per-run working records; this tracked spike intentionally does not link generated outputs.
+
+### Findings
+
+1. **Identical start/end anchors are not an automatic freeze.** The original and all three
+   candidates used the same first frame as both anchors. The original was unsatisfactory, while
+   the append-only variants visibly traversed front, side, back, opposite side, and front again.
+   For this subject and route, prompt specificity changed the outcome.
+2. **Candidate 3 is the current MVP winner for this subject.** It combines the explicit
+   `360-degree` cue, the `turntable` framing, a single complete orbit, and an explicit return to
+   the starting front view, while leaving the original wording untouched. It also produced the
+   cleanest measured endpoint closure.
+3. **The `quick`/`quickly` words were not isolated variables.** Every candidate included an explicit
+   orbit and return cue, so this test supports the combined append-only additions—not a claim that
+   either speed word alone causes rotation. The resulting turn was visually checked at
+   representative frames; constant angular speed was not quantitatively measured in this batch.
+4. **Do not promote this to a reliability guarantee yet.** Each variant had one seedless run on one
+   supplied subject. Candidate 3 is the preferred retry wording for a minimal prompt change; run
+   multiple seedless samples before treating it as a global default. The distinct-anchor
+   `generate-8-rotations` pipeline remains the safer controlled route when deterministic directional
+   coverage matters more than preserving a single-frame prompt workflow.
