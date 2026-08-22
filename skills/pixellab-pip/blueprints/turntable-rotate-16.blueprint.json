@@ -3,13 +3,7 @@
     "_pixellab": {
       "paid_call_policy": "explicit_user_run_request_required",
       "output_directory": "pixellab-pip-generations/turntable-rotate-16",
-      "output_collision_policy": "create_unique",
-      "mcp_server": {
-        "name": "PixelLab",
-        "url": "https://api.pixellab.ai/mcp",
-        "transport": "http",
-        "docs_url": "https://api.pixellab.ai/mcp/docs"
-      }
+      "output_collision_policy": "create_unique"
     },
     "_comment": "Seamless 16-frame turntable from one supplied frame: the same image is sent as both anchors, and the prompt frames the subject as a rigid object so the model orbits it instead of animating it. The object word is load-bearing for the turn itself, not only for stillness; figurine is the tested winner, and toy figure or display model score the same if either reads better for the subject. Keep the subject description minimal and name only identity-bearing props (e.g. a held shield); decorative nouns get reinterpreted as new geometry on the unseen back. Loop closure is about 75% per draw even on the best prompt, so expect to run this 2-3 times and keep the draw that closes; each run spends credits and needs its own approval. A feathered or fringed subject may show inherent particle/feather artifacts during the turn regardless of prompt or no_background; erase in post or add a negative description.",
     "_comment_prompt": "/pixellab-pip create the turntable-rotate-16 blueprint",
