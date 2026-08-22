@@ -21,7 +21,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 - Prompt prep: user wording preserved, agent-enhanced, inline `enhance_prompt`, or enhance endpoint
 
 **Inputs Used**
-- `description` / `action` / other natural-language fields: the exact final text sent
+- `description` / `action` / other natural-language fields: the exact final text sent, or a redacted summary plus the local Manifest link for secrets, personal data, or user-identified confidential content
 - Image/frame fields that anchored the result, by API field name: `image`, `first_frame`, `last_frame`, `reference_image`, `style_image`, `init_image`, `mask_image`; note omissions that change interpretation, e.g. `last_frame: omitted`
 - Seed: the seed sent, the resolved seed returned, `multiple, see Manifest`, or `omitted` when none was sent
 - Non-default settings that materially affected the output: size, view/direction, count, mode/product label, `no_background`, frame count/timing, palette, reused base asset
@@ -35,7 +35,7 @@ Done - [one plain sentence: what was produced and whether it passed verification
 
 Two rules that always apply:
 
-- Every final natural-language value sent to PixelLab (`description`, `action`, `edit_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, `color_palette`) must appear in Inputs Used, even when the output failed verification or the field seems obvious. If a value is too large for chat, label it truncated and link the manifest/request file holding the full text. For a non-English user, show visual prompts in both languages per `references/localization.md`; show talking dialogue once, exactly as sent.
+- Account for every final natural-language field sent to PixelLab (`description`, `action`, `edit_description`, `style_description`, `negative_description`, `item_descriptions`, `text`, `color_palette`) in Inputs Used, even when the output failed verification or the field seems obvious. Never repeat secrets, personal data, or content the user identified as confidential in chat; show a redacted summary instead, warn that the local Manifest contains the exact value, and link it. For all other values, show the exact final text so the user can verify the request. If a value is merely too large for chat, label it truncated and link the manifest/request file holding the full text. For a non-English user, translate only the non-redacted visual prompt text per `references/localization.md`; apply the same redaction to talking dialogue.
 - Report settings that materially affected the output; do not dump schema defaults.
 
 Use Markdown links with user-facing labels (`Spritesheet`, `ZIP package`) for every listed file. Files live under the project `pixellab-pip-generations/` folder per SKILL.md; copy temporary URLs or cache paths there before reporting them as local outputs.

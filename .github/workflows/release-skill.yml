@@ -19,8 +19,7 @@ jobs:
     name: Bump version and release skill
     runs-on: ubuntu-latest
     env:
-      VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }} # optional; VirusTotal steps skip when unset
-      CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }} # optional; ClawHub publish skips when unset
+      PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
       - name: Checkout
@@ -44,6 +43,19 @@ jobs:
             echo "This workflow must be run from a branch."
             exit 1
           fi
+
+      - name: Require security service credentials
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        shell: bash
+        run: |
+          for name in VIRUSTOTAL_API_KEY CLAWHUB_TOKEN; do
+            if [ -z "${!name}" ]; then
+              echo "Required repository secret $name is not configured."
+              exit 1
+            fi
+          done
 
       - name: Run QA checks
         shell: bash
@@ -177,6 +189,9 @@ jobs:
           if (fs.existsSync(readmePath)) {
             const readmeBefore = fs.readFileSync(readmePath, "utf8");
             const needle = `skills%2F${skillName}%2Fversions%2F${oldVersion}`;
+            if (!readmeBefore.includes(needle)) {
+              throw new Error(`README ClawHub badge does not point at current version ${oldVersion}.`);
+            }
             const readmeAfter = readmeBefore.split(needle).join(`skills%2F${skillName}%2Fversions%2F${newVersion}`);
             if (readmeAfter !== readmeBefore) {
               fs.writeFileSync(readmePath, readmeAfter);
@@ -205,12 +220,17 @@ jobs:
       - name: Build skill archive
         shell: bash
         run: |
+          generated="$(find "skills/${{ steps.bump.outputs.skill_name }}" \
+            \( -type d -name __pycache__ -o -type f \( -name '*.pyc' -o -name '*.pyo' \) \) \
+            -print -quit)"
+          if [ -n "$generated" ]; then
+            echo "Generated Python cache artifact found in publish tree: $generated"
+            exit 1
+          fi
           mkdir -p dist
           cd skills
-          # Exclude Python bytecode: the earlier QA step imports the asset modules
-          # (test_helpers load_module -> exec_module), which writes __pycache__/*.pyc
-          # into the skill tree. The repo forbids tracking those; the release must
-          # not ship them either.
+          # Keep the exclusion as defense in depth; the check above must already
+          # prove that neither the GitHub archive nor the ClawHub upload can contain bytecode.
           zip -r "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" "${{ steps.bump.outputs.skill_name }}" -x '*/__pycache__/*'
           zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^${{ steps.bump.outputs.skill_name }}/SKILL.md$'
           ! zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^skills/'
@@ -223,18 +243,50 @@ jobs:
 
       - name: VirusTotal scan release asset
         id: virustotal
-        if: env.VIRUSTOTAL_API_KEY != ''
-        continue-on-error: true # runs before the version-bump commit so the badge link points at this release's report; failure must not red the job
-        uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2 # v5.0.0
-        with:
-          vt_api_key: ${{ env.VIRUSTOTAL_API_KEY }}
-          files: dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+        timeout-minutes: 35
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        shell: bash
+        run: |
+          artifact="dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip"
+          upload_json="$(curl --fail-with-body --silent --show-error \
+            --retry 5 --retry-all-errors \
+            --request POST 'https://www.virustotal.com/api/v3/files' \
+            --header "x-apikey: $VIRUSTOTAL_API_KEY" \
+            --form "file=@${artifact}")"
+          analysis_id="$(jq -er '.data.id' <<<"$upload_json")"
+
+          for attempt in {1..60}; do
+            analysis_json="$(curl --fail-with-body --silent --show-error \
+              --retry 5 --retry-all-errors \
+              --header "x-apikey: $VIRUSTOTAL_API_KEY" \
+              "https://www.virustotal.com/api/v3/analyses/${analysis_id}")"
+            status="$(jq -er '.data.attributes.status' <<<"$analysis_json")"
+            if [ "$status" = completed ]; then
+              malicious="$(jq -er '.data.attributes.stats.malicious' <<<"$analysis_json")"
+              suspicious="$(jq -er '.data.attributes.stats.suspicious' <<<"$analysis_json")"
+              if [ "$malicious" -ne 0 ] || [ "$suspicious" -ne 0 ]; then
+                echo "VirusTotal rejected the release: malicious=$malicious suspicious=$suspicious"
+                exit 1
+              fi
+              sha256="$(sha256sum "$artifact" | cut -d' ' -f1)"
+              report_url="https://www.virustotal.com/gui/file/${sha256}/detection"
+              echo "VirusTotal completed cleanly: malicious=0 suspicious=0"
+              echo "url=${report_url}" >> "$GITHUB_OUTPUT"
+              break
+            fi
+            echo "VirusTotal analysis status: $status (attempt $attempt/60)"
+            if [ "$attempt" -eq 60 ]; then
+              echo "VirusTotal did not complete within 30 minutes (last status: $status)."
+              exit 1
+            fi
+            sleep 30
+          done
 
       - name: Point security badges at this release
-        continue-on-error: true # cosmetic badge links; must never fail a release
         env:
           PROV_URL: ${{ steps.attest.outputs.attestation-url }}
-          VT_ANALYSIS: ${{ steps.virustotal.outputs.analysis }} # <file>=<url>, empty when VirusTotal is skipped
+          VT_ANALYSIS: ${{ steps.virustotal.outputs.url }}
         shell: bash
         run: |
           python - <<'PY'
@@ -243,18 +295,20 @@ jobs:
           text = readme.read_text(encoding="utf-8")
           prov = os.environ.get("PROV_URL", "").strip()
           vt = os.environ.get("VT_ANALYSIS", "").strip()
-          if "=" in vt:
-              vt = vt.split("=", 1)[1]  # step output is "<filename>=<url>"
           changed = False
           if prov:
               text, n = re.subn(
                   r'(\]\(https://img\.shields\.io/badge/Build_Provenance-[^)]*\)\]\()[^)]*(\))',
                   lambda m: m.group(1) + prov + m.group(2), text)
+              if n != 1:
+                  raise SystemExit(f"Expected one Build Provenance badge, updated {n}")
               changed = changed or bool(n)
           if vt:
               text, n = re.subn(
                   r'(label=VirusTotal[^)]*\)\]\()[^)]*(\))',
                   lambda m: m.group(1) + vt + m.group(2), text)
+              if n != 1:
+                  raise SystemExit(f"Expected one VirusTotal badge, updated {n}")
               changed = changed or bool(n)
           if changed:
               readme.write_text(text, encoding="utf-8")
@@ -293,37 +347,12 @@ jobs:
             "${notes_args[@]}" \
             --verify-tag
 
-      - name: Append security summary to release notes
-        continue-on-error: true # post-release enhancement; the release already published, so a transient failure must not red the job
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VT_ANALYSIS: ${{ steps.virustotal.outputs.analysis }} # empty when the VirusTotal step was skipped
-        shell: bash
-        run: |
-          ver="${{ steps.bump.outputs.new_version }}"
-          gh release view "${{ steps.bump.outputs.tag }}" --json body --jq .body > notes.md
-          {
-            printf '\n---\n\n## 🔒 Security — safe to install, checked by outside services\n\n'
-            printf 'This release is independently scanned and cryptographically signed. See any of it for yourself:\n\n'
-            printf -- '- **Skill audit** — passed [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) static analysis; public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning) (a release is blocked if it goes over the risk threshold).\n'
-            if [ -n "$CLAWHUB_TOKEN" ]; then
-              printf -- '- **Independent registry audit** — [ClawHub security audit ↗](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit) (SkillSpector + VirusTotal + ClawScan).\n'
-            fi
-            if [ -n "$VT_ANALYSIS" ]; then
-              url="${VT_ANALYSIS#*=}" # step output format: <filename>=<analysis URL>
-              printf -- '- **Malware scan** — [VirusTotal security report ↗](%s) of this exact download.\n' "$url"
-            fi
-            printf -- '- **Tamper-proof build** — this zip has a cryptographic proof-of-origin; confirm nobody altered it since this repo built it: `gh attestation verify pixellab-pip-%s.zip --repo Shilo/pixellab-pip`\n' "$ver"
-            printf -- '\nFull details: https://github.com/Shilo/pixellab-pip#security\n'
-          } >> notes.md
-          gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md
-
       - name: Publish to ClawHub for its independent security audit
-        if: env.CLAWHUB_TOKEN != ''
         # No continue-on-error: the README badges pin the released version, so a silent publish
-        # failure leaves them resolving to "resource not found". This is the last step, so the
-        # release is already published — a red run only signals that ClawHub needs a re-publish.
+        # failure leaves them resolving to "resource not found". The release is already published
+        # at this point, so a red run signals that ClawHub needs a re-publish.
         env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
           CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
         shell: bash
         # One-time setup: create a ClawHub account, generate an API token, add it as the CLAWHUB_TOKEN repo secret
@@ -331,11 +360,11 @@ jobs:
         # produces its public audit verdict and badge data. The skill folder stays agent-agnostic — no
         # OpenClaw-specific files are added to it.
         run: |
-          npx --yes clawhub@latest --no-input login --token "$CLAWHUB_TOKEN"
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
           owner_args=()
           if [ -n "$CLAWHUB_OWNER" ]; then owner_args=(--owner "$CLAWHUB_OWNER"); fi
           set +e
-          out="$(npx --yes clawhub@latest --no-input skill publish "skills/${{ steps.bump.outputs.skill_name }}" \
+          out="$(npx --yes clawhub@0.23.3 --no-input skill publish "skills/${{ steps.bump.outputs.skill_name }}" \
             --slug "${{ steps.bump.outputs.skill_name }}" \
             --name "PixelLab Pip" \
             --version "${{ steps.bump.outputs.new_version }}" \
@@ -357,13 +386,67 @@ jobs:
           fi
 
       - name: Scan the published ClawHub version
-        if: env.CLAWHUB_TOKEN != ''
         timeout-minutes: 35 # the CLI polls the scan queue for up to 30 minutes
         # The CLI equivalent of the Rescan button on the ClawHub security-audit page. Publishing alone leaves the
         # version without an audit verdict, which is what the README badges read, so scan every release.
         shell: bash
+        env:
+          EXPECTED_VERSION: ${{ steps.bump.outputs.new_version }}
         run: |
-          npx --yes clawhub@latest --no-input scan \
+          scan_output="$(npx --yes clawhub@0.23.3 --no-input scan \
             --slug "${{ steps.bump.outputs.skill_name }}" \
             --version "${{ steps.bump.outputs.new_version }}" \
-            --update
+            --update \
+            --json \
+            --output "dist/clawhub-scan-${{ steps.bump.outputs.new_version }}.zip")"
+          printf '%s\n' "$scan_output"
+          printf '%s\n' "$scan_output" | sed -n '/^{/,$p' > dist/clawhub-scan.json
+          python - <<'PY'
+          import json, os, pathlib
+
+          data = json.loads(pathlib.Path("dist/clawhub-scan.json").read_text(encoding="utf-8"))
+          report = data.get("report") or {}
+          artifact = data.get("artifact") or {}
+
+          def require(condition, message):
+              if not condition:
+                  raise SystemExit(message)
+
+          require(data.get("status") == "succeeded", "ClawHub scan did not succeed")
+          require(data.get("sourceKind") == "published", "ClawHub scanned the wrong source kind")
+          require(data.get("writtenBack") is True, "ClawHub did not write the audit back to the published version")
+          require(artifact.get("version") == os.environ["EXPECTED_VERSION"], "ClawHub audited the wrong version")
+
+          clawscan = report.get("clawscan") or {}
+          require(str(clawscan.get("verdict", "")).casefold() == "benign", "ClawHub ClawScan verdict is not benign")
+          skillspector = report.get("skillspector") or {}
+          require(str(skillspector.get("status", "")).casefold() == "clean", "ClawHub SkillSpector status is not clean")
+          require(skillspector.get("issueCount") == 0, "ClawHub SkillSpector reported issues")
+          static = report.get("staticAnalysis") or {}
+          require(str(static.get("status", "")).casefold() == "clean", "ClawHub static analysis is not clean")
+
+          virustotal = report.get("virustotal")
+          if virustotal is not None:
+              require(virustotal.get("malicious", 0) == 0, "ClawHub VirusTotal telemetry reported malicious detections")
+              require(virustotal.get("suspicious", 0) == 0, "ClawHub VirusTotal telemetry reported suspicious detections")
+          print("ClawHub exact-version audit passed and was written back")
+          PY
+
+      - name: Append verified security summary to release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VT_ANALYSIS: ${{ steps.virustotal.outputs.url }}
+        shell: bash
+        run: |
+          ver="${{ steps.bump.outputs.new_version }}"
+          gh release view "${{ steps.bump.outputs.tag }}" --json body --jq .body > notes.md
+          {
+            printf '\n---\n\n## 🔒 Security — safe to install, checked by outside services\n\n'
+            printf 'This release is independently scanned and cryptographically signed. See any of it for yourself:\n\n'
+            printf -- '- **Skill audit** — passed [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) static analysis; public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning) (a release is blocked if it goes over the risk threshold).\n'
+            printf -- '- **Independent registry audit** — [ClawHub security audit ↗](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit) (ClawScan + SkillSpector).\n'
+            printf -- '- **Malware scan** — [VirusTotal security report ↗](%s) completed with zero malicious or suspicious detections for this exact download.\n' "$VT_ANALYSIS"
+            printf -- '- **Tamper-proof build** — this zip has a cryptographic proof-of-origin; confirm nobody altered it since this repo built it: `gh attestation verify pixellab-pip-%s.zip --repo Shilo/pixellab-pip`\n' "$ver"
+            printf -- '\nFull details: https://github.com/Shilo/pixellab-pip#security\n'
+          } >> notes.md
+          gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md

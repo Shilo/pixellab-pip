@@ -397,6 +397,7 @@ def check_python_compiles() -> None:
 def check_workflows() -> None:
     qa_workflow = (REPO_ROOT / ".github/workflows/qa.yml").read_text(encoding="utf-8")
     release_workflow = (REPO_ROOT / ".github/workflows/release-skill.yml").read_text(encoding="utf-8")
+    readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     # Assert the step is present regardless of the pinned major version, so a
     # routine setup-python/@vN bump does not red QA on an otherwise correct
     # workflow.
@@ -412,6 +413,31 @@ def check_workflows() -> None:
         raise AssertionError("release-skill.yml must set up Node.js explicitly before version bump")
     if release_workflow.find("actions/setup-node@") > release_workflow.find("node <<'NODE'"):
         raise AssertionError("release-skill.yml must set up Node.js before running node")
+    if "crazy-max/ghaction-virustotal" in release_workflow:
+        raise AssertionError("release-skill.yml must not use the deprecated VirusTotal action")
+    if "clawhub@latest" in release_workflow:
+        raise AssertionError("release-skill.yml must pin the ClawHub CLI version")
+    for required in (
+        "https://www.virustotal.com/api/v3/files",
+        "https://www.virustotal.com/api/v3/analyses/",
+        'status" = completed',
+        '"$malicious" -ne 0',
+        '"$suspicious" -ne 0',
+        'data.get("writtenBack") is True',
+        'artifact.get("version") == os.environ["EXPECTED_VERSION"]',
+        "sed -n '/^{/,$p' > dist/clawhub-scan.json",
+        "Expected one VirusTotal badge, updated {n}",
+        "README ClawHub badge does not point at current version",
+        "Append verified security summary to release notes",
+        'PYTHONDONTWRITEBYTECODE: "1"',
+        "Generated Python cache artifact found in publish tree",
+    ):
+        if required not in release_workflow:
+            raise AssertionError(f"release-skill.yml is missing release security gate: {required}")
+    if "img.shields.io/static/v1?label=VirusTotal" not in readme:
+        raise AssertionError("README VirusTotal badge must report the completed direct scan")
+    if "query=%24.version.security.status&label=ClawHub%20Audit" not in readme:
+        raise AssertionError("README ClawHub badge must expose the overall registry audit status")
 
 
 def check_no_tracked_generated_artifacts() -> None:
