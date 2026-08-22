@@ -430,6 +430,8 @@ def check_workflows() -> None:
         "README ClawHub badge does not point at current version",
         "withdraw_clawhub_versions",
         "Refusing to withdraw the release that just passed",
+        "Promote the audited ClawHub version",
+        "skill tag",
         "Append verified security summary to release notes",
         'PYTHONDONTWRITEBYTECODE: "1"',
         "Generated Python cache artifact found in publish tree",
@@ -440,6 +442,10 @@ def check_workflows() -> None:
         "- name: Scan the published ClawHub version"
     ):
         raise AssertionError("release-skill.yml must pass the ClawHub audit before creating the GitHub release")
+    if release_workflow.find("- name: Create GitHub Release") < release_workflow.find(
+        "- name: Promote the audited ClawHub version"
+    ):
+        raise AssertionError("release-skill.yml must promote the audited ClawHub version before GitHub release")
     if "img.shields.io/static/v1?label=VirusTotal" not in readme:
         raise AssertionError("README VirusTotal badge must report the completed direct scan")
     if "query=%24.version.security.status&label=ClawHub%20Audit" not in readme:

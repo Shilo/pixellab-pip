@@ -419,6 +419,16 @@ jobs:
           print("ClawHub exact-version audit passed and was written back")
           PY
 
+      - name: Promote the audited ClawHub version
+        env:
+          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }}
+        shell: bash
+        run: |
+          skill="${{ steps.bump.outputs.skill_name }}"
+          if [ -n "$CLAWHUB_OWNER" ]; then skill="${CLAWHUB_OWNER}/${skill}"; fi
+          npx --yes clawhub@0.23.3 --no-input skill tag \
+            "$skill" "${{ steps.bump.outputs.new_version }}" --tag latest --yes
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
