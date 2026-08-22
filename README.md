@@ -5,9 +5,9 @@
 # PixelLab Pip
 
 [![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
-[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F1.5.0&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
-[![VirusTotal](https://img.shields.io/static/v1?label=VirusTotal&message=0%20malicious%20%7C%200%20suspicious&color=2ea44f&logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/bafea5a7f835fad126613fbf75a6a1778206787cdbbab6035987011e3ee01ef6/detection)
-[![Build Provenance attested](https://img.shields.io/badge/Build_Provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations/42269199)
+[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F1.6.0&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
+[![VirusTotal](https://img.shields.io/static/v1?label=VirusTotal&message=0%20malicious%20%7C%200%20suspicious&color=2ea44f&logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/77766fbefa3e2db559d59d7af359abbb5747dc47823b5ba303df3a8216373ca1/detection)
+[![Build Provenance attested](https://img.shields.io/badge/Build_Provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations/42270205)
 
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
 
