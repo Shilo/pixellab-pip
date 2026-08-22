@@ -428,12 +428,18 @@ def check_workflows() -> None:
         "sed -n '/^{/,$p' > dist/clawhub-scan.json",
         "Expected one VirusTotal badge, updated {n}",
         "README ClawHub badge does not point at current version",
+        "withdraw_clawhub_versions",
+        "Refusing to withdraw the release that just passed",
         "Append verified security summary to release notes",
         'PYTHONDONTWRITEBYTECODE: "1"',
         "Generated Python cache artifact found in publish tree",
     ):
         if required not in release_workflow:
             raise AssertionError(f"release-skill.yml is missing release security gate: {required}")
+    if release_workflow.find("- name: Create GitHub Release") < release_workflow.find(
+        "- name: Scan the published ClawHub version"
+    ):
+        raise AssertionError("release-skill.yml must pass the ClawHub audit before creating the GitHub release")
     if "img.shields.io/static/v1?label=VirusTotal" not in readme:
         raise AssertionError("README VirusTotal badge must report the completed direct scan")
     if "query=%24.version.security.status&label=ClawHub%20Audit" not in readme:

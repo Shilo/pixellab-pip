@@ -8,6 +8,10 @@ on:
         description: "Exact version to release, e.g. 1.6.0. Leave blank to auto-bump the minor version."
         required: false
         default: ""
+      withdraw_clawhub_versions:
+        description: "Comma-separated superseded ClawHub versions to withdraw after the replacement passes its audit."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -331,26 +335,9 @@ jobs:
           git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
           git push --atomic origin "HEAD:refs/heads/${GITHUB_REF_NAME}" "${{ steps.bump.outputs.tag }}"
 
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          notes_args=(--generate-notes)
-          if [ -n "${{ steps.previous_tag.outputs.previous_tag }}" ]; then
-            notes_args+=(--notes-start-tag "${{ steps.previous_tag.outputs.previous_tag }}")
-          fi
-
-          gh release create "${{ steps.bump.outputs.tag }}" \
-            "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" \
-            --title "PixelLab Pip Skill ${{ steps.bump.outputs.tag }}" \
-            "${notes_args[@]}" \
-            --verify-tag
-
       - name: Publish to ClawHub for its independent security audit
-        # No continue-on-error: the README badges pin the released version, so a silent publish
-        # failure leaves them resolving to "resource not found". The release is already published
-        # at this point, so a red run signals that ClawHub needs a re-publish.
+        # No continue-on-error: the README badge pins this version, and the GitHub release is not
+        # created until the exact published ClawHub artifact passes the scan below.
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
           CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
@@ -431,6 +418,45 @@ jobs:
               require(virustotal.get("suspicious", 0) == 0, "ClawHub VirusTotal telemetry reported suspicious detections")
           print("ClawHub exact-version audit passed and was written back")
           PY
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          notes_args=(--generate-notes)
+          if [ -n "${{ steps.previous_tag.outputs.previous_tag }}" ]; then
+            notes_args+=(--notes-start-tag "${{ steps.previous_tag.outputs.previous_tag }}")
+          fi
+
+          gh release create "${{ steps.bump.outputs.tag }}" \
+            "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" \
+            --title "PixelLab Pip Skill ${{ steps.bump.outputs.tag }}" \
+            "${notes_args[@]}" \
+            --verify-tag
+
+      - name: Withdraw superseded ClawHub versions
+        if: inputs.withdraw_clawhub_versions != ''
+        env:
+          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }}
+          VERSIONS: ${{ inputs.withdraw_clawhub_versions }}
+        shell: bash
+        run: |
+          skill="${{ steps.bump.outputs.skill_name }}"
+          if [ -n "$CLAWHUB_OWNER" ]; then skill="${CLAWHUB_OWNER}/${skill}"; fi
+          IFS=',' read -ra versions <<< "$VERSIONS"
+          for version in "${versions[@]}"; do
+            version="${version//[[:space:]]/}"
+            if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid ClawHub version to withdraw: $version"
+              exit 1
+            fi
+            if [ "$version" = "${{ steps.bump.outputs.new_version }}" ]; then
+              echo "Refusing to withdraw the release that just passed: $version"
+              exit 1
+            fi
+            npx --yes clawhub@0.23.3 --no-input delete "$skill" --version "$version" --yes
+          done
 
       - name: Append verified security summary to release notes
         env:

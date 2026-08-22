@@ -2,12 +2,12 @@
 
 Read this when the user writes in a non-English language, mixes languages, or asks for output in a specific language.
 
-PixelLab natural-language parameters should be English unless SKILL.md preserves exact field text. Answer the user in their language unless they ask for another language.
+PixelLab natural-language parameters should be English unless SKILL.md preserves exact field text. Preserve the user's original wording, show the exact English transformation, and obtain approval before the first external call; combine this with the cost gate when one is required, and treat the approval as covering the same job unless a later transformation changes its meaning. Answer the user in their language unless they ask for another language.
 
 ## Before PixelLab Actions
 
 - Detect the user's response language from the current request and recent conversation. If response-language confidence is low but the asset/action is clear, proceed in the dominant or most recent user language instead of interrupting.
-- Translate PixelLab-facing natural-language fields (`description`, `*_description`, `action`, `item_descriptions`, visual `text`, `color_palette`) into concise English unless SKILL.md preserves exact field text. Preserve `/talking-gif.text`, `/lip-sync.text`, and MCP `text_to_speak` verbatim as dialogue; PixelLab documents Latin-alphabet dialogue support, so ask for user-approved transliteration rather than silently translating unsupported scripts.
+- Prepare concise English candidates for PixelLab-facing natural-language fields (`description`, `*_description`, `action`, `item_descriptions`, visual `text`, `color_palette`) unless SKILL.md preserves exact field text. Before sending them, show the original and exact transformed values and ask for approval in the user's language. Preserve `/talking-gif.text`, `/lip-sync.text`, and MCP `text_to_speak` verbatim as dialogue; PixelLab documents Latin-alphabet dialogue support, so ask for user-approved transliteration rather than silently translating unsupported scripts.
 - Keep non-language values unchanged: file paths, URLs, IDs, endpoint names, tool names, enum values, dimensions, seeds, colors, code identifiers, and bearer-token variable names.
 - Preserve exact quoted names or requested on-image text inside otherwise English parameter values. Otherwise translate descriptive wording into English, except exact field text preserved by SKILL.md.
 - For mixed-language requests, preserve technical terms, translate descriptive wording, and ask only when language mixing or culture-specific context creates multiple plausible asset meanings, response-language choices, or credit-spending actions.
