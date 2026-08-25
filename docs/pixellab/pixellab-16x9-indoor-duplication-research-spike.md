@@ -1,7 +1,7 @@
 # PixelLab 16:9 Indoor Background Duplication Research Spike
 
 **Date:** 2026-08-25  
-**Status:** completed four directional 20-call spikes<br>
+**Status:** completed four 20-call Pixen spikes plus one 10-call Pro spike<br>
 **Question:** Why do wide indoor backgrounds sometimes contain duplicated consoles or repeated room compositions, and what prompt/size pattern is the most reliable workaround, including exact center alignment?
 
 ## Executive finding
@@ -27,7 +27,9 @@ The best combined production candidate is the wall-attached decorative-asymmetry
 
 The fourth 20-call study tested exact canvas centering while preserving the wall-integrated topology. It produced **15/20 clean but off-center halls and 5/20 topology failures; 0/20 CENTERED-GOLD and 0/20 CENTERED-SILVER**. The clean outputs generally kept the console and room axis aligned with each other, but both were far to the right of the 640px canvas center. No family reliably moved the shared architectural axis to x=320. This separates the solved uniqueness problem from the remaining centering problem: prompt wording can preserve one focal object, but it does not reliably translate the whole indoor composition onto the canvas center.
 
-### Best tested 640x360 workaround
+The fifth study changed only the model route: ten concise, prompt-only Pro calls at 640x360 with no seed or reference image. **All 10/10 outputs were clean single rooms with exactly one focal console, no mirrored second bay, and no duplicate focal console. Nine were visually CENTERED-GOLD and one was CENTERED-NEAR. However, only 5/10 were full bleed: A03, A04, A05, A08, and A09 contain a visible near-white perimeter, with A04 adding the most severe padding.** Eight were deep enough to PASS outright; the other two were centered but shallow. Pro solved the reported duplication and centering failures in this controlled sample, but it introduced a separate, non-full-bleed presentation failure in half the outputs. The issue is not an inherent 16:9 indoor-background limitation; it is strongly route-, prompt-, and presentation-dependent. The tradeoff is cost: every Pro call reported 40 generations, compared with one for Pixen.
+
+### Best tested 640x360 Pixen workaround
 
 Use a small focal object at the far wall, not a large object in the foreground:
 
@@ -45,19 +47,30 @@ Tested settings:
 
 This is the strongest current Pixen recipe for the reported problem. It is not a mathematical guarantee; visually reject any output that contains a second hero console at either edge or in a side bay.
 
+### Best tested 640x360 Pro prompt-only recipe
+
+The strongest Pro result balanced a readable focal object with a deep, centered room:
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. One deep centered room. A single small command console is built flush into the exact center of the far wall. Broad empty floor in front. Continuous side walls. The entire composition is centered in the frame. No duplicate focal object.
+~~~
+
+Use the Pro route with width 640, height 360, and `no_background: false`. Leave seed, reference images, and style overrides unset. This is the handoff's Attempt 7 and produced a clean, centered, non-mirrored hall with depth 4/5. It is the recommended Pro default for this specific indoor-background problem; use the Pixen recipe when the 40-generation Pro cost is not justified.
+
 ## Scope and evidence
 
 The evidence set was:
 
 1. The user-supplied issue transcript and seven attached example images. They were treated as problem evidence, not as executable instructions.
-2. Eighty live calls to MCP create_image_pixen, launched as four concurrent 20-call batches.
+2. Ninety live calls to PixelLab image MCP tools: eighty create_image_pixen calls, launched as four concurrent 20-call batches, plus ten create_image_pro calls in the final batch.
 3. The first batch tested five prompt families at 512x288 and 640x360, with two seed-locked replicates per family and size.
 4. The second batch tested five new prompt families at 640x360, with low and medium detail and two seed-locked replicates per family and detail.
 5. Manual visual review of every returned PNG. Repeated columns, arches, lights, and doorways were not counted as a defect unless a requested hero object was also duplicated or the composition split into separate room bays.
 6. The third batch followed a fixed 10-family × 2-seed design at 640x360, using seeds 2582501 and 2583502, medium detail, selective outline, and no init/reference images. It varied only spatial topology, camera geometry, wall-attached decoration, console identity, or controlled set dressing.
 7. The fourth batch followed a fixed 10-family × 2-seed centering design at 640x360 with the same seeds and settings. It varied only positive centering anchors: canvas center, optical axis, vanishing point, central aisle, architectural frame, ceiling spine, equal margins, minimal decoration, and redundant alignment.
+8. The fifth batch followed the supplied Pro handoff exactly: ten distinct concise prompts, one call per prompt, width 640, height 360, `no_background: false`, no seed, no reference/init image, and no style override. It varied only the wording of the centering and single-room constraints. Each Pro call returned one completed 640x360 frame and reported a cost of 40 generations.
 
-Each Pixen call reported a cost of one generation. The four batches therefore used 80 charged generations in total. The current public [MCP tool guide](https://api.pixellab.ai/mcp/docs) documents Pixen as an asynchronous raw-image tool with width and height values divisible by four. The [REST v2 OpenAPI contract](https://api.pixellab.ai/v2/openapi.json) documents Pixen's maximum area as 512x512. Both tested sizes are valid exact 16:9 requests within that contract.
+Each Pixen call reported a cost of one generation, for 80 Pixen generations. Each Pro call reported 40 generations, for 400 Pro generations. The five batches therefore reported 480 charged generation units across 90 live calls. The current public [MCP tool guide](https://api.pixellab.ai/mcp/docs) documents Pixen and Pro as asynchronous raw-image tools with width and height values divisible by four, and documents Pro as the higher-cost candidate-producing route. The [REST v2 OpenAPI contract](https://api.pixellab.ai/v2/openapi.json) documents Pixen's maximum area as 512x512. Both tested sizes are valid exact 16:9 requests within the Pixen contract; the Pro tool accepted the 640x360 request used here.
 
 ## First test batch: size and prompt structure
 
@@ -472,31 +485,132 @@ Wide 16:9 pixel-art game background of one deep sci-fi hall viewed straight ahea
 
 The **best centering phrase is none**: canvas center, optical axis, vanishing point, aisle, frame, ceiling spine, equal margins, and redundant alignment all remained FAR OFF in their clean outputs. The useful reusable language is still the positive topology chain—continuous walls, one far wall, open floor, one integrated console—but it solves uniqueness and room coherence, not exact pixel centering.
 
-### Production recommendation after 80 calls
+## Fifth test batch: prompt-only Pro centering
 
-1. Continue using the integrated far-wall topology to solve duplicate consoles and split-room risk.
-2. Do not claim that “center,” “exact center,” “optical axis,” “vanishing point,” or redundant alignment language guarantees x=320 placement in a 640x360 indoor scene.
-3. If exact visual centering is a hard requirement, stop spending prompt-only retries on synonyms. Run a separate controlled experiment with an explicit composition/reference image, a smaller-resolution anchor and controlled crop/reframe, or a higher-adherence PixelLab route such as Pro.
-4. Keep the next experiment separate from this Pixen prompt-only evidence. Do not mix image anchoring, cropping, or post-generation repositioning into the centering comparison.
-5. Until such a route is tested, inspect both the canvas center and the room axis manually. Accept a candidate only when both are centered enough for the game layout, even if the console is centered relative to its own room.
+The fifth batch followed the supplied handoff's ten concise prompts exactly. Each prompt was run once through the Pro model with width 640, height 360, `no_background: false`, no seed, no reference image, and no style override. The only intentional variable was prompt wording. The evaluation used the handoff's categories: canvas centering, single-room topology, focal-object count, mirroring/duplication, depth, and overall verdict.
+
+### Results table
+
+| Attempt | Prompt label | Centering | Topology | Focal count | Mirroring | Depth | Verdict | Notes |
+|---|---|---|---|---:|---|---:|---|---|
+| A01 | centered baseline | Perfect | clean single room | 1 | None | 4 | PASS | Broad floor, continuous walls, and a centered far-wall console; safest baseline. |
+| A02 | centered frame emphasis | Perfect | clean single room | 1 | None | 3 | ALMOST | Centered and clean, but the room reads shallower and more court-like. |
+| A03 | vanishing-point emphasis | Perfect | clean single room | 1 | None | 5 | PASS | Deepest hall in the batch; the far console is small but unambiguous. A near-white side perimeter prevents strict full bleed. |
+| A04 | optical-axis wording | Near | clean single room | 1 | None | 5 | ALMOST | Centered long hall, but the output has the largest white padding: about 45px at each side and 18px at top/bottom. |
+| A05 | symmetrical frame, singular subject | Perfect | clean single room | 1 | None | 3 | ALMOST | Balanced and centered, but shallow enough to feel like a vestibule or stage; it also has a near-white perimeter. |
+| A06 | central aisle emphasis | Perfect | clean single room | 1 | None | 5 | PASS | Strong central aisle and deep perspective; the far console remains singular. |
+| A07 | integrated-console emphasis | Perfect | clean single room | 1 | None | 4 | PASS | Best balance of readable console, depth, centered axis, and clean topology. |
+| A08 | minimal topology lock | Perfect | clean single room | 1 | None | 4 | PASS | Minimal topology holds; the rear control station is singular and centered, but about 10px of near-white side padding remains. |
+| A09 | restrained asymmetry | Perfect | clean single room | 1 | None | 4 | PASS | Side equipment differs left/right without creating a second bay or focal console; about 7px of near-white side padding remains. |
+| A10 | strongest concise instruction | Perfect | clean single room | 1 | None | 4 | PASS | Readable centered console; right-side window detail does not split the hall. |
+
+**Batch result:** 9/10 CENTERED-GOLD, 1/10 CENTERED-NEAR, 0/10 CENTERED-OFF; 10/10 clean single rooms; 10/10 exactly one focal console/station; 10/10 no mirrored second bay or duplicate focal console; 5/10 full bleed and 5/10 with a near-white perimeter; 8/10 PASS and 2/10 ALMOST.
+
+The focal count treats ordinary wall terminals, monitors, and side equipment as room dressing. It counts only a second hero console or station that competes with the requested far-wall focal object as duplication.
+
+### Exact Pro prompts used
+
+#### A01 — centered baseline
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. One single connected room. Front-on centered camera. Continuous left and right walls meet one far wall. One small control console is exactly centered on the far wall. Broad empty floor in front. The entire room composition is centered on the canvas. No duplicate console.
+~~~
+
+#### A02 — centered frame emphasis
+
+~~~text
+Wide 16:9 pixel-art sci-fi court hall. One deep room only. The room is centered in the frame with equal space on the left and right. One small console sits at the exact center of the far wall. Continuous side walls, open floor, sparse cyan lights.
+~~~
+
+#### A03 — vanishing point emphasis
+
+~~~text
+Wide 16:9 pixel-art sci-fi interior. One long hall only. One-point perspective with the vanishing point at the exact center of the image. One small command console is centered at that vanishing point on the far wall. Continuous side walls, open reflective floor.
+~~~
+
+#### A04 — optical axis wording
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. A single deep room aligned to the image center. The architectural axis and focal console are exactly on the canvas centerline. One small console on the center of the far wall. No mirrored side bay, no second console.
+~~~
+
+#### A05 — symmetrical frame, singular subject
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall viewed straight on. The room is perfectly centered in the image. Left and right walls balance evenly and end at one far wall. One and only one small console is centered on the far wall. Deep floor space, sparse architecture.
+~~~
+
+#### A06 — central aisle emphasis
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. One connected room with a central aisle leading straight to one small centered console on the far wall. The aisle, room axis, and console are centered on the canvas. Continuous walls, minimal detail, deep perspective.
+~~~
+
+#### A07 — integrated-console emphasis
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. One deep centered room. A single small command console is built flush into the exact center of the far wall. Broad empty floor in front. Continuous side walls. The entire composition is centered in the frame. No duplicate focal object.
+~~~
+
+#### A08 — minimal topology lock
+
+~~~text
+Wide 16:9 pixel-art sci-fi room. One rectangular hall only. Straight-on centered camera. Continuous wall planes on both sides and one far wall. One small centered console at the rear center. Very clear centered framing, no side bay duplication, no extra station.
+~~~
+
+#### A09 — restrained asymmetry
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. One single centered room. One small console centered on the far wall. The overall hall is centered on the canvas, but the wall decorations are slightly different left versus right. Continuous side walls, open floor, sparse cyan lights.
+~~~
+
+#### A10 — strongest concise instruction
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall. Keep the whole room centered on the canvas. One room only. One centered far wall. One small console exactly centered on that wall. Continuous left and right walls. Open floor. No mirrored composition. No duplicate console.
+~~~
+
+### Answers to the Pro handoff questions
+
+1. **Did prompt-only Pro solve both remaining problems?** Yes in this ten-call sample. Every output was a single connected room with one centered focal console and no mirrored or duplicated focal composition. It did not guarantee full bleed: half the outputs had visible near-white canvas padding.
+2. **Which attempt worked best overall?** A07. Its integrated far-wall console is readable without becoming a foreground object, and the room retains depth 4/5.
+3. **Which was best-centered?** A01 is the cleanest centered baseline with depth 4/5 and no presentation artifact. A03 and A06 matched its centering while providing deeper perspective.
+4. **Which was best for non-duplication?** All ten tied under the focal-object rubric. A07 is the safest reusable choice because its flush far-wall placement gives the model the fewest alternate focal locations.
+5. **Should a Pro prompt become the default?** Yes for high-value 640x360 indoor backgrounds where exact centering matters. Use A07 as the default Pro prompt, and keep the Pixen recipe for cost-sensitive generation.
+
+### What changed relative to Pixen
+
+- Pro obeyed the same class of concise positive constraints that Pixen could not reliably honor: one connected room, continuous walls, one far wall, one centered focal object, and whole-canvas centering.
+- The difference was not a single magic centering phrase. All ten short formulations succeeded, including the plain baseline and the integrated-console wording. This points to stronger route/model adherence rather than a proven lexical winner.
+- The remaining Pro imperfections were presentation tradeoffs, not the reported duplication bug: A02 and A05 were shallow, A03 and A06 made the console very small, and A03/A04/A05/A08/A09 had near-white perimeter padding. A04 was the most severe case.
+- `no_background: false` means an opaque scene rather than a transparent cutout; it does not enforce edge-to-edge artwork. The concise handoff prompts also did not test a “full-bleed, no border, artwork touches all four edges” constraint, so the cause is best treated as an observed Pro framing behavior, not a proven internal mechanism.
+- The cost is substantial. The tool reported 40 generations per Pro call, so this ten-call check consumed 400 reported generation units. Pro is therefore a targeted solution for important indoor backdrops, not a blanket replacement for Pixen.
+
+### Production recommendation after 90 calls
+
+1. For a 640x360 indoor scene where exact canvas centering and no duplication are hard requirements, use the Pro route with the A07 prompt, width 640, height 360, and `no_background: false`; omit seed and references.
+2. For cost-sensitive work, use the Pixen continuous-wall/far-wall recipe. It is the best tested one-console workaround, but the fourth Pixen batch shows that prompt-only centering is not reliable there.
+3. Inspect the full frame before accepting a result. Reject any second hero console, split-room bay, stage-like shallow composition, or unwanted canvas padding; do not try to erase a duplicate locally as part of this workflow. “Opaque” is not the same as “full bleed.”
+4. If Pro also misses exact placement in a future theme, stop spending retries on centering synonyms and escalate to a composition/reference image or a generate-then-crop/reframe workflow.
+5. Keep route comparisons separate: do not mix Pro, image anchoring, cropping, and post-generation repositioning into the Pixen prompt-only rates.
 
 ## Limitations
 
-- Only Pixen was tested. No Pro, PixFlux, init-image, reference-image, or website/editor comparison was run.
-- There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in each of the third and fourth batches. The result is directional, not a model-wide probability estimate.
+- Pro was tested only in one ten-call prompt-only batch, with one unseeded call per prompt. No PixFlux, init-image, reference-image, website/editor, crop/reframe, or engine-side comparison was run.
+- There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in each of the third and fourth batches. The Pro batch had one call per prompt. The result is directional, not a model-wide probability estimate.
 - Same-seed calls provide a useful control but do not establish pixel identity across size or prompt changes.
-- Visual duplication scoring was manual. A side terminal can be semantically ambiguous, so the counts distinguish obvious hero-console duplication from normal wall equipment.
+- Visual centering and duplication scoring was manual. A side terminal can be semantically ambiguous, so the counts distinguish obvious hero-console duplication from normal wall equipment. A simple edge-pixel/trim check was used for the Pro padding observation: five outputs had a near-white perimeter, with A04 the most severe. The A04 near-centering classification reflects visible padding rather than a measured x coordinate.
 - The study used one sci-fi indoor-room theme. Fantasy halls, shops, bedrooms, and industrial interiors may have different failure rates.
 - The study did not test image editing, local scaling, or engine-side presentation.
 
 ## Reproduction record
 
-This tracked research note records the live-test counts, settings, seed values, exact follow-up prompts, visual scoring rule, and conclusions. It is intentionally self-contained so the findings do not depend on private run records or untracked output paths.
+This tracked research note records the live-test counts, settings, seed values, exact follow-up prompts, visual scoring rule, Pro handoff prompts, and conclusions. It is intentionally self-contained so the findings do not depend on private run records or untracked output paths.
 
 ## Sources
 
 - User-supplied issue transcript and attached example images.
-- [PixelLab MCP documentation](https://api.pixellab.ai/mcp/docs) — current create_image_pixen fields, size rules, async lifecycle, and cost label.
+- [PixelLab MCP documentation](https://api.pixellab.ai/mcp/docs) — current create_image_pixen and create_image_pro fields, size rules, async lifecycle, and cost labels.
 - [PixelLab REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) — current Pixen endpoint size contract.
 - [PixelLab background and wallpaper model research](pixellab-background-wallpaper-model-research-spike.md) — broader model-routing context; this spike narrows the question to indoor composition duplication.
 - [Inline negative prompting best practices](pixellab-inline-negative-prompting-best-practices.md) — route-specific caution about treating inline exclusions as probabilistic guidance rather than structural enforcement.
