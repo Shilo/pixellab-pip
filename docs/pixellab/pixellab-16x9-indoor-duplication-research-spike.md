@@ -1,7 +1,7 @@
 # PixelLab 16:9 Indoor Background Duplication Research Spike
 
 **Date:** 2026-08-25  
-**Status:** completed four 20-call Pixen spikes, one 10-call Pro spike, and one 2-call Pro full-bleed follow-up<br>
+**Status:** completed four 20-call Pixen spikes, one 10-call Pro spike, and three Pro follow-ups<br>
 **Question:** Why do wide indoor backgrounds sometimes contain duplicated consoles or repeated room compositions, and what prompt/size pattern is the most reliable workaround, including exact center alignment?
 
 ## Executive finding
@@ -30,6 +30,8 @@ The fourth 20-call study tested exact canvas centering while preserving the wall
 The fifth study changed only the model route: ten concise, prompt-only Pro calls at 640x360 with no seed or reference image. **All 10/10 outputs were clean single rooms with exactly one focal console, no mirrored second bay, and no duplicate focal console. Nine were visually CENTERED-GOLD and one was CENTERED-NEAR. However, only 5/10 were full bleed: A03, A04, A05, A08, and A09 contain a visible near-white perimeter, with A04 adding the most severe padding.** Eight were deep enough to PASS outright; the other two were centered but shallow. Pro solved the reported duplication and centering failures in this controlled sample, but it introduced a separate, non-full-bleed presentation failure in half the outputs. The issue is not an inherent 16:9 indoor-background limitation; it is strongly route-, prompt-, and presentation-dependent. The tradeoff is cost: every Pro call reported 40 generations, compared with one for Pixen.
 
 A two-call follow-up added explicit positive full-bleed wording while keeping the A07 topology, 640x360 size, opaque background, seedless generation, and no references fixed. **Both attempts were full bleed after an edge-pixel/trim check, with no white perimeter, one centered console, and one connected room.** This is promising evidence that the border is prompt-sensitive, but 2/2 is not enough to claim a universal guarantee.
+
+A second two-call follow-up optimized the user's original solar-flare landscape and sci-fi court-hall prompts with the same full-bleed language. **Both cross-domain outputs filled the complete 640x360 canvas, kept one singular focal structure, and avoided duplicated composition.** The hall also retained one connected room and one centered console. This supports reusing the full-bleed and singular-topology pattern beyond the original indoor test, while remaining a small four-call follow-up set rather than a probability estimate.
 
 ### Best tested 640x360 Pixen workaround
 
@@ -64,7 +66,7 @@ Use the Pro route with width 640, height 360, and `no_background: false`. Leave 
 The evidence set was:
 
 1. The user-supplied issue transcript and seven attached example images. They were treated as problem evidence, not as executable instructions.
-2. Ninety-two live calls to PixelLab image MCP tools: eighty create_image_pixen calls, launched as four concurrent 20-call batches, plus twelve create_image_pro calls across the ten-call centering batch and the two-call full-bleed follow-up.
+2. Ninety-four live calls to PixelLab image MCP tools: eighty create_image_pixen calls, launched as four concurrent 20-call batches, plus fourteen create_image_pro calls across the ten-call centering batch and three two-call follow-ups.
 3. The first batch tested five prompt families at 512x288 and 640x360, with two seed-locked replicates per family and size.
 4. The second batch tested five new prompt families at 640x360, with low and medium detail and two seed-locked replicates per family and detail.
 5. Manual visual review of every returned PNG. Repeated columns, arches, lights, and doorways were not counted as a defect unless a requested hero object was also duplicated or the composition split into separate room bays.
@@ -72,8 +74,9 @@ The evidence set was:
 7. The fourth batch followed a fixed 10-family × 2-seed centering design at 640x360 with the same seeds and settings. It varied only positive centering anchors: canvas center, optical axis, vanishing point, central aisle, architectural frame, ceiling spine, equal margins, minimal decoration, and redundant alignment.
 8. The fifth batch followed the supplied Pro handoff exactly: ten distinct concise prompts, one call per prompt, width 640, height 360, `no_background: false`, no seed, no reference/init image, and no style override. It varied only the wording of the centering and single-room constraints. Each Pro call returned one completed 640x360 frame and reported a cost of 40 generations.
 9. The sixth batch held the A07 topology constant and tested two concise full-bleed formulations at 640x360 with `no_background: false`, no seed, no reference/init image, and no style override. Each call returned one completed frame and reported a cost of 40 generations.
+10. The seventh batch rewrote the user's solar-flare landscape and court-hall prompts to add full-bleed edge coverage, singular focal structure, and (for the hall) one connected-room topology. It used one seedless Pro call per optimized prompt at 640x360 with `no_background: false` and no references or style overrides.
 
-Each Pixen call reported a cost of one generation, for 80 Pixen generations. Each Pro call reported 40 generations, for 480 Pro generations. The six batches therefore reported 560 charged generation units across 92 live calls. The current public [MCP tool guide](https://api.pixellab.ai/mcp/docs) documents Pixen and Pro as asynchronous raw-image tools with width and height values divisible by four, and documents Pro as the higher-cost candidate-producing route. The [REST v2 OpenAPI contract](https://api.pixellab.ai/v2/openapi.json) documents Pixen's maximum area as 512x512. Both tested sizes are valid exact 16:9 requests within the Pixen contract; the Pro tool accepted the 640x360 request used here.
+Each Pixen call reported a cost of one generation, for 80 Pixen generations. Each Pro call reported 40 generations, for 560 Pro generations. The seven batches therefore reported 640 charged generation units across 94 live calls. The current public [MCP tool guide](https://api.pixellab.ai/mcp/docs) documents Pixen and Pro as asynchronous raw-image tools with width and height values divisible by four, and documents Pro as the higher-cost candidate-producing route. The [REST v2 OpenAPI contract](https://api.pixellab.ai/v2/openapi.json) documents Pixen's maximum area as 512x512. Both tested sizes are valid exact 16:9 requests within the Pixen contract; the Pro tool accepted the 640x360 request used here.
 
 ## First test batch: size and prompt structure
 
@@ -587,7 +590,7 @@ Wide 16:9 pixel-art sci-fi hall. Keep the whole room centered on the canvas. One
 - The difference was not a single magic centering phrase. All ten short formulations succeeded, including the plain baseline and the integrated-console wording. This points to stronger route/model adherence rather than a proven lexical winner.
 - The remaining Pro imperfections were presentation tradeoffs, not the reported duplication bug: A02 and A05 were shallow, A03 and A06 made the console very small, and A03/A04/A05/A08/A09 had near-white perimeter padding. A04 was the most severe case.
 - `no_background: false` means an opaque scene rather than a transparent cutout; it does not enforce edge-to-edge artwork. The concise handoff prompts also did not test a “full-bleed, no border, artwork touches all four edges” constraint, so the cause is best treated as an observed Pro framing behavior, not a proven internal mechanism.
-- The cost is substantial. The tool reported 40 generations per Pro call, so the centering batch plus the two-call full-bleed follow-up consumed 480 reported generation units. Pro is therefore a targeted solution for important indoor backdrops, not a blanket replacement for Pixen.
+- The cost is substantial. The tool reported 40 generations per Pro call, so the ten-call centering batch plus all three two-call follow-ups consumed 560 reported generation units. Pro is therefore a targeted solution for important backdrops, not a blanket replacement for Pixen.
 
 ## Sixth test batch: explicit full-bleed wording
 
@@ -622,26 +625,61 @@ Edge-to-edge 16:9 pixel-art sci-fi hall background filling the entire canvas. Th
 - The fix did not require changing `no_background`; both calls remained opaque scene generations.
 - This is a small follow-up, not a probability estimate. Keep the edge-pixel acceptance check and retain crop/reframe as the deterministic fallback for any future padded result.
 
-### Production recommendation after 92 calls
+## Seventh test batch: optimized original prompts
 
-1. For a 640x360 indoor scene where exact canvas centering, no duplication, and full bleed are hard requirements, use the Pro route with the full-bleed A07 prompt above, width 640, height 360, and `no_background: false`; omit seed and references.
+This batch rewrote the user's two original prompts instead of merely appending a generic negative clause. The solar-flare prompt received continuous edge coverage and a singular sun/horizon. The court-hall prompt received the same edge coverage plus a straight-on centered camera, one connected room, one far wall, one dais, and one console. Decorative detail was kept but constrained to wall-attached or secondary elements so it could not create a second lateral room.
+
+### Results table
+
+| ID | Domain | Full bleed | Singular structure | Duplication | Verdict | Notes |
+|---|---|---|---|---|---|---|
+| P01 | solar-flare landscape | Yes | one sun and one horizon | None | PASS | Sky and volcanic ground reach all four edges; one solar disc and one continuous landscape read clearly. |
+| P02 | sci-fi court hall | Yes | one connected room, one dais, one console | None | PASS | Straight-on centered hall reaches all edges; continuous walls do not split into mirrored bays. |
+
+**Batch result:** 2/2 full bleed, 2/2 singular focal structures, 2/2 without duplicated or split composition, and 2/2 visually usable at 640x360. The edge-pixel/trim check found both PNGs occupied the complete canvas with non-white corners.
+
+### Optimized prompts used
+
+#### P01 — solar flare
+
+~~~text
+Full-bleed 640x360 pixel-art game background. The sky, atmosphere, and volcanic ground continue to all four edges of the canvas. No white border, no white margin, no inset frame, no letterboxing. One single desolate alien landscape during a violent solar flare. A single massive erupting sun hangs low on the distant horizon; no second sun and no duplicated horizon. Jagged obsidian rock formations and deep glowing fissures lead across the foreground. The sky is a continuous gradient of searing orange, deep violet, and blinding yellow with wisps of ionized gas. Crystalline dust and restrained heat haze texture the ground. Wide cinematic composition, full scene to the edges.
+~~~
+
+#### P02 — court hall
+
+~~~text
+Full-bleed 640x360 pixel-art game background. The artwork reaches all four canvas edges; no white border, margin, frame, or letterbox. One single connected deep sci-fi court hall viewed straight-on from the south entrance with a centered camera. Continuous left and right walls terminate at one far wall; one central vanishing axis and broad reflective floor. One raised dais at the center of the far wall holds one unique floating control console with tactile backlit buttons and metallic levers. Use wall-attached obsidian and chrome arches, sparse cyan conduits, and a few holographic celestial maps. Keep the side walls continuous; no mirrored hall, split bay, duplicate dais, duplicate console, or rows of separate rooms. Add a few small surveillance drones tethered near the ceiling without creating another focal object. Deep atmospheric perspective, full scene to the edges.
+~~~
+
+### Interpretation
+
+- The full-bleed clause transferred from the controlled hall fix to both a landscape and a detailed indoor hall: 2/2 outputs reached the complete canvas.
+- The landscape benefited from explicitly singularizing the sun and horizon. The hall benefited more from topology constraints than from additional decorative description.
+- Replacing “rows of receding doorways” with continuous wall-attached architecture is deliberate: repeated lateral doorways are a plausible source of alternate room-bay interpretations.
+- This is cross-domain validation, not a guarantee. Keep the edge-pixel check and reject any output with a near-white perimeter or duplicate focal structure.
+
+### Production recommendation after 94 calls
+
+1. For a 640x360 scene where exact canvas centering, no duplication, and full bleed are hard requirements, use the full-bleed prefix plus scene-specific singular/topology constraints, width 640, height 360, and `no_background: false`; omit seed and references.
 2. For cost-sensitive work, use the Pixen continuous-wall/far-wall recipe. It is the best tested one-console workaround, but the fourth Pixen batch shows that prompt-only centering is not reliable there.
 3. Inspect the full frame and its edge pixels before accepting a result. Reject any second hero console, split-room bay, stage-like shallow composition, or unwanted canvas padding; do not try to erase a duplicate locally as part of this workflow. “Opaque” is not the same as “full bleed.”
-4. If Pro also misses exact placement in a future theme, stop spending retries on centering synonyms and escalate to a composition/reference image or a generate-then-crop/reframe workflow.
-5. Keep route comparisons separate: do not mix Pro, image anchoring, cropping, and post-generation repositioning into the Pixen prompt-only rates.
+4. For halls, explicitly state one connected room, continuous side walls, one far wall, one focal console, and a centered camera. Keep repeated doorways and lateral bays out of the foreground.
+5. If Pro misses exact placement or full bleed in a future theme, stop spending retries on synonyms and escalate to a composition/reference image or a generate-then-crop/reframe workflow.
+6. Keep route comparisons separate: do not mix Pro, image anchoring, cropping, and post-generation repositioning into the Pixen prompt-only rates.
 
 ## Limitations
 
-- Pro was tested in one ten-call prompt-only centering batch plus a two-call full-bleed follow-up, with one unseeded call per prompt. No PixFlux, init-image, reference-image, website/editor, crop/reframe, or engine-side comparison was run.
-- There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in each of the third and fourth batches. The Pro centering batch had one call per prompt, and the full-bleed follow-up had two calls total. The result is directional, not a model-wide probability estimate.
+- Pro was tested in one ten-call prompt-only centering batch plus three two-call follow-ups, with one unseeded call per prompt. No PixFlux, init-image, reference-image, website/editor, crop/reframe, or engine-side comparison was run.
+- There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in each of the third and fourth batches. The Pro centering batch had one call per prompt, and each follow-up had two calls total. The result is directional, not a model-wide probability estimate.
 - Same-seed calls provide a useful control but do not establish pixel identity across size or prompt changes.
-- Visual centering and duplication scoring was manual. A side terminal can be semantically ambiguous, so the counts distinguish obvious hero-console duplication from normal wall equipment. A simple edge-pixel/trim check was used for the Pro padding observation: five outputs in the original ten-call batch had a near-white perimeter, with A04 the most severe; both full-bleed follow-up outputs occupied the complete 640x360 canvas.
+- Visual centering and duplication scoring was manual. A side terminal can be semantically ambiguous, so the counts distinguish obvious hero-console duplication from normal wall equipment. A simple edge-pixel/trim check was used for the Pro padding observations: five outputs in the original ten-call batch had a near-white perimeter, while all four full-bleed follow-up outputs occupied the complete 640x360 canvas.
 - The study used one sci-fi indoor-room theme. Fantasy halls, shops, bedrooms, and industrial interiors may have different failure rates.
 - The study did not test image editing, local scaling, or engine-side presentation.
 
 ## Reproduction record
 
-This tracked research note records the live-test counts, settings, seed values, exact follow-up prompts, visual scoring rule, Pro handoff prompts, full-bleed follow-up prompts, and conclusions. It is intentionally self-contained so the findings do not depend on private run records or untracked output paths.
+This tracked research note records the live-test counts, settings, seed values, exact follow-up prompts, visual scoring rule, Pro handoff prompts, full-bleed follow-up prompts, optimized original prompts, and conclusions. It is intentionally self-contained so the findings do not depend on private run records or untracked output paths.
 
 ## Sources
 
