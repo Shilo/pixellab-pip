@@ -1,8 +1,8 @@
 # PixelLab 16:9 Indoor Background Duplication Research Spike
 
 **Date:** 2026-08-25  
-**Status:** completed three directional 20-call spikes<br>
-**Question:** Why do wide indoor backgrounds sometimes contain duplicated consoles or repeated room compositions, and what prompt/size pattern is the most reliable workaround?
+**Status:** completed four directional 20-call spikes<br>
+**Question:** Why do wide indoor backgrounds sometimes contain duplicated consoles or repeated room compositions, and what prompt/size pattern is the most reliable workaround, including exact center alignment?
 
 ## Executive finding
 
@@ -24,6 +24,8 @@ The second 20-call study found a practical 640x360 workaround:
 The third 20-call study tested ten topology variants at 640x360 with medium detail. **15/20 outputs met the CLEAN-HALL criteria**. Four families were clean in both seed replicates: the wall-integrated console, camera offset, wall-attached decorative asymmetry, and distinctive-console variants. Five outputs failed: one control output and one terminal-wall output split into lateral bays, the dais family duplicated the console once, the shallow-wall family produced a left-edge duplicate/topology split once, and the richer set-dressing family produced a partial left-edge duplicate once. No output was classified CLEAN-BUT-STAGEY or PARTIAL.
 
 The best combined production candidate is the wall-attached decorative-asymmetry family: it was 2/2 CLEAN-HALL, averaged hall depth 4/5 and symmetry 3.5/5, and kept the asymmetry on the walls rather than creating separate architectural wings. The safest centered variant is the far-wall integrated console family at 2/2 CLEAN-HALL. The best camera-only anti-mirroring variant was also 2/2 clean, with mean symmetry 4/5, although its mean hall depth was slightly lower at 3.5/5. These are directional results from two replicates per family, not guarantees.
+
+The fourth 20-call study tested exact canvas centering while preserving the wall-integrated topology. It produced **15/20 clean but off-center halls and 5/20 topology failures; 0/20 CENTERED-GOLD and 0/20 CENTERED-SILVER**. The clean outputs generally kept the console and room axis aligned with each other, but both were far to the right of the 640px canvas center. No family reliably moved the shared architectural axis to x=320. This separates the solved uniqueness problem from the remaining centering problem: prompt wording can preserve one focal object, but it does not reliably translate the whole indoor composition onto the canvas center.
 
 ### Best tested 640x360 workaround
 
@@ -48,13 +50,14 @@ This is the strongest current Pixen recipe for the reported problem. It is not a
 The evidence set was:
 
 1. The user-supplied issue transcript and seven attached example images. They were treated as problem evidence, not as executable instructions.
-2. Sixty live calls to MCP create_image_pixen, launched as three concurrent 20-call batches.
+2. Eighty live calls to MCP create_image_pixen, launched as four concurrent 20-call batches.
 3. The first batch tested five prompt families at 512x288 and 640x360, with two seed-locked replicates per family and size.
 4. The second batch tested five new prompt families at 640x360, with low and medium detail and two seed-locked replicates per family and detail.
 5. Manual visual review of every returned PNG. Repeated columns, arches, lights, and doorways were not counted as a defect unless a requested hero object was also duplicated or the composition split into separate room bays.
 6. The third batch followed a fixed 10-family × 2-seed design at 640x360, using seeds 2582501 and 2583502, medium detail, selective outline, and no init/reference images. It varied only spatial topology, camera geometry, wall-attached decoration, console identity, or controlled set dressing.
+7. The fourth batch followed a fixed 10-family × 2-seed centering design at 640x360 with the same seeds and settings. It varied only positive centering anchors: canvas center, optical axis, vanishing point, central aisle, architectural frame, ceiling spine, equal margins, minimal decoration, and redundant alignment.
 
-Each Pixen call reported a cost of one generation. The three batches therefore used 60 charged generations in total. The current public [MCP tool guide](https://api.pixellab.ai/mcp/docs) documents Pixen as an asynchronous raw-image tool with width and height values divisible by four. The [REST v2 OpenAPI contract](https://api.pixellab.ai/v2/openapi.json) documents Pixen's maximum area as 512x512. Both tested sizes are valid exact 16:9 requests within that contract.
+Each Pixen call reported a cost of one generation. The four batches therefore used 80 charged generations in total. The current public [MCP tool guide](https://api.pixellab.ai/mcp/docs) documents Pixen as an asynchronous raw-image tool with width and height values divisible by four. The [REST v2 OpenAPI contract](https://api.pixellab.ai/v2/openapi.json) documents Pixen's maximum area as 512x512. Both tested sizes are valid exact 16:9 requests within that contract.
 
 ## First test batch: size and prompt structure
 
@@ -330,10 +333,157 @@ Wide 16:9 pixel-art game background of one deep sci-fi hall viewed from a fixed 
 8. Inspect the entire 640x360 output, especially the outer 10% of both sides. Reject any candidate with a second hero console or a split-room bay; do not erase or repaint the duplicate locally.
 9. If repeated retries remain unstable, use the earlier 512x288 evidence as a lower-risk fallback or run a separate image-anchor/higher-adherence study. Do not silently switch routes inside this prompt experiment.
 
+## Fourth test batch: exact centering at 640x360
+
+The fourth batch held the successful integrated-console scene topology constant and changed only positive centering language. It used ten prompt families × two seeds, width 640, height 360, medium detail, selective outline, no_background false, and no init/reference images, editing, cropping, or retries. The canvas center target was x=320.
+
+Exact x estimates were not recorded because manual inspection did not provide a reproducible pixel-measurement method. The table therefore uses the handoff's categorical bands rather than invented coordinates. `FAR OFF` means the apparent center was more than approximately 64px from x=320.
+
+### Results table
+
+| ID | Family | Seed | Console X | Console offset | Console centering | Room axis X | Room offset | Room centering | Alignment | L/R balance | Consoles | Topology | Depth | Obstruction | Perceptual | Class | Notes |
+|---|---|---:|---:|---:|---|---:|---:|---|---|---|---|---|---:|---|---:|---|---|
+| T00-A | integrated-console control | 2582501 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | Console and room axis drift right together. |
+| T00-B | integrated-console control | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | Baseline topology survives, but it is not centered on the canvas. |
+| T01-A | canvas-center language | 2582501 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | “Exact horizontal center of the image” does not overcome the shifted hall axis. |
+| T01-B | canvas-center language | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | The console remains aligned with the off-canvas room axis. |
+| T02-A | optical-axis language | 2582501 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | Optical-axis wording preserves a coherent but right-shifted composition. |
+| T02-B | optical-axis language | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | Console and far-wall axis co-drift rather than separating. |
+| T03-A | centered vanishing point | 2582501 |  |  | FAR OFF |  |  | FAR OFF | strongly misaligned | strong imbalance | exactly 1 | split/multiple bays | 3 | major | 1 | DUPLICATE/TOPOLOGY-FAIL | A foreground partition creates a left bay and a right hall despite centered-perspective wording. |
+| T03-B | centered vanishing point | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | The room remains coherent but its vanishing axis is shifted right. |
+| T04-A | central aisle | 2582501 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | A physical aisle follows the generated off-canvas axis. |
+| T04-B | central aisle | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | Floor alignment does not translate the whole room to x=320. |
+| T05-A | architectural frame | 2582501 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | The frame centers within the generated hall, not within the canvas. |
+| T05-B | architectural frame | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | A larger anchor does not correct the shared rightward translation. |
+| T06-A | ceiling spine | 2582501 |  |  | FAR OFF |  |  | FAR OFF | strongly misaligned | strong imbalance | exactly 1 | split/multiple bays | 3 | major | 1 | DUPLICATE/TOPOLOGY-FAIL | The ceiling cue coexists with a foreground partition and alternate lateral bay. |
+| T06-B | ceiling spine | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | The vertical cue reinforces the generated axis, not the canvas center. |
+| T07-A | equal left/right framing | 2582501 |  |  | FAR OFF |  |  | FAR OFF | strongly misaligned | strong imbalance | exactly 1 | split/multiple bays | 3 | major | 1 | DUPLICATE/TOPOLOGY-FAIL | Equal-space wording does not stop a foreground partition from opening a side bay. |
+| T07-B | equal left/right framing | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | The clean output is coherent but visibly shifted right. |
+| T08-A | minimal central destination | 2582501 |  |  | FAR OFF |  |  | FAR OFF | strongly misaligned | strong imbalance | exactly 1 | split/multiple bays | 3 | major | 1 | DUPLICATE/TOPOLOGY-FAIL | Removing decorative competition did not prevent a foreground bay split. |
+| T08-B | minimal central destination | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | Minimal decoration produces a clean but still off-canvas hall. |
+| T09-A | redundant centering hierarchy | 2582501 |  |  | FAR OFF |  |  | FAR OFF | strongly misaligned | strong imbalance | exactly 1 | split/multiple bays | 3 | major | 1 | DUPLICATE/TOPOLOGY-FAIL | Redundant positive alignment language does not prevent the known partition failure. |
+| T09-B | redundant centering hierarchy | 2583502 |  |  | FAR OFF |  |  | FAR OFF | aligned | strong imbalance | exactly 1 | clean single room | 4 | none | 2 | CLEAN-OFFCENTER | The console follows the shifted room axis rather than x=320. |
+
+**Batch result:** 0/20 CENTERED-GOLD, 0/20 CENTERED-SILVER, 0/20 OBJECT-ONLY-CENTERED, 0/20 ROOM-ONLY-CENTERED, 15/20 CLEAN-OFFCENTER, and 5/20 DUPLICATE/TOPOLOGY-FAIL.
+
+### Family summary
+
+| Family | GOLD | SILVER | Off-center | Fail | Mean console offset | Mean room offset | Interpretation |
+|---|---:|---:|---:|---:|---|---|---|
+| T00 — integrated-console control | 0 | 0 | 2 | 0 | FAR OFF (2/2) | FAR OFF (2/2) | Reliable one-room baseline, but both focal and room centers co-drift right. |
+| T01 — canvas-center language | 0 | 0 | 2 | 0 | FAR OFF (2/2) | FAR OFF (2/2) | Explicit canvas coordinates did not improve on the baseline. |
+| T02 — optical-axis language | 0 | 0 | 2 | 0 | FAR OFF (2/2) | FAR OFF (2/2) | Camera terminology binds the console to the wrong shared axis. |
+| T03 — centered vanishing point | 0 | 0 | 1 | 1 | FAR OFF (1/1 clean) | FAR OFF (1/1 clean) | One clean shifted hall and one foreground-bay topology failure. |
+| T04 — central aisle | 0 | 0 | 2 | 0 | FAR OFF (2/2) | FAR OFF (2/2) | A physical aisle follows rather than corrects the generated axis. |
+| T05 — architectural frame | 0 | 0 | 2 | 0 | FAR OFF (2/2) | FAR OFF (2/2) | A larger anchor centers locally within the same shifted hall. |
+| T06 — ceiling spine | 0 | 0 | 1 | 1 | FAR OFF (1/1 clean) | FAR OFF (1/1 clean) | Vertical alignment cues do not solve horizontal translation. |
+| T07 — equal left/right framing | 0 | 0 | 1 | 1 | FAR OFF (1/1 clean) | FAR OFF (1/1 clean) | Equal-space language is not reliable and can coexist with a bay split. |
+| T08 — minimal destination | 0 | 0 | 1 | 1 | FAR OFF (1/1 clean) | FAR OFF (1/1 clean) | Reducing clutter improves simplicity, not canvas alignment. |
+| T09 — redundant hierarchy | 0 | 0 | 1 | 1 | FAR OFF (1/1 clean) | FAR OFF (1/1 clean) | Redundant positive anchors do not compound into exact centering. |
+
+### Exact prompts used
+
+#### T00 — baseline reproduction
+
+~~~text
+Wide 16:9 pixel-art game background of one deep sci-fi hall viewed from a fixed centered camera. Two continuous side walls extend directly to one full-width far wall, enclosing a single room. A single small command console is built flush into the center of the far wall beneath one cyan display panel. A broad empty reflective floor stretches uninterrupted from the camera to that wall. Shallow wall-mounted arches and cyan light strips provide sparse architectural detail, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T01 — explicit canvas-center language
+
+~~~text
+Wide 16:9 pixel-art game background of one deep sci-fi hall viewed straight ahead. Two continuous side walls terminate at one full-width far wall. The exact horizontal center of the image is the architectural center of the hall. One small command console is built into the far wall exactly at the center of the image. The console and the room's central axis align on the same vertical centerline of the frame. A broad empty reflective floor fills the space between camera and far wall. Sparse shallow arches and cyan lights, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T02 — optical-axis wording
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall viewed from a straight-on fixed camera. The camera's optical axis runs through the exact center of the room and directly through one small command console built into the far wall. The console, center of the far wall, and camera axis form one straight line through the middle of the image. Continuous side walls enclose one deep room, with a broad empty reflective floor leading directly toward the console. Sparse wall-mounted arches and cyan lighting, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T03 — vanishing-point anchor
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall using centered one-point perspective. The single vanishing point lies exactly at the horizontal center of the canvas on the far wall. One small command console is built into that far wall directly over the vanishing point. The floor lines, ceiling lines, and wall depth all converge toward this same centered point. Continuous side walls enclose one room. Sparse dark architecture and cyan illumination, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T04 — central aisle
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall viewed straight down one central aisle. The aisle begins at the exact lower center of the canvas and runs straight through the middle of the floor to one small console built into the center of the far wall. The aisle, console, far-wall center, and room axis remain perfectly aligned. Continuous left and right walls frame one deep room. Sparse shallow arches and cyan lighting, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T05 — centered architectural frame
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall, one deep connected room viewed straight ahead. At the exact center of the far wall is one tall architectural frame containing one small integrated command console. This central frame is the primary architectural anchor of the entire composition and sits exactly on the vertical centerline of the image. Continuous side walls extend evenly toward it, with open reflective floor in front. Sparse cyan lighting and shallow wall detail, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T06 — centered ceiling spine
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall with one continuous room viewed from a centered camera. A narrow illuminated ceiling spine runs exactly along the middle of the ceiling toward the center of the far wall. Directly beneath its endpoint, one small command console is built into the far wall. The ceiling spine, console, and room axis share the exact vertical centerline of the canvas. Broad empty reflective floor and continuous side walls emphasize the centered depth, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T07 — equal left/right framing
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall viewed straight ahead. One deep room fills the frame with equal visible architectural width on the left and right sides of the central axis. Continuous side walls terminate at one far wall. One small command console is integrated into the exact middle of that wall and appears with equal horizontal room space to its left and right. A broad empty reflective floor leads toward it. Sparse shallow arches and cyan illumination, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T08 — central destination without decorative competition
+
+~~~text
+Wide 16:9 pixel-art game background, one long rectangular sci-fi hall viewed directly from its center. Continuous plain side walls lead to one flat far wall. One small command console is built into the exact center of the far wall and is the only focal feature in the room. The open reflective floor, wall geometry, and ceiling all lead directly toward the center of the canvas. Minimal cyan light strips, no prominent side landmarks, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+#### T09 — redundant centering hierarchy
+
+~~~text
+Wide 16:9 pixel-art sci-fi hall viewed directly straight ahead from the exact center of one connected room. The camera axis, central floor aisle, one-point-perspective vanishing point, center of the far wall, and one small wall-integrated command console all occupy the same vertical centerline through the exact middle of the canvas. Equal room width is visible to the left and right of this axis. Continuous side walls terminate at the far wall, and a broad empty reflective floor remains unobstructed between camera and console. Sparse shallow architecture and cyan lighting, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+### Answers to the centering questions
+
+1. **Does “center of the image” outperform “center of the room”?** No. T01 and T00 were both 2/2 clean but FAR OFF in both console and room-axis categories.
+2. **Does optical-axis terminology improve centering?** No. T02 was 2/2 clean but both outputs remained FAR OFF; the console followed the shifted hall axis.
+3. **Is a centered one-point vanishing point the strongest geometric anchor?** No. T03 produced one clean off-center hall and one foreground-bay topology failure. It also increased the risk of objectionable bilateral/partitioned architecture.
+4. **Does a physical floor aisle improve center adherence?** No. T04 was 2/2 clean but FAR OFF; the aisle reinforced the wrong axis.
+5. **Does a centered architectural frame work better than centering the small object directly?** No. T05 was 2/2 clean but FAR OFF. The frame and console centered within the generated room, not within the canvas.
+6. **Do multiple aligned vertical cues improve reliability?** No. T06 was 1/2 clean off-center and 1/2 topology-fail; the ceiling cue did not correct horizontal translation.
+7. **Does equal-left/right-space language improve canvas centering?** No. T07 was 1/2 clean off-center and 1/2 topology-fail.
+8. **Is visual clutter responsible for the off-centering?** No. T08's minimal scene was still FAR OFF in its clean output, and its other output split into bays.
+9. **Does redundant centering language help or hurt?** It does not help. T09 was 1/2 clean off-center and 1/2 topology-fail; redundancy did not compound into a reliable constraint.
+
+### Geometric and perceptual diagnosis
+
+- **Geometric centering:** No output reached CENTERED-GOLD or CENTERED-SILVER. In all clean outputs, both console and room axis were FAR OFF to the right of x=320.
+- **Console-to-room relationship:** The console was usually aligned with the generated room axis. This is not primarily an independent console-placement failure.
+- **Perceptual centering:** Clean outputs scored 2/5: visibly off-center at first glance. Topology failures scored 1/5 because the foreground partition made the imbalance stronger.
+- **Most important diagnosis:** The remaining problem is primarily the inability to keep the entire indoor composition centered on the canvas while preserving the hall topology. Pixen often generates a coherent room and then translates that shared room/console axis rightward; foreground architecture can additionally create a separate lateral bay.
+
+### Best exact prompt and best centering phrase
+
+No prompt achieved the handoff's preferred centering success, so there is no true centering winner. The **best available exact prompt** is T01 because it retained a clean single-room result in both seeds while directly testing canvas-center language:
+
+~~~text
+Wide 16:9 pixel-art game background of one deep sci-fi hall viewed straight ahead. Two continuous side walls terminate at one full-width far wall. The exact horizontal center of the image is the architectural center of the hall. One small command console is built into the far wall exactly at the center of the image. The console and the room's central axis align on the same vertical centerline of the frame. A broad empty reflective floor fills the space between camera and far wall. Sparse shallow arches and cyan lights, crisp readable pixel art, opaque full-bleed background.
+~~~
+
+The **best centering phrase is none**: canvas center, optical axis, vanishing point, aisle, frame, ceiling spine, equal margins, and redundant alignment all remained FAR OFF in their clean outputs. The useful reusable language is still the positive topology chain—continuous walls, one far wall, open floor, one integrated console—but it solves uniqueness and room coherence, not exact pixel centering.
+
+### Production recommendation after 80 calls
+
+1. Continue using the integrated far-wall topology to solve duplicate consoles and split-room risk.
+2. Do not claim that “center,” “exact center,” “optical axis,” “vanishing point,” or redundant alignment language guarantees x=320 placement in a 640x360 indoor scene.
+3. If exact visual centering is a hard requirement, stop spending prompt-only retries on synonyms. Run a separate controlled experiment with an explicit composition/reference image, a smaller-resolution anchor and controlled crop/reframe, or a higher-adherence PixelLab route such as Pro.
+4. Keep the next experiment separate from this Pixen prompt-only evidence. Do not mix image anchoring, cropping, or post-generation repositioning into the centering comparison.
+5. Until such a route is tested, inspect both the canvas center and the room axis manually. Accept a candidate only when both are centered enough for the game layout, even if the console is centered relative to its own room.
+
 ## Limitations
 
 - Only Pixen was tested. No Pro, PixFlux, init-image, reference-image, or website/editor comparison was run.
-- There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in the third batch. The result is directional, not a model-wide probability estimate.
+- There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in each of the third and fourth batches. The result is directional, not a model-wide probability estimate.
 - Same-seed calls provide a useful control but do not establish pixel identity across size or prompt changes.
 - Visual duplication scoring was manual. A side terminal can be semantically ambiguous, so the counts distinguish obvious hero-console duplication from normal wall equipment.
 - The study used one sci-fi indoor-room theme. Fantasy halls, shops, bedrooms, and industrial interiors may have different failure rates.
