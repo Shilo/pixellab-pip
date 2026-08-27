@@ -61,6 +61,40 @@ Full-bleed 640x360 pixel-art sci-fi game background. Artwork touches all four ed
 
 Use the Pro route with width 640, height 360, and `no_background: false`. Leave seed, reference images, and style overrides unset. This combines the handoff's successful Attempt 7 topology with the full-bleed clause tested in the two-call follow-up. Both follow-up outputs were full bleed; use the Pixen recipe when the 40-generation Pro cost is not justified.
 
+### Reusable background prompt templates
+
+These templates generalize the tested full-bleed instruction to other background types. The first two keep the prompt intentionally short and use only one interchangeable variable. The third is for scenes that need explicit control over camera, layout, depth, focal placement, and supporting details.
+
+#### Minimal one-variable template
+
+~~~text
+640x360 full-bleed game background of {{scene_description}}. Artwork reaches all four edges of the canvas.
+~~~
+
+This is the preferred starting point when the scene description already contains the subject, placement, and style requirements.
+
+#### Compact guardrail template
+
+~~~text
+640x360 full-bleed game background of {{scene_description}}. Artwork reaches all four edges of the canvas. No border, margin, frame, letterboxing, mirrored layout, split composition, duplicate main subject, or unintended extra room/bay.
+~~~
+
+Use this when the scene has a known duplication risk. The positive full-bleed sentence is the part supported by the follow-up tests; the negative clauses are additional probabilistic guidance, not structural enforcement.
+
+#### Verbose structured template
+
+~~~text
+Full-bleed 640x360 game background. Artwork fills the entire canvas and reaches all four edges. No white border, empty margin, inset frame, or letterboxing.
+
+One continuous {{environment_type}} in {{setting}}, viewed from {{camera_view}}. Use {{composition_layout}} with clear {{depth_structure}}. The primary focal element is {{primary_focal_element}}, placed at {{focal_placement}}.
+
+Include {{secondary_elements}} as supporting details only. Use {{materials_and_textures}}, {{lighting}}, {{color_palette}}, and {{atmosphere}} to establish {{mood}}.
+
+Keep the scene as one coherent composition with no mirrored or split layout, no duplicate primary focal element, and no unintended extra rooms or bays. {{special_constraints}}
+~~~
+
+Use the verbose form only when those extra variables change the desired result. For generic backgrounds, prefer the minimal form; for indoor halls, populate the variables with one connected room, continuous walls, one far wall, and one focal object before adding decorative detail.
+
 ## Scope and evidence
 
 The evidence set was:
