@@ -1,6 +1,6 @@
 # PixelLab Documentation Watch Cache
 
-Last reviewed: 2026-06-28.
+Last reviewed: 2026-09-08.
 
 Use this workflow when PixelLab's public REST, MCP, SDK, or setup documentation might have changed and PixelLab Pip needs a repeatable local record before updating the Agent Skill.
 

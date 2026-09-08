@@ -90,7 +90,7 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 
 ## Practical Picking Rule
 
-MCP is a managed-asset tool layer inside an agent that also exposes seven raw-image primitives plus talking-portrait helpers. REST v2 remains the complete HTTP API for the remaining model/version choices, stateless lip sync, and code control.
+MCP is a managed-asset tool layer inside an agent that also exposes twelve raw-image primitives (including the Cleanup family) plus talking-portrait helpers. REST v2 remains the complete HTTP API for the remaining model/version choices, stateless lip sync, and code control.
 
 | Use MCP when | Use REST v2 when |
 |---|---|
@@ -205,7 +205,7 @@ MCP's three model-specific raw-image tools mirror REST's PixFlux, Pixen, and Pro
 
 ### Cleanup
 
-New in the 2026-09-08 refresh. All three are cheap (MCP documents 0.1 generations each) and take one or more same-size frames so an animation or a character's directions stay consistent with each other. REST returns the corrected images synchronously; MCP queues a job retrieved with `get_image`.
+New in the 2026-09-08 refresh. All three are cheap (MCP documents 0.1 generations each). `correct-pixelart` and `reduce-colors` take one or more same-size frames, so an animation or a character's directions stay consistent with each other; `unzoom` takes a single image. REST returns the corrected images synchronously; MCP queues a job retrieved with `get_image`.
 
 | REST v2 | MCP functional counterpart | Parity |
 |---|---|---|

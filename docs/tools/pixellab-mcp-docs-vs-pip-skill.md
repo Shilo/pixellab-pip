@@ -32,7 +32,7 @@ Sources reviewed:
 | Image-role classification | No — lists image params only | Yes — edit / identity / style / mask / palette / frame roles |
 | Localization (non-English requests) | No | Yes — normalize to English, reply in the user's language |
 | Output integrity | No | Yes — "every pixel from PixelLab"; local processing labeled, not passed off as generated |
-| Token footprint | ~97.2k chars (~24.3k est tokens), one flat all-or-nothing document | `SKILL.md` ~49.2k chars (~12.3k est tokens) always, plus 31 `references/*.md` files loaded on demand |
+| Token footprint | ~97.2k chars (~24.3k est tokens), one flat all-or-nothing document | `SKILL.md` ~47.2k chars (~11.8k est tokens) always, plus 31 `references/*.md` files loaded on demand |
 
 Token counts are estimated as chars/4 and re-measured after the 2026-09-08 refresh. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor remains below the flat MCP document.
 
