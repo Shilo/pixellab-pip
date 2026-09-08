@@ -13,15 +13,19 @@ on:
         required: false
         default: ""
 
+# Least privilege by default; the release job below widens only what it needs, so any job added
+# later starts read-only. Scorecard's Token-Permissions check flags a workflow-wide write.
 permissions:
-  contents: write
-  id-token: write # sign the build-provenance attestation via Sigstore
-  attestations: write
+  contents: read
 
 jobs:
   release:
     name: Bump version and release skill
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the version bump commit and tag, and create the release
+      id-token: write # sign the build-provenance attestation via Sigstore
+      attestations: write
     env:
       PYTHONDONTWRITEBYTECODE: "1"
 
