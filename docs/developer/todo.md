@@ -2,6 +2,15 @@
 
 Tracked future work. Not runtime routing; see `../../AGENTS.md` for placement rules.
 
+## Finish aura testing
+
+Complete the remaining paid prompt tests in
+[`../pixellab/pixellab-character-aura-prompt-research-spike.md`](../pixellab/pixellab-character-aura-prompt-research-spike.md):
+prioritize the unresolved transparent-center upright overlay and flexible filled-center upright
+background families, then finish the ground-only control comparison and specialized wordless
+level-up test. Update bundled blueprints only from validated results and record the final evidence
+and recommendations in the research spike.
+
 ## Ship a generic async poll-and-download helper (brainstorm)
 
 **Problem.** `references/job-lifecycle.md` requires agents to retrieve every paid async result —
