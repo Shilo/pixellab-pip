@@ -41,7 +41,8 @@ jobs:
 
       - name: Upload SARIF to Code Scanning
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
-        uses: github/codeql-action/upload-sarif@v3
+        # v4 runs on Node 24; v3 is deprecated in December 2026 and warned on every run.
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: skillspector.sarif
           category: skillspector
