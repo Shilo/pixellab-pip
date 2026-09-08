@@ -423,11 +423,36 @@ jobs:
         env:
           CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }}
         shell: bash
+        # `skill publish` above already requests the latest tag, so this step confirms the audited
+        # version really holds it. ClawHub can answer "Version not found" for a few seconds after the
+        # audit write-back (v1.7.0 hit exactly that, with a "reset in 45s" backoff hint, while the same
+        # call succeeded for v1.6.0). Retry, and accept the tag already being correct — a transient
+        # third-party error must not strand a release whose bump commit and tag are already pushed.
         run: |
-          skill="${{ steps.bump.outputs.skill_name }}"
-          if [ -n "$CLAWHUB_OWNER" ]; then skill="${CLAWHUB_OWNER}/${skill}"; fi
-          npx --yes clawhub@0.23.3 --no-input skill tag \
-            "$skill" "${{ steps.bump.outputs.new_version }}" --tag latest --yes
+          slug="${{ steps.bump.outputs.skill_name }}"
+          version="${{ steps.bump.outputs.new_version }}"
+          skill="$slug"
+          if [ -n "$CLAWHUB_OWNER" ]; then skill="${CLAWHUB_OWNER}/${slug}"; fi
+
+          published_latest() {
+            curl -fsS --max-time 30 "https://clawhub.ai/api/v1/skills/${slug}" 2>/dev/null \
+              | jq -r '((.skill // .).tags.latest) // ""' 2>/dev/null || true
+          }
+
+          for attempt in 1 2 3 4 5; do
+            if npx --yes clawhub@0.23.3 --no-input skill tag "$skill" "$version" --tag latest --yes; then
+              exit 0
+            fi
+            if [ "$(published_latest)" = "$version" ]; then
+              echo "ClawHub latest already points at ${version}; treating the tag call as satisfied."
+              exit 0
+            fi
+            echo "clawhub skill tag attempt ${attempt} failed and latest is not ${version} yet; retrying."
+            sleep $((attempt * 20))
+          done
+
+          echo "ClawHub latest never reached ${version}."
+          exit 1
 
       - name: Create GitHub Release
         env:
