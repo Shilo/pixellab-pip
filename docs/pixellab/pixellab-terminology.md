@@ -19,7 +19,7 @@ PixelLab product labels, endpoint names, editor labels, and SDK method names can
 | `S-XL`, `M-XL`, `S-M`, `M-L` | User-facing size/tool labels. Do not use them as standalone technical route selectors. |
 | `create tiles` | Usually individual tile variants or tile-pro workflows. Clarify when the user might mean a full terrain tileset. |
 | `create tileset` | Usually terrain/platformer tileset workflows. Clarify when the user might mean individual tile variants. |
-| `map` | Could mean a generated map image, map object, tilemap, terrain tileset, or website Map Workshop project. Ask only when context is insufficient. |
+| `map` | Could mean a generated map image, map object, tilemap, terrain tileset, an MCP-managed tile map (`create_map`/`edit_map`/`view_map`), or a website Map Workshop project. Ask only when context is insufficient. |
 | `object` vs `character` | Infer character for people, NPCs, creatures, body templates, or identity/state animation. Infer object for props, items, furniture, and weapons. |
 
 ## Provider Claims

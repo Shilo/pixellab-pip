@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-08-09 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
+Last reviewed: 2026-09-08 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
+
+> **2026-09-08 schema refresh.** Four measured limits moved and one conflict closed: `create-tiles-pro` `tile_size` max dropped 256 → **128**, matching its prose and the MCP tool; `create-1-direction-object` `size` min dropped 32 → **16** and `create-8-direction-object` 32 → **24**; `image-to-pixelart` input max rose 1280 → **2048** and its `output_size` max 320 → **512**. The probe results recorded against the old floors were correct when run and are kept as history, not as current bounds. The refresh also added the Cleanup endpoints and `edit-image-pixen` (see [Edit / Convert / Utility](#rest-v2-limits--edit--convert--utility)) and a new `override_frame_size` on `create-character-state`.
 
 > **All maxima in this document were measured on a Tier 2 ("Pixel Artisan") subscription.** PixelLab gates max image *size* by plan tier (a soft limit under the hard schema caps). See [Tier / Plan Size Gating](#tier--plan-size-gating-soft-limits) — lower tiers cap several endpoints below the numbers below.
 
@@ -61,7 +63,7 @@ Not live-tested (would cost credits, because the value is valid and starts a rea
 - **`8px` icons, items, and tilesets are not supported** (empirically confirmed — see verification section). Every relevant *generation* field has a schema minimum of `16` (or an `enum` of `[16, 32, 64]`), so an `8px` request is rejected with a `422` at validation, not padded up. The only place `8` is a legal value on a *generation* route is `generate-font-pro.glyph_px` (`enum [8, 16, 32, 64]`); the non-generation utility route `remove-background` also accepts `8` (its per-axis min is `1`), but that is post-processing an existing image, not generating one.
 - **`16px` icons, items, and tilesets are supported at the API level.** The remaining `16px` risk is semantic quality for non-tile item sprites (they drift larger), already characterized in the 16px spike — not a hard-limit problem.
 - **The `32x32` minimum users hit in the PixelLab Aseprite extension is a client-side editor limit,** not an API floor. Different editor tools apply different local minimums.
-- Maxima vary widely and are often larger than the product wording implies (for example `generate-image-v2` per-axis max is `792×688`, not `512`). `create-tiles-pro` **validates** up to `256` while its own prose and the MCP tool both say `128` — accepted at validation is not the same as generates; treat `128` as the trustworthy ceiling until `>128` is paid-tested.
+- Maxima vary widely and are often larger than the product wording implies (for example `generate-image-v2` per-axis max is `792×688`, not `512`). `create-tiles-pro` used to **validate** up to `256` while its own prose and the MCP tool both said `128`; the 2026-09-08 schema lowered the field maximum to `128`, so all three now agree and the conflict is closed.
 
 ## Client-Side (Aseprite Extension) vs API
 
@@ -98,7 +100,7 @@ Not fake — these match the real API floor, so prefer them for small sizes:
 
 - Create image ▸ `Create S-XL image (pro)` — allows 16×16, matching `generate-image-v2` (confirmed min 16, with a committed 16×16 showcase atlas). This is the editor's genuine 16px path; 16px is **not** REST-only.
 - Inpaint ▸ `Inpaint` — min 16; Map ▸ `Create isometric tile` — min 16×16.
-- Create image ▸ `Create Image S-XL (New)` (Pixen) — min 32, but that matches `create-image-pixen`'s documented min area 32×32, so it is an honest floor, not a fake block.
+- Create image ▸ `Create Image S-XL (New)` (Pixen) — min 32. This matched `create-image-pixen`'s then-documented "min area 32×32" prose; that prose now reads "min side 16 … must be square when either side is below 32", so the editor's 32 floor is stricter than the endpoint, not a mirror of it.
 
 Blocked with an unverified backend limit (caveated, not confirmed fake): `Create character with same style` (< 128×128), `Create M-XL image` (modifier ≤ 150×150), Map ▸ `Extend map (old)` (exactly 64×64), Inpaint ▸ `Inpaint M-L (pixpatch v2)` (selection ≥ 32×32). On the max side, some editor tools cap at 200×200 or 128×128, below the `generate-image-v2` API max of 792×688.
 
@@ -110,7 +112,7 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 |---|---|---|---|---|
 | `generate-image-v2` | `image_size` | 16×16 | width 792, height 688 | Effective max is aspect-dependent: square 512×512, 16:9 688×384; long axis up to 792 at extreme ratios. `style_image` sets pixel size. **`no_background` defaults to `true` → transparent sky + side bars unless you set `no_background: false` (then opaque full-bleed; verified 0 bars at 688×384).** See empirical subsection below. |
 | `create-image-pixen` | `image_size` | 16×16 | 768×768 | Total area at most **512×512**; width and height **divisible by 4**; width must equal height whenever either side is below 32. (768 per axis only reachable at extreme aspect where area ≤ 512×512.) |
-| `create-image-pixflux` | `image_size` | 16 per axis, but **area floor rejects `16×16`** | 400×400 | Area 32×32 to 400×400 — **enforced at generation: `16×16` → `422 "Canvas must be size 32x32 area or larger"` (probe-confirmed 2026-07-15), despite the schema's `minimum: 16`. Unlike `create-image-pixen`, which shares the same "Area 32×32" prose yet does generate at `16×16`** (see line below). Transparent background blanks area over 200×200. |
+| `create-image-pixflux` | `image_size` | 16 per axis, but **area floor rejects `16×16`** | 400×400 | Area 32×32 to 400×400 — **enforced at generation: `16×16` → `422 "Canvas must be size 32x32 area or larger"` (probe-confirmed 2026-07-15), despite the schema's `minimum: 16`. Unlike `create-image-pixen`, whose prose (since the 2026-09-08 refresh) documents a min side of 16 and which does generate at `16×16`** (see line below). Transparent background blanks area over 200×200. |
 | `create-image-pixflux-background` | `image_size` | 16×16 | 400×400 | Area 32×32 to 400×400. `no_background` defaults to `false` (keeps the scene); alternative for opaque edge-to-edge backgrounds ≤400×400 (verified 0px bars, 0% transparency at 400×224, ~$0.0065). |
 | `create-image-bitforge` | `image_size` | 16×16 | 200×200 | Max area 200×200. Skeleton keypoints best at 16/32/64. |
 | `generate-with-style-v2` | derived from `style_images` | 16×16 | 512×512 | Square output; the largest dimension across 1–4 style images determines the size. Non-square style images are centered. Output buckets: 16–42 → 64 images, 43–85 → 16, 86–170 → 4, 171–512 → 1. |
@@ -171,19 +173,20 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 |---|---|---|---|
 | `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 32, 64]`, default 16 | `standard` mode: 16/32. `pro` mode: 16/32/64 plus shape controls. Optional `shape_style` (`square`/`round`) supports 16/32 only. |
 | `create-tileset-sidescroller` / `tilesets-sidescroller` | `tile_size` (w/h) | `enum [16, 32]`, default 16 | No 64 option. |
-| `create-tiles-pro` | `tile_size` (int) | schema 16–**256**, prose 16–**128**, default 32 | **Conflict — treat 128 as the ceiling.** The field schema says `16-256` (257 → `422`), but the endpoint prose says "Supported tile sizes: 16-128px" and the MCP tool caps at 128. Passing validation ≠ generating; only ≤128 is corroborated by all three. 32 recommended. `tile_height` 16–256 for non-square; `style_images` override shape/size. |
+| `create-tiles-pro` | `tile_size` (int) | 16–**128**, default 32 | Schema, prose, and the MCP tool agree since the 2026-09-08 refresh (the schema previously allowed 256). Connectable sets (`tile_feature`) have tighter per-shape ranges, and square top-down roads are exactly 32. 32 recommended. `tile_height` 16–256 for non-square; `style_images` override shape/size. |
 | `create-isometric-tile` | `image_size` | 16×16 to 64×64 | Sizes above 24×24 documented as better. `isometric_tile_size` default 16 (recommended 16 or 32). |
 
 ## REST v2 Limits — Characters And Objects
 
 | Endpoint | Field | Min | Max | Notes |
 |---|---|---|---|---|
-| `create-character-v3` | `image_size` | **32** (REST schema only; prose says 16) | 256 | Probe-confirmed: 8, 16, 24, 31 all → `422 ge 32`; 32 generates. **The 32 floor is REST-side validation, not a pipeline limit** — MCP `create_character(mode="v3", size=16)` runs the same v3 mode and generates (see MCP section), so the prose's "16" reflects what the model does and the REST schema is stricter than the pipeline. Reference mode advisory (model picks). `reference_image` max 256×256. Canvas padded ~2× **and capped at 256** (32 → 64 canvas, confirmed). |
+| `create-character-v3` | `image_size` | **32** | 256 | Probe-confirmed: 8, 16, 24, 31 all → `422 ge 32`; 32 generates. **The 32 floor is REST-side validation, not a pipeline limit** — MCP `create_character(mode="v3", size=16)` runs the same v3 mode and generates (see MCP section), so the REST schema is stricter than the pipeline. (Its prose said "16-256" until 2026-09-08, when it was corrected to "32-256" to match the schema; the MCP-generates-at-16 finding is unaffected.) Reference mode advisory (model picks). `reference_image` max 256×256. Probed canvas 32 → 64, which the current documented rule (a non-square result is padded to a `max(width, height)` square before rotation and stored at that square size) does not account for — the earlier "padded ~2× for animation room" wording was replaced in the 2026-09-08 refresh, so treat a returned canvas as run evidence, not a contract. |
 | `create-character-with-4-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.007, canvas 24×24). Per-direction reference images must match `image_size`. |
 | `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.009, canvas 24×24, 8 rotations). `standard` (1 gen) vs `pro` (20–40 gens). |
-| `create-character-pro` | `image_size` | 32×32 | 168×168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. `reference_image` max 168×168; `concept_image` max 1024×1024. Canvas padded ~2× (32 → 60, confirmed). |
-| `create-1-direction-object` | `size` | 32 | 256 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. Default 64. Mutually exclusive with `style_images` (max 256×256 each); size drives object count. |
-| `create-8-direction-object` | `size` | 32 | 168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. Default 64; the 8-rotation pipeline rejects anything larger than 168. |
+| `create-character-state` | `override_frame_size` | 32×32 | 256×256 | Schema-enforced via the new `FrameSize` model. Optional larger canvas for the new state, for edits that add something big (a weapon, wings). Both sides must be multiples of 4 and no smaller than the source character. Omit to keep the source size. MCP splits it into `override_width`/`override_height`. |
+| `create-character-pro` | `image_size` | 32×32 | 168×168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. `reference_image` max 168×168; `concept_image` max 1024×1024. Probed canvas 32 → 60, consistent with the current documented rule (rotations share a square canvas at least `max(width, height)` that may grow up to 256 to fit generated content; the earlier "padded ~2×" wording was replaced in the 2026-09-08 refresh). |
+| `create-1-direction-object` | `size` | **16** | 256 | Lowered from 32 in the 2026-09-08 refresh — the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate the change and 16 is now in range; 8 is still below the floor. Default 64. Mutually exclusive with `style_images` (max 256×256 each); size drives object count. |
+| `create-8-direction-object` | `size` | **24** | 168 | Lowered from 32 in the 2026-09-08 refresh; the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate it. Docs state that below 24 the eight angles stop being distinguishable — use `create-1-direction-object` for 16px. Default 64; the 8-rotation pipeline rejects anything larger than 168. |
 
 ### Character Floors Split By Pipeline (Probe-Confirmed 2026-07-15)
 
@@ -250,10 +253,14 @@ An in-between size (48, 96, 150) is **accepted at validation** — untested whet
 | `edit-images-v2` | `image_size` | 32×32 | 512×512 | 1–16 input images depending on size. |
 | `inpaint` | `image_size` | 16×16 | 200×200 | Max area 200×200. |
 | `inpaint-v3` | `inpainting_image` | 32×32 | 512×512 | Mask must match dimensions. `context_image` (deprecated): up to 1024×1024. **Prose-enforced, not schema-enforced** — the size fields are `minimum: 1`, no `maximum`, so an out-of-range size passes validation and fails at generation. Untested (a probe would cost a Pro generation). |
-| `image-to-pixelart` | `image_size` (input) | 16×16 | 1280×1280 | Output `output_size` 16×16 to 320×320; recommended output ≈ ¼ input. |
+| `image-to-pixelart` | `image_size` (input) | 16×16 | **2048×2048** | Both maxima raised in the 2026-09-08 refresh (input from 1280, output from 320). Output `output_size` 16×16 to **512×512**; recommended output ≈ ¼ input. |
 | `image-to-pixelart-pro` | (auto) | — | — | No output-size field; native pixel scale detected and downscaled automatically. |
 | `resize` | `reference_image_size`, `target_size` | 16×16 | 200×200 | Both source and target, area 16×16 to 200×200. |
 | `remove-background` | `image_size` | **1×1** | 400×400 | Lowest minimum in the API; max area 400×400. |
+| `edit-image-pixen` | source `image`; `width`/`height` | source ≥16×16 area | source **256 per side**; target **area 256×256** | **Prose/endpoint-enforced, not schema-enforced** — `width`/`height` are `minimum: 1` with no `maximum`, and the endpoint documents `400` (not `422`) for an out-of-range size. The two canvases are bounded differently: the source is capped per side, the target by area, so a 128×512 target is valid while 320×320 is not. Target defaults to the source size and the model re-renders at it rather than rescaling. |
+| `correct-pixelart` | `images[]` | — | area **1024×1024** | **Prose-enforced** — the request schema declares no size field. Does not resize; all frames in a call must share one size. Unzoom an upscaled sprite first. |
+| `reduce-colors` | `images[]` | — | **512×512 total across all frames** | **Prose-enforced** — the request schema declares no size field. A shared budget, not per frame — sixteen 64×64 frames or four 128×128. All frames must share one size. |
+| `unzoom` | `image` | **256×256** | area **2048×2048** | **Prose-enforced** — the request schema declares no size field; the endpoint documents `422` for too small or too large. The minimum is real: grid detection needs enough pixels to find the lattice. Output is opaque — transparency is composited onto white. |
 
 ## REST v2 Limits — UI, Fonts, Maps
 
@@ -278,14 +285,14 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_topdown_tileset` | `tile_size` | `{16, 16}` | **none declared** — plain integer object; "16 or 32 for standard; 64 requires `mode='pro'`" is prose only | REST declares `enum [16,32,64]`; MCP does not, so a bad value is not caught by the tool schema |
 | `create_sidescroller_tileset` | `tile_size` | `{16, 16}` | **none declared** — prose "16 or 32 pixels" only | REST declares `enum [16,32]`; MCP does not |
 | `create_isometric_tile` | `size` | 32 | 16–64 | matches REST `image_size`. MCP exposes no `isometric_tile_size` — it has `tile_shape` instead |
-| `create_tiles_pro` | `tile_size` | 32 | **16–128** | Stricter than REST's `16–256` schema, but matches REST's own prose. Do not route to REST to exceed 128 — untested; see the REST row. `tile_height` 16–256 on both |
+| `create_tiles_pro` | `tile_size` | 32 | **16–128** | Matches REST since the 2026-09-08 refresh, when the REST schema dropped from 256 to 128. `tile_height` 16–256 on both |
 | `create_ui_asset` | `width` / `height` | 256 | 192–688 | matches |
 | `create_portrait_character` | `result_size` | 64 | enum 16/32/48/64/128/160 | matches |
 | `create_font` | `glyph_px` | 16 | enum 8/16/32/64 | matches; retired `image_size` is absent on both surfaces |
-| `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 32–256 / 32–168 | matches |
+| `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 16–256 / 24–168 | matches (both floors lowered in the 2026-09-08 refresh) |
 | `create_map_object` | `width` / `height` | **`null`** — mandatory in basic mode, auto-detected from `background_image` | 32–400 | bound matches; **default diverges** — REST `map-objects` defaults `image_size` to 128×128, MCP has none. MCP prose also carries the mode split REST omits: basic max 400×400, inpainting max 192×192 |
 | `create_image_pixflux` | `width` / `height` | 128 / 128 (or the init image's size) | 16–400 | Matches REST `create-image-pixflux`'s `image_size`; init images may use URL or base64. MCP prose adds a total-area rule REST omits: 32×32 to 400×400 |
-| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, while only REST documents the square requirement whenever either side is below 32. Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose) |
+| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, and since the 2026-09-08 refresh both also document the square requirement whenever either side is below 32 (previously REST only). Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose) |
 | `create_image_pro` | `width` / `height` | 128 / 128 | 16–**no maximum declared**; prose: "Max depends on aspect ratio (512x512 square, 688x384 for 16:9)" | Prose gives only two aspect buckets; REST `generate-image-v2` declares width ≤ 792 / height ≤ 688 — verify against REST if an aspect outside square/16:9 is needed |
 | `edit_image` | each target image URL/base64 | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` |
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
@@ -293,7 +300,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_path_tiles` | `tile_size` | 32 | `square_topdown`: exactly **32**; `isometric`: **48–96** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "roads"` — check that schema's bounds if exact REST-side limits matter) |
 | `create_building_kit` | `tile_size` / `wall_tiles` | 32 / 2 | `isometric`: **32–96**; `square_topdown`/`oblique`: **16–96**; `wall_tiles`: **1–3** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "building"`) |
 
-**MCP is not merely a wrapper over the REST bounds — it diverges in both directions.** `create_character` is *looser* (generates at `size=16` in v3/pro where REST returns `422 ge 32`), `create_tiles_pro` is *stricter* (128 vs 256), and the two tileset tools declare no bound at all. Check the MCP schema and the REST schema separately; neither is authoritative for the other.
+**MCP is not merely a wrapper over the REST bounds — it diverges in both directions.** `create_character` is *looser* (generates at `size=16` in v3/pro where REST returns `422 ge 32`) and the two tileset tools declare no bound at all. The `create_tiles_pro` divergence closed in the 2026-09-08 refresh: REST dropped to 128 and now matches MCP. Check the MCP schema and the REST schema separately; neither is authoritative for the other.
 
 ## For The Goal: 8px And 16px Icons, Items, Tilesets
 

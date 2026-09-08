@@ -2,7 +2,9 @@
 
 Last reviewed: 2026-07-06.
 
-Purpose: capture research findings on reliably downscaling AI-generated "pixel art" (from GPT-image, Gemini/Imagen, etc.) back to a crisp low-resolution grid, so `pixellab-pip` can honestly route "downscale", "unzoom", "remove upscaling", and "fix mixels" requests through the local-tooling fallback slot in [`editor-only-utilities.md`](../../skills/pixellab-pip/references/editor-only-utilities.md) — or decline when recovery is impossible.
+Purpose: capture research findings on reliably downscaling AI-generated "pixel art" (from GPT-image, Gemini/Imagen, etc.) back to a crisp low-resolution grid, so `pixellab-pip` can honestly route "downscale", "unzoom", "remove upscaling", and "fix mixels" requests — or decline when recovery is impossible.
+
+> **Superseded premise.** This spike was written when PixelLab had no public unzoom route and the fallback lived in `editor-only-utilities.md`. The 2026-09-08 refresh added `POST /unzoom` and MCP `unzoom_image`, and that fallback slot was retired. The primary route is now the PixelLab endpoint; a local snapper is only a fallback below it — for inputs under its 256×256 minimum, or when its opaque output is unacceptable and `remove-background` cannot recover the cutout. The grid-recovery findings below still stand on their own.
 
 This is a code-and-literature spike, not a live-generation spike. It reads the full source of the two dominant open-source tools, identifies why they fail on a representative image, and proposes what a genuinely more reliable system would do. No helper was built.
 
@@ -75,7 +77,7 @@ Supporting refinements: per-seam local refinement around the autocorrelation-pre
 ## Open Questions / Next Steps
 
 - **Measure, don't assert.** For any specific image, run the autocorrelation griddiness test and inspect the profile before claiming a grid exists. The necromancer above is asserted Case B on visual evidence; that should be confirmed empirically on the file, not assumed.
-- Decide packaging: a local helper wired into the `editor-only-utilities` unzoom fallback vs. a standalone script. Undecided.
+- Decide packaging: a local helper below the `POST /unzoom` route vs. a standalone script. Undecided.
 - Confirm whether PixelLab's own unzoom is snapping or re-synthesis; if the latter, it is not comparable to a local snapper and should not be benchmarked as one.
 
 ## Sources

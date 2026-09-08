@@ -8,7 +8,7 @@ Label semantics (`Pro` expensive; `v3`/`new`/Pixen/PixFlux/BitForge cheap-family
 
 ## Current Cost Findings
 
-Checked against official REST v2 OpenAPI and MCP docs on 2026-08-06:
+Checked against official REST v2 OpenAPI and MCP docs on 2026-09-08:
 
 - Character 8-direction standard mode: 1 generation. Character `pro` / `create-character-pro`: 20-40 generations depending on size.
 - `create-character-v3`: `ceil(width * height * 8 / 65536)` generations when rotating a reference image; `1 + ceil(s * s * 8 / 65536)` from scratch (s = max dimension). Cost is size-driven — read the output size before estimating.
@@ -19,6 +19,8 @@ Checked against official REST v2 OpenAPI and MCP docs on 2026-08-06:
 - `create-ui-asset` (MCP and REST): Pro, 20-40 generations.
 - Pro-labeled REST summaries: `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `image-to-pixelart-pro`, `edit-animation-v2`, `interpolation-v2`, `transfer-outfit-v2`, `inpaint-v3`, `edit-images-v2`, `generate-8-rotations-v2`. Treat as higher-cost even without exact counts. MCP `edit_image` and `inpaint_image` are these same Pro routes (`edit-images-v2`/`inpaint-v3`, confirmed by field-level schema match, not the base `edit-image`/`inpaint`) — treat them as Pro-cost even when called via MCP; MCP `create_image_pro` is likewise `generate-image-v2`.
 - MCP `edit_image` / REST `edit-images-v2` are Pro: outputs up to 256px cost 20 generations, 257-314px cost 25, and 315-512px cost 40 per accepted call.
+- Cheap edit and convert: MCP `edit_image_pixen` / REST `edit-image-pixen` cost 1 generation (source ≤256px per side, target area ≤256×256), and MCP `image_to_pixelart` / REST `image-to-pixelart` cost 1 generation. The cleanup family — `unzoom_image`/`unzoom`, `correct_pixelart`/`correct-pixelart`, `reduce_colors`/`reduce-colors` — costs 0.1 generations per call, and each takes several same-size frames in one call, so batching frames is both cheaper and more consistent than looping.
+- Tilesets cost more than one generation: MCP documents `create_topdown_tileset` standard mode at 1-4 generations (usually 3 or 4) and `create_sidescroller_tileset` at 2 or 3. Do not quote a tileset as a 1-generation route.
 - Non-Pro-labeled image routes: MCP `create_image_pixen` and `create_image_pixflux` each cost 1 generation; their REST counterparts are `create-image-pixen` and `create-image-pixflux` (`-background` is a second URL for the identical PixFlux schema, same tier). `create-image-bitforge` is REST-only with no MCP tool. `animate-with-text-v3`/MCP `animate_image` (documented cost `ceil(width * height * frame_count / 65536)` generations) and `generate-8-rotations-v3` are the cheap v3 animation/rotation family.
 - `frame_count` is a documented cost driver only for the v3 animation family (the formula above); elsewhere do not lower it as a cost optimization unless docs or a verified pricing response show frame count changes cost. Change documented cost drivers instead: route family, mode, direction count, candidate count, enhancement use, size.
 - Talking portraits: portrait attachment, talking GIF rendering, and lip-sync plans are free; `create_vocal_animation` / `POST /vocal-animation` is the only paid-plan generation step and has no exact published unit price in the reviewed docs. Generate one mood per approved call.
@@ -37,8 +39,10 @@ If exact current costs matter, refresh official docs or run a small balance-befo
 | Objects | For standalone visuals that don't need managed object IDs: a general-image/Pixen/PixFlux or isometric-tile route, labeled as not creating a managed object; map-object route when a map object is specifically needed (measure cost) | User accepts Pro Tools 20-40 generations |
 | Object animation | `mode='v3'` (documented default) | User explicitly approves Pro |
 | UI | Non-Pro general-image route for loose UI images (explain weaker structure); `generate-ui-v2` only if its cost is acceptable | Structured `create_ui_asset`/`create-ui-asset` is required and approved |
-| Image-to-pixel-art | `image-to-pixelart` when the size fits its limits | Pro needed and approved |
-| Inpaint/edit | Base `inpaint` / non-Pro `edit-image` **via REST** — MCP's `edit_image`/`inpaint_image` are Pro-tier only (`edit-images-v2`/`inpaint-v3`), so there is no cheap MCP path for this | Pro capabilities required and cost accepted, or MCP-first with no REST fallback available |
+| Image-to-pixel-art | `image-to-pixelart`/`image_to_pixelart` (1 generation) when the size fits its limits | Pro needed and approved |
+| Edit | MCP `edit_image_pixen` (1 generation) when the source is ≤256px per side and the target area ≤256×256; otherwise base `edit-image` via REST. MCP `edit_image` is Pro-tier (`edit-images-v2`) | Larger canvas, multi-image batch, or reference-mode edit is required and Pro cost accepted |
+| Inpaint | Base `inpaint` **via REST** — MCP's `inpaint_image` is Pro-tier only (`inpaint-v3`), so there is still no cheap MCP path for masked regeneration | Pro capabilities required and cost accepted, or MCP-first with no REST fallback available |
+| Palette reduction, clean-up, unzoom | MCP `reduce_colors`/`correct_pixelart`/`unzoom_image` or their REST twins, 0.1 generations — cheaper than regenerating, and the only PixelLab-native way to fix an existing frame's palette or stray pixels | Never; there is no Pro variant |
 
 When choosing a cheap route, name the tradeoff plainly (lower cost, possibly less candidate variety or weaker Pro-quality detail) and follow `usage-reporting.md` for cost reporting.
 

@@ -51,6 +51,10 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Tool label | Endpoint | Useful for | Estimated price |
 |---|---|---|---|
 | Convert image to pixel art | `POST /v2/image-to-pixelart` | Regular image to pixel art | `64x64 $0.006`; `128x128 $0.00666`; `256x256 $0.01164` |
+| Edit image (pixen) | `POST /v2/edit-image-pixen` | Text-instruction edit on the Pixen model; source ≤256px per side, target area ≤256x256 | not covered by the pricing rows recorded here — the endpoint documents a cost of 1 generation |
+| Correct pixel art | `POST /v2/correct-pixelart` | Sharpen edges, drop stray pixels, tighten palette without resizing | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
+| Reduce colors | `POST /v2/reduce-colors` | Quantize one or more same-size frames onto one shared palette | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
+| Unzoom pixel art | `POST /v2/unzoom` | Recover native-resolution pixel art from an upscaled image | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Convert image to pixel art (Pro) | `POST /v2/image-to-pixelart-pro` | Pro image-to-pixel-art conversion, exact-size flexibility beyond the base route's limits | no separate USD row found on the public pricing page — treat as Pro-tier cost (comparable to the other `up to 256x256 $0.095`/`341x341 $0.125`/`512x512 $0.185` Pro rows above) until confirmed |
 | Resize | `POST /v2/resize` | Pixel-art-aware resizing | `64x64 $0.01788`; `128x128 $0.01777` |
 | Remove background | `POST /v2/remove-background` | Transparent PNG foreground extraction | `64x64 $0.00554`; `128x128 $0.00554`; `256x256 $0.00593` |

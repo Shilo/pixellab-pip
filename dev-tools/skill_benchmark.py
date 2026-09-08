@@ -177,7 +177,8 @@ SCENARIOS = [
         "id": "route-object-prop",
         "task": "With PixelLab, I want a standalone treasure chest prop for my dungeon.",
         # \b keeps create_object_state (an edit variant) from matching; create_map_object is
-        # deliberately not rewarded — map objects auto-delete after 8 hours, wrong for a kept prop.
+        # deliberately not rewarded — it makes a map decoration, not a managed object with states,
+        # animations and tags, which is what a reusable prop needs.
         "checks": {"object": r"create[_-][18][_-]direction[_-]object|create[_-]object\b"},
         "refs_any": [],
     },

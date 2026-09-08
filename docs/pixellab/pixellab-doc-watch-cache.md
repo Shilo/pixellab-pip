@@ -138,7 +138,7 @@ Start with the report summary table. Important signals:
 - `raw_changed`: the upstream file bytes changed but the watcher's normalized summary did not. This can recur when upstream serves dynamic documentation bytes. It is report-only, writes `normalized_change: false` plus manual-review guidance in the changes JSON, and does not make `refresh` exit `2`. Inspect raw before/after content if the source matters for a current task.
 - `metadata_changed`: OpenAPI metadata such as title, version, or description changed while tracked paths and schemas stayed the same. This is visible in the report but does not make `refresh` exit `2`.
 
-The normalized OpenAPI summary is a routing and schema-drift heuristic, not a full compatibility proof. When exact response bodies, nested inline request schemas, or subtle field behavior matter, inspect `latest/raw/rest-openapi.json` or the relevant snapshot directly.
+The normalized OpenAPI summary is a routing and schema-drift heuristic, not a full compatibility proof. It records each path's operation id, request schema names, response codes, summary, and tags, but not the operation's own `description`, so a path whose only change is its documented constraints, limits, or usage guidance will not appear under `modified_paths`. Field-level descriptions *are* kept inside the compacted schemas, so a changed field doc still surfaces under `modified_schemas`. When exact response bodies, nested inline request schemas, documented limits, or subtle field behavior matter, inspect `latest/raw/rest-openapi.json` or the relevant snapshot directly.
 
 Every report includes an Agent Skill impact checklist. Review the listed files when a change affects routing, fields, limits, or public support status.
 

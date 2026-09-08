@@ -4,6 +4,8 @@ Generated at UTC: 2026-06-28T11:04:28Z
 
 Scope: focused research on PixelLab UI generation after an outdated routing claim that shape pieces were not available through public API or MCP surfaces. Sources were current official REST v2 OpenAPI, current MCP docs, the active MCP tool schema exposed through an MCP-capable agent host, and existing repository research. No credit-spending generation was run.
 
+> **2026-09-08 update.** The two MCP field gaps this research found have closed: MCP `create_ui_asset` now exposes `style_image_base64` (a base64 PNG/JPEG, ideally ≤1024px per side, from which only the art style is copied — never its content or layout) and `project_id`. The "prefer REST because it has the fuller field set" recommendation below therefore no longer holds on field coverage alone; prefer REST for exact schemas, code, and polling control, and MCP `create_ui_asset` freely in an MCP-first workflow. Statements below marked as MCP gaps are kept as the state at the time of the original pass.
+
 ## Verdict
 
 The previous shape-piece limitation is outdated for the current public surface.
@@ -62,10 +64,10 @@ MCP lifecycle tools:
 - `list_ui_assets(limit?, offset?)`
 - `delete_ui_asset(ui_asset_id, confirm?)`
 
-MCP gaps relative to REST `POST /create-ui-asset`:
+MCP gaps relative to REST `POST /create-ui-asset` (as of the original pass; both closed in the 2026-09-08 refresh — see the update at the top):
 
-- Current MCP schema does not expose `style_image`.
-- Current MCP schema does not expose `project_id`.
+- ~~Current MCP schema does not expose `style_image`.~~ MCP now has `style_image_base64`.
+- ~~Current MCP schema does not expose `project_id`.~~ MCP now has `project_id`.
 - MCP docs list `pieces` but do not describe the piece schema in detail; the live tool schema and REST OpenAPI do.
 
 Use MCP when the agent is already working through PixelLab MCP and the request can be satisfied by the overlapping fields. It is the convenient route, not the most complete route.
@@ -109,7 +111,7 @@ Lifecycle endpoints:
 | `DELETE /ui-assets/{ui_asset_id}` | Delete a UI asset. |
 | `GET /background-jobs/{job_id}` | Generic background job status. Useful because the create response includes `background_job_id`. |
 
-Use REST `create-ui-asset` as the default structured UI route for an agent skill that can call either MCP or REST. It has the most complete documented control surface, including `style_image`, `project_id`, exact request/response schemas, and standard REST polling.
+Use REST `create-ui-asset` as the default structured UI route for an agent skill that can call either MCP or REST. It has the most complete documented control surface, including exact request/response schemas and standard REST polling. (Its `style_image` and `project_id` advantage ended with the 2026-09-08 refresh, when MCP gained both.)
 
 ## Option 3: REST `POST /generate-ui-v2`
 
@@ -225,13 +227,13 @@ Use `elements` when rough structure is enough. Use `pieces` when layout geometry
 | Shape `pieces` | Yes | Yes | No |
 | Named `elements` | Yes | Yes | No |
 | Default full-panel shape | Yes | Yes | No |
-| `style_image` | Yes | Not in current MCP schema | No |
+| `style_image` | Yes | Yes (`style_image_base64`, since the 2026-09-08 refresh) | No |
 | `concept_image` | No | No | Yes |
 | `color_palette` text hint | Yes | Yes | Yes |
 | `seed` | Yes | Yes | Yes |
 | `no_background` | Yes | Yes | Yes |
 | `name` | Yes | Yes | No |
-| `project_id` | Yes | Not in current MCP schema | No |
+| `project_id` | Yes | Yes (since the 2026-09-08 refresh) | No |
 | Small raw UI element generation | Possible, but structured-panel oriented | Possible, but structured-panel oriented | Best fit |
 | Exact API/server integration | Best fit | Possible only through MCP host | Best fit for raw generation |
 
@@ -241,7 +243,7 @@ REST `POST /create-ui-asset` and MCP `create_ui_asset` should be treated as the 
 
 Use REST `POST /create-ui-asset` as the better default when an agent skill can call both because:
 
-- REST exposes the fuller documented field set: `pieces`, `elements`, `style_image`, `color_palette`, `no_background`, `seed`, `name`, and `project_id`.
+- REST exposes the fuller documented field set: `pieces`, `elements`, `style_image`, `color_palette`, `no_background`, `seed`, `name`, and `project_id`. (Since 2026-09-08 MCP covers all of these too, so this point now rests on schema exactness rather than coverage.)
 - REST has explicit OpenAPI request and response schemas.
 - REST integrates cleanly into backend code, batch scripts, tests, and logs.
 - REST gives both `background_job_id` and `ui_asset_id`, with documented asset polling through `GET /ui-assets/{ui_asset_id}`.
@@ -267,12 +269,12 @@ When a user asks whether UI shapes can be controlled:
 1. Say yes, through `create_ui_asset` or REST `/create-ui-asset`.
 2. Do not route shape-piece requests to `/generate-ui-v2`.
 3. Prefer REST `/create-ui-asset` by default when the agent can call both MCP and REST for structured UI assets.
-4. Prefer MCP `create_ui_asset` when the user is in an MCP-first workflow and the request does not need REST-only fields such as `style_image` or `project_id`.
+4. Prefer MCP `create_ui_asset` in an MCP-first workflow; since the 2026-09-08 refresh it also carries `style_image_base64` and `project_id`, so neither forces a switch to REST.
 5. Treat website/editor endpoints as manual/editor surfaces unless official REST/MCP docs expose the same capability.
 
 ## Superseded documentation notes
 
-Older repository docs may contain now-superseded statements such as "No direct hosted MCP UI tool found" or "no public layout-template endpoint found." As of this research pass, current MCP exposes `create_ui_asset`, and current REST OpenAPI exposes `/create-ui-asset` with `pieces`.
+Older repository docs may contain now-superseded statements such as "No direct hosted MCP UI tool found" or "no public layout-template endpoint found." As of this research pass, current MCP exposes `create_ui_asset`, and current REST OpenAPI exposes `/create-ui-asset` with `pieces`. Statements in this file that call `style_image` or `project_id` REST-only were superseded in the 2026-09-08 refresh.
 
 Keep older generated research docs as historical snapshots unless updating their generated date/scope. For current routing, this file should supersede older UI gap notes.
 

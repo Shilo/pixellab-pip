@@ -128,9 +128,9 @@ the user babysitting a "ask me to check back later" handoff. Keep that boundary 
 - **No-Python / no-shell environments.** A robust "never abandon a paid job" guarantee must degrade
   when the runtime or shell is absent (see step 5's fallback ladder). Decide honestly whether
   "no runtime + short turn + async job" is supported or cleanly refused with an actionable handoff.
-- **Rate limits & expiry.** Honor `429`/`529` + `Retry-After`; MCP download URLs and map objects can
-  expire (map objects auto-delete after 8h) — retrieve promptly and re-fetch stale URLs via the getter,
-  per `references/job-lifecycle.md`.
+- **Rate limits & expiry.** Honor `429`/`529` + `Retry-After`; MCP download URLs can go stale — retrieve
+  promptly and re-fetch stale URLs via the getter, per `references/job-lifecycle.md`. (Map objects no
+  longer auto-delete after 8h; the 2026-09-08 MCP docs describe them as permanent.)
 - **Implement it scanner-safe (if it ships in the skill).** A network+secret+file executable WILL be
   scanned (SkillSpector/ClawHub/VirusTotal/provenance). Build it to read as by-design, like the existing
   `assets/bark.py` / `assets/background_removal.py`: read `PIXELLAB_SECRET` only from the environment and

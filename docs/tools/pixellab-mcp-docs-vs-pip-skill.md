@@ -12,7 +12,7 @@ Sources reviewed:
 
 ## What Each Option Is
 
-**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (76 tools as of the 2026-08-06 refresh, now including talking portraits and lip sync), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. First-party, always current, no install.
+**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (99 tools as of the 2026-09-08 refresh, now including maps, pixel-art cleanup, and job control), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. First-party, always current, no install.
 
 **Pip Agent Skill.** A skill installed into agents that support skills. `SKILL.md` (the always-loaded router) plus 31 on-demand `references/*.md` cover surface selection across MCP, REST v2, website/Pixelorama editor, Aseprite, and legacy v1, plus cost routing, prompt preparation, secret-handling guardrails, and output verification/reporting. The two are complementary, not rivals.
 
@@ -20,7 +20,7 @@ Sources reviewed:
 
 | Area | Official MCP docs | Pip Skill |
 |---|---|---|
-| MCP tool inventory | Yes — full 76-tool list, authoritative | Partial — routing tables; defers to mcp/docs for exact schemas |
+| MCP tool inventory | Yes — full 99-tool list, authoritative | Partial — routing tables; defers to mcp/docs for exact schemas |
 | REST v2 coverage | No — named only as an alternative | Yes — full endpoint router and fallback policy |
 | Non-PixelLab surfaces (Aseprite / Pixelorama / website) | No | Yes |
 | Engine integration guides (Godot / Unity / Python) | Yes — via `pixellab://` resources | No |
@@ -32,9 +32,9 @@ Sources reviewed:
 | Image-role classification | No — lists image params only | Yes — edit / identity / style / mask / palette / frame roles |
 | Localization (non-English requests) | No | Yes — normalize to English, reply in the user's language |
 | Output integrity | No | Yes — "every pixel from PixelLab"; local processing labeled, not passed off as generated |
-| Token footprint | ~81.5k chars (~20.4k est tokens), one flat all-or-nothing document | `SKILL.md` ~45.6k chars (~11.4k est tokens) always, plus 31 `references/*.md` files loaded on demand |
+| Token footprint | ~97.2k chars (~24.3k est tokens), one flat all-or-nothing document | `SKILL.md` ~49.2k chars (~12.3k est tokens) always, plus 31 `references/*.md` files loaded on demand |
 
-Token counts are estimated as chars/4 and re-measured after the 2026-08-06 refresh. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor remains below the flat MCP document.
+Token counts are estimated as chars/4 and re-measured after the 2026-09-08 refresh. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor remains below the flat MCP document.
 
 ## Use the Official MCP Docs When
 

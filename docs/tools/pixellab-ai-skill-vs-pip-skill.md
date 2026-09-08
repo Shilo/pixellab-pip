@@ -34,7 +34,8 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 | Newer v2 routes: `create-ui-asset`, `generate-font-pro`, `portrait-character-pro` | ❌ — absent from its matrix and routing (they post-date its refresh) | ✅ — routed with MCP equivalents (`create_ui_asset`, `create_font`, `create_portrait_character`) |
 | Website/editor (Pixelorama) assistance with permission boundaries | ❌ | ✅ |
 | Aseprite plugin boundary, CLI/Lua workspace integration | ❌ | ✅ — `references/aseprite-cli.md`, `references/aseprite-mcp.md` |
-| Editor-only utilities mapping (Canny/Pose/Depth, reduce colors, unzoom, pixel correction, reshape, Try on) | ❌ | ✅ — `references/editor-only-utilities.md` |
+| Editor-only utilities mapping (Canny/Pose/Depth, reshape, Try on) | ❌ | ✅ — `references/editor-only-utilities.md` |
+| Pixel-art cleanup routes (`correct-pixelart`, `reduce-colors`, `unzoom`, first seen in the 2026-09-08 refresh) | ❌ | ✅ — routed from SKILL.md with per-call size budgets and the unzoom-before-reference rule |
 | Undocumented/internal endpoint prohibition | 🟡 — "do not invent an API path if the route is not present in current docs" | ✅ — named prohibitions: website root routes, Aseprite extension internals, session tokens |
 | Account asset management (list/get/tags/ZIP) | ✅ — DELETE excluded by policy | ✅ — delete helpers allowed behind approval gates |
 | MCP platform tools (projects, sandbox, chat, deployed agents, help/feedback) | ❌ | ✅ — `references/mcp-platform-tools.md` with approval boundaries |
@@ -51,7 +52,7 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 | Per-route cost knowledge | 🟡 — coarse local budget units | ✅ — documented generation costs per route family, checked 2026-07-04 (`references/cost-routing.md`) |
 | Cheap-route selection and paid-retry gating | ❌ | ✅ — cost-sensitive intent changes routes and requires per-attempt approval |
 | Balance preflight | ✅ — dedicated command | ✅ — balance snapshot before nontrivial paid calls, delta reporting |
-| Async job lifecycle detail (423/404 early lookups, review state, expiring URLs, 8-hour map-object expiry, backoff) | 🟡 — `--poll`, timeout files, resume | ✅ — `references/job-lifecycle.md` |
+| Async job lifecycle detail (423/404 early lookups, review state, expiring URLs, MCP `list_jobs`/`cancel_job`, backoff) | 🟡 — `--poll`, timeout files, resume | ✅ — `references/job-lifecycle.md` |
 | Resume pending jobs without resubmitting paid work | ✅ — `poll-result-file`, saved job IDs | ✅ — keep IDs, poll the matching getter, never resubmit |
 | Bundled pack recipes (platformer, modular RPG character, sidescroller tileset, UI HUD, enemy variants) | ✅ — templated payloads with placeholder dependencies and seed offsets, run through the manifest pipeline | 🟡 — no templated multi-asset packs; blueprint bundles plus a `blueprints/` folder cover ordered, replayable recipes run by the host agent (`references/blueprint.md`) |
 | Replayable/shareable workflow record (portable single file, plain-language overrides) | 🟡 — recipes and saved job IDs reproduce work inside its own pipeline; no portable single-file share format | ✅ — `*.blueprint.json` = exact PixelLab requests plus flexible agent tasks, auto-written after each run, replayed with overrides, shared as one file, `_comment*` notes, example blueprints (`references/blueprint.md`) |
