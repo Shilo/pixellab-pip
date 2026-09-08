@@ -12,7 +12,7 @@ For style-reference generation, also read `style-reference.md`.
 
 ## Unzoom Upscaled Sources First
 
-Official REST v2 docs instruct callers to run user-supplied artwork through `POST /unzoom` (MCP `unzoom_image`) before sending it to any endpoint that takes a reference, style, init, or conversion image. Pixel art shared online is usually saved upscaled — each art pixel a block of screen pixels — and that is named as the most common cause of poor output. Cost is 0.1 generations. Constraints: minimum 256×256 input, maximum area 2048×2048, and the result is opaque because grid detection runs in RGB and composites transparency onto white — follow with `remove-background` when the sprite must stay cut out. Skip it when the source is already at its native pixel scale.
+Run supplied artwork through `POST /unzoom` (MCP `unzoom_image`, 0.1 generations) before any reference, style, init, or conversion image field — official docs name upscaled input as the most common cause of poor output. Skip it when the source is already at native pixel scale, and note it needs at least 256×256 to detect the grid at all. Its result is opaque, so follow with `remove-background` when the sprite must stay cut out.
 
 ## MCP Inline Image Transport
 

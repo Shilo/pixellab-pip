@@ -23,7 +23,6 @@ These are the rows that do not follow the tier you would guess from the field na
 | `POST /animate-with-text-v3` | `action` | 1000 |
 | `POST /create-tiles-pro` | `building_wall_description`, `building_floor_description`, `building_floor2_description` | 500 |
 | `POST /edit-image` | `description` | 500 |
-| `POST /edit-image-pixen` | `description` | 500 |
 | `POST /enhance-animation-v3-prompt` | `action` | 500 |
 | `POST /generate-8-rotations-v2` | `style_description` | 500 |
 | `POST /generate-image-v2` | `reference_images[].usage_description` | 500 |

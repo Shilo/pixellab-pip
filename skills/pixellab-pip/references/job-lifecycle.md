@@ -32,7 +32,7 @@ MCP creation tools return asset IDs quickly. Use the matching getter to inspect 
 - Fonts: `get_font`.
 - Portrait-character conversions: `get_portrait_character`.
 - Vocal animations: `get_vocal_animation`; partial visemes may appear before completion, so wait for the terminal result.
-- Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. Its `index` returns a single frame inline, for reaching past the first few frames of a long animation without fetching a URL. `unzoom_image` and `reduce_colors` finish in about a second, so poll once rather than backing off.
+- Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. `unzoom_image` and `reduce_colors` finish in about a second — poll once instead of backing off.
 - UI assets, tilesets, tiles, projects, or helpers: use the visible matching MCP getter when exposed.
 
 State tools such as `create_character_state` and `create_object_state` auto-wait only briefly for the source asset to finish. If a state call fails because the source is still pending, poll the source with its getter first, then retry the state call only when the source is ready.
@@ -54,7 +54,7 @@ When an object is in review:
 
 MCP download URLs may be unauthenticated and should be treated as shareable but sensitive. If a URL is stale, call the matching getter again for a fresh result.
 
-MCP map objects are permanent; they do not expire. Still download or persist needed files rather than relying on a download URL staying fresh.
+MCP map objects do not expire, but their download URLs can still go stale — persist needed files rather than relying on a URL.
 
 ## REST Error Handling
 
@@ -63,4 +63,4 @@ MCP map objects are permanent; they do not expire. Still download or persist nee
 - `400`/`422`: request validation problem. Summarize the field/error, fix the payload, and retry only if the corrected request preserves user intent.
 - `409`/`423`: conflict, duplicate, or locked/in-progress state. Inspect the job or asset status before retrying.
 - `429`/`529`: rate or overload response. Honor a `Retry-After` header when visible; otherwise wait/back off. Do not immediate-loop or fan out more paid calls.
-- Concurrency: an account runs a limited number of jobs in parallel. Dispatch an approved batch up to that limit — full parallelism finishes fastest; back off only on `429`/`529` (honor `Retry-After`). PixelLab grants queue-skipping **priority slots** for sustained high utilization over a rolling 30-minute window, but that is a user-level concern — do not artificially throttle or inflate paid work to farm slots. Limits vary by tier and are not fully published; no public surface reports your slot count or utilization. For what is running, MCP `list_jobs` returns your active (pending + processing) jobs, with `include_recent: true` adding ones that completed or failed in the last 30 minutes, and `cancel_job` cancels one; REST has neither and offers only per-job `GET /background-jobs/{job_id}`. Balance is `GET /balance` / MCP `get_balance` (generations/credits). Do not assume a specific slot number or invent a slots route.
+- Concurrency: an account runs a limited number of jobs in parallel, varying by tier and not published. Dispatch an approved batch up to that limit — full parallelism finishes fastest; back off only on `429`/`529`. Never throttle or inflate paid work to game scheduling, and do not assume a slot number or invent a slots route. For what is currently running, see `mcp-platform-tools.md`.

@@ -2,7 +2,7 @@
 
 Read this when the user wants an exact PixelLab editor utility that has no documented public REST v2 or MCP route. Map each request to the closest public route or a clearly labeled non-PixelLab local fallback; the routing boundary and the "do not invent `/v2/...` routes" rule are stated in SKILL.md.
 
-Reduce colors, unzoom, and pixel correction are not in this file: they have public REST v2 endpoints and MCP tools. Route them from SKILL.md's cleanup row.
+Reduce colors, unzoom, and pixel correction are not here — they have public routes; see SKILL.md's cleanup row.
 
 | User wording | Route | Warning |
 |---|---|---|

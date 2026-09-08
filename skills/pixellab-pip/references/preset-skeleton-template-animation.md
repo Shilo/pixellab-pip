@@ -243,7 +243,7 @@ Use the right vocabulary for the surface:
 | MCP `create_character` | `body_type` | `humanoid`, `quadruped` | Use `humanoid` for bipedal/mannequin body plans. Use `quadruped` only for four-legged animals. |
 | MCP `create_character` | `template` | `bear`, `cat`, `dog`, `horse`, `lion` | Required only when `body_type="quadruped"`. Ignored for humanoid characters. |
 | MCP `create_character` | `proportions` | preset `default`, `chibi`, `cartoon`, `stylized`, `realistic_male`, `realistic_female`, `heroic`, or custom scale JSON | Humanoid only. This is how MCP expresses realistic/chibi humanoid proportions; it is not a separate `body_type`. |
-| REST managed character create | `template_id` | `mannequin`, `bear`, `cat`, `dog`, `horse`, `lion` | `mannequin` is the bipedal/humanoid skeleton reconstruction template and the default in current OpenAPI. `humanoid` is **not** a template id — sending it fails with "Template not found"; it is only a `template_types` filter value. |
+| REST managed character create | `template_id` | `mannequin`, `bear`, `cat`, `dog`, `horse`, `lion` | `mannequin` is the bipedal/humanoid skeleton reconstruction template and the default in current OpenAPI. `humanoid` is **not** a template id — it fails with "Template not found". |
 | REST managed animation | `template_animation_id` | Exact animation ids from the character's family | Does not take `body_type`; the managed character already carries the body plan/template family. |
 | Website Add Animation | `Template` | `mannequin`, `dog`, `cat`, `horse`, `bear`, `lion` | UI label for the managed character's animation family. |
 
