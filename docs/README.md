@@ -1,6 +1,6 @@
 # More Documentation
 
-Last reviewed: 2026-08-06.
+Last reviewed: 2026-09-08.
 
 These docs contain PixelLab Pip's user guides, developer material, research, and technical background. The repository README is the short front door; detailed installation, usage, and security material lives here.
 
@@ -43,6 +43,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab Chibi Base Character Findings](pixellab/pixellab-chibi-base-character-findings.md) - live-generation findings for a reusable chibi avatar base character, including closest candidates, failed prompt/model patterns, and unresolved next tests.
 - [PixelLab Pixen 128x128 Head-and-Shoulders Portrait Prompt Spike](pixellab/pixellab-pixen-portrait-prompt-research-spike.md) - terminology, 128x128 southwest-facing Pixen prompt comparisons, scale-anchor validation across three subject classes, and the reusable MVP blueprint.
 - [PixelLab 16px Item Sprite Generation Spike](pixellab/pixellab-16px-item-sprite-generation-spike.md) - findings on why `16x16` full-cell tiles work better than strict `16x16` non-tile item sprites, including prompt comparisons, Aseprite style-reference observations, a pixen single-subject icon test (coins read well at 16px; the hollow-center background-removal artifact and its edge-flood fix), a Pro-vs-pixen 16px quality comparison (the missing detail/outline controls that make pixen cleaner at 16px while Pro wins at 32px+), and verification guidance.
+- [PixelLab Tibia High-Oblique Item Perspective MVP Research Spike](pixellab/pixellab-tibia-high-oblique-perspective-mvp-research-spike.md) - controlled Pro and edit experiments for 32x32 transparent treasure chests, including the accepted-image camera-anchor recipe, universal variable-driven MVP prompt, request props, rejection criteria, and R1-R9 evidence.
 - [PixelLab 32px VFX Atlas Density Spike](pixellab/pixellab-32px-vfx-atlas-density-spike.md) - controlled prompt findings for strict `16x16` atlases of transparent `32x32` explosion effects, including density failure analysis and safer assembly experiments.
 - [PixelLab Character Aura Prompt Research Spike](pixellab/pixellab-character-aura-prompt-research-spike.md) - live `64x64` Pro and Pixen comparisons for modular front-facing character auras, including the reliable Pro prompt hierarchy and forty-three Pixen batches showing that occasional good outputs do not form a dependable effect-only workflow.
 - [PixelLab Font Generation Spike](pixellab/pixellab-font-generation-spike.md) - live findings for REST `generate-font-pro`: async job shape, the TTF-vs-atlas distinction (`ttf_base64` is the real deliverable), current `glyph_px` controls and fixed pricing, `suspect_glyphs`, and the historical first `glyph_px: 8` test.

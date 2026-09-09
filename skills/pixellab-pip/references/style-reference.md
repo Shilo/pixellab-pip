@@ -72,3 +72,21 @@ instead of repeatedly adding prompt exclusions.
 Keep guides role-specific when their visual cues could bias a different asset class. Do not reuse an
 architecture-specific building guide for characters; use a character-appropriate guide when a
 character's view or pose needs anchoring.
+
+### High-oblique Tibia-style item perspectives
+
+For a steep, side-turned inventory camera, prefer MCP `create_image_pro` with an
+accepted sprite that already has the desired composition in `style_image_base64`.
+Add two native-size square style references for palette, outline, detail, and
+shading context. Keep the request at the target size with `no_background: true`,
+and describe the plane relationship directly: a dominant tall near-facing plane,
+a narrow side plane receding down-right, a thin upper/lid edge, and the front
+detail on the near plane. Exclude top-down, bird's-eye, visible-top,
+conventional three-quarter, isometric, and front-only interpretations.
+
+Treat descriptive `reference_images` roles as contextual guidance, not a hard
+camera lock. If the camera must be preserved exactly, use `edit_image` with the
+geometry source and a separate appearance reference. Review every returned
+alternative because Pro can still mix projections. See the [Tibia high-oblique
+research spike](../../../docs/pixellab/pixellab-tibia-high-oblique-perspective-mvp-research-spike.md)
+for the experiment matrix and universal MVP prompt.
