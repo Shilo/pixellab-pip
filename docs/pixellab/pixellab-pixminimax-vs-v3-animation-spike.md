@@ -4,6 +4,36 @@ Last reviewed: 2026-09-12.
 
 Status: completed. This spike records the refreshed public contract, a source-backed MiniMax H3 prompt adaptation, website and Aseprite research, and a paired live comparison against PixelLab's v3 raw animation route. The planned fixed-seed control was not achieved because every executed request sent `seed=0`, which PixelLab documents as random.
 
+## PixMiniMax pros and cons
+
+These are the practical tradeoffs supported by PixelLab's public documentation and this comparison. The observed quality differences come from a limited set of test images, so they are useful guidance rather than a promise about every animation.
+
+### Pros
+
+- **Longer animations in one job.** PixMiniMax can generate up to 40 new frames, while v3 stops at 16. This gives a multi-step action more room to develop without joining several shorter clips.
+- **Clearer multi-step actions in this test.** The PixMiniMax sword and bow animations showed more distinct wind-up, action, and recovery stages. The 40-frame fireplace also remained coherent across a much longer sequence than v3 can produce in one job.
+- **Full frame range at the maximum canvas size.** It accepts up to 40 generated frames on images as large as 256×256. V3 reduces its allowed frame count as the image gets larger.
+- **Works directly from an image.** It can animate a supplied image, with an optional ending image. The image does not need to belong to a saved PixelLab character or object.
+- **Useful motion controls.** Optional prompt enhancement can expand a short instruction, direction guidance can be used with that enhancement, and the REST API includes a control for reducing color flicker.
+- **Reliable output handling in the completed tests.** Every completed job kept the requested canvas size and transparency, and the larger robot and fireplace tests returned the starting image exactly.
+
+### Cons
+
+- **It cost more than v3 in the matched short tests.** For the tested 4-, 8-, and 16-frame robot clips, PixMiniMax used 2, 3, and 5 subscription generation units; v3 used 1, 2, and 4.
+- **It followed supplied ending images less closely in this test.** PixMiniMax did not exactly reach either distinct ending pose, while v3 reached the same tested endings exactly. A required final pose must therefore be checked carefully.
+- **Its stronger motion can become unwanted decoration.** The sword test produced a larger, brighter slash effect. That can make an attack easier to read, but it can also add visual effects the user did not want.
+- **The starting image is not guaranteed to remain untouched.** PixMiniMax returned exact starting images for the larger robot and fireplace, but materially changed the tiny flame's first returned image.
+- **Frame-count choices are less flexible.** PixMiniMax accepts only multiples of four. V3 accepts any even frame count from 4 through 16.
+- **It is beta and access-restricted.** It requires a Tier 1 subscription or higher, and PixelLab says a job typically takes 1–5 minutes.
+- **PixelLab exposes only part of MiniMax H3.** The PixMiniMax wrapper does not expose H3's standalone audio, shot-list, camera, or advanced reference controls.
+
+### What remains uncertain
+
+- The comparison used one robot, one tiny flame, and one fireplace. It does not establish a universal quality ranking.
+- Repeatability with a fixed seed was not tested. Every request used `seed=0`, which asks for a random result.
+- The run did not cleanly test direction control, so the results do not show how much that option changes an animation.
+- Several planned image sizes were unavailable, so the run does not provide a complete cost comparison across canvas sizes.
+
 ## Executive answer
 
 PixMiniMax is a real new public PixelLab animation family, not just a renamed v3 option. The REST route is POST /v2/animate-pixminimax and the hosted MCP tool is animate_image_pixminimax. PixelLab's public REST description says that the route is powered by MiniMax H3. It accepts up to 40 generated frames in multiples of four on a canvas up to 256×256, while v3 accepts 4–16 even frames and has a separate total-pixel budget.
