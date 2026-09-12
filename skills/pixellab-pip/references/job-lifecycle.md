@@ -32,7 +32,7 @@ MCP creation tools return asset IDs quickly. Use the matching getter to inspect 
 - Fonts: `get_font`.
 - Portrait-character conversions: `get_portrait_character`.
 - Vocal animations: `get_vocal_animation`; partial visemes may appear before completion, so wait for the terminal result.
-- Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. `unzoom_image` and `reduce_colors` finish in about a second — poll once instead of backing off.
+- Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `animate_image_pixminimax`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. `unzoom_image` and `reduce_colors` finish in about a second — poll once instead of backing off.
 - UI assets, tilesets, tiles, projects, or helpers: use the visible matching MCP getter when exposed.
 
 State tools such as `create_character_state` and `create_object_state` auto-wait only briefly for the source asset to finish. If a state call fails because the source is still pending, poll the source with its getter first, then retry the state call only when the source is ready.

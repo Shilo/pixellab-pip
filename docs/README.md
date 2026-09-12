@@ -1,6 +1,6 @@
 # More Documentation
 
-Last reviewed: 2026-09-08.
+Last reviewed: 2026-09-12.
 
 These docs contain PixelLab Pip's user guides, developer material, research, and technical background. The repository README is the short front door; detailed installation, usage, and security material lives here.
 
@@ -49,6 +49,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab Font Generation Spike](pixellab/pixellab-font-generation-spike.md) - live findings for REST `generate-font-pro`: async job shape, the TTF-vs-atlas distinction (`ttf_base64` is the real deliverable), current `glyph_px` controls and fixed pricing, `suspect_glyphs`, and the historical first `glyph_px: 8` test.
 - [PixelLab Image Size Limits (Min And Max)](pixellab/pixellab-image-size-limits.md) - per-tool minimum and maximum size limits from the raw OpenAPI schema, why the Aseprite `32x32` minimum is a client-side editor limit, the schema-enforced `16px` floor (and the `8px`-only `glyph_px` exception), and per-endpoint max/area/aspect rules across REST v2 and MCP.
 - [PixelLab API Pricing Model List](pixellab/pixellab-api-pricing-model-list.md) - current API pricing and model/tool list from PixelLab's official API catalog.
+- [PixelLab PixMiniMax vs v3 Animation Spike](pixellab/pixellab-pixminimax-vs-v3-animation-spike.md) - public PixMiniMax/MiniMax H3 contract research, H3 prompt adaptation, website/Aseprite findings, and the controlled live v3 comparison.
 - [PixelLab Documentation Watch Cache](pixellab/pixellab-doc-watch-cache.md) - local-only watcher workflow for caching upstream PixelLab docs, detecting REST/MCP drift, and deciding when the Agent Skill needs updates.
 - [PixelLab Changelog 2026-07-01](pixellab/pixellab-changelog-2026-07-01.md) - dated summary of the July 1 public-doc drift and corresponding PixelLab Pip routing/reference updates.
 - [PixelLab Top-Down Tileset Transition Findings](pixellab/pixellab-topdown-tileset-transition-findings.md) - live-generation findings for `create_topdown_tileset` transition sizes, compact 4x4 graybox exports, and the `transition_size: 1.0` expanded-layout caveat.
@@ -94,6 +95,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 ## Plans
 
+- [PixelLab PixMiniMax vs v3 Animation Test Plan](plans/pixellab-pixminimax-vs-v3-animation-test-plan.md) - bounded live comparison plan covering anchors, motion families, prompt enhancement, frame/canvas limits, reproducibility, and validation.
 - [Inline Negative Prompting Current-Model Test Plan](plans/pixellab-inline-negative-prompting-current-model-test-plan.md) - frozen protocol for the primary Pixen and Create Image Pro inline-prompt study.
 - [Negative Prompting Controlled Test Plan](plans/pixellab-negative-prompting-controlled-test-plan.md) - frozen protocol for the historical dedicated-field study on BitForge and deprecated PixFlux.
 - [MCP New-Tools Verification Plan](plans/pixellab-mcp-new-tools-test-plan.md) - scope and method for verifying newly exposed MCP tools against REST parity.

@@ -1,8 +1,14 @@
 # PixelLab PixMiniMax vs v3 Animation Test Plan
 
-Status: planned 2026-09-12. Results will be recorded in
+Status: executed 2026-09-12. Results are recorded in
 `../pixellab/pixellab-pixminimax-vs-v3-animation-spike.md` and the git-ignored
-`pixellab-pip-generations/` run folder.
+`pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/` run folder.
+
+Execution summary: 49 paid jobs completed with 128 provider-reported generation
+units and a conservative 559.1-unit bound. Two D4 requests returned HTTP 422
+before a job was accepted. C5–C7 were not run because the archive had no exact
+32×32, 64×64, or 80×80 robot source. C9 ran once on PixMiniMax with the exact
+256×256 fireplace source; v3 cannot legally request 40 generated frames.
 
 ## Goal
 
@@ -38,16 +44,18 @@ staying comfortably below the explicit 3,000-generation ceiling.
 
 ## Fixtures
 
-Use two existing, representative source families so the result is not tied to
-one subject:
+Use two existing, representative source families plus one larger stress fixture
+so the result is not tied to one subject or canvas size:
 
 1. **Robot character** — a small south-facing futuristic robot with a helmet,
    blue armor, yellow accents, outline, and transparent background. Use the
    same source PNG for paired first-frame tests and a previously recorded
    matching walking pose as the end anchor where available.
-2. **Fireplace/flame effect** — a tiny front-facing fireplace with a stationary
-   ember base and a transparent background. Use the existing source frame and
-   a matching end frame for cyclic-fire and endpoint tests.
+2. **Tiny flame effect** — a 16×32 front-facing flame with a stationary base and
+   a transparent background. Use the existing source frame and matching end
+   frame for cyclic-fire and endpoint tests.
+3. **Fireplace stress fixture** — an existing 256×256 fireplace frame with
+   transparency, used only for the PixMiniMax maximum-frame stress case.
 
 For each fixture, record dimensions, color mode, alpha coverage, non-transparent
 bounding box, and a SHA-256 digest before the first call. Copy the exact source
@@ -117,13 +125,13 @@ These cases probe controls that are materially different between the routes.
 |---|---|---|---|
 | C1 | robot | distinct first/end walking poses, 4 frames | Shortest start-to-end transition. |
 | C2 | robot | distinct first/end walking poses, 16 frames | Longer transition and endpoint convergence. |
-| C3 | flame | same first/end frame, 8 frames, PixMiniMax `drift_threshold` omitted | Documented/default de-flicker behavior. |
-| C4 | flame | same first/end frame, 8 frames, PixMiniMax `drift_threshold=0` | Aggressive de-flicker comparison; only run if C3 completes. |
+| C3 | flame | same first/end frame, 8 frames, both routes; PixMiniMax `drift_threshold` omitted | Compare documented/default de-flicker behavior on both public routes. |
+| C4 | flame | same first/end frame, 8 frames, both routes, `drift_threshold=0` | Aggressive de-flicker comparison on both public routes; only run if C3 completes. |
 | C5 | robot | 32×32 source, 4 frames | Lowest published PixMiniMax cost example and small-canvas behavior. |
 | C6 | robot | 64×64 source, 8 frames | Main quality/cost reference. |
 | C7 | robot | 80×80 source, 8 frames | Boundary behavior around the documented upscaling buckets. |
 | C8 | robot | 128×128 source, 16 frames | Larger canvas and long clip within the public route limits. |
-| C9 | robot | 256×256 source, 40 frames | Maximum-duration stress case; run once per model only if the running ledger remains below the reserve. |
+| C9 | fireplace | 256×256 source, 40 frames | Maximum-duration PixMiniMax stress case; v3 is skipped because its public maximum is 16 frames. |
 
 Cases C5–C9 may use a nearest-neighbor-preserved copy of the same supplied
 source only when a correctly sized source already exists in the archive. Do not
@@ -134,8 +142,8 @@ is unavailable, mark the case “not run” rather than making test art.
 
 | ID | Inputs | Purpose |
 |---|---|---|
-| D1 | Repeat A1 once per route with the same seed | Estimate within-route variance; do not interpret pixel differences as regressions. |
-| D2 | Repeat A2 once per route with the same seed | Check whether endpoint behavior is stable across a second sample. |
+| D1 | Repeat the 128×128 robot same-first/end-anchor case twice per route with the same seed | Estimate within-route variance under the executed anchor condition; do not interpret pixel differences as regressions. |
+| D2 | Repeat the 16×32 flame same-first/end-anchor case twice per route with the same seed | Check whether small-effect behavior is stable under the executed anchor condition. |
 | D3 | One legal request with `last_frame` but no `enhance_prompt` | Confirms the PixMiniMax end-frame path independently of prompt enhancement. |
 | D4 | One malformed/illegal request per route in a separate non-paid validation attempt where possible; otherwise use schema inspection only | Records validation boundaries without intentionally charging a job. |
 

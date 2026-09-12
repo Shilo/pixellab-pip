@@ -34,7 +34,7 @@ The defensible conclusion is narrower:
 
 1. A separate `negative_description` field is route-specific. Current public REST v2
    exposes it on selected older/base workflows, labels the PixFlux field deprecated, and
-   exposes no negative field on Pixen, Create Image Pro, modern v3 animation, Pro inpaint,
+   exposes no negative field on Pixen, Create Image Pro, modern v3/PixMiniMax animation, Pro inpaint,
    or any current public MCP tool.
 2. Inline exclusion wording such as `no text` is a different intervention from a separate
    negative field. The archive contains both apparent successes and apparent backfires.

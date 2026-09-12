@@ -6,7 +6,7 @@ SKILL.md holds the global rules this file does not restate: MCP-first routing wi
 
 Two families: managed preset/template animation on an existing character, and raw skeleton/keypoint animation. Custom skeleton authoring beyond estimated/exported keypoints is future-facing; route keypoint work to the documented REST endpoints below.
 
-PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the skeleton-based routes below — both preset/template ids and raw keypoints — because the skeleton model is older and text animation is simpler with better results. Default to v3 text animation (see `animation.md`) — MCP `animate_character(mode="v3", action_description=...)` for a managed character, MCP `animate_image` for a raw frame, REST `animate-with-text-v3` as the fallback; use the skeleton routes when the user explicitly wants a named preset motion or to own/edit keypoints.
+PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the skeleton-based routes below — both preset/template ids and raw keypoints — because the skeleton model is older and text animation is simpler with better results. Default to v3 text animation unless the user explicitly selects PixMiniMax (see `animation.md`) — MCP `animate_character(mode="v3", action_description=...)` for a managed character, MCP `animate_image` for a raw frame, REST `animate-with-text-v3` as the fallback, or the selected PixMiniMax route; use the skeleton routes when the user explicitly wants a named preset motion or to own/edit keypoints.
 
 ## Core Distinction
 

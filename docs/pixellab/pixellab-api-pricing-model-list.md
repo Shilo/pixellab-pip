@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-08-06.
+Last reviewed: 2026-09-12.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -16,7 +16,7 @@ Primary sources:
 - PixelLab account balance can include subscription generations and USD credits.
 - Hosted MCP help reports that billing uses subscription generations first, then USD credits.
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
-- The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`) scale with output area — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md) for the formulas.
+- The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, and PixMiniMax) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md).
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
 
 ## Concurrency and Priority Slots
@@ -69,6 +69,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 |---|---|---|---|---|
 | Animate with text | `POST /v2/animate-with-text` | Base text animation | 64x64 text animation with init/inpainting/palette options | `64x64`, 4 frames: `$0.01565` |
 | Animate with text (new) | `POST /v2/animate-with-text-v3` | v3 text animation | First-frame animation, optional last-frame guidance, 4-16 frames, up to 256x256 | `32x32`, 4 frames: `$0.0221`; `256x256`, 8 frames: `$0.0302`; `128x128`, 16 frames: `$0.0424` |
+| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Independently observed website estimates (2026-09-12): `64x64`, 4 frames `$0.0123`; 8 `$0.0153`; `256x256`, 8 `$0.0153`; 40 `$0.0471` — see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). REST docs also publish generation-unit examples; use returned `usage.generations` for charged usage. |
 | Animate with text (Pro) | `POST /v2/animate-with-text-v2` | Pro text animation | Reference-image animation, 4/9/16 frames, view and direction controls | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 256x256 (endpoint prose lists 16/32/64/128/256; priced rows below stop at 128x128) | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
 | Estimate skeleton | `POST /v2/estimate-skeleton` | Skeleton helper | Skeleton extraction for skeleton animation | `16x16 $0.00511`; `64x64 $0.00513`; `256x256 $0.00516` |
@@ -111,13 +112,14 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 |---|---|---|---|
 | Enhance Pixen prompt | `POST /v2/enhance-pixen-prompt` | Expand a Pixen image prompt | official estimate per call `$0.002`; live check observed `usage.generations: 0.05` |
 | Enhance character v3 prompt | `POST /v2/enhance-character-v3-prompt` | Expand a v3 character prompt | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
-| Enhance animation v3 prompt | `POST /v2/enhance-animation-v3-prompt` | Expand an action for `animate-with-text-v3` using frames as context | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
+| Enhance animation prompt | `POST /v2/enhance-animation-v3-prompt` | Expand an animation action using frames as context; `engine=v3` or `engine=pixminimax` | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
 
 ## Practical Routing Notes
 
 - For cheap image prompt iteration, start with Pixflux or Pixen.
 - For multiple image candidates from one call, use Pro image generation.
 - For first-frame animation or chained VFX animation, prefer `animate-with-text-v3`.
+- For an explicit PixMiniMax/MiniMax H3 request, use `animate-pixminimax`; it supports longer clips than v3 but has a distinct cost model and motion-prompt contract.
 - For Pro text animation with view/direction fields and a reference image, use `animate-with-text-v2`.
 - Exception for duplicate-filled atlases: observed `animate-with-text-v3` runs synchronized repeated cells instead of making them unique phases. `animate-with-text-v2` followed the cell-diversity instruction reasonably well, but produced lower apparent quality and greater color drift. Prefer single-sprite animation plus local atlas assembly; use Pro only as an approved tradeoff candidate.
 - For managed character/object assets, prefer the resource-specific character/object endpoints or MCP tools instead of raw image animation endpoints.

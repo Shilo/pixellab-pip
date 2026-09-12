@@ -1,6 +1,6 @@
 # PixelLab Credit Output Estimation Spike
 
-Last reviewed: 2026-07-16.
+Last reviewed: 2026-09-12 (PixMiniMax addendum; the catalog arithmetic below remains a 2026-07-16 historical snapshot).
 
 > **Important prefix: this is an estimation and may not be accurate.**
 >
@@ -59,6 +59,15 @@ Primary sources checked:
 - [PixelLab FAQ](https://www.pixellab.ai/docs/faq)
 - [PixelLab refund policy](https://www.pixellab.ai/refundpolicy)
 - [PixelLab terms](https://www.pixellab.ai/termsofservice)
+
+## PixMiniMax Addendum (2026-09-12)
+
+This document's 124-row arithmetic predates the public PixMiniMax route and remains historical; do not use its catalog totals as the current catalog count. The current public API page and REST docs now describe PixMiniMax separately:
+
+- REST `POST /v2/animate-pixminimax` and MCP `animate_image_pixminimax` are a new raw-animation family publicly described as powered by MiniMax H3.
+- Public generation-unit examples are 1 at 32×32/4 frames, 2 at 64×64/4, 3 at 64×64/8, 5 at 64×64/16, 12 at 64×64/40, and 2 at 80×80/8.
+- The website API page shows separate USD estimates, including $0.0123 at 64×64/4, $0.0153 at 64×64/8, and $0.0471 at 256×256/40. These are estimates, not a published conversion to generation units; the independently observed values are transcribed in the [dated website pricing observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md).
+- Use the response `usage.generations` for a live PixMiniMax charge. See [PixelLab PixMiniMax vs v3 Animation Spike](pixellab-pixminimax-vs-v3-animation-spike.md) for the controlled comparison and unresolved pricing/source conflicts.
 
 ## Key Finding
 

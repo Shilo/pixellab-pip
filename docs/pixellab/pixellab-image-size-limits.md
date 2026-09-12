@@ -1,6 +1,6 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-09-08 (schema refresh; live probes 2026-07-11; background/widescreen breakpoints + tier-gating 2026-07-13).
+Last reviewed: 2026-09-12 (schema refresh; PixMiniMax contract and live animation verification added).
 
 > **2026-09-08 schema refresh.** Four measured limits moved and one conflict closed: `create-tiles-pro` `tile_size` max dropped 256 → **128**, matching its prose and the MCP tool; `create-1-direction-object` `size` min dropped 32 → **16** and `create-8-direction-object` 32 → **24**; `image-to-pixelart` input max rose 1280 → **2048** and its `output_size` max 320 → **512**. The probe results recorded against the old floors were correct when run and are kept as history, not as current bounds. The refresh also added the Cleanup endpoints and `edit-image-pixen` (see [Edit / Convert / Utility](#rest-v2-limits--edit--convert--utility)) and a new `override_frame_size` on `create-character-state`.
 
@@ -185,7 +185,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 | `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.009, canvas 24×24, 8 rotations). `standard` (1 gen) vs `pro` (20–40 gens). |
 | `create-character-state` | `override_frame_size` | 32×32 | 256×256 | Schema-enforced via the new `FrameSize` model. Optional larger canvas for the new state, for edits that add something big (a weapon, wings). Both sides must be multiples of 4 and no smaller than the source character. Omit to keep the source size. MCP splits it into `override_width`/`override_height`. |
 | `create-character-pro` | `image_size` | 32×32 | 168×168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. `reference_image` max 168×168; `concept_image` max 1024×1024. Probed canvas 32 → 60, consistent with the current documented rule (rotations share a square canvas at least `max(width, height)` that may grow up to 256 to fit generated content; the earlier "padded ~2×" wording was replaced in the 2026-09-08 refresh). |
-| `create-1-direction-object` | `size` | **16** | 256 | Lowered from 32 in the 2026-09-08 refresh — the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate the change and 16 is now in range; 8 is still below the floor. Default 64. Mutually exclusive with `style_images` (max 256×256 each); size drives object count. |
+| `create-1-direction-object` | `size` | **16** | 256 | Lowered from 32 in the 2026-09-08 refresh — the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate the change and 16 is now in range; 8 is still below the floor. Default 64. Mutually exclusive with `style_images` (max 256×256 each); size drives object count. Supplying fewer `item_descriptions` does not shrink that grid; remaining slots are generated from the top-level `description`. |
 | `create-8-direction-object` | `size` | **24** | 168 | Lowered from 32 in the 2026-09-08 refresh; the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate it. Docs state that below 24 the eight angles stop being distinguishable — use `create-1-direction-object` for 16px. Default 64; the 8-rotation pipeline rejects anything larger than 168. |
 
 ### Character Floors Split By Pipeline (Probe-Confirmed 2026-07-15)
@@ -221,6 +221,7 @@ The two AI-rotation pipelines floor at 32 **over REST**; the two template/skelet
 | `animate-with-text` (v1) | `image_size` | fixed 64×64 | fixed 64×64 | Only 64×64. |
 | `animate-with-text-v2` | `image_size`, `reference_image_size` | 32×32 | 256×256 | Frame count is **fixed by size**, not chosen: 32×32 and 64×64 return 16 frames; 128×128, 170×170, 256×256 return 4. Recommended 64×64. |
 | `animate-with-text-v3` | `first_frame` / `last_frame` | — | 256×256 | v3 max 256×256, **plus a total pixel budget: `width × height × frame_count ≤ 524,288`** (endpoint prose). The budget binds before the per-axis max at large sizes: 256×256 affords only 8 frames (256·256·16 = 1,048,576, over budget); 16 frames needs ≤181×181. The only *user-chosen* size↔frame tradeoff — v2 and `edit-images-v2` use fixed ladders. Budget untested; `frame_count` is schema-bounded 4–16, even. |
+| `animate-pixminimax` | `first_frame` / `last_frame` | — | 256×256 | Beta Tier 1+ route powered by MiniMax H3. Endpoint prose allows 4–40 generated frames in multiples of four at any input size up to 256×256; unlike v3, the current public description does not state the v3 total-pixel budget. Response contains `frame_count+1` images. |
 | `animate-with-skeleton` | `image_size` | 16×16 | 256×256 | Schema is a continuous 16–256 range, but the endpoint prose lists **only 16/32/64/128/256** as supported. See the discrete-size caveat below. |
 | `animate-character` / `characters/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
 | `objects/{object_id}/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
@@ -297,6 +298,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `edit_image` | each target image URL/base64 | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` |
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
 | `animate_image` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
+| `animate_image_pixminimax` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-pixminimax`; 4–40 generated frames in multiples of four, Tier 1+ beta |
 | `create_path_tiles` | `tile_size` | 32 | `square_topdown`: exactly **32**; `isometric`: **48–96** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "roads"` — check that schema's bounds if exact REST-side limits matter) |
 | `create_building_kit` | `tile_size` / `wall_tiles` | 32 / 2 | `isometric`: **32–96**; `square_topdown`/`oblique`: **16–96**; `wall_tiles`: **1–3** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "building"`) |
 

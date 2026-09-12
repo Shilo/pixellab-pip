@@ -40,7 +40,7 @@ exists, use the equivalent REST route; never silently shrink or quantize a user 
 
 ## Endpoint Semantics
 
-These are REST v2 routes; MCP `edit_image`/`inpaint_image`/`animate_image` cover the same edit/inpaint/animate roles directly (fields noted above) and need no managed asset — do not route supplied-image edits to *managed* MCP tools (`create_*_state`) just because MCP is configured; those regenerate a managed asset, not an in-place edit. Only counter-intuitive or collision-prone fields are listed; where the field name plainly matches the role (`remove-background.image` = target, `resize.reference_image` = image to resize, `edit-image.image` = edit target), take it at face value.
+These are REST v2 routes; MCP `edit_image`/`inpaint_image`/`animate_image`/`animate_image_pixminimax` cover the same edit/inpaint/animate roles directly (fields noted above) and need no managed asset — do not route supplied-image edits to *managed* MCP tools (`create_*_state`) just because MCP is configured; those regenerate a managed asset, not an in-place edit. PixMiniMax-specific frame and prompt rules live in `animation.md`. Only counter-intuitive or collision-prone fields are listed; where the field name plainly matches the role (`remove-background.image` = target, `resize.reference_image` = image to resize, `edit-image.image` = edit target), take it at face value.
 
 - `create-character-v3`
   - `reference_image`: south-facing character to rotate into 8 directions (else generates from text); `outline` and `detail` are ignored when it is set.

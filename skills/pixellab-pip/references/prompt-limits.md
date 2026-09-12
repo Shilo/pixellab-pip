@@ -2,7 +2,7 @@
 
 Read this when a PixelLab REST v2 call rejects a natural-language field for length, when writing exact API code, or when preparing unusually long prompts.
 
-These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-09-08. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
+These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-09-12. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
 
 ## Pattern
 
@@ -21,6 +21,7 @@ These are the rows that do not follow the tier you would guess from the field na
 |---|---|---:|
 | `POST /animate-with-text-v2` | `action` | 500 |
 | `POST /animate-with-text-v3` | `action` | 1000 |
+| `POST /animate-pixminimax` | `description` | 1000 |
 | `POST /create-tiles-pro` | `building_wall_description`, `building_floor_description`, `building_floor2_description` | 500 |
 | `POST /edit-image` | `description` | 500 |
 | `POST /enhance-animation-v3-prompt` | `action` | 500 |
@@ -43,3 +44,5 @@ These are the rows that do not follow the tier you would guess from the field na
 Some REST v2 request schemas include natural-language string fields without a declared `maxLength` in OpenAPI, including older image, tileset, tile, base animation, and base inpaint routes (for example `create-image-pixen`/`pixflux`/`bitforge.description`, `create-isometric-tile.description`, `create-tiles-pro.description`, `create-tileset.*_description`, `create-tileset-sidescroller.*_description`, `animate-with-text.action`/`description`/`negative_description`, `inpaint.description`/`negative_description`). Do not infer that these are unlimited; keep them concise and refresh OpenAPI or interactive docs before exact integrations.
 
 MCP tool schemas may expose different parameter descriptions or validation. When using visible MCP tools, follow the tool schema shown by the host and keep prompts concise unless the tool declares a larger limit.
+
+For PixMiniMax, `description` is a motion-only field; the endpoint prose constrains `frame_count` to 4–40 in multiples of four even though the request schema does not encode every route rule. `direction` is an eight-way hint that is valid only with `enhance_prompt=true`. The standalone animation enhancer accepts `engine="pixminimax"`; its `action` limit remains 500 characters. MiniMax H3's raw audiovisual prompt fields are not PixelLab request fields.

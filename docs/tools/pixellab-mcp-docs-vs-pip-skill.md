@@ -1,6 +1,6 @@
 # PixelLab MCP Docs vs Pip Skill (Session Context)
 
-Last reviewed: 2026-08-06.
+Last reviewed: 2026-09-12.
 
 This is a decision guide for one specific choice: what PixelLab context to give a coding agent for a session. The two options are PixelLab's official MCP documentation, injected as a prompt link, versus installing the PixelLab Pip Agent Skill. It is a session-context question, not a service question; for the execution-layer comparison (MCP service vs the skill) see [Official PixelLab MCP Service Comparison](official-pixellab-mcp-service-comparison.md).
 
@@ -12,7 +12,7 @@ Sources reviewed:
 
 ## What Each Option Is
 
-**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (99 tools as of the 2026-09-08 refresh, now including maps, pixel-art cleanup, and job control), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. First-party, always current, no install.
+**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (100 tools as of the 2026-09-12 refresh, including the new `animate_image_pixminimax` raw-animation tool), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. First-party, always current, no install.
 
 **Pip Agent Skill.** A skill installed into agents that support skills. `SKILL.md` (the always-loaded router) plus 31 on-demand `references/*.md` cover surface selection across MCP, REST v2, website/Pixelorama editor, Aseprite, and legacy v1, plus cost routing, prompt preparation, secret-handling guardrails, and output verification/reporting. The two are complementary, not rivals.
 
@@ -20,7 +20,7 @@ Sources reviewed:
 
 | Area | Official MCP docs | Pip Skill |
 |---|---|---|
-| MCP tool inventory | Yes — full 99-tool list, authoritative | Partial — routing tables; defers to mcp/docs for exact schemas |
+| MCP tool inventory | Yes — full 100-tool list, authoritative | Partial — routing tables; defers to mcp/docs for exact schemas |
 | REST v2 coverage | No — named only as an alternative | Yes — full endpoint router and fallback policy |
 | Non-PixelLab surfaces (Aseprite / Pixelorama / website) | No | Yes |
 | Engine integration guides (Godot / Unity / Python) | Yes — via `pixellab://` resources | No |

@@ -1,6 +1,6 @@
 # PixelLab Surfaces And Services
 
-Last reviewed: 2026-09-08.
+Last reviewed: 2026-09-12.
 
 Purpose: explain how PixelLab's public APIs, agent tools, website/editor surfaces, SDKs, and local integrations differ so Pip can choose the right automation boundary.
 
@@ -26,6 +26,7 @@ The same asset type can appear across multiple surfaces. A character, object, ti
 
 - A hosted MCP tool name.
 - A REST v2 endpoint path.
+- The public PixMiniMax raw-animation family: REST `POST /v2/animate-pixminimax` and MCP `animate_image_pixminimax`. Its MiniMax H3 disclosure is scoped to that operation; it does not make website/editor transports or raw H3 fields public.
 - A website/editor workflow.
 - An SDK wrapper, depending on SDK version.
 

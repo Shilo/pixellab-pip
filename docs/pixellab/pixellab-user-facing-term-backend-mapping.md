@@ -1,6 +1,6 @@
 # PixelLab User-Facing Term To Backend Mapping
 
-Last reviewed: 2026-09-08.
+Last reviewed: 2026-09-12.
 
 Purpose: map PixelLab user-facing labels to backend surfaces without treating website, editor, or Aseprite integration routes as public API contracts. This production reference is intentionally conservative: public means documented in REST v2 OpenAPI/llms/API pages or MCP docs; observed means visible in first-party website/editor surfaces or Aseprite source and is used only for terminology/surface awareness; inferred means the capability matches but the exact backend branch is not exposed.
 
@@ -65,7 +65,7 @@ Important exclusions:
 - Images and UI: `/generate-image-v2`, `/generate-with-style-v2`, `/generate-ui-v2`, `/create-ui-asset`, `/ui-assets`, `/create-image-pixflux`, `/create-image-pixflux-background`, `/create-image-pixen`, `/create-image-bitforge`.
 - Image operations: `/image-to-pixelart`, `/image-to-pixelart-pro`, `/resize`, `/remove-background`, `/edit-image`, `/edit-image-pixen`, `/edit-images-v2`, `/inpaint`, `/inpaint-v3`.
 - Cleanup: `/correct-pixelart`, `/reduce-colors`, `/unzoom`.
-- Animation and rotation: `/animate-with-text`, `/animate-with-text-v2`, `/animate-with-text-v3`, `/animate-with-skeleton`, `/estimate-skeleton`, `/edit-animation-v2`, `/interpolation-v2`, `/transfer-outfit-v2`, `/rotate`, `/generate-8-rotations-v2`, `/generate-8-rotations-v3`.
+- Animation and rotation: `/animate-with-text`, `/animate-with-text-v2`, `/animate-with-text-v3`, `/animate-pixminimax`, `/animate-with-skeleton`, `/estimate-skeleton`, `/edit-animation-v2`, `/interpolation-v2`, `/transfer-outfit-v2`, `/rotate`, `/generate-8-rotations-v2`, `/generate-8-rotations-v3`.
 - Characters: `/create-character-with-4-directions`, `/create-character-with-8-directions`, `/create-character-pro`, `/create-character-v3`, `/portrait-character-pro`, `/characters/{character_id}/portrait`, `/vocal-animation`, `/talking-gif`, `/lip-sync`, `/create-character-state`, `/animate-character`, `/characters/animations`, plus character list/get/delete/tag/zip/spritesheet.
 - Fonts: `/generate-font-pro`.
 - Objects: `/create-1-direction-object`, `/create-8-direction-object`, `/objects/{object_id}/animations`, `/objects/{object_id}/states`, review selection, list/get/delete/tag/spritesheet.
@@ -89,10 +89,10 @@ Current MCP tool families:
 - UI assets: `create_ui_asset`, `get_ui_asset`, `list_ui_assets`, `delete_ui_asset`.
 - Platform helpers: `get_balance`, `list_projects`, `add_to_project`, `chat_*`, `sandbox_*`, `agent_*`, `agent_feedback`, `agent_help`, `search_knowledge`, `list_jobs`, `cancel_job`.
 - Maps: `create_map`, `list_maps`, `get_map`, `view_map`, `edit_map`, `delete_map`, `place_map_object`, `move_map_object`, `remove_map_object`, `list_map_objects`.
-- Raw image (no managed asset): `create_image_pixflux`, `create_image_pixen`, `create_image_pro`, `get_image`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors`.
+- Raw image (no managed asset): `create_image_pixflux`, `create_image_pixen`, `create_image_pro`, `get_image`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `animate_image_pixminimax`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors`.
 - Path tiles and building kits (share the tiles-pro get/list/delete tools): `create_path_tiles`, `create_building_kit`.
 
-As of the 2026-08-06 refresh, MCP covers the raw-image edit/inpaint family against the Pro variants and accepts preferred URL inputs as alternatives to inline base64. `edit_image_pixen` is the 1-generation Pixen edit, matching REST `edit-image-pixen`. Base `edit-image` and base `inpaint` retain REST-only controls, and `image-to-pixelart-pro`, `resize`, and `remove-background` still have no MCP tool. Talking-portrait workflows have counterparts on both surfaces except REST's stateless `/lip-sync` form, because MCP `get_lip_sync` requires a managed character.
+As of the 2026-09-12 refresh, MCP covers the raw-image edit/inpaint family against the Pro variants and accepts preferred URL inputs as alternatives to inline base64. `edit_image_pixen` is the 1-generation Pixen edit, matching REST `edit-image-pixen`; `animate_image_pixminimax` matches the new PixMiniMax raw-animation route. Base `edit-image` and base `inpaint` retain REST-only controls, and `image-to-pixelart-pro`, `resize`, and `remove-background` still have no MCP tool. Talking-portrait workflows have counterparts on both surfaces except REST's stateless `/lip-sync` form, because MCP `get_lip_sync` requires a managed character.
 
 Managed state naming is now explicit on both surfaces: character/object `name` is shared across sibling states, while `state_name` labels one variant and defaults to the first 20 characters of its edit description. Character list/get responses also expose `updated_at`; compare it, or the `?t=` stamp on returned URLs, when synchronizing local copies.
 
@@ -123,6 +123,7 @@ Public REST paths below are relative to `https://api.pixellab.ai/v2`. Website/in
 | User-facing label | Public REST v2 | MCP tool | First-party label/operation note | Product/model label | Public/internal status | Confidence and evidence |
 |---|---|---|---|---|---|---|
 | `Animate with text (new)` | `POST /animate-with-text-v3`; helper `POST /enhance-animation-v3-prompt`; REST-only `drift_threshold` | `animate_image` for a raw sprite (preferred frame URLs or inline base64); `animate_character`/`animate_object` remain managed-asset tools | Aseprite root `animate-with-text-v3`, `model_name = "generate_animate_with_text_v3"` | v3 animation workflow; `new` is UI label | Public REST plus editor wrapper | High. Evidence: current OpenAPI, MCP docs, and API page. |
+| `Animate with text (PixMiniMax)` | `POST /animate-pixminimax`; helper `POST /enhance-animation-v3-prompt` with `engine="pixminimax"`; inline `enhance_prompt`, `direction`, and `drift_threshold` are route-specific | `animate_image_pixminimax` for a raw sprite (preferred frame URLs or inline base64) | First-party editor label exposes PixMiniMax animation/interpolation terminology; private editor transport is not used as the public mapping | PixMiniMax; public REST description says powered by MiniMax H3 | Public REST/MCP plus editor terminology | High for the public route/tool; medium for exact editor parity. Evidence: current OpenAPI, MCP docs, API page, and local terminology inspection. |
 | `Animate with text (Pro)` | `POST /animate-with-text-v2` | Managed character/object animation only | Aseprite root `generate-animate-with-text`, `model_name = "generate_animate_with_text"` | Pro/v2 animation workflow | Public REST plus editor wrapper | High. Evidence: API page `/v2/animate-with-text-v2` and plugin tool `Animate with text (Pro)`; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
 | `Animate with text` | `POST /animate-with-text` | Managed character/object animation only | Aseprite older root `generate-movement` | Base/legacy text animation | Public REST plus legacy editor wrapper | Medium. Evidence: API page `/v2/animate-with-text`; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
 | `Animate with skeleton` | `POST /animate-with-skeleton`; `POST /estimate-skeleton` for pose utility | None as raw tool in current hosted MCP docs; MCP character/object animation may use templates/modes | Aseprite root `generate-pose-animation` or `generate-animation`; newer menu label `Animate with skeleton (new)` appears in the extension | Skeleton animation workflow | Public REST plus editor wrappers | Medium. Evidence: API llms lists both endpoints; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
@@ -133,7 +134,7 @@ Public REST paths below are relative to `https://api.pixellab.ai/v2`. Website/in
 | `Rotate to 8 directions (new)` | `POST /generate-8-rotations-v3` | None documented for raw rotate-to-8; character/object creation can output directions | Aseprite root `animate-with-text-v3`, `model_name = "generate_8_rotations_v3"` | v3 rotation workflow | Public REST plus editor wrapper | Medium/high. Evidence: API page `/v2/generate-8-rotations-v3`; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
 | `Rotate to 8 directions (Pro)` / `Create 8-directional sprite (Pro)` | `POST /generate-8-rotations-v2` | None documented for raw rotate-to-8 | Aseprite root `generate-reference-to-8-rotations`, `model_name = "reference_to_8_rotations"` | Pro rotation workflow | Public REST plus editor wrapper | Medium/high. Evidence: API page `/v2/generate-8-rotations-v2`; docs nav `Create 8-directional sprite (Pro)`; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
 | `Rotate` | `POST /rotate` | None documented | Aseprite root `generate-rotate-single` | Base rotate utility | Public REST plus editor wrapper | High. Evidence: API llms `/rotate`; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
-| `Prompt enhancement` | `POST /enhance-pixen-prompt`, `/enhance-character-v3-prompt`, `/enhance-animation-v3-prompt` | No direct prompt helper tools documented except `agent_help` | Aseprite observes WS helper paths such as `enhance-animation-prompt-ws` and `enhance-pixen-prompt-ws` in local dialog code | Prompt helper, provider undisclosed | Public REST for HTTP helpers; editor helper paths internal | High for public helpers, low for WS paths. Evidence: API page prompt helper section; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
+| `Prompt enhancement` | `POST /enhance-pixen-prompt`, `/enhance-character-v3-prompt`, `/enhance-animation-v3-prompt` (`engine="v3"` or `engine="pixminimax"`) | No direct prompt helper tools documented except `agent_help` | Aseprite observes WS helper paths such as `enhance-animation-prompt-ws` and `enhance-pixen-prompt-ws` in local dialog code | Prompt helper, provider undisclosed except PixMiniMax's route-scoped H3 disclosure | Public REST for HTTP helpers; editor helper paths internal | High for public helpers, low for WS paths. Evidence: API page prompt helper section; Aseprite terminology evidence informs this row; source filenames are intentionally omitted. |
 
 ### Characters, Objects, And Managed Assets
 
@@ -219,6 +220,7 @@ Public REST paths below are relative to `https://api.pixellab.ai/v2`. Website/in
    - `Create image S-XL (new)` maps to Pixen and `/v2/create-image-pixen`.
    - `Create S-XL image (Pro)` maps to `/v2/generate-image-v2`.
    - `Animate with text (new)` maps to `/v2/animate-with-text-v3`.
+   - `Animate with text (PixMiniMax)` maps to `/v2/animate-pixminimax`; the public REST description scopes the MiniMax H3 disclosure to that operation.
    - `Animate with text (Pro)` maps to `/v2/animate-with-text-v2`.
    - Do not route by `new` or `Pro` alone. Route by the full label and asset intent.
 
@@ -261,6 +263,10 @@ Public REST paths below are relative to `https://api.pixellab.ai/v2`. Website/in
 10. Root API redirect
    - `https://api.pixellab.ai/` redirecting to v1 docs is not evidence that website root routes are v1 REST endpoints.
    - Website and Aseprite root operations are separate first-party runtime surfaces.
+
+11. PixMiniMax versus raw MiniMax H3
+    - `PixMiniMax` is PixelLab's wrapper label, not a promise that PixelLab accepts MiniMax H3's full audiovisual prompt schema.
+    - PixelLab exposes a motion description, first/end image anchors, frame controls, and optional enhancement/direction fields. H3's standalone prompt guides also describe audio, reference labels, and shot/timeline fields; those are not public PixMiniMax request fields.
 
 ## Recommended Progressive-Disclosure References
 
@@ -328,9 +334,10 @@ For automation and code, route to REST v2 or MCP first:
 - BitForge/S-M image -> `POST /v2/create-image-bitforge`.
 - UI Pro/raw image -> `POST /v2/generate-ui-v2`; UI asset/layout/pieces -> prefer `POST /v2/create-ui-asset`, or use MCP `create_ui_asset` for MCP-first workflows.
 - Animation new/v3 -> `POST /v2/animate-with-text-v3`.
+- Explicit PixMiniMax/MiniMax H3 animation -> `POST /v2/animate-pixminimax` or MCP `animate_image_pixminimax`; use `references/animation.md` for its 4–40-frame contract and adapted prompt structure.
 - Animation Pro -> `POST /v2/animate-with-text-v2`.
 - Character/object/tileset managed workflows -> MCP tools when available, otherwise corresponding REST v2 endpoints.
-- MCP-first raw image work -> `create_image_pixflux` / `create_image_pixen` / `create_image_pro` + `get_image`, then `edit_image_pixen`, `edit_image`, `inpaint_image`, `animate_image`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, or `reduce_colors`. BitForge, multi-style-image generation, `image-to-pixelart-pro`, `resize`, and `remove-background` stay REST-only.
+- MCP-first raw image work -> `create_image_pixflux` / `create_image_pixen` / `create_image_pro` + `get_image`, then `edit_image_pixen`, `edit_image`, `inpaint_image`, `animate_image`, `animate_image_pixminimax`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, or `reduce_colors`. BitForge, multi-style-image generation, `image-to-pixelart-pro`, `resize`, and `remove-background` stay REST-only.
 - Quantize/reduce colors, unzoom, and pixel correction -> public `POST /reduce-colors`, `/unzoom`, `/correct-pixelart` or their MCP tools (first seen in the 2026-09-08 refresh).
 - Tile-based maps -> MCP `create_map`/`edit_map`/`view_map`/`get_map` and the map-object placement tools; there is no REST equivalent.
 - Website Map Workshop editing, Pixelorama save-back, try-on, reshape, and root website routes -> visible editor/website surfaces or explicitly labeled unsupported/internal paths, not public REST contracts.
