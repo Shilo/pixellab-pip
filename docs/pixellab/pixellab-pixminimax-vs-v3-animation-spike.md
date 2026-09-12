@@ -2,15 +2,15 @@
 
 Last reviewed: 2026-09-12.
 
-Status: completed. This spike records the refreshed public contract, a source-backed MiniMax H3 prompt adaptation, website and Aseprite research, and a controlled live comparison against PixelLab's v3 raw animation route.
+Status: completed. This spike records the refreshed public contract, a source-backed MiniMax H3 prompt adaptation, website and Aseprite research, and a paired live comparison against PixelLab's v3 raw animation route. The planned fixed-seed control was not achieved because every executed request sent `seed=0`, which PixelLab documents as random.
 
 ## Executive answer
 
 PixMiniMax is a real new public PixelLab animation family, not just a renamed v3 option. The REST route is POST /v2/animate-pixminimax and the hosted MCP tool is animate_image_pixminimax. PixelLab's public REST description says that the route is powered by MiniMax H3. It accepts up to 40 generated frames in multiples of four on a canvas up to 256×256, while v3 accepts 4–16 even frames and has a separate total-pixel budget.
 
-The controlled run favored PixMiniMax for longer clips and phase-rich actions. Its sword, bow, and 40-frame fireplace runs read as coherent multi-stage motion, and it held the exact first frame on the 128×128 robot and 256×256 fireplace inputs. It also introduced stronger effect accents in the sword case and did not reproduce a supplied distinct last frame exactly in the tested PixMiniMax cases. V3 was cheaper on the same fixtures, reached several distinct supplied end anchors exactly, and produced more restrained action effects, but its 16-frame ceiling prevented a matching 40-frame stress test and some actions were less decisive.
+The paired run favored PixMiniMax for longer clips and phase-rich actions. Its sword, bow, and 40-frame fireplace runs read as coherent multi-stage motion, and it held the exact first frame on the 128×128 robot and 256×256 fireplace inputs. It also introduced stronger effect accents in the sword case and did not reproduce a supplied distinct last frame exactly in the tested PixMiniMax cases. V3 was cheaper on the same fixtures, reached several distinct supplied end anchors exactly, and produced more restrained action effects, but its 16-frame ceiling prevented a matching 40-frame stress test and some actions were less decisive. Treat these as directional single-sample comparisons because seed was uncontrolled.
 
-Neither route is deterministic under a repeated seed in this sample. Neither route should be treated as automatically pixel-preserving: v3 changed transparent RGB values in the echoed robot frame, while PixMiniMax materially changed the echoed tiny flame frame. Verify the actual returned frames before treating the first result as an untouched input or before building a loop.
+This run did not test fixed-seed determinism: its repeated requests used `seed=0` (random), and their differing outputs therefore establish only random-seed variance. Neither route should be treated as automatically pixel-preserving: v3 changed transparent RGB values in the echoed robot frame, while PixMiniMax materially changed the echoed tiny flame frame. Verify the actual returned frames before treating the first result as an untouched input or before building a loop.
 
 ## Public contract delta
 
@@ -131,17 +131,17 @@ The official [exporting guide](https://www.aseprite.org/docs/exporting) document
 
 The official [Aseprite source repository](https://github.com/aseprite/aseprite) corroborates the document model: sprite creation initializes a first frame and frame duration, cels are associated with a layer/frame pair, and the new-frame command supports empty, duplicate, copy, and linked-frame behavior. The official [sprite-sheet export implementation](https://raw.githubusercontent.com/aseprite/aseprite/main/src/app/commands/cmd_export_sprite_sheet.cpp) selects frames and layers for export rather than inventing a new animation timeline. This source research informs import/export and verification guidance only; it does not turn private PixelLab editor operations into public API.
 
-## Controlled comparison
+## Paired comparison
 
 ### Protocol
 
-The [test plan](../plans/pixellab-pixminimax-vs-v3-animation-test-plan.md) was written before the first paid generation. It fixed a public-only route set, reused existing source frames, defined A–D cases, set the 3,000-generation hard ceiling, and required a per-call ledger. The run used only:
+The [test plan](../plans/pixellab-pixminimax-vs-v3-animation-test-plan.md) was written before the first paid generation. It fixed a public-only route set, reused existing source frames, defined A–D cases, set the 3,000-generation hard ceiling, and required a per-call ledger. The runner sent `seed=0` on every request even though the plan called for a fixed seed; because the public schemas define zero as random, route, input, prompt, frame count, and background handling were paired but seed was not controlled. The run used only:
 
 - POST /v2/animate-with-text-v3
 - POST /v2/animate-pixminimax
 - GET /v2/background-jobs/{job_id}
 
-The runner persisted request metadata, job IDs, polling responses, raw returned frames, contact sheets, GIF previews, per-call verification, and usage. A transient poll connection reset was recovered by polling the accepted job ID; no paid create request was resubmitted.
+The runner persisted request metadata, job IDs, polling responses, raw returned frames, contact sheets, GIF previews, per-call verification, and usage. A transient poll connection reset was recovered by polling the accepted job ID; no paid create request was resubmitted. The PixMiniMax robot payloads also sent `direction=south` when enhancement was disabled, although the public schema says direction is used only with enhancement. The server accepted those requests, but they do not isolate a direction effect; no conclusion below depends on one.
 
 Fixtures were exact existing source files: a 128×128 south-facing robot, a 16×32 flame/fireplace effect, and a 256×256 fireplace. No new art or local resize was used. The planned 32×32, 64×64, and 80×80 robot cases were not run because no exact-size source existed. The 256×256/40-frame case was run once on PixMiniMax because v3's public maximum is 16 frames.
 
@@ -151,13 +151,13 @@ The run root is [the ignored evidence folder](../../pixellab-pip-generations/pix
 
 | Group | Paid calls | Provider-reported generations | Conservative bound |
 |---|---:|---:|---:|
-| A common baselines | 12 | 24 | 134.1 |
+| A common baselines | 12 | 24.1 | 134.1 |
 | B motion families | 16 | 48 | 188.0 |
 | C endpoint/drift/scale | 11 | 37 | 126.0 |
 | D repeats/failure checks | 10 | 19 | 111.0 |
-| Total | 49 | 128 | 559.1 |
+| Total | 49 | 128.1 | 559.1 |
 
-All 49 paid jobs completed and reported usage. The two D4 validation requests were rejected with HTTP 422 before a job was accepted; they did not consume generation units. The measured total was 128 generations and the conservative bound was 559.1, below the 3,000-unit ceiling.
+All 49 paid jobs completed and reported usage. The total combines 128 base generation units with 0.1 enhancement units from A6. The two D4 validation requests were rejected with HTTP 422 before a job was accepted; they did not consume generation units. The measured total was 128.1 generations and the conservative bound was 559.1, below the 3,000-unit ceiling.
 
 ### Contract and integrity results
 
@@ -169,7 +169,7 @@ All 49 paid jobs completed and reported usage. The two D4 validation requests we
 | Canvas dimensions | Consistent in every completed job | Consistent in every completed job |
 | Transparency | Preserved on tested transparent inputs | Preserved on tested transparent inputs |
 | First-frame echo | Exact on robot and 256×256 fireplace; tiny flame differed by 293 pixels | Robot raw RGBA differed by 14,095 pixels with very small channel changes; tiny flame differed by about 311 pixels |
-| Fixed-seed repeatability | Two repeated robot and flame runs were not pixel-identical | Two repeated robot and flame runs were not pixel-identical |
+| Random-seed repeats (`seed=0`) | Two repeated robot and flame runs were not pixel-identical; fixed-seed behavior untested | Two repeated robot and flame runs were not pixel-identical; fixed-seed behavior untested |
 
 The v3 robot echo difference was largely transparent-RGB normalization rather than a visible redesign. The PixMiniMax tiny-flame difference was a material first-frame change for that small input. The public “unchanged first frame” convention therefore needs output verification on both routes, especially for very small effects.
 
@@ -188,11 +188,11 @@ The v3 robot echo difference was largely transparent-RGB normalization rather th
 | B7 coin spin | Both produced 17 unique frames and a usable rigid-object turn. |
 | B8 16-frame flame | Both produced distinct flame motion. PixMiniMax had larger temporal changes and a more expressive sequence; v3 was calmer on the tiny effect. |
 | C1 distinct anchors, 4 frames | V3 reached the supplied end exactly; PixMiniMax did not, with 15,471 differing pixels. Both produced a readable short transition. |
-| C2 same anchor, 16 frames | PixMiniMax ended near the matching anchor, with 956 differing pixels; v3 ended 14,095 differing pixels from the anchor. The result is evidence for this sample, not a general endpoint guarantee. |
+| C2 same anchor, 16 frames | PixMiniMax ended near the matching anchor, with 956 differing pixels; v3 ended 14,095 differing pixels from the anchor. This deviated from the planned distinct-anchor case, and the fixed prompt still said “8-frame” while requesting 16 generated frames, so treat it only as evidence for this executed sample, not a general endpoint guarantee. |
 | C3/C4 drift threshold | Both routes completed both settings. With the default/omitted threshold, v3 averaged 103.2 changed pixels per adjacent-frame comparison (max 129; same-anchor endpoint diff 311), while PixMiniMax averaged 120.4 (max 204; endpoint diff 476). With `drift_threshold=0`, v3 averaged 112.0 (max 128; endpoint diff 311), while PixMiniMax averaged 108.6 (max 124; endpoint diff 323). Each produced 9 unique images; zero did not clearly improve endpoint integrity or establish a flicker winner on this tiny flame, so use the control when drift is observed and verify visually. |
 | C8 128×128/16 | PixMiniMax completed the longer clip at 5 reported generations and v3 completed it at 4. |
 | C9 256×256/40 | PixMiniMax completed the maximum legal clip at 12 reported generations and returned 41 unique frames. This was a successful stress result; no v3 comparison was legal. |
-| D1/D2 anchored repeats | Neither route reproduced identical pixels under the same seed when given the same first/end anchor. Repeated previews were similar enough to show the same motion family, but fixed seeds are not deterministic contracts. |
+| D1/D2 anchored repeats | The requests used `seed=0`, which means random, so they do not test fixed-seed reproducibility. Repeated previews were similar enough to show the same motion family, but only random-seed sample variance was observed. |
 | D3 last frame without enhancement | PixMiniMax completed the end-frame path without enhancement but did not reach the distinct end exactly; v3 reached the tested end exactly. |
 | D4 validation | Missing first_frame was rejected with HTTP 422 on both routes without an accepted job. |
 
@@ -200,7 +200,7 @@ The v3 robot echo difference was largely transparent-RGB normalization rather th
 
 The strongest PixMiniMax advantage in this sample is temporal planning for a multi-phase action and a longer sequence. It is the better first candidate when the user explicitly asks for PixMiniMax/H3, wants 16–40 generated frames, or needs a richer raise/aim/release/impact sequence. It should be inspected for stronger effect accents and endpoint fidelity.
 
-The strongest v3 advantages are lower reported usage on matched short runs, a smaller established frame budget, and exact distinct end anchors in several tested cases. It remains the default v3 route when PixMiniMax is not requested, when a restrained short clip is sufficient, or when the user values the tested end-anchor behavior more than long-clip capacity. This is not a universal model ranking: the study used one robot, one tiny flame, one fireplace stress fixture, one main motion prompt family, and a finite seed sample.
+The strongest v3 advantages are lower reported usage on matched short runs, a smaller established frame budget, and exact distinct end anchors in several tested cases. It remains the default v3 route when PixMiniMax is not requested, when a restrained short clip is sufficient, or when the user values the tested end-anchor behavior more than long-clip capacity. This is not a universal model ranking: the study used one robot, one tiny flame, one fireplace stress fixture, one main motion prompt family, and a finite random-seed sample.
 
 ## Routing and verification recommendations
 
@@ -217,7 +217,7 @@ The strongest v3 advantages are lower reported usage on matched short runs, a sm
 - Website USD estimates and REST generation-unit examples are both official but are not presented as a conversion. The dated website observation is separate from the doc-watch cache; the response's usage.generations remains the billing ledger.
 - The public REST/MCP docs say Tier 1+ while a local editor comment observed a different tier. Public docs win for automation; the editor discrepancy should be rechecked on a future refresh.
 - The official H3 materials describe audiovisual modes and richer multimodal prompting than PixelLab exposes. The adaptation here is evidence-based prompt structure, not a claim that PixelLab provides raw H3 mode parity.
-- Fixed seeds did not produce deterministic pixels in this sample, so a seed is a comparison control rather than a reproducibility guarantee.
+- Fixed-seed determinism remains untested because all requests used `seed=0` (random). A future repeatability check needs the same explicit nonzero seed on both repeats.
 - No exact 32×32, 64×64, or 80×80 robot source existed in the archive, so those planned scale points remain untested. The 16×32 flame and 256×256 fireplace provide small-effect and maximum-canvas evidence, but not a complete pricing curve.
 - The live sample was designed to fit safely under the user's 3,000-unit cap. It is a routing spike, not a benchmark leaderboard or a substitute for visual review of a user's own sprite.
 

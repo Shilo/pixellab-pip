@@ -26,7 +26,6 @@ The same asset type can appear across multiple surfaces. A character, object, ti
 
 - A hosted MCP tool name.
 - A REST v2 endpoint path.
-- The public PixMiniMax raw-animation family: REST `POST /v2/animate-pixminimax` and MCP `animate_image_pixminimax`. Its MiniMax H3 disclosure is scoped to that operation; it does not make website/editor transports or raw H3 fields public.
 - A website/editor workflow.
 - An SDK wrapper, depending on SDK version.
 
@@ -48,4 +47,4 @@ Use this order for most agent work:
 - `https://api.pixellab.ai/v1` is the legacy public REST API base.
 - Undocumented root or unversioned endpoints under `https://api.pixellab.ai/` that are used by first-party surfaces such as the website or Aseprite extension are not public REST v1/v2 just because they share a host or operation name.
 - Website login/session credentials are not the same thing as the public REST/MCP bearer token.
-- Product labels such as `Pro`, `v3`, `new`, `Pixen`, `PixFlux`, and `BitForge` need to be interpreted in the context of the selected surface.
+- Product labels such as `Pro`, `v3`, `new`, `Pixen`, `PixFlux`, `PixMiniMax`, and `BitForge` need to be interpreted in the context of the selected surface. The public MiniMax H3 disclosure is scoped to `POST /v2/animate-pixminimax`; it does not make website/editor transports or standalone H3 fields public.

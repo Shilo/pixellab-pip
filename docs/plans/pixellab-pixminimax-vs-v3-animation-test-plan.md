@@ -4,11 +4,19 @@ Status: executed 2026-09-12. Results are recorded in
 `../pixellab/pixellab-pixminimax-vs-v3-animation-spike.md` and the git-ignored
 `pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/` run folder.
 
-Execution summary: 49 paid jobs completed with 128 provider-reported generation
+Execution summary: 49 paid jobs completed with 128.1 provider-reported generation
 units and a conservative 559.1-unit bound. Two D4 requests returned HTTP 422
 before a job was accepted. C5–C7 were not run because the archive had no exact
 32×32, 64×64, or 80×80 robot source. C9 ran once on PixMiniMax with the exact
-256×256 fireplace source; v3 cannot legally request 40 generated frames.
+256×256 fireplace source; v3 cannot legally request 40 generated frames. C2
+was planned with distinct anchors but executed with the same first/end frame;
+its fixed prompt also retained the baseline wording “8-frame” while requesting
+16 generated frames. Results treat C2 only as the executed same-anchor case.
+Every executed request sent `seed=0`, which the public schemas define as
+random, so the planned fixed-seed control and repeatability test were not run.
+PixMiniMax robot requests also sent `direction=south` when enhancement was off,
+although the schema says direction is used only with enhancement; those samples
+therefore do not test direction control.
 
 ## Goal
 
@@ -124,7 +132,7 @@ These cases probe controls that are materially different between the routes.
 | ID | Fixture | Inputs | Purpose |
 |---|---|---|---|
 | C1 | robot | distinct first/end walking poses, 4 frames | Shortest start-to-end transition. |
-| C2 | robot | distinct first/end walking poses, 16 frames | Longer transition and endpoint convergence. |
+| C2 | robot | Planned: distinct first/end walking poses, 16 frames. Executed: same first/end frame, 16 frames, with the fixed baseline prompt still saying “8-frame.” | Executed as a longer same-anchor endpoint/loop-closure case; the prompt/frame-count mismatch limits interpretation. |
 | C3 | flame | same first/end frame, 8 frames, both routes; PixMiniMax `drift_threshold` omitted | Compare documented/default de-flicker behavior on both public routes. |
 | C4 | flame | same first/end frame, 8 frames, both routes, `drift_threshold=0` | Aggressive de-flicker comparison on both public routes; only run if C3 completes. |
 | C5 | robot | 32×32 source, 4 frames | Lowest published PixMiniMax cost example and small-canvas behavior. |
@@ -142,8 +150,8 @@ is unavailable, mark the case “not run” rather than making test art.
 
 | ID | Inputs | Purpose |
 |---|---|---|
-| D1 | Repeat the 128×128 robot same-first/end-anchor case twice per route with the same seed | Estimate within-route variance under the executed anchor condition; do not interpret pixel differences as regressions. |
-| D2 | Repeat the 16×32 flame same-first/end-anchor case twice per route with the same seed | Check whether small-effect behavior is stable under the executed anchor condition. |
+| D1 | Planned: repeat the 128×128 robot same-first/end-anchor case twice per route with a fixed seed. Executed: two repeats per route with `seed=0` (random). | Records random-seed sample variance only; fixed-seed repeatability remains untested. |
+| D2 | Planned: repeat the 16×32 flame same-first/end-anchor case twice per route with a fixed seed. Executed: two repeats per route with `seed=0` (random). | Records random-seed sample variance only; fixed-seed small-effect stability remains untested. |
 | D3 | One legal request with `last_frame` but no `enhance_prompt` | Confirms the PixMiniMax end-frame path independently of prompt enhancement. |
 | D4 | One malformed/illegal request per route in a separate non-paid validation attempt where possible; otherwise use schema inspection only | Records validation boundaries without intentionally charging a job. |
 
