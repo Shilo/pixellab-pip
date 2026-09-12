@@ -63,7 +63,7 @@ Inspect raw before/after content even when the report labels a source only `raw_
 
 Treat a source with `fetch_failed` or `parse_failed` as unverified. Never add, remove, or revise a claim based on that source. If failed coverage prevents a reliable update, stop and report the exact blocker. Do not fill gaps from memory, search-engine snippets, website internals, or private endpoints.
 
-When exact REST behavior matters, use the refreshed raw OpenAPI document rather than a normalized summary. Use the public MCP docs cache as the MCP inventory authority. Apply every source-precedence and public-surface rule in `docs/pixellab/pixellab-doc-watch-cache.md`.
+When exact REST behavior matters, use the refreshed raw OpenAPI document rather than a normalized summary. Use the public MCP docs cache as the MCP inventory authority. When `mcp_docs` is initialized or its raw content changes, also review the raw [official MCP guide](https://api.pixellab.ai/mcp/docs) for relevant parameter declarations, examples, setup and lifecycle advice, and linked resources that could affect Pip's skill. Check MCP examples against their declared parameters and REST or parity claims against raw OpenAPI; do not adopt MCP-only advice that conflicts with Pip's supported REST routes or safety boundaries. Apply every source-precedence and public-surface rule in `docs/pixellab/pixellab-doc-watch-cache.md`.
 
 If the refresh initializes a missing baseline, do not claim that those sources changed over time because no before/after conclusion is possible. Still compare their successfully fetched current public contracts against every semantically related tracked claim and correct any evidence-proven contradiction. Otherwise a fresh cache could never repair an already-stale repository.
 
