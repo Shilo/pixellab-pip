@@ -16,7 +16,9 @@ Every executed request sent `seed=0`, which the public schemas define as
 random, so the planned fixed-seed control and repeatability test were not run.
 PixMiniMax robot requests also sent `direction=south` when enhancement was off,
 although the schema says direction is used only with enhancement; those samples
-therefore do not test direction control.
+therefore do not test direction control. The planned 0–4 visual scorecard was
+not completed; the Spike reports raw verification measurements and qualitative
+observations, not case-level scores or score means.
 
 ## Goal
 
@@ -150,8 +152,8 @@ is unavailable, mark the case “not run” rather than making test art.
 
 | ID | Inputs | Purpose |
 |---|---|---|
-| D1 | Planned: repeat the 128×128 robot same-first/end-anchor case twice per route with a fixed seed. Executed: two repeats per route with `seed=0` (random). | Records random-seed sample variance only; fixed-seed repeatability remains untested. |
-| D2 | Planned: repeat the 16×32 flame same-first/end-anchor case twice per route with a fixed seed. Executed: two repeats per route with `seed=0` (random). | Records random-seed sample variance only; fixed-seed small-effect stability remains untested. |
+| D1 | Planned: repeat the 128×128 robot same-first/end-anchor case twice per route with a fixed seed. Executed: two repeats per route with `seed=0` (random). | These random-seed samples cannot establish fixed-seed repeatability. |
+| D2 | Planned: repeat the 16×32 flame same-first/end-anchor case twice per route with a fixed seed. Executed: two repeats per route with `seed=0` (random). | These random-seed samples cannot establish fixed-seed small-effect stability. |
 | D3 | One legal request with `last_frame` but no `enhance_prompt` | Confirms the PixMiniMax end-frame path independently of prompt enhancement. |
 | D4 | One malformed/illegal request per route in a separate non-paid validation attempt where possible; otherwise use schema inspection only | Records validation boundaries without intentionally charging a job. |
 
@@ -180,6 +182,10 @@ job is accepted; record any unexpected charge and stop the branch.
    technical validity and visual usefulness separately.
 
 ## Scoring
+
+Execution note: this scorecard was not completed during the run. No case-level
+scores or means are reported; the Spike's model-quality conclusions are
+qualitative and remain limited to the reviewed samples.
 
 Score each completed output on a 0–4 scale, with “not applicable” allowed:
 

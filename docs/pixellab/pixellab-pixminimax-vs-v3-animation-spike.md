@@ -38,9 +38,9 @@ These are the practical tradeoffs supported by PixelLab's public documentation a
 
 PixMiniMax is a real new public PixelLab animation family, not just a renamed v3 option. The REST route is POST /v2/animate-pixminimax and the hosted MCP tool is animate_image_pixminimax. PixelLab's public REST description says that the route is powered by MiniMax H3. It accepts up to 40 generated frames in multiples of four on a canvas up to 256×256, while v3 accepts 4–16 even frames and has a separate total-pixel budget.
 
-The paired run favored PixMiniMax for longer clips and phase-rich actions. Its sword, bow, and 40-frame fireplace runs read as coherent multi-stage motion, and it held the exact first frame on the 128×128 robot and 256×256 fireplace inputs. It also introduced stronger effect accents in the sword case and did not reproduce a supplied distinct last frame exactly in the tested PixMiniMax cases. V3 was cheaper on the same fixtures, reached several distinct supplied end anchors exactly, and produced more restrained action effects, but its 16-frame ceiling prevented a matching 40-frame stress test and some actions were less decisive. Treat these as directional single-sample comparisons because seed was uncontrolled.
+In the qualitative review, PixMiniMax looked stronger on longer clips and actions with several distinct stages. Its sword, bow, and 40-frame fireplace runs read as coherent multi-stage motion, and it held the exact first frame on the 128×128 robot and 256×256 fireplace inputs. It also introduced stronger effect accents in the sword case and did not reproduce a supplied distinct last frame exactly in the tested PixMiniMax cases. V3 was cheaper on the same fixtures, reached several distinct supplied end anchors exactly, and produced more restrained action effects, but its 16-frame ceiling prevented a matching 40-frame stress test and some actions were less decisive. Treat these as directional single-sample comparisons because seed was uncontrolled.
 
-This run did not test fixed-seed determinism: its repeated requests used `seed=0` (random), and their differing outputs therefore establish only random-seed variance. Neither route should be treated as automatically pixel-preserving: v3 changed transparent RGB values in the echoed robot frame, while PixMiniMax materially changed the echoed tiny flame frame. Verify the actual returned frames before treating the first result as an untouched input or before building a loop.
+This run did not test fixed-seed determinism: its repeated requests used `seed=0` (random). Those random-seed samples were not identical, but they cannot establish fixed-seed reproducibility or identify the cause of every difference. Neither route should be treated as automatically pixel-preserving: v3 changed transparent RGB values in the echoed robot frame, while PixMiniMax materially changed the echoed tiny flame frame. Verify the actual returned frames before treating the first result as an untouched input or before building a loop.
 
 ## Public contract delta
 
@@ -85,7 +85,7 @@ The corresponding public parity is:
 
 | REST | MCP | Parity |
 |---|---|---|
-| POST /animate-pixminimax | animate_image_pixminimax | Full functional parity |
+| POST /animate-pixminimax | animate_image_pixminimax | Core animation workflow parity; REST additionally exposes drift_threshold |
 | POST /animate-with-text-v3 | animate_image | Full functional parity for the shared raw workflow; each surface has route-specific controls |
 
 MCP does not expose REST's drift_threshold field on the new tool. On an MCP-first request, use the tool's enhance_prompt/direction controls when appropriate, or perform prompt improvement as the agent; preserve the user's wording when they explicitly provide it.
@@ -171,7 +171,7 @@ The [test plan](../plans/pixellab-pixminimax-vs-v3-animation-test-plan.md) was w
 - POST /v2/animate-pixminimax
 - GET /v2/background-jobs/{job_id}
 
-The runner persisted request metadata, job IDs, polling responses, raw returned frames, contact sheets, GIF previews, per-call verification, and usage. A transient poll connection reset was recovered by polling the accepted job ID; no paid create request was resubmitted. The PixMiniMax robot payloads also sent `direction=south` when enhancement was disabled, although the public schema says direction is used only with enhancement. The server accepted those requests, but they do not isolate a direction effect; no conclusion below depends on one.
+The runner persisted request metadata, job IDs, polling responses, raw returned frames, contact sheets, GIF previews, per-call verification, and usage. A transient poll connection reset was recovered by polling the accepted job ID; no paid create request was resubmitted. The PixMiniMax robot payloads also sent `direction=south` when enhancement was disabled, although the public schema says direction is used only with enhancement. The server accepted those requests, but they do not isolate a direction effect; no conclusion below depends on one. The planned 0–4 visual scorecard was not completed, so the findings combine objective frame measurements with qualitative visual review; no case-level or mean scores were calculated.
 
 Fixtures were exact existing source files: a 128×128 south-facing robot, a 16×32 flame/fireplace effect, and a 256×256 fireplace. No new art or local resize was used. The planned 32×32, 64×64, and 80×80 robot cases were not run because no exact-size source existed. The 256×256/40-frame case was run once on PixMiniMax because v3's public maximum is 16 frames.
 
@@ -218,11 +218,11 @@ The v3 robot echo difference was largely transparent-RGB normalization rather th
 | B7 coin spin | Both produced 17 unique frames and a usable rigid-object turn. |
 | B8 16-frame flame | Both produced distinct flame motion. PixMiniMax had larger temporal changes and a more expressive sequence; v3 was calmer on the tiny effect. |
 | C1 distinct anchors, 4 frames | V3 reached the supplied end exactly; PixMiniMax did not, with 15,471 differing pixels. Both produced a readable short transition. |
-| C2 same anchor, 16 frames | PixMiniMax ended near the matching anchor, with 956 differing pixels; v3 ended 14,095 differing pixels from the anchor. This deviated from the planned distinct-anchor case, and the fixed prompt still said “8-frame” while requesting 16 generated frames, so treat it only as evidence for this executed sample, not a general endpoint guarantee. |
+| C2 same anchor, 16 frames | PixMiniMax's final frame differed from the matching anchor in 956 visible pixels. V3 had 14,095 raw RGBA differences, but every change was an invisible RGB value inside a fully transparent pixel; its visible pixels and transparency matched the anchor exactly. Visually, v3 closed the loop exactly and PixMiniMax did not. This deviated from the planned distinct-anchor case, and the fixed prompt still said “8-frame” while requesting 16 generated frames, so treat it only as evidence for this executed sample, not a general endpoint guarantee. |
 | C3/C4 drift threshold | Both routes completed both settings. With the default/omitted threshold, v3 averaged 103.2 changed pixels per adjacent-frame comparison (max 129; same-anchor endpoint diff 311), while PixMiniMax averaged 120.4 (max 204; endpoint diff 476). With `drift_threshold=0`, v3 averaged 112.0 (max 128; endpoint diff 311), while PixMiniMax averaged 108.6 (max 124; endpoint diff 323). Each produced 9 unique images; zero did not clearly improve endpoint integrity or establish a flicker winner on this tiny flame, so use the control when drift is observed and verify visually. |
 | C8 128×128/16 | PixMiniMax completed the longer clip at 5 reported generations and v3 completed it at 4. |
 | C9 256×256/40 | PixMiniMax completed the maximum legal clip at 12 reported generations and returned 41 unique frames. This was a successful stress result; no v3 comparison was legal. |
-| D1/D2 anchored repeats | The requests used `seed=0`, which means random, so they do not test fixed-seed reproducibility. Repeated previews were similar enough to show the same motion family, but only random-seed sample variance was observed. |
+| D1/D2 anchored repeats | The requests used `seed=0`, which means random. The repeated previews were not identical but showed the same broad motion family. These are random-seed samples and cannot establish fixed-seed reproducibility. |
 | D3 last frame without enhancement | PixMiniMax completed the end-frame path without enhancement but did not reach the distinct end exactly; v3 reached the tested end exactly. |
 | D4 validation | Missing first_frame was rejected with HTTP 422 on both routes without an accepted job. |
 
