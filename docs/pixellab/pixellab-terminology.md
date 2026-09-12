@@ -11,6 +11,7 @@ PixelLab product labels, endpoint names, editor labels, and SDK method names can
 | Term | Public handling |
 |---|---|
 | `Pro` | Treat as a product/mode label scoped to a specific tool or endpoint. Do not treat it as one global model. |
+| `Pro Fast` | A separate image/character/object/edit/inpaint family, not a faster alias for the older Pro endpoints. Creation gives one image; character views are always eight. Its speed, visual quality, and price advantage have not been independently tested here. |
 | `v3` | Treat as a workflow/version label scoped to endpoints such as character creation, animation, rotation, or inpainting. |
 | `new` | Treat as a UI or workflow label. Map to the concrete endpoint/tool before giving technical advice. |
 | `Pixen` | Public image-generation product/endpoint label. Verify exact endpoint fields in REST v2 docs. |

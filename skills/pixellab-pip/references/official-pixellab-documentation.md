@@ -23,6 +23,7 @@ Read this when a needed endpoint, tool, field, price, limit, SDK detail, or exac
 - `https://api.pixellab.ai/mcp/docs` is the authoritative public MCP tool inventory. It explains available tools, non-blocking jobs, polling, downloads, and warns that MCP tools are not REST endpoints. Do not rely on the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` to decide whether a current MCP tool exists.
 - The MCP tool set can change between sessions as PixelLab ships server updates. A client's connected tool list can also lag a very recent server change until the client reconnects — if a documented tool is unexpectedly missing, do not conclude it was removed from a single stale check; note the discrepancy and prefer a fresh connection or `mcp/docs` before routing around it.
 - An MCP-capable client may also expose `pixellab://docs/...` documentation resources (engine/framework guides such as Godot, Unity, Python, Wang tilesets, sidescroller tilesets, isometric tiles, and platform overview). Use those resources when visible; otherwise fall back to the public docs URLs above.
+- The 2026-09-12 MCP guide added separate Pro Fast image, character, object, edit, inpaint, and capability tools. The REST OpenAPI confirms matching operation paths plus a REST-only provisional cost estimator. Read `pro-fast.md` for routing and inputs. Do not use the guide's copied `create_character` examples under `create_character_pro_fast` or its contradictory four-direction hint; check the live tool schema and REST OpenAPI instead.
 
 ## Prompt Enhancement Pricing
 

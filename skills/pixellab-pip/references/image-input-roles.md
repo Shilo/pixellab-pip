@@ -68,6 +68,8 @@ These are REST v2 routes; MCP `edit_image`/`inpaint_image`/`animate_image`/`anim
 
 For animation frame anchors (`first_frame`, `last_frame`) and idle-loop risk, see `animation.md`.
 
+For explicit Pro Fast work, read `pro-fast.md`: an owned `source_image_id` or supplied south-facing first frame anchors character/object rotations; `style_image` guides appearance, while `edit_image_pro_fast`/`inpaint_image_pro_fast` take a target image or MCP-owned source ID. The inpaint mask is a separate same-size black/white image, not a style reference.
+
 Exact-mask edits: avoid MCP `inpaint_image` and REST `inpaint-v3` until fixed; live tests changed
 pixels outside the mask or ignored the masked region. For other inpainting, verify both regions and
 report failures without retrying or repairing silently.
