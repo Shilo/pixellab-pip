@@ -24,7 +24,7 @@ These are the practical tradeoffs supported by PixelLab's public documentation a
 - **Its stronger motion can become unwanted decoration.** The sword test produced a larger, brighter slash effect. That can make an attack easier to read, but it can also add visual effects the user did not want.
 - **The starting image is not guaranteed to remain untouched.** PixMiniMax returned exact starting images for the larger robot and fireplace, but materially changed the tiny flame's first returned image.
 - **Frame-count choices are less flexible.** PixMiniMax accepts only multiples of four. V3 accepts any even frame count from 4 through 16.
-- **It is beta and access-restricted.** It requires a Tier 1 subscription or higher, and PixelLab says a job typically takes 1–5 minutes.
+- **It is beta.** PixelLab says a job typically takes 1–5 minutes.
 - **PixelLab exposes only part of MiniMax H3.** The PixMiniMax wrapper does not expose H3's standalone audio, shot-list, camera, or advanced reference controls.
 
 ### What remains uncertain
@@ -57,7 +57,7 @@ The existing REST animation enhancer also changed: EnhanceAnimationV3PromptReque
 
 ### REST
 
-POST /v2/animate-pixminimax is a beta route that requires a Tier 1 subscription or higher. It uses the public bearer-token contract and returns HTTP 200 with a background_job_id. Poll GET /v2/background-jobs/{job_id}; the completed result is in last_response.images.
+POST /v2/animate-pixminimax is a beta route. It uses the public bearer-token contract and returns HTTP 200 with a background_job_id. Poll GET /v2/background-jobs/{job_id}; the completed result is in last_response.images.
 
 The request shape is:
 
@@ -93,8 +93,6 @@ MCP does not expose REST's drift_threshold field on the new tool. On an MCP-firs
 ### Boundary decisions
 
 The REST description mentions the semantics of a cost helper associated with the operation. That unversioned/private cost route is not in the public REST v2 path inventory and is not documented here as an endpoint. The installed Aseprite extension uses a private editor transport as well. Both are evidence about first-party behavior only; Pip routes code and automation through public REST v2 or MCP.
-
-The public REST/MCP docs are the authority for subscription gating. A local editor comment observed during source review described a different tier. Because the website API page and public REST/MCP docs agree on Tier 1+, the docs and runtime references use Tier 1+ and record the editor discrepancy only as an unresolved observation.
 
 ## MiniMax H3 research and PixelLab adaptation
 
@@ -245,7 +243,6 @@ The strongest v3 advantages are lower reported usage on matched short runs, a sm
 ## Limitations and unresolved questions
 
 - Website USD estimates and REST generation-unit examples are both official but are not presented as a conversion. The dated website observation is separate from the doc-watch cache; the response's usage.generations remains the billing ledger.
-- The public REST/MCP docs say Tier 1+ while a local editor comment observed a different tier. Public docs win for automation; the editor discrepancy should be rechecked on a future refresh.
 - The official H3 materials describe audiovisual modes and richer multimodal prompting than PixelLab exposes. The adaptation here is evidence-based prompt structure, not a claim that PixelLab provides raw H3 mode parity.
 - Fixed-seed determinism remains untested because all requests used `seed=0` (random). A future repeatability check needs the same explicit nonzero seed on both repeats.
 - No exact 32×32, 64×64, or 80×80 robot source existed in the archive, so those planned scale points remain untested. The 16×32 flame and 256×256 fireplace provide small-effect and maximum-canvas evidence, but not a complete pricing curve.
