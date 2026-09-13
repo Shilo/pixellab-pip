@@ -230,6 +230,18 @@ The strongest PixMiniMax advantage in this sample is temporal planning for a mul
 
 The strongest v3 advantages are lower reported usage on matched short runs, a smaller established frame budget, and exact distinct end anchors in several tested cases. It remains the default v3 route when PixMiniMax is not requested, when a restrained short clip is sufficient, or when the user values the tested end-anchor behavior more than long-clip capacity. This is not a universal model ranking: the study used one robot, one tiny flame, one fireplace stress fixture, one main motion prompt family, and a finite random-seed sample.
 
+### Follow-up: v3 cinematic replays (2026-09-12–13)
+
+A later [preview-app research spike](../pixellab-preview-app-research-spike.md) replayed three archived cinematic recipes with fresh PixelLab jobs. These were **v3 animation checks, not new PixMiniMax-vs-v3 pairs**, so they refine the verification caveats but do not change the model ranking above. The three replays used 360 reported generation units in total, including still-image routes; that total is not a v3 animation price comparison.
+
+| Replay | What the returned frames showed |
+|---|---|
+| Pip, 37 chained v3 clips | Six first-frame echoes were exact, three differed only in invisible RGB under full transparency, and 28 changed visible pixels. The final frame visually matched the opening, but the dog was much larger immediately before that return; the requested red ball was also absent in sampled catch/hold frames. |
+| Space duel, 20 v3 clips plus still-image jobs | Nineteen first-frame echoes were exact. The other was a new scene cut from an edited still: 11,404 opaque pixels changed by a very small amount on average, so the raw count alone overstated the visible effect. Requested speech-bubble punctuation also drifted. |
+| Astronaut, three chained v3 clips plus an opening still | All first-frame echoes and the final anchor were pixel-exact. The assembled cut omitted that closing anchor, however, and its bright-moon-to-pink-moon wrap still had an obvious visual jump. |
+
+These replays show why the C2 visually exact v3 endpoint is a **case result**, not a guarantee for every clip or assembled loop. Inspect the displayed cut around handoffs and the wrap, along with the raw endpoint images; an exact anchor can coexist with an abrupt approach or a visible cut. The replay's request blueprints, per-job ledger, and frame checks are documented in the linked preview-app spike.
+
 ## Routing and verification recommendations
 
 1. Route an explicit PixMiniMax, PixMiniMax/H3, or MiniMax H3 request to REST POST /v2/animate-pixminimax or MCP animate_image_pixminimax. Route an unspecified raw animation request to the existing v3 family.
