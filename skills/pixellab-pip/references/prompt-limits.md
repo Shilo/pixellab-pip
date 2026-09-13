@@ -10,7 +10,7 @@ Do not globally cap every prompt at 500 characters. `maxLength` follows a rough 
 
 - 2000 for most primary `description` fields.
 - 1000 for the managed state/edit-description family: character/object state `edit_description` and object `animation_description`, and `animate-with-text-v3` `action`.
-- 500 for the other raw-animation `action` fields, `/edit-image` and `/edit-image-pixen` descriptions (`/edit-image-pro-fast` allows 2000), and some style/reference descriptions.
+- 500 for the other raw-animation `action` fields, `/edit-image` and `/edit-image-pixen` descriptions (`/edit-image-pro-flash` allows 2000), and some style/reference descriptions.
 - 200 for some UI/font fields (`color_palette`, `font_name`).
 
 ## Non-Obvious Limits

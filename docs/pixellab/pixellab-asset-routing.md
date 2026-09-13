@@ -8,7 +8,7 @@ PixelLab requests usually start as plain asset goals: "make a character," "gener
 
 Use this as routing guidance, not as a frozen schema. Refresh official docs for exact current parameters, result shapes, model/mode availability, pricing, and SDK coverage.
 
-**Pro Fast is a separate option, not the default Pro route.** The current public MCP/REST docs add one-image, eight-view character, one/eight-view object, one-image edit, and masked-edit operations. Their size and price checks are separate, pricing is provisional, and this repository has not benchmarked their output. Use the [Pro Fast operational reference](../../skills/pixellab-pip/references/pro-fast.md) for an explicit request or comparison; do not silently replace the tested routes below.
+**Pro Flash is a separate option, not the default Pro route.** The current public MCP/REST docs add one-image, eight-view character, one/eight-view object, one-image edit, and masked-edit operations. Their size and price checks are separate, pricing is provisional, and this repository has not benchmarked their output. Use the [Pro Flash operational reference](../../skills/pixellab-pip/references/pro-flash.md) for an explicit request or comparison; do not silently replace the tested routes below.
 
 ## Asset Intent Map
 

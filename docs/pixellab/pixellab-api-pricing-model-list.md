@@ -47,19 +47,19 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Create UI elements (Pro) | `POST /v2/generate-ui-v2` | Pro UI generation | Buttons, health bars, slots, menus | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
 | Create UI asset (Pro) | `POST /v2/create-ui-asset` | Structured UI asset generation | Saved UI panels with `pieces`, `elements`, style image, project assignment, and polling | current public pricing page has no USD row; local cost docs treat this as Pro / `20-40` generations |
 
-## Pro Fast (New, Provisional Pricing)
+## Pro Flash (New, Provisional Pricing)
 
-The 2026-09-12 public REST/MCP refresh added a distinct Pro Fast family. It has not been quality-, latency-, or charge-tested in this repository. It is not a rename of the older Pro image/edit/character/object routes and should not displace the tested defaults just because “Fast” appears in the label.
+The public REST/MCP docs introduced this family as Pro Fast, then renamed its routes and tools to Pro Flash. It has not been quality-, latency-, or charge-tested in this repository. It is separate from the older Pro image/edit/character/object routes and should not displace tested defaults because its name suggests speed.
 
 | Operation | REST v2 | MCP | Billing and output distinction |
 |---|---|---|---|
-| Create one image | `POST /create-image-pro-fast` | `create_image_pro_fast` | One image per call; REST describes a provisional five-generation first-image estimate. Older Pro may return a size-dependent batch. |
-| Create character | `POST /create-character-pro-fast` | `create_character_pro_fast` | First south-facing image plus eight V3 views; using an owned prior `source_image_id` avoids the new-image stage, not the rotations. |
-| Create object | `POST /create-object-pro-fast` | `create_object_pro_fast` | One or eight directions. Finalizing one direction from an already-paid source image is documented as free; eight directions still incur rotation charges. |
-| Edit one image | `POST /edit-image-pro-fast` | `edit_image_pro_fast` | Keeps the input's native canvas dimensions; no published fixed cost here. |
-| Masked edit | `POST /inpaint-image-pro-fast` | `inpaint_image_pro_fast` | Source and mask must share native size; no published fixed cost here. Exact outside-mask preservation is claimed, not live-verified. |
+| Create one image | `POST /create-image-pro-flash` | `create_image_pro_flash` | One image per call; REST describes a provisional five-generation first-image estimate. Older Pro may return a size-dependent batch. |
+| Create character | `POST /create-character-pro-flash` | `create_character_pro_flash` | First south-facing image plus eight V3 views; using an owned prior `source_image_id` avoids the new-image stage, not the rotations. |
+| Create object | `POST /create-object-pro-flash` | `create_object_pro_flash` | One or eight directions. Finalizing one direction from an already-paid source image is documented as free; eight directions still incur rotation charges. |
+| Edit one image | `POST /edit-image-pro-flash` | `edit_image_pro_flash` | Keeps the input's native canvas dimensions; no published fixed cost here. |
+| Masked edit | `POST /inpaint-image-pro-flash` | `inpaint_image_pro_flash` | Source and mask must share native size; no published fixed cost here. Exact outside-mask preservation is claimed, not live-verified. |
 
-Use `GET /v2/pro-fast/cost` with operation, width, height, and direction count for a provisional estimate before a paid call, and `GET /v2/pro-fast/capabilities` (or MCP `get_pro_fast_capabilities`) to check dimensions. The public MCP inventory has no cost-estimator tool. Actual usage comes from the completed job, not the provisional number. The live capability endpoint required bearer auth during this review, so no account-specific response or paid probe is included.
+Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count for a provisional estimate before a paid call, and `GET /v2/pro-flash/capabilities` (or MCP `get_pro_flash_capabilities`) to check dimensions. The public MCP inventory has no cost-estimator tool. Actual usage comes from the completed job, not the provisional number. The live capability endpoint required bearer auth during this review, so no account-specific response or paid probe is included.
 
 ## Image Operations
 
