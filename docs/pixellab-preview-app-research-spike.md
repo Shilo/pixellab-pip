@@ -1,6 +1,7 @@
 # PixelLab Pip Preview App — Research Spike
 
-Status: research complete, design pending approval. Companion: `plans/pixellab-preview-app-plan.md`.
+Status: research expanded with archived-cinematic replay tests; design pending approval. Companion:
+`plans/pixellab-preview-app-plan.md`.
 
 Research/evidence doc (docs/ is user-facing, exempt from the runtime KISS/YAGNI rules). This
 records *why* the preview app is designed the way the plan proposes, including the options that were
@@ -138,20 +139,170 @@ a *later* option for single-file sharing.
 
 ## Blueprint reality (drives the detail panel)
 
-A `*.blueprint.json` is an **array of steps** (or one step). Each step's executable key is
-`MCP <tool>`, `POST /v2/<endpoint>`, or `TASK`, with the literal request body as its value, plus
-`_comment` / `_comment_prompt` metadata. Fields vary by step: `seed` appears on REST steps
-(`animate-with-text-v3`, `create-image-pixflux`) and is absent on `MCP create_character`. Verified
-against real blueprints in `pixellab-pip-generations/` (some have `seed`, many do not).
+A current `*.blueprint.json` is usually an **array of steps** (or one step). Each step's executable
+key is `MCP <tool>`, `POST /v2/<endpoint>`, or `TASK`, with the literal request body as its value,
+plus `_comment` / `_comment_prompt` metadata. Fields vary by step: `seed` appears on some REST steps
+and is absent on other routes. Archived runs are less uniform: `pip-cinematic.blueprint.json` is
+one older object with a request template, not executable steps. The duel blueprint is an array, but
+its twenty animation steps have **neither `size` nor `image_size`**; the six still/edit steps use
+`image_size`, not `size`. Its sheet geometry cannot be derived from one animation-step field.
 
-**Therefore the detail panel renders blueprint fields generically** (prompt/`description`, the route
-key, `size`, then remaining scalars as key/value) — it never hardcodes a fixed field list, and it
-shows a "Open blueprint ↗" relative link rather than reimplementing a JSON tree viewer (the user's
-own editor already opens the file). Blueprint geometry (`size`) is also the reliable source for
-**sprite-sheet frame dimensions**, which raw pixels cannot convey.
+**Therefore the detail panel renders blueprint fields generically** (prompt/`description`, route,
+available geometry, then remaining scalars) and links to the raw file rather than reimplementing a
+JSON tree viewer. For playback, use an explicit frame manifest where present; otherwise inspect
+companion frame PNG dimensions. A bare sheet still needs explicit frame geometry: neither its total
+PNG size nor an arbitrary blueprint step reliably tells the player how to slice it. Do not guess.
+The duel's one finished cut spans 26 paid steps, so attaching any one step's prompt to the whole
+295-frame asset would be misleading. Show per-step details only when an asset has one clear source;
+for a multi-step cut, label it as such and link the complete blueprint.
+The old duel blueprint is also not a byte-for-byte record of the original PixFlux request: its
+runner always sent `text_guidance_scale` (default 8.0 unless overridden), but the script that
+later reconstructed the blueprint left that field out. The fresh replay follows the archived
+blueprint as written, not an invented claim of identical original HTTP bodies. Future blueprints
+should capture the body actually submitted, as the current blueprint contract already requires.
 
 Source: `skills/pixellab-pip/references/blueprint.md`; real blueprints under
 `pixellab-pip-generations/`.
+
+## Cinematic tests — archived runs and live replays (2026-09-12–13)
+
+The preview proposal must handle real Pip outputs, not only a tidy eight-frame walk cycle. This
+round uses four deliberately different archives:
+
+| Case | What it stresses | Archived evidence |
+| --- | --- | --- |
+| Pip virtual pet | Long transparent loop, chained handoffs, a separate locally repaired final cut | 37 animation jobs; 600-frame, 100 ms GIF; 128×128 PNG frames; old single-object blueprint |
+| Brick-figure space duel | Opaque scene cuts, independent keyframes, speech bubbles, slow dramatic beats | 26 paid calls, 20 animation clips; 295-frame cut; 192×108; per-frame timing manifest |
+| Astronaut at dusk | Short opaque loop with a transient star and explicit closing-frame anchor | One opening still plus three chained shots; 42-frame, 100 ms cut; 224×144 |
+| Dusk hoverboard ride | Short anchored/free-run mix and rejected re-rolls left alongside accepted shots | Six accepted clips, 97-frame cut; 256×128; `rejected/` and inspection artifacts |
+
+For the three live cases, the replay sends the archived request text, seeds, and dependency order to
+the documented REST routes, but uses **new outputs as each next input**. It retains every raw PNG,
+job identifier, exact executable request body, and returned generation-unit charge in a fresh local
+run folder. The source archives are not overwritten. A pre-call balance guard reserves 100 units
+below the user's 3,000-generation ceiling; charged POSTs are never blindly retried. The test checks
+image count and dimensions, and compares each returned frame 0 (the service's echo of its starting
+image) to the supplied handoff both bytewise and ignoring RGB values at fully transparent pixels.
+No local pixel repair is applied to the replays.
+
+This is a **generation and artifact-structure test**, not a browser acceptance test: the preview app
+does not exist yet, and this environment's browser security policy blocks opening `file://` pages.
+Browser playback smoothness, memory use, and cross-browser `file://` behavior therefore remain to
+be measured when the app is built. Counts below are filesystem measurements, not browser telemetry.
+
+### Archive measurements that change the design
+
+- **Timing is not always one FPS.** The duel's 295-frame `frames_manifest.json` has ten distinct
+  frame delays from 95 to 440 ms, totaling **57.41 seconds**. A uniform 12 fps would play it in
+  **24.58 seconds** and erase the intended pauses. Its delivered GIF rounds 95/125 ms to 90/120 ms
+  (GIF centisecond granularity), so that file actually plays for **56.76 seconds**. The preview
+  should use recorded per-frame delays by default, or the GIF's extracted delays when matching the
+  delivered GIF specifically. The FPS control may flatten them deliberately for inspection; it
+  must not flatten them silently. This is playback fidelity, **not** a timing editor.
+- **There is no global "drop frame 0" rule.** The duel keeps the returned first frame for seven
+  fresh-keyframe cut openings, but drops it at thirteen continued handoffs. Dropping all twenty
+  would lose opening poses; keeping all twenty would insert repeated frames. The accepted cut's
+  explicit sequence is the reliable source of this choice.
+- **A folder is not a candidate list.** The Pip archive has 1,861 PNGs: 600 finished frames, 589
+  raw assembled frames, 629 job frames, 40 inspection images, and three root PNGs including two
+  3,072×3,200 sheets. Decoding all of those simultaneously as RGBA would represent about **252 MB**
+  of pixel buffers, versus **39 MB** for the 600 finished frames alone (before browser overhead).
+  The duel likewise has 315 raw job PNGs, 295 numbered cut PNGs, and a sheet. The hoverboard folder
+  also contains rejected attempts. A generic recursive scan would show duplicates and rejected
+  work as if they were candidates. Use the accepted output manifest/sequence first; never preload
+  every PNG just because it is present. These byte counts flag a risk, not measured browser memory.
+- **A finished cut is not necessarily raw model output.** Pip's final 600-frame GIF includes speck
+  cleanup, a composited ball repair, and a locally made loop-reset tween. Its 37 jobs produce at
+  most 593 assembled frames when each echoed handoff is dropped. The preview must label the raw
+  model sequence and the edited final cut distinctly; showing the finished GIF as if it were
+  untouched PixelLab evidence would be misleading.
+- **Timing and geometry metadata differ by archive.** The duel has an explicit ordered
+  `frames_manifest.json`; Pip's older blueprint records 100 ms only in prose, but its GIF exposes
+  that delay. None of the duel's 20 animation blueprint steps contains a `size` field, and Pip's
+  blueprint has no structured size at all. Use manifest timing/order and companion frame dimensions
+  where available. If only a sheet survives, require frame width, height, and count explicitly;
+  do not infer them from the total sheet dimensions.
+
+### Replay blueprints and observed results
+
+These are the human-readable recipes; the **exact request bodies, seeds, new job IDs, and frame
+paths** are in each replay's `blueprint.json` and `ledger.jsonl` under its local
+`pixellab-pip-generations/preview-spike-*-replay-20260912/` folder. The files remain local because
+generated art and account-specific job records are gitignored.
+
+| Replay | Recipe | Assembly |
+| --- | --- | --- |
+| Pip | Original `pip_start_frame.png`; 37 chained `POST /v2/animate-with-text-v3` requests, 16 frames each, transparent, `enhance_prompt=false`, recorded actions and seeds. The earlier manifest has two attempts at job 13; this replay uses the later recorded prompt. Job 37 points `last_frame` to the opening echo. | Use the next job's recorded handoff to choose each prior clip's last kept frame (job 5 stops at frame 13; job 15 at 15). Keep every raw endpoint frame separately; omit continuation frame-0 echoes from this diagnostic cut as the archived cut did, while recording visible mismatches. Play at 100 ms/frame. |
+| Space duel | One `create-image-pixflux` master at 192×108; four `generate-image-v2` keyframes with the new master as reference and style, one `edit-image` keyframe, and 20 `animate-with-text-v3` clips with the archived seed and actions. Every dependent input comes from this new replay, not the old finished movie. | Use the original explicit 295-entry frame manifest for shot order and per-frame delays. Keep cut frames, keyframes, raw job frames, and GIF as different roles. |
+| Astronaut | One unseeded `create-image-pixflux` opening at 224×144, then three chained 14-frame `animate-with-text-v3` jobs with seeds 221, 231, and 251. The final job targets the opening image. | Opening plus 14 + 14 + 13 frames; omit duplicate frame-0 echoes and the exact closing anchor; 100 ms/frame. |
+
+The fresh **Pip** run completed all 37 calls for **148 reported generation units**. It produced 629
+raw returned PNGs and a 589-frame, 58.9-second diagnostic cut. Every decoded GIF frame matches its
+source PNG, including transparency. Of the 37 returned frame-0 echoes, six were pixel-exact, three
+differed only in invisible transparent RGB, and **28 changed visible pixels** (usually a few; four
+changed more than 50). Thus a viewer or stitcher must not assume every echo is a safe duplicate.
+
+The diagnostic cut also makes two story/loop failures clear. In sampled catch and hold frames
+(`j12_f16.png` and `j16_f16.png`), the requested separate red ball is not visibly present. Job 5's
+frame 13 still has the ball, but its last three frames lose it; the recorded frame-13 handoff avoids
+that loss. The final returned frame visually equals the opening, yet the dog immediately before it
+is much larger. That return changes **3,706 visible pixels**, versus a median **1,044** between
+neighboring frames in this cut; the wrap itself changes zero. Endpoint equality proves closure of
+the last *image*, not a smooth approach to it. The earlier 600-frame final had local ball repair and
+a reset tween; this raw replay deliberately does not.
+
+The fresh **astronaut** run completed its four calls for **22 reported generation units**. It has
+42 cut frames, 4.2 seconds, three pixel-exact frame-0 echoes, and a pixel-exact final anchor. Its
+new GIF also matches all 42 source PNGs. Yet the moon is bright in the last displayed frame and
+pink at the opening: the visible wrap changes **9,207 pixels**, versus a median **2,940** per
+neighboring-frame step. The user-requested astronaut-at-left composition also came back on the
+right. A playable preview and prompt detail would make both issues easy to spot; an endpoint check
+and a frame count do not.
+
+The duel replay exposed two job-lifecycle wrinkles before its cut was assembled. Its sixth
+request (the close-up speech-bubble keyframe) returned a generic PixelLab policy failure and no
+reported charge; one **unchanged** restart, requested by the user, succeeded. The reason the first
+attempt was rejected is not known, so the result is not evidence that a particular word or image
+was prohibited. Later, a local test helper treated an image field as a finished PNG before the
+edit job reported `completed`; that field was not a PNG. Fetching the **same completed job ID**
+recovered its final PNG (`quantized_image`) without another paid POST. The existing job-lifecycle
+rule to wait for completion and re-poll rather than resubmit an uncertain job is necessary here; no
+new runtime rule is needed.
+
+The fresh **space-duel** run then completed all 26 intended calls for **190 reported generation
+units**. It saved 314 final raw PNG outputs and assembled the intended 295-frame cut from the
+recorded shot order. All 295 decoded GIF frames match their source PNGs exactly. The manifest's
+delays total 57.41 seconds; the new GIF, like the archived one, plays for 56.76 seconds after GIF
+rounding. Nineteen of its twenty animation frame-0 echoes were pixel-exact. The exception is the
+edited still used as a *new scene cut*: its returned opening differs at 11,404 opaque pixels, yet
+the average channel shift across the image is under 1 on a 0–255 scale and the scene looks nearly
+the same. A large raw difference count alone would overstate this as a severe seam, and this is not
+even a continuation seam. The inspected speech bubbles also vary from their exact requested
+punctuation ("ME FATHER" gains a period; "NOOOOOO!" loses its exclamation), despite otherwise
+recognizable scene and characters. Prompt text needs visual inspection at pixel-art zoom.
+
+Across all three fresh replays, the accepted calls used **360 generation units total**, leaving
+**2,640 units unspent** from the user's 3,000-unit test ceiling. This includes the successful
+unchanged retry but no charged replacement for the failed edit *save* (the original edit job was
+recovered). The Pip opening clip's last frame differs from the archived one at 195 displayed pixels
+under the recorded seed, prompt, and starting image. That shows these blueprints do not promise
+byte-identical historical output; this one replay cannot separate sampling variation from service
+or model changes, or from archived request fields that were not preserved. The old duel blueprint's
+omitted guidance field makes that warning concrete.
+Across the three assembled cuts, every tested spritesheet slice also matches its corresponding
+numbered PNG exactly. The PNG frames are the authoritative pixels; GIF and sheet are verified
+viewing/packaging formats, with GIF timing rounding noted above.
+
+**Smallest design correction:** keep the four proposed asset types and the no-server local player.
+Add only an optional per-frame delay list, accepted-cut selection, verified sheet geometry, clear
+raw-versus-edited labels, and an honest multi-step blueprint link. Do not add an editor, video
+pipeline, automatic prompt scoring, or browser GIF decoder. The still-unverified browser play/scrub
+test remains a build-phase gate, not a result of this spike.
+
+The [PixelLab REST OpenAPI](https://api.pixellab.ai/v2/openapi.json) documents the asynchronous
+generation routes and job polling used by the replays. The local archive names above are under
+`pixellab-pip-generations/`; their generated outputs are gitignored, while this research record is
+committed.
 
 ## Rejected / cut (with reason)
 
@@ -176,9 +327,10 @@ Source: `skills/pixellab-pip/references/blueprint.md`; real blueprints under
 For a pixel-art tool, "professional" is almost entirely *not betraying the pixels*: nearest-neighbor
 `image-rendering: pixelated`, **integer-only** zoom (fractional zoom shimmers), checkerboard
 transparency, dark neutral chrome that auto-hides during playback (PhotoSwipe pattern), zero layout
-shift, and instant state-preserving asset switching (preload the folder; a source swap, not a
-reload). A blur, a shimmer, a reflow, a reset-to-frame-0, or a wrong sheet slice with no fix reads as
-a toy.
+shift, and state-preserving asset switching. Preload only **reviewable candidates**, not every raw
+job frame and duplicate export in the folder; long sequences still need a measured browser-memory
+test before "instant" can be promised. A blur, a shimmer, a reflow, a reset-to-frame-0, or a wrong
+sheet slice with no fix reads as a toy.
 
 Sources: [MDN — Crisp pixel art look](https://developer.mozilla.org/en-US/docs/Games/Techniques/Crisp_pixel_art_look),
 [MDN — image-rendering](https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering),

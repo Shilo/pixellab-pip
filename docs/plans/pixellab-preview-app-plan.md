@@ -56,9 +56,10 @@ window.PIP = {
       type: "sheet",              // "static" | "frames" | "sheet" | "gif"
       src: "walk-south-sheet.png",// sheet/static/gif: one file
       frames: null,               // "frames" type: ["frame_000.png", …] in order
-      frameW: 48, frameH: 48, count: 8,  // sheet geometry (from blueprint size; overridable)
-      fps: 12,                    // default playback fps (frames/sheet); GIF ignores (native timing)
-      blueprint: {                // flattened per-step scalars for the detail panel, rendered generically
+      frameW: 48, frameH: 48, count: 8,  // sheet geometry explicit or verified from companion frames
+      fps: 12,                    // uniform timing fallback; GIF ignores this (native timing)
+      durationsMs: null,          // optional per-frame delays from a sequence/GIF manifest
+      blueprint: {                // one clear source step only; null for a multi-step cut
         prompt: "a knight in shining silver armor, walking",
         route: "POST /v2/animate-with-text-v3",
         size: 48, seed: 231       // whatever scalars the step actually has; no fixed field list
@@ -86,15 +87,19 @@ A directional rotation set (e.g. 8 separate PNGs) is just a **group of `static` 
 filmstrip — not a special mode.
 
 To make scrubbing universal, an optional build-time step explodes a bare GIF into PNG frames with
-Pillow so it becomes a `frames` asset. Only used when a GIF has no accompanying frame PNGs.
+Pillow so it becomes a `frames` asset. Only used when a GIF has no accompanying frame PNGs; retain
+its frame delays in `durationsMs`.
 
 ### Unified player model
 
 On load, `frames` and `sheet` assets both normalize to **`frames[] + currentIndex`**. Play/pause,
-timeline scrub, prev/next frame, frame counter, loop, and FPS then operate on that one structure, so
-the two behave identically. `gif` and `static` bypass the frame model (native `<img>`).
+timeline scrub, prev/next frame, frame counter, and loop operate on that one structure. Playback
+uses `durationsMs` when present and uniform `fps` otherwise; an FPS override may deliberately
+flatten timing for inspection, but the default must not. `gif` and `static` bypass the frame model
+(native `<img>`).
 
-Sheets default to 12 fps; a `frames` asset uses its manifest fps; both expose the same FPS override.
+Sheets default to 12 fps; frame sequences use recorded delays where available, then manifest fps.
+The FPS control remains a manual uniform-timing override.
 
 ## UX
 
@@ -133,7 +138,7 @@ all chrome, revealed on mouse-move/keypress.
 8. FPS control
    — cut line —
 9. Onion skin — authoring aid; add later if asked
-10. Ping-pong / per-frame timing / export / color tools — that's an editor
+10. Ping-pong / per-frame timing **editing** / export / color tools — that's an editor
 
 ### Keyboard map (keyboard-first is most of "professional")
 
@@ -153,9 +158,10 @@ all chrome, revealed on mouse-move/keypress.
 ### Blueprint detail (tasteful minimum)
 
 In the `i` drawer: prompt, route, size, then any remaining scalar fields rendered generically as
-key/value (so `seed`, `view`, `mode` appear when present without special-casing — spike: blueprints
-are per-step and field sets vary). Plus a relative `<a href="name.blueprint.json">Open blueprint ↗</a>`
-that opens the raw recipe in the browser. No in-app JSON tree viewer.
+key/value when the asset has one clear source step (so `seed`, `view`, `mode` appear when present
+without special-casing). A multi-step cinematic shows "multi-step recipe" instead of attributing
+all its frames to one prompt. Both cases get a relative
+`<a href="name.blueprint.json">Open blueprint ↗</a>` link to the full recipe. No in-app JSON tree viewer.
 
 ### Style direction
 
@@ -168,10 +174,14 @@ idle. No modals, no toasts, no onboarding — it opens showing pixels.
 ## The make-or-break flow
 
 *Agent generates 4 candidate animations → user opens the app → plays all four → compares → picks
-one.* The single thing that, if wrong, kills it: **asset switching must be instant and
-state-preserving.** Guarantee it by:
+one.* The single thing that, if wrong, kills it: **asset switching must feel fast and remain
+state-preserving.** Design for it by:
 
-1. Preloading/decoding the whole folder on open (no mid-comparison spinner).
+1. Preloading/decoding only reviewable candidate assets, not raw job frames, inspection images,
+   and duplicate sheet/GIF/numbered exports as separate candidates. If a raw cut and a locally
+   edited final cut are both selected for review, label them clearly by those names. A long
+   cinematic may still be too large to preload instantly; measure that in the player test rather
+   than promise it blindly.
 2. A fixed stage box (no reflow switching between a 48px still and a 384px sheet).
 3. A shared running clock (switching swaps the frame source but keeps play state and the clock, so
    the next candidate is already animating on arrival).
@@ -184,13 +194,13 @@ generation.
 
 **MVP (v1):**
 - Reads one Pip run folder; filmstrip of its assets.
-- Four asset types (static, frames, sheet-with-geometry-from-blueprint + manual count override, gif
+- Four asset types (static, frames, sheet-with-verified-geometry + manual count override, gif
   native).
 - Unified `frames[]` player: play/pause, scrubber, prev/next, counter, loop, FPS.
 - Integer zoom + fit; background toggle.
 - Fullscreen lightbox with auto-hiding chrome; info drawer.
 - Generic blueprint detail + "Open blueprint ↗" link.
-- Keyboard-first nav; all assets preloaded for instant, state-preserving switching.
+- Keyboard-first nav; preload listed candidates where practical for state-preserving switching.
 - Dark theme, crisp pixels, zero layout shift; `schema` version guard in `data.js`.
 
 **Later (explicitly cut):** onion skin; in-app JSON viewer; local server; GitHub Pages / drag-drop /
@@ -219,9 +229,11 @@ The app only helps if it fires **by itself**. Wire it into the flows that produc
 1. **Player (`preview.html`)** — build against a hand-written `data.js` fixture pointing at an
    existing run folder (e.g. `astronaut-dusk-cliff-loop-20260712/`). Verify play/scrub/switch/zoom/bg
    and crisp integer pixels in Chrome, Firefox, and one WebKit browser, opened via `file://`.
-2. **Generator (`build_preview.py`)** — scan a run dir, classify assets, read sheet geometry from
-   blueprints, optionally explode a bare GIF to frames, emit `data.js`, copy `preview.html`. A tiny
-   self-check (assert on a sample folder) per the repo's test norm.
+2. **Generator (`build_preview.py`)** — scan a run dir, classify reviewable assets (exclude
+   unselected intermediates and duplicate representations), prefer an explicit sequence manifest
+   for order and timing, require verified sheet geometry, optionally explode a bare GIF to frames,
+   emit `data.js`, copy `preview.html`. A tiny self-check (assert on a sample folder) per the repo's
+   test norm.
 3. **Wire-in** — update `local-asset-assembly.md` (+ pointers) with the launch contract; run
    `python dev-tools/qa.py`.
 
