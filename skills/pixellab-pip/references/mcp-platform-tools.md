@@ -2,7 +2,7 @@
 
 Use this reference for PixelLab MCP tools that operate on projects, sandboxes, deployed agents, chat conversations, help, or feedback rather than direct asset generation.
 
-Official MCP docs currently expose platform helpers such as `list_projects`, `add_to_project`, `chat_*`, `sandbox_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, `agent_talk`, `search_knowledge`, `list_jobs`, and `cancel_job`. These are public MCP tools, not REST v2 endpoints.
+Official MCP docs currently expose platform helpers such as `list_projects`, `add_to_project`, `chat_*`, `sandbox_*`, `agent_help`, `agent_feedback`, `agent_list`, `agent_inspect`, `agent_talk`, `search_knowledge`, `list_jobs`, and `cancel_job`. These are public MCP tools, not REST v2 endpoints. Version 0.4.123 makes Game Builder available to Tier 1+ subscribers; use the visible Game Builder product for that workflow and only use the public project/chat/sandbox helpers when the user requests an approved project-scoped action. Generation tools that accept `project_id` can link results to that Game Builder context, but there is no documented dedicated REST v2 Game Builder endpoint.
 
 ## Safety Rules
 

@@ -1,6 +1,6 @@
 # PixelLab MCP Docs vs Pip Skill (Session Context)
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-09-13.
 
 This is a decision guide for one specific choice: what PixelLab context to give a coding agent for a session. The two options are PixelLab's official MCP documentation, injected as a prompt link, versus installing the PixelLab Pip Agent Skill. It is a session-context question, not a service question; for the execution-layer comparison (MCP service vs the skill) see [Official PixelLab MCP Service Comparison](official-pixellab-mcp-service-comparison.md).
 
@@ -12,7 +12,7 @@ Sources reviewed:
 
 ## What Each Option Is
 
-**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (106 tools in the latest 2026-09-12 snapshot, including six Pro Flash tools renamed from Pro Fast), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. It is first-party and live, but its generated examples and prose can disagree with its own parameters; no install is needed to read it.
+**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (106 tools in the latest 2026-09-12 snapshot, including six Pro Flash tools), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. It is first-party and live, but its generated examples and prose can disagree with its own parameters; no install is needed to read it.
 
 **Pip Agent Skill.** A skill installed into agents that support skills. `SKILL.md` (the always-loaded router) plus 32 on-demand `references/*.md` cover surface selection across MCP, REST v2, website/Pixelorama editor, Aseprite, and legacy v1, plus cost routing, prompt preparation, secret-handling guardrails, and output verification/reporting. The two are complementary, not rivals.
 

@@ -1,6 +1,6 @@
 # PixelLab Surfaces And Services
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-09-13.
 
 Purpose: explain how PixelLab's public APIs, agent tools, website/editor surfaces, SDKs, and local integrations differ so Pip can choose the right automation boundary.
 
@@ -12,10 +12,10 @@ For exact current schemas and tool lists, verify against the official [REST v2 d
 
 | Surface | What it is | Best use | Automation stance |
 |---|---|---|---|
-| Hosted MCP | A managed PixelLab tool server for agents. Tools create and manage PixelLab assets by task names. | Agent workflows with managed assets, raw-image primitives, talking portraits/lip sync, IDs, polling, lifecycle helpers, tile-based maps, pixel-art cleanup, projects, sandboxes, job control, and balance checks. | Use directly when the agent has PixelLab MCP tools configured. MCP tool names are not REST endpoints. |
+| Hosted MCP | A managed PixelLab tool server for agents. Tools create and manage PixelLab assets by task names. | Agent workflows with managed assets, raw-image primitives, talking portraits/lip sync, IDs, polling, lifecycle helpers, tile-based maps, pixel-art cleanup, Game Builder project/chat/sandbox context, projects, sandboxes, job control, and balance checks. | Use directly when the agent has PixelLab MCP tools configured. MCP tool names are not REST endpoints. |
 | REST v2 | The current public HTTP API under `https://api.pixellab.ai/v2`. | Code, scripts, batch jobs, server integrations, direct endpoint control, exact schemas, and features not exposed by MCP. | Preferred programmatic fallback when MCP is unavailable or insufficient. |
 | REST v1 | Older public HTTP API under `https://api.pixellab.ai/v1`. | Existing legacy code or SDK compatibility. | Avoid for new work unless the user explicitly needs v1. |
-| Website and account UI | Human product surfaces such as the account page, creation pages, Map Workshop, and asset libraries. | Visual/manual workflows, account token setup, browsing existing assets, and website-only features. | Use as a visible user-guided surface. Do not treat undocumented internal website routes as public REST. |
+| Website and account UI | Human product surfaces such as the account page, creation pages, Map Workshop, Game Builder, and asset libraries. | Visual/manual workflows, account token setup, Creator queue, Tier 1+ Game Builder workflows, Godot/Unity Map Workshop export, browsing existing assets, and website-only features. | Use as a visible user-guided surface. Do not treat undocumented internal website routes as public REST. |
 | Pixelorama/editor | Pixelorama/editor integrations and website editor workflows. | Visible editor assistance, manual edits, and save-back flows when supported and permission-gated. | Ask before browser use and again before login, generation, spending credits, save/download/edit/delete actions. |
 | Aseprite extension | Local editor integration for users working inside Aseprite. | In-editor asset creation or editing when the user is actively using Aseprite. | Treat as an editor integration, not as a public REST/MCP contract. |
 | Official SDKs | Public client libraries under [pixellab-code](https://github.com/pixellab-code). | Convenience wrappers when installed SDK coverage matches the needed operation. | Verify installed SDK coverage before claiming a method exists. Use REST v2 directly when unsure. |
@@ -37,7 +37,7 @@ Use this order for most agent work:
 
 1. If PixelLab MCP tools are configured and the task maps to a managed asset workflow, use MCP.
 2. If the user asks for code, batch generation, server integration, exact request fields, or a route not exposed by MCP, use REST v2.
-3. If the task requires visual editing, website libraries, account setup, Map Workshop, Pixelorama, or Aseprite, use a visible user-guided workflow.
+3. If the task requires visual editing, website libraries, account setup, Map Workshop, Game Builder, Pixelorama, or Aseprite, use a visible user-guided workflow.
 4. If existing code is explicitly v1 or old-SDK based, use REST v1 compatibility.
 
 ## Important Distinctions
@@ -48,3 +48,4 @@ Use this order for most agent work:
 - Undocumented root or unversioned endpoints under `https://api.pixellab.ai/` that are used by first-party surfaces such as the website or Aseprite extension are not public REST v1/v2 just because they share a host or operation name.
 - Website login/session credentials are not the same thing as the public REST/MCP bearer token.
 - Product labels such as `Pro`, the separate `Pro Flash` family, `v3`, `new`, `Pixen`, `PixFlux`, `PixMiniMax`, and `BitForge` need to be interpreted in the context of the selected surface. The public MiniMax H3 disclosure is scoped to `POST /v2/animate-pixminimax`; it does not make website/editor transports or standalone H3 fields public.
+- Version 0.4.123 product additions do not expand the documented REST v2 inventory: Creator queueing, Tier 1+ Game Builder, and Godot/Unity export from Map Workshop are product/UI behavior. Use the visible surface for those features; keep map CRUD on the public MCP map tools and do not invent REST routes for Game Builder or map export.

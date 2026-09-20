@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-09-13.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -19,6 +19,14 @@ Primary sources:
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
 - The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, and PixMiniMax) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md).
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
+
+## Version 0.4.123 Product Update
+
+- **Pro Flash (Beta):** the single-image option is advertised at 4–6 generations and a maximum size of `256x256`. The current REST OpenAPI describes a provisional five-generation first-image estimate for `POST /v2/create-image-pro-flash`; query `GET /v2/pro-flash/cost` when an estimate matters and report completed-job usage.
+- **PixMiniMax:** available to Tier 1+ subscribers and surfaced in Character Creator, Creator, Aseprite, and Pixelorama. Programmatic routing remains REST `POST /v2/animate-pixminimax` or MCP `animate_image_pixminimax`.
+- **Game Builder:** available to Tier 1+ subscribers. It is a visible product workflow; public MCP project/chat/sandbox helpers can provide approved project context, but no dedicated public REST v2 Game Builder endpoint is documented. See the [official tutorial/showcase](https://youtu.be/Iaxk_8ftJ5s).
+- **Creator queue:** submitted Creator work is queued so closing or changing the window does not discard the job. This is a product/UI behavior, not a new public REST route.
+- **Map export:** Map Workshop can export for Godot and Unity. The public REST v2 inventory still has no map or map-export route; MCP map tools remain the programmatic map surface.
 
 ## Concurrency and Priority Slots
 
@@ -47,13 +55,13 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Create UI elements (Pro) | `POST /v2/generate-ui-v2` | Pro UI generation | Buttons, health bars, slots, menus | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
 | Create UI asset (Pro) | `POST /v2/create-ui-asset` | Structured UI asset generation | Saved UI panels with `pieces`, `elements`, style image, project assignment, and polling | current public pricing page has no USD row; local cost docs treat this as Pro / `20-40` generations |
 
-## Pro Flash (New, Provisional Pricing)
+## Pro Flash (Beta, Provisional Pricing)
 
-The public REST/MCP docs introduced this family as Pro Fast, then renamed its routes and tools to Pro Flash. It has not been quality-, latency-, or charge-tested in this repository. It is separate from the older Pro image/edit/character/object routes and should not displace tested defaults because its name suggests speed.
+The current public REST/MCP docs use the Pro Flash display name. It has not been quality-, latency-, or charge-tested in this repository. It is separate from the older Pro image/edit/character/object routes and should not displace tested defaults because its name suggests speed.
 
 | Operation | REST v2 | MCP | Billing and output distinction |
 |---|---|---|---|
-| Create one image | `POST /create-image-pro-flash` | `create_image_pro_flash` | One image per call; REST describes a provisional five-generation first-image estimate. Older Pro may return a size-dependent batch. |
+| Create one image | `POST /create-image-pro-flash` | `create_image_pro_flash` | One image per call; Version 0.4.123 advertises 4–6 generations, while REST describes a provisional five-generation first-image estimate. Older Pro may return a size-dependent batch. |
 | Create character | `POST /create-character-pro-flash` | `create_character_pro_flash` | First south-facing image plus eight V3 views; using an owned prior `source_image_id` avoids the new-image stage, not the rotations. |
 | Create object | `POST /create-object-pro-flash` | `create_object_pro_flash` | One or eight directions. Finalizing one direction from an already-paid source image is documented as free; eight directions still incur rotation charges. |
 | Edit one image | `POST /edit-image-pro-flash` | `edit_image_pro_flash` | Keeps the input's native canvas dimensions; no published fixed cost here. |
@@ -84,7 +92,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 |---|---|---|---|---|
 | Animate with text | `POST /v2/animate-with-text` | Base text animation | 64x64 text animation with init/inpainting/palette options | `64x64`, 4 frames: `$0.01565` |
 | Animate with text (new) | `POST /v2/animate-with-text-v3` | v3 text animation | First-frame animation, optional last-frame guidance, 4-16 frames, up to 256x256 | `32x32`, 4 frames: `$0.0221`; `256x256`, 8 frames: `$0.0302`; `128x128`, 16 frames: `$0.0424` |
-| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Independently observed website estimates (2026-09-12): `64x64`, 4 frames `$0.0123`; 8 `$0.0153`; `256x256`, 8 `$0.0153`; 40 `$0.0471` — see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). REST docs also publish generation-unit examples; use returned `usage.generations` for charged usage. |
+| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Tier 1+; beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Independently observed website estimates (2026-09-12): `64x64`, 4 frames `$0.0123`; 8 `$0.0153`; `256x256`, 8 `$0.0153`; 40 `$0.0471` — see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). REST docs also publish generation-unit examples; use returned `usage.generations` for charged usage. |
 | Animate with text (Pro) | `POST /v2/animate-with-text-v2` | Pro text animation | Reference-image animation, 4/9/16 frames, view and direction controls | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 256x256 (endpoint prose lists 16/32/64/128/256; priced rows below stop at 128x128) | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
 | Estimate skeleton | `POST /v2/estimate-skeleton` | Skeleton helper | Skeleton extraction for skeleton animation | `16x16 $0.00511`; `64x64 $0.00513`; `256x256 $0.00516` |
