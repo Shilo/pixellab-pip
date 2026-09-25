@@ -17,7 +17,7 @@ Primary sources:
 - PixelLab account balance can include subscription generations and USD credits.
 - Hosted MCP help reports that billing uses subscription generations first, then USD credits.
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
-- The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; image-to-text ~0.09 for a typical image; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, PixMiniMax, and Skeleton v3) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md).
+- Approximate generation observations are route-specific: most base/`new`/`v3` image routes are about 1 generation; a dated live check measured `enhance-pixen-prompt` at 0.05; `estimate-skeleton` is about 0.1; the OpenAPI estimates image-to-text at about 0.09 for a typical image; top-down and sidescroller tilesets are about 3; and Pro Tools are about 20–40. Do not generalize the Pixen enhancer measurement to every enhancer. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, PixMiniMax, and Skeleton v3) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md). These generation observations are separate from the USD estimates recorded below.
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
 
 ## Version 0.4.123 Product Update
@@ -32,7 +32,7 @@ Primary sources:
 
 - **PixelArt Workbench:** MCP adds `pixelart_workbench`, an MCP-only command tool for model-authored pixel-art operations. PixelLab describes its commands as free for subscribers. The release announcement reports roughly 70% lower token consumption in its testing; this repository did not independently benchmark that estimate.
 - **Skeleton v3:** available in Character Creator, Aseprite, and Pixelorama. The public beta is Tier 1+ and supports 3–15 keypoint frames up to 256×256; programmatic routes are REST `POST /v2/animate-with-skeleton-v3` and MCP `animate_with_skeleton_v3`, with managed-character mode `skeleton-v3` also available. Public estimated USD prices: 3 frames `$0.0436`, 8 `$0.0513`, 15 `$0.0622`.
-- **Image to text:** REST adds `POST /v2/image-to-text` for turning an image into a PixelLab-ready prompt; it returns text, has no MCP counterpart, and is estimated at about 0.09 generations for a typical sprite or screenshot. Actual usage varies with answer length.
+- **Image to text:** REST adds `POST /v2/image-to-text` to describe an image as a generic 1–3 sentence generation prompt or answer a custom visual question; it returns text and has no MCP counterpart. It overlaps with prompt enhancers only in that both can produce text for a later generation: enhancers refine existing text for a target route, while image-to-text extracts a description or answer from pixels. Do not chain them by default. PixelLab estimates about 0.09 generations for a typical sprite or screenshot, with longer answers costing more; see the [research spike](pixellab-image-to-text-research-spike.md).
 
 ## Concurrency and Priority Slots
 
@@ -81,7 +81,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 |---|---|---|---|
 | Convert image to pixel art | `POST /v2/image-to-pixelart` | Regular image to pixel art | `64x64 $0.006`; `128x128 $0.00666`; `256x256 $0.01164` |
 | Edit image (pixen) | `POST /v2/edit-image-pixen` | Text-instruction edit on the Pixen model; source ≤256px per side, target area ≤256x256 | not covered by the pricing rows recorded here — the endpoint documents a cost of 1 generation |
-| Image to text | `POST /v2/image-to-text` | PixelLab-ready image description; REST-only, no image generated | about 0.09 generations for a typical sprite/screenshot; variable with response length |
+| Image to text | `POST /v2/image-to-text` | Generic image description or custom visual answer; REST-only, no image generated | about 0.09 generations for a typical sprite/screenshot; variable with response length |
 | Correct pixel art | `POST /v2/correct-pixelart` | Sharpen edges, drop stray pixels, tighten palette without resizing | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Reduce colors | `POST /v2/reduce-colors` | Quantize one or more same-size frames onto one shared palette | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Unzoom pixel art | `POST /v2/unzoom` | Recover native-resolution pixel art from an upscaled image | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
