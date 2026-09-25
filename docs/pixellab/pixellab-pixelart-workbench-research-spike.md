@@ -2,9 +2,9 @@
 
 ## Summary
 
-`pixelart_workbench` is a PixelLab MCP-only, command-driven way for an agent's chosen model to inspect, edit, draw, and animate pixel art using structured operations. It runs PixelLab commands against an image reference and returns a new image ID for follow-up work. The exposed interface accepts PixelLab IDs and supported image references such as URLs; it does not accept a local filesystem path. It is useful when the requested work is specific enough to express as pixel operations, a layered drawing, or frame-by-frame scene recipe. For open-ended image creation and prompt-led model edits, PixelLab's normal generation and edit routes remain the better fit.
+`pixelart_workbench` is a PixelLab MCP-only command interface for explicit pixel edits, layered drawings, and authored animation. In the live sample below, a guarded one-pixel edit changed exactly one pixel and repeated identically; the closest tested text-edit and cleanup routes changed 308 and 305 pixels respectively. The account generation counter also rose by six during a Workbench-only test window, without per-call usage fields. The tool metadata still says “free for subscribers,” but this campaign could not verify a zero-generation cost.
 
-PixelLab's live MCP tool description calls the Workbench commands free for subscribers. The public MCP guide and REST API catalog do not publish that billing detail, so this spike treats it as a vendor statement from the exposed tool metadata. PixelLab's 0.4.125 announcement also reports about 70% lower token use in its own testing; this repository has not benchmarked that estimate, and it does not mean the caller's preferred AI model uses no tokens.
+The 0.4.125 announcement reports roughly 70% lower token use in PixelLab's testing. This repository has not reproduced that benchmark, and PixelLab generation units, PixelLab USD credits, and the caller's model tokens remain separate meters.
 
 ## Scope And Evidence
 
@@ -19,6 +19,46 @@ Sources checked on 2026-09-25:
 - The Version 0.4.125 announcement supplied with the request. Its token-reduction figure is an attributed product claim, not an independent measurement.
 
 The cache refresh at 2026-09-25T14:50:51Z completed all seven configured sources without fetch failures. The MCP guide had a raw update but no normalized summary drift; its meaningful Workbench change from the prior snapshot is that a subject may now be an ID **or** image reference (`character:<id>:south`, a data URL, or an HTTPS link), while local file paths remain excluded. Website-page raw changes had no normalized text change. REST OpenAPI and REST index sources were unchanged in that refresh.
+
+## Controlled Live Test Results (2026-09-25)
+
+### Fixture And Contract Checks
+
+The campaign used one existing account-owned, one-direction red gem sprite as fixture F1; no fixture-generation call was needed. Its Workbench inspection reported a 32×32 canvas, 306 visible pixels, 718 transparent pixels, 34 opaque colors, bbox `[5, 6, 26, 25]` (22×20 inclusive), centroid `(15.6, 13.8)`, one hole, and one connected component. The alpha values were binary in the returned grid: transparent pixels and opaque `#RRGGBBff` colors.
+
+Read-only `describe start`, `describe cli`, `describe draw`, `describe edits`, `describe lint_rules`, and command help confirmed the one-command-per-call `argv` contract, `low`/`high` modes, and the current command families. No schema version was exposed. The public [MCP guide](https://api.pixellab.ai/mcp/docs) still describes Workbench as an MCP tool; the current [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) has no Workbench operation.
+
+`inspect` accepted F1 as `object:<id>`, its HTTPS image URL, and an 894-character PNG data URL. All three returned new `image_id` references and the same canvas/palette facts. A repository-local file path and a malformed ID both returned the same generic decode error; local paths are not accepted references.
+
+### Test Matrix
+
+| Case | Result |
+|---|---|
+| W0 — read-only discovery | The live command list included `inspect`, `edit`, `draw`, `describe`, `lint`, `measure`, `explain`, `clusters`, `parts`, `silhouette`, `motion`, `storyboard`, `reveal`, `crop`, `sweep`, `score`, `extract-palette`, `repair`, `compare`, and the craft commands. Exact flags still came from live help. |
+| W1 — inputs and identity | PixelLab ID, HTTPS URL, data URL, and a Workbench result URL worked. A local path and malformed ID failed with a generic image-reference/decode error. Mutating operations returned new IDs; follow-up `measure`, `lint`, `parts`, and `motion` calls used those returned IDs successfully. |
+| W2 — objective analysis | `measure`, `inspect`, `extract-palette`, `clusters`, `silhouette`, `lint`, and `score` agreed on the fixture's dimensions, bounds, colors, components, and pixel counts. `lint` reported 0 errors, 0 warnings, and 3 informational findings (49 one- or two-pixel clusters, pillow shading, and silhouette facts). `score` returned 68/100, citing near-duplicate colors and singleton colors; treat this as a heuristic, not an art-quality verdict. |
+| W3 — recipe drawing and creation baseline | A from-scratch 16×16 Workbench recipe rendered a 4-color, 77-visible-pixel gem with a 12×12 bbox; `lint` had no errors or warnings and `score` returned 98.5. One matching `create_image_pixen` baseline returned one transparent 16×16 image and reported 1 generation. A single pair is insufficient for a general quality or cost winner. |
+| W4 — exact edit and cleanup | A guarded `patch_pixels` changed the inspected highlight at `(11, 7)` from `#fefdfdff` to `#ffe5a8ff`. `compare` found exactly 1 changed pixel; repeating the identical operation produced an identical image. `repair --ops stray` removed a planted isolated pixel, and the repaired result compared identical to the clean source. `edit_image_pixen` followed the highlight instruction visually but changed 308 pixels on the 32×32 image (reported 1 generation). `correct_pixelart` at strength 0.1 changed 305 pixels relative to the clean source and left a pixel at `(0, 0)`, recolored to `#14abdaff` (reported 0.1 generation). |
+| W5 — animation | A 48×48, four-frame sparkle loop used a 32×32 source at offset `[8, 8]`; `parts` reported 306 pixels assigned, 0 unassigned, and 0 double-claimed. `lint` had no errors or warnings. `motion` reported deltas `[5, 0, 5]` and a 0-pixel seam. A separate four-frame translation used node positions `[8,8]`, `[9,7]`, `[10,6]`, `[11,5]`; its 361-pixel seam was expected for a non-returning action. The matching `animate_image` call returned the unchanged input plus four generated frames, reported 1 generation, and visually drifted from the gem silhouette in later frames instead of holding a clean 3-pixel translation. |
+| W6 — chained workflow | The `image_id` from inspection was passed to guarded edit; the returned ID measured `(11,7)` as `#ffe5a8ff`. Drawing IDs were passed to `parts`, `lint`, `motion`, and `storyboard`. A `measure --layer` call using the displayed layer name failed; live output requires the layer ID (`body`/`fx`). |
+| W7 — invalid input and failure behavior | An unknown command returned the available command list. A zero-by-zero recipe failed with `cannot write empty image` before rendering. A local path and malformed ID both failed without a more specific rejection reason. No oversized or destructive input was submitted. |
+| W8 — repeatability | Two identical guarded one-pixel edits from the same source compared as 0 pixels changed. This establishes repeatability for that deterministic patch only, not for all drawing or animation recipes. |
+
+One animation draft initially used an empty wildcard source part. It rendered visibly, but `parts` reported 0 parts and all 306 visible source pixels unassigned. Replacing it with an explicit full-canvas include polygon produced 1 part with 306 pixels and no unassigned/double-claimed pixels. The recipe reference describes an empty `{}` part as selecting the full source, so the discrepancy remains unresolved; use explicit masks and check the `parts` report whenever coverage matters.
+
+The initial sparkle recipe also used a literal color without declaring it in `scene.palette`; `lint` reported two off-palette warnings. Declaring the sparkle color in the palette removed those warnings. The corrected loop still received the normal `needs_visual_review` state, so output rendering alone was not treated as acceptance.
+
+### Usage And Cost Evidence
+
+| Snapshot | Account generation counter | Campaign treatment |
+|---|---:|---|
+| Pre-Workbench baseline | 0 used | Starting point before the Workbench test suite |
+| After Workbench-only calls | 6 used | Conservatively charged 6 to this campaign; the Workbench replies did not expose per-call `usage.generations`. |
+| Final campaign snapshot | 18 used | Conservatively charged 18 total to this campaign; the balance counter cannot attribute the additional usage to individual calls. |
+
+USD credits showed no balance change. The four paid route submissions reported costs of 1 (`create_image_pixen`), 1 (`edit_image_pixen`), 0.1 (`correct_pixelart`), and 1 (`animate_image`) generation. Their completed `get_image` results did not include `usage.generations`. Those submission estimates total 3.1; the account balance delta of 18 is the conservative campaign total and is not reconciled to per-command charges. Concurrent account activity could not be ruled out, so the balance evidence does not prove that Workbench itself caused all six generations; it does disprove treating this session as a verified zero-cost test.
+
+The 2,000-generation campaign cap remained intact: 18 generations counted, leaving 1,982 unspent; 50 of those remain reserved as contingency, leaving 1,932 unreserved headroom. No paid retry, second candidate, corrective rerun, Pro route, or extra fixture was submitted.
 
 ## What The Tool Is
 
@@ -125,7 +165,7 @@ These reports help an agent decide what to inspect or edit; they are not an arti
 
 | Claim | Evidence and limit |
 |---|---|
-| Workbench commands are free for subscribers | Present in the live PixelLab MCP tool description inspected on 2026-09-25. The static [public MCP guide](https://api.pixellab.ai/mcp/docs) and [REST API catalog](https://api.pixellab.ai/v2/docs) do not publish this detail. Treat it as the vendor's tool-metadata claim; no separate usage test or plan-by-plan billing contract was available. |
+| Workbench commands are free for subscribers | The live tool description makes this claim, but the 2026-09-25 Workbench-only test window coincided with an account counter increase of 6 generations and no per-call `usage.generations`. Later campaign usage rose to 18 total; the increase cannot be allocated per command or distinguished from concurrent account activity. Treat the claim as unverified and do not budget Workbench as zero generations based on metadata alone. |
 | The tool uses fewer LLM tokens | The live tool description calls low mode a fewest-token mode; the 0.4.125 announcement reports roughly 70% lower consumption in PixelLab's testing. The repository has not reproduced the benchmark, and no baseline/model, prompt set, or measurement method was supplied in the announcement. |
 | No token cost at all | Not established. Workbench may avoid sending image bytes between calls by referring to IDs, but the agent's chosen AI model still consumes context and produces tool arguments. Its cost depends on that model and the size of the discussion. |
 | Same billing as PixelLab generation | Not established. The Workbench tool metadata says its commands are free for subscribers; ordinary image-generation/edit/animation routes may consume PixelLab generations or credits. Do not apply a generation price estimate to Workbench or assume an edit/animation recipe is free solely because it uses the same MCP server. |
@@ -170,6 +210,19 @@ The comparison follows the official descriptions of [REST v2 operations](https:/
 Choose `pixelart_workbench` when the user asks for exact pixel-level work, analysis of a PixelLab image/drawing, layered pixel art, or a hand-authored frame recipe that fits its command language. Begin with `describe cli` or a task-relevant `describe` topic, inspect the source, batch a bounded command, and inspect the returned art and ID. Use regular PixelLab generation for open-ended new art, natural-language editing for semantic redraws, text animation for generative motion, and Skeleton v3 when a model should render from supplied pose keypoints. Use a visible website/editor or local tool when direct visual/file workflows are the required interaction.
 
 Do not route a task to Workbench just because it mentions “pixel art,” and do not promise that it will achieve a better-looking result or a fixed token saving. Confirm that the exact operation, source reference, and desired result can be expressed by current live help before relying on it.
+
+## Route Decision After Live Tests
+
+| Task | Preferred route | Tested boundary |
+|---|---|---|
+| Exact coordinate edit or guarded pixel correction | Workbench `edit`, followed by `compare` and visual inspection | The one-pixel patch changed only the requested pixel and repeated identically. The tested Pixen text edit changed 308 pixels, so use it when a semantic redraw is acceptable rather than when outside pixels must stay fixed. |
+| New small sprite from a fully specified pixel recipe | Workbench `draw`; use `create_image_pixen` for prompt-led alternatives | Workbench rendered the 16×16 recipe as authored. One Pixen image completed at the same size, but one sample does not establish a quality winner. |
+| Remove known pixel-art defects | Workbench `repair` for a specified, bounded correction; `correct_pixelart` for broader cleanup where redrawing is acceptable | Workbench removed the planted stray and restored the exact source. The 0.1-generation corrector recolored but did not remove that stray and changed 305 other pixels. |
+| Layered, explicitly positioned animation or a loop with measurable timing | Workbench `draw`, then inspect body frames, run `parts` and `motion`, and verify the seam | The authored loop had a 0-pixel seam and clean source-part coverage. Use explicit source masks where the coverage audit matters. |
+| Descriptive, open-ended motion | `animate_image` or the matching animation model | The one tested text-animation run returned four generated frames plus its unchanged input, but later frames drifted from the gem's shape. Use when generative interpretation is acceptable; review every frame. |
+| Local-file editing or direct human pixel work | Aseprite, Pixelorama, or another local editor | Workbench rejected the local path; no local-file or open-editor synchronization contract was found. |
+
+Workbench billing remains unresolved. Apply the normal paid-call gate whenever PixelLab generation usage matters, and record account-balance deltas separately from USD credits and host-model tokens.
 
 ## Unresolved Questions
 
