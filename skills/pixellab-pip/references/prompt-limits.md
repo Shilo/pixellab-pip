@@ -2,7 +2,7 @@
 
 Read this when a PixelLab REST v2 call rejects a natural-language field for length, when writing exact API code, or when preparing unusually long prompts.
 
-These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-09-12. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
+These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-09-25. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
 
 ## Pattern
 
@@ -30,6 +30,7 @@ These are the rows that do not follow the tier you would guess from the field na
 | `POST /generate-image-v2` | `style_image.usage_description` | 500 |
 | `POST /generate-with-style-v2` | `style_description` | 500 |
 | `POST /interpolation-v2` | `action` | 500 |
+| `POST /image-to-text` | `prompt` | 2000 |
 | `POST /remove-background` | `text` | 500 |
 | `POST /create-ui-asset` | `color_palette` | 200 |
 | `POST /generate-ui-v2` | `color_palette` | 200 |

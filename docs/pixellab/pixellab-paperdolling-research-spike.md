@@ -53,7 +53,7 @@ Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` retu
 Important official-doc nuance:
 
 - `edit-image`, `edit-images-v2`, `inpaint-v3`, `edit-animation-v2`, and `transfer-outfit-v2` are documented as returning edited images or frames, not native layer files.
-- MCP now exposes generic raw-image tools alongside the managed character/state/animation/object/tile/UI helpers: `create_image_pixflux`/`create_image_pixen`/`create_image_pro` (+ `get_image`), `edit_image` (Pro, matches REST `edit-images-v2`), `inpaint_image` (Pro, matches REST `inpaint-v3`), and `animate_image` (matches REST `animate-with-text-v3`, no managed asset needed). MCP still has no equivalent for `edit-animation-v2`, `transfer-outfit-v2`, `estimate-skeleton`, or `animate-with-skeleton`.
+- MCP now exposes generic raw-image tools alongside the managed character/state/animation/object/tile/UI helpers: `create_image_pixflux`/`create_image_pixen`/`create_image_pro` (+ `get_image`), `edit_image` (Pro, matches REST `edit-images-v2`), `inpaint_image` (Pro, matches REST `inpaint-v3`), `animate_image` (matches REST `animate-with-text-v3`, no managed asset needed), and `animate_with_skeleton_v3` (matches REST `animate-with-skeleton-v3`). MCP still has no equivalent for `edit-animation-v2`, `transfer-outfit-v2`, or the legacy `estimate-skeleton` / `animate-with-skeleton` routes.
 - `animate-with-skeleton` defaults are side/east in the public schema; RPG paperdoll workflows should set `view` and `direction` explicitly.
 
 ## Aseprite Changes-Only Layer Findings

@@ -4,6 +4,10 @@ Generated: 2026-06-30.
 
 Scope: developer-facing research on PixelLab preset skeleton/template character animations and the REST-first auto-rig/keypoint pipeline for estimating, exporting, and animating skeleton data. This document focuses on observed website behavior, public REST v2/MCP equivalents, and the Aseprite extension's local skeleton/template evidence. It does not cover a full custom skeleton authoring UI beyond the current estimate/export/animate surfaces.
 
+## 2026-09-25 Contract Addendum
+
+Version 0.4.125 adds Skeleton v3 as a distinct route: REST `POST /animate-with-skeleton-v3` matches MCP `animate_with_skeleton_v3`, and managed character animation adds `mode="skeleton-v3"`. The Tier 1+ beta accepts 3–15 per-frame keypoint sets from a reference image up to 256×256. The release also lists Character Creator, Aseprite, and Pixelorama as product surfaces for Skeleton v3. This is newer than the legacy `/animate-with-skeleton` workflow documented below; the earlier text-animation recommendation and three-pose limits apply only to those older routes. The research and visual observations below remain dated findings; this update did not run paid generation tests.
+
 ## Executive Summary
 
 PixelLab has two related but distinct animation concepts:

@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-09-13.
+Last reviewed: 2026-09-25.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -17,7 +17,7 @@ Primary sources:
 - PixelLab account balance can include subscription generations and USD credits.
 - Hosted MCP help reports that billing uses subscription generations first, then USD credits.
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
-- The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, and PixMiniMax) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md).
+- The pricing page shows the same estimate two ways: **generations** (the subscription-spend unit, its default view) and the USD values recorded below. Baselines: most base/`new`/`v3` routes ~1 generation; enhancers ~0.05; `estimate-skeleton` ~0.1; image-to-text ~0.09 for a typical image; top-down and sidescroller tilesets ~3; Pro Tools ~20-40. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, PixMiniMax, and Skeleton v3) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md).
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
 
 ## Version 0.4.123 Product Update
@@ -27,6 +27,12 @@ Primary sources:
 - **Game Builder:** available to Tier 1+ subscribers. It is a visible product workflow; public MCP project/chat/sandbox helpers can provide approved project context, but no dedicated public REST v2 Game Builder endpoint is documented. See the [official tutorial/showcase](https://youtu.be/Iaxk_8ftJ5s).
 - **Creator queue:** submitted Creator work is queued so closing or changing the window does not discard the job. This is a product/UI behavior, not a new public REST route.
 - **Map export:** Map Workshop can export for Godot and Unity. The public REST v2 inventory still has no map or map-export route; MCP map tools remain the programmatic map surface.
+
+## Version 0.4.125 Product Update
+
+- **PixelArt Workbench:** MCP adds `pixelart_workbench`, an MCP-only command tool for model-authored pixel-art operations. PixelLab describes its commands as free for subscribers. The release announcement reports roughly 70% lower token consumption in its testing; this repository did not independently benchmark that estimate.
+- **Skeleton v3:** available in Character Creator, Aseprite, and Pixelorama. The public beta is Tier 1+ and supports 3–15 keypoint frames up to 256×256; programmatic routes are REST `POST /v2/animate-with-skeleton-v3` and MCP `animate_with_skeleton_v3`, with managed-character mode `skeleton-v3` also available. Public estimated USD prices: 3 frames `$0.0436`, 8 `$0.0513`, 15 `$0.0622`.
+- **Image to text:** REST adds `POST /v2/image-to-text` for turning an image into a PixelLab-ready prompt; it returns text, has no MCP counterpart, and is estimated at about 0.09 generations for a typical sprite or screenshot. Actual usage varies with answer length.
 
 ## Concurrency and Priority Slots
 
@@ -75,6 +81,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 |---|---|---|---|
 | Convert image to pixel art | `POST /v2/image-to-pixelart` | Regular image to pixel art | `64x64 $0.006`; `128x128 $0.00666`; `256x256 $0.01164` |
 | Edit image (pixen) | `POST /v2/edit-image-pixen` | Text-instruction edit on the Pixen model; source ≤256px per side, target area ≤256x256 | not covered by the pricing rows recorded here — the endpoint documents a cost of 1 generation |
+| Image to text | `POST /v2/image-to-text` | PixelLab-ready image description; REST-only, no image generated | about 0.09 generations for a typical sprite/screenshot; variable with response length |
 | Correct pixel art | `POST /v2/correct-pixelart` | Sharpen edges, drop stray pixels, tighten palette without resizing | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Reduce colors | `POST /v2/reduce-colors` | Quantize one or more same-size frames onto one shared palette | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Unzoom pixel art | `POST /v2/unzoom` | Recover native-resolution pixel art from an upscaled image | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
@@ -92,7 +99,8 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 |---|---|---|---|---|
 | Animate with text | `POST /v2/animate-with-text` | Base text animation | 64x64 text animation with init/inpainting/palette options | `64x64`, 4 frames: `$0.01565` |
 | Animate with text (new) | `POST /v2/animate-with-text-v3` | v3 text animation | First-frame animation, optional last-frame guidance, 4-16 frames, up to 256x256 | `32x32`, 4 frames: `$0.0221`; `256x256`, 8 frames: `$0.0302`; `128x128`, 16 frames: `$0.0424` |
-| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Tier 1+; beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Independently observed website estimates (2026-09-12): `64x64`, 4 frames `$0.0123`; 8 `$0.0153`; `256x256`, 8 `$0.0153`; 40 `$0.0471` — see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). REST docs also publish generation-unit examples; use returned `usage.generations` for charged usage. |
+| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Tier 1+; beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Current official estimates (2026-09-25): `64x64`, 4 frames `$0.0178`; 8 `$0.0231`; `256x256`, 8 `$0.0231`; 40 `$0.0787`. The lower estimates independently observed on 2026-09-12 are historical; see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). Use returned `usage.generations` for charged usage. |
+| Animate with skeleton (v3) | `POST /v2/animate-with-skeleton-v3` | Skeleton-guided animation from 3–15 keypoint frames | Tier 1+ beta; max 256x256; matched MCP tool `animate_with_skeleton_v3` | Official estimates: 3 frames `$0.0436`; 8 `$0.0513`; 15 `$0.0622`. The managed-character `skeleton-v3` mode documents 2–4 generations per direction; check returned usage. |
 | Animate with text (Pro) | `POST /v2/animate-with-text-v2` | Pro text animation | Reference-image animation, 4/9/16 frames, view and direction controls | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 256x256 (endpoint prose lists 16/32/64/128/256; priced rows below stop at 128x128) | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
 | Estimate skeleton | `POST /v2/estimate-skeleton` | Skeleton helper | Skeleton extraction for skeleton animation | `16x16 $0.00511`; `64x64 $0.00513`; `256x256 $0.00516` |
@@ -135,7 +143,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 |---|---|---|---|
 | Enhance Pixen prompt | `POST /v2/enhance-pixen-prompt` | Expand a Pixen image prompt | official estimate per call `$0.002`; live check observed `usage.generations: 0.05` |
 | Enhance character v3 prompt | `POST /v2/enhance-character-v3-prompt` | Expand a v3 character prompt | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
-| Enhance animation prompt | `POST /v2/enhance-animation-v3-prompt` | Expand an animation action using frames as context; `engine=v3` or `engine=pixminimax` | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
+| Enhance animation prompt | `POST /v2/enhance-animation-v3-prompt` | Expand an animation action using frames as context; `engine=v3`, `pixminimax`, or `skeleton-v3` | official estimate per call `$0.002`; treat reported usage/credits as a separate unit |
 
 ## Practical Routing Notes
 

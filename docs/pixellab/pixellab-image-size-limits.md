@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-09-12 (PixMiniMax and current Pro Flash size contracts checked).
+Last reviewed: 2026-09-25 (Skeleton v3, image-to-text, and Pixen edit limits checked).
+
+> **2026-09-25 API refresh.** Added REST/MCP Skeleton v3 animation (Tier 1+, 3–15 keypoint frames, input up to 256×256) and REST `/image-to-text` (input up to 4096×4096). `edit-image-pixen` now requires source and target dimensions in multiples of four; the target remains area-capped at 256×256 and is padded with transparency instead of rescaled.
 
 > **2026-09-08 schema refresh.** Four measured limits moved and one conflict closed: `create-tiles-pro` `tile_size` max dropped 256 → **128**, matching its prose and the MCP tool; `create-1-direction-object` `size` min dropped 32 → **16** and `create-8-direction-object` 32 → **24**; `image-to-pixelart` input max rose 1280 → **2048** and its `output_size` max 320 → **512**. The probe results recorded against the old floors were correct when run and are kept as history, not as current bounds. The refresh also added the Cleanup endpoints and `edit-image-pixen` (see [Edit / Convert / Utility](#rest-v2-limits--edit--convert--utility)) and a new `override_frame_size` on `create-character-state`.
 
@@ -10,7 +12,7 @@ Purpose: document the true minimum and maximum image-size hard limits for every 
 
 Motivating goal: support `8px` and `16px` icons, items, and tilesets if the tools allow it. The `32x32` minimum seen in some workflows prompted this review; that floor turned out to be a client-side editor limit, not an API limit.
 
-Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from the live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The `generate-with-style-v2` row was rechecked against the 2026-08-07 OpenAPI refresh; the other values below were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
+Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The 2026-09-25 refresh checked the new Skeleton v3 and image-to-text limits and the updated `edit-image-pixen` bounds; the `generate-with-style-v2` row was rechecked 2026-08-07 and other older values were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
 
 ## How To Read These Limits
 
@@ -225,6 +227,7 @@ The two AI-rotation pipelines floor at 32 **over REST**; the two template/skelet
 | `animate-with-text-v2` | `image_size`, `reference_image_size` | 32×32 | 256×256 | Frame count is **fixed by size**, not chosen: 32×32 and 64×64 return 16 frames; 128×128, 170×170, 256×256 return 4. Recommended 64×64. |
 | `animate-with-text-v3` | `first_frame` / `last_frame` | — | 256×256 | v3 max 256×256, **plus a total pixel budget: `width × height × frame_count ≤ 524,288`** (endpoint prose). The budget binds before the per-axis max at large sizes: 256×256 affords only 8 frames (256·256·16 = 1,048,576, over budget); 16 frames needs ≤181×181. The only *user-chosen* size↔frame tradeoff — v2 and `edit-images-v2` use fixed ladders. Budget untested; `frame_count` is schema-bounded 4–16, even. |
 | `animate-pixminimax` | `first_frame` / `last_frame` | — | 256×256 | Beta route powered by MiniMax H3. Endpoint prose allows 4–40 generated frames in multiples of four at any input size up to 256×256; unlike v3, the current public description does not state the v3 total-pixel budget. Response contains `frame_count+1` images. |
+| `animate-with-skeleton-v3` | `first_frame` | — | 256×256 | Tier 1+ beta; requires 3–15 keypoint frame sets, each with the named 18 joints. Returns exactly one output frame per `keypoints` entry. |
 | `animate-with-skeleton` | `image_size` | 16×16 | 256×256 | Schema is a continuous 16–256 range, but the endpoint prose lists **only 16/32/64/128/256** as supported. See the discrete-size caveat below. |
 | `animate-character` / `characters/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
 | `objects/{object_id}/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
@@ -262,7 +265,8 @@ An in-between size (48, 96, 150) is **accepted at validation** — untested whet
 | `image-to-pixelart-pro` | (auto) | — | — | No output-size field; native pixel scale detected and downscaled automatically. |
 | `resize` | `reference_image_size`, `target_size` | 16×16 | 200×200 | Both source and target, area 16×16 to 200×200. |
 | `remove-background` | `image_size` | **1×1** | 400×400 | Lowest minimum in the API; max area 400×400. |
-| `edit-image-pixen` | source `image`; `width`/`height` | source ≥16×16 area | source **256 per side**; target **area 256×256** | **Prose/endpoint-enforced, not schema-enforced** — `width`/`height` are `minimum: 1` with no `maximum`, and the endpoint documents `400` (not `422`) for an out-of-range size. The two canvases are bounded differently: the source is capped per side, the target by area, so a 128×512 target is valid while 320×320 is not. Target defaults to the source size and the model re-renders at it rather than rescaling. |
+| `edit-image-pixen` | source `image`; `width`/`height` | source ≥16×16 area | source **256 per side**; target **area 256×256** | **Prose/endpoint-enforced, not schema-enforced** — source and target dimensions must each be multiples of four; `width`/`height` schema fields have `minimum: 1` and no maximum. Source is capped per side, target by area, so a 128×512 target is valid while 320×320 is not. Target defaults to source dimensions; the server pads transparently and re-renders instead of rescaling. |
+| `image-to-text` | `image` | — | 4096×4096 | PNG, JPEG, or data URI image input; optional `prompt` is at most 2000 characters. Returns text and does not generate an image. |
 | `correct-pixelart` | `images[]` | — | area **1024×1024** | **Prose-enforced** — the request schema declares no size field. Does not resize; all frames in a call must share one size. Unzoom an upscaled sprite first. |
 | `reduce-colors` | `images[]` | — | **512×512 total across all frames** | **Prose-enforced** — the request schema declares no size field. A shared budget, not per frame — sixteen 64×64 frames or four 128×128. All frames must share one size. |
 | `unzoom` | `image` | **256×256** | area **2048×2048** | **Prose-enforced** — the request schema declares no size field; the endpoint documents `422` for too small or too large. The minimum is real: grid detection needs enough pixels to find the lattice. Output is opaque — transparency is composited onto white. |
@@ -303,6 +307,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
 | `animate_image` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
 | `animate_image_pixminimax` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-pixminimax`; 4–40 generated frames in multiples of four, beta |
+| `animate_with_skeleton_v3` | first frame URL/base64 | — | **max 256×256** | Tier 1+ beta; 3–15 keypoint frame sets |
 | `create_path_tiles` | `tile_size` | 32 | `square_topdown`: exactly **32**; `isometric`: **48–96** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "roads"` — check that schema's bounds if exact REST-side limits matter) |
 | `create_building_kit` | `tile_size` / `wall_tiles` | 32 / 2 | `isometric`: **32–96**; `square_topdown`/`oblique`: **16–96**; `wall_tiles`: **1–3** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "building"`) |
 
