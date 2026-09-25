@@ -2,7 +2,9 @@
 
 ## Summary
 
-`pixelart_workbench` is a PixelLab MCP-only command interface for explicit pixel edits, layered drawings, and authored animation. In the live sample below, a guarded one-pixel edit changed exactly one pixel and repeated identically; the closest tested text-edit and cleanup routes changed 308 and 305 pixels respectively. The Workbench replies did not expose per-call usage, so this campaign could not verify the tool metadata’s “free for subscribers” claim or establish zero-generation cost.
+Use `pixelart_workbench` when you need to change only specific pixels or plan an animation's movement step by step. The usual create/edit/animate tools are easier to describe in plain language, but ask PixelLab's image model to invent or redraw pixels; Workbench lets the agent inspect the art and specify what changes. In one test, a one-pixel correction changed only that pixel and repeated identically, while a comparable text edit changed 308 pixels. In one authored loop, the start and end matched; the tested text animation drifted from the source. These examples show extra control for precise tasks, not generally better art. Workbench also takes more detailed instructions, and moving a cutout can expose missing pixels that must be supplied.
+
+Workbench replies did not expose per-call usage, so this campaign could not verify the tool metadata’s “free for subscribers” claim or establish zero-generation cost.
 
 The 0.4.125 announcement reports roughly 70% lower token use in PixelLab's testing. This repository has not reproduced that benchmark, and PixelLab generation units, PixelLab USD credits, and the caller's model tokens remain separate meters.
 
