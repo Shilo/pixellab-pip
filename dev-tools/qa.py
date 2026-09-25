@@ -425,7 +425,10 @@ def check_workflows() -> None:
         '"$suspicious" -ne 0',
         'data.get("writtenBack") is True',
         'artifact.get("version") == os.environ["EXPECTED_VERSION"]',
+        'clawscan.get("confidence", "")).casefold() == "high"',
         "sed -n '/^{/,$p' > dist/clawhub-scan.json",
+        "if: failure() && hashFiles('dist/clawhub-scan-*.zip') != ''",
+        "path: dist/clawhub-scan-*.zip",
         "Expected one VirusTotal badge, updated {n}",
         "README ClawHub badge does not point at current version",
         "withdraw_clawhub_versions",
@@ -482,6 +485,8 @@ def check_workflows() -> None:
         "- name: Scan the published ClawHub version"
     ):
         raise AssertionError("release-skill.yml must pass the ClawHub audit before creating the GitHub release")
+    if 'require(str(skillspector.get("status", "")).casefold() == "clean"' in release_workflow or 'require(skillspector.get("issueCount") == 0' in release_workflow:
+        raise AssertionError("release-skill.yml must treat ClawHub SkillSpector output as advisory, not as an independent release gate")
     if release_workflow.find("- name: Create GitHub Release") < release_workflow.find(
         "- name: Promote the audited ClawHub version"
     ):
@@ -494,6 +499,12 @@ def check_workflows() -> None:
         < release_workflow.find("- name: Create GitHub Release")
     ):
         raise AssertionError("release-skill.yml must verify and audit the exact ClawHub version before latest promotion and GitHub release")
+    if not (
+        release_workflow.find("- name: Scan the published ClawHub version")
+        < release_workflow.find("- name: Preserve failed ClawHub scan diagnostics")
+        < release_workflow.find("- name: Keep ClawHub latest on the saved version through the audit")
+    ):
+        raise AssertionError("release-skill.yml must preserve scan diagnostics after the scan and before latest-tag handling")
     if "--clobber" in release_workflow:
         raise AssertionError("release-skill.yml must never replace an existing public release asset")
     if release_workflow.count("release.get(\"isDraft\") is True") != 2:

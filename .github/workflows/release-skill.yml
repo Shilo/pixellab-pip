@@ -851,15 +851,6 @@ jobs:
           echo "ClawHub did not expose ${RELEASE_VERSION} for exact file-hash verification within 30 minutes. Do not retry blindly; inspect or resume only after resolving its registry state."
           exit 1
 
-      - name: Preserve failed ClawHub scan diagnostics
-        if: failure() && hashFiles('dist/clawhub-scan-*-diagnostic.zip') != ''
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: clawhub-scan-diagnostics-${{ github.run_id }}
-          path: dist/clawhub-scan-*-diagnostic.zip
-          if-no-files-found: error
-          retention-days: 7
-
       - name: Scan the published ClawHub version
         timeout-minutes: 35 # the CLI polls the scan queue for up to 30 minutes
         # The CLI equivalent of the Rescan button on the ClawHub security-audit page. Publishing alone leaves the
@@ -896,11 +887,10 @@ jobs:
           require(data.get("writtenBack") is True, "ClawHub did not write the audit back to the published version")
           require(artifact.get("version") == os.environ["EXPECTED_VERSION"], "ClawHub audited the wrong version")
 
+          # ClawHub defines ClawScan as the final adjudicator; SkillSpector is advisory.
           clawscan = report.get("clawscan") or {}
           require(str(clawscan.get("verdict", "")).casefold() == "benign", "ClawHub ClawScan verdict is not benign")
-          skillspector = report.get("skillspector") or {}
-          require(str(skillspector.get("status", "")).casefold() == "clean", "ClawHub SkillSpector status is not clean")
-          require(skillspector.get("issueCount") == 0, "ClawHub SkillSpector reported issues")
+          require(str(clawscan.get("confidence", "")).casefold() == "high", "ClawHub ClawScan confidence is not high")
           static = report.get("staticAnalysis") or {}
           require(str(static.get("status", "")).casefold() == "clean", "ClawHub static analysis is not clean")
 
@@ -910,6 +900,15 @@ jobs:
               require(virustotal.get("suspicious", 0) == 0, "ClawHub VirusTotal telemetry reported suspicious detections")
           print("ClawHub exact-version audit passed and was written back")
           PY
+
+      - name: Preserve failed ClawHub scan diagnostics
+        if: failure() && hashFiles('dist/clawhub-scan-*.zip') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: clawhub-scan-diagnostics-${{ github.run_id }}
+          path: dist/clawhub-scan-*.zip
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Keep ClawHub latest on the saved version through the audit
         if: always() && steps.clawhub_context.outputs.previous_latest != ''
