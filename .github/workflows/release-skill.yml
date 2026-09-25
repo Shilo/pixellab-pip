@@ -574,6 +574,7 @@ jobs:
           echo "Using ClawHub publisher @${owner}; saved latest baseline ${previous_latest}."
 
       - name: Publish and verify exact ClawHub version
+        id: clawhub_version
         # ClawHub may publish the exact version before its scan. The CLI has internal transient retries; this workflow never starts a second publish command after ambiguity.
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
@@ -734,8 +735,6 @@ jobs:
               relative = path.relative_to(root).as_posix()
               if any(part.startswith(".") for part in pathlib.PurePosixPath(relative).parts):
                   continue
-              if relative == "skill-card.md":
-                  continue
               local_files[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
 
           normalized_remote = {}
@@ -748,12 +747,15 @@ jobs:
                   raise SystemExit(f"ClawHub returned a duplicate file path: {item['path']}.")
               normalized_remote[item["path"]] = item["sha256"].lower()
 
+          generated_card = "skill-card.md" in normalized_remote and "skill-card.md" not in local_files
+          if generated_card:
+              del normalized_remote["skill-card.md"]
           if local_files != normalized_remote:
               missing = sorted(set(local_files) - set(normalized_remote))
               extra = sorted(set(normalized_remote) - set(local_files))
               changed = sorted(path for path in local_files.keys() & normalized_remote.keys() if local_files[path] != normalized_remote[path])
               raise SystemExit(f"ClawHub {version} differs from the tagged files (missing={missing}, extra={extra}, changed={changed}).")
-          print(f"ClawHub {version} file hashes match the release tag.")
+          print("true" if generated_card else "false")
           PY
           }
 
@@ -822,7 +824,12 @@ jobs:
           while true; do
             if exact_version_visible; then
               restore_latest || exit 1
-              verify_remote_files
+              generated_card="$(verify_remote_files)"
+              echo "generated_card=${generated_card}" >> "$GITHUB_OUTPUT"
+              echo "ClawHub ${RELEASE_VERSION} source file hashes match the release tag."
+              if [ "$generated_card" = "true" ]; then
+                echo "ClawHub attached skill-card.md; its server verification will run after ClawScan."
+              fi
               exit 0
             else
               inspect_status=$?
@@ -909,6 +916,52 @@ jobs:
           path: dist/clawhub-scan-*.zip
           if-no-files-found: error
           retention-days: 7
+
+      - name: Verify ClawHub-generated skill card
+        if: steps.clawhub_version.outputs.generated_card == 'true'
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
+          RELEASE_VERSION: ${{ steps.bump.outputs.new_version }}
+          EXISTING_JSON: dist/clawhub-existing-${{ steps.bump.outputs.new_version }}.json
+          VERIFY_JSON: dist/clawhub-verify-${{ steps.bump.outputs.new_version }}.json
+        shell: bash
+        run: |
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          skill_ref="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
+          npx --yes clawhub@0.23.3 --no-input skill verify "$skill_ref" --version "$RELEASE_VERSION" > "$VERIFY_JSON"
+          python - <<'PY'
+          import json, os, pathlib, re
+
+          version = os.environ["RELEASE_VERSION"]
+          owner = os.environ["CLAWHUB_RESOLVED_OWNER"]
+          inspect = json.loads(pathlib.Path(os.environ["EXISTING_JSON"]).read_text(encoding="utf-8"))
+          verification = json.loads(pathlib.Path(os.environ["VERIFY_JSON"]).read_text(encoding="utf-8"))
+          record = inspect.get("version") or {}
+          inspect_cards = [item for item in record.get("files", []) if isinstance(item, dict) and item.get("path") == "skill-card.md"]
+          if len(inspect_cards) != 1:
+              raise SystemExit("ClawHub inspect did not return exactly one skill-card.md file.")
+          inspect_sha = inspect_cards[0].get("sha256")
+          if not isinstance(inspect_sha, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", inspect_sha):
+              raise SystemExit("ClawHub inspect returned an invalid skill-card.md hash.")
+
+          security = verification.get("security") or {}
+          card = verification.get("card") or {}
+          if (verification.get("slug") != "pixellab-pip"
+                  or not isinstance(verification.get("publisherHandle"), str)
+                  or verification["publisherHandle"].casefold() != owner.casefold()
+                  or verification.get("version") != version):
+              raise SystemExit("ClawHub skill-card verification returned the wrong publisher, skill, or version.")
+          if (verification.get("ok") is not True or verification.get("decision") != "pass"
+                  or verification.get("reasons") != [] or security.get("status") != "clean"):
+              raise SystemExit("ClawHub skill-card verification did not pass with a clean security status.")
+          card_sha = card.get("sha256")
+          if (card.get("available") is not True or card.get("path") != "skill-card.md"
+                  or not isinstance(card_sha, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", card_sha)
+                  or card_sha.casefold() != inspect_sha.casefold()):
+              raise SystemExit("ClawHub's verified skill-card.md does not match the exact-version file hash.")
+          print(f"ClawHub skill-card.md verification passed for {version} and matches the inspected file hash.")
+          PY
 
       - name: Keep ClawHub latest on the saved version through the audit
         if: always() && steps.clawhub_context.outputs.previous_latest != ''

@@ -461,6 +461,27 @@ def check_workflows() -> None:
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
         "file hashes match the release tag.",
         "Publish and verify exact ClawHub version",
+        "id: clawhub_version",
+        'generated_card = "skill-card.md" in normalized_remote and "skill-card.md" not in local_files',
+        'del normalized_remote["skill-card.md"]',
+        'echo "generated_card=${generated_card}" >> "$GITHUB_OUTPUT"',
+        "ClawHub attached skill-card.md; its server verification will run after ClawScan.",
+        "Verify ClawHub-generated skill card",
+        "npx --yes clawhub@0.23.3 --no-input skill verify \"$skill_ref\" --version \"$RELEASE_VERSION\"",
+        "if len(inspect_cards) != 1:",
+        'not re.fullmatch(r"[0-9a-fA-F]{64}", inspect_sha)',
+        'verification.get("slug") != "pixellab-pip"',
+        'verification["publisherHandle"].casefold() != owner.casefold()',
+        'verification.get("version") != version',
+        'verification.get("ok") is not True',
+        'verification.get("decision") != "pass"',
+        'verification.get("reasons") != []',
+        'security.get("status") != "clean"',
+        'card.get("available") is not True',
+        'card.get("path") != "skill-card.md"',
+        'not re.fullmatch(r"[0-9a-fA-F]{64}", card_sha)',
+        'card_sha.casefold() != inspect_sha.casefold()',
+        "if: steps.clawhub_version.outputs.generated_card == 'true'",
         'owner="${CLAWHUB_OWNER:-$token_owner}"',
         '--owner "$CLAWHUB_RESOLVED_OWNER"',
         '--slug "$skill_ref"',
@@ -502,9 +523,12 @@ def check_workflows() -> None:
     if not (
         release_workflow.find("- name: Scan the published ClawHub version")
         < release_workflow.find("- name: Preserve failed ClawHub scan diagnostics")
+        < release_workflow.find("- name: Verify ClawHub-generated skill card")
         < release_workflow.find("- name: Keep ClawHub latest on the saved version through the audit")
     ):
-        raise AssertionError("release-skill.yml must preserve scan diagnostics after the scan and before latest-tag handling")
+        raise AssertionError("release-skill.yml must preserve scan diagnostics and verify generated card metadata before latest-tag handling")
+    if 'if relative == "skill-card.md"' in release_workflow:
+        raise AssertionError("release-skill.yml must hash a repository-authored skill-card.md as release source")
     if "--clobber" in release_workflow:
         raise AssertionError("release-skill.yml must never replace an existing public release asset")
     if release_workflow.count("release.get(\"isDraft\") is True") != 2:
