@@ -6,6 +6,8 @@ Skeleton v3 is PixelLab’s pose-conditioned animation workflow: give it one spr
 
 The public docs call REST `/animate-with-skeleton` the older three-frame engine, but the current OpenAPI does **not** mark that endpoint deprecated or removed. “Standard skeleton” can also mean managed `mode="template"`, which is a separate managed-character option. This spike keeps those terms distinct and avoids treating either legacy route as unavailable.
 
+The live campaign found that the initial hand-placed starting pose differed from REST `estimate-skeleton` by a median 10.5% of the normalized canvas. After repeating the 3-, 8-, and 15-frame walk with the estimate as the exact starting pose, the sampled output still showed only small visible motion for this sprite and pose sequence. That is a fixture-specific observation, not a general claim about Skeleton v3 quality. Text animation showed a clearer raised-arm pose in the sampled frames, with less pose-authoring work. Matched managed template and Skeleton v3 runs completed at eight frames; the Skeleton v3 REST run cost 3 generations but showed no decisive visual advantage in sampled frames. Exact response-level usage totaled 37.1 generations, and the account counter showed 42 at close, well below the 2,000-generation cap.
+
 ## Scope And Evidence Labels
 
 Research checked on 2026-09-25 against PixelLab’s refreshed REST OpenAPI, MCP docs, exposed live MCP tool metadata, current API pricing page, product guides, the supplied Version 0.4.125 announcement, and the requested video. The local documentation-watch snapshot is `.local/pixellab-doc-watch/snapshots/20260925T145051Z/`; its report says all seven sources fetched, REST OpenAPI and REST index were unchanged, and MCP and website source bytes changed without a normalized-content change.
@@ -14,8 +16,42 @@ Research checked on 2026-09-25 against PixelLab’s refreshed REST OpenAPI, MCP 
 - **Product-guide fact** means it appears in PixelLab’s product documentation; some animation guides describe the earlier editor workflow and are not Skeleton v3 API specifications.
 - **Walkthrough observation** means the video creator showed or said it. It is not an independent benchmark.
 - **Inference** means a practical conclusion drawn from those facts; it is labeled as such.
+- **Live observation** means a result from this campaign’s submitted PixelLab jobs. Visual comparisons are qualitative samples unless stated otherwise.
 
-No paid PixelLab generation or account-specific cost check was made for this spike. The video transcript is YouTube’s auto-generated English transcript, not a human-verified transcript. The summary below paraphrases it and links to timestamps rather than reproducing the transcript.
+The campaign stayed below its 2,000-generation ceiling. MCP raw-animation and REST calls that returned `usage.generations` are recorded separately from managed-animation pricing estimates; PixelLab’s managed `animate_character` responses did not return per-job generation usage. The video transcript is YouTube’s auto-generated English transcript, not a human-verified transcript. The summary below paraphrases it and links to timestamps rather than reproducing the transcript.
+
+## Controlled Live Tests (2026-09-25)
+
+### Protocol and starting-pose calibration
+
+The raw tests used one existing 64×64 south-facing, low-top-down humanoid sprite and a fixed appearance description. The same input image and action-specific target poses were reused within matched raw comparisons. Submitted raw MCP jobs completed, returned the requested number of frames, and reported transparent output; completed raw results were saved to the PixelLab gallery. Representative frames were inspected at native pixel size.
+
+The first 3-, 8-, and 15-frame walk sweep used manually placed starting points. Afterward, REST `POST /v2/estimate-skeleton` returned 18 distinct joint labels and reported `usage.generations: 0.1`. The manual points had a median Euclidean displacement of 0.105 normalized canvas units from that estimate. This is a comparison between two pose sources, not an accuracy score for the estimator. The result prompted a corrected walk sweep: the first pose and the source `first_frame_keypoints` were both set to the estimate, then the planned 8-frame repeat was used for the corrected 8-frame case.
+
+### Results and usage
+
+| Case | Route and input | Reported usage | Live result |
+|---|---|---:|---|
+| Initial frame-count and motion checks | Raw MCP Skeleton v3: 3-, 8-, and 15-frame walk, then 8-frame idle and jump; manually placed starting pose | 15 generations total | Exact requested counts completed with transparent output and stable character/palette. Walk and idle samples looked nearly static; jump showed a more visible raised-arm/body shift. Because the starting pose was misaligned with the estimator by a median 0.105, these runs are calibration checks, not evidence of pose-control quality. |
+| Corrected frame-count sweep | Raw MCP Skeleton v3 walk, 3, 8, and 15 frames; estimated starting pose reused exactly | 9 generations total | All three counts completed exactly with transparent output. At native size, sampled frames remained visually close and did not show a strong readable stride for this pose sequence. |
+| Cross-body strike | Raw MCP Skeleton v3, 8 frames; same estimated starting pose and a large right-arm crossing sequence | 3 generations | Eight transparent frames completed. Sampled frames showed limited visible arm crossing; this is a qualitative observation for this authored sequence. |
+| Explicit depth | Raw MCP Skeleton v3, 8-frame walk with explicit left/right/torso depth; compared with the corrected 8-frame walk using template defaults | 3 generations | Eight transparent frames completed. The sampled pair showed no obvious limb-order change; no pixel-level difference score was computed. |
+| URL/base64 parity | Raw MCP Skeleton v3, corrected 3-frame walk; same sprite and poses sent once as URL and once as base64 | 2 generations | Both jobs returned three transparent frames. Sampled frames looked similar; this was not a pixel-equivalence test. |
+| Text-animation control | MCP `animate_image`, same sprite, short eight-frame walk prompt | 1 generation | The response contained the original input plus eight generated frames (nine images total, as the MCP contract specifies). A sampled middle frame showed a clearer raised-arm pose than the corrected raw walk samples. |
+| Legacy three-frame route | REST `POST /v2/animate-with-skeleton`, three corrected poses | 1 generation | The synchronous response contained exactly three images. The sampled poses looked similar to one another. The endpoint remains a separate older REST contract; it is not managed template mode. |
+| Managed template baseline | MCP `animate_character(mode="template")`, `walking-8-frames`, south and east | Per-direction usage was not returned; public MCP pricing says 1 generation per direction | Both directions completed as eight-frame animations. The east result was selected as the matched managed baseline for the REST Skeleton v3 request. |
+| Managed Skeleton v3 | MCP request for the existing south template reused completed output; REST `POST /v2/animate-character`, same character/template and east direction, accepted a distinct job | REST background-job response reported 3 generations | The REST job completed as an eight-frame east animation and saved to character storage. The MCP response returned “already complete” for the south template and exposed no separate job usage, so the REST run supplied the distinct managed Skeleton v3 sample. Representative east-facing samples from both managed modes kept the same side-facing character; the v3 sample showed small limb shifts but no decisive visual advantage in this review. |
+| Quadruped boundary | Not submitted | 0 | The public schema exposes one humanoid-style 18-label rig; `template_id="horse"` only changes default depth and is not a separate quadruped joint schema. No alternate pose mapping was invented for this campaign. |
+
+The raw MCP Skeleton v3 jobs reported 32 generations total: 15 for the initial walk/motion checks, 9 for the corrected frame-count sweep, 3 for the strike, 3 for explicit depth, and 2 for URL/base64 parity. The text control reported 1 generation, the legacy REST route reported 1, `estimate-skeleton` reported 0.1, and the completed managed Skeleton v3 REST job reported 3. These response-level usages total 37.1 generations. Managed template usage is not included because its MCP responses did not expose per-job usage; keep the public estimate of 1 generation per direction separate from the exact response-level total. The account cycle counter showed 42 generations used at close, up from 0 at preflight; this account-level number is a cap cross-check and does not allocate usage by route.
+
+### Interpretation
+
+- **Live observation:** with this one sprite, the exact estimated start pose, and the tested target sequences, the raw Skeleton v3 samples showed little visible gait or arm-crossing change. Identity, palette, and transparent output remained stable in the sampled raw frames.
+- **Live observation:** the text control produced a more visibly raised arm in the sampled walk sequence and required only a short motion description. It also includes the source frame in its result, so its returned image count should not be compared directly with raw Skeleton v3’s output-only count.
+- **Live observation:** the matched managed east-facing `walking-8-frames` outputs both completed with eight frames. The sampled Skeleton v3 output retained the side-facing character and showed small limb movement; this small visual sample did not establish a decisive benefit over the template output.
+- **Inference:** use raw Skeleton v3 when the caller needs ownership of each keypoint pose, but validate the start pose against the image and inspect whether the generated frames visibly follow the authored range before relying on it. For a simple walk draft on this fixture, text animation was easier to prepare and read more clearly in the selected samples.
+- **Limitation:** the test did not use independent human-scored pose coordinates, repeated seeds, or an alternate subject. It does not establish general comparative quality or whether a different pose amplitude, view, seed, or sprite would behave the same way.
 
 ## What Skeleton v3 Does
 
