@@ -2,7 +2,7 @@
 
 ## Summary
 
-`pixelart_workbench` is a PixelLab MCP-only command interface for explicit pixel edits, layered drawings, and authored animation. In the live sample below, a guarded one-pixel edit changed exactly one pixel and repeated identically; the closest tested text-edit and cleanup routes changed 308 and 305 pixels respectively. The account generation counter also rose by six during a Workbench-only test window, without per-call usage fields. The tool metadata still says “free for subscribers,” but this campaign could not verify a zero-generation cost.
+`pixelart_workbench` is a PixelLab MCP-only command interface for explicit pixel edits, layered drawings, and authored animation. In the live sample below, a guarded one-pixel edit changed exactly one pixel and repeated identically; the closest tested text-edit and cleanup routes changed 308 and 305 pixels respectively. The Workbench replies did not expose per-call usage, so this campaign could not verify the tool metadata’s “free for subscribers” claim or establish zero-generation cost.
 
 The 0.4.125 announcement reports roughly 70% lower token use in PixelLab's testing. This repository has not reproduced that benchmark, and PixelLab generation units, PixelLab USD credits, and the caller's model tokens remain separate meters.
 
@@ -24,7 +24,7 @@ The cache refresh at 2026-09-25T14:50:51Z completed all seven configured sources
 
 ### Fixture And Contract Checks
 
-The campaign used one existing account-owned, one-direction red gem sprite as fixture F1; no fixture-generation call was needed. Its Workbench inspection reported a 32×32 canvas, 306 visible pixels, 718 transparent pixels, 34 opaque colors, bbox `[5, 6, 26, 25]` (22×20 inclusive), centroid `(15.6, 13.8)`, one hole, and one connected component. The alpha values were binary in the returned grid: transparent pixels and opaque `#RRGGBBff` colors.
+The campaign used one existing one-direction red gem sprite as fixture F1; no fixture-generation call was needed. Its Workbench inspection reported a 32×32 canvas, 306 visible pixels, 718 transparent pixels, 34 opaque colors, bbox `[5, 6, 26, 25]` (22×20 inclusive), centroid `(15.6, 13.8)`, one hole, and one connected component. The alpha values were binary in the returned grid: transparent pixels and opaque `#RRGGBBff` colors.
 
 Read-only `describe start`, `describe cli`, `describe draw`, `describe edits`, `describe lint_rules`, and command help confirmed the one-command-per-call `argv` contract, `low`/`high` modes, and the current command families. No schema version was exposed. The public [MCP guide](https://api.pixellab.ai/mcp/docs) still describes Workbench as an MCP tool; the current [REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) has no Workbench operation.
 
@@ -50,15 +50,9 @@ The initial sparkle recipe also used a literal color without declaring it in `sc
 
 ### Usage And Cost Evidence
 
-| Snapshot | Account generation counter | Campaign treatment |
-|---|---:|---|
-| Pre-Workbench baseline | 0 used | Starting point before the Workbench test suite |
-| After Workbench-only calls | 6 used | Conservatively charged 6 to this campaign; the Workbench replies did not expose per-call `usage.generations`. |
-| Final campaign snapshot | 18 used | Conservatively charged 18 total to this campaign; the balance counter cannot attribute the additional usage to individual calls. |
+Workbench replies did not expose per-call `usage.generations`, so their charges could not be isolated. Four paid comparison submissions reported 1 (`create_image_pixen`), 1 (`edit_image_pixen`), 0.1 (`correct_pixelart`), and 1 (`animate_image`) generation, totaling 3.1; their completed `get_image` results did not include usage. Account-level readings could not attribute charges to Workbench and are not recorded here. The evidence neither verifies zero cost nor establishes that Workbench caused any observed account-level usage.
 
-USD credits showed no balance change. The four paid route submissions reported costs of 1 (`create_image_pixen`), 1 (`edit_image_pixen`), 0.1 (`correct_pixelart`), and 1 (`animate_image`) generation. Their completed `get_image` results did not include `usage.generations`. Those submission estimates total 3.1; the account balance delta of 18 is the conservative campaign total and is not reconciled to per-command charges. Concurrent account activity could not be ruled out, so the balance evidence does not prove that Workbench itself caused all six generations; it does disprove treating this session as a verified zero-cost test.
-
-The 2,000-generation campaign cap remained intact: 18 generations counted, leaving 1,982 unspent; 50 of those remain reserved as contingency, leaving 1,932 unreserved headroom. No paid retry, second candidate, corrective rerun, Pro route, or extra fixture was submitted.
+The campaign stayed under its 2,000-generation cap. No paid retry, second candidate, corrective rerun, Pro route, or extra fixture was submitted.
 
 ## What The Tool Is
 
@@ -165,7 +159,7 @@ These reports help an agent decide what to inspect or edit; they are not an arti
 
 | Claim | Evidence and limit |
 |---|---|
-| Workbench commands are free for subscribers | The live tool description makes this claim, but the 2026-09-25 Workbench-only test window coincided with an account counter increase of 6 generations and no per-call `usage.generations`. Later campaign usage rose to 18 total; the increase cannot be allocated per command or distinguished from concurrent account activity. Treat the claim as unverified and do not budget Workbench as zero generations based on metadata alone. |
+| Workbench commands are free for subscribers | The live tool description makes this claim, but test replies exposed no per-call `usage.generations`, so billing could not be isolated. Treat the claim as unverified and do not budget Workbench as zero generations based on metadata alone. |
 | The tool uses fewer LLM tokens | The live tool description calls low mode a fewest-token mode; the 0.4.125 announcement reports roughly 70% lower consumption in PixelLab's testing. The repository has not reproduced the benchmark, and no baseline/model, prompt set, or measurement method was supplied in the announcement. |
 | No token cost at all | Not established. Workbench may avoid sending image bytes between calls by referring to IDs, but the agent's chosen AI model still consumes context and produces tool arguments. Its cost depends on that model and the size of the discussion. |
 | Same billing as PixelLab generation | Not established. The Workbench tool metadata says its commands are free for subscribers; ordinary image-generation/edit/animation routes may consume PixelLab generations or credits. Do not apply a generation price estimate to Workbench or assume an edit/animation recipe is free solely because it uses the same MCP server. |
@@ -222,7 +216,7 @@ Do not route a task to Workbench just because it mentions “pixel art,” and d
 | Descriptive, open-ended motion | `animate_image` or the matching animation model | The one tested text-animation run returned four generated frames plus its unchanged input, but later frames drifted from the gem's shape. Use when generative interpretation is acceptable; review every frame. |
 | Local-file editing or direct human pixel work | Aseprite, Pixelorama, or another local editor | Workbench rejected the local path; no local-file or open-editor synchronization contract was found. |
 
-Workbench billing remains unresolved. Apply the normal paid-call gate whenever PixelLab generation usage matters, and record account-balance deltas separately from USD credits and host-model tokens.
+Workbench billing remains unresolved. Do not budget zero cost from tool metadata: per-call `usage.generations` is unavailable, so account-level deltas cannot isolate Workbench from other activity or host-model token costs.
 
 ## Unresolved Questions
 
