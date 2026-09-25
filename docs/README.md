@@ -1,6 +1,6 @@
 # More Documentation
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-09-25.
 
 These docs contain PixelLab Pip's user guides, developer material, research, and technical background. The repository README is the short front door; detailed installation, usage, and security material lives here.
 
@@ -34,6 +34,8 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 - [PixelLab Surfaces And Services](pixellab/pixellab-surfaces-and-services.md) - where MCP, REST v2, website/editor, Aseprite, Pixelorama, SDKs, and legacy v1 fit.
 - [PixelLab Asset Routing](pixellab/pixellab-asset-routing.md) - how common requests map to PixelLab tools, endpoints, and workflows.
+- [PixelLab PixelArt Workbench Research Spike](pixellab/pixellab-pixelart-workbench-research-spike.md) - the MCP command model, supported inputs, live command families, comparisons, billing and token claims, and open documentation gaps.
+- [PixelLab Skeleton v3 Research Spike](pixellab/pixellab-skeleton-v3-research-spike.md) - raw and managed v3 workflows, current REST/MCP contracts, comparisons, limitations, and timestamped video walkthrough findings.
 - [PixelLab Background And Wallpaper Model Research Spike](pixellab/pixellab-background-wallpaper-model-research-spike.md) - applied comparison of Pro, Pixen, PixFlux, and BitForge for wide environmental backgrounds and wallpapers, including the conditional BitForge finding.
 - [PixelLab 16:9 Indoor Background Duplication Research Spike](pixellab/pixellab-16x9-indoor-duplication-research-spike.md) - four controlled 20-call Pixen studies plus Pro centering, full-bleed, and cross-domain follow-ups showing stronger Pro instruction adherence and explicit full-bleed wording can meet centering, no-duplication, and edge-to-edge requirements at 640x360.
 - [PixelLab UI Generation Surfaces Research](pixellab/pixellab-ui-generation-surfaces-research.md) - current UI-specific matrix for MCP `create_ui_asset`, REST `/create-ui-asset`, REST `/generate-ui-v2`, shape pieces, elements, and website/editor boundaries.

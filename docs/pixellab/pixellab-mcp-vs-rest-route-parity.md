@@ -381,7 +381,7 @@ The 2026-07-19 snapshot added REST routes for the `delete` / `list` lifecycle he
 
 ### Pixel-art command workflow (1) — MCP-only
 
-`pixelart_workbench` is the model-authored pixel-art command tool. It works with PixelLab asset IDs and has no public REST route. The 0.4.125 announcement reports lower token use from PixelLab's testing; that estimate was not independently measured here.
+`pixelart_workbench` is the model-authored pixel-art command tool. It accepts PixelLab IDs and supported image references, not local paths, and has no public REST route. The 0.4.125 announcement reports lower token use from PixelLab's testing; that estimate was not independently measured here. For the accepted input forms and live help contract, see the [PixelArt Workbench reference](../../skills/pixellab-pip/references/pixelart-workbench.md).
 
 **Total: 38 MCP tools with no REST v2 counterpart** — 37 in map/platform layers and one PixelArt Workbench tool. Version 0.4.125 added `remove_from_project`, `wait_for_jobs`, and `pixelart_workbench`; the new Skeleton v3 tool has a REST counterpart and is counted as parity.
 
