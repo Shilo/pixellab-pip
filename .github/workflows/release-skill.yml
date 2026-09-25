@@ -1,5 +1,5 @@
 name: Release New Version
-run-name: ${{ inputs.version && format('Release Version {0}', inputs.version) || 'Release New Version (auto-bump)' }}
+run-name: ${{ inputs.resume_version && format('Resume Release Version {0}', inputs.resume_version) || inputs.version && format('Release Version {0}', inputs.version) || 'Release New Version (auto-bump)' }}
 
 on:
   workflow_dispatch:
@@ -8,10 +8,26 @@ on:
         description: "Exact version to release, e.g. 1.6.0. Leave blank to auto-bump the minor version."
         required: false
         default: ""
+      resume_version:
+        description: "Resume an existing tagged release without bumping or retagging, e.g. 1.9.0."
+        required: false
+        default: ""
+      resume_previous_latest:
+        description: "Assert the prior ClawHub latest when resuming a version that is already latest; the registry cannot confirm historical pointers."
+        required: false
+        default: ""
       withdraw_clawhub_versions:
         description: "Comma-separated superseded ClawHub versions to withdraw after the replacement passes its audit."
         required: false
         default: ""
+
+concurrency:
+  group: pixellab-pip-release
+  cancel-in-progress: false
+
+# ClawHub has no conditional tag update. Do not change this skill's `latest` tag manually or from
+# another publisher while a release is running; this workflow can detect prior changes, not close
+# a race between its final read and ClawHub's tag write.
 
 # Least privilege by default; the release job below widens only what it needs, so any job added
 # later starts read-only. Scorecard's Token-Permissions check flags a workflow-wide write.
@@ -20,7 +36,8 @@ permissions:
 
 jobs:
   release:
-    name: Bump version and release skill
+    name: Prepare and release skill
+    if: github.ref_type == 'branch' && github.ref_name == 'main'
     runs-on: ubuntu-latest
     permissions:
       contents: write # push the version bump commit and tag, and create the release
@@ -45,11 +62,38 @@ jobs:
         run: python -m pip install -r requirements-dev.txt
 
       - name: Ensure branch dispatch
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          RESUME_VERSION: ${{ inputs.resume_version }}
         shell: bash
         run: |
-          if [ "${GITHUB_REF_TYPE}" != "branch" ]; then
-            echo "This workflow must be run from a branch."
+          if [ "${GITHUB_REF_TYPE}" != "branch" ] || [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "Release workflow must be dispatched from main."
             exit 1
+          fi
+          if [ -n "$INPUT_VERSION" ] && [ -n "$RESUME_VERSION" ]; then
+            echo "Set either version or resume_version, not both."
+            exit 1
+          fi
+          if [ -n "$RESUME_VERSION" ]; then
+            if ! [[ "$RESUME_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "resume_version must use MAJOR.MINOR.PATCH format."
+              exit 1
+            fi
+            tag="v${RESUME_VERSION}"
+            if ! git rev-parse --verify --quiet "refs/tags/${tag}^{commit}" >/dev/null; then
+              echo "Cannot resume: tag ${tag} does not exist."
+              exit 1
+            fi
+            tag_commit="$(git rev-parse "${tag}^{commit}")"
+            if ! git merge-base --is-ancestor "$tag_commit" "$GITHUB_SHA"; then
+              echo "Cannot resume: ${tag} is not on main's history."
+              exit 1
+            fi
+            if ! git diff --quiet "$tag_commit" "$GITHUB_SHA" -- skills/pixellab-pip; then
+              echo "Cannot resume: the current skill files differ from ${tag}."
+              exit 1
+            fi
           fi
 
       - name: Require security service credentials
@@ -78,9 +122,20 @@ jobs:
 
       - name: Find previous tag
         id: previous_tag
+        env:
+          RESUME_VERSION: ${{ inputs.resume_version }}
         shell: bash
         run: |
-          previous_tag="$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 2>/dev/null || true)"
+          if [ -n "$RESUME_VERSION" ]; then
+            release_tag="v${RESUME_VERSION}"
+            previous_tag="$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 "${release_tag}^" 2>/dev/null || true)"
+          else
+            previous_tag="$(git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 2>/dev/null || true)"
+          fi
+          if [ -n "$previous_tag" ] && ! [[ "$previous_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Previous Git tag is not a plain vMAJOR.MINOR.PATCH tag: ${previous_tag}"
+            exit 1
+          fi
           echo "previous_tag=${previous_tag}" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js
@@ -93,6 +148,7 @@ jobs:
         shell: bash
         env:
           INPUT_VERSION: ${{ inputs.version }}
+          RESUME_VERSION: ${{ inputs.resume_version }}
         run: |
           node <<'NODE'
           const fs = require("fs");
@@ -174,41 +230,53 @@ jobs:
 
           const oldVersion = versions[0];
           const inputVersion = (process.env.INPUT_VERSION || "").trim();
+          const resumeVersion = (process.env.RESUME_VERSION || "").trim();
+          if (resumeVersion && inputVersion) {
+            throw new Error("Set either version or resume_version, not both.");
+          }
           if (inputVersion && !/^\d+\.\d+\.\d+$/.test(inputVersion)) {
             throw new Error(`Requested version must be MAJOR.MINOR.PATCH, found: ${inputVersion}`);
+          }
+          if (resumeVersion && !/^\d+\.\d+\.\d+$/.test(resumeVersion)) {
+            throw new Error(`Resume version must be MAJOR.MINOR.PATCH, found: ${resumeVersion}`);
           }
           if (inputVersion && inputVersion === oldVersion) {
             throw new Error(`Requested version ${inputVersion} is already the current version.`);
           }
-          const newVersion = inputVersion || bumpVersion(oldVersion);
+          if (resumeVersion && resumeVersion !== oldVersion) {
+            throw new Error(`Cannot resume ${resumeVersion}: repository manifests are at ${oldVersion}.`);
+          }
+          const newVersion = resumeVersion || inputVersion || bumpVersion(oldVersion);
           const updatedFiles = [];
 
-          for (const item of files) {
-            for (const versionPath of item.versionPaths) {
-              setPath(item.data, versionPath, newVersion);
+          if (!resumeVersion) {
+            for (const item of files) {
+              for (const versionPath of item.versionPaths) {
+                setPath(item.data, versionPath, newVersion);
+              }
+
+              fs.writeFileSync(item.fullPath, `${JSON.stringify(item.data, null, 2)}\n`);
+              updatedFiles.push(item.file);
             }
 
-            fs.writeFileSync(item.fullPath, `${JSON.stringify(item.data, null, 2)}\n`);
-            updatedFiles.push(item.file);
-          }
-
-          // Keep the live ClawHub/VirusTotal security badges pointed at the released version.
-          const readmePath = path.join(root, "README.md");
-          if (fs.existsSync(readmePath)) {
-            const readmeBefore = fs.readFileSync(readmePath, "utf8");
-            const needle = `skills%2F${skillName}%2Fversions%2F${oldVersion}`;
-            if (!readmeBefore.includes(needle)) {
-              throw new Error(`README ClawHub badge does not point at current version ${oldVersion}.`);
+            // Keep the live ClawHub/VirusTotal security badges pointed at the released version.
+            const readmePath = path.join(root, "README.md");
+            if (fs.existsSync(readmePath)) {
+              const readmeBefore = fs.readFileSync(readmePath, "utf8");
+              const needle = `skills%2F${skillName}%2Fversions%2F${oldVersion}`;
+              if (!readmeBefore.includes(needle)) {
+                throw new Error(`README ClawHub badge does not point at current version ${oldVersion}.`);
+              }
+              const readmeAfter = readmeBefore.split(needle).join(`skills%2F${skillName}%2Fversions%2F${newVersion}`);
+              if (readmeAfter !== readmeBefore) {
+                fs.writeFileSync(readmePath, readmeAfter);
+                updatedFiles.push("README.md");
+              }
             }
-            const readmeAfter = readmeBefore.split(needle).join(`skills%2F${skillName}%2Fversions%2F${newVersion}`);
-            if (readmeAfter !== readmeBefore) {
-              fs.writeFileSync(readmePath, readmeAfter);
-              updatedFiles.push("README.md");
-            }
-          }
 
-          if (updatedFiles.length === 0) {
-            throw new Error("No JSON version fields were updated.");
+            if (updatedFiles.length === 0) {
+              throw new Error("No JSON version fields were updated.");
+            }
           }
 
           fs.mkdirSync(path.join(root, "dist"), { recursive: true });
@@ -219,10 +287,11 @@ jobs:
           output.write(`new_version=${newVersion}\n`);
           output.write(`tag=v${newVersion}\n`);
           output.write(`skill_name=${skillName}\n`);
+          output.write(`resume=${Boolean(resumeVersion)}\n`);
           output.end();
 
-          console.log(`Bumped ${oldVersion} -> ${newVersion}`);
-          console.log(`Updated JSON files: ${updatedFiles.join(", ")}`);
+          console.log(resumeVersion ? `Resuming tagged release v${newVersion}` : `Bumped ${oldVersion} -> ${newVersion}`);
+          console.log(`Updated files: ${updatedFiles.join(", ") || "none (resume mode)"}`);
           NODE
 
       - name: Build skill archive
@@ -236,12 +305,73 @@ jobs:
             exit 1
           fi
           mkdir -p dist
-          cd skills
-          # Keep the exclusion as defense in depth; the check above must already
-          # prove that neither the GitHub archive nor the ClawHub upload can contain bytecode.
-          zip -r "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" "${{ steps.bump.outputs.skill_name }}" -x '*/__pycache__/*'
-          zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^${{ steps.bump.outputs.skill_name }}/SKILL.md$'
-          ! zipinfo -1 "../dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" | grep -q '^skills/'
+          python - "${{ steps.bump.outputs.skill_name }}" "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" <<'PY'
+          import pathlib, stat, sys, zipfile
+
+          skill_name = sys.argv[1]
+          root = pathlib.Path("skills") / skill_name
+          output = pathlib.Path(sys.argv[2])
+          with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
+              for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+                  if not path.is_file():
+                      continue
+                  relative = path.relative_to(root.parent).as_posix()
+                  if "__pycache__" in pathlib.PurePosixPath(relative).parts or path.suffix in {".pyc", ".pyo"}:
+                      continue
+                  mode = 0o755 if path.stat().st_mode & stat.S_IXUSR else 0o644
+                  info = zipfile.ZipInfo(relative, date_time=(1980, 1, 1, 0, 0, 0))
+                  info.create_system = 3
+                  info.external_attr = (stat.S_IFREG | mode) << 16
+                  info.compress_type = zipfile.ZIP_STORED
+                  archive.writestr(info, path.read_bytes())
+
+          with zipfile.ZipFile(output) as archive:
+              names = archive.namelist()
+              if f"{skill_name}/SKILL.md" not in names or any(name.startswith("skills/") for name in names):
+                  raise SystemExit("The release ZIP does not have the expected skill root.")
+          print(f"Built deterministic {output} ({output.stat().st_size} bytes).")
+          PY
+
+      - name: Verify any existing GitHub release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+          ASSET_NAME: ${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+        shell: bash
+        run: |
+          release_json="dist/existing-github-release.json"
+          release_error="dist/existing-github-release-error.txt"
+          set +e
+          gh release view "$RELEASE_TAG" --json isDraft,isPrerelease,assets > "$release_json" 2> "$release_error"
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ]; then
+            if grep -Eqi 'release not found|HTTP 404|Not Found' "$release_error"; then
+              echo "No GitHub release exists for ${RELEASE_TAG}; the new asset will be uploaded after all checks pass."
+              exit 0
+            fi
+            cat "$release_error"
+            exit "$status"
+          fi
+          asset_present="$(python - "$release_json" "$ASSET_NAME" <<'PY'
+          import json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          if release.get("isDraft") is True or release.get("isPrerelease") is True:
+              raise SystemExit("The existing GitHub release is a draft or prerelease; resolve it before resuming.")
+          print("yes" if any(asset.get("name") == sys.argv[2] for asset in release.get("assets", [])) else "no")
+          PY
+          )"
+          if [ "$asset_present" = "yes" ]; then
+            mkdir -p dist/existing-release-asset
+            gh release download "$RELEASE_TAG" --pattern "$ASSET_NAME" --dir dist/existing-release-asset
+            existing="dist/existing-release-asset/${ASSET_NAME}"
+            candidate="dist/${ASSET_NAME}"
+            if [ "$(sha256sum "$existing" | cut -d' ' -f1)" != "$(sha256sum "$candidate" | cut -d' ' -f1)" ]; then
+              echo "Existing GitHub asset bytes differ from the deterministic archive built from the release tag; refusing to replace them."
+              exit 1
+            fi
+            echo "Existing GitHub release asset exactly matches the build and can be reused without replacement."
+          fi
 
       - name: Attest build provenance
         id: attest
@@ -329,6 +459,7 @@ jobs:
           PY
 
       - name: Commit version bump
+        if: steps.bump.outputs.resume != 'true'
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
@@ -339,42 +470,395 @@ jobs:
           git tag -a "${{ steps.bump.outputs.tag }}" -m "Release ${{ steps.bump.outputs.tag }}"
           git push --atomic origin "HEAD:refs/heads/${GITHUB_REF_NAME}" "${{ steps.bump.outputs.tag }}"
 
-      - name: Publish to ClawHub for its independent security audit
-        # No continue-on-error: the README badge pins this version, and the GitHub release is not
-        # created until the exact published ClawHub artifact passes the scan below.
+      - name: Commit verified release badges
+        if: steps.bump.outputs.resume == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- README.md
+          if git diff --cached --quiet; then
+            echo "Release badges already match the current build."
+          else
+            git commit -m "docs: refresh v${{ steps.bump.outputs.new_version }} release badges"
+            git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
+          fi
+
+      - name: Resolve release source commit
+        id: release_source
+        env:
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        shell: bash
+        run: |
+          release_commit="$(git rev-parse "${RELEASE_TAG}^{commit}")"
+          echo "release_commit=${release_commit}" >> "$GITHUB_OUTPUT"
+          echo "Publishing files from ${RELEASE_TAG} at ${release_commit}"
+
+      - name: Resolve ClawHub publisher and previous latest
+        id: clawhub_context
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
-          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }} # optional publisher handle; defaults to the token's account
+          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }}
+          RELEASE_VERSION: ${{ steps.bump.outputs.new_version }}
+          RESUME_PREVIOUS_LATEST: ${{ inputs.resume_previous_latest }}
         shell: bash
-        # One-time setup: create a ClawHub account, generate an API token, add it as the CLAWHUB_TOKEN repo secret
-        # (optionally set a CLAWHUB_OWNER repo variable). Publishing uploads the version; the scan below is what
-        # produces its public audit verdict and badge data. The skill folder stays agent-agnostic — no
-        # OpenClaw-specific files are added to it.
         run: |
           npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
-          owner_args=()
-          if [ -n "$CLAWHUB_OWNER" ]; then owner_args=(--owner "$CLAWHUB_OWNER"); fi
-          set +e
-          out="$(npx --yes clawhub@0.23.3 --no-input skill publish "skills/${{ steps.bump.outputs.skill_name }}" \
-            --slug "${{ steps.bump.outputs.skill_name }}" \
-            --name "PixelLab Pip" \
-            --version "${{ steps.bump.outputs.new_version }}" \
-            --changelog "Release ${{ steps.bump.outputs.tag }}" \
-            --tags latest \
-            --topics "pixellab,pixel-art,game-assets,sprites,mcp" \
-            --source-repo "${{ github.repository }}" \
-            --source-commit "$(git rev-parse HEAD)" \
-            --source-ref "${{ steps.bump.outputs.tag }}" \
-            --source-path "skills/${{ steps.bump.outputs.skill_name }}" \
-            "${owner_args[@]}" 2>&1)"
-          status=$?
-          set -e
-          echo "$out"
-          # An upload that already landed is success for this step's purpose: the scan below still has to run,
-          # and without this a re-release of the same version could never finish.
-          if [ "$status" -ne 0 ] && ! grep -qF "already exists" <<<"$out"; then
-            exit "$status"
+          token_owner="$(npx --yes clawhub@0.23.3 --no-input whoami | tr -d '\r\n')"
+          owner="${CLAWHUB_OWNER:-$token_owner}"
+          owner="${owner#@}"
+          if ! [[ "$owner" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$owner" == *".."* ]]; then
+            echo "ClawHub publisher handle is missing or invalid."
+            exit 1
           fi
+          skill_ref="@${owner}/pixellab-pip"
+          current_json="dist/clawhub-current-before-publish.json"
+          npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --json > "$current_json"
+          current_latest="$(python - "$current_json" "$owner" <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          skill = payload.get("skill") or {}
+          publisher = payload.get("owner") or {}
+          if (skill.get("slug") != "pixellab-pip" or not isinstance(publisher.get("handle"), str)
+                  or publisher["handle"].casefold() != sys.argv[2].casefold()):
+              raise SystemExit("ClawHub inspect did not resolve the requested publisher and skill.")
+          latest = payload.get("latestVersion") or {}
+          print(latest.get("version") or (skill.get("tags") or {}).get("latest") or "")
+          PY
+          )"
+          if [ -z "$current_latest" ]; then
+            echo "Could not determine the current ClawHub latest version; refusing to publish without a rollback baseline."
+            exit 1
+          fi
+          if ! [[ "$current_latest" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "ClawHub latest is not a plain MAJOR.MINOR.PATCH version: ${current_latest}"
+            exit 1
+          fi
+
+          expected="${RESUME_PREVIOUS_LATEST#v}"
+          if [ -n "$expected" ] && ! [[ "$expected" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "resume_previous_latest must use MAJOR.MINOR.PATCH format."
+            exit 1
+          fi
+          if [ "$current_latest" = "$RELEASE_VERSION" ]; then
+            if [ -z "$expected" ]; then
+              echo "ClawHub already lists ${RELEASE_VERSION} as latest; provide resume_previous_latest so the pre-audit baseline is known."
+              exit 1
+            fi
+            previous_latest="$expected"
+          else
+            previous_latest="$current_latest"
+            if [ -n "$expected" ] && [ "$expected" != "$current_latest" ]; then
+              echo "resume_previous_latest=${expected} does not match ClawHub latest (${current_latest})."
+              exit 1
+            fi
+          fi
+          if [ "$previous_latest" = "$RELEASE_VERSION" ]; then
+            echo "The previous ClawHub latest must differ from the release version."
+            exit 1
+          fi
+          npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --version "$previous_latest" --json > dist/clawhub-previous-version.json
+          python - "$previous_latest" "$owner" dist/clawhub-previous-version.json <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8"))
+          version = payload.get("version") or {}
+          publisher = payload.get("owner") or {}
+          skill = payload.get("skill") or {}
+          if (version.get("version") != sys.argv[1] or not isinstance(publisher.get("handle"), str)
+                  or publisher["handle"].casefold() != sys.argv[2].casefold()
+                  or skill.get("slug") != "pixellab-pip"):
+              raise SystemExit(f"ClawHub did not confirm previous version {sys.argv[1]}.")
+          PY
+          echo "owner=${owner}" >> "$GITHUB_OUTPUT"
+          echo "previous_latest=${previous_latest}" >> "$GITHUB_OUTPUT"
+          echo "Using ClawHub publisher @${owner}; saved latest baseline ${previous_latest}."
+
+      - name: Publish and verify exact ClawHub version
+        # ClawHub may publish the exact version before its scan. The CLI has internal transient retries; this workflow never starts a second publish command after ambiguity.
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
+          PREVIOUS_LATEST: ${{ steps.clawhub_context.outputs.previous_latest }}
+          RELEASE_VERSION: ${{ steps.bump.outputs.new_version }}
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+          RELEASE_COMMIT: ${{ steps.release_source.outputs.release_commit }}
+          RELEASE_RESUME: ${{ steps.bump.outputs.resume }}
+          EXISTING_JSON: dist/clawhub-existing-${{ steps.bump.outputs.new_version }}.json
+          PUBLISH_JSON: dist/clawhub-publish-${{ steps.bump.outputs.new_version }}.json
+        shell: bash
+        timeout-minutes: 40
+        run: |
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          skill_ref="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
+          publish_json="$PUBLISH_JSON"
+          publish_log="dist/clawhub-publish.log"
+          exact_version_visible() {
+            python - <<'PY'
+          import http.client, json, os, ssl, sys
+          from urllib.error import HTTPError, URLError
+          from urllib.parse import quote, urlencode
+          from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+          owner = os.environ["CLAWHUB_RESOLVED_OWNER"]
+          version = os.environ["RELEASE_VERSION"]
+          url = (
+              "https://clawhub.ai/api/v1/skills/pixellab-pip/versions/"
+              f"{quote(version, safe='')}?{urlencode({'ownerHandle': owner})}"
+          )
+          request = Request(url, headers={
+              "Accept": "application/json",
+              "Authorization": f"Bearer {os.environ['CLAWHUB_TOKEN']}",
+          })
+
+          class NoRedirect(HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+
+          try:
+              with build_opener(NoRedirect).open(request, timeout=15) as response:
+                  status, body = response.status, response.read()
+          except HTTPError as error:
+              status = error.code
+              try:
+                  body = error.read()
+              except (TimeoutError, URLError, OSError, http.client.HTTPException) as read_error:
+                  print(f"ClawHub HTTP {status} response body could not be read: {read_error}", file=sys.stderr)
+                  raise SystemExit(2)
+              except Exception as read_error:
+                  print(f"ClawHub HTTP {status} response body was invalid: {read_error}", file=sys.stderr)
+                  raise SystemExit(3)
+          except (TimeoutError, URLError, OSError, http.client.HTTPException) as error:
+              if isinstance(getattr(error, "reason", None), ssl.SSLError) or isinstance(error, ssl.SSLError):
+                  print(f"ClawHub exact-version lookup failed TLS verification: {error}", file=sys.stderr)
+                  raise SystemExit(3)
+              print(f"ClawHub exact-version lookup had a network error: {error}", file=sys.stderr)
+              raise SystemExit(2)
+          except Exception as error:
+              print(f"ClawHub exact-version lookup failed unexpectedly: {error}", file=sys.stderr)
+              raise SystemExit(3)
+
+          message = body.decode("utf-8", errors="replace").strip()
+          if status in {408, 429} or status >= 500:
+              print(f"ClawHub exact-version lookup returned HTTP {status}.", file=sys.stderr)
+              raise SystemExit(2)
+          if status == 404:
+              if message.casefold() == "version not found":
+                  raise SystemExit(10)
+              print(f"ClawHub exact-version lookup returned an unexpected 404: {message}", file=sys.stderr)
+              raise SystemExit(3)
+          if status < 200 or status >= 300:
+              print(f"ClawHub exact-version lookup returned HTTP {status}: {message}", file=sys.stderr)
+              raise SystemExit(3)
+          try:
+              payload = json.loads(message)
+              if not isinstance(payload, dict):
+                  raise ValueError("response is not an object")
+              version_record = payload.get("version")
+              skill_record = payload.get("skill")
+              if not isinstance(version_record, dict) or not isinstance(skill_record, dict):
+                  raise ValueError("version or skill record is missing")
+              # The pinned CLI's ApiV1SkillVersionResponseSchema confirms these fields;
+              # ownerHandle scopes this request, and CLI inspect verifies owner on reuse.
+              if (version_record.get("version") != version
+                      or skill_record.get("slug") != "pixellab-pip"):
+                  raise ValueError("response is for another version or skill")
+          except Exception as error:
+              print(f"ClawHub exact-version lookup returned an invalid response: {error}", file=sys.stderr)
+              raise SystemExit(3)
+          PY
+            return $?
+          }
+
+          current_latest() {
+            npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --json > dist/clawhub-current-latest.json || return 1
+            python - dist/clawhub-current-latest.json <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          latest = payload.get("latestVersion") or {}
+          skill = payload.get("skill") or {}
+          print(latest.get("version") or (skill.get("tags") or {}).get("latest") or "")
+          PY
+          }
+
+          restore_latest() {
+            latest="$(current_latest)" || latest=""
+            if [ "$latest" = "$PREVIOUS_LATEST" ]; then
+              echo "ClawHub latest remains at saved version ${PREVIOUS_LATEST}."
+              return 0
+            fi
+            if [ "$latest" != "$RELEASE_VERSION" ]; then
+              echo "ClawHub latest changed to ${latest:-unknown}; preserving it and stopping."
+              return 1
+            fi
+            echo "Restoring ClawHub latest to ${PREVIOUS_LATEST} before waiting for the audit version."
+            npx --yes clawhub@0.23.3 --no-input skill tag "$skill_ref" "$PREVIOUS_LATEST" --tag latest --yes || true
+            for attempt in 1 2 3 4 5; do
+              latest="$(current_latest)" || latest=""
+              if [ "$latest" = "$PREVIOUS_LATEST" ]; then
+                echo "ClawHub latest restored and verified at ${PREVIOUS_LATEST}."
+                return 0
+              fi
+              if [ "$latest" != "$RELEASE_VERSION" ]; then
+                echo "ClawHub latest changed to ${latest:-unknown}; preserving it and stopping."
+                return 1
+              fi
+              sleep $((attempt * 5))
+            done
+            echo "Could not verify that ClawHub latest returned to ${PREVIOUS_LATEST}; last value: ${latest:-unknown}."
+            return 1
+          }
+
+          verify_remote_files() {
+            npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --version "$RELEASE_VERSION" --json > "$EXISTING_JSON"
+            python - <<'PY'
+          import hashlib, json, os, pathlib, re
+
+          version = os.environ["RELEASE_VERSION"]
+          payload = json.loads(pathlib.Path(os.environ["EXISTING_JSON"]).read_text(encoding="utf-8"))
+          record = payload.get("version") or {}
+          skill = payload.get("skill") or {}
+          publisher = payload.get("owner") or {}
+          if (record.get("version") != version or skill.get("slug") != "pixellab-pip"
+                  or not isinstance(publisher.get("handle"), str)
+                  or publisher["handle"].casefold() != os.environ["CLAWHUB_RESOLVED_OWNER"].casefold()):
+              raise SystemExit(f"ClawHub did not return the exact version {version}.")
+          remote_files = record.get("files")
+          if not isinstance(remote_files, list) or not remote_files:
+              raise SystemExit("ClawHub version has no file hashes to verify; refusing to reuse it.")
+
+          root = pathlib.Path("skills/pixellab-pip")
+          local_files = {}
+          for path in root.rglob("*"):
+              if not path.is_file():
+                  continue
+              relative = path.relative_to(root).as_posix()
+              if any(part.startswith(".") for part in pathlib.PurePosixPath(relative).parts):
+                  continue
+              if relative == "skill-card.md":
+                  continue
+              local_files[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+
+          normalized_remote = {}
+          for item in remote_files:
+              if (not isinstance(item, dict) or not isinstance(item.get("path"), str)
+                      or not isinstance(item.get("sha256"), str)
+                      or not re.fullmatch(r"[0-9a-fA-F]{64}", item["sha256"])):
+                  raise SystemExit("ClawHub returned invalid file hashes; refusing to reuse the version.")
+              if item["path"] in normalized_remote:
+                  raise SystemExit(f"ClawHub returned a duplicate file path: {item['path']}.")
+              normalized_remote[item["path"]] = item["sha256"].lower()
+
+          if local_files != normalized_remote:
+              missing = sorted(set(local_files) - set(normalized_remote))
+              extra = sorted(set(normalized_remote) - set(local_files))
+              changed = sorted(path for path in local_files.keys() & normalized_remote.keys() if local_files[path] != normalized_remote[path])
+              raise SystemExit(f"ClawHub {version} differs from the tagged files (missing={missing}, extra={extra}, changed={changed}).")
+          print(f"ClawHub {version} file hashes match the release tag.")
+          PY
+          }
+
+          restore_latest || exit 1
+          publish_needed=no
+          if exact_version_visible; then
+            echo "${skill_ref}@${RELEASE_VERSION} already exists; restoring latest and verifying its stored files."
+          else
+            inspect_status=$?
+            if [ "$inspect_status" -eq 10 ]; then
+              if [ "$RELEASE_RESUME" = "true" ]; then
+                echo "Resume mode found no visible exact version; trying the tagged version once, with ClawHub version uniqueness preventing replacement."
+              fi
+              publish_needed=yes
+            elif [ "$inspect_status" -eq 2 ]; then
+              echo "Initial ClawHub lookup was transient; entering read-only polling without publishing."
+            else
+              echo "Could not confirm that the exact ClawHub version is absent; refusing to publish on an uncertain lookup."
+              exit 1
+            fi
+          fi
+          if [ "$publish_needed" = yes ]; then
+            echo "ClawHub confirms ${RELEASE_VERSION} is not yet visible; sending one publish request."
+            set +e
+            npx --yes clawhub@0.23.3 --no-input skill publish "skills/pixellab-pip" \
+              --slug "pixellab-pip" \
+              --name "PixelLab Pip" \
+              --version "$RELEASE_VERSION" \
+              --changelog "Release ${RELEASE_TAG}" \
+              --topics "pixellab,pixel-art,game-assets,sprites,mcp" \
+              --source-repo "${GITHUB_REPOSITORY}" \
+              --source-commit "$RELEASE_COMMIT" \
+              --source-ref "$RELEASE_TAG" \
+              --source-path "skills/pixellab-pip" \
+              --owner "$CLAWHUB_RESOLVED_OWNER" \
+              --json > "$publish_json" 2> "$publish_log"
+            status=$?
+            set -e
+            cat "$publish_log" "$publish_json"
+            if [ "$status" -eq 0 ]; then
+              if ! python - <<'PY'
+          import json, os, pathlib
+          try:
+              result = json.loads(pathlib.Path(os.environ["PUBLISH_JSON"]).read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError):
+              raise SystemExit(1)
+          if result.get("version") != os.environ["RELEASE_VERSION"] or result.get("status") not in {"submitted", "published", "pending-publication"}:
+              raise SystemExit(1)
+          print(f"ClawHub accepted {result['version']} ({result['status']}).")
+          PY
+              then
+                echo "Publish response was unexpected; switching to read-only exact-version polling."
+              fi
+            elif grep -Eqi 'already exists|version (is )?reserved|version.*exists' "$publish_json" "$publish_log"; then
+              echo "ClawHub reports this version already exists or is reserved; switching to read-only polling."
+            elif grep -Eqi 'timed out|ETIMEDOUT|ECONNRESET|Network request failed|fetch failed|HTTP 429|HTTP 5[0-9][0-9]|Too Many Requests|Service Unavailable|Gateway Timeout' "$publish_json" "$publish_log"; then
+              echo "Publish outcome is uncertain after a transient error; switching to read-only polling without invoking the publish command again."
+            else
+              echo "ClawHub publish failed for a non-transient reason."
+              exit "$status"
+            fi
+            restore_latest || exit 1
+          fi
+
+          deadline=$((SECONDS + 1800))
+          while true; do
+            if exact_version_visible; then
+              restore_latest || exit 1
+              verify_remote_files
+              exit 0
+            else
+              inspect_status=$?
+              if [ "$inspect_status" -ne 10 ] && [ "$inspect_status" -ne 2 ]; then
+                echo "ClawHub exact-version lookup returned an unexpected failure status ${inspect_status}; stopping."
+                exit 1
+              fi
+              if [ "$inspect_status" -eq 2 ]; then
+                echo "ClawHub lookup timed out; retrying the read-only exact-version check."
+              fi
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              break
+            fi
+            echo "${skill_ref}@${RELEASE_VERSION} is not inspectable yet; checking again in 20 seconds."
+            sleep 20
+          done
+
+          diagnostic="dist/clawhub-scan-${RELEASE_VERSION}-diagnostic.zip"
+          if npx --yes clawhub@0.23.3 --no-input scan download "$skill_ref" \
+            --version "$RELEASE_VERSION" --kind skill --output "$diagnostic"; then
+            echo "A stored ClawHub scan report is available for diagnosis at ${diagnostic}; it does not verify the uploaded files."
+          else
+            echo "No stored scan report could be downloaded. This does not prove that ClawHub has no hidden reservation."
+          fi
+          echo "ClawHub did not expose ${RELEASE_VERSION} for exact file-hash verification within 30 minutes. Do not retry blindly; inspect or resume only after resolving its registry state."
+          exit 1
+
+      - name: Preserve failed ClawHub scan diagnostics
+        if: failure() && hashFiles('dist/clawhub-scan-*-diagnostic.zip') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: clawhub-scan-diagnostics-${{ github.run_id }}
+          path: dist/clawhub-scan-*-diagnostic.zip
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Scan the published ClawHub version
         timeout-minutes: 35 # the CLI polls the scan queue for up to 30 minutes
@@ -382,14 +866,18 @@ jobs:
         # version without an audit verdict, which is what the README badges read, so scan every release.
         shell: bash
         env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
           EXPECTED_VERSION: ${{ steps.bump.outputs.new_version }}
         run: |
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          skill_ref="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
           scan_output="$(npx --yes clawhub@0.23.3 --no-input scan \
-            --slug "${{ steps.bump.outputs.skill_name }}" \
-            --version "${{ steps.bump.outputs.new_version }}" \
+            --slug "$skill_ref" \
+            --version "$EXPECTED_VERSION" \
             --update \
             --json \
-            --output "dist/clawhub-scan-${{ steps.bump.outputs.new_version }}.zip")"
+            --output "dist/clawhub-scan-${EXPECTED_VERSION}.zip")"
           printf '%s\n' "$scan_output"
           printf '%s\n' "$scan_output" | sed -n '/^{/,$p' > dist/clawhub-scan.json
           python - <<'PY'
@@ -423,66 +911,192 @@ jobs:
           print("ClawHub exact-version audit passed and was written back")
           PY
 
+      - name: Keep ClawHub latest on the saved version through the audit
+        if: always() && steps.clawhub_context.outputs.previous_latest != ''
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
+          PREVIOUS_LATEST: ${{ steps.clawhub_context.outputs.previous_latest }}
+          RELEASE_VERSION: ${{ steps.bump.outputs.new_version }}
+        shell: bash
+        run: |
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          skill_ref="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
+          latest_version() {
+            npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --json > dist/clawhub-current-after-scan.json || return 1
+            python - dist/clawhub-current-after-scan.json <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          latest = payload.get("latestVersion") or {}
+          skill = payload.get("skill") or {}
+          print(latest.get("version") or (skill.get("tags") or {}).get("latest") or "")
+          PY
+          }
+          latest="$(latest_version)" || latest=""
+          if [ "$latest" = "$PREVIOUS_LATEST" ]; then
+            echo "ClawHub latest stayed on ${PREVIOUS_LATEST} through the audit."
+            exit 0
+          fi
+          if [ "$latest" != "$RELEASE_VERSION" ]; then
+            echo "ClawHub latest changed to ${latest:-unknown}; preserving it and reporting the change."
+            exit 1
+          fi
+          npx --yes clawhub@0.23.3 --no-input skill tag "$skill_ref" "$PREVIOUS_LATEST" --tag latest --yes || true
+          for attempt in 1 2 3 4 5; do
+            latest="$(latest_version)" || latest=""
+            if [ "$latest" = "$PREVIOUS_LATEST" ]; then
+              echo "ClawHub latest restored and verified at ${PREVIOUS_LATEST}."
+              exit 0
+            fi
+            if [ "$latest" != "$RELEASE_VERSION" ]; then
+              echo "ClawHub latest changed to ${latest:-unknown}; preserving it and reporting the change."
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "Could not keep ClawHub latest on ${PREVIOUS_LATEST}; current value: ${latest:-unknown}."
+          exit 1
+
       - name: Promote the audited ClawHub version
         env:
-          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }}
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
+          RELEASE_VERSION: ${{ steps.bump.outputs.new_version }}
+          PREVIOUS_LATEST: ${{ steps.clawhub_context.outputs.previous_latest }}
         shell: bash
-        # `skill publish` above already requests the latest tag, so this step confirms the audited
-        # version really holds it. ClawHub can answer "Version not found" for a few seconds after the
-        # audit write-back (v1.7.0 hit exactly that, with a "reset in 45s" backoff hint, while the same
-        # call succeeded for v1.6.0). Retry, and accept the tag already being correct — a transient
-        # third-party error must not strand a release whose bump commit and tag are already pushed.
         run: |
-          slug="${{ steps.bump.outputs.skill_name }}"
-          version="${{ steps.bump.outputs.new_version }}"
-          skill="$slug"
-          if [ -n "$CLAWHUB_OWNER" ]; then skill="${CLAWHUB_OWNER}/${slug}"; fi
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          skill_ref="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
+          current_json="dist/clawhub-current-after-audit.json"
 
-          published_latest() {
-            curl -fsS --max-time 30 "https://clawhub.ai/api/v1/skills/${slug}" 2>/dev/null \
-              | jq -r '((.skill // .).tags.latest) // ""' 2>/dev/null || true
+          latest_version() {
+            npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --json > "$current_json" || return 1
+            python - "$current_json" <<'PY'
+          import json, pathlib, sys
+          payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          latest = payload.get("latestVersion") or {}
+          skill = payload.get("skill") or {}
+          print(latest.get("version") or (skill.get("tags") or {}).get("latest") or "")
+          PY
           }
 
-          for attempt in 1 2 3 4 5; do
-            if npx --yes clawhub@0.23.3 --no-input skill tag "$skill" "$version" --tag latest --yes; then
-              exit 0
-            fi
-            if [ "$(published_latest)" = "$version" ]; then
-              echo "ClawHub latest already points at ${version}; treating the tag call as satisfied."
-              exit 0
-            fi
-            echo "clawhub skill tag attempt ${attempt} failed and latest is not ${version} yet; retrying."
-            sleep $((attempt * 20))
-          done
+          version_cmp() {
+            python - "$1" "$2" <<'PY'
+          import sys
+          left = tuple(int(part) for part in sys.argv[1].split("."))
+          right = tuple(int(part) for part in sys.argv[2].split("."))
+          print((left > right) - (left < right))
+          PY
+          }
 
-          echo "ClawHub latest never reached ${version}."
+          latest="$(latest_version)" || latest=""
+          if ! [[ "$latest" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Could not read a valid current ClawHub latest version."
+            exit 1
+          fi
+          if [ "$latest" = "$RELEASE_VERSION" ]; then
+            echo "ClawHub latest already points at the audited ${RELEASE_VERSION}."
+            exit 0
+          fi
+          if [ "$(version_cmp "$latest" "$RELEASE_VERSION")" -gt 0 ]; then
+            echo "ClawHub latest is newer (${latest}); preserving it instead of moving latest backward."
+            exit 0
+          fi
+          if [ "$latest" != "$PREVIOUS_LATEST" ]; then
+            echo "ClawHub latest changed from the saved baseline to ${latest}; refusing to overwrite it."
+            exit 1
+          fi
+
+          echo "Promoting the audited version once; the saved latest is ${PREVIOUS_LATEST}."
+          npx --yes clawhub@0.23.3 --no-input skill tag "$skill_ref" "$RELEASE_VERSION" --tag latest --yes || echo "Tag request did not confirm; checking latest without resubmitting."
+          for attempt in 1 2 3 4 5; do
+            latest="$(latest_version)" || latest=""
+            if [ "$latest" = "$RELEASE_VERSION" ]; then
+              echo "ClawHub latest now points at ${RELEASE_VERSION}."
+              exit 0
+            fi
+            if [ -n "$latest" ] && [[ "$latest" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              if [ "$(version_cmp "$latest" "$RELEASE_VERSION")" -gt 0 ]; then
+                echo "ClawHub latest advanced to ${latest}; preserving the newer release."
+                exit 0
+              fi
+              if [ "$latest" != "$PREVIOUS_LATEST" ]; then
+                echo "ClawHub latest changed to ${latest}; refusing to overwrite it."
+                exit 1
+              fi
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "Could not confirm promotion of the audited ClawHub version; latest was not resubmitted."
           exit 1
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+          ASSET_NAME: ${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
+          PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}
         shell: bash
         run: |
           notes_args=(--generate-notes)
-          if [ -n "${{ steps.previous_tag.outputs.previous_tag }}" ]; then
-            notes_args+=(--notes-start-tag "${{ steps.previous_tag.outputs.previous_tag }}")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            if ! [[ "$PREVIOUS_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Previous tag is not a plain vMAJOR.MINOR.PATCH tag."
+              exit 1
+            fi
+            notes_args+=(--notes-start-tag "$PREVIOUS_TAG")
           fi
 
-          gh release create "${{ steps.bump.outputs.tag }}" \
-            "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" \
-            --title "PixelLab Pip Skill ${{ steps.bump.outputs.tag }}" \
-            "${notes_args[@]}" \
-            --verify-tag
+          tag="$RELEASE_TAG"
+          asset="dist/${ASSET_NAME}"
+          release_json="dist/github-release-final.json"
+          release_error="dist/github-release-final-error.txt"
+          set +e
+          gh release view "$tag" --json isDraft,isPrerelease,assets > "$release_json" 2> "$release_error"
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            asset_present="$(python - "$release_json" "$ASSET_NAME" <<'PY'
+          import json, pathlib, sys
+          release = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          if release.get("isDraft") is True or release.get("isPrerelease") is True:
+              raise SystemExit("The existing GitHub release is a draft or prerelease; refusing to leave the asset unpublished.")
+          print("yes" if any(asset.get("name") == sys.argv[2] for asset in release.get("assets", [])) else "no")
+          PY
+          )"
+            if [ "$asset_present" = "yes" ]; then
+              mkdir -p dist/final-release-asset
+              gh release download "$tag" --pattern "$ASSET_NAME" --dir dist/final-release-asset
+              if [ "$(sha256sum "dist/final-release-asset/${ASSET_NAME}" | cut -d' ' -f1)" != "$(sha256sum "$asset" | cut -d' ' -f1)" ]; then
+                echo "Existing public GitHub asset differs from this deterministic build; refusing to overwrite it."
+                exit 1
+              fi
+              echo "Existing public GitHub asset matches this build; leaving it unchanged."
+            else
+              gh release upload "$tag" "$asset"
+            fi
+            gh release edit "$tag" --title "PixelLab Pip Skill $tag"
+          else
+            if ! grep -Eqi 'release not found|HTTP 404|Not Found' "$release_error"; then
+              cat "$release_error"
+              exit "$status"
+            fi
+            gh release create "$tag" "$asset" \
+              --title "PixelLab Pip Skill $tag" \
+              "${notes_args[@]}" \
+              --verify-tag
+          fi
 
       - name: Withdraw superseded ClawHub versions
         if: inputs.withdraw_clawhub_versions != ''
         env:
-          CLAWHUB_OWNER: ${{ vars.CLAWHUB_OWNER }}
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
           VERSIONS: ${{ inputs.withdraw_clawhub_versions }}
         shell: bash
         run: |
-          skill="${{ steps.bump.outputs.skill_name }}"
-          if [ -n "$CLAWHUB_OWNER" ]; then skill="${CLAWHUB_OWNER}/${skill}"; fi
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          skill="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
           IFS=',' read -ra versions <<< "$VERSIONS"
           for version in "${versions[@]}"; do
             version="${version//[[:space:]]/}"
@@ -505,13 +1119,30 @@ jobs:
         run: |
           ver="${{ steps.bump.outputs.new_version }}"
           gh release view "${{ steps.bump.outputs.tag }}" --json body --jq .body > notes.md
-          {
-            printf '\n---\n\n## 🔒 Security — safe to install, checked by outside services\n\n'
-            printf 'This release is independently scanned and cryptographically signed. See any of it for yourself:\n\n'
-            printf -- '- **Skill audit** — passed [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) static analysis; public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning) (a release is blocked if it goes over the risk threshold).\n'
-            printf -- '- **Independent registry audit** — [ClawHub security audit ↗](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit) (ClawScan + SkillSpector).\n'
-            printf -- '- **Malware scan** — [VirusTotal security report ↗](%s) completed with zero malicious or suspicious detections for this exact download.\n' "$VT_ANALYSIS"
-            printf -- '- **Tamper-proof build** — this zip has a cryptographic proof-of-origin; confirm nobody altered it since this repo built it: `gh attestation verify pixellab-pip-%s.zip --repo Shilo/pixellab-pip`\n' "$ver"
-            printf -- '\nFull details: https://github.com/Shilo/pixellab-pip#security\n'
-          } >> notes.md
+          python - "$VT_ANALYSIS" "$ver" <<'PY'
+          import pathlib, sys
+          path = pathlib.Path("notes.md")
+          body = path.read_text(encoding="utf-8")
+          marker = "<!-- pixellab-pip-release-security -->"
+          if marker in body:
+              body = body.split(marker, 1)[0].rstrip()
+          section = f"""
+
+          ---
+
+          ## 🔒 Security — safe to install, checked by outside services
+
+          {marker}
+
+          This release is independently scanned and cryptographically signed. See any of it for yourself:
+
+          - **Skill audit** — passed [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) static analysis; public on the [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning) (a release is blocked if it goes over the risk threshold).
+          - **Independent registry audit** — [ClawHub security audit ↗](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit) (ClawScan + SkillSpector).
+          - **Malware scan** — [VirusTotal security report ↗]({sys.argv[1]}) completed with zero malicious or suspicious detections for this exact download.
+          - **Tamper-proof build** — this zip has a cryptographic proof-of-origin; confirm nobody altered it since this repo built it: `gh attestation verify pixellab-pip-{sys.argv[2]}.zip --repo Shilo/pixellab-pip`
+
+          Full details: https://github.com/Shilo/pixellab-pip#security
+          """
+          path.write_text(f"{body.rstrip()}\n{section.strip()}\n", encoding="utf-8")
+          PY
           gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md

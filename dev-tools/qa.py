@@ -433,6 +433,46 @@ def check_workflows() -> None:
         "Promote the audited ClawHub version",
         "skill tag",
         "Append verified security summary to release notes",
+        "resume_version",
+        "resume_previous_latest",
+        '"${GITHUB_REF_NAME}" != "main"',
+        'git diff --quiet "$tag_commit" "$GITHUB_SHA" -- skills/pixellab-pip',
+        "already exists; restoring latest and verifying its stored files.",
+        'inspect "$skill_ref" --version "$RELEASE_VERSION" --json',
+        "from urllib.request import HTTPRedirectHandler, Request, build_opener",
+        'message.casefold() == "version not found"',
+        "raise SystemExit(10)",
+        "urlencode({'ownerHandle': owner})",
+        "except Exception as error:",
+        "ClawHub HTTP {status} response body could not be read",
+        'if [ "$inspect_status" -eq 10 ]; then',
+        'elif [ "$inspect_status" -eq 2 ]; then',
+        'if [ "$inspect_status" -ne 10 ] && [ "$inspect_status" -ne 2 ]; then',
+        "ClawHub exact-version lookup returned an invalid response",
+        "Initial ClawHub lookup was transient; entering read-only polling without publishing.",
+        "without invoking the publish command again",
+        "RELEASE_RESUME: ${{ steps.bump.outputs.resume }}",
+        "Resume mode found no visible exact version; trying the tagged version once, with ClawHub version uniqueness preventing replacement.",
+        "PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}",
+        "isPrerelease",
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+        "file hashes match the release tag.",
+        "Publish and verify exact ClawHub version",
+        'owner="${CLAWHUB_OWNER:-$token_owner}"',
+        '--owner "$CLAWHUB_RESOLVED_OWNER"',
+        '--slug "$skill_ref"',
+        'scan download "$skill_ref"',
+        "PREVIOUS_LATEST",
+        "restore_latest || exit 1",
+        "ClawHub latest changed",
+        "deterministic",
+        "ZIP_STORED",
+        "sha256sum",
+        "Verify any existing GitHub release asset",
+        "release.get(\"isDraft\") is True",
+        "asset_present=\"$(python - \"$release_json\"",
+        "Keep ClawHub latest on the saved version through the audit",
+        "cancel-in-progress: false",
         'PYTHONDONTWRITEBYTECODE: "1"',
         "Generated Python cache artifact found in publish tree",
     ):
@@ -446,6 +486,32 @@ def check_workflows() -> None:
         "- name: Promote the audited ClawHub version"
     ):
         raise AssertionError("release-skill.yml must promote the audited ClawHub version before GitHub release")
+    if not (
+        release_workflow.find("- name: Publish and verify exact ClawHub version")
+        < release_workflow.find("- name: Scan the published ClawHub version")
+        < release_workflow.find("- name: Keep ClawHub latest on the saved version through the audit")
+        < release_workflow.find("- name: Promote the audited ClawHub version")
+        < release_workflow.find("- name: Create GitHub Release")
+    ):
+        raise AssertionError("release-skill.yml must verify and audit the exact ClawHub version before latest promotion and GitHub release")
+    if "--clobber" in release_workflow:
+        raise AssertionError("release-skill.yml must never replace an existing public release asset")
+    if release_workflow.count("release.get(\"isDraft\") is True") != 2:
+        raise AssertionError("release-skill.yml must reject an existing draft in both asset preflight and final release checks")
+    if release_workflow.count("release.get(\"isPrerelease\") is True") != 2:
+        raise AssertionError("release-skill.yml must reject an existing prerelease in both asset preflight and final release checks")
+    if release_workflow.count('gh release view "$RELEASE_TAG" --json isDraft,isPrerelease,assets') != 1:
+        raise AssertionError("release-skill.yml must request isPrerelease during existing-release preflight")
+    if release_workflow.count('gh release view "$tag" --json isDraft,isPrerelease,assets') != 1:
+        raise AssertionError("release-skill.yml must request isPrerelease during final release checks")
+    if 'if [ "$(python - "$release_json" "$ASSET_NAME"' in release_workflow:
+        raise AssertionError("release-skill.yml must not swallow a failed draft-release check in a conditional")
+    if '"${{ steps.previous_tag.outputs.previous_tag }}"' in release_workflow:
+        raise AssertionError("release-skill.yml must pass the previous tag through an environment variable, not inline shell code")
+    if "retrying the pinned CLI once its backoff elapses" in release_workflow:
+        raise AssertionError("release-skill.yml must not resubmit after an ambiguous publish result")
+    if release_workflow.count('npx --yes clawhub@0.23.3 --no-input skill publish "skills/pixellab-pip"') != 1:
+        raise AssertionError("release-skill.yml must invoke the ClawHub publish command no more than once per run")
     if "img.shields.io/static/v1?label=VirusTotal" not in readme:
         raise AssertionError("README VirusTotal badge must report the completed direct scan")
     if "query=%24.version.security.status&label=ClawHub%20Audit" not in readme:
