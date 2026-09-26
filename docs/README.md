@@ -72,6 +72,8 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 - [PixelLab Aseprite Extension Coverage Audit](tools/aseprite-extension-coverage-audit.md) - comparison of official Aseprite editor workflows with Pip's MCP/REST/editor routing.
 - [Aseprite CLI Integration Testing](tools/aseprite-cli-integration-testing.md) - maintainer QA policy for local Aseprite CLI workflow tests.
 - [PixelLab AI Skill vs Pip Skill](tools/pixellab-ai-skill-vs-pip-skill.md) - feature comparison between Pip and the unofficial PixelLab AI Skill.
+- [PixelLab CLI vs Pip Skill](tools/pixellab-cli-vs-pip-skill.md) - comparison of the separate REST-backed CLI and its companion skills with Pip's MCP-focused routing skill.
+- [PixelKiln vs PixelLab Pip](tools/pixelkiln-vs-pip.md) - comparison of PixelKiln's manifest-driven asset pipeline with Pip's PixelLab routing skill.
 - [PixelLab 16px Chibi Character Generation Spike](pixellab/pixellab-16px-character-generation-spike.md) - smallest reliable prompt and route for a flat, low-detail 16px character with a cozy chibi read.
 - [PixelLab Pixen Full-Body Character Prompt Spike](pixellab/pixellab-pixen-character-prompt-research-spike.md) - smallest description that reliably makes Pixen produce a 64px south-facing full-body idle character at default settings.
 - [PixelLab Armless Character Prompt Research Spike](pixellab/pixellab-armless-character-prompt-research-spike.md) - whether `create_character` can produce a genuinely armless humanoid at 32px/eight directions, across long-to-minimal descriptions.
