@@ -1145,21 +1145,35 @@ jobs:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
           CLAWHUB_RESOLVED_OWNER: ${{ steps.clawhub_context.outputs.owner }}
           VERSIONS: ${{ inputs.withdraw_clawhub_versions }}
+          CURRENT_VERSION: ${{ steps.bump.outputs.new_version }}
         shell: bash
         run: |
-          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
           skill="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
+          if [[ "$VERSIONS" == *, ]]; then
+            echo "Invalid ClawHub version list: trailing comma."
+            exit 1
+          fi
           IFS=',' read -ra versions <<< "$VERSIONS"
+          valid_versions=()
+          declare -A seen_versions=()
           for version in "${versions[@]}"; do
             version="${version//[[:space:]]/}"
             if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               echo "Invalid ClawHub version to withdraw: $version"
               exit 1
             fi
-            if [ "$version" = "${{ steps.bump.outputs.new_version }}" ]; then
+            if [ "$version" = "$CURRENT_VERSION" ]; then
               echo "Refusing to withdraw the release that just passed: $version"
               exit 1
             fi
+            if [[ -z "${seen_versions[$version]+x}" ]]; then
+              seen_versions[$version]=1
+              valid_versions+=("$version")
+            fi
+          done
+
+          npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
+          for version in "${valid_versions[@]}"; do
             npx --yes clawhub@0.23.3 --no-input delete "$skill" --version "$version" --yes
           done
 

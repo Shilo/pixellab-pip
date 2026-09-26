@@ -547,6 +547,17 @@ def check_workflows() -> None:
         raise AssertionError("release-skill.yml must not resubmit after an ambiguous publish result")
     if release_workflow.count('npx --yes clawhub@0.23.3 --no-input skill publish "skills/pixellab-pip"') != 1:
         raise AssertionError("release-skill.yml must invoke the ClawHub publish command no more than once per run")
+    withdrawal_step = release_workflow.split("      - name: Withdraw superseded ClawHub versions\n", 1)[1].split(
+        "      - name: Append verified security summary to release notes\n", 1
+    )[0]
+    withdrawal_order = (
+        withdrawal_step.find("for version in \"${versions[@]}\"; do"),
+        withdrawal_step.find('npx --yes clawhub@0.23.3 --no-input login'),
+        withdrawal_step.find('for version in "${valid_versions[@]}"; do'),
+        withdrawal_step.find('npx --yes clawhub@0.23.3 --no-input delete'),
+    )
+    if min(withdrawal_order) < 0 or tuple(sorted(withdrawal_order)) != withdrawal_order:
+        raise AssertionError("release-skill.yml must validate all withdrawal versions before deleting any version")
     if "img.shields.io/static/v1?label=VirusTotal" not in readme:
         raise AssertionError("README VirusTotal badge must report the completed direct scan")
     if "query=%24.version.security.status&label=ClawHub%20Audit" not in readme:
