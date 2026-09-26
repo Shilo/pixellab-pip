@@ -4,15 +4,96 @@
 
 Skeleton v3 is PixelLab’s pose-conditioned animation workflow: give it one sprite, a keypoint skeleton for the sprite’s existing pose, and a full skeleton for each desired output frame. The REST/MCP route supports 3–15 frames up to 256×256, requires Tier 1 or higher, and is currently beta. Its useful distinction from text animation is that the motion is laid out as explicit poses instead of left entirely to an action prompt. The tradeoff is substantially more pose-authoring work, plus the model still redraws pixel art and needs output review. For an existing managed character, `animate_character(mode="skeleton-v3", template_animation_id=...)` applies a named animation template with the Skeleton v3 model; it is a different workflow from supplying raw per-frame keypoints.
 
-**Practical choice:** use the regular creation and editing tools to make the sprite, and text animation for a quick motion draft. Use raw Skeleton v3 when particular limb positions or action beats matter enough to author every pose; it guides generated frames but does not lock the original pixels in place. For a stored character and a named motion, managed Skeleton v3 reuses the template with a different animation model. PixelLab claims steadier identity and colors than managed `mode="template"`, at 2–4 rather than 1 generation per direction; this campaign’s matched sample found no decisive visual improvement, so treat that as a possible benefit rather than a guarantee. [MCP docs](https://api.pixellab.ai/mcp/docs)
+**Practical choice:** use text-v3 as the first try for ordinary walks and jumps. In the matched samples, PixMiniMax made punches and jumps more visually forceful, but added impact effects and sometimes turned the character away from the requested facing. Use raw Skeleton v3 when caller-authored pose order matters enough to justify writing a full 18-joint sequence and paying more; it guides the pose but does not lock the original pixels in place. For a stored character and a named motion, managed Skeleton v3 reuses a template with a different animation model. PixelLab claims steadier identity and colors than managed `mode="template"`, at 2–4 rather than 1 generation per direction; the earlier matched managed sample found no decisive visual improvement, so treat that as a possible benefit rather than a guarantee. [MCP docs](https://api.pixellab.ai/mcp/docs)
 
 The public docs call REST `/animate-with-skeleton` the older three-frame engine, but the current OpenAPI does **not** mark that endpoint deprecated or removed. “Standard skeleton” can also mean managed `mode="template"`, which is a separate managed-character option. This spike keeps those terms distinct and avoids treating either legacy route as unavailable.
 
-The live campaign found that the initial hand-placed starting pose differed from REST `estimate-skeleton` by a median 10.5% of the normalized canvas. After repeating the 3-, 8-, and 15-frame walk with the estimate as the exact starting pose, the sampled output still showed only small visible motion for this sprite and pose sequence. That is a fixture-specific observation, not a general claim about Skeleton v3 quality. Text animation showed a clearer raised-arm pose in the sampled frames, with less pose-authoring work. Matched managed template and Skeleton v3 runs completed at eight frames; the Skeleton v3 REST run cost 3 generations but showed no decisive visual advantage in sampled frames. Recorded response-level usage totaled 37.1 generations; one of the two URL/base64 parity calls has no recorded usage. The campaign stayed below its 2,000-generation cap.
+The expanded raw-image comparison on 2026-09-26 covered 18 matched cases: two 64×64 sprites, four actions, and three seeds, with 54 accepted jobs across raw Skeleton v3, text-v3, and PixMiniMax. All jobs completed with eight generated frames and transparent output. The estimated spend was 90 generations for the animation jobs plus 0.3 for three skeleton estimates; two text-v3 submissions omitted a response cost field, so their documented one-generation rate is included in that estimate. Text-v3 was clearest for walks and jumps in this sample; PixMiniMax was clearest for punches and also produced strong jumps, but often added unrequested hit effects; raw Skeleton v3 exposed the authored pose progression but did not consistently produce a readable stride or jump. These are single-reviewer observations from a narrow fixture set, not a general model benchmark.
+
+The earlier 2026-09-25 campaign found that the initial hand-placed starting pose differed from REST `estimate-skeleton` by a median 10.5% of the normalized canvas. After repeating the 3-, 8-, and 15-frame walk with the estimate as the exact starting pose, the sampled output still showed only small visible motion for that sprite and pose sequence. Matched managed template and Skeleton v3 runs completed at eight frames; the Skeleton v3 REST run cost 3 generations but showed no decisive visual advantage in sampled frames. Recorded response-level usage totaled 37.1 generations; one of the two URL/base64 parity calls has no recorded usage. That separate campaign stayed below its 2,000-generation cap.
+
+## Expanded Comparative Test Plan (2026-09-26)
+
+The previous comparison sampled one text-animation output against one corrected raw Skeleton v3 sequence. This follow-up is designed to distinguish model behavior from a lucky or unlucky seed and to cover different kinds of motion.
+
+### Questions
+
+1. Do caller-authored skeletons make intended limb placement and action beats more readable than text prompts on matched sprites?
+2. Does the answer change for cyclic, subtle, and large-amplitude actions?
+3. How do identity/palette retention, frame-to-frame coherence, transparency, and loop closure compare across repeated outputs?
+4. When is the added keypoint-authoring work and generation cost worthwhile compared with text animation?
+
+### Protocol
+
+- **Routes:** raw MCP `animate_with_skeleton_v3`; text-v3 MCP `animate_image`; and PixMiniMax MCP `animate_image_pixminimax`. Do not mix managed `animate_character` results into this raw-image comparison: managed Skeleton v3 consumes named template poses, while managed v3 consumes a text action.
+- **Fixtures:** two existing 64×64, south-facing, low-top-down humanoid sprites with different silhouettes and palettes: a red-haired figure in a dark outfit and a colorful chibi girl. Use the same source PNG, view, direction, and background setting for all three routes within each matched case.
+- **Actions:** walk cycle, breathing idle, cross-body punch, and jump/land on the first fixture; walk cycle and cross-body punch on the second. These cover periodic, subtle, contact/action-beat, and large-displacement movement without testing a rig that the published 18-joint schema does not support.
+- **Repetitions:** three fixed seed values per fixture/action case, shared across the routes. Generate eight frames per case. Use the same concise motion intent for each text route; for raw Skeleton v3, keep the appearance description fixed and supply eight complete 18-joint poses plus the matching starting pose.
+- **Review:** inspect every generated frame at native 64×64 pixels. Score each animation’s action readability from 1–5 (1 unclear, 3 recognizable with cleanup, 5 immediately clear); summarize median and range by action and route. Record perceived pose-sequence correspondence, identity/palette, frame coherence, transparency/edges, and loop closure descriptively. Do not treat visual review as pixel-level joint-coordinate measurement. Record response cost, generated frame count, job outcome, and required input structure; this compares setup burden, not timed authoring speed. This is a single-reviewer qualitative evaluation, not a blinded or statistically powered benchmark.
+
+### Inputs For Reproduction
+
+The text-v3 and PixMiniMax routes received the same action string for each matched case, with `frame_count=8`, `no_background=true`, and seeds `101`, `202`, and `303`:
+
+| Action | Prompt |
+|---|---|
+| Walk | `Walk in place through one complete eight-frame cycle, with alternating footfalls and opposite arm swings. Keep facing south.` |
+| Idle | `Breathe quietly in place, with a subtle chest rise and fall and a slight head bob. Keep facing south.` |
+| Punch | `Perform one fast cross-body punch with a clear wind-up, impact, and recovery. Keep facing south.` |
+| Jump | `Crouch, jump vertically with arms raised and legs tucked at the apex, then land and settle. Keep facing south.` |
+
+Raw Skeleton v3 used the short action label (`walk`, `idle`, `punch`, or `jump`), `direction="south"`, `view="low top-down"`, and `template_id="mannequin"`. Its fixed appearance descriptions were `humanoid with spiky red hair, brown eyes, and a dark outfit` for fixture A and `chibi girl with purple hair and a colorful outfit` for fixture B. The source pose came from REST `estimate-skeleton`; each eight-frame action sequence used all 18 labels and manually authored normalized-coordinate offsets from that starting pose. The same per-fixture action sequence was reused across its three seeds. The two text routes did not receive a separate effect-suppression instruction or prompt enhancement.
+
+### Budget And Stop Rules
+
+The 18 matched fixture/action/seed cases are expected to use 54 generations for raw Skeleton v3 (3 per eight-frame job) and 36 total for the two text routes (1 per eight-frame job), for a planned 90 generations. Allow up to 10 more for an optional managed-route spot check only if the raw comparison leaves a question unresolved, plus 30 for any explicitly justified retry. The campaign ceiling is **150 generations**, well below the requested approximate 1,000-generation maximum. Count reported `usage.generations`; when a route does not return usage, count its published worst-case estimate against the ceiling. Do not submit further jobs once projected spend would exceed 150, and do not retry a failed/ambiguous job without checking its status and remaining budget first.
+
+### Planned Reporting
+
+Keep the observations fixture- and action-specific. Report per-route usage and completion, compare action-readability medians and ranges across repeated cases, describe the other review dimensions qualitatively, and separate live observations from conclusions inferred from route contracts. Do not claim that shared seed numbers make the different models deterministic or that this small fixture set predicts all art styles. The completed results follow.
+
+## Expanded Comparative Results (2026-09-26)
+
+### Completion and spend
+
+- **Matrix:** 18 matched cases × 3 routes = 54 accepted jobs. Every case requested eight generated frames.
+- **Completed jobs:** raw Skeleton v3 18/18, text-v3 18/18, PixMiniMax 18/18. The raw route returned eight images; both text routes returned nine images as documented (the unchanged source plus eight generated frames). All completed responses reported transparent output.
+- **Generation estimate:** raw Skeleton v3 reported 54 generations total (18 × 3); PixMiniMax reported 18 (18 × 1); text-v3 reported 16, while two accepted text-v3 jobs omitted the response cost field. The published rate for each missing 64×64 eight-frame text job is 1 generation, so the animation-job estimate is **90 generations**. Three REST `estimate-skeleton` calls reported 0.1 generation each, for **90.3 generations total**. No account-specific dollar conversion is inferred.
+- **Rejected submissions:** two text-route attempts returned a 20/20 concurrency-limit error before a job ID was issued. They were retried once after slots freed; the errors had no accepted job or cost. There were no failed accepted jobs and no charged retries.
+- **Latency:** under the campaign’s 20-job peak concurrency, PixelLab’s `wait_for_jobs` reported 997–1,814 seconds for several completed jobs (about 17–30 minutes), longer than the published route estimates. The load and mixed routes were not controlled well enough to rank engines by latency.
+- **Review material:** all 54 eight-frame sequences were inspected in nearest-neighbor contact sheets at native pixel scale. These temporary sheets are not committed; the findings below are the retained research record.
+
+### Action readability
+
+The 1–5 score is a single-reviewer ordinal judgment for how clearly the requested action reads across the generated sequence. Values are median (minimum–maximum) across the listed matched cases; they are not statistical confidence intervals.
+
+| Action | Cases | Raw Skeleton v3 | Text-v3 | PixMiniMax |
+|---|---:|---:|---:|---:|
+| Walk | 6 | 3 (2–4) | 4 (3–4) | 2 (2–3) |
+| Breathing idle | 3 | 2 (2–2) | 3 (3–3) | 1 (1–2) |
+| Cross-body punch | 6 | 3 (3–4) | 2 (2–3) | 4 (4–4) |
+| Jump and land | 3 | 3 (2–3) | 5 (4–5) | 4 (4–5) |
+
+The action-specific pattern matters more than a single route-wide average: the routes traded strengths rather than producing one overall winner.
+
+### Visual findings and practical fit
+
+- **Raw Skeleton v3:** it exposed the caller-authored order of limb poses, and the punch sequence was more readable than text-v3 in several cases. Walk and jump motion was often compressed, delayed, or uneven, especially on the red-haired fixture; the colorful chibi fixture generally showed larger steps. A submitted skeleton is therefore a useful choreography input, not a guarantee that the rendered pixels will land exactly on every point. One eight-frame call required 18 starting-pose joints plus 8 × 18 target-pose joints (162 joint entries total), versus one action sentence for either text route. Its reported 3-generation cost was triple each text route’s documented 1-generation cost at this size.
+- **Text-v3:** it gave the clearest walks and jumps with the least setup. The punch wording was not reliable in these samples: several outputs looked like a guard or crossed-arm stance rather than a clear wind-up, impact, and recovery. The idle was subtle and mostly appropriate, though face and eyelid changes varied between seeds.
+- **PixMiniMax:** it made the clearest punches and strong jumps, but punch sequences frequently added bright impact/projectile effects and turned the sprite toward a side view. Those can be desirable for a hit effect but need to be explicitly accepted or cleaned up. Walks were often nearly static, and idles frequently showed little visible movement. The route’s extra motion amplitude did not make it the best general-purpose choice in this matrix.
+- **Identity and output integrity:** all three routes kept each source character recognizable and retained its main palette. Facial expression, limb placement, and apparent facing varied; PixMiniMax punch effects were the largest additions outside the source design. Every completed job reported transparent output. No pixel-level alpha-mask or edge-quality measurement was made, and transparency success does not imply a finished loop.
+- **Timing and closure:** generated motion was coherent enough to read as one sequence in most samples, but pose rhythm and frame-to-frame amplitude varied by seed. A number of walk and action sequences did not end exactly where they began. Check the first-to-last transition before treating any result as a seamless loop.
+
+### Decision guidance from this sample
+
+- Start with text-v3 for quick walks, jumps, and ordinary motion; it was the clearest and least labor-intensive path for those actions here.
+- Try PixMiniMax for forceful hits or jumps when dynamic motion is desired, then review facing, extra impact graphics, and loop closure.
+- Use raw Skeleton v3 when a specific pose sequence is part of the requirement and someone can author and revise the joints. Budget 3 generations per eight-frame 64×64 output and plan for visual cleanup.
+- Do not choose among these routes from this sample alone for other styles, camera angles, resolutions, non-humanoids, or more elaborate motions. This campaign used two south-facing low-top-down humanoids, the four fixed prompts above, three shared seed numbers, and a single reviewer. The same raw pose sequences were reused across seeds; authoring time was not measured. The equal seed numbers do not control the different model routes’ random processes.
 
 ## Scope And Evidence Labels
 
-Research checked on 2026-09-25 against PixelLab’s refreshed REST OpenAPI, MCP docs, exposed live MCP tool metadata, current API pricing page, product guides, the supplied Version 0.4.125 announcement, and the requested video. The local documentation-watch snapshot is `.local/pixellab-doc-watch/snapshots/20260925T145051Z/`; its report says all seven sources fetched, REST OpenAPI and REST index were unchanged, and MCP and website source bytes changed without a normalized-content change.
+Research checked on 2026-09-25 against PixelLab’s refreshed REST OpenAPI, MCP docs, exposed live MCP tool metadata, current API pricing page, product guides, the supplied Version 0.4.125 announcement, and the requested video. The comparative live campaign ran on 2026-09-26. The local documentation-watch snapshot is `.local/pixellab-doc-watch/snapshots/20260925T145051Z/`; its report says all seven sources fetched, REST OpenAPI and REST index were unchanged, and MCP and website source bytes changed without a normalized-content change.
 
 - **Contract fact** means a current REST schema or official MCP tool description says it.
 - **Product-guide fact** means it appears in PixelLab’s product documentation; some animation guides describe the earlier editor workflow and are not Skeleton v3 API specifications.
@@ -20,7 +101,7 @@ Research checked on 2026-09-25 against PixelLab’s refreshed REST OpenAPI, MCP 
 - **Inference** means a practical conclusion drawn from those facts; it is labeled as such.
 - **Live observation** means a result from this campaign’s submitted PixelLab jobs. Visual comparisons are qualitative samples unless stated otherwise.
 
-The campaign stayed below its 2,000-generation ceiling. MCP raw-animation and REST calls that returned `usage.generations` are recorded separately from managed-animation pricing estimates; PixelLab’s managed `animate_character` responses did not return per-job generation usage. The video transcript is YouTube’s auto-generated English transcript, not a human-verified transcript. The summary below paraphrases it and links to timestamps rather than reproducing the transcript.
+The earlier 2026-09-25 campaign stayed below its 2,000-generation ceiling. The expanded 2026-09-26 campaign has its separate job and estimator accounting above. MCP raw-animation and REST calls that returned `usage.generations` are recorded separately from managed-animation pricing estimates; PixelLab’s managed `animate_character` responses did not return per-job generation usage. The video transcript is YouTube’s auto-generated English transcript, not a human-verified transcript. The summary below paraphrases it and links to timestamps rather than reproducing the transcript.
 
 ## Controlled Live Tests (2026-09-25)
 
