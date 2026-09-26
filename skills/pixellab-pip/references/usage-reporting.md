@@ -56,7 +56,7 @@ Write a manifest for every live generation flow. Record per call or per result i
 
 - `job_id` / `background_job_id`, `asset_id`, and route-specific result/child IDs when present — enough to resume, inspect, or reproduce later.
 - `seed`: the seed sent, or the resolved seed PixelLab returned. Any async v2 job you already poll may expose it at `last_response.seed` on `GET /background-jobs/{job_id}` — read it there and store it when present (confirmed on `generate-image-v2` and `animate-with-text-v3`; read rather than assume it for PixMiniMax because the field is not declared in OpenAPI). The sync `create-image-*` routes and async `create-image-pixflux-background` return none. Record `omitted` only when none was sent and none came back; never back-fill a value that was not sent or returned.
-- Record PixelLab's exact, non-null `usage.generations` and/or `usage.usd` values in that call's `reported_usage` object under the same unit names, once per paid call, not per result item. Omit absent or null units and the object if empty; preserve `0`. Keep it out of blueprints, do not convert units, and do not treat it as authority for extra paid calls or budget changes.
+- Record each paid call's exact `usage.generations` and/or `usage.usd` values in a `reported_usage` object under those unit names, once per call, not per result item. Omit absent or null units and an empty object; preserve numeric `0`.
 
 ## Pending Jobs
 
