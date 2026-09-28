@@ -14,6 +14,34 @@ Companions:
 
 ## Verdict
 
+### At a glance
+
+Across 33 inline-negative treatment calls—16 concise exclusions (`C1`), 11 long lists
+(`L1`), and 6 forbidden-noun probes (`I1`)—the blinded call-level classifications were:
+
+| Outcome | Calls | Share |
+|---|---:|---:|
+| Helpful | 3 | 9.1% |
+| Worse | 8 | 24.2% |
+| No observed effect | 19 | 57.6% |
+| Inconclusive | 3 | 9.1% |
+
+For concise exclusions alone, 3/16 calls helped, 2/16 worsened, 10/16 had no observed
+effect, and 1/16 was inconclusive. All three helpful calls were on Pro; both concise-call
+regressions were on Pixen. Pro's pseudo-text failures fell from 7/8 baseline candidates to
+1/8 with concise exclusions across two paid calls. On Pixen, `No red balloon.` produced a
+red balloon in all four registered seeds and the exact repeat, while the neutral and
+matched-negative controls produced none.
+
+These are descriptive shares of this small, mixed task set, not probabilities for arbitrary
+prompts. “No observed effect” is not a formal equivalence finding; Pro siblings are counted
+within their paid call, and independent human visual validation is still pending.
+
+**Practical result:** concise inline exclusions can help on a specific Pro pseudo-text
+failure, but there is no broad benefit; most calls showed no change, and naming a forbidden
+object can backfire on Pixen. Use exclusions only for a specific, testable issue, and prefer
+describing the desired visible state when an absent object might become salient.
+
 Neither blanket claim survived current-model testing:
 
 - Negative prompting is **not generally bad**. On Create Image Pro/v2, concise inline
