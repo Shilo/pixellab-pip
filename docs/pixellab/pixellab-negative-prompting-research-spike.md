@@ -17,16 +17,22 @@ Pro/v2 is governed by the new research and plan in
 `pixellab-inline-negative-prompting-best-practices.md` and
 `../plans/pixellab-inline-negative-prompting-current-model-test-plan.md`.
 
-**Inline results through 2026-09-29:** the earlier 76-call study found one narrow positive
-case: on Create Image Pro/v2, concise exclusions reduced pseudo-text failures from 7/8 to
-1/8 candidates across two paid blocks. Pixen showed the opposite risk: `No red balloon.`
+**Inline results through 2026-09-29:** an earlier 16-call Pro calibration reduced
+pseudo-text failures from 7/8 to 1/8 candidates, prompting a focused 96-call follow-up.
+In that follow-up, negative wording beat a vague baseline on pseudo-text and some view
+requests, but a matched positive-only rewrite reached the same 0/12 failure rate on both
+tasks. Across 66 negative-vs-positive-only call pairs, none improved, six worsened, 59 tied,
+and one was unclear. This does not establish an incremental negative-specific benefit or
+reliable negative-prompt handling on Pro. Pixen showed the opposite risk: `No red balloon.`
 produced a balloon in all four registered seeds and an exact repeat; neutral and matched
-negative controls produced none. The completed follow-up covered PixMiniMax and all five
-Pro Flash operations with 246 REST calls and 12 MCP parity calls. None of its 54
-negative-involving contrasts met the benefit, harm, or equivalence threshold; all remain
-inconclusive. PixMiniMax's no-sparks clause failed like baseline in 3/3 clips, and its
-enhancer removed the exclusions from the returned prompt in 3/3 cases. One Pro Flash edit
-comparison showed a small adverse direction. See
+negative controls produced none. In the Pro follow-up absent-object sentinel, direct
+negative, baseline, and positive-empty-state arms produced no red balloon in 16 candidates;
+the positive capability control produced red balloons in 15/16, with one color-unclear.
+The new-tool study covered PixMiniMax and all five Pro Flash operations with 246 REST calls
+and 12 MCP parity calls. None of its 54 negative-involving contrasts met the benefit, harm,
+or equivalence threshold; all remain inconclusive. PixMiniMax's no-sparks clause failed like
+baseline in 3/3 cases, and its enhancer removed exclusions from the returned prompt in 3/3
+cases. One Pro Flash edit comparison showed a small adverse direction. See
 `pixellab-inline-negative-prompting-current-model-results.md` and
 `pixellab-inline-negative-prompting-new-tool-results.md`.
 
@@ -42,15 +48,15 @@ The defensible conclusion is narrower:
    Pixen, Create Image Pro, PixMiniMax, all five Pro Flash operations, modern v3 animation,
    and current public MCP tools do not expose a dedicated negative field.
 2. Inline exclusion wording is a different intervention from a separate negative field.
-   The only clear positive inline result in the tested routes is task-specific pseudo-text
-   cleanup on Create Image Pro/v2. Pixen's absent-object sentinel backfired, while the new
+   Pro improved on some tasks versus an underspecified baseline, but positive-only wording
+   matched or beat it; Pixen's absent-object sentinel backfired, while the new
    PixMiniMax/Pro Flash study was underpowered to classify effects reliably.
 3. Historical outputs cannot establish causality. Later controlled work now includes both
    a 106-call legacy dedicated-field study and inline-description studies on older and new
    routes; each finding remains scoped to its route, tested task, and sample.
 4. The strongest current engineering default is positive structural wording plus real
-   route controls. A short targeted exclusion can be a probabilistic guardrail, but it is
-   not enforcement and should not be used to rescue a route-level failure.
+   route controls. An exclusion is not enforcement and should not be used to rescue a
+   route-level failure.
 5. The question must be answered per endpoint/model stack, surface, service build, and use
    case. Pooling PixFlux, BitForge, Pixen, Pro, inpaint, and animation into one “PixelLab
    negative prompting” verdict would hide materially different schemas, model priors,
@@ -62,12 +68,13 @@ The defensible conclusion is narrower:
    the tested task. See `pixellab-negative-prompting-confirmation-results.md`.
 
 The evidence does not support a blanket “negatives always hurt” or “negatives are harmless”
-rule. Do not add negative boilerplate by default. If the question is practical positive
-benefit, Create Image Pro/v2 has the strongest route-specific evidence for a concise
-pseudo-text exclusion. The Pixen test shows that naming an absent object can backfire. For
-PixMiniMax and Pro Flash, no reliable benefit is established; the recorded classifications
-are inconclusive, with a prompt-enhancement preservation risk on PixMiniMax. A compact
-route-by-route summary is in
+rule. Do not add negative boilerplate by default. Create Image Pro/v2 is the only tested
+route where negative wording repeatedly beat a vague baseline on pseudo-text, but a
+positive-only rewrite matched or beat every negative arm in the focused comparison. Treat
+that as a prompt-clarity result, not evidence that negatives add value. The Pixen test shows
+that naming an absent object can backfire. For PixMiniMax and Pro Flash, no reliable benefit
+is established; the recorded classifications are inconclusive, with a prompt-enhancement
+preservation risk on PixMiniMax. A compact route-by-route summary is in
 `pixellab-inline-negative-prompting-best-practices.md`; full new-tool methods and results
 are in `pixellab-inline-negative-prompting-new-tool-results.md`. The new-tool visual review
 had one AI reviewer rather than the planned independent dual review, so treat it as
@@ -509,8 +516,10 @@ report `inconclusive` if the maximum sample remains insufficient.
 ### Completed inline studies on Pixen and Create Image Pro
 
 The planned inline-image phase was executed on 2026-08-08. Its result is no longer pending:
-Create Image Pro/v2 showed a targeted pseudo-text improvement, while Pixen's forbidden
-red-balloon sentinel backfired. See `pixellab-inline-negative-prompting-current-model-results.md`.
+the initial Pro calibration showed a targeted pseudo-text improvement, while Pixen's
+forbidden red-balloon sentinel backfired. A separate 96-call Pro follow-up later found no
+incremental advantage over positive-only wording. See
+`pixellab-inline-negative-prompting-current-model-results.md`.
 
 ### Completed new-tool study and routes still outside scope
 

@@ -1,5 +1,56 @@
 # PixelLab Inline Negative Prompting — Current-Model Results
 
+## Focused Create Image Pro/v2 follow-up — 2026-09-29
+
+**Practical result:** Create Image Pro/v2 followed inline exclusions better than a vague
+baseline on pseudo-text and some view requests, but a positive-only rewrite matched or beat
+the negative wording. This run found no incremental negative-specific benefit and does not
+justify recommending negative prompts as a Pro capability. Describe the wanted result
+clearly first; test a short exclusion only for a repeatable failure.
+
+The study used PixelLab REST v2 `POST /v2/generate-image-v2` with inline wording in
+`description`; it did not use a separate negative-prompt property. See the
+[PixelLab REST v2 docs](https://api.pixellab.ai/v2/docs) for the live route contract.
+The randomized matched-seed run completed 96 calls, four candidates per call, and 1,920
+generations (80 of the 2,000-generation cap remained). TXT, CNT, and VIEW had three matched
+blocks per wording arm; the absent-object sentinel had four. A single blinded AI reviewer
+scored 384 outputs using opaque IDs. Candidates from the same call are siblings, so the
+paid call is the comparison unit.
+
+### Pro-only outcome table
+
+Each result cell is target failures/candidates. For treatment cells, the four numbers in
+parentheses are matched call blocks with fewer/same/more failures/unclear relative to B0.
+There were four candidates in each call; the core task denominators are 12 candidates.
+
+| Target (three matched blocks) | B0 baseline | N0 `No…` | W0 `without…` | A0 `avoid…` | E0 `exclude…` | L1 long list | P1 positive only | C1 positive + negative |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| No pseudo-text | 8/12 | 1/12 (2/1/0/0) | 0/12 (2/1/0/0) | 1/12 (2/0/1/0) | 0/12 (2/1/0/0) | 0/12 (2/1/0/0) | 0/12 (2/1/0/0) | 0/12 (2/1/0/0) |
+| Exactly two sword blades | 0/12 | 0/12 (0/3/0/0) | 0/12 (0/3/0/0) | 0/12 (0/3/0/0) | 0/12 (0/3/0/0) | 0/12 (0/3/0/0) | 0/12 (0/3/0/0) | 0/12 (0/3/0/0) |
+| Cottage front view | 4/12 (+1 unclear) | 0/12 (2/1/0/0) | 1/12 (+1 unclear; 2/0/0/1) | 1/12 (2/0/1/0) | 1/12 (2/0/1/0) | 0/12 (2/1/0/0) | 0/12 (2/1/0/0) | 1/12 (2/0/1/0) |
+
+For the absent-red-balloon sentinel, the direct inline exclusion (`I1`), `without` wording
+(`W1`), matched unrelated negative (`Q1`), baseline (`B0`), and positive empty-state rewrite
+(`P1`) all produced 0 red balloons in 16 candidates across four calls. The positive
+capability control (`Pcap`) produced 15 red balloons in 16 candidates; the remaining balloon
+was color-unclear. The negative clauses therefore did not induce the named object in this
+sample, and the capability control shows the route could draw it.
+
+Across 66 negative-involving call comparisons against matched baselines, 24 (36.4%) had
+fewer failures, 4 (6.1%) had more, 37 (56.1%) tied, and 1 (1.5%) was unclear. Against the
+matched positive-only rewrites, the same 66 comparisons were 0 (0%) better, 6 (9.1%) worse,
+59 (89.4%) tied, and 1 (1.5%) unclear. These are descriptive directions in this sample,
+not success probabilities; ties do not establish equivalence. The positive-only rewrite
+reached the same 0/12 pseudo-text result and 0/12 view result as the best negative arms.
+
+**Conclusion:** Pro can respond to inline negative wording, but this follow-up found no
+reliable advantage from including it over clearly describing the desired image. Baseline
+improvement alone does not isolate a negative effect: positive-only wording performed as
+well or better. This is exploratory evidence because each core task had only three matched
+blocks and visual scores came from one reviewer. The earlier two-block Pro result below
+was the reason for this expanded follow-up; its tentative “try an exclusion” guidance is
+superseded by this comparison.
+
 ## New-tool results — 2026-09-29
 
 **Practical answer: inline negative wording has no demonstrated general benefit on
@@ -44,6 +95,9 @@ The model-by-model capability table, including earlier Pixen and Create Image Pr
 
 ## Historical prior study — 2026-08-08
 
+This section records the earlier study as it was measured. Its tentative Pro prompting
+recommendation was superseded by the focused follow-up above.
+
 Executed: 2026-08-08.
 
 Status: Stage A generation complete; 76 paid REST calls, 124 candidates, and blinded
@@ -81,16 +135,17 @@ These are descriptive shares of this small, mixed task set, not probabilities fo
 prompts. “No observed effect” is not a formal equivalence finding; Pro siblings are counted
 within their paid call, and independent human visual validation is still pending.
 
-**Practical result:** concise inline exclusions can help on a specific Pro pseudo-text
-failure, but there is no broad benefit; most calls showed no change, and naming a forbidden
-object can backfire on Pixen. Use exclusions only for a specific, testable issue, and prefer
-describing the desired visible state when an absent object might become salient.
+**Practical result:** concise inline exclusions reduced Pro pseudo-text failures in this
+historical two-block sample, but the focused follow-up above found that a positive-only
+rewrite matched the negative arms. The earlier baseline improvement therefore does not
+establish a negative-specific benefit. Naming an absent object can backfire on Pixen. State
+the desired result first and test a targeted exclusion only for a repeatable failure.
 
 Neither blanket claim survived current-model testing:
 
 - Negative prompting is **not generally bad**. On Create Image Pro/v2, concise inline
-  exclusions reduced pseudo-text failures from 7/8 baseline candidates to 1/8 across two
-  independent paid call blocks.
+  exclusions reduced pseudo-text failures from 7/8 baseline candidates to 1/8 in the
+  initial study, but the follow-up found no benefit over positive-only wording.
 - Negative prompting is **not harmless or reliably beneficial**. On Pixen/v3/new, `No
   red balloon.` generated a visible red balloon in 4/4 registered seeds and again in the
   exact repeat, while 0/4 neutral baselines and 0/4 matched `No black cat.` controls
@@ -102,10 +157,9 @@ Neither blanket claim survived current-model testing:
   bad. It fixed Pixen projection in all 3 seeds where baseline, concise, and long-negative
   arms all failed.
 
-The operational answer is conditional: use a short, targeted inline exclusion when the
-selected route and failure mode have evidence it can help; describe the desired visible
-state when naming an otherwise absent object risks introducing it. Do not attach broad
-negative boilerplate automatically.
+The operational answer is conditional: describe the desired visible state first, then test
+a short, targeted inline exclusion only when a repeatable failure remains. Do not attach
+broad negative boilerplate automatically.
 
 ## Execution And Cost
 
@@ -192,8 +246,9 @@ require a second preregistered noun and context.
 ## What Changes In Practice
 
 1. Inline exclusions are legitimate negative prompting even without a dedicated field.
-2. On Pro, concise task-specific exclusions are worth trying for visible pseudo-text; the
-   current count evidence is promising but small.
+2. The initial Pro calibration suggested trying a concise pseudo-text exclusion. The
+   follow-up above found that positive-only wording matched it, so no negative-specific
+   advantage is established.
 3. On Pixen, do not name an otherwise absent object solely to prohibit it. Describe the
    intended empty/replacement state instead.
 4. On Pixen projection/view problems, use positive structural wording or a route/control

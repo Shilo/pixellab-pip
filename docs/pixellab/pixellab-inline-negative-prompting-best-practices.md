@@ -132,7 +132,7 @@ reliably honors the exclusion. Current evidence is route- and task-specific:
 
 | Route or model family | Inline wording accepted | Dedicated negative field | Measured behavior | Practical conclusion |
 |---|---|---|---|---|
-| Create Image Pro/v2 | Yes, in the main description | No | Pseudo-text failures fell from 7/8 baseline candidates to 1/8 with a concise exclusion across two paid blocks. | The only tested route with a specific positive use case; try a short exclusion for pseudo-text, then inspect. |
+| Create Image Pro/v2 | Yes, in the main description | No | In a 96-call follow-up, pseudo-text failures were 8/12 at baseline and 0–1/12 across negative arms; a positive-only rewrite also reached 0/12. Across 66 negative-vs-positive-only call pairs, 0 improved, 6 worsened, 59 tied, and 1 was unclear. | Pro followed inline negatives better than a vague baseline on some tasks, but no incremental benefit over clear positive wording was demonstrated. Describe the desired result first; inspect any targeted exclusion. See the [focused Pro results](pixellab-inline-negative-prompting-current-model-results.md). |
 | Pixen/v3/new | Yes, in the main description | No | `No red balloon` produced a balloon in 4/4 tested seeds and the exact repeat; neutral and matched `No black cat` controls produced none. Positive front-elevation wording fixed a separate view failure. | It responds to wording but can backfire; don't name absent objects when positive structure can specify the scene. |
 | PixMiniMax | Yes, as a motion-only description | No | The no-sparks clause failed in 3/3 clips, like baseline. Prompt enhancement removed the exclusions from its returned text in 3/3 negative cases. | No benefit demonstrated. Disable enhancement when a constraint must survive, or inspect the expanded text. |
 | Pro Flash: image, character, object, edit, and inpaint | Yes, through each operation's description | No | No validated benefit in the small new-tool study; its registered contrasts remain inconclusive. One edit task showed a 1/3 adverse paired direction and two ties. | Not established as a reliable negative-prompt route; prefer positive construction and verify the result. |
@@ -145,8 +145,10 @@ for PixMiniMax and Pro Flash; all 54 are classified as inconclusive, not as no-e
 
 - Start with a clear subject, context, composition, and desired visible replacement.
 - Keep negative constraints specific to a visually scoreable failure.
-- Treat concise exclusions as route-specific experiments, not a global default; the
-  clearest positive evidence is limited to pseudo-text removal on Create Image Pro/v2.
+- Treat concise exclusions as route-specific experiments, not a global default. The Pro
+  follow-up found baseline improvement on pseudo-text and view tasks, but matched
+  positive-only wording performed as well or better; no incremental negative benefit was
+  established.
 - Do not mix a literal positive requirement with its prohibition.
 - Do not assume `no`, `without`, `avoid`, `exclude`, and a noun list are equivalent.
 - Treat long generic defect lists as a separate intervention, not an automatic quality
