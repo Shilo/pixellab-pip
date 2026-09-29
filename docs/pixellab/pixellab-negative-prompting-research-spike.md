@@ -1,6 +1,6 @@
 # PixelLab Negative Prompting Research Spike
 
-Last reviewed: 2026-08-08.
+Last reviewed: 2026-09-29.
 
 Purpose: determine what the repository, current public PixelLab documentation, and the
 local generation archive actually establish about negative prompting. This is a research
@@ -17,13 +17,18 @@ Pro/v2 is governed by the new research and plan in
 `pixellab-inline-negative-prompting-best-practices.md` and
 `../plans/pixellab-inline-negative-prompting-current-model-test-plan.md`.
 
-**Current-model result:** the 76-call inline study is now complete. Pro concise exclusions
-reduced pseudo-text failure from 7/8 to 1/8 candidates across two paid call blocks. Pixen
-showed the opposite risk in a direct induction sentinel: `No red balloon.` produced a red
-balloon in all four seeds and the exact repeat, while neutral and matched-negative
-controls produced none. Pixen view negatives were no-op; positive front-elevation wording
-worked in all three seeds. See
-`pixellab-inline-negative-prompting-current-model-results.md`.
+**Inline results through 2026-09-29:** the earlier 76-call study found one narrow positive
+case: on Create Image Pro/v2, concise exclusions reduced pseudo-text failures from 7/8 to
+1/8 candidates across two paid blocks. Pixen showed the opposite risk: `No red balloon.`
+produced a balloon in all four registered seeds and an exact repeat; neutral and matched
+negative controls produced none. The completed follow-up covered PixMiniMax and all five
+Pro Flash operations with 246 REST calls and 12 MCP parity calls. None of its 54
+negative-involving contrasts met the benefit, harm, or equivalence threshold; all remain
+inconclusive. PixMiniMax's no-sparks clause failed like baseline in 3/3 clips, and its
+enhancer removed the exclusions from the returned prompt in 3/3 cases. One Pro Flash edit
+comparison showed a small adverse direction. See
+`pixellab-inline-negative-prompting-current-model-results.md` and
+`pixellab-inline-negative-prompting-new-tool-results.md`.
 
 The completed evidence does **not** support either universal claim:
 
@@ -33,15 +38,16 @@ The completed evidence does **not** support either universal claim:
 The defensible conclusion is narrower:
 
 1. A separate `negative_description` field is route-specific. Current public REST v2
-   exposes it on selected older/base workflows, labels the PixFlux field deprecated, and
-   exposes no negative field on Pixen, Create Image Pro, modern v3/PixMiniMax animation, Pro inpaint,
-   or any current public MCP tool.
-2. Inline exclusion wording such as `no text` is a different intervention from a separate
-   negative field. The archive contains both apparent successes and apparent backfires.
-3. The pre-study archive contains no controlled same-route, same-seed,
-   same-positive-description comparison where only `negative_description` changes.
-   Historical outputs cannot establish causality, but the later 106-call controlled study
-   now supplies 52 such negative-field attempts.
+   exposes it on selected older/base workflows and labels the PixFlux field deprecated.
+   Pixen, Create Image Pro, PixMiniMax, all five Pro Flash operations, modern v3 animation,
+   and current public MCP tools do not expose a dedicated negative field.
+2. Inline exclusion wording is a different intervention from a separate negative field.
+   The only clear positive inline result in the tested routes is task-specific pseudo-text
+   cleanup on Create Image Pro/v2. Pixen's absent-object sentinel backfired, while the new
+   PixMiniMax/Pro Flash study was underpowered to classify effects reliably.
+3. Historical outputs cannot establish causality. Later controlled work now includes both
+   a 106-call legacy dedicated-field study and inline-description studies on older and new
+   routes; each finding remains scoped to its route, tested task, and sample.
 4. The strongest current engineering default is positive structural wording plus real
    route controls. A short targeted exclusion can be a probabilistic guardrail, but it is
    not enforcement and should not be used to rescue a route-level failure.
@@ -55,11 +61,17 @@ The defensible conclusion is narrower:
    prevent the named failure; PixFlux's deprecated field was semantically weak/no-op on
    the tested task. See `pixellab-negative-prompting-confirmation-results.md`.
 
-This challenges both the developers' reported blanket warning and the opposite intuition
-that negatives are helpful or necessarily harmless. The data support not adding negatives
-by default because no benefit was measured—not because every negative made every image
-worse. No controlled call used Pixen, Create Image Pro, character v3/new, modern v3
-animation, or Pro/v3 inpaint. It cannot decide the current Pixen/Pro inline question.
+The evidence does not support a blanket “negatives always hurt” or “negatives are harmless”
+rule. Do not add negative boilerplate by default. If the question is practical positive
+benefit, Create Image Pro/v2 has the strongest route-specific evidence for a concise
+pseudo-text exclusion. The Pixen test shows that naming an absent object can backfire. For
+PixMiniMax and Pro Flash, no reliable benefit is established; the recorded classifications
+are inconclusive, with a prompt-enhancement preservation risk on PixMiniMax. A compact
+route-by-route summary is in
+`pixellab-inline-negative-prompting-best-practices.md`; full new-tool methods and results
+are in `pixellab-inline-negative-prompting-new-tool-results.md`. The new-tool visual review
+had one AI reviewer rather than the planned independent dual review, so treat it as
+preliminary.
 
 ## TODO: Deferred Pro Calls Cut For Cost
 
@@ -188,7 +200,8 @@ No official current source was found that:
 - recommends automatically populating negatives;
 - recommends a standard negative list, weighting syntax, or comma format;
 - says PixFlux's deprecated field is ignored;
-- exposes the field on Pixen, Pro, v3 animation, Pro inpaint, or MCP; or
+- exposes the field on Pixen, Create Image Pro/v2, PixMiniMax, Pro Flash, v3 animation,
+  Pro inpaint, or current public MCP tools; or
 - shows a controlled efficacy test.
 
 ## Repository Findings
@@ -493,29 +506,23 @@ extended in pre-registered batches to 16 and at most 32 seeds. The eight-seed re
 not meet the ±10-point equivalence band. Any extension needs a new approval gate and must
 report `inconclusive` if the maximum sample remains insufficient.
 
-### Remaining study: inline negation on no-field image routes
+### Completed inline studies on Pixen and Create Image Pro
 
-Test Pixen separately with `B0`, an inline concise exclusion, an inline long exclusion,
-and `P1`. Use the route's actual structured controls identically in every arm. This tests
-main-channel concept priming, not `negative_description`.
+The planned inline-image phase was executed on 2026-08-08. Its result is no longer pending:
+Create Image Pro/v2 showed a targeted pseudo-text improvement, while Pixen's forbidden
+red-balloon sentinel backfired. See `pixellab-inline-negative-prompting-current-model-results.md`.
 
-Create Image Pro is a separate high-cost phase. Its native small-size batches can provide
-many candidates per call, but a call is Pro-priced and candidates from one call are not
-independent seeds. Use a small pre-registered number of calls only after the Pixen/static
-studies justify the question.
+### Completed new-tool study and routes still outside scope
 
-### Remaining study: animation and inpaint
+PixMiniMax and all five Pro Flash operations were tested in the 2026-09-28/29 study. The
+study did not validate a reliable benefit; its 54 negative-involving comparisons remain
+inconclusive, and its visual review had one reviewer rather than the planned independent
+dual review. See `pixellab-inline-negative-prompting-new-tool-results.md`.
 
-Do not generalize static-image results to animation or editing.
-
-- For modern `animate-with-text-v3`, compare baseline `action`, concise inline exclusion,
-  long inline exclusion, and positive internal-motion wording on the same anchors and
-  seed blocks. Score every frame for forbidden artifacts, identity drift, and motion
-  quality.
-- Test legacy `animate-with-text` separately if its negative field remains relevant to
-  supported routing.
-- For base `inpaint`, reuse the exact same source and mask across arms. Score only pixels
-  in and near the mask as well as whole-image collateral change.
+These studies do not establish inline behavior for modern `animate-with-text-v3`, base
+`inpaint`, or every editor/web wrapper. Do not transfer the current evidence to those
+routes. Any future test should use the route's actual public contract and a newly frozen
+comparison matrix.
 
 ### Scoring and analysis
 

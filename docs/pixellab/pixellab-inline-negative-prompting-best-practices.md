@@ -1,6 +1,6 @@
 # Inline Negative Prompting Best Practices For Current PixelLab Models
 
-Last reviewed: 2026-08-08.
+Last reviewed: 2026-09-29.
 
 Purpose: define negative prompting broadly as any text telling an image model what should
 not appear, whether that text is sent through a dedicated negative channel or included in
@@ -125,12 +125,28 @@ The literature yields competing, model-specific hypotheses rather than one rule:
 6. **Model/routing interaction hypothesis:** Pixen and Pro can rank these strategies
    differently because their model priors and prompt-processing stacks differ.
 
-## Practical Prompting Guidance Pending PixelLab Results
+## PixelLab Inline Results By Route
+
+An operation accepting negative wording in its main `description` field does not mean it
+reliably honors the exclusion. Current evidence is route- and task-specific:
+
+| Route or model family | Inline wording accepted | Dedicated negative field | Measured behavior | Practical conclusion |
+|---|---|---|---|---|
+| Create Image Pro/v2 | Yes, in the main description | No | Pseudo-text failures fell from 7/8 baseline candidates to 1/8 with a concise exclusion across two paid blocks. | The only tested route with a specific positive use case; try a short exclusion for pseudo-text, then inspect. |
+| Pixen/v3/new | Yes, in the main description | No | `No red balloon` produced a balloon in 4/4 tested seeds and the exact repeat; neutral and matched `No black cat` controls produced none. Positive front-elevation wording fixed a separate view failure. | It responds to wording but can backfire; don't name absent objects when positive structure can specify the scene. |
+| PixMiniMax | Yes, as a motion-only description | No | The no-sparks clause failed in 3/3 clips, like baseline. Prompt enhancement removed the exclusions from its returned text in 3/3 negative cases. | No benefit demonstrated. Disable enhancement when a constraint must survive, or inspect the expanded text. |
+| Pro Flash: image, character, object, edit, and inpaint | Yes, through each operation's description | No | No validated benefit in the small new-tool study; its registered contrasts remain inconclusive. One edit task showed a 1/3 adverse paired direction and two ties. | Not established as a reliable negative-prompt route; prefer positive construction and verify the result. |
+
+The last two rows are covered in the [new-tool results report](pixellab-inline-negative-prompting-new-tool-results.md).
+The 54 formal contrasts in that report pool only registered negative-involving comparisons
+for PixMiniMax and Pro Flash; all 54 are classified as inconclusive, not as no-effect.
+
+## Practical Prompting Guidance From PixelLab Results
 
 - Start with a clear subject, context, composition, and desired visible replacement.
 - Keep negative constraints specific to a visually scoreable failure.
-- Place constraints in a consistent final `Constraint:` or `Exclude:` clause so prompt
-  position does not drift between experiments.
+- Treat concise exclusions as route-specific experiments, not a global default; the
+  clearest positive evidence is limited to pseudo-text removal on Create Image Pro/v2.
 - Do not mix a literal positive requirement with its prohibition.
 - Do not assume `no`, `without`, `avoid`, `exclude`, and a noun list are equivalent.
 - Treat long generic defect lists as a separate intervention, not an automatic quality
@@ -139,6 +155,8 @@ The literature yields competing, model-specific hypotheses rather than one rule:
   exclusion instead of attaching a permanent blacklist to every prompt.
 - Keep prompt enhancement disabled during causal tests; a hidden rewrite changes the
   treatment.
+- On PixMiniMax, keep enhancement off when an exclusion must survive, or inspect the
+  returned expanded prompt.
 - Hold route, surface, size, transparency, seed, and every other public input fixed.
 - Blind target-compliance review separately from overall visual quality.
 - Preserve and score every Pro candidate, but use the paid call as the statistical cluster.
@@ -152,5 +170,7 @@ The literature yields competing, model-specific hypotheses rather than one rule:
 - It does not make a dedicated diffusion negative embedding equivalent to inline English.
 - It does not identify PixelLab's undisclosed internal model, router, or system prompt.
 
-Those questions require the controlled current-model study in
-`../plans/pixellab-inline-negative-prompting-current-model-test-plan.md`.
+The tested routes and limitations are documented in
+`pixellab-inline-negative-prompting-current-model-results.md` and
+`pixellab-inline-negative-prompting-new-tool-results.md`. The small new-tool study's
+single-reviewer limitation means those conclusions remain preliminary.

@@ -1,5 +1,49 @@
 # PixelLab Inline Negative Prompting — Current-Model Results
 
+## New-tool results — 2026-09-29
+
+**Practical answer: inline negative wording has no demonstrated general benefit on
+PixMiniMax or the tested Pro Flash operations.** The controlled run completed 246
+REST calls plus 12 MCP parity calls. Under the registered decision thresholds, the
+54 negative-involving REST contrasts classify as **0% beneficial, 0% harmful, 0%
+proven no-meaningful-effect, and 100% inconclusive**. That is an underpowered
+evidence classification, not a claim that 100% had no effect.
+
+The clearest observations point toward caution, not a new recommendation:
+
+- PixMiniMax's no-sparks clause and its positive comparator both failed the
+  registered flame constraint in all 3/3 core clips, as did baseline. Its prompt
+  enhancer removed the exclusions from the returned prompt in all 3/3 negative
+  cases.
+- On one Pro Flash edit task, residual `OX7` lettering appeared in 2/3 baseline
+  outputs and 3/3 when an unrelated `No red balloon in the upper-left sky`
+  clause was added.
+  Paired directions were 0/3 better, 1/3 worse, and 2/3 tied; this is a small,
+  inconclusive adverse signal, not proof of harm.
+- In the forbidden-object sentinel, the red balloon appeared in 0/12 baseline
+  calls and 0/12 calls that said not to include it; positive controls produced
+  it in 12/12. The negative wording did not induce it in this sample.
+
+The tested REST and MCP schemas expose `description` but no explicit
+`negative_prompt` field, so there is no dedicated-field generation result.
+PixelLab's live Pro Flash capability metadata reported
+`provider_model=gpt-image-2.5-flare`; the live MCP tool metadata labels
+PixMiniMax as powered by MiniMax H3. These are PixelLab-reported labels, not an
+independent backend audit, and provide no evidence that Pro Flash is secretly
+MiniMax.
+
+**Recommendation:** don't add negative boilerplate by default. Prefer a positive
+description of the desired result; use a short exclusion only for a specific,
+reproducible failure and inspect the output. For PixMiniMax, leave prompt
+enhancement off when the exclusion must survive, or review its expanded prompt.
+
+Full methods, limits, route coverage, and results: [new-tool study report](pixellab-inline-negative-prompting-new-tool-results.md).
+The model-by-model capability table, including earlier Pixen and Create Image Pro results, is in [inline results by route](pixellab-inline-negative-prompting-best-practices.md#pixellab-inline-results-by-route).
+
+---
+
+## Historical prior study — 2026-08-08
+
 Executed: 2026-08-08.
 
 Status: Stage A generation complete; 76 paid REST calls, 124 candidates, and blinded
