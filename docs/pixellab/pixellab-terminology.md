@@ -1,6 +1,6 @@
 # PixelLab Terminology
 
-Last reviewed: 2026-09-13.
+Last reviewed: 2026-09-29.
 
 Purpose: prevent agents from over-interpreting PixelLab labels such as `Pro`, `v3`, `new`, `Pixen`, `PixFlux`, `BitForge`, `tiles`, and `tileset`.
 
@@ -25,9 +25,21 @@ PixelLab product labels, endpoint names, editor labels, and SDK method names can
 | `Game Builder` | A Tier 1+ first-party product workflow. Keep it separate from the public REST v2 API: visible Game Builder may use project/chat/sandbox context, but no dedicated public REST Game Builder endpoint is documented. |
 | `object` vs `character` | Infer character for people, NPCs, creatures, body templates, or identity/state animation. Infer object for props, items, furniture, and weapons. |
 
+## Model Identity Disclosures
+
+This table records the model names PixelLab documents or returns. A returned name confirms PixelLab's disclosure at that time; it does not independently audit backend routing or guarantee that the mapping will not change.
+
+| PixelLab term | Model disclosed | Evidence and scope |
+|---|---|---|
+| `Pro` | Unknown; no single model is disclosed | `Pro` labels many different endpoints, and the [public API catalog](https://www.pixellab.ai/pixellab-api) does not identify their underlying models. |
+| `Pro Flash` | `gpt-image-2.5-flare` (PixelLab-reported) | The live `GET /v2/pro-flash/capabilities` response captured 2026-09-28 returned `provider_model=gpt-image-2.5-flare` and `provider_quality=medium`. This confirms the capability metadata returned then, not an independent backend audit. See the [new-tool study report](pixellab-inline-negative-prompting-new-tool-results.md#interface-and-model-identity). OpenAI identifies this model ID as GPT Image 2.5 Flare in its [model documentation](https://developers.openai.com/api/docs/models/gpt-image-2.5-flare). |
+| `PixMiniMax` | MiniMax H3 (PixelLab-disclosed) | The [public API catalog](https://www.pixellab.ai/pixellab-api) says “Powered by MiniMax H3” for `POST /v2/animate-pixminimax`. This disclosure applies to that animation route, not other PixelLab tools. |
+| `Pixen`, `PixFlux`, `BitForge` | Unknown; no provider model disclosed | These are PixelLab product/endpoint labels in the public REST/MCP docs reviewed. |
+| `v3`, `new`, size/tool labels | No single model implied | These identify a workflow, version, UI status, or size/tool class rather than an underlying model. |
+
 ## Provider Claims
 
-Do not infer provider identity, proprietary model details, or backend ownership from product labels. PixelLab's current public REST description specifically discloses MiniMax H3 for `animate-pixminimax`; scope that claim to the operation and do not generalize it to other PixelLab routes or to undocumented editor operations. If PixelLab public REST/MCP docs do not disclose a provider or backend model, say that the provider is not disclosed in the public docs.
+Do not infer provider identity, proprietary model details, or backend ownership from product labels. PixelLab publicly discloses MiniMax H3 for `animate-pixminimax` and its live Pro Flash capability metadata reported `gpt-image-2.5-flare` in the 2026-09-28 capture; scope each claim to that evidence and route. If no disclosure is listed above, say the provider/model is unknown from the docs reviewed.
 
 ## Recommended Agent Behavior
 
