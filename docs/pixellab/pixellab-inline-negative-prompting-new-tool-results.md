@@ -2,7 +2,24 @@
 
 **Study date:** 2026-09-28 to 2026-09-29
 
-**Status:** all registered generation calls completed; visual/statistical conclusions are preliminary because the planned independent rating process was not completed.
+**Status:** the initial six-operation generation run is complete; its planned independent
+rating process was not completed. The subsequent Pro Flash image-creation follow-up used
+one blinded reviewer.
+
+## Additional Pro Flash image-creation follow-up — 2026-09-29
+
+A later matched run replayed 96 Pro prompts and seeds against REST v2
+`create-image-pro-flash`, with one Flash image and the first Pro candidate scored per
+prompt. Flash had no target failures in this sample. Across 66 negative-containing
+comparisons, it was better in 0, worse in 0, and tied in all 66 against both the baseline
+and positive-only wording. This shows no observed negative-specific gain; the ties are not
+proof of equivalence. The follow-up used 480 reported usage (485 conservative including a
+zero-usage load failure) from a separate 600-usage authorization. It is scoped to image
+creation and does not change the initial study's classifications for PixMiniMax or Pro
+Flash character, object, edit, and inpaint.
+
+Full matched target rates, paired results, and limitations are in the
+[Create Image Pro/v2 vs Pro Flash comparison](pixellab-inline-negative-prompting-current-model-results.md#matched-pro-and-pro-flash-image-creation-comparison-2026-09-29).
 
 ## Decision
 

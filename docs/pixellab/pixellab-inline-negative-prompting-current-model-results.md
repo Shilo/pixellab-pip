@@ -1,5 +1,65 @@
 # PixelLab Inline Negative Prompting — Current-Model Results
 
+## Matched Pro and Pro Flash image-creation comparison (2026-09-29)
+
+**Practical result:** Pro Flash followed every scored target in this small matched sample,
+but inline negative wording added no observed benefit over either the vague baseline or a
+positive-only rewrite. Across 66 negative-containing comparisons, Pro Flash was better in
+0 (0%), worse in 0 (0%), and tied in 66 (100%) against each comparator. Those ties show no
+observed difference in this sample; they do not establish equivalence or prove the wording
+has no effect on other prompts.
+
+The run replayed the Pro study's exact 96 descriptions, seeds, 96×96 size, and per-prompt
+background setting through REST v2 `POST /v2/create-image-pro-flash`. It produced 96
+successful Pro Flash images at a reported 480 usage; one heavy-load failure reported zero
+usage and was retried once. The conservative expected total, including the failed attempt,
+was 485 of the user's 600-usage allowance. No dedicated negative-prompt property is
+available on this route, so this tested only inline wording in `description`.
+
+For equal image counts, this route comparison used Pro's first candidate from each matched
+call against Pro Flash's one image. All 192 images were shuffled under opaque IDs and scored
+once by a blinded AI reviewer. A Pro Flash “win” means fewer observed target failures on
+that exact prompt/seed pair; rates are descriptive.
+
+### Matched first-candidate target results
+
+| Target | Pro first candidate | Pro Flash | Flash better / worse / tied vs Pro |
+|---|---:|---:|---:|
+| No pseudo-text (24 matched prompts) | 2 failures / 24 | 0 / 24 | 2 / 0 / 22 |
+| Exactly two sword blades (24) | 0 / 24 | 0 / 24 | 0 / 0 / 24 |
+| Cottage front view (24) | 1 / 24 | 0 / 24 | 1 / 0 / 23 |
+| No red balloon on absent-object prompts (20) | 0 / 20 | 0 / 20 | 0 / 0 / 20 |
+| Positive balloon capability control (4) | 4 / 4 present | 4 / 4 present | 0 / 0 / 4 |
+
+The three matched Pro misses were two pseudo-text baseline cases and one view-angle
+baseline case. Flash had no worse result among the 96 matched prompts. This is a small
+single-sample comparison, and the Pro result is its first candidate rather than the
+four-candidate best-of result reported below.
+
+### Negative wording direction by route
+
+“Better” means fewer target failures for the negative-containing arm. Ties are exact binary
+score ties for the matched seed, not a statistical equivalence finding.
+
+| Route / candidate policy | Negative-containing arms vs baseline | Negative-containing arms vs positive-only |
+|---|---:|---:|
+| Pro first candidate | 18/66 better (27.3%), 0/66 worse, 48/66 tied (72.7%) | 0/66 better, 0/66 worse, 66/66 tied (100%) |
+| Pro Flash (one image per call) | 0/66 better, 0/66 worse, 66/66 tied (100%) | 0/66 better, 0/66 worse, 66/66 tied (100%) |
+
+The 66 comparisons include six negative-containing arms against the same baseline block in
+each core task and three arms against the same baseline block in the balloon sentinel;
+they are matched directions, not 66 independent images. The full four-candidate Pro study
+below is the better estimate for Pro's call-level outcome.
+For Pro Flash, the ceiling on these simple tasks makes the all-tie result especially
+unsuitable as proof that negatives never matter. Both routes reached the same outcomes
+with clear positive-only wording.
+
+**Conclusion:** Pro Flash can satisfy these inline-constraint examples, but the experiment
+does not show that it needs, benefits from, or is more reliable because of negative wording.
+Prefer the positive-only description, and treat a short exclusion as a prompt-specific
+experiment when a repeatable failure remains. The result applies only to Pro Flash image
+creation; the earlier character, object, edit, and inpaint contrasts remain inconclusive.
+
 ## Focused Create Image Pro/v2 follow-up — 2026-09-29
 
 **Practical result:** Create Image Pro/v2 followed inline exclusions better than a vague

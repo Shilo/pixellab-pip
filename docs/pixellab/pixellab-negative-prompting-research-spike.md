@@ -23,16 +23,20 @@ In that follow-up, negative wording beat a vague baseline on pseudo-text and som
 requests, but a matched positive-only rewrite reached the same 0/12 failure rate on both
 tasks. Across 66 negative-vs-positive-only call pairs, none improved, six worsened, 59 tied,
 and one was unclear. This does not establish an incremental negative-specific benefit or
-reliable negative-prompt handling on Pro. Pixen showed the opposite risk: `No red balloon.`
-produced a balloon in all four registered seeds and an exact repeat; neutral and matched
-negative controls produced none. In the Pro follow-up absent-object sentinel, direct
-negative, baseline, and positive-empty-state arms produced no red balloon in 16 candidates;
-the positive capability control produced red balloons in 15/16, with one color-unclear.
-The new-tool study covered PixMiniMax and all five Pro Flash operations with 246 REST calls
-and 12 MCP parity calls. None of its 54 negative-involving contrasts met the benefit, harm,
-or equivalence threshold; all remain inconclusive. PixMiniMax's no-sparks clause failed like
-baseline in 3/3 cases, and its enhancer removed exclusions from the returned prompt in 3/3
-cases. One Pro Flash edit comparison showed a small adverse direction. See
+reliable negative-prompt handling on Pro. A later matched comparison replayed 96 prompts
+through Pro Flash image creation: the first Pro candidate had three target misses, Flash
+had none, and all 66 Pro Flash negative-containing comparisons tied with both baseline and
+positive-only wording. This shows no negative-specific gain in the small sample; the ties
+are not an equivalence finding. Pixen showed the opposite risk: `No red balloon.` produced
+a balloon in all four registered seeds and an exact repeat; neutral and matched negative
+controls produced none. In the Pro follow-up absent-object sentinel, direct negative,
+baseline, and positive-empty-state arms produced no red balloon in 16 candidates; the
+positive capability control produced red balloons in 15/16, with one color-unclear. The
+initial new-tool study covered PixMiniMax and all five Pro Flash operations with 246 REST
+calls and 12 MCP parity calls. None of its 54 negative-involving contrasts met the benefit,
+harm, or equivalence threshold; all remain inconclusive. PixMiniMax's no-sparks clause
+failed like baseline in 3/3 cases, and its enhancer removed exclusions from the returned
+prompt in 3/3 cases. One Pro Flash edit comparison showed a small adverse direction. See
 `pixellab-inline-negative-prompting-current-model-results.md` and
 `pixellab-inline-negative-prompting-new-tool-results.md`.
 
@@ -49,8 +53,10 @@ The defensible conclusion is narrower:
    and current public MCP tools do not expose a dedicated negative field.
 2. Inline exclusion wording is a different intervention from a separate negative field.
    Pro improved on some tasks versus an underspecified baseline, but positive-only wording
-   matched or beat it; Pixen's absent-object sentinel backfired, while the new
-   PixMiniMax/Pro Flash study was underpowered to classify effects reliably.
+   matched or beat it; Pixen's absent-object sentinel backfired. Pro Flash image creation
+   followed the tested constraints but showed no observed incremental benefit from
+   negatives in a matched single-reviewer run; PixMiniMax and the other four Pro Flash
+   operations remain inconclusive.
 3. Historical outputs cannot establish causality. Later controlled work now includes both
    a 106-call legacy dedicated-field study and inline-description studies on older and new
    routes; each finding remains scoped to its route, tested task, and sample.
@@ -72,8 +78,10 @@ rule. Do not add negative boilerplate by default. Create Image Pro/v2 is the onl
 route where negative wording repeatedly beat a vague baseline on pseudo-text, but a
 positive-only rewrite matched or beat every negative arm in the focused comparison. Treat
 that as a prompt-clarity result, not evidence that negatives add value. The Pixen test shows
-that naming an absent object can backfire. For PixMiniMax and Pro Flash, no reliable benefit
-is established; the recorded classifications are inconclusive, with a prompt-enhancement
+that naming an absent object can backfire. Pro Flash image creation followed this limited
+prompt set with no failures, but negative and positive-only prompts had identical outcomes;
+no general reliability or negative-specific benefit follows from the small sample. The
+other Pro Flash operations and PixMiniMax remain inconclusive, with a prompt-enhancement
 preservation risk on PixMiniMax. A compact route-by-route summary is in
 `pixellab-inline-negative-prompting-best-practices.md`; full new-tool methods and results
 are in `pixellab-inline-negative-prompting-new-tool-results.md`. The new-tool visual review

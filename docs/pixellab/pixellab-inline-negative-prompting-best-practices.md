@@ -135,11 +135,16 @@ reliably honors the exclusion. Current evidence is route- and task-specific:
 | Create Image Pro/v2 | Yes, in the main description | No | In a 96-call follow-up, pseudo-text failures were 8/12 at baseline and 0–1/12 across negative arms; a positive-only rewrite also reached 0/12. Across 66 negative-vs-positive-only call pairs, 0 improved, 6 worsened, 59 tied, and 1 was unclear. | Pro followed inline negatives better than a vague baseline on some tasks, but no incremental benefit over clear positive wording was demonstrated. Describe the desired result first; inspect any targeted exclusion. See the [focused Pro results](pixellab-inline-negative-prompting-current-model-results.md). |
 | Pixen/v3/new | Yes, in the main description | No | `No red balloon` produced a balloon in 4/4 tested seeds and the exact repeat; neutral and matched `No black cat` controls produced none. Positive front-elevation wording fixed a separate view failure. | It responds to wording but can backfire; don't name absent objects when positive structure can specify the scene. |
 | PixMiniMax | Yes, as a motion-only description | No | The no-sparks clause failed in 3/3 clips, like baseline. Prompt enhancement removed the exclusions from its returned text in 3/3 negative cases. | No benefit demonstrated. Disable enhancement when a constraint must survive, or inspect the expanded text. |
-| Pro Flash: image, character, object, edit, and inpaint | Yes, through each operation's description | No | No validated benefit in the small new-tool study; its registered contrasts remain inconclusive. One edit task showed a 1/3 adverse paired direction and two ties. | Not established as a reliable negative-prompt route; prefer positive construction and verify the result. |
+| Pro Flash image creation (`create-image-pro-flash`) | Yes, in `description` | No | In 96 exact prompt/seed matches against Pro, Flash had 0/24 pseudo-text failures, 0/24 blade-count failures, 0/24 view failures, and 0/20 absent-balloon failures; its positive balloon control succeeded 4/4. Across 66 negative-containing pairs, all tied against both baseline and positive-only wording. | It followed these constraints, but negatives showed no added benefit. Prefer clear positive wording; this result covers image creation only. |
+| Pro Flash character, object, edit, and inpaint | Yes, through each operation's description | No | The earlier small new-tool study leaves its registered contrasts inconclusive. One edit task showed a 1/3 adverse paired direction and two ties. | No reliable negative-specific benefit established for these operations; prefer positive construction and verify the result. |
 
-The last two rows are covered in the [new-tool results report](pixellab-inline-negative-prompting-new-tool-results.md).
-The 54 formal contrasts in that report pool only registered negative-involving comparisons
-for PixMiniMax and Pro Flash; all 54 are classified as inconclusive, not as no-effect.
+The Pro Flash image-creation follow-up is documented in the [matched Pro and Pro Flash
+results](pixellab-inline-negative-prompting-current-model-results.md#matched-pro-and-pro-flash-image-creation-comparison-2026-09-29).
+The earlier 54 formal contrasts in the [new-tool results report](pixellab-inline-negative-prompting-new-tool-results.md)
+pool registered comparisons for PixMiniMax and Pro Flash's then-tested operations. Those
+results remain inconclusive and are unchanged for Pro Flash character, object, edit, and
+inpaint; ties in the new, task-specific image-creation follow-up are not proof of
+equivalence.
 
 ## Practical Prompting Guidance From PixelLab Results
 
