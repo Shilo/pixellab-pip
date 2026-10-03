@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-09-25.
+Last reviewed: 2026-10-03.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -31,7 +31,7 @@ Primary sources:
 ## Version 0.4.125 Product Update
 
 - **PixelArt Workbench:** MCP adds `pixelart_workbench`, an MCP-only command tool for model-authored pixel-art operations. The live tool description says commands are free for subscribers, but test replies exposed no per-call `usage.generations`, so billing remains unverified; do not report a confirmed zero-generation cost. The release announcement reports roughly 70% lower token consumption in its testing; this repository did not independently benchmark that estimate.
-- **Skeleton v3:** available in Character Creator, Aseprite, and Pixelorama. The public beta is Tier 1+ and supports 3–15 keypoint frames up to 256×256; programmatic routes are REST `POST /v2/animate-with-skeleton-v3` and MCP `animate_with_skeleton_v3`, with managed-character mode `skeleton-v3` also available. Public estimated USD prices: 3 frames `$0.0436`, 8 `$0.0513`, 15 `$0.0622`.
+- **Skeleton v3:** available in Character Creator, Aseprite, and Pixelorama. The public beta supports 3–15 keypoint frames up to 256×256; the refreshed REST and MCP descriptions no longer state a Tier 1 gate. Programmatic routes are REST `POST /v2/animate-with-skeleton-v3` and MCP `animate_with_skeleton_v3`, with managed-character mode `skeleton-v3` also available. Public estimated USD prices: 3 frames `$0.0436`, 8 `$0.0513`, 15 `$0.0622`.
 - **Image to text:** REST adds `POST /v2/image-to-text` to describe an image as a generic 1–3 sentence generation prompt or answer a custom visual question; it returns text and has no MCP counterpart. It overlaps with prompt enhancers only in that both can produce text for a later generation: enhancers refine existing text for a target route, while image-to-text extracts a description or answer from pixels. Do not chain them by default. PixelLab estimates about 0.09 generations for a typical sprite or screenshot, with longer answers costing more; see the [research spike](pixellab-image-to-text-research-spike.md).
 
 ## Concurrency and Priority Slots
@@ -100,7 +100,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 | Animate with text | `POST /v2/animate-with-text` | Base text animation | 64x64 text animation with init/inpainting/palette options | `64x64`, 4 frames: `$0.01565` |
 | Animate with text (new) | `POST /v2/animate-with-text-v3` | v3 text animation | First-frame animation, optional last-frame guidance, 4-16 frames, up to 256x256 | `32x32`, 4 frames: `$0.0221`; `256x256`, 8 frames: `$0.0302`; `128x128`, 16 frames: `$0.0424` |
 | Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Tier 1+; beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Current official estimates (2026-09-25): `64x64`, 4 frames `$0.0178`; 8 `$0.0231`; `256x256`, 8 `$0.0231`; 40 `$0.0787`. The lower estimates independently observed on 2026-09-12 are historical; see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). Use returned `usage.generations` for charged usage. |
-| Animate with skeleton (v3) | `POST /v2/animate-with-skeleton-v3` | Skeleton-guided animation from 3–15 keypoint frames | Tier 1+ beta; max 256x256; matched MCP tool `animate_with_skeleton_v3` | Official estimates: 3 frames `$0.0436`; 8 `$0.0513`; 15 `$0.0622`. The managed-character `skeleton-v3` mode documents 2–4 generations per direction; check returned usage. |
+| Animate with skeleton (v3) | `POST /v2/animate-with-skeleton-v3` | Skeleton-guided animation from 3–15 keypoint frames | Beta; max 256x256; matched MCP tool `animate_with_skeleton_v3`; refreshed REST/MCP descriptions no longer state a Tier 1 gate | Official estimates: 3 frames `$0.0436`; 8 `$0.0513`; 15 `$0.0622`. The managed-character `skeleton-v3` mode documents 2–4 generations per direction; check returned usage. |
 | Animate with text (Pro) | `POST /v2/animate-with-text-v2` | Pro text animation | Reference-image animation, 4/9/16 frames, view and direction controls | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 256x256 (endpoint prose lists 16/32/64/128/256; priced rows below stop at 128x128) | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
 | Estimate skeleton | `POST /v2/estimate-skeleton` | Skeleton helper | Skeleton extraction for skeleton animation | `16x16 $0.00511`; `64x64 $0.00513`; `256x256 $0.00516` |

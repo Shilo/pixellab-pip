@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-09-25 (Skeleton v3, image-to-text, and Pixen edit limits checked).
+Last reviewed: 2026-10-03 (Pro Flash native sizes and Skeleton v3 contract wording refreshed).
+
+> **2026-10-03 API refresh.** Pro Flash adds native `48x48` and `128x128` presets to image, character, and object creation. The refreshed Skeleton v3 REST/MCP descriptions retain beta status and the 3–15 / 256×256 limits but no longer state a Tier 1 gate. The 2026-09-25 note below is retained as the earlier snapshot record.
 
 > **2026-09-25 API refresh.** Added REST/MCP Skeleton v3 animation (Tier 1+, 3–15 keypoint frames, input up to 256×256) and REST `/image-to-text` (input up to 4096×4096). `edit-image-pixen` now requires source and target dimensions in multiples of four; the target remains area-capped at 256×256 and is padded with transparency instead of rescaled.
 
@@ -12,7 +14,7 @@ Purpose: document the true minimum and maximum image-size hard limits for every 
 
 Motivating goal: support `8px` and `16px` icons, items, and tilesets if the tools allow it. The `32x32` minimum seen in some workflows prompted this review; that floor turned out to be a client-side editor limit, not an API limit.
 
-Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The 2026-09-25 refresh checked the new Skeleton v3 and image-to-text limits and the updated `edit-image-pixen` bounds; the `generate-with-style-v2` row was rechecked 2026-08-07 and other older values were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
+Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The 2026-10-03 refresh checked the Skeleton v3 and Pro Flash contract changes, including the added native Pro Flash presets; the `generate-with-style-v2` row was rechecked 2026-08-07 and other older values were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
 
 ## How To Read These Limits
 
@@ -118,7 +120,7 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 | `create-image-pixflux-background` | `image_size` | 16×16 | 400×400 | Area 32×32 to 400×400. `no_background` defaults to `false` (keeps the scene); alternative for opaque edge-to-edge backgrounds ≤400×400 (verified 0px bars, 0% transparency at 400×224, ~$0.0065). |
 | `create-image-bitforge` | `image_size` | 16×16 | 200×200 | Max area 200×200. Skeleton keypoints best at 16/32/64. |
 | `generate-with-style-v2` | derived from `style_images` | 16×16 | 512×512 | Square output; the largest dimension across 1–4 style images determines the size. Non-square style images are centered. Output buckets: 16–42 → 64 images, 43–85 → 16, 86–170 → 4, 171–512 → 1. |
-| `create-image-pro-flash` | `image_size` | 16×16 | 256×256 | Presets: 16×16 experimental, 24×24, 32×32, 32×48, 64×64, 96×64, 96×96. Custom dimensions in multiples of four are Beta. One image per call; check the live capability lookup before selecting a size. |
+| `create-image-pro-flash` | `image_size` | 16×16 | 256×256 | Presets: 16×16 experimental, 24×24, 32×32, 32×48, 48×48, 64×64, 96×64, 96×96, 128×128. Custom dimensions in multiples of four are Beta. One image per call; check the live capability lookup before selecting a size. |
 
 `generate-with-style-v2` no longer has a supported output-size request field. The OpenAPI schema retains an optional deprecated `image_size` property marked as removed, but `style_images` and `description` are the only required request fields; do not use `image_size` to choose the result dimensions.
 
@@ -188,10 +190,10 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 | `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.009, canvas 24×24, 8 rotations). `standard` (1 gen) vs `pro` (20–40 gens). |
 | `create-character-state` | `override_frame_size` | 32×32 | 256×256 | Schema-enforced via the new `FrameSize` model. Optional larger canvas for the new state, for edits that add something big (a weapon, wings). Both sides must be multiples of 4 and no smaller than the source character. Omit to keep the source size. MCP splits it into `override_width`/`override_height`. |
 | `create-character-pro` | `image_size` | 32×32 | 168×168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. `reference_image` max 168×168; `concept_image` max 1024×1024. Probed canvas 32 → 60, consistent with the current documented rule (rotations share a square canvas at least `max(width, height)` that may grow up to 256 to fit generated content; the earlier "padded ~2×" wording was replaced in the 2026-09-08 refresh). |
-| `create-character-pro-flash` | optional `image_size` | 16×16 | 256×256 | Text creation defaults to 64×64; same Pro Flash presets/custom Beta dimensions as image creation. Eight directions only; input pixels may be transparently padded to the V3 square canvas. Schema-read, not live-tested. |
+| `create-character-pro-flash` | optional `image_size` | 16×16 | 256×256 | Text creation defaults to 64×64; same Pro Flash presets/custom Beta dimensions as image creation, including native `48x48` and `128x128`. Eight directions only; input pixels may be transparently padded to the V3 square canvas. Schema-read, not live-tested. |
 | `create-1-direction-object` | `size` | **16** | 256 | Lowered from 32 in the 2026-09-08 refresh — the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate the change and 16 is now in range; 8 is still below the floor. Default 64. Mutually exclusive with `style_images` (max 256×256 each); size drives object count. Supplying fewer `item_descriptions` does not shrink that grid; remaining slots are generated from the top-level `description`. |
 | `create-8-direction-object` | `size` | **24** | 168 | Lowered from 32 in the 2026-09-08 refresh; the 2026-07 probes (8, 16, 31 → `422 ge 32`) predate it. Docs state that below 24 the eight angles stop being distinguishable — use `create-1-direction-object` for 16px. Default 64; the 8-rotation pipeline rejects anything larger than 168. |
-| `create-object-pro-flash` | optional `image_size` | 16×16 | 256×256 | Text creation defaults to 64×64; same Pro Flash presets/custom Beta dimensions. One or eight directions. Schema-read, not live-tested. |
+| `create-object-pro-flash` | optional `image_size` | 16×16 | 256×256 | Text creation defaults to 64×64; same Pro Flash presets/custom Beta dimensions, including native `48x48` and `128x128`. One or eight directions. Schema-read, not live-tested. |
 
 ### Character Floors Split By Pipeline (Probe-Confirmed 2026-07-15)
 
@@ -227,7 +229,7 @@ The two AI-rotation pipelines floor at 32 **over REST**; the two template/skelet
 | `animate-with-text-v2` | `image_size`, `reference_image_size` | 32×32 | 256×256 | Frame count is **fixed by size**, not chosen: 32×32 and 64×64 return 16 frames; 128×128, 170×170, 256×256 return 4. Recommended 64×64. |
 | `animate-with-text-v3` | `first_frame` / `last_frame` | — | 256×256 | v3 max 256×256, **plus a total pixel budget: `width × height × frame_count ≤ 524,288`** (endpoint prose). The budget binds before the per-axis max at large sizes: 256×256 affords only 8 frames (256·256·16 = 1,048,576, over budget); 16 frames needs ≤181×181. The only *user-chosen* size↔frame tradeoff — v2 and `edit-images-v2` use fixed ladders. Budget untested; `frame_count` is schema-bounded 4–16, even. |
 | `animate-pixminimax` | `first_frame` / `last_frame` | — | 256×256 | Beta route powered by MiniMax H3. Endpoint prose allows 4–40 generated frames in multiples of four at any input size up to 256×256; unlike v3, the current public description does not state the v3 total-pixel budget. Response contains `frame_count+1` images. |
-| `animate-with-skeleton-v3` | `first_frame` | — | 256×256 | Tier 1+ beta; requires 3–15 keypoint frame sets, each with the named 18 joints. Returns exactly one output frame per `keypoints` entry. |
+| `animate-with-skeleton-v3` | `first_frame` | — | 256×256 | Beta; requires 3–15 keypoint frame sets, each with the named 18 joints. The refreshed REST/MCP descriptions no longer state a Tier 1 gate. Returns exactly one output frame per `keypoints` entry. |
 | `animate-with-skeleton` | `image_size` | 16×16 | 256×256 | Schema is a continuous 16–256 range, but the endpoint prose lists **only 16/32/64/128/256** as supported. See the discrete-size caveat below. |
 | `animate-character` / `characters/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
 | `objects/{object_id}/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
@@ -307,7 +309,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
 | `animate_image` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
 | `animate_image_pixminimax` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-pixminimax`; 4–40 generated frames in multiples of four, beta |
-| `animate_with_skeleton_v3` | first frame URL/base64 | — | **max 256×256** | Tier 1+ beta; 3–15 keypoint frame sets |
+| `animate_with_skeleton_v3` | first frame URL/base64 | — | **max 256×256** | Beta; 3–15 keypoint frame sets; refreshed REST/MCP descriptions no longer state a Tier 1 gate |
 | `create_path_tiles` | `tile_size` | 32 | `square_topdown`: exactly **32**; `isometric`: **48–96** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "roads"` — check that schema's bounds if exact REST-side limits matter) |
 | `create_building_kit` | `tile_size` / `wall_tiles` | 32 / 2 | `isometric`: **32–96**; `square_topdown`/`oblique`: **16–96**; `wall_tiles`: **1–3** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "building"`) |
 
@@ -324,8 +326,8 @@ The Pro Flash MCP page lists `width`/`height` but not their full validation boun
 | `16px` isometric tile | Yes | `image_size` min 16×16. |
 | `16px` icons/items canvas (`generate-image-v2`) | Yes | `image_size` min 16×16. |
 | `16px` standalone item/icon **semantics** | Partial | Item sprites drift larger; full-cell tiles/textures reliable, transparent item sprites experimental. See [`pixellab-16px-item-sprite-generation-spike.md`](pixellab-16px-item-sprite-generation-spike.md). |
-| `16px` character | Yes, but only standard mode has a live-confirmed clean 16px result | Standard `create-character-with-4/8-directions` generated a 16px-tall subject on a padded 24×24 canvas. REST v3/older Pro reject 16; MCP v3/older Pro accept but did not honour that size in the historical probes. Pro Flash lists 16×16 as experimental, with no live quality result here. |
-| `16px` object | One direction is schema-supported; eight directions are not on the older object route | `create-1-direction-object` minimum fell to 16 in the 2026-09-08 schema refresh; `create-8-direction-object` minimum is 24. The earlier 32px rejection probes predate that change. Pro Flash also lists experimental 16×16 for one or eight directions, but neither output is live-verified. |
+| `16px` character | Yes, but only standard mode has a live-confirmed clean 16px result | Standard `create-character-with-4/8-directions` generated a 16px-tall subject on a padded 24×24 canvas. REST v3/older Pro reject 16; MCP v3/older Pro accept but did not honour that size in the historical probes. Pro Flash lists 16×16 as experimental, with no live quality result here; current native presets also include 48×48 and 128×128. |
+| `16px` object | One direction is schema-supported; eight directions are not on the older object route | `create-1-direction-object` minimum fell to 16 in the 2026-09-08 schema refresh; `create-8-direction-object` minimum is 24. The earlier 32px rejection probes predate that change. Pro Flash also lists experimental 16×16 for one or eight directions and now lists native 48×48 and 128×128, but neither output is live-verified. |
 | `8px` icons / items | **No** | `generate-image-v2` and all image routes have schema min 16 → request rejected. |
 | `8px` tilesets | **No** | Top-down/sidescroller `tile_size` enum is `[16,32,64]`/`[16,32]`; `create-tiles-pro` min 16; isometric min 16×16. All reject 8. |
 | `8px` font glyphs | Yes | `generate-font-pro.glyph_px` enum includes 8 — the only 8px-native path in the API. |

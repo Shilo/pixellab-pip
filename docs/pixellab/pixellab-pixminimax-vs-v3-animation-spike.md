@@ -1,6 +1,6 @@
 # PixelLab PixMiniMax (MiniMax H3) vs v3 Animation Spike
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-10-03.
 
 Status: completed. This spike records the refreshed public contract, a source-backed MiniMax H3 prompt adaptation, website and Aseprite research, and a paired live comparison against PixelLab's v3 raw animation route. The planned fixed-seed control was not achieved because every executed request sent `seed=0`, which PixelLab documents as random.
 
@@ -14,7 +14,7 @@ These are the practical tradeoffs supported by PixelLab's public documentation a
 - **Clearer multi-step actions in this test.** The PixMiniMax sword and bow animations showed more distinct wind-up, action, and recovery stages. The 40-frame fireplace also remained coherent across a much longer sequence than v3 can produce in one job.
 - **Full frame range at the maximum canvas size.** It accepts up to 40 generated frames on images as large as 256×256. V3 reduces its allowed frame count as the image gets larger.
 - **Works directly from an image.** It can animate a supplied image, with an optional ending image. The image does not need to belong to a saved PixelLab character or object.
-- **Useful motion controls.** Optional prompt enhancement can expand a short instruction, direction guidance can be used with that enhancement, and the REST API includes a control for reducing color flicker.
+- **Useful motion controls.** Optional prompt enhancement can expand a short instruction; the refreshed contract also exposes independent subject, initial-pose, view, and facing caption fields, and the REST API includes a control for reducing color flicker.
 - **Reliable output handling in the completed tests.** Every completed job kept the requested canvas size and transparency, and the larger robot and fireplace tests returned the starting image exactly.
 
 ### Cons
@@ -71,15 +71,15 @@ The request shape is:
 | no_background | Default true; removes an opaque input backdrop when enabled |
 | drift_threshold | Optional de-flicker threshold; zero applies correction every frame, higher values correct only larger color drift |
 | enhance_prompt | Optional inline PixMiniMax prompt expansion; the public docs price it at about 0.05 generations |
-| direction | Optional south/north/east/west and four diagonal values; valid with enhance_prompt and used as facing/attack guidance |
+| direction | Optional south/north/east/west and four diagonal values; independent facing/attack caption guidance. Omit it to let the service read facing from the image. |
 
 The completed response includes background_job_id, status, optional enhanced_prompt and enhance_usage, and usage when exposed. The public description says the result contains frame_count + 1 images: index 0 is the input frame and the following images are the generated frames. This is a contract to verify, not a reason to skip pixel and visual checks.
 
-The public REST description describes cost by generation time and gives examples: 32×32 at 4 frames costs 1 generation; 64×64 at 4, 8, 16, and 40 frames costs 2, 3, 5, and 12 generations; 80×80 at 8 frames costs 2. The website API page shows separate estimated USD values, including 64×64 at 4 frames for $0.0123, 64×64 at 8 for $0.0153, and 256×256 at 40 for $0.0471. These are not a documented conversion. For a real call, use response usage.generations; do not infer charged usage from image count or from the website USD estimate.
+The public REST description describes cost by generation time and gives examples: 32×32 at 4 frames costs 1 generation; 64×64 at 4, 8, 16, and 40 frames costs 1, 1, 2, and 6 generations; 80×80 at 8 frames costs 1. The website API page shows separate estimated USD values, including 64×64 at 4 frames for $0.0123, 64×64 at 8 for $0.0153, and 256×256 at 40 for $0.0471. These are not a documented conversion. For a real call, use response usage.generations; do not infer charged usage from image count or from the website USD estimate.
 
 ### MCP
 
-The new hosted MCP tool is animate_image_pixminimax. It is a raw-image tool and does not require a managed character or object. Supply exactly one required first-frame input (`first_frame_url` preferred, or `first_frame_base64`); `last_frame_url` or `last_frame_base64` is an optional end anchor, also one alternative. Its public description matches the route's core behavior: motion description, 4–40 frames in multiples of four, maximum 256×256, optional end frame, optional seed, optional no-background control, and optional prompt enhancement/direction guidance. MCP does not expose REST's drift_threshold; it does expose enhance_prompt and direction in its own tool schema. MCP tool names are called through MCP and must not be treated as REST paths.
+The new hosted MCP tool is animate_image_pixminimax. It is a raw-image tool and does not require a managed character or object. Supply exactly one required first-frame input (`first_frame_url` preferred, or `first_frame_base64`); `last_frame_url` or `last_frame_base64` is an optional end anchor, also one alternative. Its public description matches the route's core behavior: motion description, 4–40 frames in multiples of four, maximum 256×256, optional end frame, optional seed, optional no-background control, prompt enhancement, and subject/initial-pose/view/facing caption fields. MCP does not expose REST's drift_threshold; it does expose the caption fields and independent `direction` in its own tool schema. MCP tool names are called through MCP and must not be treated as REST paths.
 
 The corresponding public parity is:
 
@@ -88,7 +88,7 @@ The corresponding public parity is:
 | POST /animate-pixminimax | animate_image_pixminimax | Core animation workflow parity; REST additionally exposes drift_threshold |
 | POST /animate-with-text-v3 | animate_image | Full functional parity for the shared raw workflow; each surface has route-specific controls |
 
-MCP does not expose REST's drift_threshold field on the new tool. On an MCP-first request, use the tool's enhance_prompt/direction controls when appropriate, or perform prompt improvement as the agent; preserve the user's wording when they explicitly provide it.
+MCP does not expose REST's drift_threshold field on the new tool. On an MCP-first request, use the tool's caption fields and `enhance_prompt`/`direction` controls when appropriate, or perform prompt improvement as the agent; preserve the user's wording when they explicitly provide it.
 
 ### Boundary decisions
 
@@ -133,7 +133,7 @@ For an effect:
 
 > Start the fire moving on the first frame. Animate an irregular flame in place: tongues rise, curl, split, merge, contract, and swell with varied timing. Keep the stone hearth and ember base stationary; preserve the pixel-art scale, palette, placement, and transparency.
 
-Use enhance_prompt when the user's short motion wording is ambiguous enough to benefit from expansion and the extra charge is accepted. Use direction only with enhancement. Enhancement is not a replacement for a clear first-frame phase order. For a precise request, preserve the user's exact field value rather than silently rewriting it. MCP exposes `enhance_prompt` and `direction`; REST additionally exposes `drift_threshold`.
+Use enhance_prompt when the user's short motion wording is ambiguous enough to benefit from expansion and the extra charge is accepted. Use `direction`, `view`, `subject_description`, and `initial_pose` as separate caption fields when the source image does not make those facts reliable; direction is not restricted to enhancement. Enhancement is not a replacement for a clear first-frame phase order. For a precise request, preserve the user's exact field value rather than silently rewriting it. MCP exposes the caption fields and `enhance_prompt`; REST additionally exposes `drift_threshold`.
 
 Avoid appearance-only prompts such as “a robot” in the animation description. Avoid vague cinematic language when the task is a sprite clip. Avoid unsupported H3 audio instructions, shot labels, reference tags, or camera blocks. One coherent action with ordered visible phases is a better wrapper input than a long list of simultaneous concepts.
 
@@ -169,11 +169,11 @@ The [test plan](../plans/pixellab-pixminimax-vs-v3-animation-test-plan.md) was w
 - POST /v2/animate-pixminimax
 - GET /v2/background-jobs/{job_id}
 
-The runner persisted request metadata, job IDs, polling responses, raw returned frames, contact sheets, GIF previews, per-call verification, and usage. A transient poll connection reset was recovered by polling the accepted job ID; no paid create request was resubmitted. The PixMiniMax robot payloads also sent `direction=south` when enhancement was disabled, although the public schema says direction is used only with enhancement. The server accepted those requests, but they do not isolate a direction effect; no conclusion below depends on one. The planned 0–4 visual scorecard was not completed, so the findings combine objective frame measurements with qualitative visual review; no case-level or mean scores were calculated.
+The runner persisted request metadata, job IDs, polling responses, raw returned frames, contact sheets, GIF previews, per-call verification, and usage. A transient poll connection reset was recovered by polling the accepted job ID; no paid create request was resubmitted. The historical PixMiniMax robot payloads also sent `direction=south` when enhancement was disabled. Under the current refreshed schema, direction is an independent caption field; the old requests therefore do not isolate a direction effect, and no conclusion below depends on them. The planned 0–4 visual scorecard was not completed, so the findings combine objective frame measurements with qualitative visual review; no case-level or mean scores were calculated.
 
 Fixtures were exact existing source files: a 128×128 south-facing robot, a 16×32 flame/fireplace effect, and a 256×256 fireplace. No new art or local resize was used. The planned 32×32, 64×64, and 80×80 robot cases were not run because no exact-size source existed. The 256×256/40-frame case was run once on PixMiniMax because v3's public maximum is 16 frames.
 
-The run root is [the ignored evidence folder](../../pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/). The [run ledger](../../pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/ledger.json) is the usage authority and the [run manifest](../../pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/run-manifest.json) records the sanitized flow metadata.
+The run root is [the ignored evidence folder](../../pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/). The [run ledger](../../pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/ledger.json) is the usage authority and the [run manifest](../../pixellab-pip-generations/pixminimax-vs-v3-animation-20260912/run-manifest.json) records the sanitized flow metadata. The historical runner sent `direction=south` even when enhancement was disabled; current refreshed docs define direction as an independent caption field, so that old request detail is not a current constraint.
 
 ### Budget and completion
 
@@ -246,7 +246,7 @@ These replays show why the C2 visually exact v3 endpoint is a **case result**, n
 
 1. Route an explicit PixMiniMax, PixMiniMax/H3, or MiniMax H3 request to REST POST /v2/animate-pixminimax or MCP animate_image_pixminimax. Route an unspecified raw animation request to the existing v3 family.
 2. For PixMiniMax prompts, start the action on frame 1, order visible phases, say “in place” for locomotion, preserve identity anchors positively, and keep the field motion-only. Use enhancement for short ambiguous wording when the approximately 0.05-generation surcharge is acceptable.
-3. Use direction only with PixMiniMax enhancement. Do not copy MiniMax H3's audio, reference-label, shot, or soundscape fields into PixelLab's description.
+3. Use PixMiniMax's independent `direction`, `view`, `subject_description`, and `initial_pose` caption fields when needed. Do not copy MiniMax H3's audio, reference-label, shot, or soundscape fields into PixelLab's description.
 4. Use last_frame for a real target pose or transition. Treat identical/near-identical anchors as high risk for low-motion loops, and inspect the middle frames even when the endpoints match.
 5. Expect frame_count + 1 returned images on both raw routes. Preserve the raw sequence and identify whether index 0 is truly the input before dropping it during a chained stitch or Aseprite import.
 6. Report usage.generations when present. Keep website USD estimates separate from generation units, and never infer a route cost from the number of output images.

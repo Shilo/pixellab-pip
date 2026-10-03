@@ -4,7 +4,9 @@ Read this for live PixelLab calls that return a job, asset ID, managed MCP asset
 
 ## Polling
 
-REST v2 async jobs normally use `GET /background-jobs/{job_id}` when the create response returns a background job ID. Vocal animation is the explicit exception: poll `GET /vocal-animation/{job_id}`. MCP managed assets use the matching `get_*` tool, not REST background-job polling.
+REST v2 async jobs normally use `GET /background-jobs/{job_id}` when the create response returns a background job ID. While a job is processing, `last_response.queue_position` and `last_response.estimated_wait_seconds` can report that it is waiting for a GPU. The public REST cancellation route is `DELETE /background-jobs/{job_id}`: it is for a still-processing job, removes queued work without charging it, frees a concurrency slot, and may still charge work a GPU already started. Cancel only with explicit user approval; do not cancel merely because queue telemetry shows a wait, and do not cancel to resubmit an otherwise healthy job because the replacement goes to the back of the queue. Vocal animation is the explicit exception: poll `GET /vocal-animation/{job_id}`. MCP managed assets use the matching `get_*` tool, not REST background-job polling.
+
+The cancellation response is `CancelBackgroundJobResponse`: required `id`, `status`, and `message`; optional `usage`. The returned `status` is `failed` because cancellation terminates the job; it does not mean a generation completed successfully.
 
 MCP `wait_for_jobs` waits for all currently active generation jobs; it does not select by job ID. Use it only when every active job it may wait for belongs to the current task. The default timeout is 240 seconds; a timeout does not cancel jobs. After it returns or times out, re-fetch the specific result with its getter before acting.
 
@@ -34,7 +36,7 @@ MCP creation tools return asset IDs quickly. Use the matching getter to inspect 
 - Fonts: `get_font`.
 - Portrait-character conversions: `get_portrait_character`.
 - Vocal animations: `get_vocal_animation`; partial visemes may appear before completion, so wait for the terminal result.
-- Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `inpaint_image`, `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. The newer Pro Flash image/edit/inpaint tools also return raw-image job IDs; use `get_image` when the connected getter accepts them, and check `pro-flash.md` for their route-specific rules. `unzoom_image` and `reduce_colors` finish in about a second — poll once instead of backing off.
+- Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `transfer_outfit`, `inpaint_image`, `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, `image_to_pixelart`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. The newer Pro Flash image/edit/inpaint tools also return raw-image job IDs; use `get_image` when the connected getter accepts them, and check `pro-flash.md` for their route-specific rules. `unzoom_image` and `reduce_colors` finish in about a second — poll once instead of backing off.
 - UI assets, tilesets, tiles, projects, or helpers: use the visible matching MCP getter when exposed.
 
 State tools such as `create_character_state` and `create_object_state` auto-wait only briefly for the source asset to finish. If a state call fails because the source is still pending, poll the source with its getter first, then retry the state call only when the source is ready.

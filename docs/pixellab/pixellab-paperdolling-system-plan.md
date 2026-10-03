@@ -74,7 +74,7 @@ Local tooling may not synthesize missing equipment art or repaint broken pixels 
 | Fast AI-generated armed/dressed animation | Generate or edit a full character spritesheet with equipment baked in | Asset-combiner workflow; first-frame video-to-sheet; managed state plus animation | `baked equipment composite`, not reusable layer |
 | Single-frame fitted weapon/accessory layer | REST `edit-image` or `edit-images-v2` (MCP `edit_image` matches `edit-images-v2`), then diff extraction | `inpaint-v3` with mask (MCP `inpaint_image`); Aseprite changes-only layer; second remove-character edit | `client-extracted layer` if QA passes |
 | Short animated equipment layer | REST `edit-animation-v2` (no MCP equivalent), then per-frame diff extraction | Per-frame `edit-images-v2`/MCP `edit_image`; masked per-frame inpaint (`inpaint-v3`/MCP `inpaint_image`); editor cleanup | `client-extracted animation layer` if temporal QA passes |
-| Outfit/armor over animation | REST `transfer-outfit-v2`, then extraction only if needed | `edit-animation-v2`; managed state; composite-only | Usually `composited frames`; layer only if QA passes |
+| Outfit/armor over animation | MCP `transfer_outfit` when visible or REST `transfer-outfit-v2`, then extraction only if needed | `edit-animation-v2`; managed state; composite-only | Usually `composited frames`; layer only if QA passes |
 | Dressed preview/state | MCP `create_character_state` or REST `create-character-state` | Image edit routes | `managed character variant` or `composite` |
 | Managed base animation | MCP `animate_character`; REST `characters/animations` | REST v3/pro custom animation | `base animation frames` |
 | Skeleton/hardpoint metadata | REST `estimate-skeleton` on base frames | Manual hardpoints; Aseprite/editor keypoint workflow | `hardpoint metadata`, not layer |
@@ -591,7 +591,7 @@ Reviewed 2026-07-05 (v1.5.5). See the research spike's "PixelLab AI Skill Paperd
 | Their artifact | Maps to this plan | Notes |
 |---|---|---|
 | `validate-sprites` file-checker (frame set/order match vs reference layer, per-frame PNG-header size) | A subset of Gate 1 (Input contract), runnable in Phase 1 / Phase 2 QA and manifest checks | Validates already-separated layer files by filename and header size only. Does not read pixels, so it is not Gate 2-4 and does not replace extraction. |
-| `transfer-outfit-v2` → `edit-animation-v2` "remove the body" pipeline | Route Planner "composite routes" and the AI Workflow Planner two-pass add/remove fallback | A second generative pass, not the reusable-layer extraction route. Keep it labeled fallback, not default. |
+| `transfer-outfit-v2`/MCP `transfer_outfit` → `edit-animation-v2` "remove the body" pipeline | Route Planner "composite routes" and the AI Workflow Planner two-pass add/remove fallback | A second generative pass, not the reusable-layer extraction route. Keep it labeled fallback, not default. |
 | `modular-rpg-character` recipe `sprite_contract` / `qa` fields | Phase 2 manifest shape (`paperdoll.json`) and Gate 1 input contract | A compact machine-readable contract worth mirroring; their `qa` entries are prose, not executable gates. |
 | `estimate-skeleton` / `animate-with-skeleton` example payloads | Phase 5 skeleton/hardpoint inputs | Example payloads only; no hardpoint derivation or manifest on their side. |
 

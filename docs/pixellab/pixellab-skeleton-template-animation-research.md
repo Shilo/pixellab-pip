@@ -4,9 +4,9 @@ Generated: 2026-06-30.
 
 Scope: developer-facing research on PixelLab preset skeleton/template character animations and the REST-first auto-rig/keypoint pipeline for estimating, exporting, and animating skeleton data. This document focuses on observed website behavior, public REST v2/MCP equivalents, and the Aseprite extension's local skeleton/template evidence. It does not cover a full custom skeleton authoring UI beyond the current estimate/export/animate surfaces.
 
-## 2026-09-25 Contract Addendum
+## 2026-10-03 Contract Addendum
 
-Version 0.4.125 adds Skeleton v3 as a distinct route: REST `POST /animate-with-skeleton-v3` matches MCP `animate_with_skeleton_v3`, and managed character animation adds `mode="skeleton-v3"`. The Tier 1+ beta accepts 3–15 per-frame keypoint sets from a reference image up to 256×256. The release also lists Character Creator, Aseprite, and Pixelorama as product surfaces for Skeleton v3. This is newer than the legacy `/animate-with-skeleton` workflow documented below; the earlier text-animation recommendation and three-pose limits apply only to those older routes. For the current v3 contract, workflow comparisons, pros/cons, and video transcript findings, see the [Skeleton v3 research spike](pixellab-skeleton-v3-research-spike.md). The research and visual observations below remain dated findings; this update did not run paid generation tests.
+The 2026-10-03 docs refresh confirms Skeleton v3 as a distinct route: REST `POST /animate-with-skeleton-v3` matches MCP `animate_with_skeleton_v3`, and managed character animation adds `mode="skeleton-v3"`. The beta accepts 3–15 per-frame keypoint sets from a reference image up to 256×256; the refreshed REST/MCP descriptions no longer state a Tier 1 gate. The release also lists Character Creator, Aseprite, and Pixelorama as product surfaces for Skeleton v3. This is newer than the legacy `/animate-with-skeleton` workflow documented below; the earlier text-animation recommendation and three-pose limits apply only to those older routes. For the current v3 contract, workflow comparisons, pros/cons, and video transcript findings, see the [Skeleton v3 research spike](pixellab-skeleton-v3-research-spike.md). The research and visual observations below remain dated findings; this update did not run paid generation tests.
 
 ## Executive Summary
 
@@ -351,7 +351,7 @@ Current public REST v2 exposes these skeleton-related primitives:
 | REST route/schema | Public role |
 | --- | --- |
 | `POST /v2/estimate-skeleton` | Estimate keypoints from an image. OpenAPI response is `keypoints: Keypoint[]`. |
-| `POST /v2/animate-with-skeleton-v3` | Generate 3–15 frames from `first_frame`, its 18-joint `first_frame_keypoints`, and a full 18-joint `keypoints` sequence; up to 256×256, Tier 1+ beta. |
+| `POST /v2/animate-with-skeleton-v3` | Generate 3–15 frames from `first_frame`, its 18-joint `first_frame_keypoints`, and a full 18-joint `keypoints` sequence; up to 256×256, beta. The refreshed REST/MCP descriptions no longer state a Tier 1 gate. |
 | `POST /v2/animate-with-skeleton` | Legacy three-frame route with `reference_image`, `image_size`, nested `skeleton_keypoints`, and optional `init_images`, `inpainting_images`, `mask_images`, `color_image`, `view`, `direction`, and `guidance_scale`. |
 | `POST /v2/create-image-bitforge` | Skeleton-guided single-image generation via `skeleton_keypoints` and `skeleton_guidance_scale`. |
 | `GET /v2/characters/{character_id}` | Managed character details can include `skeletons`, but this is returned metadata, not an edit surface. |

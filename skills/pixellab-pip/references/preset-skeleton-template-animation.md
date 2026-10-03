@@ -6,7 +6,7 @@ SKILL.md holds the global rules this file does not restate: MCP-first routing wi
 
 Four workflows: managed preset/template animation, managed Skeleton v3 template animation, raw Skeleton v3 keypoint animation, and the legacy raw skeleton endpoint. Use Skeleton v3 for an explicit new skeleton workflow; keep the legacy route only when its exact REST payload is required.
 
-PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the older preset/template and raw-skeleton routes below for ordinary motion; the Skeleton v3 keypoint workflow is a separate Tier 1+ beta. Default to text animation unless the user explicitly selects PixMiniMax (see `animation.md`), asks for Skeleton v3, wants a named preset motion, or needs to own/edit keypoints.
+PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the older preset/template and raw-skeleton routes below for ordinary motion; the Skeleton v3 keypoint workflow is a separate beta. The refreshed REST and MCP descriptions no longer state a Tier 1 gate, but availability and billing still come from the live surface. Default to text animation unless the user explicitly selects PixMiniMax (see `animation.md`), asks for Skeleton v3, wants a named preset motion, or needs to own/edit keypoints.
 
 ## Table of Contents
 
@@ -181,7 +181,7 @@ Only add `action_description` for a variant the route supports:
 
 ## Skeleton v3 Keypoint Animation
 
-Use this route when the user explicitly wants the new skeleton workflow or supplies a pose sequence. It is a Tier 1+ beta and requires 3–15 output-frame keypoint sets; each frame supplies the 18 named joints with normalized `x`/`y` coordinates from 0 to 1. The reference image and its `first_frame_keypoints` anchor the first pose, while `keypoints` contains the full ordered output sequence.
+Use this route when the user explicitly wants the new skeleton workflow or supplies a pose sequence. It is a beta and requires 3–15 output-frame keypoint sets; each frame supplies the 18 named joints with normalized `x`/`y` coordinates from 0 to 1. The reference image and its `first_frame_keypoints` anchor the first pose, while `keypoints` contains the full ordered output sequence.
 
 Use MCP `animate_with_skeleton_v3` when available, or REST `POST /v2/animate-with-skeleton-v3` for code and exact REST control. REST returns a background job; poll `GET /background-jobs/{job_id}`. MCP returns a job ID; retrieve the result with `get_image`. The result contains exactly `len(keypoints)` frames, in input order; it does not echo the reference frame.
 

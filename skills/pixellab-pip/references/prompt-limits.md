@@ -2,7 +2,7 @@
 
 Read this when a PixelLab REST v2 call rejects a natural-language field for length, when writing exact API code, or when preparing unusually long prompts.
 
-These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-09-25. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
+These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-10-03. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
 
 ## Pattern
 
@@ -22,6 +22,8 @@ These are the rows that do not follow the tier you would guess from the field na
 | `POST /animate-with-text-v2` | `action` | 500 |
 | `POST /animate-with-text-v3` | `action` | 1000 |
 | `POST /animate-pixminimax` | `description` | 1000 |
+| `POST /animate-pixminimax` | `subject_description` | 300 |
+| `POST /animate-pixminimax` | `initial_pose` | 300 |
 | `POST /create-tiles-pro` | `building_wall_description`, `building_floor_description`, `building_floor2_description` | 500 |
 | `POST /edit-image` | `description` | 500 |
 | `POST /enhance-animation-v3-prompt` | `action` | 500 |
