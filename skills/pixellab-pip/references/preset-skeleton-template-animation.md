@@ -39,7 +39,7 @@ REST `/estimate-skeleton` estimates keypoints for one pose and remains a shared 
 
 The current public MCP `animate_character` schema exposes `template`, `skeleton-v3`, `v3`, and `pixminimax` modes; it does not expose managed `pro`. It includes `template_animation_id`, `directions`, mode-specific `frame_count`, template-only `ai_freedom`, custom start/end frame base64/URL fields for v3 and PixMiniMax, `keep_first_frame`, `animation_group_id`, and PixMiniMax-only `subject_description`/`initial_pose`. It does not expose REST's inline `enhance_prompt`. Connected client schemas may lag; check the visible mode before calling managed Skeleton v3 or PixMiniMax. Separate MCP `animate_with_skeleton_v3` accepts a raw reference image and keypoint sequence; it does not expose REST `/estimate-skeleton`.
 
-It is not field-for-field equivalent to REST `/characters/animations`. REST additionally exposes `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` (v3 mode); REST also retains managed `pro`. The REST `subject_description` and `initial_pose` fields are PixMiniMax-only and accept 1–300 characters. Use REST when those extra fields matter, for integration code, or to validate exact API behavior.
+It is not field-for-field equivalent to REST `/characters/animations`. REST additionally exposes `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` (v3 mode); REST also retains managed `pro`. The REST `subject_description` and `initial_pose` fields are PixMiniMax-only; see `prompt-limits.md` for their surface-specific length contract. Use REST when those extra fields matter, for integration code, or to validate exact API behavior.
 
 ## Managed Preset Animation (MCP)
 
@@ -129,7 +129,7 @@ Request shape:
 | `end_frame` | Optional target pose for v3 or PixMiniMax interpolation. Dimensions must match the start frame, requires exactly one direction, and is not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
 | `keep_first_frame` | v3 or PixMiniMax, default `true`. Controls whether the reference frame is stored as frame 0 (see Frame Count). Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
 | `action_description` | Optional in the MCP schema; provide it for custom v3 or PixMiniMax motion. REST requires it when `template_animation_id` is omitted. In template mode, use it only for light customization. |
-| `subject_description`, `initial_pose` | Optional PixMiniMax-only character and starting-pose captions; REST strings are 1–300 characters. |
+| `subject_description`, `initial_pose` | Optional PixMiniMax-only character and starting-pose captions; see `prompt-limits.md` for their surface-specific length contract. |
 | `enhance_prompt` | REST only, valid for v3 custom mode; do not set it for template, PixMiniMax, pro, or Skeleton v3. |
 
 Polling:
