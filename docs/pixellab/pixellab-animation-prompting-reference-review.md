@@ -2,7 +2,7 @@
 
 Reviewed: 2026-10-05.
 
-**Decision:** retain the existing animation contract and make two small additions: distinguish a textual storyboard from actual per-frame controls, and explicitly preserve opaque scene backdrops on PixMiniMax. Do not import the supplied reference wholesale or create another runtime prompting guide.
+**Decision:** retain the existing animation contract with three narrow additions: distinguish a textual storyboard from actual per-frame controls, explicitly preserve opaque scene backdrops on PixMiniMax, and select the raw engine by required frame/canvas capacity when the user has not named one. Do not import the supplied reference wholesale or create another runtime prompting guide.
 
 ## Scope and evidence
 
@@ -66,9 +66,21 @@ Other inconsistencies reduce confidence in the prescriptions: JSON is recommende
 
 Concrete paths and destinations, ordered motion phases, an explicit in-place requirement, reference-grounded captions, and inspection of the middle frames are useful advice. They substantially overlap existing [Animation](../../skills/pixellab-pip/references/animation.md), [Image Input Roles](../../skills/pixellab-pip/references/image-input-roles.md), and [Text Preparation](../../skills/pixellab-pip/SKILL.md#text-preparation). Longer multi-phase motion is a reasonable PixMiniMax candidate; neither choreography nor an ambient scene guarantees better loop closure. The Pro website page describes a separate tool configuration and does not redefine raw v3 limits.
 
-Two changes were made in the canonical animation reference:
+Three additions were made in the canonical animation reference:
 
-1. Explain that a textual or JSON storyboard is not a documented per-frame control, and point to Skeleton v3 for actual caller-supplied pose inputs when appropriate. This does not promise exact rendered pixels from a skeleton.
+1. Explain that a textual or JSON storyboard is not a documented per-frame control, and point specifically to raw Skeleton v3 for caller-supplied per-frame keypoints. This does not promise exact rendered pixels from a skeleton.
 2. State PixMiniMax's background-removal default and the explicit setting needed to retain an opaque scene backdrop.
+3. When no engine was specified, use raw PixMiniMax if the requested generated frame count and input canvas exceed v3's limits but fit PixMiniMax. Keep the detailed limits canonical and have the main skill router point to this decision.
 
-No word-count policy, frame-allocation recipe, generic lock library, JSON format, automatic reroll workflow, or new route preference was added. A controlled compact-prose-versus-compact-JSON study, or a visible-part-versus-ambiguous-limb study, could investigate the remaining hypotheses. The current evidence does not require spending the user's allowance on either experiment to make these contract corrections.
+No word-count policy, frame-allocation recipe, generic lock library, JSON format, automatic reroll workflow, or genre-based route preference was added. A controlled compact-prose-versus-compact-JSON study, or a visible-part-versus-ambiguous-limb study, could investigate the remaining hypotheses. The current evidence does not require spending the user's allowance on either experiment to make these contract corrections.
+
+## Follow-up independent sweep
+
+A second read-only agent reviewed the committed additions and remaining source advice. Its findings were challenged against the public contracts and the skill's purpose as a portable workflow router.
+
+- Kept the background-setting clarification: it changes a concrete request control and matches the live MCP schema.
+- Kept the storyboard warning, but corrected its broad "Skeleton v3 routes above" pointer. Managed Skeleton v3 takes a template, while raw Skeleton v3 takes caller-authored keypoints; text descriptions alone are not keypoint inputs.
+- Accepted the capacity-based routing omission after checking that the unconditional v3 default could not fulfill 24 generated frames, or a 256×256 input with 16 generated frames. This decision applies only when the engine is unspecified and the complete request fits PixMiniMax. An 18-frame request fits neither route; an explicit v3 choice is not silently replaced. Existing availability, requested-frame preservation, and cost rules still apply.
+- Declined generic motion-writing additions because they were already covered or lacked comparative evidence. In particular, "never name invisible parts" would wrongly prohibit requests that reveal previously hidden parts.
+
+No new quality ranking, numeric limit duplication, per-frame JSON format, or paid experiment resulted from this sweep. Total additional generation spend remained zero.
