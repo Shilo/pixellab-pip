@@ -7,6 +7,7 @@ Last reviewed: 2026-07-05.
 - [Quality Assurance](#quality-assurance)
 - [Security Checks](#security-checks)
   - [OpenSSF Scorecard (maintainer-only)](#openssf-scorecard-maintainer-only)
+- [Dependency Updates](#dependency-updates)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [Claude Code Local Plugin Testing](#claude-code-local-plugin-testing)
 - [OpenCode Local Skill Testing](#opencode-local-skill-testing)
@@ -46,6 +47,14 @@ The user-facing security story lives in [Security And Trust](security.md): the S
 ### OpenSSF Scorecard (maintainer-only)
 
 [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) runs weekly for repo-hygiene tracking, but is intentionally kept off the README and out of the Code Scanning tab. The score reads low and largely **cannot** be raised on a solo project: Scorecard measures supply-chain maturity for widely-depended-upon libraries, and its heaviest checks — `Code-Review` (requires a second developer to approve pull requests) and `Maintained` (penalizes repos under 90 days old) — are structurally unreachable for a one-person, mostly-Markdown skill, so they sit near zero no matter the effort. Read it as a rough hygiene signal (branch protection, workflow permissions, pinned dependencies), not a safety verdict — the SkillSpector skill audit is the check that actually matters here.
+
+## Dependency Updates
+
+[Dependabot](../.github/dependabot.yml) checks GitHub Actions and Python dependencies weekly, grouping minor and patch updates into one PR per ecosystem. Major updates remain separate for manual review.
+
+[Dependabot Merge](../.github/workflows/dependabot-merge.yml) verifies the bot's metadata and requires exactly one signed Dependabot commit, then merges minor/patch updates only after Repository QA, SkillSpector skill audit, and HOL Plugin Scanner all succeed for that commit. Failed, skipped, missing, or ambiguous checks cannot authorize a merge. A changed commit, draft, closed PR, or different target branch aborts the attempt; a pending check has a 20-minute deadline. Failed or timed-out attempts leave the PR open for investigation or a workflow rerun.
+
+The merge workflow runs its inline CI gate with its write token and does not check out repository code. Its explicit CI gate does not change branch rules or interfere with the release workflow's direct pushes to `main`.
 
 ## Codex Local Plugin Testing
 

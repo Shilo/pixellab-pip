@@ -38,6 +38,8 @@ class SecurityTriggerPatternTests(unittest.TestCase):
             "a crontab entry that runs curl",
             "Codex config lives at ~/.codex/config.toml",
             "loop forever, and explicit disposal",
+            "The cancellation route is `DELETE /background-jobs/{job_id}`:",
+            "remove '/path/to/file'",
         ):
             self.assertTrue(self._hit(bad), f"should flag: {bad!r}")
 
@@ -50,6 +52,8 @@ class SecurityTriggerPatternTests(unittest.TestCase):
             "Codex writes a global user `config.toml`",
             "infinite looping, and explicit disposal",
             "Never ask users to paste the PixelLab bearer token into chat",
+            "The cancellation route uses HTTP `DELETE` on `/background-jobs/{job_id}`:",
+            "Poll `GET /background-jobs/{job_id}`.",
         ):
             self.assertFalse(self._hit(ok), f"should NOT flag: {ok!r}")
 

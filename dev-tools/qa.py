@@ -646,10 +646,11 @@ def run_unit_tests() -> None:
 # Honestly scoped: a NON-ADVERSARIAL predictor for maintainer-authored text, not a security control.
 # Trivial variants (printf, tee -a, .zshrc/.bash_profile, ${HOME}) are intentionally NOT covered, and
 # it scans text files only (.md/.py/.json). The AUTHORITATIVE scan is the pinned SkillSpector step in
-# the security/release workflows. These regexes are a hand-derived subset of two rules from
+# the security/release workflows. These regexes are a hand-derived subset of rules from
 # SkillSpector commit dde36f258729b5aec7c835295a9556e64a2def0c (the pin in security-scan.yml /
-# release-skill.yml) — malware.yar `backdoor_persistence`, agent_snooping `AS1`, and
-# excessive_agency `EA4`; re-check them when that pin is bumped. Not guarded: the project's accepted
+# release-skill.yml) — malware.yar `backdoor_persistence`, agent_snooping `AS1`,
+# excessive_agency `EA4`, and tool_misuse `TM1`; re-check them when that pin is bumped.
+# Not guarded: the project's accepted
 # by-design findings (documented api.pixellab.ai URLs, bearer-token-handling rules, the bark.py
 # subprocess), intentionally kept — including `EA2`, whose "never ask the user to paste a token"
 # phrasing is load-bearing safety prose that must not be reworded to dodge a regex.
@@ -667,6 +668,10 @@ SECURITY_TRIGGER_PATTERNS = [
     (
         r"(?:loop|iterate|repeat)\s+(?:indefinitely|forever|infinitely|endlessly)",
         "EA4: reads as unbounded looping (e.g. say `infinite looping` for a GIF loop flag)",
+    ),
+    (
+        r"\b(?:delete|remove)\s+['\"]?/[^\s'\"]{1,100}",
+        "TM1: reads as file deletion (for REST docs, separate the HTTP method from the path)",
     ),
 ]
 SECURITY_TRIGGER_REGEXES = [(re.compile(rx, re.IGNORECASE), label) for rx, label in SECURITY_TRIGGER_PATTERNS]

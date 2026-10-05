@@ -1,0 +1,148 @@
+name: Dependabot Merge
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  merge:
+    name: Merge tested dependency update
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.ref == 'main' &&
+      !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: read
+
+    steps:
+      - name: Verify Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      # No checkout: run only this trusted workflow script and the pinned metadata action.
+      - name: Wait for checks and merge the verified commit
+        if: >-
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor') &&
+          (steps.metadata.outputs.package-ecosystem == 'github_actions' ||
+          steps.metadata.outputs.package-ecosystem == 'pip') &&
+          steps.metadata.outputs.maintainer-changes == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          """Wait for the existing CI gates before merging a verified Dependabot update."""
+
+          from __future__ import annotations
+
+          import json
+          import os
+          import subprocess
+          import sys
+          import time
+
+
+          REQUIRED_CHECKS = {
+              "Repository QA": "Quality Assurance",
+              "SkillSpector skill audit": "Skill Security Audit",
+              "HOL Plugin Scanner": "HOL Plugin Scanner",
+          }
+
+
+          def verify_commit(pages: list[list[dict]], expected_head: str) -> None:
+              commits = [commit for page in pages for commit in page]
+              if (
+                  len(commits) != 1
+                  or commits[0]["sha"] != expected_head
+                  or (commits[0].get("author") or {}).get("login") != "dependabot[bot]"
+                  or commits[0]["commit"]["verification"].get("verified") is not True
+              ):
+                  raise RuntimeError("Expected one signed Dependabot commit; leave the PR open.")
+
+
+          def checks_passed(pr: dict, expected_head: str) -> bool:
+              if (
+                  pr["state"] != "OPEN"
+                  or pr["isDraft"]
+                  or pr["baseRefName"] != "main"
+                  or pr["headRefOid"] != expected_head
+              ):
+                  raise RuntimeError("PR is no longer eligible or its commit changed; leave it open.")
+
+              ready = True
+              for name, workflow in REQUIRED_CHECKS.items():
+                  checks = [
+                      check
+                      for check in pr["statusCheckRollup"]
+                      if check.get("__typename") == "CheckRun"
+                      and check.get("name") == name
+                      and check.get("workflowName") == workflow
+                  ]
+                  if len(checks) != 1:
+                      ready = False
+                      continue
+                  check = checks[0]
+                  if check.get("status") != "COMPLETED":
+                      ready = False
+                  elif check.get("conclusion") != "SUCCESS":
+                      raise RuntimeError(f"{name} did not succeed; leave the PR open.")
+              return ready
+
+
+          def wait_for_checks(pr_number: str, expected_head: str) -> None:
+              verify_commit(
+                  json.loads(subprocess.check_output(
+                      [
+                          "gh", "api",
+                          f"repos/{os.environ['GH_REPO']}/pulls/{pr_number}/commits?per_page=100",
+                          "--paginate", "--slurp",
+                      ],
+                      text=True,
+                      timeout=60,
+                  )),
+                  expected_head,
+              )
+              deadline = time.monotonic() + 20 * 60
+              while time.monotonic() < deadline:
+                  pr = json.loads(
+                      subprocess.check_output(
+                          [
+                              "gh", "pr", "view", pr_number, "--json",
+                              "state,isDraft,baseRefName,headRefOid,statusCheckRollup",
+                          ],
+                          text=True,
+                          timeout=60,
+                      )
+                  )
+                  if checks_passed(pr, expected_head):
+                      print("All three required CI checks succeeded for the expected commit.")
+                      return
+                  time.sleep(15)
+              raise RuntimeError("CI did not finish within 20 minutes; leave the PR open.")
+
+
+          if __name__ == "__main__":
+              try:
+                  wait_for_checks(os.environ["PR_NUMBER"], os.environ["PR_HEAD_SHA"])
+              except RuntimeError as error:
+                  print(error, file=sys.stderr)
+                  raise SystemExit(1)
+          PY
+          gh pr merge "$PR_URL" --squash --match-head-commit "$PR_HEAD_SHA"
