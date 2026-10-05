@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-import importlib.util
+import textwrap
+import types
 import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 
-spec = importlib.util.spec_from_file_location(
-    "dependabot_merge", Path(__file__).resolve().parents[1] / "dev-tools/dependabot_merge.py"
-)
-assert spec and spec.loader
-merge = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(merge)
+workflow_path = Path(__file__).resolve().parents[1] / ".github/workflows/dependabot-merge.yml"
+workflow = workflow_path.read_text(encoding="utf-8")
+source = textwrap.dedent(workflow.split("python3 - <<'PY'\n", 1)[1].split("\n          PY", 1)[0])
+merge = types.ModuleType("dependabot_merge")
+exec(compile(source, str(workflow_path), "exec"), merge.__dict__)
 
 
 def passing_pr() -> dict:
@@ -36,6 +36,10 @@ def verified_commit() -> dict:
 
 
 class DependabotMergeTests(unittest.TestCase):
+    def test_privileged_workflow_has_no_checkout(self):
+        self.assertNotIn("actions/checkout@", workflow)
+        self.assertNotIn("git checkout", workflow)
+
     def test_requires_one_signed_bot_commit_at_the_expected_head(self):
         merge.verify_commit([[verified_commit()]], "expected")
         for commits in ([], [verified_commit(), verified_commit()]):

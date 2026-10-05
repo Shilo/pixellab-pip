@@ -54,7 +54,7 @@ The user-facing security story lives in [Security And Trust](security.md): the S
 
 [Dependabot Merge](../.github/workflows/dependabot-merge.yml) verifies the bot's metadata and requires exactly one signed Dependabot commit, then merges minor/patch updates only after Repository QA, SkillSpector skill audit, and HOL Plugin Scanner all succeed for that commit. Failed, skipped, missing, or ambiguous checks cannot authorize a merge. A changed commit, draft, closed PR, or different target branch aborts the attempt; a pending check has a 20-minute deadline. Failed or timed-out attempts leave the PR open for investigation or a workflow rerun.
 
-The merge workflow runs trusted base-branch code with its write token; it never checks out the PR's code. Its explicit CI gate does not change branch rules or interfere with the release workflow's direct pushes to `main`.
+The merge workflow runs its inline CI gate with its write token and does not check out repository code. Its explicit CI gate does not change branch rules or interfere with the release workflow's direct pushes to `main`.
 
 ## Codex Local Plugin Testing
 
