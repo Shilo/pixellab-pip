@@ -1,6 +1,6 @@
 # PixelLab Credit Output Estimation Spike
 
-Last reviewed: 2026-09-12 (PixMiniMax addendum; the catalog arithmetic below remains a 2026-07-16 historical snapshot).
+Last reviewed: 2026-10-05 (managed PixMiniMax contract update; the raw PixMiniMax addendum is dated 2026-09-12 and the catalog arithmetic below remains a 2026-07-16 historical snapshot).
 
 > **Important prefix: this is an estimation and may not be accurate.**
 >
@@ -64,10 +64,14 @@ Primary sources checked:
 
 This document's 124-row arithmetic predates the public PixMiniMax route and remains historical; do not use its catalog totals as the current catalog count. The current public API page and REST docs now describe PixMiniMax separately:
 
-- REST `POST /v2/animate-pixminimax` and MCP `animate_image_pixminimax` are a new raw-animation family publicly described as powered by MiniMax H3.
+- The public API catalog identifies REST `POST /v2/animate-pixminimax` as powered by MiniMax H3 and lists the plugin label “Animate with text (PixMiniMax)”; the MCP guide documents `animate_image_pixminimax` but does not repeat the provider attribution.
 - Public generation-unit examples are 1 at 32×32/4 frames, 2 at 64×64/4, 3 at 64×64/8, 5 at 64×64/16, 12 at 64×64/40, and 2 at 80×80/8.
 - The website API page shows separate USD estimates, including $0.0123 at 64×64/4, $0.0153 at 64×64/8, and $0.0471 at 256×256/40. These are estimates, not a published conversion to generation units; the independently observed values are transcribed in the [dated website pricing observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md).
 - Use the response `usage.generations` for a live PixMiniMax charge. See [PixelLab PixMiniMax vs v3 Animation Spike](pixellab-pixminimax-vs-v3-animation-spike.md) for the controlled comparison and unresolved pricing/source conflicts.
+
+## Managed PixMiniMax Update (2026-10-05)
+
+REST `POST /v2/animate-character` and `POST /v2/characters/animations`, plus MCP `animate_character(mode="pixminimax")`, now document PixMiniMax animation for stored characters. The public generation examples are 1 generation for 8 frames and 6 for 40 frames at 64×64, per direction; multiply by the requested direction count. No matching managed-mode USD estimate is published. These figures are not part of the historical 124-row arithmetic or the raw-animation estimates above. Use returned `usage.generations` for actual charges; current routing is in [animation.md](../../skills/pixellab-pip/references/animation.md).
 
 ## Key Finding
 

@@ -1,6 +1,6 @@
 # PixelLab Skeleton v3 Research Spike
 
-Current contract recheck (2026-10-03): the refreshed REST/MCP descriptions still document beta status, 3–15 frames, and a 256×256 maximum, but no longer state a Tier 1 gate. The live comparison findings below remain historical observations from the dated campaigns and were not rerun.
+Current contract recheck (2026-10-05): the refreshed REST/MCP descriptions still document beta status, 3–15 frames, and a 256×256 maximum, but no longer state a Tier 1 gate. MCP now specifies each of the 18 named joints exactly once per pose, in any order, and documents any-integer `z_index` draw order (default 0) plus `depth` from 0–255 (about 128 is body center; higher is nearer; omission uses the template's standing-pose depth for the selected direction). The live comparison findings below remain historical observations from the dated campaigns and were not rerun.
 
 ## Summary
 
@@ -168,7 +168,7 @@ The REST operation requires `description`, `action`, `direction`, `first_frame`,
 | `no_background` | Boolean, defaults to `true`; returns transparent frames when true. |
 | `seed` | Non-negative integer; `0` means random. |
 
-Each keypoint is an object with a required label and normalized `x` and `y`: `0` is the left/top edge and `1` the right/bottom edge. Optional `z_index` controls draw order (higher values draw on top; defaults to `0`). Optional `depth` is a 0–255 camera-depth value; higher means nearer. If omitted, the template body’s standing-pose depth for that direction is used. REST OpenAPI lists the 18 label values below. [Exact REST schema](https://api.pixellab.ai/v2/openapi.json) · [MCP field descriptions](https://api.pixellab.ai/mcp/docs)
+Each keypoint is an object with a required label and normalized `x` and `y`: `0` is the left/top edge and `1` the right/bottom edge. MCP docs require each of the 18 labels exactly once in the starting pose and every animation frame; order is arbitrary. Optional `z_index` accepts any integer as draw order (higher draws on top; default `0`). Optional `depth` is a 0–255 camera-depth value; higher means nearer. If omitted, the template body’s standing-pose depth for that direction is used. REST OpenAPI lists the 18 label values below. [Exact REST schema](https://api.pixellab.ai/v2/openapi.json) · [MCP field descriptions](https://api.pixellab.ai/mcp/docs)
 
 | Area | Required joint labels |
 |---|---|
@@ -179,7 +179,7 @@ Each keypoint is an object with a required label and normalized `x` and `y`: `0`
 | Left leg | `LEFT HIP`, `LEFT KNEE`, `LEFT LEG` |
 | Face and ears | `RIGHT EYE`, `LEFT EYE`, `RIGHT EAR`, `LEFT EAR` |
 
-**Schema caveat:** the OpenAPI field descriptions require all 18 joints for the starting pose and every animation pose, but the published JSON schema does not add `minItems`/`maxItems` or unique-label constraints to those arrays. Treat the prose contract as authoritative and do not infer that an incomplete array is accepted merely because its JSON shape parses. The schema publishes one 18-label set; although `template_id` includes animal bodies for depth defaults, the docs do not define a separate quadruped joint-label schema.
+**Schema caveat:** MCP prose explicitly requires each exact joint label once, while REST OpenAPI does not add `minItems`/`maxItems` or unique-label constraints to the arrays. Treat the prose contract as authoritative and do not infer that an incomplete or duplicate-label array is accepted merely because its JSON shape parses. The schema publishes one 18-label set; although `template_id` includes animal bodies for depth defaults, the docs do not define a separate quadruped joint-label schema.
 
 ### Response and job lifecycle
 
@@ -269,7 +269,7 @@ The separate REST `estimate-skeleton` helper has its own public estimates around
 |---|---|---|
 | Palette drift, background leakage, or loss of transparency | The first pose is redrawn; if `first_frame_keypoints` do not represent the pixels in the reference image, the model may learn a different color/background representation. | Match the first pose carefully, use the correct view/direction, and inspect transparency and colors across all frames. |
 | Wrong apparent depth/flat quadruped | Omitted depth is borrowed from `template_id`; default is mannequin. | Choose a matching template for supported animal depth defaults or supply depth when there is reliable depth data. The docs do not publish a distinct quadruped joint set. |
-| Unreadable or inconsistent motion | Keypoints are normalized coordinates and all 18 labels must be present, but the contract does not guarantee the model’s pixel-level interpretation. | Validate frame order, joint locations, silhouette, limb crossing/occlusion, and motion rhythm. Fix poses or manually clean the result. |
+| Unreadable or inconsistent motion | Keypoints are normalized coordinates and each of the 18 labels must occur exactly once (order is arbitrary), but the contract does not guarantee the model’s pixel-level interpretation. | Validate frame order, joint locations, silhouette, limb crossing/occlusion, and motion rhythm. Fix poses or manually clean the result. |
 | Wrong camera angle or facing | `view` and `direction` determine how the pose is interpreted. | Match the source sprite’s view; set required direction intentionally instead of relying on a default (REST has none). |
 | Incorrect output count | There must be one target skeleton per requested output frame. | Confirm `keypoints.length` is between 3 and 15 and inspect that the returned `images` count equals it. |
 | Submission rejected before a job is accepted | `POST /animate-with-skeleton-v3` returns 401 for an invalid token, 402 for insufficient credits, 422 for validation errors, or 429 when too many background jobs are concurrent. HTTP 200 means the background job was accepted; it does not mean the animation completed. | Check credentials, credits, request shape, and concurrency. Correct the cause before resubmitting; do not blindly repeat a potentially paid generation. |

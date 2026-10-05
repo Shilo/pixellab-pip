@@ -1,6 +1,6 @@
 # PixelLab Font Generation Spike
 
-Last reviewed: 2026-08-06 (current schema); live test 2026-07-11.
+Last reviewed: 2026-08-06 (REST schema); live test 2026-07-11. MCP docs checked 2026-10-05.
 
 Purpose: capture live findings for PixelLab font generation via REST `generate-font-pro`, starting with the first `glyph_px: 8` test. This is a research spike for route behavior, response shape, and quality expectations. It is not a canonical agent instruction contract.
 
@@ -20,6 +20,7 @@ The completed job's `last_response` holds:
 
 - `ttf_base64` — **the actual deliverable: a TrueType font file.** Decode and use this; a font is judged by rendering text with the TTF.
 - `images[0]` — a glyph-**atlas** preview (`{type, width, height, base64}`): every glyph laid out in a grid. This is the character map, not sample text, so it never "reads" as words. Do not treat it as the output or as a legibility test.
+- Current MCP `create_font` docs describe this atlas as 10×8 row-major cells for `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,!?:;'"-+()0123456789/%*=_$`; cell `i` represents character `i`, and there is no space glyph.
 - `font_name`, `glyph_px`, `weight`, `seed`.
 - `suspect_glyphs` — a list of glyph indices the model self-flagged as low quality.
 - `billing_usage` / `usage`, `billing_charged`, `progress`.
@@ -57,7 +58,7 @@ Local run outputs (not committed showcase assets) are in the `pixellab-pip-gener
 
 - `weight: "Bold"` — thicker strokes may survive `8px` better.
 - `glyph_px: 16` and up — expected to be clearly legible; not yet tested.
-- MCP `create_font` versus REST parity — not live-compared; current documented fields agree on `glyph_px` and no longer include `image_size`.
+- MCP `create_font` versus REST output parity — not live-compared; current docs agree on `glyph_px` and omit `image_size`, and MCP now documents the 10×8 glyph order above.
 - Whether re-rolling the `seed` or adjusting the description reduces `suspect_glyphs` at `8px`.
 
 ## Verification Guidance

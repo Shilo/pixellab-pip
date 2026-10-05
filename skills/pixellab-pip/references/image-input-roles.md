@@ -19,6 +19,10 @@ Run supplied artwork through `POST /unzoom` (MCP `unzoom_image`, 0.1 generations
 Large base64-only MCP inputs can be truncated by the client. When exact pixels matter and no URL field
 exists, use the equivalent REST route; never silently shrink or quantize a user image.
 
+## REST Upload References
+
+When a public PixelLab tool accepts an image URL and the source has no usable URL, REST `POST /uploads` accepts a PNG, JPEG, or image Pillow reads as multipart `file` and returns a temporary `ref`. Pass that `ref` only to fields documented to accept an image URL. The bearer-authenticated upload stores the image for three days, runs no generation, and is not charged; it is hidden after three days and deleted a day later. Do not use it for fields that specifically require a base64 image.
+
 ## Goal Router
 
 | User goal | Use this role | Meaning | Common fields/endpoints |

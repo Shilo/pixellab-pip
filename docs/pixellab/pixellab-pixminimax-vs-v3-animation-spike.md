@@ -1,6 +1,6 @@
-# PixelLab PixMiniMax (MiniMax H3) vs v3 Animation Spike
+# PixelLab Raw PixMiniMax (MiniMax H3) vs v3 Animation Spike
 
-Last reviewed: 2026-10-03.
+Last reviewed: 2026-10-05.
 
 Status: completed. This spike records the refreshed public contract, a source-backed MiniMax H3 prompt adaptation, website and Aseprite research, and a paired live comparison against PixelLab's v3 raw animation route. The planned fixed-seed control was not achieved because every executed request sent `seed=0`, which PixelLab documents as random.
 
@@ -244,7 +244,9 @@ These replays show why the C2 visually exact v3 endpoint is a **case result**, n
 
 ## Routing and verification recommendations
 
-1. Route an explicit PixMiniMax, PixMiniMax/H3, or MiniMax H3 request to REST POST /v2/animate-pixminimax or MCP animate_image_pixminimax. Route an unspecified raw animation request to the existing v3 family.
+This comparison covers raw supplied-frame animation only. Managed-character PixMiniMax was added to the public API afterward and was not generated or evaluated in this study. For an explicit request on an existing managed character, use REST `/animate-character` or `/characters/animations` with `mode="pixminimax"`, or MCP `animate_character(mode="pixminimax")`; for a raw supplied image, use the routes compared here.
+
+1. Route an explicit raw PixMiniMax request to REST `POST /v2/animate-pixminimax` or MCP `animate_image_pixminimax`. The public API catalog identifies the REST operation as powered by MiniMax H3 and lists plugin label “Animate with text (PixMiniMax)”; the MCP guide names `animate_image_pixminimax` without repeating that attribution. If the H3 provider is required, use REST. Route an unspecified raw animation request to the existing v3 family.
 2. For PixMiniMax prompts, start the action on frame 1, order visible phases, say “in place” for locomotion, preserve identity anchors positively, and keep the field motion-only. Use enhancement for short ambiguous wording when the approximately 0.05-generation surcharge is acceptable.
 3. Use PixMiniMax's independent `direction`, `view`, `subject_description`, and `initial_pose` caption fields when needed. Do not copy MiniMax H3's audio, reference-label, shot, or soundscape fields into PixelLab's description.
 4. Use last_frame for a real target pose or transition. Treat identical/near-identical anchors as high risk for low-motion loops, and inspect the middle frames even when the endpoints match.

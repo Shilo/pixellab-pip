@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-03 (Pro Flash native sizes and Skeleton v3 contract wording refreshed).
+Last reviewed: 2026-10-05 (managed PixMiniMax animation size and frame contract refreshed).
+
+> **2026-10-05 API refresh.** Managed character animation adds the documented PixMiniMax mode: up to 40 frames at the stored character size (“any size” in the public description). Its optional custom start frame is capped at 256×256; managed v3 remains capped at 256×256. The 2026-10-03 and 2026-09-25 notes below are retained as earlier snapshot records.
 
 > **2026-10-03 API refresh.** Pro Flash adds native `48x48` and `128x128` presets to image, character, and object creation. The refreshed Skeleton v3 REST/MCP descriptions retain beta status and the 3–15 / 256×256 limits but no longer state a Tier 1 gate. The 2026-09-25 note below is retained as the earlier snapshot record.
 
@@ -231,7 +233,7 @@ The two AI-rotation pipelines floor at 32 **over REST**; the two template/skelet
 | `animate-pixminimax` | `first_frame` / `last_frame` | — | 256×256 | Beta route powered by MiniMax H3. Endpoint prose allows 4–40 generated frames in multiples of four at any input size up to 256×256; unlike v3, the current public description does not state the v3 total-pixel budget. Response contains `frame_count+1` images. |
 | `animate-with-skeleton-v3` | `first_frame` | — | 256×256 | Beta; requires 3–15 keypoint frame sets, each with the named 18 joints. The refreshed REST/MCP descriptions no longer state a Tier 1 gate. Returns exactly one output frame per `keypoints` entry. |
 | `animate-with-skeleton` | `image_size` | 16×16 | 256×256 | Schema is a continuous 16–256 range, but the endpoint prose lists **only 16/32/64/128/256** as supported. See the discrete-size caveat below. |
-| `animate-character` / `characters/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
+| `animate-character` / `characters/animations` | frames | — | mode-specific | Managed v3 is capped at 256×256. PixMiniMax supports up to 40 frames at the stored character size (public docs say “any size”); its optional custom start frame is capped at 256×256. Do not apply that custom-frame limit to the stored character canvas. |
 | `objects/{object_id}/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
 | `edit-animation-v2` | `image_size` | 16×16 | 256×256 | |
 | `interpolation-v2` | `image_size` | 16×16 | 128×128 | |

@@ -37,9 +37,9 @@ REST `/estimate-skeleton` estimates keypoints for one pose and remains a shared 
 
 ## MCP vs REST v2 Field Coverage
 
-The current public MCP `animate_character` schema includes managed-template, v3 custom, Skeleton v3, and pro modes. It exposes `mode`, `template_animation_id`, `directions`, `frame_count` (v3 only), `ai_freedom` (template only), custom start/end frame base64/URL fields, `keep_first_frame`, `animation_group_id`, and `confirm_cost` (pro). Connected client schemas may lag; check the visible mode before calling managed Skeleton v3. Separate MCP `animate_with_skeleton_v3` accepts a raw reference image and keypoint sequence; it does not expose REST `/estimate-skeleton`.
+The current public MCP `animate_character` schema exposes `template`, `skeleton-v3`, `v3`, and `pixminimax` modes; it does not expose managed `pro`. It includes `template_animation_id`, `directions`, mode-specific `frame_count`, template-only `ai_freedom`, custom start/end frame base64/URL fields for v3 and PixMiniMax, `keep_first_frame`, `animation_group_id`, and PixMiniMax-only `subject_description`/`initial_pose`. It does not expose REST's inline `enhance_prompt`. Connected client schemas may lag; check the visible mode before calling managed Skeleton v3 or PixMiniMax. Separate MCP `animate_with_skeleton_v3` accepts a raw reference image and keypoint sequence; it does not expose REST `/estimate-skeleton`.
 
-It is not field-for-field equivalent to REST `/characters/animations`. REST exposes extra exact-control fields MCP lacks: `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` (v3 mode). Use REST when those fields matter, for integration code, or to validate exact API behavior.
+It is not field-for-field equivalent to REST `/characters/animations`. REST additionally exposes `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` (v3 mode); REST also retains managed `pro`. The REST `subject_description` and `initial_pose` fields are PixMiniMax-only and accept 1–300 characters. Use REST when those extra fields matter, for integration code, or to validate exact API behavior.
 
 ## Managed Preset Animation (MCP)
 
@@ -63,7 +63,7 @@ animate_character(
 )
 ```
 
-To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only mode that accepts a reference sprite, always outputs 8 directions, and prefers the URL form over inline base64 (MCP clients truncate large inline base64) — then animate the returned `character_id` with MCP once the character completes (verified for a horse-headed biped from a source GIF frame). Fall back to REST `create-character-v3` (`description`, `reference_image`, `template_id="mannequin"`, `view`/`no_background`) when MCP is unavailable or `template_id`/`no_background`/`enhance_prompt` matter.
+To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only MCP mode that accepts a reference sprite, always outputs 8 directions, and prefers the URL form over inline base64 (MCP clients truncate large inline base64). For MCP v3 with a reference image, use the mannequin body plan; MCP quadruped v3 works from text with a matching `body_type="quadruped"` and `template`, but not with a reference image. REST `create-character-v3` supports a quadruped reference when `template_id` matches the animal body type. Then animate the returned `character_id` once the character completes. Fall back to REST when MCP is unavailable or REST's matching `template_id`, `no_background`, or `enhance_prompt` fields matter.
 
 For a newly created quadruped:
 
@@ -121,15 +121,16 @@ Request shape:
 | Field | Guidance |
 |---|---|
 | `character_id` | Required. Managed character must belong to the authenticated user. |
-| `mode` | Use `template` for preset animation ids. Providing `template_animation_id` may auto-detect template mode, but be explicit. |
+| `mode` | `template`, `skeleton-v3`, `v3`, `pixminimax`, or REST-only `pro`. Use `template` for preset ids; an omitted mode may auto-detect template when `template_animation_id` is provided, but be explicit. |
 | `template_animation_id` | Exact preset id. Do not pass display labels. |
 | `directions` | Be explicit to avoid accidental all-direction generation. |
-| `frame_count` | Only for `mode="v3"` custom text animation. Ignored by preset template mode; do not set it expecting it to override `walking-8-frames`. |
-| `custom_start_frame` | Optional v3-only starting pose. Requires exactly one direction, uses the character's stored direction frame when omitted, incompatible with template/pro mode. |
-| `end_frame` | Optional v3-only target pose for interpolation. Dimensions must match the start frame, requires exactly one direction, incompatible with template/pro mode. |
-| `keep_first_frame` | v3-only, default `true`. Controls whether the reference frame is stored as frame 0 (see Frame Count). Incompatible with template/pro mode. |
-| `action_description` | Required for custom v3/pro. Optional in template mode; use only for light customization. |
-| `enhance_prompt` | Only for v3 custom mode; do not set it for template/pro. |
+| `frame_count` | v3: even 4–16; PixMiniMax: multiples of 4 from 4–40; default 8. Ignored by template, Skeleton v3, and pro; it does not override a preset's frame count. |
+| `custom_start_frame` | Optional starting pose for v3 or PixMiniMax. Requires exactly one direction; max 256×256. Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
+| `end_frame` | Optional target pose for v3 or PixMiniMax interpolation. Dimensions must match the start frame, requires exactly one direction, and is not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
+| `keep_first_frame` | v3 or PixMiniMax, default `true`. Controls whether the reference frame is stored as frame 0 (see Frame Count). Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
+| `action_description` | Optional in the MCP schema; provide it for custom v3 or PixMiniMax motion. REST requires it when `template_animation_id` is omitted. In template mode, use it only for light customization. |
+| `subject_description`, `initial_pose` | Optional PixMiniMax-only character and starting-pose captions; REST strings are 1–300 characters. |
+| `enhance_prompt` | REST only, valid for v3 custom mode; do not set it for template, PixMiniMax, pro, or Skeleton v3. |
 
 Polling:
 
@@ -185,7 +186,7 @@ Use this route when the user explicitly wants the new skeleton workflow or suppl
 
 Use MCP `animate_with_skeleton_v3` when available, or REST `POST /v2/animate-with-skeleton-v3` for code and exact REST control. REST returns a background job; poll `GET /background-jobs/{job_id}`. MCP returns a job ID; retrieve the result with `get_image`. The result contains exactly `len(keypoints)` frames, in input order; it does not echo the reference frame.
 
-The first pose is redrawn from the prompt and keypoints, so provide a close reference pose: a mismatch can affect the learned palette, background, and transparency. The input image is limited to 256×256. Supply all 18 named joints in `first_frame_keypoints` and each `keypoints` frame. `description` is an appearance noun phrase (not pose, motion, style, or background); `action` is a short motion label because the keypoints carry the pose sequence. REST requires `direction`; `view` defaults to `low top-down` and `template_id` to `mannequin`, so set view/direction when the art needs a specific camera. Use the live schema for exact joint names and optional depth fields. Current cost examples are in `cost-routing.md`.
+The first pose is redrawn from the prompt and keypoints, so provide a close reference pose: a mismatch can affect the learned palette, background, and transparency. The input image is limited to 256×256. Supply each of the 18 named joints exactly once in `first_frame_keypoints` and every `keypoints` frame; their order is arbitrary. The joint labels are listed below. Optional `z_index` accepts any integer as draw order (higher draws on top; default 0). Optional `depth` is 0–255 (about 128 is body center; higher is nearer); when omitted, the template's standing-pose depth for that direction is used. `description` is an appearance noun phrase (not pose, motion, style, or background); `action` is a short motion label because the keypoints carry the pose sequence. REST requires `direction`; `view` defaults to `low top-down` and `template_id` to `mannequin`, so set view/direction when the art needs a specific camera. Current cost examples are in `cost-routing.md`.
 
 For an existing managed character, use MCP `animate_character(mode="skeleton-v3", template_animation_id=...)` when the connected schema exposes that mode; otherwise use REST `POST /animate-character` with `mode="skeleton-v3"` and `template_animation_id`. Use `animate_with_skeleton_v3` or REST `/animate-with-skeleton-v3` when the user supplies an independent raw keypoint sequence.
 
@@ -475,7 +476,7 @@ If an animation exists for one template family but not another, say so and offer
 ## Frame Count
 
 - Preset template mode owns its frame count through the selected template id; do not set `frame_count` expecting it to override `walking-8-frames`.
-- V3 custom mode owns frame count through `frame_count` 4-16, even only, default 8. V3 also stores the reference frame as frame 0 (so `frame_count=8` stores 9 frames) unless `keep_first_frame=false`; details in `animation.md`.
+- V3 custom mode uses `frame_count` 4–16, even only, default 8. Managed PixMiniMax mode uses multiples of 4 from 4–40, default 8. Both store the reference frame as frame 0 unless `keep_first_frame=false`; details in `animation.md`.
 - Report the actual returned frame count if it differs from the id or expectation.
 
 ## Verification

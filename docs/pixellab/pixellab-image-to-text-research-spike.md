@@ -6,7 +6,7 @@
 
 The endpoint is useful when an agent needs PixelLab to describe an image it cannot otherwise inspect, or needs PixelLab's own image-conditioned caption/answer. Skip it when the image is already visually available to the agent, when the task is only to improve text for one known route, when structured pixel-art inspection is needed from MCP Workbench, or when the user wants the image converted rather than described. The added call may be unnecessary overhead in those cases.
 
-Checked against the current PixelLab sources on **2026-09-25**. No paid endpoint call was made for this research.
+Checked against the current PixelLab sources on **2026-10-05**. No paid endpoint call was made for this research.
 
 ## What The Endpoint Does
 
@@ -40,7 +40,7 @@ This is a contract-level conclusion, not a measured quality comparison. The curr
 
 ## MCP And Workbench Comparison
 
-The current public MCP tool guide has no `image_to_text` tool and documents none of the three REST `enhance-*` routes as MCP tools. MCP `agent_help` and `search_knowledge` answer questions about PixelLab's tools and documentation; they do not accept a source image for visual Q&A. [MCP tool guide](https://api.pixellab.ai/mcp/docs)
+The current public MCP tool guide has no `image_to_text` tool and documents none of the three REST `enhance-*` routes as MCP tools. MCP `search_help` and `search_knowledge` answer questions about PixelLab's tools and documentation; they do not accept a source image for visual Q&A. [MCP tool guide](https://api.pixellab.ai/mcp/docs)
 
 `pixelart_workbench` is the closest MCP-side adjacent capability, not a one-for-one equivalent. Its tool contract accepts an image reference and its commands can inspect or analyze pixel art: `inspect` returns frame sheets or exact-color crops; `score` reports pixel-art discipline; `extract-palette` proposes colors and ramps; `lint`, `measure`, `clusters`, `silhouette`, and `motion` report specialized findings. Those outputs serve concrete pixel-art review and editing workflows. The documented command list does not offer a generic “describe this image as a generation prompt” or arbitrary image-question endpoint. This command distinction was checked through the live, read-only Workbench `describe cli` and command help on 2026-09-25; the public MCP guide describes Workbench as a tool that checks, explains, and improves drawings. [MCP tool guide](https://api.pixellab.ai/mcp/docs)
 

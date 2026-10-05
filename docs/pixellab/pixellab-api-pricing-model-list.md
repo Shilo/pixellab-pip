@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-10-03.
+Last reviewed: 2026-10-05.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -23,7 +23,7 @@ Primary sources:
 ## Version 0.4.123 Product Update
 
 - **Pro Flash (Beta):** the single-image option is advertised at 4–6 generations and a maximum size of `256x256`. The current REST OpenAPI describes a provisional five-generation first-image estimate for `POST /v2/create-image-pro-flash`; query `GET /v2/pro-flash/cost` when an estimate matters and report completed-job usage.
-- **PixMiniMax:** available to Tier 1+ subscribers and surfaced in Character Creator, Creator, Aseprite, and Pixelorama. Programmatic routing remains REST `POST /v2/animate-pixminimax` or MCP `animate_image_pixminimax`.
+- **PixMiniMax:** available to Tier 1+ subscribers and surfaced in Character Creator, Creator, Aseprite, and Pixelorama. For a managed character, use REST `POST /v2/animate-character` or `/v2/characters/animations` with `mode="pixminimax"`, or MCP `animate_character(mode="pixminimax")`; the mode is beta and supports 4–40 frames in multiples of four. Public examples list 1 generation for 8 frames and 6 for 40 frames at 64×64, per direction; multiply by the requested direction count. For raw supplied frames, use REST `POST /v2/animate-pixminimax` or MCP `animate_image_pixminimax`; the public API catalog identifies the raw REST operation as powered by MiniMax H3 and lists the plugin label “Animate with text (PixMiniMax)”. The MCP guide does not repeat the provider attribution. See [animation routing](../../skills/pixellab-pip/references/animation.md).
 - **Game Builder:** available to Tier 1+ subscribers. It is a visible product workflow; public MCP project/chat/sandbox helpers can provide approved project context, but no dedicated public REST v2 Game Builder endpoint is documented. See the [official tutorial/showcase](https://youtu.be/Iaxk_8ftJ5s).
 - **Creator queue:** submitted Creator work is queued so closing or changing the window does not discard the job. This is a product/UI behavior, not a new public REST route.
 - **Map export:** Map Workshop can export for Godot and Unity. The public REST v2 inventory still has no map or map-export route; MCP map tools remain the programmatic map surface.
@@ -99,7 +99,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 |---|---|---|---|---|
 | Animate with text | `POST /v2/animate-with-text` | Base text animation | 64x64 text animation with init/inpainting/palette options | `64x64`, 4 frames: `$0.01565` |
 | Animate with text (new) | `POST /v2/animate-with-text-v3` | v3 text animation | First-frame animation, optional last-frame guidance, 4-16 frames, up to 256x256 | `32x32`, 4 frames: `$0.0221`; `256x256`, 8 frames: `$0.0302`; `128x128`, 16 frames: `$0.0424` |
-| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | PixMiniMax animation, publicly disclosed as powered by MiniMax H3 | Tier 1+; beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Current official estimates (2026-09-25): `64x64`, 4 frames `$0.0178`; 8 `$0.0231`; `256x256`, 8 `$0.0231`; 40 `$0.0787`. The lower estimates independently observed on 2026-09-12 are historical; see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). Use returned `usage.generations` for charged usage. |
+| Animate with text (PixMiniMax) | `POST /v2/animate-pixminimax` | Raw PixMiniMax operation; public API catalog identifies it as powered by MiniMax H3 and lists plugin label “Animate with text (PixMiniMax)” | Tier 1+; beta; first/end frame anchors, 4-40 generated frames in multiples of four, up to 256x256 | Current official estimates (2026-09-25): `64x64`, 4 frames `$0.0178`; 8 `$0.0231`; `256x256`, 8 `$0.0231`; 40 `$0.0787`. The lower estimates independently observed on 2026-09-12 are historical; see [dated observation](pixellab-pixminimax-website-pricing-observation-2026-09-12.md). Use returned `usage.generations` for charged usage. |
 | Animate with skeleton (v3) | `POST /v2/animate-with-skeleton-v3` | Skeleton-guided animation from 3–15 keypoint frames | Beta; max 256x256; matched MCP tool `animate_with_skeleton_v3`; refreshed REST/MCP descriptions no longer state a Tier 1 gate | Official estimates: 3 frames `$0.0436`; 8 `$0.0513`; 15 `$0.0622`. The managed-character `skeleton-v3` mode documents 2–4 generations per direction; check returned usage. |
 | Animate with text (Pro) | `POST /v2/animate-with-text-v2` | Pro text animation | Reference-image animation, 4/9/16 frames, view and direction controls | up to `128x128 $0.095`; up to `170x170 $0.125`; up to `256x256 $0.185` |
 | Animate with skeleton | `POST /v2/animate-with-skeleton` | Skeleton-guided animation | Pose/skeleton-driven animation up to 256x256 (endpoint prose lists 16/32/64/128/256; priced rows below stop at 128x128) | `32x32 $0.0136`; `64x64 $0.01433`; `128x128 $0.01572` |
@@ -128,7 +128,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 | Create character v3 | `POST /v2/create-character-v3` | v3 8-direction character | `64x64 $0.041`; `128x128 $0.042`; `168x168 $0.045` |
 | Portrait to character / character to portrait (Pro) | `POST /v2/portrait-character-pro` | Pro portrait-character conversion | Convert a portrait image to a full-body character or the reverse | current public pricing page has no USD row; verify current usage before cost-sensitive calls |
 | Set character portrait | `POST /v2/characters/{character_id}/portrait` | Managed portrait attachment | Attach or replace the portrait used by vocal animation | Free and synchronous; replacing an existing portrait is destructive |
-| Animate character | `POST /v2/animate-character` | Character animation, per direction | template `64x64 $0.0323`, `128x128 $0.0956`; v3 4 frames `64x64 $0.0129`, `128x128 $0.0145`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
+| Animate character | `POST /v2/animate-character` | Managed character animation, per direction; modes include template, v3, PixMiniMax, and Pro (REST only) | template `64x64 $0.0323`, `128x128 $0.0956`; v3 4 frames `64x64 $0.0129`, `128x128 $0.0145`; PixMiniMax: 8 frames at `64x64` = 1 generation and 40 frames = 6 generations (generation units, no matching USD estimate published); Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create character state | `POST /v2/create-character-state` | Character state/variant | up to `84x84 $0.095`; up to `112x112 $0.125`; up to `168x168 $0.185` |
 | Create single direction objects | `POST /v2/create-1-direction-object` | Style-consistent object candidates | up to `168x168 $0.095` |
 | Create 8 directional objects | `POST /v2/create-8-direction-object` | 8-direction object | up to `84x84 $0.095`; up to `112x112 $0.125`; up to `168x168 $0.185` |
@@ -150,7 +150,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 - For cheap image prompt iteration, start with Pixflux or Pixen.
 - For multiple image candidates from one call, use Pro image generation.
 - For first-frame animation or chained VFX animation, prefer `animate-with-text-v3`.
-- For an explicit PixMiniMax/MiniMax H3 request, use `animate-pixminimax`; it supports longer clips than v3 but has a distinct cost model and motion-prompt contract.
+- For an existing managed character, select `mode="pixminimax"` on the managed character animation route; its provider is not disclosed. For supplied raw frames, use `animate-pixminimax`; the public API catalog identifies the REST operation as powered by MiniMax H3, while the MCP guide does not repeat the attribution. Follow the field and frame limits in [animation routing](../../skills/pixellab-pip/references/animation.md).
 - For Pro text animation with view/direction fields and a reference image, use `animate-with-text-v2`.
 - Exception for duplicate-filled atlases: observed `animate-with-text-v3` runs synchronized repeated cells instead of making them unique phases. `animate-with-text-v2` followed the cell-diversity instruction reasonably well, but produced lower apparent quality and greater color drift. Prefer single-sprite animation plus local atlas assembly; use Pro only as an approved tradeoff candidate.
 - For managed character/object assets, prefer the resource-specific character/object endpoints or MCP tools instead of raw image animation endpoints.

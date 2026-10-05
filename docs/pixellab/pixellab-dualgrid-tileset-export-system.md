@@ -1,6 +1,6 @@
 # PixelLab DualGrid Tileset Export System
 
-Last reviewed: 2026-08-09.
+Last reviewed: 2026-10-05.
 
 Purpose: document the observed DualGrid/Wang export contract for PixelLab tilesets so local tools can simulate the deterministic parts of tileset assembly before spending generations.
 
@@ -120,6 +120,8 @@ REST v2 routes:
 - `GET /v2/background-jobs/{job_id}`
 - `POST /v2/create-tiles-pro`
 - `GET /v2/tiles-pro/{tile_id}`
+
+The MCP guide additionally documents unauthenticated direct downloads for top-down tilesets: `GET /mcp/tilesets/{id}/image` (use `?inline=true` to return bytes instead of a CDN redirect) and `GET /mcp/tilesets/{id}/metadata`. These are MCP download helpers, not REST v2 routes or separate MCP tools. The tileset UUID is the access key; keep it private. While generation is pending, both paths return 423 with `Retry-After`.
 
 REST top-down tileset creation uses `CreateTilesetRequest`. Key fields are `lower_description`, `upper_description`, `transition_description`, `tile_size`, `mode`, `view`, `shape_style`, `transition_size`, style controls, guidance/adherence controls, base tile IDs, reference images, `color_image`, and `seed`. `shape_style` is optional (`square` or `round`), supports square 16px or 32px tiles, and makes `transition_size` continuous from 0 to 1; values above 0.5 use an extended 4x8 layout.
 

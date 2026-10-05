@@ -1,6 +1,6 @@
 # PixelLab Surfaces And Services
 
-Last reviewed: 2026-10-03.
+Last reviewed: 2026-10-05.
 
 Purpose: explain how PixelLab's public APIs, agent tools, website/editor surfaces, SDKs, and local integrations differ so Pip can choose the right automation boundary.
 
@@ -47,7 +47,8 @@ Use this order for most agent work:
 - `https://api.pixellab.ai/v1` is the legacy public REST API base.
 - Undocumented root or unversioned endpoints under `https://api.pixellab.ai/` that are used by first-party surfaces such as the website or Aseprite extension are not public REST v1/v2 just because they share a host or operation name.
 - Website login/session credentials are not the same thing as the public REST/MCP bearer token.
-- Product labels such as `Pro`, the separate `Pro Flash` family, `v3`, `new`, `Pixen`, `PixFlux`, `PixMiniMax`, and `BitForge` need to be interpreted in the context of the selected surface. The public MiniMax H3 disclosure is scoped to `POST /v2/animate-pixminimax`; it does not make website/editor transports or standalone H3 fields public.
+- Product labels such as `Pro`, the separate `Pro Flash` family, `v3`, `new`, `Pixen`, `PixFlux`, `PixMiniMax`, and `BitForge` need to be interpreted in the context of the selected surface. The public API catalog and REST operation description identify raw `POST /v2/animate-pixminimax` as powered by MiniMax H3; the MCP guide does not repeat that attribution, and the managed mode's provider remains undisclosed. This does not make website/editor transports or standalone H3 fields public.
 - Version 0.4.123 product additions do not expand the documented REST v2 inventory: Creator queueing, Tier 1+ Game Builder, and Godot/Unity export from Map Workshop are product/UI behavior. Use the visible surface for those features; keep map CRUD on the public MCP map tools and do not invent REST routes for Game Builder or map export.
 - Version 0.4.125 adds the MCP-only `pixelart_workbench`, matched REST/MCP Skeleton v3 routes, and REST-only `POST /image-to-text`. Skeleton v3 is also available in Character Creator, Aseprite, and Pixelorama. The release announcement reports roughly 70% lower token consumption from PixelLab testing; it is an estimate, not an independently verified result here.
 - The 2026-10-03 public-contract refresh adds REST `DELETE /background-jobs/{job_id}` and the two animation-group/direction delete routes, plus MCP `list_images`, `save_to_asset`, and `transfer_outfit`. `transfer_outfit` matches REST `POST /transfer-outfit-v2`; gallery browsing/save-back remain MCP-only. The refreshed Skeleton v3 descriptions retain beta status and limits but no longer state a Tier 1 gate.
+- The 2026-10-05 public-contract refresh adds temporary REST `POST /uploads` references and managed PixMiniMax mode on REST `/animate-character` and `/characters/animations` plus MCP `animate_character`. MCP replaces `agent_help` with `search_help`; no net tool-count change. Raw PixMiniMax remains a separate route, and its MiniMax H3 disclosure does not apply to managed mode. See [REST/MCP parity](pixellab-mcp-vs-rest-route-parity.md) and [animation routing](../../skills/pixellab-pip/references/animation.md) for exact behavior.

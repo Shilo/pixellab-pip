@@ -8,6 +8,10 @@ Scope: developer-facing research on PixelLab preset skeleton/template character 
 
 The 2026-10-03 docs refresh confirms Skeleton v3 as a distinct route: REST `POST /animate-with-skeleton-v3` matches MCP `animate_with_skeleton_v3`, and managed character animation adds `mode="skeleton-v3"`. The beta accepts 3–15 per-frame keypoint sets from a reference image up to 256×256; the refreshed REST/MCP descriptions no longer state a Tier 1 gate. The release also lists Character Creator, Aseprite, and Pixelorama as product surfaces for Skeleton v3. This is newer than the legacy `/animate-with-skeleton` workflow documented below; the earlier text-animation recommendation and three-pose limits apply only to those older routes. For the current v3 contract, workflow comparisons, pros/cons, and video transcript findings, see the [Skeleton v3 research spike](pixellab-skeleton-v3-research-spike.md). The research and visual observations below remain dated findings; this update did not run paid generation tests.
 
+## 2026-10-05 Contract Addendum
+
+The managed character animation schema now documents `mode="pixminimax"` on REST `/animate-character` and `/characters/animations`, with MCP `animate_character` exposing the same mode. It accepts 4–40 frames in multiples of four; the shared schema defaults to 8. REST still exposes `mode="pro"` at 20–40 generations per direction, which the current MCP mode list does not. Managed v3 and PixMiniMax both accept optional custom start/end frames and `keep_first_frame`; PixMiniMax also accepts `subject_description` and `initial_pose`. REST prompt enhancement remains v3-only. These are contract updates only; no managed PixMiniMax jobs were run.
+
 ## Executive Summary
 
 PixelLab has two broad animation categories with four related but distinct workflows:
@@ -165,7 +169,7 @@ Current OpenAPI documents two managed character animation paths:
 
 | Endpoint | Notes |
 | --- | --- |
-| `POST /v2/characters/animations` | Current documented managed character animation endpoint. The schema describes `template`, `v3`, and `pro` modes. |
+| `POST /v2/characters/animations` | Current documented managed character animation endpoint. The shared schema describes `template`, `skeleton-v3`, `v3`, `pixminimax`, and `pro` modes. |
 | `POST /v2/animate-character` | Also documented with the same request schema. Older descriptive text remains here, but the schema is current. |
 
 Both use `CreateCharacterAnimationRequest`.
@@ -175,15 +179,18 @@ Key request fields:
 | Field | Role |
 | --- | --- |
 | `character_id` | Existing managed character id. Required. |
-| `mode` | `template`, `v3`, or `pro`. Auto-detected as `template` when `template_animation_id` is provided; otherwise `v3`. |
+| `mode` | `template`, `skeleton-v3`, `v3`, `pixminimax`, or `pro`. Auto-detected as `template` when `template_animation_id` is provided; otherwise `v3`. |
 | `template_animation_id` | Preset skeleton/template animation id. Required for template mode. |
-| `action_description` | Required for custom `v3`/`pro`; optional customization/description in template mode. |
+| `action_description` | Required for custom `v3`, `pixminimax`, or `pro`; optional customization/description in template mode. |
 | `animation_name` | Name stored for this animation; defaults from action when omitted. |
 | `directions` | Directions to animate. Template mode defaults to all available character directions. Custom mode defaults to south only. |
-| `frame_count` | Only used in `v3` custom mode. Even integer 4-16, default 8. Ignored by template mode. |
+| `frame_count` | v3 mode: even 4–16; PixMiniMax: multiple of 4 from 4–40; default 8. Ignored by template, Skeleton v3, and pro. |
 | `outline`, `shading`, `detail` | Template-mode style overrides. Defaults to character settings. |
 | `text_guidance_scale` | Template-mode prompt following strength. |
-| `enhance_prompt` | Only valid for `mode="v3"`; not for template/pro. |
+| `custom_start_frame`, `end_frame` | Optional in v3 and PixMiniMax; require exactly one direction, end dimensions must match the start, and neither is compatible with template or pro. |
+| `keep_first_frame` | v3 and PixMiniMax only, default `true`; set false to store exactly `frame_count` generated frames. Not compatible with template or pro. |
+| `subject_description`, `initial_pose` | PixMiniMax only; each REST string is 1–300 characters. |
+| `enhance_prompt` | Only valid for `mode="v3"`; not for template, PixMiniMax, or pro. |
 
 Secondary request fields include `description`, `color_image`, `force_colors`, `isometric`, and `seed`. These can matter for exact API integrations, especially when trying to reduce template-mode style drift, but they should not be confused with the primary preset contract: `character_id`, `mode="template"`, `template_animation_id`, and explicit `directions`.
 
@@ -279,9 +286,11 @@ Relevant tools:
 | `action_description` | Custom motion text; optional in template mode. |
 | `animation_name` | Stored name. |
 | `directions` | Requested directions. |
-| `mode` | `template`, `v3`, or `pro` when exposed by the tool. |
-| `frame_count` | Default 8; relevant for v3 custom animations. |
-| `confirm_cost` | Cost confirmation gate in MCP. |
+| `mode` | `template`, `skeleton-v3`, `v3`, or `pixminimax`; the current MCP schema does not expose `pro`. |
+| `frame_count` | Default 8; v3 uses even 4–16, PixMiniMax uses multiples of four from 4–40. |
+| `custom_start_frame_*`, `end_frame_*` | Optional v3/PixMiniMax anchors; custom start is capped at 256×256. Prefer URL forms for large images. Require one direction; end frame dimensions must match the start. |
+| `keep_first_frame` | v3 or PixMiniMax only; defaults to true. |
+| `subject_description`, `initial_pose` | PixMiniMax-only captions; REST accepts 1–300 characters per field. Omit to infer from the character image. |
 
 Recommended MCP flow for preset skeleton/template animations:
 
@@ -300,7 +309,7 @@ For managed preset template animations, MCP and REST v2 expose essentially the s
 | Create managed characters | Yes, simpler agent-facing schema. | Yes, fuller exact schemas across multiple endpoints. |
 | Animate existing character with preset id | Yes, `animate_character`. | Yes, `POST /characters/animations` / `POST /animate-character`. |
 | Select directions | Yes. | Yes. |
-| Select mode `template` / `skeleton-v3` / `v3` / `pro` | Yes when the connected tool schema exposes the mode; refresh a stale connection if it does not. | Yes in OpenAPI schema. |
+| Select mode `template` / `skeleton-v3` / `v3` / `pixminimax` | Yes when the connected tool schema exposes the mode; refresh a stale connection if it does not. | Yes in OpenAPI schema, plus REST-only `pro`. |
 | Exact schema introspection | Limited to MCP tool schema/docs visible in client. | Strong, via OpenAPI. |
 | Managed polling/download helpers | Strong, through `get_character`. | Available via background jobs and character endpoints. |
 | Raw Skeleton v3 keypoints | MCP `animate_with_skeleton_v3` accepts caller-supplied per-frame keypoints; it has no estimator. | `POST /animate-with-skeleton-v3` accepts the matching raw v3 sequence; `POST /estimate-skeleton` estimates one pose. |
@@ -524,7 +533,8 @@ Frame count behavior depends on route/mode:
 | Managed `template` mode | Determined by `template_animation_id`; `frame_count` is not the control surface. |
 | Managed `skeleton-v3` mode | Determined by the selected `template_animation_id`; the mode does not take caller-authored per-frame keypoints. |
 | Managed `v3` mode | `frame_count` is even 4-16, default 8. |
-| Managed `pro` mode | Custom/pro route; higher cost. Direction generation may use completed sides as reference. |
+| Managed `pixminimax` mode | `frame_count` is a multiple of four from 4–40, default 8; cost depends on size and count (64×64 at 8 frames = 1 generation per direction, 40 = 6); multiply by the requested direction count. |
+| Managed `pro` mode | REST-only custom/pro route; higher cost. Direction generation may use completed sides as reference. |
 | `animate-with-text-v3` | Raw first-frame animation, even 4-16, default 8, pixel budget `width * height * frame_count <= 524288`. |
 | `animate-with-text-v2` | Pro/raw route; frame count depends on size bands in docs/tool behavior. |
 | `animate-with-skeleton-v3` | Raw Skeleton v3 route; 3-15 full keypoint sets, one per returned frame. |
