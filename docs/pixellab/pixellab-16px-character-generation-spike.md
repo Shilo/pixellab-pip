@@ -46,10 +46,12 @@ Pixen:
   Pixen output in this spike used 48 opaque colors despite the low-detail
   controls; quantization is the next experiment, not part of this result.
 
-For the cleanest style when 24px output is acceptable, use managed
-`create_character` in standard mode. It produced the cleanest flat color
-clusters and consistent directional identity, but `size: 16` returned 24x24
-rotation canvases. Do not crop or resize that output and call it native 16px.
+Historical 2026-08 result: when 24px output was acceptable, managed
+`create_character` in standard mode produced the cleanest flat color clusters
+and consistent directional identity. Pip now treats character Standard as
+deprecated for routing, so this is test evidence rather than current route
+advice. The `size: 16` request returned 24x24 rotation canvases; do not crop or
+resize that output and call it native 16px.
 
 Pro exposes no structured `detail`, `outline`, `shading`, or palette controls;
 its prompt controls are soft and the raw files remain color-noisy. Do not
@@ -218,10 +220,11 @@ Use these structured settings where the route exposes them:
 }
 ~~~
 
-For `create_character`, use standard mode, four directions for a quick
-comparison, `size: 16`, and the documented proportions preset
-`{"type":"preset","name":"chibi"}`. Expect the observed 24x24 canvas behavior
-until PixelLab exposes a smaller managed-character size.
+The 2026-07 test plan used standard mode, four directions, `size: 16`, and the
+documented chibi proportions preset `{"type":"preset","name":"chibi"}`. Pip
+now treats character Standard as deprecated for routing; do not reuse that
+plan as current tool guidance. The test observed a 24x24 canvas. Follow
+`skills/pixellab-pip/SKILL.md` for current character routes.
 
 For Pro, keep the same text but do not pretend that `flat`, `low detail`,
 or `5 to 8 colors` are structured controls: Pro v2 exposes no matching

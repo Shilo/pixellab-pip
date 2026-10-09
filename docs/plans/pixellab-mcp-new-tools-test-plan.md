@@ -5,6 +5,8 @@ Status: executed 2026-07-27. Results: `../pixellab/pixellab-mcp-new-tools-test-r
 (the schema-verified parity source every comparison below is drawn from) and
 `../pixellab/pixellab-doc-watch-cache.md` (the refresh mechanism that surfaced these tools).
 
+This is a historical, completed plan; do not rerun it verbatim. Its character Standard fixture is deprecated for Pip routing. For any repeat, follow `skills/pixellab-pip/SKILL.md` and recalculate the cost budget.
+
 ## Goal
 
 Verify that every MCP tool added across the last 3 doc-watch refreshes that detected `mcp_docs`

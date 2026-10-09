@@ -14,7 +14,7 @@ The managed character animation schema now documents `mode="pixminimax"` on REST
 
 ## 2026-10-08 Contract Addendum
 
-The refreshed MCP guide now documents text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions; REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
+The refreshed MCP guide lists text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. Pip defaults quadruped creation to v3 with a supplied reference; text-only Pro is an opt-in after the user accepts its size-based cost. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions. REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
 
 ## Executive Summary
 

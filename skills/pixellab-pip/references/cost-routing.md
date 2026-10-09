@@ -10,7 +10,6 @@ Label semantics (`Pro` expensive; `v3`/`new`/Pixen/PixFlux/BitForge cheap-family
 
 Core cost facts checked against the refreshed official REST v2 OpenAPI and MCP docs on 2026-10-08, plus the Version 0.4.128 announcement. PixelLab states Pro Tools cost 10 generations for 16×16–256×256, 15 for 256×256–384×384, and 25 for 384×384–512×512. The announcement overlaps at 256 and 384, so do not infer an exact boundary tier; use returned usage. Managed PixMiniMax fields and examples remain from the 2026-10-05 documentation refresh:
 
-- Character 8-direction standard mode: 1 generation. Character `pro` / `create-character-pro`: 10, 15, or 25 generations by generated image size, using the announced bands above.
 - `create-character-v3`: `ceil(width * height * 8 / 65536)` generations when rotating a reference image; `1 + ceil(s * s * 8 / 65536)` from scratch (s = max dimension). Cost is size-driven — read the output size before estimating.
 - `create_character_state` / `create-character-state`: 10, 15, or 25 generations by canvas size.
 - Character template animation: 1 generation per direction. Managed Pro animation for characters or objects: 10, 15, or 25 per direction by canvas/image size (80–200 for a full 8-direction run). MCP `animate_object(mode="pro")` is available and requires its documented confirmation gate; the current MCP `animate_character` mode list has no `pro`. v3 custom animation is size-and-frame-scaled on the generated canvas: `ceil(width * height * frame_count / 65536)` per direction. Silhouettes may expand beyond the source image, so inspect the returned dimensions and usage instead of estimating from source size. v3 is the default custom family; prefer it for cheap custom animation.
@@ -38,7 +37,7 @@ If exact current costs matter, refresh official docs or run a small balance-befo
 |---|---|---|
 | General images | `create-image-pixen`/`create_image_pixen` (small/single/icon iteration, outline/detail/view controls) or `create-image-pixflux`/`create_image_pixflux` (general/background style) | Style-reference generation or high-quality sheet output is required and approved |
 | Icon sheets | Propose a non-Pro/Pixen comparison or a smaller test first; ask whether quality or savings wins | User approves the Pro sheet after the tradeoff is named |
-| Characters | Standard mode or v3 | User accepts the size-based 10/15/25 generation cost for `pro`; use it when user instructions must be followed closely because Pixen/v3/new may underweight them |
+| Characters | v3 by default; request a south-facing reference for quadrupeds | Offer Pro when it fits the request, disclose the size-based 10/15/25 cost, and use it only if the user chooses it |
 | Character animation | Template mode when a template fits; else v3 custom; one direction first | User approves Pro cost |
 | Objects | For standalone visuals that don't need managed object IDs: a general-image/Pixen/PixFlux or isometric-tile route, labeled as not creating a managed object; map-object route when a map object is specifically needed (measure cost) | User accepts Pro Tools at 10/15/25 generations by size |
 | Object animation | `mode='v3'` (documented default) | User explicitly approves Pro |

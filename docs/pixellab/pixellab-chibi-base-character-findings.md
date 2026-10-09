@@ -162,9 +162,11 @@ Alternate wording if `upside-down hourglass` is too abstract:
 Cute unisex tall chibi avatar base character, young adult proportions, tiny tapered torso, narrow waist, slightly wider shoulders and hips, longer simple limbs, big simple hands and feet, soft rounded proportions, light peach bare skin, no clothes, bald hairless.
 ```
 
-## Model And Setting Findings
+## Model And Setting Findings (Historical 2026-07 Study)
 
-Standard mode:
+These comparisons describe the routes tested at the time. Pip now treats character Standard as deprecated for routing; use `skills/pixellab-pip/SKILL.md` for current character routes.
+
+Character Standard (historical):
 
 - Produced the two closest candidates so far.
 - Best fit for small, simple, clothing-template-style character bases.
@@ -185,7 +187,7 @@ Pro mode:
 - Ignored detail settings.
 - Always returned 8 directions in the MCP tool.
 - Cost substantially more than standard mode.
-- Not justified as the default route for this unresolved base-template search.
+- The study did not justify Pro as the default route for this unresolved base-template search.
 
 Detail:
 
@@ -465,9 +467,11 @@ Important visual findings:
 - Long prompts are not proven to help. The stronger result may have come from specific terms such as `dress-up avatar base`, `heavy wedge feet`, `thick close-set limbs`, and `tapered geometry`, not from prompt length.
 - Ragnarok Online is still useful as a human-facing research reference, but direct `Ragnarok Online style` or `RO-style` prompt wording should be treated as risky for blank base generation.
 
-Next focused prompt direction:
+## Historical Next Focus (2026-07 Study)
 
-- Stay in standard mode with low detail and flat shading.
+These prompt ideas preserve the study's visual findings. The proposed character Standard mode is deprecated for Pip routing; use `skills/pixellab-pip/SKILL.md` for current character routes.
+
+- The six-prompt batch used character Standard with low detail and flat shading.
 - Build around prompt 3's successful terms.
 - Remove direct game names.
 - Reduce anatomical-detail cues.
@@ -475,7 +479,7 @@ Next focused prompt direction:
 - Add more explicit arm shape language: `wedge arms`, `sleeve-shaped arms`, `arms widen from shoulder to mitten hands`, or `flat tapered arms`.
 - Add torso simplification: `flat narrow hourglass torso`, `simple torso silhouette`, or `no detailed torso anatomy`.
 
-Next three prompts to test:
+Prompts proposed in the study:
 
 1. `Unisex semi-chibi dress-up avatar base, 3 heads tall, light peach bare skin, no clothes, bald hairless, flat low-shading pixel sprite, flat narrow hourglass torso, no detailed torso anatomy, thick close-set wedge legs, heavy wedge feet, sleeve-shaped arms that widen into mitten hands.`
 2. `Unisex semi-chibi base character, light peach bare skin, no clothes, bald hairless, simple flat hourglass torso, compact thick limbs, wedge legs, wedge arms, large mitten hands, heavy wedge feet, legs close together, flat low-detail shading.`
@@ -597,9 +601,9 @@ Findings:
 - Pro with a different seed and `medium readable detail` still leaned too flat. The Pro route is not currently beating V3 or the original standard-mode favorite.
 - None of these five should replace the ranked liked-result registry unless future human review chooses one as a partial anchor.
 
-## Suggested Next Test Plan
+## Historical Next Test Plan (2026-07-15)
 
-Use standard mode first, with 4 directions, chibi proportions, low top-down view, size target 64, low or default detail, and omitted/default outline.
+The original plan proposed character standard mode with 4 directions, chibi proportions, low top-down view, size target 64, low or default detail, and omitted/default outline. Pip now treats character Standard as deprecated for routing; do not execute this plan as current tool guidance. Follow `skills/pixellab-pip/SKILL.md` for current character routes.
 
 Prefer a small batch that tests only one variable at a time:
 
@@ -720,8 +724,8 @@ Best partial lessons:
 - `RPG maker scale` and `sprite sheet cell` helped communicate small full-body scale, but still did not force the CPACK-like body shape.
 - The single-image Pixen route is poor for discovering this very specific CPACK/RO-like base shape from text alone. It may be useful for cheap rough probing, but the stronger path is likely reference-guided editing or character generation anchored on a known-good body.
 
-Current conclusion:
+Conclusions from the 2026-07 study:
 
 - Prompt-only Pixen is not the secret for this target yet.
 - The most promising future direction is to use the purchased CPACK-style asset or the original `Clean Chibi Base Template` as a reference/identity anchor, then test hair removal or style transfer while preserving body proportions.
-- If generating from text only, use V3/standard character routes rather than Pixen single-image, because character routes are more likely to preserve full-body sprite structure.
+- The study found V3 and Standard character workflows more likely than Pixen single-image to preserve full-body sprite structure. Standard evidence is historical; use `skills/pixellab-pip/SKILL.md` for current routing.

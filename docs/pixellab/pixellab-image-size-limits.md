@@ -220,7 +220,7 @@ The two AI-rotation pipelines floor at 32 **over REST**; the two template/skelet
 | MCP `create_character(mode="v3")` | 28×28 | 11×14 | 93 | Roughly — but 93 colours means a downscaled render, not clean 16px pixel art |
 | MCP `create_character(mode="pro")` | 56×56 | 17×28 | 23 | **No — size silently ignored.** A 28px-tall subject; REST pro at *32* returns a 60×60 canvas, so 16 is being inflated to ~28–30 |
 
-**Only standard mode actually respects a 16px request.** v3 gets close but muddy; pro silently returns a larger character than asked for — a worse failure than the REST 422, because nothing signals it. For a genuine 16px character, use standard mode and expect scale-drift on costume detail, as in the [16px item spike](pixellab-16px-item-sprite-generation-spike.md).
+The 2026-07 probe found that only the legacy character-standard route respected a 16px request. Pip no longer recommends that mode. In the same probe, v3 produced a muddy downscaled render and Pro returned a larger character than requested; Pro Flash lists 16×16 experimentally, but its character quality has not been verified. No current Pip route is confirmed to produce a clean, exact-16px managed character.
 | `portrait-character-pro` | `result_size` | `enum [16, 32, 48, 64, 128, 160]`, default 64 | | 128/160 render at 2K (cost more). |
 
 ## REST v2 Limits — Animation And Rotation
@@ -295,7 +295,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 
 | MCP tool | Size parameter | Default | MCP schema bound | vs REST |
 |---|---|---|---|---|
-| `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | **Looser than REST — live-confirmed.** `size=16` is accepted and *generates* for **all three modes**, including `v3` (2 gens) and `pro` (20 gens), which the REST routes reject outright with `422 ge 32`. It does not fail downstream. But only `standard` honours 16px: `v3` returns a 93-colour downscaled render, `pro` silently inflates to a ~28px subject on a 56×56 canvas. Prose documents per-mode *maxima* (128 standard/pro, 256 v3) and no minimum. |
+| `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | **Looser than REST — live-confirmed.** The 2026-07 probe accepted `size=16` for all three then-listed modes; REST routes rejected it with `422 ge 32`. In that probe, v3 returned a 93-colour downscaled render, Pro silently inflated to a ~28px subject on a 56×56 canvas, and only the legacy Standard mode matched 16px. That historical behavior is not a current Pip route recommendation. |
 | `create_topdown_tileset` | `tile_size` | `{16, 16}` | **none declared** — plain integer object; "16 or 32 for standard; 64 requires `mode='pro'`" is prose only | REST declares `enum [16,32,64]`; MCP does not, so a bad value is not caught by the tool schema |
 | `create_sidescroller_tileset` | `tile_size` | `{16, 16}` | **none declared** — prose "16 or 32 pixels" only | REST declares `enum [16,32]`; MCP does not |
 | `create_isometric_tile` | `size` | 32 | 16–64 | matches REST `image_size`. MCP exposes no `isometric_tile_size` — it has `tile_shape` instead |
@@ -329,7 +329,7 @@ The Pro Flash MCP page lists `width`/`height` but not their full validation boun
 | `16px` isometric tile | Yes | `image_size` min 16×16. |
 | `16px` icons/items canvas (`generate-image-v2`) | Yes | `image_size` min 16×16. |
 | `16px` standalone item/icon **semantics** | Partial | Item sprites drift larger; full-cell tiles/textures reliable, transparent item sprites experimental. See [`pixellab-16px-item-sprite-generation-spike.md`](pixellab-16px-item-sprite-generation-spike.md). |
-| `16px` character | Yes, but only standard mode has a live-confirmed clean 16px result | Standard `create-character-with-4/8-directions` generated a 16px-tall subject on a padded 24×24 canvas. REST v3/older Pro reject 16; MCP v3/older Pro accept but did not honour that size in the historical probes. Pro Flash lists 16×16 as experimental, with no live quality result here; current native presets also include 48×48 and 128×128. |
+| `16px` character | No verified current Pip route for clean, exact-size output | The legacy character-standard route matched 16px in a historical probe, but Pip no longer recommends it. MCP Pro Flash lists 16×16 experimentally, with no live quality result here; current native presets also include 48×48 and 128×128. |
 | `16px` object | One direction is schema-supported; eight directions are not on the older object route | `create-1-direction-object` minimum fell to 16 in the 2026-09-08 schema refresh; `create-8-direction-object` minimum is 24. The earlier 32px rejection probes predate that change. Pro Flash also lists experimental 16×16 for one or eight directions and now lists native 48×48 and 128×128, but neither output is live-verified. |
 | `8px` icons / items | **No** | `generate-image-v2` and all image routes have schema min 16 → request rejected. |
 | `8px` tilesets | **No** | Top-down/sidescroller `tile_size` enum is `[16,32,64]`/`[16,32]`; `create-tiles-pro` min 16; isometric min 16×16. All reject 8. |
