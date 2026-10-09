@@ -1,6 +1,6 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-05 (managed PixMiniMax animation size and frame contract refreshed).
+Last reviewed: 2026-10-08 (Pro Flash pixel converter and character reference directions refreshed).
 
 > **2026-10-05 API refresh.** Managed character animation adds the documented PixMiniMax mode: up to 40 frames at the stored character size (“any size” in the public description). Its optional custom start frame is capped at 256×256; managed v3 remains capped at 256×256. The 2026-10-03 and 2026-09-25 notes below are retained as earlier snapshot records.
 
@@ -189,7 +189,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 |---|---|---|---|---|
 | `create-character-v3` | `image_size` | **32** | 256 | Probe-confirmed: 8, 16, 24, 31 all → `422 ge 32`; 32 generates. **The 32 floor is REST-side validation, not a pipeline limit** — MCP `create_character(mode="v3", size=16)` runs the same v3 mode and generates (see MCP section), so the REST schema is stricter than the pipeline. (Its prose said "16-256" until 2026-09-08, when it was corrected to "32-256" to match the schema; the MCP-generates-at-16 finding is unaffected.) Reference mode advisory (model picks). `reference_image` max 256×256. Probed canvas 32 → 64, which the current documented rule (a non-square result is padded to a `max(width, height)` square before rotation and stored at that square size) does not account for — the earlier "padded ~2× for animation room" wording was replaced in the 2026-09-08 refresh, so treat a returned canvas as run evidence, not a contract. |
 | `create-character-with-4-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.007, canvas 24×24). Per-direction reference images must match `image_size`. |
-| `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.009, canvas 24×24, 8 rotations). `standard` (1 gen) vs `pro` (20–40 gens). |
+| `create-character-with-8-directions` | `image_size` | 16×16 | 128×128 | Probe-confirmed: 8, 15 → `422`; **16×16 generates** (~$0.009, canvas 24×24, 8 rotations). `standard` (1 gen) vs `pro` (10/15/25 generations by size under Version 0.4.128 pricing). |
 | `create-character-state` | `override_frame_size` | 32×32 | 256×256 | Schema-enforced via the new `FrameSize` model. Optional larger canvas for the new state, for edits that add something big (a weapon, wings). Both sides must be multiples of 4 and no smaller than the source character. Omit to keep the source size. MCP splits it into `override_width`/`override_height`. |
 | `create-character-pro` | `image_size` | 32×32 | 168×168 | Probe-confirmed: 8, 16, 31 → `422 ge 32`. `reference_image` max 168×168; `concept_image` max 1024×1024. Probed canvas 32 → 60, consistent with the current documented rule (rotations share a square canvas at least `max(width, height)` that may grow up to 256 to fit generated content; the earlier "padded ~2×" wording was replaced in the 2026-09-08 refresh). |
 | `create-character-pro-flash` | optional `image_size` | 16×16 | 256×256 | Text creation defaults to 64×64; same Pro Flash presets/custom Beta dimensions as image creation, including native `48x48` and `128x128`. Eight directions only; input pixels may be transparently padded to the V3 square canvas. Schema-read, not live-tested. |
@@ -206,7 +206,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 | `create-character-with-4-directions` | **16** | standard — template/skeleton, 1 gen |
 | `create-character-with-8-directions` | **16** | standard — template/skeleton, 1 gen |
 | `create-character-v3` | **32** | Pixen sprite → v3 rotation, `ceil(s²·8/65536)` gens |
-| `create-character-pro` | **32** | AI reference-based, 20–40 gens |
+| `create-character-pro` | **32** | AI reference-based; 10/15/25 generations by size under Version 0.4.128 pricing |
 
 The two AI-rotation pipelines floor at 32 **over REST**; the two template/skeleton ones accept 16. `8×8` is rejected by all four character routes and both object routes — there is no lower tier below these floors.
 
@@ -266,7 +266,8 @@ An in-between size (48, 96, 150) is **accepted at validation** — untested whet
 | `inpaint-v3` | `inpainting_image` | 32×32 | 512×512 | Mask must match dimensions. `context_image` (deprecated): up to 1024×1024. **Prose-enforced, not schema-enforced** — the size fields are `minimum: 1`, no `maximum`, so an out-of-range size passes validation and fails at generation. Untested (a probe would cost a Pro generation). |
 | `edit-image-pro-flash` / `inpaint-image-pro-flash` | encoded source image (and same-size mask for inpaint) | Native size from `/pro-flash/capabilities` | Native size from `/pro-flash/capabilities` | No resize: edit retains the source canvas. Inpaint requires equal source/mask dimensions and a black/white RGB mask. The request schema does not enumerate a universal min/max for these images; query capabilities for exact supported pairs. Schema-read, not live-tested. |
 | `image-to-pixelart` | `image_size` (input) | 16×16 | **2048×2048** | Both maxima raised in the 2026-09-08 refresh (input from 1280, output from 320). Output `output_size` 16×16 to **512×512**; recommended output ≈ ¼ input. |
-| `image-to-pixelart-pro` | (auto) | — | — | No output-size field; native pixel scale detected and downscaled automatically. |
+| `image-to-pixelart-pro` | (auto) | — | — | Detects native pixel scale and chooses, downscales, and cleans output automatically. Inputs over 2048px on the longest side are scaled down first. |
+| `image-to-pixelart-pro-flash` | (auto) | — | — | Same conversion as the older Pro route, with no output-size field; 6 generations per image. Inputs over 2048px on the longest side are scaled down first. |
 | `resize` | `reference_image_size`, `target_size` | 16×16 | 200×200 | Both source and target, area 16×16 to 200×200. |
 | `remove-background` | `image_size` | **1×1** | 400×400 | Lowest minimum in the API; max area 400×400. |
 | `edit-image-pixen` | source `image`; `width`/`height` | source ≥16×16 area | source **256 per side**; target **area 256×256** | **Prose/endpoint-enforced, not schema-enforced** — source and target dimensions must each be multiples of four; `width`/`height` schema fields have `minimum: 1` and no maximum. Source is capped per side, target by area, so a 128×512 target is valid while 320×320 is not. Target defaults to source dimensions; the server pads transparently and re-renders instead of rescaling. |

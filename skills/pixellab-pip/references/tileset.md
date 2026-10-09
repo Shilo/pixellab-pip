@@ -11,7 +11,7 @@ Multi-shape connectable terrain transition:
 - `tile_type` supports `square_topdown`, `isometric`, `hex`, `hex_pointy`, and `oblique` in tileset mode. Square top-down, isometric, and oblique return a 16-tile corner set; hex shapes return a 32-tile coastline set.
 - Shape controls are `tile_size` (connectable sets have tighter per-shape ranges than plain variants, and square top-down roads are exactly 32), `tile_view_angle`, `tile_depth_ratio`, `tile_flat_top_px` (isometric), `oblique_lean` (oblique), and `outline_mode`. `create_tiles_pro` exposes no boundary-raggedness or raised-terrain-height fields; do not map those concepts to another tiles-pro control.
 - `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down requests, supplied per-terrain reference images and palette controls require REST `create-tileset`; the MCP top-down schema does not expose those inputs.
-- Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules.
+- Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules. Interpret `edge/4` bits as N/E/S/W continuation; `edge/6` bits as the six hex edges counter-clockwise from vertex 0, where set means the other terrain lies beyond; and `corner/4` as `NW<<3 | NE<<2 | SW<<1 | SE`, where set means the first terrain occupies that corner.
 
 Shared MCP controls on the top-down and sidescroller routes (not `create_tiles_pro`):
 

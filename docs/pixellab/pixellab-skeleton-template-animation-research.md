@@ -10,7 +10,11 @@ The 2026-10-03 docs refresh confirms Skeleton v3 as a distinct route: REST `POST
 
 ## 2026-10-05 Contract Addendum
 
-The managed character animation schema now documents `mode="pixminimax"` on REST `/animate-character` and `/characters/animations`, with MCP `animate_character` exposing the same mode. It accepts 4–40 frames in multiples of four; the shared schema defaults to 8. REST still exposes `mode="pro"` at 20–40 generations per direction, which the current MCP mode list does not. Managed v3 and PixMiniMax both accept optional custom start/end frames and `keep_first_frame`; PixMiniMax also accepts `subject_description` and `initial_pose`. REST prompt enhancement remains v3-only. These are contract updates only; no managed PixMiniMax jobs were run.
+The managed character animation schema now documents `mode="pixminimax"` on REST `/animate-character` and `/characters/animations`, with MCP `animate_character` exposing the same mode. It accepts 4–40 frames in multiples of four; the shared schema defaults to 8. REST still exposes `mode="pro"` at 10/15/25 generations per direction by output size, which the current MCP mode list does not. Managed v3 and PixMiniMax both accept optional custom start/end frames and `keep_first_frame`; PixMiniMax also accepts `subject_description` and `initial_pose`. REST prompt enhancement remains v3-only. These are contract updates only; no managed PixMiniMax jobs were run.
+
+## 2026-10-08 Contract Addendum
+
+The refreshed MCP guide now documents text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions; REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
 
 ## Executive Summary
 

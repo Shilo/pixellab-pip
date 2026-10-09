@@ -1,6 +1,6 @@
 # PixelLab Surfaces And Services
 
-Last reviewed: 2026-10-05.
+Last reviewed: 2026-10-08.
 
 Purpose: explain how PixelLab's public APIs, agent tools, website/editor surfaces, SDKs, and local integrations differ so Pip can choose the right automation boundary.
 
@@ -52,3 +52,4 @@ Use this order for most agent work:
 - Version 0.4.125 adds the MCP-only `pixelart_workbench`, matched REST/MCP Skeleton v3 routes, and REST-only `POST /image-to-text`. Skeleton v3 is also available in Character Creator, Aseprite, and Pixelorama. The release announcement reports roughly 70% lower token consumption from PixelLab testing; it is an estimate, not an independently verified result here.
 - The 2026-10-03 public-contract refresh adds REST `DELETE /background-jobs/{job_id}` and the two animation-group/direction delete routes, plus MCP `list_images`, `save_to_asset`, and `transfer_outfit`. `transfer_outfit` matches REST `POST /transfer-outfit-v2`; gallery browsing/save-back remain MCP-only. The refreshed Skeleton v3 descriptions retain beta status and limits but no longer state a Tier 1 gate.
 - The 2026-10-05 public-contract refresh adds temporary REST `POST /uploads` references and managed PixMiniMax mode on REST `/animate-character` and `/characters/animations` plus MCP `animate_character`. MCP replaces `agent_help` with `search_help`; no net tool-count change. Raw PixMiniMax remains a separate route, and its MiniMax H3 disclosure does not apply to managed mode. See [REST/MCP parity](pixellab-mcp-vs-rest-route-parity.md) and [animation routing](../../skills/pixellab-pip/references/animation.md) for exact behavior.
+- **Version 0.4.128:** REST adds `POST /image-to-pixelart-pro-flash` and `POST /uploads/{ticket}`; MCP adds `image_to_pixelart_pro_flash` and `get_upload_url`. Character v3 now accepts supplied directions and quadruped references on MCP; Pro Tools cost 10/15/25 generations by image size. The experimental Create VFX page is website-only in the refreshed public contract, with MCP support announced as forthcoming. Aseprite and Pixelorama pricing changes are also forthcoming, but no new visual prices were supplied.

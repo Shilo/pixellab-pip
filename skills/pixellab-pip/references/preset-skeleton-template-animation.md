@@ -63,13 +63,14 @@ animate_character(
 )
 ```
 
-To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only MCP mode that accepts a reference sprite, always outputs 8 directions, and prefers the URL form over inline base64 (MCP clients truncate large inline base64). For MCP v3 with a reference image, use the mannequin body plan; MCP quadruped v3 works from text with a matching `body_type="quadruped"` and `template`, but not with a reference image. REST `create-character-v3` supports a quadruped reference when `template_id` matches the animal body type. Then animate the returned `character_id` once the character completes. Fall back to REST when MCP is unavailable or REST's matching `template_id`, `no_background`, or `enhance_prompt` fields matter.
+To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only MCP mode that accepts a reference sprite; from scratch it outputs 8 directions, while a reference allows `n_directions` 4 or 8. Prefer the URL form over inline base64 (MCP clients truncate large inline base64). For text-only quadrupeds, use MCP `mode="standard"` or `mode="pro"` with `body_type="quadruped"` and the matching `template`; v3 without a reference is humanoid-only. MCP v3 accepts quadruped reference images when `body_type="quadruped"` and the matching `template` are supplied. With a reference, set `n_directions` to 4 or 8 and pass a south-facing sprite as `reference_image_url`. Supply other views through `direction_images` to preserve them exactly and generate only missing directions. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. Directions must match their labels and use the reference canvas size. REST `create-character-v3` supports the corresponding quadruped reference with matching `template_id`. Then animate the returned `character_id` once the character completes. Fall back to REST when MCP is unavailable or REST's matching `template_id`, `no_background`, or `enhance_prompt` fields matter.
 
 For a newly created quadruped:
 
 ```python
 create_character(
     description="small black outline companion animal",
+    mode="standard",
     body_type="quadruped",
     template="dog",
     n_directions=4,

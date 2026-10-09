@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-10-05.
+Last reviewed: 2026-10-08.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -17,7 +17,7 @@ Primary sources:
 - PixelLab account balance can include subscription generations and USD credits.
 - Hosted MCP help reports that billing uses subscription generations first, then USD credits.
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
-- Approximate generation observations are route-specific: most base/`new`/`v3` image routes are about 1 generation; a dated live check measured `enhance-pixen-prompt` at 0.05; `estimate-skeleton` is about 0.1; the OpenAPI estimates image-to-text at about 0.09 for a typical image; top-down and sidescroller tilesets are about 3; and Pro Tools are about 20–40. Do not generalize the Pixen enhancer measurement to every enhancer. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, PixMiniMax, and Skeleton v3) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md). These generation observations are separate from the USD estimates recorded below.
+- Approximate generation observations are route-specific: most base/`new`/`v3` image routes are about 1 generation; a dated live check measured `enhance-pixen-prompt` at 0.05; `estimate-skeleton` is about 0.1; the OpenAPI estimates image-to-text at about 0.09 for a typical image; top-down and sidescroller tilesets are about 3; and Pro Tools cost 10/15/25 generations by the announced image-size bands. Do not generalize the Pixen enhancer measurement to every enhancer. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, PixMiniMax, and Skeleton v3) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md). These generation observations are separate from the USD estimates recorded below.
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
 
 ## Version 0.4.123 Product Update
@@ -27,6 +27,11 @@ Primary sources:
 - **Game Builder:** available to Tier 1+ subscribers. It is a visible product workflow; public MCP project/chat/sandbox helpers can provide approved project context, but no dedicated public REST v2 Game Builder endpoint is documented. See the [official tutorial/showcase](https://youtu.be/Iaxk_8ftJ5s).
 - **Creator queue:** submitted Creator work is queued so closing or changing the window does not discard the job. This is a product/UI behavior, not a new public REST route.
 - **Map export:** Map Workshop can export for Godot and Unity. The public REST v2 inventory still has no map or map-export route; MCP map tools remain the programmatic map surface.
+
+## Version 0.4.128 Product Update
+
+- **Pro Tools pricing:** PixelLab announces 10 generations for 16×16–256×256, 15 for 256×256–384×384, and 25 for 384×384–512×512. The stated bands overlap at 256 and 384; do not infer the exact boundary tier. The announcement says Aseprite and Pixelorama visual pricing will be updated later, but gives no new editor prices.
+- **Image to Pixel Art Pro Flash:** adds a separate MCP and REST converter. It detects native pixel scale/output size, scales inputs down first when the longest side exceeds 2048px, and costs 6 generations per image. The experimental Create VFX page is at `https://www.pixellab.ai/create-vfx`; the release says MCP support is planned, and no public REST/MCP route is present in the refreshed docs.
 
 ## Version 0.4.125 Product Update
 
@@ -59,7 +64,7 @@ Agent behavior on the ceiling (`429`/`529`, batch pacing): see [job-lifecycle.md
 | Create S-XL image (Pro) | `POST /v2/generate-image-v2` | Pro image generation | Closer adherence to user instructions than Pixen/v3/new, especially for explicit shape/feature details, plus multiple candidates, reference images, style image, and static south-facing candidates; costs more and produces a different, broader character style | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
 | Generate with style (Pro) | `POST /v2/generate-with-style-v2` | Pro style generation | Matching a reference style across new images | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
 | Create UI elements (Pro) | `POST /v2/generate-ui-v2` | Pro UI generation | Buttons, health bars, slots, menus | up to `256x256 $0.095`; up to `341x341 $0.125`; up to `512x512 $0.185` |
-| Create UI asset (Pro) | `POST /v2/create-ui-asset` | Structured UI asset generation | Saved UI panels with `pieces`, `elements`, style image, project assignment, and polling | current public pricing page has no USD row; local cost docs treat this as Pro / `20-40` generations |
+| Create UI asset (Pro) | `POST /v2/create-ui-asset` | Structured UI asset generation | Saved UI panels with `pieces`, `elements`, style image, project assignment, and polling | current public pricing page has no USD row; local cost docs treat this as Pro at 10/15/25 generations by output size |
 
 ## Pro Flash (Beta, Provisional Pricing)
 
@@ -72,6 +77,7 @@ The current public REST/MCP docs use the Pro Flash display name. It has not been
 | Create object | `POST /create-object-pro-flash` | `create_object_pro_flash` | One or eight directions. Finalizing one direction from an already-paid source image is documented as free; eight directions still incur rotation charges. |
 | Edit one image | `POST /edit-image-pro-flash` | `edit_image_pro_flash` | Keeps the input's native canvas dimensions; no published fixed cost here. |
 | Masked edit | `POST /inpaint-image-pro-flash` | `inpaint_image_pro_flash` | Source and mask must share native size; no published fixed cost here. Exact outside-mask preservation is claimed, not live-verified. |
+| Image to pixel art | `POST /image-to-pixelart-pro-flash` | `image_to_pixelart_pro_flash` | 6 generations per image; detects native pixel scale/output size and has no size parameter. |
 
 Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count for a provisional estimate before a paid call, and `GET /v2/pro-flash/capabilities` (or MCP `get_pro_flash_capabilities`) to check dimensions. The public MCP inventory has no cost-estimator tool. Actual usage comes from the completed job, not the provisional number. The live capability endpoint required bearer auth during this review, so no account-specific response or paid probe is included.
 
@@ -85,7 +91,8 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 | Correct pixel art | `POST /v2/correct-pixelart` | Sharpen edges, drop stray pixels, tighten palette without resizing | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Reduce colors | `POST /v2/reduce-colors` | Quantize one or more same-size frames onto one shared palette | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
 | Unzoom pixel art | `POST /v2/unzoom` | Recover native-resolution pixel art from an upscaled image | not covered by the pricing rows recorded here — MCP documents 0.1 generations |
-| Convert image to pixel art (Pro) | `POST /v2/image-to-pixelart-pro` | Pro image-to-pixel-art conversion, exact-size flexibility beyond the base route's limits | no separate USD row found on the public pricing page — treat as Pro-tier cost (comparable to the other `up to 256x256 $0.095`/`341x341 $0.125`/`512x512 $0.185` Pro rows above) until confirmed |
+| Convert image to pixel art (Pro) | `POST /v2/image-to-pixelart-pro` | Detects native pixel scale and automatically chooses/downscales/cleans the output; no output-size field | no separate USD row found on the public pricing page; Pro Tools use the announced 10/15/25 generation bands by image size |
+| Convert image to pixel art (Pro Flash) | `POST /v2/image-to-pixelart-pro-flash` | Automatically detects native pixel scale/output size; no output-size field | 6 generations per image |
 | Resize | `POST /v2/resize` | Pixel-art-aware resizing | `64x64 $0.01788`; `128x128 $0.01777` |
 | Remove background | `POST /v2/remove-background` | Transparent PNG foreground extraction | `64x64 $0.00554`; `128x128 $0.00554`; `256x256 $0.00593` |
 | Inpaint | `POST /v2/inpaint` | Non-Pro inpainting/editing | `64x64 $0.00716`; `128x128 $0.00797`; `200x200 $0.01122`; transparent `64x64 $0.00738`; transparent `128x128 $0.00821`; transparent `200x200 $0.01285` |
