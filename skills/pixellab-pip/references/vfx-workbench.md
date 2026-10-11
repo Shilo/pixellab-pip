@@ -1,0 +1,21 @@
+# VFX Workbench
+
+Read this for animated effects that use timed parts, a sprite anchor, projectile motion, or reusable VFX clips. The tool is a command-based effect composer, not prompt-to-image generation. It is MCP-only; no public REST VFX endpoint is documented.
+
+## Choose the Route
+
+- Use `vfx_workbench` for composed one-shot hits, explosions, spells, projectile trails, persistent auras, and weather/environment loops. It can render standalone effects or compose them around a supplied sprite.
+- For a still effect image, use the existing static image route: Create Image Pro for an isolated reusable effect, or an image edit when the user asks to add a static effect to a supplied target. Those edit results are whole images, not extracted effect layers.
+- Use raw image animation when the user wants free-form motion on an existing image and does not need independently controlled parts, sprite anchoring, or game-pack clips; read [Animation](animation.md) for raw-route inputs and frame constraints. Keep managed character/object animation on its managed route.
+- Do not infer that the experimental Create VFX website page shares an implementation with this MCP tool. No public REST VFX route is documented.
+
+## Run the Workbench
+
+1. Confirm the live `vfx_workbench` tool is callable and the account is eligible. Begin with `argv=["describe","start"]` and `mode="low"`; put the user's request in `notes` on the first call. Read live help for the commands needed; it is the current command/schema source. High mode adds a review-oriented response, but did not change the generated recipe in the tested low/high pair. It requires a plan and observations in `notes`; do not offer it as an art-style setting.
+2. Use `--sprite` for the subject/anchor and `--projectile` for a separate moving projectile. Keep those roles distinct. Live help documents PixelArt Workbench IDs, `character:<id>:<direction>[:<animation>]`, `object:<id>[...]`, `gallery:<id>`, URLs, and base64 for `--sprite`. Tests confirmed a managed character aligned its feet, a PixelArt Workbench image ID retained six-frame timing, and base64/HTTPS PNGs worked as single images. An HTTPS spritesheet URL was treated as one still. Object/gallery references and animation-qualified IDs were not separately tested.
+3. Start from a relevant preset or tuned part when one fits, then change only the parts or layers that address the request. Use `throw` when a projectile path, trail, and impact should be composed together; one tested call created all three roles. Use custom recipe layers when no tuned part fits. Each state-changing command returns a new step ID. Pass the latest ID to the next operation; retain an earlier ID when intentionally making a separate branch. Previous steps remained unchanged in the branch test. Removing a part also removes its unused dependent controls and ramps, so render again and check for newly exposed dead time.
+4. Render and inspect the result. Trust the returned frames, bounds, warnings, and pixels rather than echoed control values. One blank final frame is a clean end; multiple blank tail frames are dead time. Correct the specific timing, layer, or parameter issue and render again. When a boundary warning appears, use the supported canvas-fit option and inspect the new bounds; it fixed a clipped one-shot projectile in testing.
+5. Export with a new name. A normal export returns a GIF plus spritesheet PNG and JSON. `--game-pack` adds a ZIP with clip sheets and manifest metadata for frame timing, anchor, offsets, layers, and parts. Tested `--part <id>` scoped the ZIP's isolated clip; the ordinary GIF/PNG/JSON still contained the complete effect. A supplied projectile appeared in the output files but was not saved with the My effects asset, so add it again when reopening that effect for edits.
+
+Do not replace or delete an existing remote effect without the destructive-action approval required by `SKILL.md`. For saved-output handling, manifests, portable replay, frame inspection, and job follow-up, use the existing [Usage Reporting](usage-reporting.md), [Blueprint](blueprint.md), [Local Asset Assembly](local-asset-assembly.md), and [Job Lifecycle](job-lifecycle.md) contracts.
+
