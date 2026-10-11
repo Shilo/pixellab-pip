@@ -456,12 +456,12 @@ def validate_request(
         if request_value(tool, request, "view") not in {"low top-down", "high top-down"}:
             raise SystemExit("create_topdown_tileset view must be low top-down or high top-down.")
         if mode == "pro" and shape_style is None:
-            if raw_transition >= 0.5:
+            if raw_transition > 0.4:
                 raise SystemExit(
-                    "This is a valid top-down Pro request shape, but observed PixelLab Pro outputs can expand at "
-                    "transition_size 0.5. This compact simulator only renders Pro requests below 0.5."
+                    "Current REST docs say Pro transition_size above 0.4 produces tall walls and 25 tiles. "
+                    "This compact simulator only renders Pro requests at or below 0.4."
                 )
-            warnings.append("Top-down pro mode below transition_size 0.5 is approximated with the compact deterministic renderer.")
+            warnings.append("Top-down pro mode at transition_size 0.4 or below is approximated with the compact deterministic renderer.")
         if raw_transition > 0 and not str(request_value(tool, request, "transition_description") or "").strip():
             warnings.append("Top-down transition_size > 0 normally needs a transition_description for meaningful output.")
 

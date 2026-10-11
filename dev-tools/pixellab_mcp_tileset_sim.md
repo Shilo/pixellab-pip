@@ -66,6 +66,8 @@ Common accepted MCP fields:
 - Sidescroller: `lower_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `tile_strength`, `base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`.
 - Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `shape_style`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`.
 
+In Pro mode, the current public REST/MCP descriptions say `spread_x` and `slope_size` have no effect; `raggedness` shapes the border. The simulator accepts the schema fields but does not model PixelLab's Pro rendering.
+
 By default, it writes to:
 
 ```text
@@ -196,9 +198,9 @@ For strict 1-bit prompt work, judge simulator runs by the shape question first: 
 
 The simulator validates only the MCP-facing request shape that matters for local simulation. It does not call PixelLab, spend credits, poll jobs, download assets, or reproduce expanded top-down transition sheets.
 
-Unsupported compact simulation cases fail intentionally, including top-down `transition_size: 1.0` and every explicit `shape_style`. MCP documents `transition_size` as a float and cites `0`, `0.25`, `0.5`, and `1.0`; this compact renderer keeps its existing numeric handling. With `shape_style: "square"` or `"round"`, MCP documents a 0–1 range and a 4x8 sheet above 0.5, but its procedural boundary geometry is outside this compact Wang renderer. The simulator reports those documented requests as unsupported instead of producing a misleading 4x4 PNG.
+Unsupported compact simulation cases fail intentionally, including top-down Pro requests with `transition_size > 0.4` and every explicit `shape_style`. MCP documents `transition_size` as a float and cites `0`, `0.25`, `0.5`, and `1.0`; this compact renderer keeps its existing numeric handling for supported cases. With `shape_style: "square"` or `"round"`, MCP documents a 0–1 range and a 4x8 sheet above 0.5, but its procedural boundary geometry is outside this compact Wang renderer. The simulator reports those documented requests as unsupported instead of producing a misleading 4x4 PNG.
 
-Top-down `mode: "pro"` is also conservative: observed PixelLab Pro corpus outputs can expand at `transition_size: 0.5`, so the simulator refuses Pro requests at `0.5` or higher instead of pretending compact parity.
+Top-down `mode: "pro"` is also conservative: REST OpenAPI now describes `transition_size` as upper-terrain height and says values above 0.4 produce tall walls and 25 tiles. The simulator refuses those requests because its compact renderer does not model the expanded output.
 
 AI renderers are explicitly experimental. They do not draw arbitrary pixels directly; they return a small JSON recipe for terrain colors, texture hints, and transition placement. The recipe schema is tool-shaped: sidescroller uses lower plus transition, while top-down uses lower, upper, and transition. `transition_size` remains the simulator's geometry control; the AI cannot disable a requested transition. The simulator still performs DualGrid masks and export-layout composition. Treat the result as a non-PixelLab approximation, not a PixelLab prediction.
 

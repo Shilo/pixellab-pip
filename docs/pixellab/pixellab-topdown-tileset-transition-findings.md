@@ -1,6 +1,6 @@
 # PixelLab Top-Down Tileset Transition Findings
 
-Last reviewed: 2026-08-09.
+Last reviewed: 2026-10-11.
 
 This note records live-generation findings for PixelLab top-down Wang/autotile tilesets when using the hosted MCP `create_topdown_tileset` tool for grid-based graybox prototyping assets.
 
@@ -19,7 +19,7 @@ Standard mode was the better fit for the tested graybox prototype goal. A batch 
 
 Pro mode was not a good fit in the same live review. Even when the prompt explicitly requested full continuous grid lines at 16px spacing with no dashed or broken lines, the generated assets drifted toward rounded or block-mass shapes rather than crisp grid-based graybox Wang tiles. Pro `0.0` and `0.25` kept the compact `128x128` 4x4 atlas, but were still visually rejected for this prototype use case.
 
-Pro `0.5` and `1.0` both showed the expanded-layout problem. The requested Pro `0.5` run returned metadata with `transition_size: 1.0` and downloaded as `128x256`, a 4x8 atlas with 25 populated tiles. The Pro `1.0` run also downloaded as `128x256`. Treat Pro transition values at and above `0.5` as unsafe for strict 16-tile 4x4 graybox exports until this behavior changes.
+Pro `0.5` and `1.0` both showed the expanded-layout problem. The requested Pro `0.5` run returned metadata with `transition_size: 1.0` and downloaded as `128x256`, a 4x8 atlas with 25 populated tiles. The Pro `1.0` run also downloaded as `128x256`. The current REST contract now documents values above `0.4` as tall walls with 25 tiles; avoid those values when the user requires a strict 16-tile 4x4 export.
 
 Pro mode was also materially more expensive in the live test. Four accepted Pro generations consumed 80 subscription generations, while a ten-generation Standard `0.5` batch consumed 40 subscription generations. Record this as observed run cost, not a permanent pricing guarantee.
 
@@ -119,7 +119,7 @@ For a strict 4x4 graybox top-down tileset, start with:
 - selective outline
 - flat or basic shading
 
-Avoid Pro mode for this specific graybox blockout workflow unless testing Pro-only controls such as corner-pair behavior, spread, slope, or raggedness. The live Pro tests cost more and did not improve visual quality for compact grid prototyping.
+Avoid Pro mode for this specific graybox blockout workflow unless the user wants its richer painted tilesets or active border shaping through `raggedness`. Do not test `spread_x` or `slope_size` as controls; current public docs say they have no effect. The live Pro tests cost more and did not improve visual quality for compact grid prototyping.
 
 Use `transition_size: 1.0` only when the richer expanded transition set is acceptable. It may be visually preferable, but it should be treated as a different export layout rather than a compact 16-tile replacement.
 

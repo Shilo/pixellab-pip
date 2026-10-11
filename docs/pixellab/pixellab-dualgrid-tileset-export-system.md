@@ -125,7 +125,7 @@ The MCP guide additionally documents unauthenticated direct downloads for top-do
 
 REST top-down tileset creation uses `CreateTilesetRequest`. Key fields are `lower_description`, `upper_description`, `transition_description`, `tile_size`, `mode`, `view`, `shape_style`, `transition_size`, style controls, guidance/adherence controls, base tile IDs, reference images, `color_image`, and `seed`. `shape_style` is optional (`square` or `round`), supports square 16px or 32px tiles, and makes `transition_size` continuous from 0 to 1; values above 0.5 use an extended 4x8 layout.
 
-Current MCP `create_topdown_tileset` docs expose the main descriptions, transition size, tile size, mode, `shape_style`, Pro shape controls, style controls, view, adherence/guidance controls, and base tile IDs. They do not expose the REST reference-image, palette-image, or seed fields.
+Current MCP `create_topdown_tileset` docs expose the main descriptions, transition size, tile size, mode, `shape_style`, Pro `raggedness` border control, `spread_x` and `slope_size` fields documented as having no effect, style controls, view, adherence/guidance controls, and base tile IDs. They do not expose the REST reference-image, palette-image, or seed fields.
 
 REST sidescroller tileset creation uses `CreateTilesetSidescrollerRequest`. It uses `lower_description` for the platform body and `transition_description` for the top/surface layer. REST exposes `lower_reference_image`, `transition_reference_image`, and `color_image`. Current MCP sidescroller docs expose the main descriptions, tile size, style controls, guidance/adherence controls, `base_tile_id`, and seed, but not the REST reference or palette image fields.
 

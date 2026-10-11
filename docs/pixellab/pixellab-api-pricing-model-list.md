@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-10-08.
+Last reviewed: 2026-10-11.
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -31,7 +31,7 @@ Primary sources:
 ## Version 0.4.128 Product Update
 
 - **Pro Tools pricing:** PixelLab announces 10 generations for 16×16–256×256, 15 for 256×256–384×384, and 25 for 384×384–512×512. The stated bands overlap at 256 and 384; do not infer the exact boundary tier. The announcement says Aseprite and Pixelorama visual pricing will be updated later, but gives no new editor prices.
-- **Image to Pixel Art Pro Flash:** adds a separate MCP and REST converter. It detects native pixel scale/output size, scales inputs down first when the longest side exceeds 2048px, and costs 6 generations per image. The experimental Create VFX page is at `https://www.pixellab.ai/create-vfx`; the release says MCP support is planned, and no public REST/MCP route is present in the refreshed docs.
+- **Image to Pixel Art Pro Flash:** adds a separate MCP and REST converter. It detects native pixel scale/output size, scales inputs down first when the longest side exceeds 2048px, and costs 6 generations per image. The experimental Create VFX page is at `https://www.pixellab.ai/create-vfx`; the current MCP docs separately list `vfx_workbench` for animated effects and say it is free for subscribers. Export saves to My effects and returns a GIF plus spritesheet PNG/JSON; `--game-pack` adds a ZIP. The docs do not establish that the MCP tool shares an implementation with the website page, and no public REST VFX route is documented.
 
 ## Version 0.4.125 Product Update
 
