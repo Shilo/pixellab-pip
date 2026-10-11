@@ -458,7 +458,6 @@ def check_workflows() -> None:
         "Resume mode found no visible exact version; trying the tagged version once, with ClawHub version uniqueness preventing replacement.",
         "PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}",
         "isPrerelease",
-        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
         "file hashes match the release tag.",
         "Publish and verify exact ClawHub version",
         "id: clawhub_version",
@@ -502,6 +501,13 @@ def check_workflows() -> None:
     ):
         if required not in release_workflow:
             raise AssertionError(f"release-skill.yml is missing release security gate: {required}")
+    if not re.search(
+        r"- name: Preserve failed ClawHub scan diagnostics\n"
+        r"\s+if: failure\(\) && hashFiles\('dist/clawhub-scan-\*\.zip'\) != ''\n"
+        r"\s+uses: actions/upload-artifact@[0-9a-f]{40} # v7\.\d+\.\d+",
+        release_workflow,
+    ):
+        raise AssertionError("release-skill.yml must pin failed ClawHub scan diagnostics to actions/upload-artifact v7 by commit SHA")
     if release_workflow.find("- name: Create GitHub Release") < release_workflow.find(
         "- name: Scan the published ClawHub version"
     ):
