@@ -221,6 +221,8 @@ Helper groups:
 
 ## Current Pip Features Since The Initial Comparison
 
+The Game Art review directly inspired two additions Pip did not previously ship: explicit motion-aware canvas preparation in the existing Animation reference and the optional `inspect_images.py` helper. Pip already required output verification; the helper adds a reusable implementation for objective offline measurements.
+
 Pip's [Create Image Pro](../../skills/pixellab-pip/references/create-image-pro.md) contract now distinguishes exact palette colors from a color-count cap, maps MCP controls to REST `target_palette`, and documents style/palette precedence and single-image-only `smart` handling. It also records REST native-size candidate counts and matching style-reference batch behavior without treating those counts as guaranteed MCP output. The [Animation](../../skills/pixellab-pip/references/animation.md) contract separately routes strict palette-constrained animation to the documented REST Pro path. Game Art already documents MCP Pro palette controls and local palette snapping; these additions deepen Pip's surface-specific guidance rather than introduce named project styles or automatic recoloring.
 
 Pip's existing Animation reference now plans transparent padding when a supplied raw sprite's requested motion needs space beyond its canvas. It preserves source pixels and placement offsets, matches anchor canvas sizes without changing intended relative alignment, honors fixed requested dimensions, and rechecks route limits and cost after padding. This applies to motion generally; it does not adopt Game Art's complete combat recipe or claim padding guarantees unclipped output.
