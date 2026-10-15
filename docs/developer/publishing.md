@@ -4,10 +4,12 @@ Where to publish PixelLab Pip for discovery, as both an **Agent Skill** and an *
 
 **Priority rule:** High traffic → do it regardless of effort. Medium → only if low-effort (auto-index or a paste-URL form). Low → automatic only, else skip. "Traffic" is a reasoned tier from a visible signal (list-repo stars, catalog size, brand), not analytics.
 
-## Status snapshot (2026-07-24)
+## Status snapshot
 
-- **Live now:** ClawHub, awesomeskills.dev, skills.sh, SkillsMP, LobeHub.
-- **In review:** Cursor Marketplace, Anthropic community marketplace, ComposioHQ PR #1436, heilcheng PR #370.
+heilcheng listing verified 2026-10-15; other target statuses retain their 2026-07-24 snapshot.
+
+- **Live now:** ClawHub, awesomeskills.dev, skills.sh, SkillsMP, LobeHub, heilcheng/awesome-agent-skills.
+- **In review:** Cursor Marketplace, Anthropic community marketplace, ComposioHQ PR #1436.
 - **Passive (will crawl on its own):** FindSkills, SkillsMD, claudemarketplaces.com, Gemini CLI gallery.
 - **Skipped (broken/low-value):** awesomeskill.ai (broken auth), ClaudeSkills.info (submit API returns HTTP 500).
 - **Later:** VoltAgent (needs install traction), github/awesome-copilot (optional PR).
@@ -21,7 +23,7 @@ Pip is a SKILL.md skill, so these apply.
 **High traffic — do regardless of effort (PRs):**
 
 - [x] **ComposioHQ/awesome-claude-skills** — ~70k★. Submitted as a link entry in Development: [PR #1436](https://github.com/ComposioHQ/awesome-claude-skills/pull/1436) (in review).
-- [x] **heilcheng/awesome-agent-skills** — ~6k★. Submitted to Community Skills → Development and Testing: [PR #370](https://github.com/heilcheng/awesome-agent-skills/pull/370) (in review).
+- [x] **heilcheng/awesome-agent-skills** — **Live.** Listed in Community Skills → Development and Testing in the [README on `main`](https://github.com/heilcheng/awesome-agent-skills/blob/main/README.md), verified 2026-10-15. [PR #370](https://github.com/heilcheng/awesome-agent-skills/pull/370) is closed without a recorded merge; the published entry links to this repository rather than vendoring the skill.
 - [ ] **VoltAgent/awesome-agent-skills** — 28.9k★, ~1,500 skills. **On hold — do not submit yet.** Its `CONTRIBUTING.md` rejects brand-new skills ("Brand new skills that were just created are not accepted. Give your skill time to mature and gain users"). Revisit once installs grow; entry format is `- **[Shilo/pixellab-pip](https://github.com/Shilo/pixellab-pip)** — <=10-word desc` under Community Skills → Development and Testing.
 
 **Medium traffic — attempted, both broken → skipped:**
@@ -77,4 +79,4 @@ These pull from GitHub or ClawHub on their own. A GitHub release *is* the publis
 
 ---
 
-*Last updated: 2026-07-24. Re-scan §1–§2 only after a release with a big pitch/branding change, or when checking whether in-review submissions landed.*
+*Last updated: 2026-10-15 (heilcheng listing only). Re-scan §1–§2 only after a release with a big pitch/branding change, or when checking whether in-review submissions landed.*
