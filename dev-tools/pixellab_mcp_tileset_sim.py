@@ -119,13 +119,13 @@ MCP_TOOLS = {
             "view",
             "mode",
             "shape_style",
+            "enhance",
             "tile_strength",
             "lower_base_tile_id",
             "upper_base_tile_id",
             "tileset_adherence",
             "tileset_adherence_freedom",
             "text_guidance_scale",
-            "seed",
             "spread_x",
             "slope_size",
             "raggedness",
@@ -140,6 +140,7 @@ MCP_TOOLS = {
             "tile_size": {"width": 16, "height": 16},
             "mode": "standard",
             "shape_style": None,
+            "enhance": True,
             "view": "high top-down",
             "transition_size": 0.0,
             "detail": None,
@@ -151,7 +152,6 @@ MCP_TOOLS = {
             "tileset_adherence": 100.0,
             "tileset_adherence_freedom": 500.0,
             "text_guidance_scale": 8.0,
-            "seed": None,
             "spread_x": 0.5,
             "slope_size": 0.0,
             "raggedness": 0.0,
@@ -385,9 +385,13 @@ def request_value(tool: str, request: dict[str, Any], key: str) -> Any:
 
 
 def tile_size_from_request(tool: str, request: dict[str, Any]) -> tuple[int, int]:
-    tile_size = request_value(tool, request, "tile_size") or {"width": 16, "height": 16}
+    tile_size = request_value(tool, request, "tile_size")
+    if isinstance(tile_size, int) and not isinstance(tile_size, bool):
+        if tile_size <= 0:
+            raise SystemExit("tile_size must be positive.")
+        return tile_size, tile_size
     if not isinstance(tile_size, dict):
-        raise SystemExit("tile_size must be an object with width and height.")
+        raise SystemExit("tile_size must be an integer or an object with width and height.")
     if "width" not in tile_size or "height" not in tile_size:
         raise SystemExit("tile_size must include both width and height.")
     if (
@@ -455,6 +459,8 @@ def validate_request(
         raise SystemExit("boundary_seed must be a non-negative integer.")
     if "connect_diagonals" in request and not isinstance(request["connect_diagonals"], bool):
         raise SystemExit("connect_diagonals must be a boolean.")
+    if "enhance" in request and not isinstance(request["enhance"], bool):
+        raise SystemExit("enhance must be a boolean.")
 
     if (tile_width, tile_height) not in config["tile_sizes"]:
         raise SystemExit(f"{tool} does not support tile_size {tile_width}x{tile_height}.")

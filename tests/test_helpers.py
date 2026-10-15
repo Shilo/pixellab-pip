@@ -180,6 +180,17 @@ class BarkConfigTests(unittest.TestCase):
 
 
 class HelperCliSmokeTests(unittest.TestCase):
+    def test_tileset_simulator_accepts_current_mcp_tile_size_and_enhance(self) -> None:
+        top = {"lower_description": "ocean", "upper_description": "beach", "tile_size": 16, "enhance": False}
+        self.assertEqual(tileset_sim.tile_size_from_request("create_topdown_tileset", top), (16, 16))
+        tileset_sim.validate_request("create_topdown_tileset", top, 16, 16)
+        with self.assertRaisesRegex(SystemExit, "Fields not exposed.*seed"):
+            tileset_sim.validate_request("create_topdown_tileset", {**top, "seed": 1}, 16, 16)
+
+        side = {"lower_description": "stone", "transition_description": "grass", "tile_size": 32, "seed": 1}
+        self.assertEqual(tileset_sim.tile_size_from_request("create_sidescroller_tileset", side), (32, 32))
+        tileset_sim.validate_request("create_sidescroller_tileset", side, 32, 32)
+
     def test_tileset_simulator_recognizes_shape_style_as_documented_but_unsupported(self) -> None:
         request = {
             "lower_description": "ocean",

@@ -200,7 +200,7 @@ Fresh checkout and maintenance instructions live in [PixelLab Documentation Watc
 
 ## PixelLab MCP Tileset Simulator
 
-Use [dev-tools/pixellab_mcp_tileset_sim.py](../dev-tools/pixellab_mcp_tileset_sim.py) when maintaining or validating the tileset workflow without spending PixelLab generations. It accepts the same MCP create-tool JSON used by `create_sidescroller_tileset` and `create_topdown_tileset`, validates the request shape, renders local component previews, and repacks the compact simulated sheet into PixelLab-style export layouts.
+Use [dev-tools/pixellab_mcp_tileset_sim.py](../dev-tools/pixellab_mcp_tileset_sim.py) when maintaining or validating the tileset workflow without spending PixelLab generations. It accepts MCP create-tool JSON for supported compact layouts, validates the request shape, renders local component previews, and repacks the compact simulated sheet into PixelLab-style export layouts.
 
 Typical smoke tests from the repository root:
 

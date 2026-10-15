@@ -20,7 +20,7 @@ Fastest top-down smoke test:
 '{"lower_description":"ocean water","upper_description":"sandy beach","transition_description":"sea foam","transition_size":0.25}' | python dev-tools/pixellab_mcp_tileset_sim.py create_topdown_tileset --draw-grid
 ```
 
-The simulator accepts the same MCP create-tool JSON object an agent would pass to PixelLab MCP and writes local PNGs. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
+The simulator accepts MCP create-tool JSON for the compact layouts it supports and writes local PNGs. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
 
 Important: the PNG is a schematic semantic preview, not a PixelLab-style visual prediction. Use it to classify where colors/details are expected to land, not to judge whether the final PixelLab art will have the same silhouette, brick texture, wobble, palette drift, dithering taste, or hand-drawn contour.
 
@@ -64,9 +64,9 @@ Omitted optional fields use the documented MCP defaults for simulation only. The
 Common accepted MCP fields:
 
 - Sidescroller: `lower_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `tile_strength`, `base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`.
-- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `shape_style`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`, `roundness`, `boundary_amplitude`, `boundary_seed`, `step_slope`, `connect_diagonals`.
+- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `shape_style`, `enhance`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `spread_x`, `slope_size`, `raggedness`, `roundness`, `boundary_amplitude`, `boundary_seed`, `step_slope`, `connect_diagonals`.
 
-Top-down border controls include Pro-only `raggedness`, `step_slope`, and `connect_diagonals`; `roundness` also works with `shape_style`, and `boundary_amplitude` works with Pro or `shape_style` up to `transition_size` 0.5. `boundary_seed` selects a repeatable meander for `boundary_amplitude`. `spread_x` and `slope_size` have no effect. The simulator accepts these schema fields but does not model their PixelLab rendering.
+Both tools accept `tile_size` as a square-size integer or a width/height object. Top-down border controls include Pro-only `raggedness`, `step_slope`, and `connect_diagonals`; `roundness` also works with `shape_style`, and `boundary_amplitude` works with Pro or `shape_style` up to `transition_size` 0.5. `boundary_seed` selects a repeatable meander for `boundary_amplitude`. `enhance` affects only `shape_style` tilesets; `spread_x` and `slope_size` have no effect. The simulator accepts these schema fields but does not model their PixelLab rendering.
 
 By default, it writes to:
 
