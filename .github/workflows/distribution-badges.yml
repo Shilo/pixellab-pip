@@ -130,8 +130,7 @@ jobs:
                   )
                   total = count(traffic["count"])
                   metrics["clones"] = {"count": total, "period": "last 14 days"}
-                  # The date keeps an older snapshot honest if scheduling stops.
-                  clones = badge("Clones (14 days)", f"{total:,} · {observed_at[:10]}", "7c3aed")
+                  clones = badge("Clones (14 days)", f"{total:,}", "7c3aed")
               except (HTTPError, URLError, OSError, ValueError, KeyError, TypeError):
                   failures.append("Clones unavailable; verify TRAFFIC_TOKEN has repository Administration read access.")
               return {"downloads.json": downloads, "clones.json": clones, "metrics.json": metrics}, failures

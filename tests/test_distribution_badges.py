@@ -36,7 +36,8 @@ class DistributionBadgeTests(unittest.TestCase):
             files, failures = badges.collect("owner/repo", "write-secret", "traffic-secret", "2026-10-15T10:00:00+00:00")
         self.assertEqual(failures, [])
         self.assertEqual(files["downloads.json"]["message"], "1,401")
-        self.assertEqual(files["clones.json"]["message"], "1,232 · 2026-10-15")
+        self.assertEqual(files["clones.json"]["message"], "1,232")
+        self.assertEqual(files["metrics.json"]["observed_at"], "2026-10-15T10:00:00+00:00")
         self.assertNotIn("secret", json.dumps(files))
 
     def test_download_failure_never_publishes_partial_total_or_fake_zero(self):
@@ -46,7 +47,7 @@ class DistributionBadgeTests(unittest.TestCase):
             files, failures = badges.collect("owner/repo", "token", "traffic-token", "2026-10-15T10:00:00+00:00")
         self.assertEqual(files["downloads.json"]["message"], "unavailable")
         self.assertIsNone(files["metrics.json"]["downloads"])
-        self.assertEqual(files["clones.json"]["message"], "0 · 2026-10-15")
+        self.assertEqual(files["clones.json"]["message"], "0")
         self.assertEqual(len(failures), 1)
 
     def test_clone_auth_failure_preserves_downloads_without_old_clone_value(self):
