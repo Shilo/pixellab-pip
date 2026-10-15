@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import struct
 
 from PIL import Image, ImageSequence
 
@@ -58,7 +59,8 @@ def inspect_images(
                             f"{path} frame {index}: size {frame.width}x{frame.height}; "
                             f"expected {expected_size[0]}x{expected_size[1]}"
                         )
-        except (OSError, ValueError, SyntaxError, EOFError, Image.DecompressionBombError) as exc:
+        except (OSError, ValueError, SyntaxError, EOFError, IndexError,
+                struct.error, Image.DecompressionBombError) as exc:
             errors.append(f"{path}: {type(exc).__name__}: {exc}")
     if expected_frames is not None and total != expected_frames:
         errors.append(f"decoded {total} frames; expected {expected_frames}")

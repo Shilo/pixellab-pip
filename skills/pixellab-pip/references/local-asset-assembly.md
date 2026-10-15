@@ -8,10 +8,10 @@ Local assembly only assembles, previews, format-converts, or verifies existing P
 
 ## Local Image Inspection
 
-For repeatable offline measurements, use `assets/inspect_images.py` from this skill's directory with Python and Pillow, or equivalent host tools if unavailable:
+For repeatable offline measurements, use this skill's `assets/inspect_images.py` with Python and Pillow, or equivalent host tools if unavailable. Resolve the helper to an absolute path in the installed skill; keep the working directory at the generation's run folder so relative input paths resolve there. In this example, replace `<skill-dir>` with that installation's absolute directory:
 
 ```bash
-python assets/inspect_images.py frame-00.png frame-01.png --expect-size 64x64 --expect-frames 2
+python "<skill-dir>/assets/inspect_images.py" frame-00.png frame-01.png --expect-size 64x64 --expect-frames 2
 ```
 
 Pass files in their intended order. The helper decodes every frame of each input and prints JSON with dimensions, alpha extrema, nonzero-alpha bounds (right/bottom exclusive; null when empty), and observed GIF durations/loop metadata (null when absent; loop 0 means infinite). It writes no files. `--expect-frames` checks the total decoded frames across all inputs. Supply expected dimensions/count only when the request or selected route guarantees them; account for echoed input frames per `animation.md`. Decode errors and explicit expectation mismatches return exit code 1; without a mismatch, exit 0 means decoding and supplied checks passed, not that the art meets the request.

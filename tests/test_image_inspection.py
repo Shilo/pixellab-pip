@@ -96,16 +96,26 @@ class ImageInspectionTests(unittest.TestCase):
         self.assertEqual([f["index"] for f in report["files"][0]["frames"]], [0, 1, 2])
 
     def test_late_corruption_retains_decoded_frames_and_continues(self) -> None:
-        animation = self.save_animation("late.gif", duration=40)
-        animation.write_bytes(animation.read_bytes()[:-9])
+        data = self.save_animation("source.gif", duration=40).read_bytes()
+        marker = b"\x21\xf9\x04"
+        second_control = data.index(marker, data.index(marker) + 8)
+        descriptor = data.index(b"\x2c", second_control + 8)
+        corruptions = (
+            ("late.gif", data[:-9], 2),
+            ("truncated-control.gif", data[:second_control + 3], 1),
+            ("truncated-descriptor.gif", data[:descriptor + 1], 1),
+        )
         Image.new("RGB", (8, 8), "red").save(self.root / "good.png")
-        report = self.run_helper("late.gif", "missing.png", "good.png", expected_exit=1)
-        self.assertEqual(len(report["files"][0]["frames"]), 2)
-        self.assertEqual(report["files"][1]["frames"], [])
-        self.assertEqual(len(report["files"][2]["frames"]), 1)
-        self.assertEqual(len(report["errors"]), 2)
-        self.assertTrue(any("late.gif" in error for error in report["errors"]))
-        self.assertTrue(any("missing.png" in error for error in report["errors"]))
+        for name, content, decoded in corruptions:
+            with self.subTest(file=name):
+                (self.root / name).write_bytes(content)
+                report = self.run_helper(name, "missing.png", "good.png", expected_exit=1)
+                self.assertEqual(len(report["files"][0]["frames"]), decoded)
+                self.assertEqual(report["files"][1]["frames"], [])
+                self.assertEqual(len(report["files"][2]["frames"]), 1)
+                self.assertEqual(len(report["errors"]), 2)
+                self.assertTrue(any(name in error for error in report["errors"]))
+                self.assertTrue(any("missing.png" in error for error in report["errors"]))
 
     def test_total_expected_frame_count_mismatch(self) -> None:
         self.save_animation("timed.gif", duration=40)
