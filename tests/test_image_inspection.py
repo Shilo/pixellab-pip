@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -131,6 +132,40 @@ class ImageInspectionTests(unittest.TestCase):
                                         cwd=self.root, capture_output=True, text=True)
                 self.assertEqual(result.returncode, 2)
                 self.assertEqual(result.stdout, "")
+
+    def test_unavailable_pillow_skips_before_inspection_without_writes(self) -> None:
+        environment = {**os.environ, "PYTHONPATH": str(self.root),
+                       "PYTHONDONTWRITEBYTECODE": "1"}
+        for broken in (False, True):
+            with self.subTest(broken_import=broken):
+                if broken:
+                    package = self.root / "PIL"
+                    package.mkdir()
+                    (package / "__init__.py").write_text(
+                        'raise OSError("unavailable native imaging library")\n', encoding="utf-8")
+                before = {str(p.relative_to(self.root)): p.read_bytes()
+                          for p in self.root.rglob("*") if p.is_file()}
+                result = subprocess.run(
+                    [sys.executable, "-S", str(HELPER), "not-inspected.png"],
+                    cwd=self.root, env=environment, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(set(report), {"skipped"})
+                self.assertIn("Pillow", report["skipped"])
+                self.assertEqual(result.stderr, "")
+                after = {str(p.relative_to(self.root)): p.read_bytes()
+                         for p in self.root.rglob("*") if p.is_file()}
+                self.assertEqual(before, after)
+
+    def test_help_and_invalid_arguments_work_without_pillow(self) -> None:
+        for args, expected in ((("--help",), 0),
+                               (("input.png", "--expect-frames", "0"), 2)):
+            with self.subTest(args=args):
+                result = subprocess.run(
+                    [sys.executable, "-S", str(HELPER), *args],
+                    cwd=self.root, capture_output=True, text=True)
+                self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
 
 
 if __name__ == "__main__":

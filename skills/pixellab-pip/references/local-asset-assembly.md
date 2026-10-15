@@ -8,13 +8,15 @@ Local assembly only assembles, previews, format-converts, or verifies existing P
 
 ## Local Image Inspection
 
-For repeatable offline measurements, use this skill's `assets/inspect_images.py` with Python and Pillow, or equivalent host tools if unavailable. Resolve the helper to an absolute path in the installed skill; keep the working directory at the generation's run folder so relative input paths resolve there. In this example, replace `<skill-dir>` with that installation's absolute directory:
+Prefer available host tools when they already provide equivalent all-frame checks. This skill's `assets/inspect_images.py` is an optional reusable implementation, not a prerequisite for PixelLab work. Use it only with a known usable Python interpreter. If Python cannot launch, skip the helper; do not install Python or Pillow solely for inspection. Use equivalent host checks where available and report any checks left unverified. Resolve the helper to an absolute path in the installed skill; keep the working directory at the generation's run folder so relative input paths resolve there. In this example, replace `<skill-dir>` with that installation's absolute directory:
 
 ```bash
 python "<skill-dir>/assets/inspect_images.py" frame-00.png frame-01.png --expect-size 64x64 --expect-frames 2
 ```
 
 Pass files in their intended order. The helper decodes every frame of each input and prints JSON with dimensions, alpha extrema, nonzero-alpha bounds (right/bottom exclusive; null when empty), and observed GIF durations/loop metadata (null when absent; loop 0 means infinite). It writes no files. `--expect-frames` checks the total decoded frames across all inputs. Supply expected dimensions/count only when the request or selected route guarantees them; account for echoed input frames per `animation.md`. Decode errors and explicit expectation mismatches return exit code 1; without a mismatch, exit 0 means decoding and supplied checks passed, not that the art meets the request.
+
+Missing or unusable Pillow returns a JSON `skipped` reason and exit code 3 before inspecting inputs. Treat this as unavailable verification, never a pass; continue with the host-check fallback above. `--help` and argument validation work without Pillow.
 
 Alpha/bounds are observations: a fully transparent effect frame may be intentional, edge contact does not prove clipping, and transparency does not prove the background was correctly removed. Continue visual verification. This helper does not verify GIF disposal or source-pixel fidelity; retain the GIF checks below.
 

@@ -7,8 +7,6 @@ import argparse
 import json
 import struct
 
-from PIL import Image, ImageSequence
-
 
 def positive_int(value: str) -> int:
     try:
@@ -32,6 +30,11 @@ def inspect_images(
     expected_size: tuple[int, int] | None = None,
     expected_frames: int | None = None,
 ) -> dict:
+    try:
+        from PIL import Image, ImageSequence
+    except (ImportError, OSError):
+        return {"skipped": "Pillow is unavailable; use equivalent host checks."}
+
     files, errors, total = [], [], 0
     for path in paths:
         item = {"path": path, "frames": []}
@@ -76,6 +79,8 @@ def main() -> int:
     args = parser.parse_args()
     report = inspect_images(args.paths, args.expect_size, args.expect_frames)
     print(json.dumps(report, indent=2))
+    if "skipped" in report:
+        return 3
     return 1 if report["errors"] else 0
 
 
