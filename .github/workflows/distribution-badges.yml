@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      contents: write # publish aggregate JSON only to codex/badges
+      contents: write # publish aggregate JSON only to badge-data
     steps:
       # No checkout: collecting statistics must not add a repository clone.
       - name: Read official APIs and publish badge data
@@ -49,7 +49,7 @@ jobs:
           from urllib.error import HTTPError, URLError
           from urllib.request import Request, urlopen
 
-          BRANCH = "codex/badges"
+          BRANCH = "badge-data"
           CLAWHUB_URL = "https://clawhub.ai/api/v1/skills/pixellab-pip"
 
 
@@ -172,7 +172,7 @@ jobs:
               publish(os.environ["GH_REPO"], os.environ["GH_TOKEN"], files)
               for failure in failures:
                   print(f"::error::{failure}")
-              print("Published aggregate badge data to codex/badges.")
+              print(f"Published aggregate badge data to {BRANCH}.")
               if failures:
                   raise SystemExit(1)
 

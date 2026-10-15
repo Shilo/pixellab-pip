@@ -34,7 +34,7 @@ The public counters below were read live on 2026-10-15. The screenshot is a sepa
 | Same API | 3 installs | ClawHub recorded installs |
 | [skills.sh skill page](https://skills.sh/shilo/pixellab-pip/pixellab-pip) | 22 installs | skills CLI reported installs |
 | [GitHub releases API](https://api.github.com/repos/Shilo/pixellab-pip/releases?per_page=100) | 42 downloads across 17 current release assets | GitHub release asset downloads |
-| Authenticated GitHub traffic API, published in [badge metrics](https://raw.githubusercontent.com/Shilo/pixellab-pip/codex/badges/metrics.json) | 1,232 clones at initial activation | GitHub clones (14 days) |
+| Authenticated GitHub traffic API, published in [badge metrics](https://raw.githubusercontent.com/Shilo/pixellab-pip/badge-data/metrics.json) | 1,232 clones at initial activation | GitHub clones (14 days) |
 | Supplied GitHub Traffic screenshot, September 30 through October 13, 2026 | 1,232 clones; 389 unique cloners | GitHub clones and unique cloners for that stated period |
 | [GitHub repository](https://github.com/Shilo/pixellab-pip) | 37 stars | GitHub stars |
 
@@ -135,7 +135,9 @@ GitHub's [webhook event reference](https://docs.github.com/en/webhooks/webhook-e
 
 **Clones (14 days)** uses the top-level `count` returned by GitHub's clone traffic endpoint. It does not sum daily unique cloners or attempt a lifetime estimate. The badge shows only the count; `metrics.json` records the UTC observation time. Marketplace additions, installation tools, and automation can contribute; a clone does not confirm a successful installation.
 
-The [Distribution Badges workflow](../../.github/workflows/distribution-badges.yml) reads the official APIs directly and publishes two [Shields endpoint](https://shields.io/badges/endpoint-badge) JSON files plus a source breakdown to the dedicated `codex/badges` branch. It uses no repository checkout, hosted analytics service, or installed-skill telemetry. Updating that branch does not trigger the existing `main` push workflows. A repository guard prevents forks from mixing their own GitHub counts with Pip's ClawHub counter.
+The [Distribution Badges workflow](../../.github/workflows/distribution-badges.yml) reads the official APIs directly and publishes two [Shields endpoint](https://shields.io/badges/endpoint-badge) JSON files plus a source breakdown to the dedicated `badge-data` branch. It uses no repository checkout, hosted analytics service, or installed-skill telemetry. Updating that branch does not trigger the existing `main` push workflows. A repository guard prevents forks from mixing their own GitHub counts with Pip's ClawHub counter.
+
+The branch is permanent public storage for three small generated JSON files. It lets Shields read the counts without receiving the private traffic credential, and keeps routine data commits separate from the source history on `main`. It is a hosting choice, not a GitHub requirement. Writing the files to `main` would add routine data commits there; GitHub Actions' built-in token normally prevents those commits from triggering more workflows. [GitHub Pages deployed through Actions](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) could serve the same files without a separate data branch, but requires Pages setup and deployment permissions. An external endpoint could also serve the data, with another hosting service to operate. The dedicated branch keeps the current setup entirely on GitHub without adding a separate deployment system.
 
 The badges link here, and the public `metrics.json` file on that branch records the component counts and UTC observation time. Transient connection and selected server errors receive up to three GET attempts with short increasing delays. Authentication failures, rate limits, and writes are not automatically retried. GitHub requests use the documented `2026-03-10` API version.
 
@@ -149,7 +151,7 @@ Source failures produce `unavailable`, never a partial download sum, guessed clo
 
 **Traffic credential renewal:** The current `TRAFFIC_TOKEN` was configured with a 90-day lifetime on 2026-10-15, giving an expected expiry of **2027-01-13**. Confirm the exact expiry in GitHub's token settings and renew by **2027-01-06**. Generate a replacement with the same repository restriction and Administration read permission, replace the Actions secret, and dispatch **Distribution Badges** to verify it. Update this renewal note when replacing the token; never record its value here.
 
-To verify activation, check the latest **Distribution Badges** run, inspect the public `downloads.json`, `clones.json`, and `metrics.json` on `codex/badges`, and confirm both badge images render in the README after caches refresh. A local preview or a passing unit test alone does not establish that GitHub can read traffic, publish the data branch, or serve the live badge images.
+To verify activation, check the latest **Distribution Badges** run, inspect the public `downloads.json`, `clones.json`, and `metrics.json` on `badge-data`, and confirm both badge images render in the README after caches refresh. A local preview or a passing unit test alone does not establish that GitHub can read traffic, publish the data branch, or serve the live badge images.
 
 ## Preserving scope
 

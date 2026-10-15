@@ -122,6 +122,7 @@ class DistributionBadgeTests(unittest.TestCase):
         self.assertIn("workflow_dispatch:", workflow)
 
     def test_publish_creates_or_updates_only_data_branch_without_force(self):
+        self.assertEqual(badges.BRANCH, "badge-data")
         for exists in (True, False):
             calls = []
 
@@ -136,10 +137,11 @@ class DistributionBadgeTests(unittest.TestCase):
             with self.subTest(exists=exists), patch.object(badges, "request", side_effect=request):
                 badges.publish("owner/repo", "token", {"downloads.json": {"message": "10"}})
             self.assertNotIn("main", json.dumps(calls))
+            self.assertTrue(calls[0][0].endswith("/git/ref/heads/badge-data"))
             self.assertEqual(calls[2][2]["parents"], ["parent"] if exists else [])
             if exists:
                 self.assertFalse(calls[-1][2]["force"])
             else:
-                self.assertEqual(calls[-1][2]["ref"], "refs/heads/codex/badges")
+                self.assertEqual(calls[-1][2]["ref"], "refs/heads/badge-data")
         self.assertNotIn("actions/checkout", workflow)
         self.assertNotIn("pull_request", workflow)
