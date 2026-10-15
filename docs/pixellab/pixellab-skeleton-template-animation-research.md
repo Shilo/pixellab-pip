@@ -16,6 +16,10 @@ The managed character animation schema now documents `mode="pixminimax"` on REST
 
 The refreshed MCP guide lists text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. Pip defaults quadruped creation to v3 with a supplied reference; text-only Pro is an opt-in after the user accepts its size-based cost. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions. REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
 
+## 2026-10-15 Contract Addendum
+
+The refreshed REST docs and MCP guide retain template mode's nominal cost of 1 generation per direction, but clarify that canvases over about 100px are billed per rendering batch. REST `/animate-character` documents up to 3 batches at 128px, 5 at 180px, and one per clip frame at 256px; MCP says the receipt gives the batch ceiling. MCP managed `animate_character` v3 also documents `width × height × frame_count ≤ 8 × 256 × 256` (at most 8 frames on a 256px canvas; 16 frames fit up to about 180px). The REST managed-animation schema does not publish this pixel budget. These are public-contract changes only; no animation jobs were run.
+
 ## Executive Summary
 
 PixelLab has two broad animation categories with four related but distinct workflows:
@@ -229,7 +233,7 @@ PATCH /v2/characters/{character_id}/tags
 DELETE /v2/characters/{character_id}
 ```
 
-Template-mode cost is documented as lower than custom/pro in both REST descriptions and MCP docs. The public docs describe template mode as one generation per direction, while custom/pro is significantly more expensive.
+Template-mode cost is documented as lower than custom/pro in both REST descriptions and MCP docs. The nominal cost is one generation per direction, with additional batch charges on canvases over about 100px; custom/pro remains significantly more expensive. Check the current batch guidance and returned usage rather than applying one generation to every canvas (see [cost routing](../../skills/pixellab-pip/references/cost-routing.md)).
 
 ### REST Example: Dog Walk 8 Frames
 

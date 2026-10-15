@@ -1,13 +1,13 @@
 # VFX Workbench
 
-Read this for animated effects that use timed parts, a sprite anchor, projectile motion, or reusable VFX clips. The tool is a command-based effect composer, not prompt-to-image generation. It is MCP-only; no public REST VFX endpoint is documented.
+Read this for animated effects that use timed parts, a sprite anchor, projectile motion, or reusable VFX clips. The tool is a command-based effect composer, not prompt-to-image generation. The 0.4.130 announcement also says VFX is available through API, but current public REST v2 OpenAPI and `llms.txt` publish no VFX route or schema. Use `vfx_workbench` when visible; do not infer a REST path from the announcement or tool name.
 
 ## Choose the Route
 
 - Use `vfx_workbench` for composed one-shot hits, explosions, spells, projectile trails, persistent auras, and weather/environment loops. It can render standalone effects or compose them around a supplied sprite.
 - For a still effect image, use the existing static image route: Create Image Pro for an isolated reusable effect, or an image edit when the user asks to add a static effect to a supplied target. Those edit results are whole images, not extracted effect layers.
 - Use raw image animation when the user wants free-form motion on an existing image and does not need independently controlled parts, sprite anchoring, or game-pack clips; read [Animation](animation.md) for raw-route inputs and frame constraints. Keep managed character/object animation on its managed route.
-- Do not infer that the experimental Create VFX website page shares an implementation with this MCP tool. No public REST VFX route is documented.
+- Do not infer that the experimental Create VFX website page shares an implementation with this MCP tool.
 
 ## Run the Workbench
 

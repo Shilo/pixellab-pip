@@ -41,6 +41,8 @@ The current public MCP `animate_character` schema exposes `template`, `skeleton-
 
 It is not field-for-field equivalent to REST `/characters/animations`. REST additionally exposes `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `seed`, and inline `enhance_prompt` (v3 mode); REST also retains managed `pro`. The REST `subject_description` and `initial_pose` fields are PixMiniMax-only; see `prompt-limits.md` for their surface-specific length contract. Use REST when those extra fields matter, for integration code, or to validate exact API behavior.
 
+Template mode is nominally 1 generation per direction, but canvases over about 100px are billed per rendering batch. See `cost-routing.md` for the published batch sizes and check returned usage. MCP `animate_character`'s v3 mode also documents a canvas-area × frame-count budget that the REST managed-animation schema does not publish; see the `frame_count` field below.
+
 ## Managed Preset Animation (MCP)
 
 Flow for an existing or wanted managed character:
@@ -124,7 +126,7 @@ Request shape:
 | `mode` | `template`, `skeleton-v3`, `v3`, `pixminimax`, or REST-only `pro`. Use `template` for preset ids; an omitted mode may auto-detect template when `template_animation_id` is provided, but be explicit. |
 | `template_animation_id` | Exact preset id. Do not pass display labels. |
 | `directions` | Be explicit to avoid accidental all-direction generation. |
-| `frame_count` | v3: even 4–16; PixMiniMax: multiples of 4 from 4–40; default 8. Ignored by template, Skeleton v3, and pro; it does not override a preset's frame count. |
+| `frame_count` | v3: even 4–16; PixMiniMax: multiples of 4 from 4–40; default 8. MCP managed v3 additionally caps `width × height × frame_count` at `8 × 256 × 256` (256px canvas: at most 8 frames; 16 frames: up to about 180px). The REST managed schema does not publish that pixel budget. Ignored by template, Skeleton v3, and pro; it does not override a preset's frame count. |
 | `custom_start_frame` | Optional starting pose for v3 or PixMiniMax. Requires exactly one direction; max 256×256. Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
 | `end_frame` | Optional target pose for v3 or PixMiniMax interpolation. Dimensions must match the start frame, requires exactly one direction, and is not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
 | `keep_first_frame` | v3 or PixMiniMax, default `true`. Controls whether the reference frame is stored as frame 0 (see Frame Count). Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |

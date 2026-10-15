@@ -64,9 +64,9 @@ Omitted optional fields use the documented MCP defaults for simulation only. The
 Common accepted MCP fields:
 
 - Sidescroller: `lower_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `tile_strength`, `base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`.
-- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `shape_style`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`.
+- Top-down: `lower_description`, `upper_description`, `transition_description`, `transition_size`, `tile_size`, `outline`, `shading`, `detail`, `view`, `mode`, `shape_style`, `tile_strength`, `lower_base_tile_id`, `upper_base_tile_id`, `tileset_adherence`, `tileset_adherence_freedom`, `text_guidance_scale`, `seed`, `spread_x`, `slope_size`, `raggedness`, `roundness`, `boundary_amplitude`, `boundary_seed`, `step_slope`, `connect_diagonals`.
 
-In Pro mode, the current public REST/MCP descriptions say `spread_x` and `slope_size` have no effect; `raggedness` shapes the border. The simulator accepts the schema fields but does not model PixelLab's Pro rendering.
+Top-down border controls include Pro-only `raggedness`, `step_slope`, and `connect_diagonals`; `roundness` also works with `shape_style`, and `boundary_amplitude` works with Pro or `shape_style` up to `transition_size` 0.5. `boundary_seed` selects a repeatable meander for `boundary_amplitude`. `spread_x` and `slope_size` have no effect. The simulator accepts these schema fields but does not model their PixelLab rendering.
 
 By default, it writes to:
 

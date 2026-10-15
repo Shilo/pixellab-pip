@@ -129,6 +129,11 @@ MCP_TOOLS = {
             "spread_x",
             "slope_size",
             "raggedness",
+            "roundness",
+            "boundary_amplitude",
+            "boundary_seed",
+            "step_slope",
+            "connect_diagonals",
         },
         "defaults": {
             "transition_description": None,
@@ -150,6 +155,11 @@ MCP_TOOLS = {
             "spread_x": 0.5,
             "slope_size": 0.0,
             "raggedness": 0.0,
+            "roundness": None,
+            "boundary_amplitude": 0.0,
+            "boundary_seed": 0,
+            "step_slope": 0.0,
+            "connect_diagonals": False,
         },
         "tile_sizes": {(16, 16), (32, 32), (64, 64)},
         "transition_range": (0.0, 1.0),
@@ -426,12 +436,25 @@ def validate_request(
         "spread_x",
         "slope_size",
         "raggedness",
+        "boundary_amplitude",
+        "step_slope",
     ):
         if field in request and (isinstance(request[field], bool) or not isinstance(request[field], (int, float))):
             raise SystemExit(f"{field} must be a number.")
+    if "roundness" in request and request["roundness"] is not None:
+        if isinstance(request["roundness"], bool) or not isinstance(request["roundness"], (int, float)):
+            raise SystemExit("roundness must be a number or null.")
     if "seed" in request and request["seed"] is not None:
         if isinstance(request["seed"], bool) or not isinstance(request["seed"], int):
             raise SystemExit("seed must be an integer or null.")
+    if "boundary_seed" in request and (
+        isinstance(request["boundary_seed"], bool)
+        or not isinstance(request["boundary_seed"], int)
+        or request["boundary_seed"] < 0
+    ):
+        raise SystemExit("boundary_seed must be a non-negative integer.")
+    if "connect_diagonals" in request and not isinstance(request["connect_diagonals"], bool):
+        raise SystemExit("connect_diagonals must be a boolean.")
 
     if (tile_width, tile_height) not in config["tile_sizes"]:
         raise SystemExit(f"{tool} does not support tile_size {tile_width}x{tile_height}.")

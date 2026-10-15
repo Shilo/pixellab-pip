@@ -17,12 +17,7 @@ For website/Aseprite workflows, or a local preparation task that explicitly requ
 
 Do not maximize the number of generated subjects by enlarging the canvas. For style fidelity, preserve the style reference's scale first.
 
-For `generate-with-style-v2`, output count is tied to the deduced square size buckets in the public docs:
-
-- `16-42`: 64 images
-- `43-85`: 16 images
-- `86-170`: 4 images
-- `171-512`: 1 image
+For `generate-with-style-v2`, output count follows the refreshed `generate-image-v2` ladder through `170px`; `171–512px` returns one image. See [Create Image Pro](create-image-pro.md#native-size-multi-output-batches) for the current size-to-count bands. The output size is still derived from the style images.
 
 When the style reference's target size yields one image, generate one output asset, or one requested sheet/atlas, per request unless the user explicitly accepts a packed multi-asset atlas. A packed atlas competes with scale, layout, and style fidelity.
 

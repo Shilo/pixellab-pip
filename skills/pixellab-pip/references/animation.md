@@ -66,6 +66,8 @@ For `animate-with-text-v3`, with `enhance_prompt=true`, null `enhanced_prompt` m
 
 If the user insists on animating an atlas in one job, explain that the result is experimental. `animate-with-text-v2` / Pro may honor per-cell variation better but at lower pixel quality; offer it as an optional paid candidate, not a quality upgrade, warn about palette and color drift, and verify every cell.
 
+REST Pro `POST /animate-with-text-v2` also accepts `target_palette`: PixelLab puts the reference image on the palette first, then shares the palette and optional `max_colors` cap across every frame. Its `smart` option is single-image only and is refused for animation. The current MCP tools do not expose this Pro/v2 animation route or an equivalent hex-palette field; MCP `animate_image` maps to v3, and `color_image` is a reference rather than a strict palette constraint. Use REST v2 when the user requires a palette-constrained animation.
+
 ## Walk Loops From Idle Stances
 
 Seamless walk loops generated from a single idle or neutral stance frame are high-risk:

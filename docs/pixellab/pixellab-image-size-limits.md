@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-08 (Pro Flash pixel converter and character reference directions refreshed).
+Last reviewed: 2026-10-15 (normal-map limits and current character size/frame rules refreshed).
+
+> **2026-10-15 API refresh.** REST `POST /normal-map` accepts 8–512px-per-side PNG sprites and horizontal strips up to 32 equal frames. MCP managed `animate_character` v3 now documents a canvas-area × frame-count cap; the REST managed schema does not publish that cap. MCP `create_character` now clarifies that Standard `size` is subject size and its stored canvas is about 40% larger.
 
 > **2026-10-05 API refresh.** Managed character animation adds the documented PixMiniMax mode: up to 40 frames at the stored character size (“any size” in the public description). Its optional custom start frame is capped at 256×256; managed v3 remains capped at 256×256. The 2026-10-03 and 2026-09-25 notes below are retained as earlier snapshot records.
 
@@ -16,7 +18,7 @@ Purpose: document the true minimum and maximum image-size hard limits for every 
 
 Motivating goal: support `8px` and `16px` icons, items, and tilesets if the tools allow it. The `32x32` minimum seen in some workflows prompted this review; that floor turned out to be a client-side editor limit, not an API limit.
 
-Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The 2026-10-03 refresh checked the Skeleton v3 and Pro Flash contract changes, including the added native Pro Flash presets; the `generate-with-style-v2` row was rechecked 2026-08-07 and other older values were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
+Source: raw `https://api.pixellab.ai/v2/openapi.json`, parsed field-by-field **and endpoint description by endpoint description** — several endpoints (`inpaint-v3`, `rotate`, `animate-with-text-v3`, `estimate-skeleton`) state their real bounds only in prose while their fields are loose or unbounded, so field schemas alone under-report. MCP bounds come from live tool schemas, not `https://api.pixellab.ai/mcp/docs`. The 2026-10-15 refresh rechecked the `generate-with-style-v2` output-count ladder; the 2026-10-03 refresh checked Skeleton v3 and Pro Flash changes, and older values were checked 2026-07-15. Numbers below are quoted, not inferred. Refresh before exact integrations.
 
 ## How To Read These Limits
 
@@ -121,7 +123,7 @@ Mapping caveat: the editor tools communicate over the extension's internal trans
 | `create-image-pixflux` | `image_size` | 16 per axis, but **area floor rejects `16×16`** | 400×400 | Area 32×32 to 400×400 — **enforced at generation: `16×16` → `422 "Canvas must be size 32x32 area or larger"` (probe-confirmed 2026-07-15), despite the schema's `minimum: 16`. Unlike `create-image-pixen`, whose prose (since the 2026-09-08 refresh) documents a min side of 16 and which does generate at `16×16`** (see line below). Transparent background blanks area over 200×200. |
 | `create-image-pixflux-background` | `image_size` | 16×16 | 400×400 | Area 32×32 to 400×400. `no_background` defaults to `false` (keeps the scene); alternative for opaque edge-to-edge backgrounds ≤400×400 (verified 0px bars, 0% transparency at 400×224, ~$0.0065). |
 | `create-image-bitforge` | `image_size` | 16×16 | 200×200 | Max area 200×200. Skeleton keypoints best at 16/32/64. |
-| `generate-with-style-v2` | derived from `style_images` | 16×16 | 512×512 | Square output; the largest dimension across 1–4 style images determines the size. Non-square style images are centered. Output buckets: 16–42 → 64 images, 43–85 → 16, 86–170 → 4, 171–512 → 1. |
+| `generate-with-style-v2` | derived from `style_images` | 16×16 | 512×512 | Square output; the largest dimension across 1–4 style images determines the size. Non-square style images are centered. Output buckets: 16–32 → 64 images, 33–35 → 49, 36–41 → 36, 42–50 → 25, 51–64 → 16, 65–84 → 9, 85 → 16, 86–170 → 4, 171–512 → 1. |
 | `create-image-pro-flash` | `image_size` | 16×16 | 256×256 | Presets: 16×16 experimental, 24×24, 32×32, 32×48, 48×48, 64×64, 96×64, 96×96, 128×128. Custom dimensions in multiples of four are Beta. One image per call; check the live capability lookup before selecting a size. |
 
 `generate-with-style-v2` no longer has a supported output-size request field. The OpenAPI schema retains an optional deprecated `image_size` property marked as removed, but `style_images` and `description` are the only required request fields; do not use `image_size` to choose the result dimensions.
@@ -272,6 +274,7 @@ An in-between size (48, 96, 150) is **accepted at validation** — untested whet
 | `remove-background` | `image_size` | **1×1** | 400×400 | Lowest minimum in the API; max area 400×400. |
 | `edit-image-pixen` | source `image`; `width`/`height` | source ≥16×16 area | source **256 per side**; target **area 256×256** | **Prose/endpoint-enforced, not schema-enforced** — source and target dimensions must each be multiples of four; `width`/`height` schema fields have `minimum: 1` and no maximum. Source is capped per side, target by area, so a 128×512 target is valid while 320×320 is not. Target defaults to source dimensions; the server pads transparently and re-renders instead of rescaling. |
 | `image-to-text` | `image` | — | 4096×4096 | PNG, JPEG, or data URI image input; optional `prompt` is at most 2000 characters. Returns text and does not generate an image. |
+| `normal-map` | `image`; optional `frames` | 8×8 per frame | 512×512 per frame | PNG sprite or horizontal strip of equal-size frames; up to 32 frames is in endpoint prose, while the schema gives `frames` a minimum of 1 and default 1 but no maximum. Output is a same-size PNG strip. |
 | `correct-pixelart` | `images[]` | — | area **1024×1024** | **Prose-enforced** — the request schema declares no size field. Does not resize; all frames in a call must share one size. Unzoom an upscaled sprite first. |
 | `reduce-colors` | `images[]` | — | **512×512 total across all frames** | **Prose-enforced** — the request schema declares no size field. A shared budget, not per frame — sixteen 64×64 frames or four 128×128. All frames must share one size. |
 | `unzoom` | `image` | **256×256** | area **2048×2048** | **Prose-enforced** — the request schema declares no size field; the endpoint documents `422` for too small or too large. The minimum is real: grid detection needs enough pixels to find the lattice. Output is opaque — transparency is composited onto white. |
@@ -295,7 +298,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 
 | MCP tool | Size parameter | Default | MCP schema bound | vs REST |
 |---|---|---|---|---|
-| `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | **Looser than REST — live-confirmed.** The 2026-07 probe accepted `size=16` for all three then-listed modes; REST routes rejected it with `422 ge 32`. In that probe, v3 returned a 93-colour downscaled render, Pro silently inflated to a ~28px subject on a 56×56 canvas, and only the legacy Standard mode matched 16px. That historical behavior is not a current Pip route recommendation. |
+| `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | Prose limits Standard/Pro to 128 and v3 to 256. Standard `size` means subject size; the stored canvas is about 40% larger (64→92×92, 128→180×180) for animation room. The 2026-07 probe's size-16 results remain historical, not a current Pip route recommendation. |
 | `create_topdown_tileset` | `tile_size` | `{16, 16}` | **none declared** — plain integer object; "16 or 32 for standard; 64 requires `mode='pro'`" is prose only | REST declares `enum [16,32,64]`; MCP does not, so a bad value is not caught by the tool schema |
 | `create_sidescroller_tileset` | `tile_size` | `{16, 16}` | **none declared** — prose "16 or 32 pixels" only | REST declares `enum [16,32]`; MCP does not |
 | `create_isometric_tile` | `size` | 32 | 16–64 | matches REST `image_size`. MCP exposes no `isometric_tile_size` — it has `tile_shape` instead |
@@ -312,6 +315,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
 | `animate_image` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
 | `animate_image_pixminimax` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-pixminimax`; 4–40 generated frames in multiples of four, beta |
+| `animate_character` | `frame_count` | 8 | v3: even 4–16; PixMiniMax: multiples of 4 from 4–40 | MCP managed v3 additionally caps `width × height × frame_count` at `8 × 256 × 256` (256px canvas: at most 8 frames; 16 frames: up to about 180px). REST managed schema does not publish this pixel budget. |
 | `animate_with_skeleton_v3` | first frame URL/base64 | — | **max 256×256** | Beta; 3–15 keypoint frame sets; refreshed REST/MCP descriptions no longer state a Tier 1 gate |
 | `create_path_tiles` | `tile_size` | 32 | `square_topdown`: exactly **32**; `isometric`: **48–96** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "roads"` — check that schema's bounds if exact REST-side limits matter) |
 | `create_building_kit` | `tile_size` / `wall_tiles` | 32 / 2 | `isometric`: **32–96**; `square_topdown`/`oblique`: **16–96**; `wall_tiles`: **1–3** | No REST endpoint of its own (folds into `create-tiles-pro` `tile_feature: "building"`) |

@@ -1,6 +1,6 @@
 # PixelLab Credit Output Estimation Spike
 
-Last reviewed: 2026-10-05 (managed PixMiniMax contract update; the raw PixMiniMax addendum is dated 2026-09-12 and the catalog arithmetic below remains a 2026-07-16 historical snapshot).
+Last reviewed: 2026-10-15 (managed animation batch-pricing clarification; the catalog arithmetic below remains a 2026-07-16 historical snapshot).
 
 > **Important prefix: this is an estimation and may not be accurate.**
 >
@@ -72,6 +72,10 @@ This document's 124-row arithmetic predates the public PixMiniMax route and rema
 ## Managed PixMiniMax Update (2026-10-05)
 
 REST `POST /v2/animate-character` and `POST /v2/characters/animations`, plus MCP `animate_character(mode="pixminimax")`, now document PixMiniMax animation for stored characters. The public generation examples are 1 generation for 8 frames and 6 for 40 frames at 64×64, per direction; multiply by the requested direction count. No matching managed-mode USD estimate is published. These figures are not part of the historical 124-row arithmetic or the raw-animation estimates above. Use returned `usage.generations` for actual charges; current routing is in [animation.md](../../skills/pixellab-pip/references/animation.md).
+
+## Managed Template Batch-Pricing Update (2026-10-15)
+
+Current REST/MCP docs retain a nominal 1 generation per direction for template animation but clarify that canvases over about 100px are charged per rendering batch. REST lists up to 3 batches at 128px, 5 at 180px, and one per clip frame at 256px; MCP says the receipt gives the batch ceiling. The 2026-07-16 catalog arithmetic and its 128px template-animation comparisons predate this clarification and are historical estimates, not current large-canvas per-direction costs. Use returned usage and the current [cost-routing reference](../../skills/pixellab-pip/references/cost-routing.md) for planning.
 
 ## Key Finding
 

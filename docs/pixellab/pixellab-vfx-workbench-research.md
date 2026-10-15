@@ -1,8 +1,8 @@
 # VFX Workbench Routing Research
 
-Last reviewed: 2026-10-11.
+Last reviewed: 2026-10-15 (public REST route status; live test: 2026-10-11).
 
-This is a limited live test of PixelLab MCP `vfx_workbench`, with matched raw-image animation and static-image baselines. It establishes practical routing boundaries, not a universal quality guarantee. The tool is MCP-only; current public docs do not document a REST VFX endpoint or prove that MCP Workbench and the experimental Create VFX website page share an implementation.
+This is a limited live test of PixelLab MCP `vfx_workbench`, with matched raw-image animation and static-image baselines. It establishes practical routing boundaries, not a universal quality guarantee. The 0.4.130 announcement also says VFX is available through API, but current public REST v2 docs do not publish a route or schema; this research uses the documented MCP contract and does not infer a REST endpoint. Public docs also do not prove that MCP Workbench and the experimental Create VFX website page share an implementation.
 
 ## Use-Case Matrix
 

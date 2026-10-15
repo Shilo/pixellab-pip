@@ -1,6 +1,8 @@
 # PixelLab Top-Down Tileset Transition Findings
 
-Last reviewed: 2026-10-11.
+Last reviewed: 2026-10-15.
+
+> **2026-10-15 public-contract note:** REST and MCP now document additional Pro boundary controls: `roundness`, `boundary_amplitude`/`boundary_seed`, `step_slope`, and `connect_diagonals`. They were not covered by the live-generation tests recorded here; the results below do not establish their visual quality or behavior. See the [tileset reference](../../skills/pixellab-pip/references/tileset.md) for eligibility and defaults.
 
 This note records live-generation findings for PixelLab top-down Wang/autotile tilesets when using the hosted MCP `create_topdown_tileset` tool for grid-based graybox prototyping assets.
 
@@ -119,7 +121,7 @@ For a strict 4x4 graybox top-down tileset, start with:
 - selective outline
 - flat or basic shading
 
-Avoid Pro mode for this specific graybox blockout workflow unless the user wants its richer painted tilesets or active border shaping through `raggedness`. Do not test `spread_x` or `slope_size` as controls; current public docs say they have no effect. The live Pro tests cost more and did not improve visual quality for compact grid prototyping.
+Avoid Pro mode for this specific graybox blockout workflow unless the user wants its richer painted tilesets or explicitly needs its documented border controls (`raggedness`, `roundness`, `boundary_amplitude`, `boundary_seed`, `step_slope`, or `connect_diagonals`). The added controls were not exercised by these tests. Do not test `spread_x` or `slope_size` as controls; current public docs say they have no effect. The live Pro tests cost more and did not improve visual quality for compact grid prototyping.
 
 Use `transition_size: 1.0` only when the richer expanded transition set is acceptable. It may be visually preferable, but it should be treated as a different export layout rather than a compact 16-tile replacement.
 

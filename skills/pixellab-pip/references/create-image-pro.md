@@ -8,6 +8,10 @@ Prefer Pro when user instructions must be followed closely; it follows the user'
 
 MCP `create_image_pro` and REST `generate-image-v2` both remove the background by default (`no_background` defaults to `true`). Send `no_background: false` when the user wants an opaque, full-bleed image, scene, or sheet.
 
+## Exact Palette Control
+
+MCP `create_image_pro` accepts `palette` (2–256 hex colors), optional `palette_name`, and `max_colors` (2–64 per image). REST `generate-image-v2` uses `target_palette.colors`, optional `name`, `max_colors`, and beta `smart`. The palette colors constrain every result pixel; `max_colors` only caps the count. REST `smart` requires `colors`, is for single images, and adds about 15–60 seconds. If REST also uses `style_image`, set `style_options.color_palette: false` so the palette controls the colors. MCP does not document a `smart` equivalent.
+
 ## Sub-32px Cell Requests
 
 For exact grid/sheet/tile/icon/sprite requests with per-cell size below `32px`, treat Create Image Pro as prompt-sensitive rather than structurally guaranteed. Do not avoid it when the user asks for it; use prompt wording that makes the cell math, independence, and no-margin packing explicit, then verify the raw output honestly.
@@ -26,6 +30,13 @@ Do not call a Create Image Pro result a valid exact tile/icon/sprite grid based 
 ## Native-Size Multi-Output Batches
 
 At small `image_size` values, `generate-image-v2` may return many same-prompt images. Native sizing enforces each returned file's dimensions; it does not assign a different requested concept to each output or guarantee semantic variety. Treat the results as candidates or variations unless the user explicitly requested a multi-asset set and delegated keeping all outputs; follow `reviewable-candidates.md` otherwise.
+
+REST `generate-image-v2` documents the following output counts by maximum dimension:
+
+- `16–32px`: 64; `33–35px`: 49; `36–41px`: 36; `42–50px`: 25.
+- `51–64px`: 16; `65–84px`: 9; `85px`: 16; `86–170px`: 4; above `170px`: 1.
+
+The MCP tool describes several candidates but does not publish these exact bands; inspect the returned results instead of assuming the REST counts. REST `generate-with-style-v2` uses the same count ladder through `170px` and returns one image from `171–512px`; its output size is still derived from the style images (see `style-reference.md`).
 
 Variety requests (route-specific refinement of SKILL.md's "produce one candidate first"): when the user asks for a set, variety, or several `unique` small assets, run exactly one call. `generate-image-v2` at small sizes often returns dozens of distinct candidates from a single generation. Expand to further paid calls only when the first result's candidates are too few or too similar and the user approves the extra scope — or when the user explicitly approved a multi-call plan upfront per SKILL.md's batch-approval rule.
 
