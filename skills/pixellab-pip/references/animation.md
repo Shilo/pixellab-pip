@@ -10,6 +10,8 @@ Skeleton v3 has separate raw and managed routes: use MCP `animate_with_skeleton_
 
 Classify supplied frame images (first frame vs last frame vs style/edit reference vs managed asset ID) per the Goal Router in `image-input-roles.md`; ask before a credit-spending call when the role would change the endpoint, field, or output.
 
+When a supplied raw sprite's requested motion needs room beyond its canvas, plan transparent padding before pose edits or animation. Pad a copy without scaling or changing source pixels; add room where the motion needs it, and keep start/end anchors on matching canvases without changing their intended relative alignment. Honor fixed requested dimensions; explain a conflict rather than silently expanding them. Recheck the selected routes' size/frame-count limits and cost after padding. Record the source's placement offset for later alignment or requested export, without assuming a stationary footline. Inspect returned frames for clipping; padding does not guarantee containment.
+
 Frame-numbered prose or serialized JSON inside either raw text-animation route's motion field is descriptive text, not a documented per-frame control. Do not promise precise pacing or loop closure from it. For caller-supplied per-frame keypoints, use raw Skeleton v3; read `preset-skeleton-template-animation.md` for its input and body-plan requirements.
 
 ## PixMiniMax and raw MiniMax H3
