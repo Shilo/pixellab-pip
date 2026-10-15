@@ -34,10 +34,11 @@ The public counters below were read live on 2026-10-15. The screenshot is a sepa
 | Same API | 3 installs | ClawHub recorded installs |
 | [skills.sh skill page](https://skills.sh/shilo/pixellab-pip/pixellab-pip) | 22 installs | skills CLI reported installs |
 | [GitHub releases API](https://api.github.com/repos/Shilo/pixellab-pip/releases?per_page=100) | 42 downloads across 17 current release assets | GitHub release asset downloads |
+| Authenticated GitHub traffic API, published in [badge metrics](https://raw.githubusercontent.com/Shilo/pixellab-pip/codex/badges/metrics.json) | 1,232 clones at initial activation | GitHub clones (14 days) |
 | Supplied GitHub Traffic screenshot, September 30 through October 13, 2026 | 1,232 clones; 389 unique cloners | GitHub clones and unique cloners for that stated period |
 | [GitHub repository](https://github.com/Shilo/pixellab-pip) | 37 stars | GitHub stars |
 
-The current clone API request returned HTTP 401 in the research environment. No live rolling clone badge can be populated from that request. Authentication and an approved source of publisher metrics remain prerequisites; a missing response is not zero.
+The initial unauthenticated clone request returned HTTP 401. After configuring `TRAFFIC_TOKEN`, the deployed workflow successfully read live clone statistics and published both badge files. Initial creation and a subsequent update both succeeded, and both badge images were verified in the GitHub README. The public metrics file records the latest observation time; these review figures are snapshots, not permanently current totals. A missing response is never zero.
 
 ### ClawHub
 
