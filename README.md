@@ -4,8 +4,8 @@
 
 # PixelLab Pip
 
-[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FShilo%2Fpixellab-pip%2Frefs%2Fheads%2Fcodex%2Fbadges%2Fdownloads.json&style=flat-square)](docs/developer/adoption-metrics.md#what-the-badges-count)
-[![Clones over 14 days](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FShilo%2Fpixellab-pip%2Frefs%2Fheads%2Fcodex%2Fbadges%2Fclones.json&style=flat-square)](docs/developer/adoption-metrics.md#what-the-badges-count)
+[![Downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FShilo%2Fpixellab-pip%2Fcodex%2Fbadges%2Fdownloads.json&style=flat-square)](docs/developer/adoption-metrics.md#what-the-badges-count)
+[![Clones over 14 days](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FShilo%2Fpixellab-pip%2Fcodex%2Fbadges%2Fclones.json&style=flat-square)](docs/developer/adoption-metrics.md#what-the-badges-count)
 
 [![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
 [![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F2.2.0&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
