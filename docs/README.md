@@ -32,6 +32,7 @@ Agent-facing routing and operational instructions belong in `../skills/pixellab-
 
 ## Research
 
+- [PixelLab Pip Installation Measurement](developer/adoption-metrics.md) - evidence across Git, registries, cross-agent installers, cached and manual installs; source-scoped README activity badges and the limits of install and active-user totals.
 - [PixelLab Surfaces And Services](pixellab/pixellab-surfaces-and-services.md) - where MCP, REST v2, website/editor, Aseprite, Pixelorama, SDKs, and legacy v1 fit.
 - [PixelLab Asset Routing](pixellab/pixellab-asset-routing.md) - how common requests map to PixelLab tools, endpoints, and workflows.
 - [PixelLab PixelArt Workbench Research Spike](pixellab/pixellab-pixelart-workbench-research-spike.md) - the MCP command model, supported inputs, live command families, comparisons, billing and token claims, and open documentation gaps.

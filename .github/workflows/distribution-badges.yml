@@ -1,0 +1,183 @@
+name: Distribution Badges
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/distribution-badges.yml]
+  release:
+    types: [published, deleted]
+  workflow_run:
+    workflows: [Release New Version]
+    branches: [main]
+    types: [completed]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: distribution-badges
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: >-
+      github.repository == 'Shilo/pixellab-pip' &&
+      (github.ref == 'refs/heads/main' || github.event_name == 'release')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # publish aggregate JSON only to codex/badges
+    steps:
+      # No checkout: collecting statistics must not add a repository clone.
+      - name: Read official APIs and publish badge data
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          """Publish source-reported downloads and the latest official clone window."""
+
+          import json
+          import os
+          import time
+          from datetime import datetime, timezone
+          from urllib.error import HTTPError, URLError
+          from urllib.request import Request, urlopen
+
+          BRANCH = "codex/badges"
+          CLAWHUB_URL = "https://clawhub.ai/api/v1/skills/pixellab-pip"
+
+
+          def request(url, token="", method="GET", data=None):
+              headers = {"User-Agent": "pixellab-pip-distribution-badges"}
+              if token:
+                  headers["Authorization"] = f"Bearer {token}"
+              if url.startswith("https://api.github.com/"):
+                  headers["Accept"] = "application/vnd.github+json"
+                  headers["X-GitHub-Api-Version"] = "2026-03-10"
+              body = None if data is None else json.dumps(data).encode()
+              if body is not None:
+                  headers["Content-Type"] = "application/json"
+              for attempt in range(3):
+                  try:
+                      with urlopen(Request(url, data=body, headers=headers, method=method), timeout=20) as response:
+                          return json.load(response)
+                  except (HTTPError, URLError, OSError) as error:
+                      if method != "GET" or attempt == 2:
+                          raise
+                      if isinstance(error, HTTPError) and error.code not in (500, 502, 503, 504):
+                          # Do not retry authentication errors or rate limits.
+                          raise
+                      time.sleep(2 ** attempt)
+
+
+          def count(value):
+              if type(value) is not int or value < 0:
+                  raise ValueError("Invalid counter")
+              return value
+
+
+          def github_downloads(repo, token):
+              total = 0
+              page = 1
+              while True:
+                  releases = request(
+                      f"https://api.github.com/repos/{repo}/releases?per_page=100&page={page}", token
+                  )
+                  if not isinstance(releases, list):
+                      raise ValueError("Invalid releases response")
+                  for release in releases:
+                      if not release["draft"]:
+                          total += sum(count(asset["download_count"]) for asset in release["assets"])
+                  if len(releases) < 100:
+                      return total
+                  page += 1
+
+
+          def badge(label, value=None, color="lightgrey"):
+              return {
+                  "schemaVersion": 1, "label": label,
+                  "message": "unavailable" if value is None else value,
+                  "color": color, "cacheSeconds": 3600,
+              }
+
+
+          def collect(repo, token, traffic_token, observed_at):
+              downloads = badge("Downloads")
+              clones = badge("Clones (14 days)")
+              metrics = {"observed_at": observed_at, "downloads": None, "clones": None}
+              failures = []
+              try:
+                  clawhub = count(request(CLAWHUB_URL)["skill"]["stats"]["downloads"])
+                  releases = github_downloads(repo, token)
+                  total = clawhub + releases
+                  downloads = badge("Downloads", f"{total:,}", "2563eb")
+                  metrics["downloads"] = {
+                      "clawhub": clawhub, "github_release_assets": releases, "total": total,
+                  }
+              except (HTTPError, URLError, OSError, ValueError, KeyError, TypeError):
+                  failures.append("Downloads unavailable; no partial total published.")
+              try:
+                  if not traffic_token:
+                      raise ValueError("TRAFFIC_TOKEN is not configured")
+                  traffic = request(
+                      f"https://api.github.com/repos/{repo}/traffic/clones", traffic_token
+                  )
+                  total = count(traffic["count"])
+                  metrics["clones"] = {"count": total, "period": "last 14 days"}
+                  # The date keeps an older snapshot honest if scheduling stops.
+                  clones = badge("Clones (14 days)", f"{total:,} · {observed_at[:10]}", "7c3aed")
+              except (HTTPError, URLError, OSError, ValueError, KeyError, TypeError):
+                  failures.append("Clones unavailable; verify TRAFFIC_TOKEN has repository Administration read access.")
+              return {"downloads.json": downloads, "clones.json": clones, "metrics.json": metrics}, failures
+
+
+          def publish(repo, token, files):
+              base = f"https://api.github.com/repos/{repo}/git"
+              parent = None
+              try:
+                  parent = request(f"{base}/ref/heads/{BRANCH}", token)["object"]["sha"]
+              except HTTPError as error:
+                  if error.code != 404:
+                      raise
+              tree = request(f"{base}/trees", token, "POST", {"tree": [
+                  {"path": name, "mode": "100644", "type": "blob",
+                   "content": json.dumps(value, ensure_ascii=False, indent=2) + "\n"}
+                  for name, value in files.items()
+              ]})
+              commit = request(f"{base}/commits", token, "POST", {
+                  "message": "chore: refresh distribution badges",
+                  "tree": tree["sha"], "parents": [parent] if parent else [],
+              })
+              if parent:
+                  request(f"{base}/refs/heads/{BRANCH}", token, "PATCH", {
+                      "sha": commit["sha"], "force": False,
+                  })
+              else:
+                  request(f"{base}/refs", token, "POST", {
+                      "ref": f"refs/heads/{BRANCH}", "sha": commit["sha"],
+                  })
+
+
+          def main():
+              observed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+              files, failures = collect(
+                  os.environ["GH_REPO"], os.environ["GH_TOKEN"],
+                  os.environ.get("TRAFFIC_TOKEN", ""), observed_at,
+              )
+              publish(os.environ["GH_REPO"], os.environ["GH_TOKEN"], files)
+              for failure in failures:
+                  print(f"::error::{failure}")
+              print("Published aggregate badge data to codex/badges.")
+              if failures:
+                  raise SystemExit(1)
+
+
+          if __name__ == "__main__":
+              main()
+          PY
