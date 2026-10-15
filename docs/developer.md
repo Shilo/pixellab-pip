@@ -327,5 +327,5 @@ Runtime files:
 
 - `skills/pixellab-pip/SKILL.md` - the canonical skill file (router and contract).
 - `skills/pixellab-pip/pixellab-pip.json` - optional user-local bark preference file, created only when bark is toggled.
-- `skills/pixellab-pip/assets/` - `bark.py` + `bark.wav` (completion sound) and `background_removal.py` (conservative local background removal).
+- `skills/pixellab-pip/assets/` - `bark.py` + `bark.wav` (completion sound), `background_removal.py` (conservative local background removal), and `inspect_images.py` (read-only decoded-frame measurements and explicit size/count checks).
 - `skills/pixellab-pip/references/*.md` - progressive-discovery references; SKILL.md's "References" section is the authoritative index of what each file covers. Notable merges: `icon.md` covers both skill/ability and inventory item icons.

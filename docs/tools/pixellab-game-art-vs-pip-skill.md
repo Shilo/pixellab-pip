@@ -1,6 +1,6 @@
 # PixelLab Game Art vs Pip Skill
 
-Last reviewed: 2026-10-14, against `pixellab-game-art` v1.3.0 at commit `601159dd2801ddc75c1320df596d0c3517683d78` and the current PixelLab Pip working tree, based on commit `4f7abb9f226d3b52684b2473cd6afc058a86a261` with local changes already present.
+Initial review: 2026-10-14, against `pixellab-game-art` v1.3.0 at commit `601159dd2801ddc75c1320df596d0c3517683d78` and the PixelLab Pip working tree based on commit `4f7abb9f226d3b52684b2473cd6afc058a86a261`, with local changes already present. The Pip columns now also reflect the canvas-planning and offline-inspection follow-up described below; upstream remains pinned to the original review.
 
 This compares PixelLab Pip with the unofficial [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) skill by lexingel. It follows the comparison structure of [PixelLab AI Skill vs Pip Skill](pixellab-ai-skill-vs-pip-skill.md): summary, feature inventory, practical use cases, workflow tradeoffs, package inventory, and evidence limits. Its purpose is to help users choose between the skills. It does not compare generated art quality through new paid experiments.
 
@@ -17,7 +17,7 @@ PixelLab Game Art is a project-oriented game-art production assistant. It combin
 
 PixelLab Pip is an agent-agnostic routing and execution contract. It chooses between callable PixelLab MCP tools, public REST v2, visible website/editor workflows, Aseprite, Pixelorama, and legacy compatibility. Its operational depth includes image-role selection, asset-specific constraints, cost approval, remote-action safety, output integrity, localization, async lifecycle handling, reports, and portable blueprints.
 
-Use Game Art when you want its saved-style project workflow, combat-animation finishing tools, and packaged local helpers. Use Pip when route accuracy, broader surface coverage, preservation of returned assets, explicit spending control, or portable workflow records are central. Both work across multiple agents; this is a workflow choice, not a Claude-versus-Codex distinction.
+Use Game Art when you want its saved-style project workflow, combat-animation finishing tools, and broader local production-helper suite. Use Pip when route accuracy, broader surface coverage, preservation of returned assets, explicit spending control, or portable workflow records are central. Pip also bundles a limited read-only image inspector. Both work across multiple agents; this is a workflow choice, not a Claude-versus-Codex distinction.
 
 ## Feature Inventory
 
@@ -65,7 +65,7 @@ Batching and rerolls are agent instructions rather than a standalone execution e
 |---|---|---|
 | Prompt preparation | ✅ — subject/layout/detail/style/palette sequence with category templates | ✅ — visual-content-only English preparation, supported controls, exact-field preservation |
 | Persistent named project styles | ✅ — `pixellab.json`, active style, per-call selection, CRUD, family anchors | 🟡 — consistency anchors and recorded inputs, without a named-style manager |
-| Analyze supplied PNG/GIF/folder into style rules | ✅ — local metrics plus agent visual interpretation and user-reviewed saved rules | 🟡 — image inspection and style/palette routing, without a bundled measurement-to-profile tool |
+| Analyze supplied PNG/GIF/folder into style rules | ✅ — local metrics plus agent visual interpretation and user-reviewed saved rules | 🟡 — bundled dimensions/alpha/bounds and GIF timing/loop measurements plus style/palette routing; no style inference, folder discovery, or measurement-to-profile tool |
 | Genre/density presets | ✅ — ten named genres, arbitrary setting text, low/mid/high density, user precedence | 🟡 — user-led intent and constraints rather than a preset style system |
 | Seed defaults | ✅ — fixed family seed, default 7, changed for rerolls | ✅ — omit by default; user seed or shared seed for a composition-lock attempt |
 | Negative-prompt approach | ✅ — house/category exclusions, with conflicting exclusions removed for user requests | ✅ — targeted exclusions and route-specific field availability; no generic boilerplate |
@@ -79,7 +79,7 @@ The [parameter contract](https://github.com/lexingel/pixellab-game-art/blob/6011
 
 | Feature | PixelLab Game Art | PixelLab Pip |
 |---|---|---|
-| Combat key-pose recipe | ✅ — padded canvas, wind-up and hit edits, interpolation, hold timing, optional slash layer | 🟡 — first/last/custom-start-frame routes and verification, without that packaged combat finishing pipeline |
+| Combat key-pose recipe | ✅ — padded canvas, wind-up and hit edits, interpolation, hold timing, optional slash layer | 🟡 — motion-aware canvas planning, first/last/custom-start-frame routes and verification, without that packaged combat finishing pipeline |
 | Local combat finishing | ✅ — flash cleanup, trail recoloring, slash extraction, ground alignment, mirrored directions | 🟡 — permitted assembly/inspection; altered final art requires approval |
 | Preset/template/skeleton animations | 🟡 — named tools, example template IDs, and selected parameters | ✅ — dedicated template/skeleton catalog and constraints |
 | Walk/idle/death guidance | ✅ — house recipes and timing | ✅ — route-dependent guidance, returned-frame preservation, idle-loop artifact warnings |
@@ -94,7 +94,7 @@ Game Art's combat workflow is described in [pga-anim](https://github.com/lexinge
 
 | Feature | PixelLab Game Art | PixelLab Pip |
 |---|---|---|
-| Advisory image QA script | ✅ — empty/alpha/edge/palette/animation-flash flags, flagged sheet | 🟡 — route-specific verification and workbench inspection, no equivalent bundled general image checker |
+| Advisory image QA script | ✅ — empty/alpha/edge/palette/animation-flash flags, flagged sheet | 🟡 — read-only all-frame decoder with optional exact size/count checks, plus route-specific and visual verification; no heuristic quality verdicts or flagged sheet |
 | Contact sheets and GIF previews | ✅ — bundled scripts, half-size review strategy, combat timing/VFX preview | ✅ — host assembly, spritesheet/GIF previews and grid inspection requirements |
 | Pixel integrity | 🟡 — reports cleanup but routinely modifies colors, alignment, and selected frames | ✅ — PixelLab/user pixel origin, approval for altered final assets, failed verification disclosed |
 | Reporting | ✅ — beginner summary, detailed batch table, logs and outcomes | ✅ — exact inputs, route, outputs, reported usage, verification, manifest and blueprint |
@@ -117,7 +117,7 @@ Choose Game Art when these are the workflow you actually want:
 2. **Several reusable looks in one project.** Save and switch named styles, keep separate hero/monster/background anchors, and apply an alternate style to one call without changing the active project style.
 3. **Learning rules from existing pixel art.** Analyze a PNG, GIF, or folder for native scale, palette, outline, shading/dither/light heuristics, and animation timing; let the agent interpret the look and save reviewed rules.
 4. **Side-view combat moves with a known finishing recipe.** Produce padded wind-up/hit poses, interpolate, review/clean frames, set damage timing, and export the move for a game. This assumes the user accepts that recipe's local transformations and cost policy.
-5. **Local helper commands rather than host-written image operations.** Use its QA, contact-sheet, palette, padding, finishing, preview, and export scripts with their Python dependencies.
+5. **A broad local production-helper suite.** Use its QA, contact-sheet, palette, padding, finishing, preview, and export scripts with their Python dependencies. Pip's bundled inspector covers objective frame facts and explicit size/count checks; most other local operations use host tools.
 6. **A project history browser.** Search prior results and verdicts, aggregate recorded costs, and reroll one previous step with one change.
 7. **Optional per-task agent dispatch.** Install host-specific task agents with configurable model/effort tiers. Actual savings depend on host support and model configuration; a cheaper model is not automatically configured for every host.
 
@@ -213,8 +213,25 @@ Helper groups:
 | Combat/palette finishing | `apply_palette.py`, `scrub.py`, `ground_snap.py`, `find_muzzle.py`, `recolor_trail.py`, `slash_layer.py`, `dir8_finish.py` |
 | History/outcomes/sharing | `history.py`, `cost_report.py`, `outcome.py`, `share.py` |
 
+## Pip Follow-Up: Canvas Planning And Offline Inspection
+
+Pip's existing [Animation](../../skills/pixellab-pip/references/animation.md) reference now plans transparent padding when a supplied raw sprite's requested motion needs space beyond its canvas. It preserves source pixels and placement offsets, keeps anchor canvases aligned, honors fixed requested dimensions, and rechecks route limits and cost after padding. This applies to motion generally; it does not adopt Game Art's complete combat recipe or claim padding guarantees unclipped output.
+
+Pip also adds [inspect_images.py](../../skills/pixellab-pip/assets/inspect_images.py), documented in [Local Image Inspection](../../skills/pixellab-pip/references/local-asset-assembly.md#local-image-inspection). It decodes every frame from explicitly ordered files and reports dimensions, alpha extrema, nonzero-alpha bounds, and observed GIF duration/loop metadata as JSON on stdout. Optional expected dimensions and total decoded-frame count produce explicit failures alongside decode errors. Missing GIF timing remains unknown rather than receiving an invented playback default. The helper writes no files, makes no network calls, and uses Pillow, already used by Pip's background-removal helper and repository QA.
+
+There is existing demand for these measurements: the [cinematic spike's validation methodology](../pixellab/pixellab-cinematic-spike.md#validation-methodology) checks count, canvas, and alpha for every job; the [aura](../../skills/pixellab-pip/blueprints/aura.blueprint.json), [knight](../../skills/pixellab-pip/blueprints/knight.blueprint.json), and [turntable](../../skills/pixellab-pip/blueprints/turntable-rotate-16.blueprint.json) blueprints also record frame-verification requirements. A correct host script can perform the same checks; the helper provides one reusable implementation with all-frame decoding and consistent error reporting. No speed or generation-cost advantage was measured.
+
+Offline synthetic fixtures in [test_image_inspection.py](../../tests/test_image_inspection.py) cover:
+
+- Opaque, palette-transparent, partially transparent, and empty images, with unchanged input hashes and no added output files.
+- Explicit input order and duplicate paths; size checks through a multi-frame file's final frame; total decoded-count mismatches.
+- GIF variable durations, zero versus absent delays, finite/infinite/absent loop metadata, and late-frame corruption followed by another valid input.
+- Invalid explicit expectations and nonzero exits for decode or expectation failures.
+
+These are structural checks, not proof that art meets the request. Empty frames may be intentional, edge contact does not prove clipping, and alpha does not establish correct background removal. The helper does not compare source pixels, infer style or native scale, diagnose flashes/drift, repair art, or trigger retries. It also does not verify GIF disposal: the separate metadata, coalescing, and source-frame comparisons in Local Asset Assembly remain necessary. No paid combat comparison or engine-import experiment was performed.
+
 ## Review Scope And Verification
 
-This was a read-only review of the upstream source plus a documentation change in Pip. No upstream skill was installed, no third-party script was executed, no credentials were inspected, no art was generated, and no outcome was sent to its authors. The comparison describes shipped instructions/code and identifies where claims require live verification. It does not certify helper reliability, model quality, privacy-service behavior, or engine compatibility.
+The initial comparison was a read-only review of upstream source plus a documentation change in Pip. The follow-up adds Pip's canvas-planning rule, a local inspector, its runtime documentation, and synthetic regression fixtures. No upstream skill was installed, no third-party helper script was executed, no credentials were inspected, no art was generated through PixelLab, and no outcome was sent to its authors. The comparison describes shipped instructions/code and identifies where claims require live verification. It does not certify upstream helper reliability, model quality, privacy-service behavior, or engine compatibility.
 
-Pip's repository validation command for this documentation change is `python dev-tools/qa.py`, which includes the unit tests. Future upstream changes or changes to Pip's working tree require refreshing the comparison rather than assuming these findings remain current.
+Pip's repository validation command is `python dev-tools/qa.py`, which includes the unit tests. Future upstream changes or changes to Pip's working tree require refreshing the comparison rather than assuming these findings remain current.

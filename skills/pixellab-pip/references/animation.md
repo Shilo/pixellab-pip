@@ -83,6 +83,8 @@ If this route fails or the agent needs more detail, read `../../docs/pixellab/pi
 
 ## Verification
 
+For offline decoded-frame measurements, see [Local Image Inspection](local-asset-assembly.md#local-image-inspection).
+
 Before calling an animation final, verify:
 
 - Frame count and frame order.

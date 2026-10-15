@@ -173,7 +173,7 @@ Read each reference only when its trigger applies:
 - REST v2 prompt/field character limits: `references/prompt-limits.md`.
 - Explicit Aseprite handling, `.aseprite` workspaces, palette quantization, CLI/Lua export: `references/aseprite-cli.md`.
 - Third-party Aseprite MCP servers: `references/aseprite-mcp.md`.
-- Atlas/spritesheet grid inspection previews, local assembly, preview GIFs, and ImageMagick: `references/local-asset-assembly.md`.
+- Local decoded-image checks, atlas/spritesheet grid inspection previews, local assembly, preview GIFs, and ImageMagick: `references/local-asset-assembly.md`.
 
 Optional broader docs: in full plugin/repo installs these resolve relative to this `SKILL.md`; raw skill installs may omit them. Read at most one matching file if runtime references are not enough; if absent, continue with `references/official-pixellab-documentation.md` and current official docs.
 

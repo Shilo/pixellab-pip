@@ -1,10 +1,22 @@
 # Local Asset Assembly
 
-Read this for atlas or spritesheet grid inspection previews and when creating local preview or assembled artifacts from PixelLab-generated frames.
+Read this for local image inspection, atlas or spritesheet grid inspection previews, and local preview or assembled artifacts from PixelLab-generated frames.
 
 For Aseprite-specific opening, import/export, layers, frames, tags, `.aseprite` workspace creation, or Aseprite CLI/Lua behavior, read `aseprite-cli.md` instead.
 
 Local assembly only assembles, previews, format-converts, or verifies existing PixelLab-generated or user-supplied pixels — it never creates or alters requested art. Preserve frame order, write outputs to the run's `pixellab-pip-generations/` tree, and record manifest fields per `usage-reporting.md` (SKILL.md holds the asset-integrity, frame-order, and output-folder rules).
+
+## Local Image Inspection
+
+For repeatable offline measurements, use `assets/inspect_images.py` from this skill's directory with Python and Pillow, or equivalent host tools if unavailable:
+
+```bash
+python assets/inspect_images.py frame-00.png frame-01.png --expect-size 64x64 --expect-frames 2
+```
+
+Pass files in their intended order. The helper decodes every frame of each input and prints JSON with dimensions, alpha extrema, nonzero-alpha bounds (right/bottom exclusive; null when empty), and observed GIF durations/loop metadata (null when absent; loop 0 means infinite). It writes no files. `--expect-frames` checks the total decoded frames across all inputs. Supply expected dimensions/count only when the request or selected route guarantees them; account for echoed input frames per `animation.md`. Decode errors and explicit expectation mismatches return exit code 1; without a mismatch, exit 0 means decoding and supplied checks passed, not that the art meets the request.
+
+Alpha/bounds are observations: a fully transparent effect frame may be intentional, edge contact does not prove clipping, and transparency does not prove the background was correctly removed. Continue visual verification. This helper does not verify GIF disposal or source-pixel fidelity; retain the GIF checks below.
 
 ## Atlas And Spritesheet Grid Inspection
 
