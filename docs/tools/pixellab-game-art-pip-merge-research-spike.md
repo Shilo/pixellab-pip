@@ -1,5 +1,14 @@
 # PixelLab Game Art And Pip: Merge Research Spike
 
+## Summary: What Is Needed
+
+Work toward **one jointly maintained skill with neutral defaults and optional personalized workflows**. Combine useful behavior gradually rather than importing both packages wholesale.
+
+1. Agree common rules for API constraints, spending/retries, output changes and privacy. Saved preferences grant no execution authority.
+2. Start with a jointly reviewed normal-map correction and a bounded test if needed, with separate approval for paid calls. Review blueprint reference-versus-replay routing next.
+3. Choose the combined MVP; add only justified workflows or helpers. A style manager is not required to begin collaborating.
+4. Before a shared release, settle naming, credit, maintenance ownership, QA and migration for anything that actually changes.
+
 Reviewed: 2026-10-15. Status: research and recommendation only; no runtime changes implemented.
 
 Pip baseline: v2.2.0, commit `43da5765a44e1fba955592999cb10867ca990138`. Game Art baseline: v1.4.0, commit `92614b51bf99638899521cdf4fb74435ba8a47db`, verified against its remote default-branch HEAD for this review. See the [current feature comparison](pixellab-game-art-vs-pip-skill.md) for the complete inventory and helper limitations.
