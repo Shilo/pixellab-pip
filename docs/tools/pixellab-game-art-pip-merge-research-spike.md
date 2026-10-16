@@ -4,6 +4,8 @@
 
 Work toward **a shared product that combines Pip's general PixelLab routing with Game Art's personalized project workflow**. Recommend one core skill with on-demand project guidance, reading existing `pixellab.json` named styles and family references. This is a design recommendation, not an implemented merger or maintainer agreement.
 
+Potentially breaking merge implementation must use a dedicated feature branch, such as `feat/pga-merge`, rather than proceed directly on `main`.
+
 1. Agree common rules for API constraints, spending/retries, output changes and privacy. Saved preferences grant no execution authority.
 2. Start with a jointly reviewed normal-map correction and a bounded test if needed, with separate approval for paid calls. Review blueprint reference-versus-replay routing next.
 3. Define safe selection, inheritance, overrides and approved saves in the existing project file, plus a guided setup flow. Preserve multiple named styles without importing the full manager or house defaults.
@@ -201,6 +203,8 @@ Reconsider multiple skills when supported-host evidence shows a useful distincti
 There is no demonstrated technical incompatibility that prevents one combined skill. Both products are chiefly instructions plus Python helpers. The difficult part is choosing one consistent behavior when their current instructions disagree; combining files alone leaves the agent with conflicting directions.
 
 The product identity can accommodate both strengths: neutral general PixelLab handling and persistent user-selected project direction with relevant production workflows. Recommend exposing that through one core and on-demand project guidance. A one-off icon request should remain usable without a project profile. This is a proposed product boundary, not an implemented profile system.
+
+Before implementing the merger, create a dedicated branch from an up-to-date `main`, for example `feat/pga-merge`. Keep runtime, project-state, packaging and migration changes on that branch until the agreed acceptance checks, migration validation and maintainer review are complete. The merge plan must include this branch-creation step before implementation tasks.
 
 Practical next steps:
 
