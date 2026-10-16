@@ -6,11 +6,23 @@ Pip baseline: v2.2.0, commit `43da5765a44e1fba955592999cb10867ca990138`. Game Ar
 
 ## Recommendation
 
-Keep Pip as one general-purpose, agent-agnostic skill. Do not merge the codebases, import the helper suite, or build project-style state now. Selectively adapt verified operational improvements into existing references. This preserves Game Art's useful ideas without adopting its default aesthetic or its different execution policies.
+Support joint maintenance and phased convergence toward one general-purpose, agent-agnostic skill if both maintainers choose a shared product. Avoid an immediate mechanical union of the codebases, helper suite and runtime instructions. Start with selectively adapted, verified operational improvements in existing references; no new project-style state is needed for that first step.
+
+This extends the original review to a collaboration scenario: shared fixes, complementary expertise, one maintained release and one source of documentation can benefit users. Those are potential benefits of joint development, not measured savings or an agreement already reached between maintainers. The earlier recommendation against a codebase merge concerned wholesale adoption under the then-reviewed scope; it was not a reason to keep competing projects or reject collaboration.
 
 The immediate proposal is deliberately small: correct the MCP-versus-REST normal-map input distinction, explain shared base-tile reuse for a requested terrain chain, and review all returned tile configurations rather than relying on an example map. These are recommendations for a later implementation, not features shipped by this spike.
 
 Personalized project direction remains compatible with Pip: users can explicitly supply art-direction notes and approved references today. Existing blueprints already represent requested chains. Those practices do not provide Game Art's automatic reuse of the user's selected active style and onboarding convenience; that usability gap remains real.
+
+## Recommended Next Tasks (Not Implemented)
+
+| Next task | Canonical home or review location | Completion check | Status |
+|---|---|---|---|
+| Correct normal-map input wording | Existing [image-role row](../../skills/pixellab-pip/references/image-input-roles.md#goal-router) | Distinguish MCP animation references/GIF from REST PNG strips and their frame count; retain correct single-sprite behavior without a new helper | Proposed; not implemented |
+| Clarify requested terrain-chain linkage and complete tile review | Existing [tileset reference](../../skills/pixellab-pip/references/tileset.md) | Reuse the shared returned base ID/stored description; inspect actual returned configurations and shared seams without new artifacts, defaults, scheduling rules or retries | Proposed; not implemented |
+| Jointly review a small integration pilot and the shared product contract | This spike and the existing review process | Review the two edits under Pip's current contract; map overlapping rules/helpers to keep, adapt or defer; record unresolved default, personalization and release decisions | Proposed; no merger agreement assumed |
+
+The [comparison spike](pixellab-game-art-vs-pip-skill.md#recommended-next-tasks-not-implemented) carries the same immediate tasks. The bounded edits and acceptance scenarios below define their scope. They may be contributed and reviewed before deciding a shared name or final repository structure; run `python dev-tools/qa.py` after implementation.
 
 ## Questions And Evidence
 
@@ -77,10 +89,26 @@ A broader normal-map verification proposal was considered and removed from the i
 | Vendor both codebases and adopt all workflows | Fastest access to the full helper/profile suite | Conflicting execution policies, duplicate contracts, dependency and update ownership, mixed state and attribution obligations | Reject now |
 | Mechanically repackage commands under one skill, in the main file or task references | One visible entry point and familiar task names | Packaging alone leaves conflicting behavior and duplicate routing; a flat main file additionally increases loaded instructions | Reject a packaging-only merge |
 | Keep separate companion skills | Each workflow keeps its identity and defaults | Two entry points/configurations and potential trigger conflicts; fails this project's one-skill direction | Not the recommended Pip architecture |
-| One neutral Pip with optional, user-requested workflows | Can combine personalization and production depth while preserving one entry point | New references, style selection or helper state still require demonstrated need and clear authority | Best future form if evidence warrants expansion; not a feature build now |
+| Jointly maintained neutral skill with optional, user-requested workflows | Combines maintainer expertise and can preserve personalized production depth behind one entry point | Shared defaults and responsibility need agreement; each imported reference, helper or state mechanism still needs justification | Recommended convergence target if jointly chosen; no new feature/state build implied |
 | Keep the architecture; selectively adapt useful decisions | Small changes, existing canonical homes, no new state or dependency framework | Leaves automatic style selection and the turnkey helper suite unavailable | **Recommended now** |
 
-The recommendation is a selective integration of ideas, not a mechanical repository merge. It does not introduce a style profile schema, automatic project discovery, another log, an installer merger, a workflow graph or a second execution framework.
+The immediate recommendation is selective integration within the existing architecture. Joint authorship and one eventual product do not require importing every behavior. No style profile schema, automatic project discovery, second log, installer merger, workflow graph or second execution framework is proposed now.
+
+## A Practical Path To One Shared Skill
+
+There is no demonstrated technical incompatibility that prevents one combined skill. Both products are chiefly instructions plus Python helpers. The difficult part is choosing one consistent behavior when their current instructions disagree; combining files alone leaves the agent with conflicting directions.
+
+The product identity can accommodate both strengths: one neutral entry point for any PixelLab request, with user-selected project direction and requested production workflows loaded only when relevant. A one-off icon request should remain usable without setting up a project profile. An ongoing project may deliberately reuse approved direction without imposing its aesthetic on unrelated requests. This is a proposed product boundary, not a new profile system or implemented automatic continuity.
+
+Practical next steps:
+
+1. **Start with a joint-reviewed contribution.** Use the two bounded reference edits above as a small pilot under Pip's existing contract. This tests review, canonical placement and shared ownership without importing helpers or waiting for a rebrand.
+2. **Map behavior before combining it.** In this spike, identify one canonical home for overlapping rules and record what is retained, adapted or excluded. Agree one behavior for spending/retries, original preservation, public fields, privacy and user-selected defaults. Small contributions need only resolve the policies they touch; a merged release needs a coherent overall contract.
+3. **Choose a concrete shared workflow.** Walk through a real user request together using current Pip, explicitly selected project direction and existing blueprints. Add only the missing actions that improve that request. Do not build a generic style manager or a new workflow format to make the partnership look complete.
+4. **Settle identity and release responsibilities before combined distribution.** Agree the product name, contributor credit, repository/release ownership, public documentation and what existing users should expect. There is no evidence yet that either maintainer has accepted a particular name or migration policy.
+5. **Migrate only what the adopted design requires.** If commands, config, styles, outputs or installation paths change, define their treatment and test representative existing projects in an isolated checkout. Do not overwrite user profiles or artifacts, promise compatibility without tests, or build migration machinery for unchanged formats. Ship the shared product only after the selected workflows and supported hosts have been checked.
+
+This allows cooperation immediately while keeping unproven feature imports out of the runtime. It also leaves a real decision for maintainers: whether the shared identity promises a neutral PixelLab tool for everyone with optional project continuity, or a prescriptive production system. Those identities can coexist only when the production choices are deliberately selected and their authority is explicit.
 
 ## Conflicts A Real Merge Would Have To Resolve
 
@@ -112,7 +140,7 @@ The table summarizes arguments actually exchanged, not hypothetical reviewers. D
 | Should normal-map lighting checks be added too? | Addition reviewer initially proposed structural/lighting checks alongside transport correction | Parent challenged duplication, binary alpha and unwanted previews. Reviewer narrowed the immediate recommendation to input correctness. |
 | Does a merge need new state now? | Personalization supplied the strongest case for automatic continuity | It reduces retrieval/selection effort but no reviewed task establishes sufficient current friction to justify a new runtime contract. Both rejected state/profile work now. |
 
-Consensus: no architectural/codebase merge now; no new helper or profile system; propose only the two bounded canonical edits above. The unresolved question is whether richer packaged workflows improve quality or total effort for Pip's varied users. Published examples and agreement among reviewers cannot answer it.
+Original review consensus: no immediate architectural/codebase union, new helper or profile system; propose the two bounded canonical edits above. After considering voluntary joint maintenance, both reviewers supported phased convergence and clarified that shared authorship is compatible with this limited initial scope. The unresolved question is whether richer packaged workflows improve quality or total effort for Pip's varied users. Published examples and agreement among reviewers cannot answer it.
 
 ## Validation And Decision Gates
 
