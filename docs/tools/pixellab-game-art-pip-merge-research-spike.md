@@ -15,7 +15,9 @@ Pip baseline: v2.2.0, commit `43da5765a44e1fba955592999cb10867ca990138`. Game Ar
 
 ## Recommendation
 
-Support joint maintenance and phased convergence toward a general-purpose, agent-agnostic product if both maintainers choose it. Preserve Game Art's project-personalized experience while retaining Pip's broad routes and protections. Avoid a mechanical union of instruction sets and helpers. Recommend one core skill with one on-demand project-direction reference for the MVP. Reuse `pixellab.json` and its named-style shape; preserving that data does not require every management command. Native command wrappers need a demonstrated host requirement and shared-policy loading before reconsideration.
+**Recommend a phased merger into one jointly maintained product**, subject to both maintainers agreeing its scope and responsibilities. Use Pip's neutral, general PixelLab routing as the foundation and add Game Art's optional personalized project workflow. The MVP should use one core skill with on-demand project guidance, existing `pixellab.json` named styles and approved family references, with migration handling for appearance differences and conflicting installed instructions.
+
+The practical benefit is that users establish their game's look once and reuse it across later character, icon, background and animation requests, while retaining Pip's broader routes and safeguards. One-off requests remain available without project setup. A staged release lets maintainers validate continuity and migration before retiring either standalone product; copying both instruction sets and helper suites together would retain conflicting behavior and add upkeep. Preserving existing style data does not require every management command.
 
 This extends the original review to a collaboration scenario: shared fixes, complementary expertise, one maintained release and one source of documentation can benefit users. Co-maintenance distributes the work; dependency upkeep, testing and coordination still need owners. Those are potential benefits of joint development, not measured savings or an agreement already reached between maintainers. The earlier recommendation against a codebase merge concerned wholesale adoption under the then-reviewed scope; it was not a reason to keep competing projects or reject collaboration.
 
@@ -186,6 +188,14 @@ A broader normal-map verification proposal was considered and removed from the i
 
 The current work remains research and small proposed guidance fixes. Recommend reusing the existing project-file shape and one-core architecture for the personalization MVP. Discovery scope, nested precedence and safe writes still need specification and tests; this does not adopt a second log, installer merger, workflow graph or second execution framework.
 
+### Why One Core Skill Is Recommended
+
+Character generation, animation and project-style setup share routing, selected project context, reference interpretation, spending protections and output rules. One core gives those rules a canonical home and loads specialized guidance only when needed. Personalized setup, named styles and chained workflows can all use that structure. Game Art's portable distribution already demonstrates one skill with task references; its Claude task skills are a separate packaging choice.
+
+Multiple skills would need reliable loading of the same shared contract and selected project context on every direct entry. Otherwise, the same project could receive different reference selection, spending behavior or output handling depending on the entry point. This is solvable, but adds dispatch, packaging and verification work without a demonstrated benefit for the current MVP.
+
+Reconsider multiple skills when supported-host evidence shows a useful distinction: native task commands users depend on, or genuinely separate responsibilities that work better with different entry points. Any proposal must show that common protections and project state load consistently. Command exposure, skill count and subagent delegation are separate decisions; adding commands does not by itself require several independent skills. One core is the current implementation recommendation, not a permanent restriction on the shared product.
+
 ## A Practical Path To A Shared Product
 
 There is no demonstrated technical incompatibility that prevents one combined skill. Both products are chiefly instructions plus Python helpers. The difficult part is choosing one consistent behavior when their current instructions disagree; combining files alone leaves the agent with conflicting directions.
@@ -201,6 +211,12 @@ Practical next steps:
 5. **Migrate only what the adopted design requires.** Keeping the JSON shape does not preserve unstored house defaults or remove old installed no-ask instructions. Coordinate reviewed appearance pinning and scoped instruction cleanup with Game Art; reconcile budget restrictions. Also cover changed commands, credentials or paths where applicable. Do not overwrite user profiles/artifacts or promise compatibility without isolated representative-project tests. Publish migration notes and ship after selected workflows and supported hosts have been checked.
 
 This allows cooperation immediately while keeping unproven feature imports out of the runtime. It also leaves a real decision for maintainers: whether the shared identity promises a neutral PixelLab tool for everyone with optional project continuity, or a prescriptive production system. Those identities can coexist only when the production choices are deliberately selected and their authority is explicit.
+
+### Planning From The Two Research Spikes
+
+This spike and the [feature comparison](pixellab-game-art-vs-pip-skill.md) provide enough context for a fresh agent to draft a phased merge plan: the proposed architecture, source evidence, alternatives, unresolved decisions, next tasks and acceptance scenarios are included. Private debate notes and the Claude handoff are supporting history, not prerequisites for that planning task.
+
+The plan should identify maintainer decisions, bounded implementation phases, migration work and validation gates, while separating shipped behavior from recommendations. Before finalizing file-level implementation tasks, verify the relevant current source in both repositories and any live provider contract the change depends on. The spikes use pinned baselines and do not establish that a proposed feature is implemented or that later source remains unchanged. Producing a plan does not authorize paid experiments, installation changes or a shared release.
 
 ## Conflicts A Real Merge Would Have To Resolve
 
