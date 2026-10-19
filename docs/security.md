@@ -20,7 +20,7 @@ For detailed auth and service-boundary guidance, see [PixelLab auth and security
 
 ## Public Checks
 
-- **Skill audit:** [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) scans the skill on every push and weekly. Results appear in the repository's [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning), and releases are blocked above the configured risk threshold.
+- **Skill audit:** [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) scans the skill on every push and weekly. Results appear in the repository's [Code Scanning tab](https://github.com/Shilo/pixellab-pip/security/code-scanning), and releases are blocked above the configured risk threshold of this repository's pinned SkillSpector version.
 - **Independent registry audit:** [ClawHub](https://clawhub.ai/shilo/skills/pixellab-pip) publishes its SkillSpector, VirusTotal, and ClawScan verdict in the [public security audit](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit).
 - **Malware scan:** each release links a VirusTotal report for the exact release download in the [latest release notes](https://github.com/Shilo/pixellab-pip/releases/latest).
 - **Build provenance:** each release zip includes a Sigstore build-provenance attestation showing that GitHub built the file from this public repository.
@@ -36,6 +36,13 @@ These checks are independently inspectable layers, not a guarantee that any inst
 ## Expected Scanner Disclosures
 
 Instruction scanners can flag Pip because it legitimately documents bearer-token handling, official `api.pixellab.ai` URLs, and local sound playback. Dismissed findings include a public, per-finding rationale in the [closed Code Scanning results](https://github.com/Shilo/pixellab-pip/security/code-scanning?query=is%3Aclosed).
+
+ClawHub's registry audit runs a newer SkillSpector with model-based checks. Its score is a capped aggregate of every finding, so it can read `CRITICAL` / `DO_NOT_INSTALL` even though no single finding is critical; ClawHub's final ClawScan review rates the same version benign with high confidence, and the release workflow promotes a version and creates its GitHub release only after that verdict. Expected findings there:
+
+- **Incomplete referenced-artifact analysis (`AE1`):** a scanner coverage notice, not detected hidden content. Ordinary prose trips it, such as the `${XDG_CONFIG_HOME:-~/.config}` settings path or the words "remove" and "DELETE" beside code spans. Every referenced file ships as readable Markdown with no hidden characters, comments, or encoded content.
+- **MCP config access (`AS2`):** the setup wizard adds the PixelLab entry to an app's MCP config only when the user names that app, after a token-free preview and explicit approval. Broad config and secret scans are forbidden.
+- **Autonomous decision making (`EA2`):** phrase matches on safety rules such as "Never ask users to paste the PixelLab bearer token into chat" and "Do not post-process PixelLab output into a claimed final asset without explicit approval".
+- **Description mismatch (`TP4`) and language policy (`SQP-3`):** model checks that compare one local helper script with the whole skill description, or flag English prompt preparation that already shows the translation and asks for approval before any non-English request is sent.
 
 ## Report A Concern
 
