@@ -542,7 +542,7 @@ Frame count behavior depends on route/mode:
 | Managed `skeleton-v3` mode | Determined by the selected `template_animation_id`; the mode does not take caller-authored per-frame keypoints. |
 | Managed `v3` mode | `frame_count` is even 4-16, default 8. |
 | Managed `pixminimax` mode | `frame_count` is a multiple of four from 4–40, default 8; cost depends on size and count (64×64 at 8 frames = 1 generation per direction, 40 = 6); multiply by the requested direction count. |
-| Managed `pro` mode | REST-only custom/pro route; higher cost. Direction generation may use completed sides as reference. |
+| Managed `pro` mode | REST-only custom/pro route, labeled legacy since 2026-10-19 (prefer v3 or PixMiniMax); higher cost. Direction generation may use completed sides as reference. |
 | `animate-with-text-v3` | Raw first-frame animation, even 4-16, default 8, pixel budget `width * height * frame_count <= 524288`. |
 | `animate-with-text-v2` | Pro/raw route; frame count depends on size bands in docs/tool behavior. |
 | `animate-with-skeleton-v3` | Raw Skeleton v3 route; 3-15 full keypoint sets, one per returned frame. |

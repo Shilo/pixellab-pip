@@ -1,6 +1,6 @@
 # PixelLab Terminology
 
-Last reviewed: 2026-10-05.
+Last reviewed: 2026-10-19.
 
 Purpose: prevent agents from over-interpreting PixelLab labels such as `Pro`, `v3`, `new`, `Pixen`, `PixFlux`, `BitForge`, `tiles`, and `tileset`.
 
@@ -16,12 +16,12 @@ PixelLab product labels, endpoint names, editor labels, and SDK method names can
 | `new` | Treat as a UI or workflow label. Map to the concrete endpoint/tool before giving technical advice. |
 | `Pixen` | Public image-generation product/endpoint label. Verify exact endpoint fields in REST v2 docs. |
 | `PixFlux` | Public image/background-generation product/endpoint label. Verify exact endpoint fields in REST v2 docs. |
-| `PixMiniMax` | PixelLab's public raw-animation route (`/animate-pixminimax`, MCP `animate_image_pixminimax`) and managed-character mode (`mode="pixminimax"` on `/animate-character`, `/characters/animations`, or MCP `animate_character`). The raw REST operation says it is powered by MiniMax H3; that disclosure is not made for the managed mode. Both are Tier 1+ beta. This wrapper is not the full standalone H3 prompt or audio contract. |
+| `PixMiniMax` | PixelLab's public raw-animation route (`/animate-pixminimax`, MCP `animate_image_pixminimax`) and managed-character mode (`mode="pixminimax"` on `/animate-character`, `/characters/animations`, or MCP `animate_character`). The raw REST operation says it is powered by MiniMax H3; that disclosure is not made for the managed mode. Both are beta; REST and the raw MCP tool no longer state a Tier 1 gate, though the MCP managed-mode text still does. This wrapper is not the full standalone H3 prompt or audio contract. |
 | `BitForge` | Public image-generation product/endpoint label. Verify exact endpoint fields in REST v2 docs. |
 | `S-XL`, `M-XL`, `S-M`, `M-L` | User-facing size/tool labels. Do not use them as standalone technical route selectors. |
 | `create tiles` | Usually individual tile variants or tile-pro workflows. Clarify when the user might mean a full terrain tileset. |
 | `create tileset` | Usually terrain/platformer tileset workflows. Clarify when the user might mean individual tile variants. |
-| `map` | Could mean a generated map image, map object, tilemap, terrain tileset, an MCP-managed tile map (`create_map`/`edit_map`/`view_map`), or a website Map Workshop project. Map Workshop also exports for Godot and Unity. Ask only when context is insufficient. |
+| `map` | Could mean a generated map image, map object, tilemap, terrain tileset, an MCP-managed map (`create_map`/`edit_map`/`place_map_tiles`/`view_map`), or a website Map Workshop project. Map Workshop also exports for Godot and Unity. Ask only when context is insufficient. |
 | `Game Builder` | A Tier 1+ first-party product workflow. Keep it separate from the public REST v2 API: visible Game Builder may use project/chat/sandbox context, but no dedicated public REST Game Builder endpoint is documented. |
 | `object` vs `character` | Infer character for people, NPCs, creatures, body templates, or identity/state animation. Infer object for props, items, furniture, and weapons. |
 

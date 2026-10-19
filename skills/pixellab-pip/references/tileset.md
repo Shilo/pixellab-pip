@@ -10,7 +10,7 @@ Multi-shape connectable terrain transition:
 - Put the ordered terrain pair in `description`, such as `grass to water`; the first terrain is the main terrain and the second surrounds it.
 - `tile_type` supports `square_topdown`, `isometric`, `hex`, `hex_pointy`, and `oblique` in tileset mode. Square top-down, isometric, and oblique return a 16-tile corner set; hex shapes return a 32-tile coastline set.
 - Shape controls are `tile_size` (connectable sets have tighter per-shape ranges than plain variants, and square top-down roads are exactly 32), `tile_view_angle`, `tile_depth_ratio`, `tile_flat_top_px` (isometric), `oblique_lean` (oblique), and `outline_mode`. `create_tiles_pro` exposes no boundary-raggedness or raised-terrain-height fields; do not map those concepts to another tiles-pro control.
-- `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down requests, supplied per-terrain reference images and palette controls require REST `create-tileset`; the MCP top-down schema does not expose those inputs.
+- `style_images` cannot be combined with `tile_feature="tileset"`. For square top-down requests, supplied per-terrain reference images and `color_image` require REST `create-tileset`; the MCP top-down schema does not expose those inputs. Hex palette fields exist on both surfaces; see `create-image-pro.md` for their mode limits.
 - Poll MCP `get_tiles_pro(tile_id)` or REST `GET /tiles-pro/{tile_id}` for completion and per-tile placement rules. Interpret `edge/4` bits as N/E/S/W continuation; `edge/6` bits as the six hex edges counter-clockwise from vertex 0, where set means the other terrain lies beyond; and `corner/4` as `NW<<3 | NE<<2 | SW<<1 | SE`, where set means the first terrain occupies that corner.
 
 Shared MCP controls on the top-down and sidescroller routes (not `create_tiles_pro`):
@@ -66,7 +66,7 @@ These labels are not symmetric with the MCP parameter names:
 |---|---|---|---|
 | `Top tile description`, `Top Tile` | `create_sidescroller_tileset` | `transition_description` | Sidescroller MCP calls this the top decoration/surface layer. Not the same as `transition_size`. |
 | `Center tile description`, `Center Tile`, `platform center` | `create_sidescroller_tileset` | `lower_description` | Sidescroller MCP calls this the platform material/body. |
-| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_tiles_pro`, `create_topdown_tileset`, `create_sidescroller_tileset` | no current MCP parameter | If no palette/control image field is exposed, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
+| `Target palette`, `palette`, `1-bit palette`, `Game Boy palette` | `create_tiles_pro`, `create_topdown_tileset`, `create_sidescroller_tileset` | `palette`/`palette_name`/`max_colors` on `create_tiles_pro` and `create_topdown_tileset` (see `create-image-pro.md` for mode limits); none on `create_sidescroller_tileset` | For sidescroller, say palette is not enforced by MCP generation alone and plan an approved palette-control or palette-clamp route. |
 
 Do not reinterpret `upper`, `lower`, `inner`, `outer`, `floor`, `wall`, `transition`, or `terrain pair` as sidescroller center/top layers without side-view intent. For an explicit Create Image Pro packed texture sheet or small-cell image grid, route to `create-image-pro.md`; do not treat it as an autotile tileset just because the user says tiles.
 

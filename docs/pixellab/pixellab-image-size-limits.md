@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-15 (normal-map limits and current character size/frame rules refreshed).
+Last reviewed: 2026-10-19 (REST `/vfx` sprite limits and the MCP Pixen transparency area added).
+
+> **2026-10-19 API refresh.** REST `POST /vfx` accepts an optional PNG or GIF sprite up to 512×512 per frame and 32 frames, and says to crop or pad rather than rescale pixel art. MCP `create_image_pixen` now says `no_background` transparency holds only up to about 65,536 px of canvas area (for example 256×256 or 512×128); larger canvases currently return fully opaque. The REST and raw MCP PixMiniMax descriptions no longer state a Tier 1 gate.
 
 > **2026-10-15 API refresh.** REST `POST /normal-map` accepts 8–512px-per-side PNG sprites and horizontal strips up to 32 equal frames. MCP managed `animate_character` v3 now documents a canvas-area × frame-count cap; the REST managed schema does not publish that cap. MCP `create_character` now clarifies that Standard `size` is subject size and its stored canvas is about 40% larger.
 
@@ -237,6 +239,7 @@ The 2026-07 probe found that only the legacy character-standard route respected 
 | `animate-with-skeleton` | `image_size` | 16×16 | 256×256 | Schema is a continuous 16–256 range, but the endpoint prose lists **only 16/32/64/128/256** as supported. See the discrete-size caveat below. |
 | `animate-character` / `characters/animations` | frames | — | mode-specific | Managed v3 is capped at 256×256. PixMiniMax supports up to 40 frames at the stored character size (public docs say “any size”); its optional custom start frame is capped at 256×256. Do not apply that custom-frame limit to the stored character canvas. |
 | `objects/{object_id}/animations` | frames | — | 256×256 | v3 mode subject to 256×256. |
+| `vfx` | `sprite` (optional) | — | 512×512 per frame | PNG or GIF, up to 32 frames (`sprite_frames` for a PNG strip); crop or pad rather than rescale. Larger sprites raise the quoted cost. |
 | `edit-animation-v2` | `image_size` | 16×16 | 256×256 | |
 | `interpolation-v2` | `image_size` | 16×16 | 128×128 | |
 | `transfer-outfit-v2` | `image_size` | 32×32 | 256×256 | |
@@ -309,7 +312,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 16–256 / 24–168 | matches (both floors lowered in the 2026-09-08 refresh) |
 | `create_map_object` | `width` / `height` | **`null`** — mandatory in basic mode, auto-detected from `background_image` | 32–400 | bound matches; **default diverges** — REST `map-objects` defaults `image_size` to 128×128, MCP has none. MCP prose also carries the mode split REST omits: basic max 400×400, inpainting max 192×192 |
 | `create_image_pixflux` | `width` / `height` | 128 / 128 (or the init image's size) | 16–400 | Matches REST `create-image-pixflux`'s `image_size`; init images may use URL or base64. MCP prose adds a total-area rule REST omits: 32×32 to 400×400 |
-| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, and since the 2026-09-08 refresh both also document the square requirement whenever either side is below 32 (previously REST only). Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose) |
+| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, and since the 2026-09-08 refresh both also document the square requirement whenever either side is below 32 (previously REST only). Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose). Since 2026-10-19 MCP also says `no_background` transparency holds only up to about 65,536 px of area; larger canvases return opaque. |
 | `create_image_pro` | `width` / `height` | 128 / 128 | 16–**no maximum declared**; prose: "Max depends on aspect ratio (512x512 square, 688x384 for 16:9)" | Prose gives only two aspect buckets; REST `generate-image-v2` declares width ≤ 792 / height ≤ 688 — verify against REST if an aspect outside square/16:9 is needed |
 | `edit_image` | each target image URL/base64 | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` |
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |

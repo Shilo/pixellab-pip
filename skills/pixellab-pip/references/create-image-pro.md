@@ -1,6 +1,6 @@
 # Create Image Pro
 
-Read this for explicit Create Image Pro wording, MCP `create_image_pro`/REST `generate-image-v2`, exact grid or sheet requests, and small cell-size requests that are not already covered by `icon.md`.
+Read this for explicit Create Image Pro wording, MCP `create_image_pro`/REST `generate-image-v2`, exact grid or sheet requests, small cell-size requests that are not already covered by `icon.md`, and exact hex palettes or color caps on any route.
 
 Create Image Pro / MCP `create_image_pro` (+ `get_image`) / REST `generate-image-v2` is a general image-generation route. It can make attractive sprite sheets and texture sheets, but exact cell layout is prompt-guided rather than structurally guaranteed. A correct output canvas size is not proof that the image contains the requested cell grid. Style is prompt-guided too: there is no `detail`, `outline`, `shading`, `negative_description`, `color_image`, or `coverage_percentage` field; MCP accepts a preferred `style_image_url` or inline base64 plus `style_copy`, while REST has `style_image`+`style_options`. Route to `create_image_pixen`/`create-image-pixen`, `create_image_pixflux`/`create-image-pixflux`, or `create-image-bitforge` when another field must be enforced.
 
@@ -10,7 +10,15 @@ MCP `create_image_pro` and REST `generate-image-v2` both remove the background b
 
 ## Exact Palette Control
 
-MCP `create_image_pro` accepts `palette` (2–256 hex colors), optional `palette_name`, and `max_colors` (2–64 per image). REST `generate-image-v2` uses `target_palette.colors`, optional `name`, `max_colors`, and beta `smart`. The palette colors constrain every result pixel; `max_colors` only caps the count. REST `smart` requires `colors`, is for single images, and adds about 15–60 seconds. If REST also uses `style_image`, set `style_options.color_palette: false` so the palette controls the colors. MCP does not document a `smart` equivalent.
+MCP uses `palette` (2–256 hex colors), optional `palette_name`, and `max_colors` (2–64 per image); REST uses `target_palette.colors`, optional `name`, `max_colors`, and beta `smart`. The palette colors constrain every result pixel; `max_colors` only caps the count. REST `smart` requires `colors`, is for single images, adds about 15–60 seconds, and is refused for animation; MCP documents no `smart` equivalent.
+
+Routes with these fields:
+
+- REST `target_palette`: `generate-image-v2`, `generate-with-style-v2`, `generate-ui-v2`, `create-ui-asset`, `image-to-pixelart-pro`, the Pro Flash image/character/object creation and `image-to-pixelart-pro-flash` routes, `create-character-pro`, `create-character-with-8-directions` (`mode="pro"` only), `create-character-state`, `portrait-character-pro`, 1/8-direction object creation, object states, `create-tileset`/`tilesets` (`mode="pro"` only), `create-tiles-pro`, `generate-8-rotations-v2`, managed character animation (`pro`, `v3`, and `pixminimax` modes), object animation (`mode="pro"` only), `animate-with-text-v2`, `interpolation-v2`, `edit-animation-v2`, and `transfer-outfit-v2`.
+- MCP `palette`/`palette_name`/`max_colors`: `create_image_pro`, the Pro Flash creation tools and `image_to_pixelart_pro_flash`, `create_character`, `create_character_state`, `create_portrait_character`, `create_1_direction_object`, `create_8_direction_object`, `create_object_state`, `animate_object`, `create_topdown_tileset`, `create_tiles_pro`, `create_path_tiles`, `create_building_kit`, `create_ui_asset`, and `transfer_outfit`. Apply the REST counterpart's mode limits. On `create_character`, REST documents palettes only for Pro; in v3 or standard mode, say enforcement is undocumented and check every visible output pixel against `colors` before claiming compliance.
+- Every other route has no `palette`/`target_palette` field; do not send one. MCP `animate_character` lacks it, so use REST managed animation for a palette-constrained character animation.
+
+For multiple directions or frames, give `colors`: a `max_colors` cap alone picks different colors per direction, and frame-based routes use one palette choice for all frames. Managed character animation and `animate-with-text-v2` put the source frame on the palette first; Pro Flash keeps a supplied `first_frame` or `source_image_id` unchanged; in outfit transfer the palette, not the reference, sets final colors. With REST `style_image`, set `style_options.color_palette: false` so the palette controls the colors; MCP `style_copy` already omits `color_palette` when a palette is given.
 
 ## Sub-32px Cell Requests
 
