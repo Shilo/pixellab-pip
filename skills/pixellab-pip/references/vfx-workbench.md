@@ -1,13 +1,13 @@
 # VFX Workbench
 
-Read this for animated effects through MCP `vfx_workbench` or REST `POST /vfx`. The workbench is a command-based effect composer for timed parts, a sprite anchor, projectile motion, or reusable VFX clips, with the agent as the artist. REST `/vfx` is PixelLab's own effects artist working from a description; PixelLab's REST docs recommend the MCP workbench for agents.
+Read this for animated effects through MCP `vfx_workbench` or REST `POST /vfx`. The workbench is a command-based effect composer for timed parts, a sprite anchor, projectile motion, or reusable VFX clips, with the agent as the artist. REST `/vfx` is PixelLab's own effects artist working from a description.
 
 ## Choose the Route
 
 - Use `vfx_workbench` for composed one-shot hits, explosions, spells, projectile trails, persistent auras, and weather/environment loops. It can render standalone effects or compose them around a supplied sprite.
 - For a still effect image, use the existing static image route: Create Image Pro for an isolated reusable effect, or an image edit when the user asks to add a static effect to a supplied target. Those edit results are whole images, not extracted effect layers.
 - Use raw image animation when the user wants free-form motion on an existing image and does not need independently controlled parts, sprite anchoring, or game-pack clips; read [Animation](animation.md) for raw-route inputs and frame constraints. Keep managed character/object animation on its managed route.
-- Use REST `POST /vfx` when `vfx_workbench` is not visible, for code or batch integrations, or when the user wants PixelLab's own effects artist. When falling back only because MCP is unavailable, note that `vfx_workbench` is free for subscribers and offer MCP setup before the paid call. Its docs call it the same artist as the website VFX creator; do not infer that `vfx_workbench` shares that implementation.
+- Use REST `POST /vfx` when `vfx_workbench` is not visible, for code or batch integrations, or when the user wants PixelLab's own effects artist. When falling back only because MCP is unavailable, note that `vfx_workbench` is free for subscribers and offer MCP setup before the paid call.
 
 ## Run the Workbench
 
@@ -19,10 +19,10 @@ Read this for animated effects through MCP `vfx_workbench` or REST `POST /vfx`. 
 
 ## Use REST `/vfx`
 
-1. Send a plain-language `description` (what the effect is, its colors, motion, and duration; up to 8,000 characters) and `artist`: `lite` (default) or `pro` for detailed effects. An optional `sprite` (base64 PNG or GIF, up to 512×512 per frame and 32 frames; a PNG strip needs `sprite_frames`) makes the effect around that subject. Crop or pad a larger sprite; never rescale pixel art. `game_pack: true` adds the pieces ZIP.
+1. Send a plain-language `description` (what the effect is, its colors, motion, and duration) and `artist`: `lite` (default) or `pro` for detailed effects. An optional `sprite` (base64 PNG or GIF, up to 512×512 per frame and 32 frames; a PNG strip needs `sprite_frames`) makes the effect around that subject. Crop or pad a larger sprite; never rescale pixel art. `game_pack: true` adds the pieces ZIP.
 2. Cost is quoted at submit and charged only on delivery: the quote, or more when the effect overruns, never above 2× the quote. Lite: 1 generation for a new effect or change with no sprite or a sprite up to 128px, 3 (change 2) up to 256px, 5 (change 2) up to 512px. Pro: 6 new (8 with a sprite), 4 change, 14 (change 5) up to 256px, 28 (change 8) up to 512px; its quote rises 1.25× from 400 description characters and 1.5× from 1,000. An animated sprite adds a little per frame. Approve against the 2× ceiling.
-3. The `202` response returns `background_job_id` and `quoted_generations`; poll `GET /background-jobs/{job_id}` (usually 30–90 seconds). The completed `last_response` has unauthenticated `files` links (GIF, spritesheet PNG with frame/anchor JSON, optional game-pack ZIP, normals PNG when a light made one), `effect_id`, `edit_url`, canvas, frames, fps, loop, anchor, parts, and `conversation`. A `503` means the renderer is busy; retry after a few seconds.
+3. The `202` response returns `background_job_id` and `quoted_generations`; poll `GET /background-jobs/{job_id}` (usually 30–90 seconds). The completed `last_response` has unauthenticated `files` download links, `effect_id`, `edit_url`, and `conversation`. A `503` means the renderer is busy; retry after a few seconds.
 4. To change a saved effect (including one made on the website), send its `effect_id`; this saves over it in place and keeps its saved sprite. Pass the previous result's `conversation` with it to be priced as a change.
 
-Do not replace or delete an existing remote effect, including a REST `effect_id` change, without the destructive-action approval required by `SKILL.md`. For saved-output handling, manifests, portable replay, and frame inspection, use the existing [Usage Reporting](usage-reporting.md), [Blueprint](blueprint.md), and [Local Asset Assembly](local-asset-assembly.md) contracts.
+Do not replace or delete an existing remote effect without the destructive-action approval required by `SKILL.md`. For saved-output handling, manifests, portable replay, and frame inspection, use the existing [Usage Reporting](usage-reporting.md), [Blueprint](blueprint.md), and [Local Asset Assembly](local-asset-assembly.md) contracts.
 

@@ -1,8 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-19 (REST `/vfx` sprite limits and the MCP Pixen transparency area added).
+Last reviewed: 2026-10-19 (MCP Pixen transparency area and REST `/vfx` sprite limits added).
 
-> **2026-10-19 API refresh.** REST `POST /vfx` accepts an optional PNG or GIF sprite up to 512×512 per frame and 32 frames, and says to crop or pad rather than rescale pixel art. MCP `create_image_pixen` now says `no_background` transparency holds only up to about 65,536 px of canvas area (for example 256×256 or 512×128); larger canvases currently return fully opaque. The REST and raw MCP PixMiniMax descriptions no longer state a Tier 1 gate.
+> **2026-10-19 API refresh.** MCP `create_image_pixen` now says `no_background` transparency holds only up to about 65,536 px of canvas area (for example 256×256 or 512×128); larger canvases currently return fully opaque. REST `POST /vfx` accepts an optional PNG or GIF sprite up to 512×512 per frame and 32 frames, and says to crop or pad rather than rescale pixel art. The raw MCP and REST PixMiniMax descriptions no longer state a Tier 1 gate.
 
 > **2026-10-15 API refresh.** REST `POST /normal-map` accepts 8–512px-per-side PNG sprites and horizontal strips up to 32 equal frames. MCP managed `animate_character` v3 now documents a canvas-area × frame-count cap; the REST managed schema does not publish that cap. MCP `create_character` now clarifies that Standard `size` is subject size and its stored canvas is about 40% larger.
 
