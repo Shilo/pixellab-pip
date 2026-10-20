@@ -128,12 +128,6 @@ Before I run this blueprint, what should I use for:
 Reply with all values in one message, for example: `class: knight; armor: red`.
 ```
 
-Related choices can use ordinary placeholders too. A recipe's `TASK` instructions can tell the
-agent how to infer one value from another known input before preflight—for example, a character's
-size from the selected RPG Maker version when you have not supplied or implied a different size.
-That needs no extra question or new variable syntax. `default:` supplies a literal value; it does
-not evaluate expressions or refer to other variables.
-
 Variables with defaults are not included in that question. The same description, ignoring case and
 extra whitespace, identifies the same variable everywhere in the workflow; it may have only one
 distinct default. Explicit `false`, `0`, and empty-string values are real choices rather than missing
@@ -366,15 +360,6 @@ Ready-made examples ship in the skill's `blueprints/` folder, including the conf
 without a path and the assistant semantically matches it, then inspects or replays it according to
 your request. You can place hand-authored recipes there too, but plugin updates may replace the
 folder, so keep the source copy of your own recipe elsewhere.
-
-For the bundled [`rpg-maker-character` recipe](../skills/pixellab-pip/blueprints/rpg-maker-character.blueprint.json),
-name the version and optionally the size of **one character frame**: “MZ, size 128” and
-“MZ, size 128x128” both request 128x128 cells in a 384x512 single-character sheet. Rectangular
-cells such as “MZ, size 64x128” work too. When neither the request nor context establishes a size,
-use the version default: XP 32x48, VX/VX Ace 32x32, or MV/MZ 48x48. Version still selects the
-layout, playback, and filename rules.
-See [RPG Maker map-character sheet formats](pixellab/rpg-maker-character-sheet-formats.md)
-for engine support and the separate PixelLab generation limits.
 
 ## Sharing
 

@@ -125,10 +125,6 @@ Resolve the entire workflow in memory before normal preflight:
 3. Otherwise use the declared default without asking.
 4. Otherwise ask for every unresolved variable in one concise prompt.
 
-Use deterministic rules in the recipe's `TASK` instructions to infer related values from other
-resolved inputs before preflight; do not ask for a value those inputs already determine.
-`default:` remains a literal fallback, not an expression or a reference to another variable.
-
 User values such as `false`, `0`, or an empty string are explicit values, not missing values to
 replace with a default.
 
