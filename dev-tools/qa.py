@@ -112,7 +112,11 @@ def check_manifest_metadata() -> None:
         raise AssertionError("keywords mismatch: " + ", ".join(keyword_mismatches))
 
 
-def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str | None, int, int]]:
+def iter_blueprint_placeholders(
+    value: str, label: str, *, whole_only: bool = False
+) -> list[tuple[str, str | None, int, int]]:
+    if whole_only and not value.startswith("{{"):
+        return []
     placeholders: list[tuple[str, str | None, int, int]] = []
     default_marker = re.compile(r"\|\s*default\s*:", re.IGNORECASE)
     position = 0
@@ -145,6 +149,9 @@ def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str |
             elif character == "}" and object_depth:
                 object_depth -= 1
             elif character == "}" and cursor + 1 < len(value) and value[cursor + 1] == "}":
+                # A nonwhole default stays literal, including malformed placeholder-like text.
+                if whole_only and cursor + 2 != len(value):
+                    return []
                 body = value[start + 2:cursor]
                 if len(markers) > 1:
                     raise AssertionError(f"{label}: blueprint variable has multiple default markers")
@@ -231,8 +238,8 @@ def normalize_blueprint_default(value: str) -> tuple[str, object]:
 def whole_blueprint_placeholder(value: object, label: str) -> tuple[str, str | None] | None:
     if not isinstance(value, str):
         return None
-    placeholders = iter_blueprint_placeholders(value, label)
-    if len(placeholders) == 1 and placeholders[0][2] == 0 and placeholders[0][3] == len(value):
+    placeholders = iter_blueprint_placeholders(value, label, whole_only=True)
+    if placeholders:
         return placeholders[0][0], placeholders[0][1]
     return None
 

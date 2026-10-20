@@ -215,6 +215,22 @@ class BlueprintShapeTests(unittest.TestCase):
             qa.normalize_blueprint_default('"{{fallback}}"'),
         )
 
+    def test_nonwhole_defaults_keep_placeholder_like_text_literal(self) -> None:
+        for literal in (
+            "{{}} suffix",
+            "prefix {{}}",
+            "{{base | default:}} suffix",
+            "prefix {{base | default:}}",
+            "{{}} {{other}}",
+        ):
+            with self.subTest(literal=literal):
+                qa.validate_blueprint_data(
+                    {"MCP create_character": {"description": "{{value | default: " + literal + "}}"}},
+                    "test blueprint",
+                )
+                self.assertEqual(qa.normalize_blueprint_default(literal), ("string", literal))
+                self.assertEqual(qa.blueprint_default_literal(literal), ("string", literal))
+
     def test_rejects_malformed_nested_defaults_and_nested_conflicts(self) -> None:
         invalid = (
             ("{{size | default: {{}}}}", "description must not be blank"),
