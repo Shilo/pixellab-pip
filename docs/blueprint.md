@@ -94,6 +94,7 @@ current request:
 ```text
 Required: {{plain-language description}}
 Defaulted: {{plain-language description | default: value}}
+Nested fallback: {{plain-language description | default: {{fallback description}}}}
 ```
 
 Write one space around `|` and after `:` for readability. Spacing remains optional when a blueprint
@@ -104,6 +105,21 @@ ambiguous; unfamiliar wording alone does not make an otherwise understandable re
 ```text
 {{weapon | default: sword}}
 ```
+
+A fallback can be another variable:
+
+```text
+{{accent color | default: {{base color | default: blue}}}}
+```
+
+Your accent color wins. If you do not supply or imply one, use the base color; if that is missing
+too, use `blue`. Only an unquoted whole placeholder written as a default is evaluated this way.
+Quoted placeholder text, strings inside JSON defaults, and values you supply stay literal.
+The agent validates every authored fallback but asks for missing inputs only in a fallback it
+needs. A selected fallback chain that loops back to an unresolved variable is an error.
+
+When a request field has a user override and a fallback, put both directly in that field's
+placeholder. Instructions can explain how to normalize the input to the field's schema.
 
 A configurable knight can remain a single readable sentence:
 
@@ -136,8 +152,8 @@ values.
 Use `''` for an empty-string default.
 
 Variables work in nested MCP, REST, and `TASK` string values. When a placeholder fills an entire
-JSON string, it can resolve to a string, number, boolean, `null`, list, or object. Resolve `''` and
-`""` as empty strings; otherwise a valid JSON default keeps its JSON type and any other default is
+JSON string, it can resolve to a string, number, boolean, `null`, list, or object. For literal defaults,
+resolve `''` and `""` as empty strings; otherwise valid JSON keeps its JSON type and other defaults are
 text. A placeholder embedded in a longer
 sentence must be a scalar value. Placeholders never change field names, route names, or comments,
 and a resolved value is never treated as another placeholder.
@@ -360,6 +376,22 @@ Ready-made examples ship in the skill's `blueprints/` folder, including the conf
 without a path and the assistant semantically matches it, then inspects or replays it according to
 your request. You can place hand-authored recipes there too, but plugin updates may replace the
 folder, so keep the source copy of your own recipe elsewhere.
+
+The [`rpg-maker-character` recipe](../skills/pixellab-pip/blueprints/rpg-maker-character.blueprint.json)
+declares the nested fallback directly in its PixelLab request:
+
+```json
+"size": "{{character size | default: {{RPG Maker version | map: {\"XP\": 48, \"VX\": 32, \"VX Ace\": 32, \"MV\": 48, \"MZ\": 48}}}}}"
+```
+
+Your size takes priority; otherwise the version supplies the numeric request default.
+Instructions normalize a supplied `WxH` size to the numeric source size and retain the original
+export dimensions. `MZ, size 128` and `MZ, size 128x128` both
+produce 128x128 cells in a 384x512 sheet; rectangular cells such as `64x128` work too. With no
+user size, XP uses 32x48, VX/VX Ace 32x32, and MV/MZ 48x48. Version still selects the layout,
+playback, and filename rules. The recipe's first TASK explains its fallback and map semantics,
+so it can be followed without the skill or these docs. See the
+[format research](pixellab/rpg-maker-character-sheet-formats.md) for engine and PixelLab size limits.
 
 ## Sharing
 

@@ -101,9 +101,14 @@ Hand-authored and bundled blueprints may place variables in any string value und
 MCP, REST, or `TASK` key. Automatically written blueprints record the concrete values that were
 actually used and do not contain variables.
 
+When expressing a user override with a fallback for a request field, put that variable and
+fallback directly in the request value. `TASK` instructions may normalize supplied input to the
+field's schema.
+
 ```text
 Required: {{plain-language description}}
 Defaulted: {{plain-language description | default: value}}
+Nested fallback: {{plain-language description | default: {{fallback description}}}}
 ```
 
 When writing, use one space around `|` and after `:` as shown above. Readers do not require
@@ -122,16 +127,26 @@ Resolve the entire workflow in memory before normal preflight:
 
 1. Use a value explicitly supplied or overridden in the current request.
 2. Otherwise use a value confidently inferred from the request and relevant conversation context.
-3. Otherwise use the declared default without asking.
+3. Otherwise use the declared default without asking; resolve a nested fallback only at this point.
 4. Otherwise ask for every unresolved variable in one concise prompt.
 
 User values such as `false`, `0`, or an empty string are explicit values, not missing values to
 replace with a default.
 
+A default may be one **unquoted whole placeholder authored in the blueprint**. Resolve that
+fallback using the same rules, preserving its JSON type. Validate its syntax even when the outer
+value is supplied, but ask for missing fallback inputs only when that branch is needed. Stop if a
+selected fallback chain revisits an unresolved variable. Other defaults remain literal: quoted
+placeholder text, strings inside JSON defaults, and supplied or resolved values are never expanded.
+
+```text
+{{accent color | default: {{base color | default: blue}}}}
+```
+
 Substitute only in executable values, including nested request fields and structured `TASK` data;
 never substitute route or object keys or `_comment*` metadata. A placeholder that occupies its
-entire JSON string may resolve to any JSON value. Resolve `''` and `""` as empty strings; otherwise
-parse a default as JSON when it is valid JSON (`8`, `true`, `null`, `[1, 2]`, or an object), or treat
+entire JSON string may resolve to any JSON value. For literal defaults, resolve `''` and `""` as
+empty strings; otherwise parse valid JSON (`8`, `true`, `null`, `[1, 2]`, or an object), or treat
 it as a string. An embedded
 placeholder must resolve to a scalar and is inserted as text. Match an inferred or user-supplied
 whole-field value to the target schema. Values are literal data: do not recursively expand
@@ -166,7 +181,7 @@ Reply with all values in one message, for example: `class: knight; armor: red`.
 
 Reject an unclosed or blank placeholder, conflicting recognized defaults, a non-scalar embedded
 value, or any variable still unresolved after clarification. Unknown modifiers are not rejected by
-name; interpret them when clear, otherwise clarify. Then remove all placeholder syntax and validate
+name; interpret them when clear, otherwise clarify. Then resolve all authored placeholders and validate
 the resolved workflow as an ordinary blueprint.
 
 ## Task steps

@@ -114,18 +114,21 @@ def check_manifest_metadata() -> None:
 
 def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str | None, int, int]]:
     placeholders: list[tuple[str, str | None, int, int]] = []
+    default_marker = re.compile(r"\|\s*default\s*:", re.IGNORECASE)
     position = 0
     while True:
         start = value.find("{{", position)
+        if "}}" in (value[position:start] if start >= 0 else value[position:]):
+            raise AssertionError(f"{label}: blueprint variable has a closing marker without an opening marker")
         if start < 0:
-            if "}}" in value[position:]:
-                raise AssertionError(f"{label}: blueprint variable has a closing marker without an opening marker")
             return placeholders
 
         cursor = start + 2
         object_depth = 0
         in_json_string = False
         escaped = False
+        markers: list[int] = []
+        separator: int | None = None
         while cursor < len(value):
             character = value[cursor]
             if in_json_string:
@@ -143,22 +146,27 @@ def iter_blueprint_placeholders(value: str, label: str) -> list[tuple[str, str |
                 object_depth -= 1
             elif character == "}" and cursor + 1 < len(value) and value[cursor + 1] == "}":
                 body = value[start + 2:cursor]
-                markers = list(re.finditer(r"\|\s*default\s*:", body, re.IGNORECASE))
                 if len(markers) > 1:
                     raise AssertionError(f"{label}: blueprint variable has multiple default markers")
-                marker = markers[0] if markers else None
-                description = body.split("|", 1)[0]
+                default_end = markers[0] if markers else None
+                description = value[start + 2:separator] if separator is not None else body
                 description = " ".join(description.split())
                 if not description:
                     raise AssertionError(f"{label}: blueprint variable description must not be blank")
-                default = body[marker.end():].strip() if marker else None
-                if marker and not default:
+                default = value[default_end:cursor].strip() if default_end is not None else None
+                if default_end is not None and not default:
                     raise AssertionError(
                         f"{label}: blueprint variable {description!r} has a blank default; use default: '' for an empty string"
                     )
                 position = cursor + 2
                 placeholders.append((description, default, start, position))
                 break
+            elif character == "|" and not object_depth:
+                if separator is None:
+                    separator = cursor
+                marker = default_marker.match(value, cursor)
+                if marker:
+                    markers.append(marker.end())
             cursor += 1
         else:
             raise AssertionError(f"{label}: blueprint variable starting at character {start + 1} is not closed")
@@ -187,6 +195,20 @@ def reject_blueprint_variable_keys(value: object, label: str) -> None:
 
 
 def normalize_blueprint_default(value: str) -> tuple[str, object]:
+    if value.startswith("{{"):
+        placeholder = whole_blueprint_placeholder(value, "blueprint default")
+        if placeholder:
+            description, default = placeholder
+            prefix = value[2:-2].strip()
+            if default is not None:
+                prefix = re.sub(
+                    r"\|\s*default\s*:\s*$", "", prefix[:-len(default)], flags=re.IGNORECASE
+                )
+            modifiers = prefix.partition("|")[2].strip()
+            return "placeholder", (
+                description.casefold(), modifiers,
+                normalize_blueprint_default(default) if default is not None else None,
+            )
     if value == "''":
         return "string", ""
     try:
@@ -213,6 +235,39 @@ def whole_blueprint_placeholder(value: object, label: str) -> tuple[str, str | N
     if len(placeholders) == 1 and placeholders[0][2] == 0 and placeholders[0][3] == len(value):
         return placeholders[0][0], placeholders[0][1]
     return None
+
+
+def blueprint_default_literal(value: str) -> tuple[str, object] | None:
+    while value.startswith("{{"):
+        placeholder = whole_blueprint_placeholder(value, "blueprint default")
+        if not placeholder:
+            break
+        # An unfamiliar modifier may change the result's type; only follow plain defaults.
+        if normalize_blueprint_default(value)[1][1]:
+            return None
+        if placeholder[1] is None:
+            return None
+        value = placeholder[1]
+    return normalize_blueprint_default(value)
+
+
+def validate_blueprint_variables(
+    value: str, label: str, defaults: dict[str, tuple[str, object]]
+) -> None:
+    for description, default, start, end in iter_blueprint_placeholders(value, label):
+        if default is None:
+            continue
+        normalized_default = normalize_blueprint_default(default)
+        literal = blueprint_default_literal(default)
+        if literal and literal[0] in {"array", "object"} and (start != 0 or end != len(value)):
+            raise AssertionError(
+                f"{label}: blueprint variable {description!r} has a non-scalar default embedded in text"
+            )
+        previous_default = defaults.setdefault(description.casefold(), normalized_default)
+        if previous_default != normalized_default:
+            raise AssertionError(f"{label}: blueprint variable {description!r} has conflicting defaults")
+        if normalized_default[0] == "placeholder":
+            validate_blueprint_variables(default, label, defaults)
 
 
 def validate_pixellab_metadata(value: object, label: str) -> None:
@@ -291,22 +346,7 @@ def validate_blueprint_data(data: object, label: str) -> None:
             raise AssertionError(f"{label}: step {number} has multiple recognized executable keys {actions}")
 
         for text_value in blueprint_strings(step):
-            for description, default, start, end in iter_blueprint_placeholders(
-                text_value, f"{label}: step {number}"
-            ):
-                if default is None:
-                    continue
-                variable = description.casefold()
-                normalized_default = normalize_blueprint_default(default)
-                if normalized_default[0] in {"array", "object"} and (start != 0 or end != len(text_value)):
-                    raise AssertionError(
-                        f"{label}: blueprint variable {description!r} has a non-scalar default embedded in text"
-                    )
-                previous_default = variable_defaults.setdefault(variable, normalized_default)
-                if previous_default != normalized_default:
-                    raise AssertionError(
-                        f"{label}: blueprint variable {description!r} has conflicting defaults"
-                    )
+            validate_blueprint_variables(text_value, f"{label}: step {number}", variable_defaults)
         if not actions:
             continue
         action = actions[0]
@@ -336,22 +376,37 @@ def validate_blueprint_data(data: object, label: str) -> None:
             if field_value is None:
                 continue
             placeholder = whole_blueprint_placeholder(field_value, f"{label}: step {number} TASK {field}")
-            if placeholder and placeholder[1] is not None and normalize_blueprint_default(placeholder[1])[0] != "string":
+            literal = blueprint_default_literal(placeholder[1]) if placeholder and placeholder[1] is not None else None
+            if literal and literal[0] != "string":
                 raise AssertionError(f"{label}: step {number} TASK {field} default must be a string")
         for field in ("inputs", "outputs"):
             paths = value.get(field)
             if paths is None:
                 continue
+            literal_paths = False
             placeholder = whole_blueprint_placeholder(paths, f"{label}: step {number} TASK {field}")
             if placeholder:
                 _, default = placeholder
                 if default is None:
                     continue
-                default_type, paths = normalize_blueprint_default(default)
+                literal = blueprint_default_literal(default)
+                if literal is None:
+                    continue
+                default_type, paths = literal
                 if default_type != "array":
                     raise AssertionError(f"{label}: step {number} TASK {field} default must be an array")
+                literal_paths = True
             if not isinstance(paths, list) or not paths or any(not isinstance(path, str) or not path.strip() for path in paths):
                 raise AssertionError(f"{label}: step {number} TASK {field} must be a nonempty string array")
+            if not literal_paths:
+                paths = list(paths)
+                for index, path in enumerate(paths):
+                    placeholder = whole_blueprint_placeholder(path, f"{label}: step {number} TASK {field}")
+                    literal = blueprint_default_literal(placeholder[1]) if placeholder and placeholder[1] is not None else None
+                    if literal is not None:
+                        if literal[0] != "string" or not literal[1].strip():
+                            raise AssertionError(f"{label}: step {number} TASK {field} must be a nonempty string array")
+                        paths[index] = literal[1]
             normalized = [path.replace("\\", "/") for path in paths]
             if any(
                 path.startswith("/")

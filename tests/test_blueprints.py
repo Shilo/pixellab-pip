@@ -161,6 +161,151 @@ class BlueprintShapeTests(unittest.TestCase):
                 "test blueprint",
             )
 
+    def test_accepts_nested_defaults_and_the_rpg_numeric_size_fallback(self) -> None:
+        placeholders = (
+            "{{size | default: {{base size | default: 48}}}}",
+            "{{size|default:{{base|default:{{minimum|default:32}}}}}}",
+            '{{size | default: {{base | vendor: {"note": "| default: literal"} | default: 48}}}}',
+        )
+        for placeholder in placeholders:
+            with self.subTest(placeholder=placeholder):
+                qa.validate_blueprint_data(
+                    {"MCP create_character": {"description": f"Use {placeholder} cells."}},
+                    "test blueprint",
+                )
+                parsed = qa.iter_blueprint_placeholders(placeholder, "test blueprint")
+                self.assertEqual(len(parsed), 1)
+                self.assertEqual(qa.normalize_blueprint_default(parsed[0][1])[0], "placeholder")
+
+        qa.validate_blueprint_data(
+            {
+                "MCP create_character": {
+                    "size": '{{character size | default: {{RPG Maker version | map: '
+                    '{"XP": 48, "VX": 32, "VX Ace": 32, "MV": 48, "MZ": 48}}}}}'
+                }
+            },
+            "test blueprint",
+        )
+        qa.validate_blueprint_data(
+            {
+                "MCP create_character": {
+                    "description": '{{size | default: {{base size | default: sword}}}} and '
+                    '{{ SIZE | DEFAULT: {{ Base   Size | default: "sword" }} }}'
+                }
+            },
+            "test blueprint",
+        )
+
+    def test_nested_defaults_preserve_quoted_and_json_literals(self) -> None:
+        literals = (
+            ('"{{invalid|default:}}"', "string", "{{invalid|default:}}"),
+            ('{"note":"{{}} | default: literal"}', "object", {"note": "{{}} | default: literal"}),
+            ('["{{}}", "| default: literal"]', "array", ["{{}}", "| default: literal"]),
+            ('"| default: literal"', "string", "| default: literal"),
+        )
+        for literal, kind, expected in literals:
+            with self.subTest(literal=literal):
+                qa.validate_blueprint_data(
+                    {"MCP create_character": {"options": "{{value | default: " + literal + "}}"}},
+                    "test blueprint",
+                )
+                self.assertEqual(qa.normalize_blueprint_default(literal), (kind, expected))
+        self.assertNotEqual(
+            qa.normalize_blueprint_default("{{fallback}}"),
+            qa.normalize_blueprint_default('"{{fallback}}"'),
+        )
+
+    def test_rejects_malformed_nested_defaults_and_nested_conflicts(self) -> None:
+        invalid = (
+            ("{{size | default: {{}}}}", "description must not be blank"),
+            ("{{size | default: {{base | default:}}}}", "blank default"),
+            ("{{size | default: {{base}}", "is not closed"),
+            ("{{size | default: {{base}}}}}}", "closing marker without an opening"),
+            ("{{size | default: {{base}}}} }} {{other}}", "closing marker without an opening"),
+            ("{{size | default: {{base}} | default: 48}}", "multiple default markers"),
+            ('{{size | default: {{base}}}} {{size | default: "{{base}}"}}', "conflicting defaults"),
+            ("{{size | default: {{base | default: 32}}}} {{base | default: 48}}", "conflicting defaults"),
+            (
+                '{{size | default: {{version | map: {"MZ":32}}}}} '
+                '{{size | default: {{version | map: {"MZ":48}}}}}',
+                "conflicting defaults",
+            ),
+        )
+        for placeholder, error in invalid:
+            with self.subTest(placeholder=placeholder), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(
+                    {"MCP create_character": {"description": placeholder}}, "test blueprint"
+                )
+
+    def test_nested_terminal_literals_keep_task_type_and_path_checks(self) -> None:
+        invalid = (
+            ({"instruction": "{{text | default: {{base | default: true}}}}"}, "instruction default must be a string"),
+            (
+                {"instruction": "Check.", "verify": "{{text | default: {{base | default: []}}}}"},
+                "verify default must be a string",
+            ),
+            (
+                {"instruction": "Package.", "inputs": '{{files | default: {{base | default: ["../outside.png"]}}}}'},
+                "local relative paths",
+            ),
+            (
+                {"instruction": "Package.", "inputs": "{{files | default: {{base | default: []}}}}"},
+                "nonempty string array",
+            ),
+            (
+                {"instruction": "Package.", "inputs": "{{files | default: {{base | default: false}}}}"},
+                "default must be an array",
+            ),
+            (
+                {"instruction": "Package.", "outputs": ["{{file | default: {{base | default: ../outside.png}}}}"]},
+                "local relative paths",
+            ),
+            (
+                {"instruction": "Package.", "outputs": ["{{file | default: {{base | default: true}}}}"]},
+                "nonempty string array",
+            ),
+        )
+        for task, error in invalid:
+            with self.subTest(task=task), self.assertRaisesRegex(AssertionError, error):
+                qa.validate_blueprint_data(
+                    [{"MCP create_character": {}}, {"TASK": task}], "test blueprint"
+                )
+
+        for default in ('[1, 2]', '{"x":1}'):
+            with self.subTest(default=default), self.assertRaisesRegex(AssertionError, "non-scalar default embedded"):
+                qa.validate_blueprint_data(
+                    {"MCP create_character": {"description": "Use {{size | default: {{base | default: " + default + "}}}} cells."}},
+                    "test blueprint",
+                )
+        qa.validate_blueprint_data(
+            [
+                {"MCP create_character": {}},
+                {
+                    "TASK": {
+                        "instruction": "Package.",
+                        "inputs": '{{files | default: {{base | default: ["{{}}.png"]}}}}',
+                    }
+                },
+            ],
+            "test blueprint",
+        )
+
+    def test_unknown_nested_modifiers_do_not_imply_a_terminal_result_type(self) -> None:
+        fallback = '{{name | map: {"x": "a.png"} | default: [1]}}'
+        self.assertIsNone(qa.blueprint_default_literal(fallback))
+        qa.validate_blueprint_data(
+            [
+                {"MCP create_character": {"description": "Use {{value | default: " + fallback + "}} cells."}},
+                {"TASK": {"instruction": "{{text | default: " + fallback + "}}"}},
+            ],
+            "test blueprint",
+        )
+        with self.assertRaisesRegex(AssertionError, "conflicting defaults"):
+            qa.validate_blueprint_data(
+                {"MCP create_character": {"description": "{{value | default: " + fallback + "}} {{name | default: 48}}"}},
+                "test blueprint",
+            )
+
     def test_validates_known_pixellab_metadata_and_allows_extensions(self) -> None:
         qa.validate_blueprint_data(
             {
