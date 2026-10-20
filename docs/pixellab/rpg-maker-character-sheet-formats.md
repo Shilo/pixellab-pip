@@ -1,6 +1,6 @@
 # RPG Maker map-character sheet formats
 
-Research checked July 30, 2026. This document covers the Windows RPG Maker map-character formats from RPG Maker 2000 through MZ plus RPG Maker Unite. It separates engine requirements from familiar RTP defaults. A size labeled **flexible** is computed from the imported image or configured in the editor; the listed conventional size is not an engine limit.
+Character-size support and blueprint overrides rechecked October 20, 2026; the broader format matrix was originally checked July 30, 2026. This document covers the Windows RPG Maker map-character formats from RPG Maker 2000 through MZ plus RPG Maker Unite. It separates engine requirements from familiar RTP defaults. A size labeled **flexible** is computed from the imported image or configured in the editor; the listed conventional size is not an engine limit.
 
 ## Verified format matrix
 
@@ -19,14 +19,15 @@ Research checked July 30, 2026. This document covers the Windows RPG Maker map-c
 
 The executable blueprint deliberately supports **XP, VX, VX Ace, MV, and MZ only**. RPG Maker 2000/2003 remain research-only because their fixed 24x32 indexed-palette CharSet pipeline would add palette conversion and different direction ordering for an exceptionally unlikely target. Unite remains research-only because it requires four separate direction files, explicit gutters, and per-direction import metadata rather than the single-sheet deliverable shared by XP–MZ.
 
-The blueprint exposes two user-facing variables:
+The recipe accepts three user choices:
 
 - `RPG Maker version`, with no default. If the version was not supplied or confidently inferred from the current request and relevant context, the agent asks the user to choose XP, VX, VX Ace, MV, or MZ. This validated export-profile enum is not image-prompt text; it selects cell defaults plus the engine's sheet geometry, frame semantics, and filename rules.
 - `character`, default **bald unisex chibi base character, plain skin-tone body**. The description stays intentionally minimal; v3 handles direction generation and visual treatment.
+- Optional `size`. This is the size of one exported character frame/cell, including its transparent padding. A single positive integer such as `128` means `128x128`; `WxH` supplies rectangular dimensions. Both `x` and `×`, optional whitespace, and `px` units are accepted. Use a size supplied or confidently inferred from the request and relevant context; otherwise infer the version's conventional size. Malformed or unsupported values are reported rather than silently replaced with a default.
 
-No global enum or expression system is required. The MCP `size` field contains one self-describing `map` modifier, and the standalone preflight TASK defines its semantics: normalize the version, accept only the map keys, and substitute the mapped JSON number. The same TASK derives the fixed export profile:
+The recipe's first TASK states the sizing rules used to resolve cell width `CW` and height `CH` before preflight. These conventional sizes apply only when the request and context establish no other size:
 
-| Resolved version | PixelLab `size` | Export cell | Output |
+| Resolved version | Default PixelLab `size` | Default export cell | Default output |
 |---|---:|---:|---|
 | XP | 48 | 32x48 | 4x4 = 128x192 |
 | VX | 32 | 32x32 | 3x4 = 96x128 |
@@ -34,15 +35,29 @@ No global enum or expression system is required. The MCP `size` field contains o
 | MV | 48 | 48x48 | 3x4 = 144x192 |
 | MZ | 48 | 48x48 | 3x4 = 144x192 |
 
-Version cannot collapse into size alone: it also controls column count, playback, standing-frame treatment, and filename. The technical sizes are therefore derived and never requested from the user.
+The official XP and VX material standards explicitly allow arbitrary character sizes; the VX Ace product page confirms that VX graphic formats carry over unchanged. The MV and MZ manuals call 48x48 the normal size while allowing it to change freely. The official charset guide also confirms that cells may be rectangular. These are image-slicing rules, not requirements to match the map tile size.
 
-The resolved version is never interpolated into `create_character.description`. That field is exactly the resolved `character` value; engine-specific knowledge remains entirely in deterministic packaging TASKs.
+Version continues to control column count, playback, standing-frame treatment, and filename when size changes. XP exports `4*CW` by `4*CH`; VX through MZ export `3*CW` by `4*CH` and retain the `$` prefix. For example:
+
+| Request settings | Export cell | PixelLab `size` | Sheet |
+|---|---:|---:|---:|
+| `MZ, size 128` or `MZ, size 128x128` | 128x128 | 128 | 384x512 |
+| `MZ, size 64x128` | 64x128 | 128 | 192x512 |
+| `XP, size 128` | 128x128 | 128 | 512x512 |
+
+The blueprint uses ordinary placeholders and the existing contextual inference step, with no conditional default or `map:` modifier. Its TASK rules determine `{{character generation size in pixels}}` as the numeric value `max(32, CW, CH)` and `{{character sheet filename}}` from the version before preflight. These are inferred tool/output values, not extra questions for the user. The lower bound comes from the current v3 from-scratch generator, not the RPG Maker engine: smaller export cells use a 32px source and the existing shared downscale. The route currently supports a generation size up to 256px; a requested cell with a greater dimension stops before spending and is reported as a PixelLab route limit. The recipe does not silently clamp the request or switch routes. An unqualified `size` always means one cell; an explicitly requested whole-sheet size must not be mistaken for that cell size.
+
+Neither version nor size options are interpolated into `create_character.description`. That field is exactly the resolved `character` wording after request framing and these options are removed; engine-specific knowledge remains in deterministic packaging TASKs.
 
 ## PixelLab source canvas versus RPG Maker cell size
 
-PixelLab's MCP `create_character.size` is **character size**, not a guaranteed PNG canvas size. MCP documentation up to the 2026-08-09 snapshot said the canvas is about 40% larger to leave room for animation and gave **48px character → about 68px canvas** as its example; the 2026-09-08 refresh dropped both the percentage and the example, describing per-mode canvas behavior instead. A local decode of completed MCP artifacts confirmed that behavior: a standard-mode request with the default 48px character produced **68x68 RGBA** direction PNGs. Separate v3 requests at size 48 produced **84x84** and **92x92** canvases, demonstrating why an observed canvas dimension must not become a replay requirement.
+PixelLab's MCP `create_character.size` is a source-generation control, separate from the exact RPG Maker export cell. The current MCP docs distinguish modes: standard mode adds roughly 40% canvas space; v3 from scratch sends the requested square size to the sprite generator, while reference-mode size is advisory. The REST v3 schema documents a 32-256px from-scratch range. Returned dimensions still need to be inspected, and animation may use a larger canvas.
 
-The blueprint maps `create_character.size` to 32 for VX/VX Ace and 48 for XP/MV/MZ, records each returned canvas only as run evidence, removes only fully transparent margins, and packages from nonzero-alpha content bounds into the fixed profile cell. Returned padding may vary between images: packaging bottom-centers the cropped poses, computes one global nearest-neighbor scale from the greatest cropped pose width and height across the delivered poses, never upscales, and adds only transparent padding to reach the exact RPG Maker cell.
+Historical runs illustrate why source size must not become a returned-canvas guarantee: a standard-mode request at size 48 produced 68x68 RGBA direction PNGs, and separate v3 requests at size 48 produced 84x84 and 92x92 canvases. Those observations remain run evidence rather than replay requirements.
+
+The blueprint uses the inferred numeric generation size, records each returned canvas only as run evidence, removes only fully transparent margins, and packages from nonzero-alpha content bounds into the resolved cell. Packaging bottom-centers the cropped poses, computes one global nearest-neighbor scale from the greatest cropped pose width and height across the delivered poses, never upscales, and adds only transparent padding to reach the exact RPG Maker cell. Rectangular cells use the same shared fit without stretching the character.
+
+Larger size also affects paid usage. The default-size chain remains approximately six generations, but that is not a flat price for every cell size. The current v3 from-scratch formula is `1 + ceil(S*S*8/65536)` for source size `S`; template animations can use multiple billable batches per direction on larger canvases. Preflight therefore estimates creation and all four directional jobs using current tool descriptions or official MCP docs and shows the cell and sheet dimensions before approval. A regeneration is costed at the selected source size too.
 
 ## Other blueprint decisions
 
@@ -92,6 +107,7 @@ That guard has to tolerate being unable to answer. A five-profile test run found
 - [Makerpendium CharSet geometry, direction order, and standing column](https://makerpendium.de/wiki/CharSet)
 - [RPG Maker XP material standards](https://rpgmakerofficial.com/product/products/rpgxp/material/index.html)
 - [RPG Maker VX material standards](https://rpgmakerofficial.com/product/products/rpgvx/material/index.html)
+- [RPG Maker VX Ace product page: unchanged VX graphic formats](https://rpgmakerofficial.com/product/products/rpgvxace/index/index.html)
 - [RPG Maker VX Ace help: resource standards (archived)](https://web.archive.org/web/20250710042541/https://rpgmaker.fixato.org/Manual/RPGVXAce/rpgvxace/6100_resource.html)
 - [RPG Maker MV feature comparison: VX Ace 32x32 to MV 48x48](https://rpgmakerofficial.com/product/mv/new_function/02.html)
 - [RPG Maker MV help: asset standards](https://rpgmakerofficial.com/product/MV_Help/page/01_11_01.html)
@@ -101,3 +117,4 @@ That guard has to tolerate being unable to answer. A five-profile test run found
 - [RPG Maker Unite Resource Manager character settings](https://rpgmakerunite.com/en/article/9570339256473/)
 - [RPG Maker Unite field-character file layout and naming](https://rpgmakerunite.com/en/learn/002_eng.html)
 - [PixelLab MCP character-tool documentation](https://api.pixellab.ai/mcp/docs)
+- [PixelLab REST v2 OpenAPI: CreateCharacterV3Request and V3OutputImageSize](https://api.pixellab.ai/v2/openapi.json)
