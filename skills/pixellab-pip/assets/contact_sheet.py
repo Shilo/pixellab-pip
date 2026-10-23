@@ -9,9 +9,10 @@ images (nearest neighbour) before labelling; 0.5 costs about a quarter of the im
 from __future__ import annotations
 
 import json
+import math
 import sys
 
-from _assembly import expand, require_pillow
+from _assembly import expand, require_pillow, preflight_outputs
 
 args = sys.argv[2:]
 if not args or sys.argv[1] in ("-h", "--help"):
@@ -32,7 +33,10 @@ cols = option("--cols", int, 10)
 Image = require_pillow()
 from PIL import ImageDraw, ImageFont  # noqa: E402
 
+if cols < 1 or not math.isfinite(scale) or scale <= 0:
+    sys.exit("--cols and --scale must be positive")
 paths = expand(args)
+preflight_outputs([sys.argv[1]], paths)
 groups = [paths[i:i + cols] for i in range(0, len(paths), cols)]   # wrapped: 20 frames aren't a 10,000 px strip
 rows = []
 for group in groups:

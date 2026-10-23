@@ -160,5 +160,89 @@ class FaithfulPreviewTests(unittest.TestCase):
             self.assertNotEqual(r.returncode, 0)
 
 
+class OutputIntegrityTests(unittest.TestCase):
+    def test_all_destinations_are_preflighted_before_source_or_sidecar_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src = root / "source.png"
+            frame((40, 80, 120, 255)).save(src)
+            before = src.read_bytes()
+            for script, args in (
+                    ("pad_sprite.py", [src, src, 8, 10, 0, 0]),
+                    ("contact_sheet.py", [src, src]),
+                    ("make_sheet.py", [src.with_suffix(""), src]),
+                    ("preview_gif.py", [src, src])):
+                with self.subTest(script=script):
+                    self.assertNotEqual(run(script, *args).returncode, 0)
+                    self.assertEqual(src.read_bytes(), before)
+            stem = root / "export"
+            stem.with_suffix(".json").write_text("old sidecar")
+            self.assertNotEqual(run("make_sheet.py", stem, src).returncode, 0)
+            self.assertFalse(stem.with_suffix(".png").exists())
+            self.assertEqual(stem.with_suffix(".json").read_text(), "old sidecar")
+
+    def test_hardlink_alias_is_protected(self):
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            src, alias = Path(tmp) / "source.png", Path(tmp) / "alias.png"
+            frame((40, 80, 120, 255)).save(src)
+            try:
+                os.link(src, alias)
+            except OSError as exc:
+                self.skipTest(str(exc))
+            before = src.read_bytes()
+            self.assertNotEqual(run("pad_sprite.py", src, alias, 8, 10, 0, 0).returncode, 0)
+            self.assertEqual(src.read_bytes(), before)
+
+    def test_dangling_symlink_is_an_existing_destination(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src, alias, target = root / "source.png", root / "alias.png", root / "unexpected.png"
+            frame((40, 80, 120, 255)).save(src)
+            try:
+                alias.symlink_to(target)
+            except OSError as exc:
+                self.skipTest(str(exc))
+            self.assertNotEqual(run("pad_sprite.py", src, alias, 8, 10, 0, 0).returncode, 0)
+            self.assertTrue(alias.is_symlink())
+            self.assertFalse(target.exists())
+
+    def test_unrequested_hit_metadata_is_absent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = save_frames(Path(tmp), [frame((200, 0, 0, 255))])
+            stem = Path(tmp) / "idle"
+            self.assertEqual(run("make_sheet.py", stem, *paths).returncode, 0)
+            data = json.loads(stem.with_suffix(".json").read_text())
+            self.assertNotIn("hit_frame", data["meta"]["pixellab"])
+
+    def test_gif_opaque_repeats_partial_alpha_and_invalid_timing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            opaque = Image.new("RGBA", (4, 4), (200, 30, 70, 255))
+            paths = save_frames(root, [opaque, opaque, frame((10, 60, 150, 120), (4, 4), (0, 0, 4, 4))])
+            out = root / "preview.gif"
+            result = run("preview_gif.py", out, *paths)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(json.loads(result.stdout)["exact"])
+            with Image.open(out) as image:
+                self.assertEqual(image.n_frames, 3)
+            for timing in ("0,100,100", "-1,100,100"):
+                bad = root / ("bad" + timing.split(',')[0] + ".gif")
+                self.assertNotEqual(run("preview_gif.py", bad, *paths, "--durations", timing).returncode, 0)
+                self.assertFalse(bad.exists())
+
+    def test_gif_quantization_preserves_declared_frames_and_reports_approximation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Image.new("RGBA", (20, 20))
+            source.putdata([(i % 256, (i * 7) % 256, (i // 256) * 50, 255) for i in range(400)])
+            paths = save_frames(Path(tmp), [source, source])
+            result = run("preview_gif.py", Path(tmp) / "many.gif", *paths)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertFalse(report["exact"])
+            self.assertTrue(report["colors_quantized"])
+            self.assertEqual(report["frames"], 2)
+
+
 if __name__ == "__main__":
     unittest.main()

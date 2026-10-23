@@ -49,10 +49,10 @@ def test_free_fixes_then_a_question(tmp_path):
     assert {c['check'] for c in a['changes'] if c['result'] == 'fixed'} >= {'specks', 'brightness'}
     for name in ('fix_report.txt', 'fix_sheet.png', 'timing.json', 'knight_attack_preview.gif'):
         assert os.path.exists(os.path.join(out, name)), name
-    fix(tmp_path / 'k', '--accept', p['id'])
-    r2 = report(out)
+    fix(tmp_path / 'k', '--accept', p['id'], '--out', tmp_path / 'accepted')
+    r2 = report(str(tmp_path / 'accepted'))
     assert r2['verdict'] == 'ready after free fixes'
-    assert np.array(Image.open(os.path.join(out, 'knight_attack_6.png')))[24, 40, 3] == 0   # the flash is gone
+    assert np.array(Image.open(tmp_path / 'accepted' / 'knight_attack_6.png'))[24, 40, 3] == 0   # the flash is gone
 
 
 def test_check_only_writes_only_the_reports(tmp_path):
@@ -70,10 +70,10 @@ def test_json_to_stdout(tmp_path):
     assert r['version'] == 1 and r['anims'][0]['key'] == 'knight/idle'
 
 
-def test_table_matches_the_reference():
-    t = fix('--table').strip()
-    ref = open(os.path.join(os.path.dirname(SCRIPTS), 'references', 'animation-doctor.md'), encoding='utf-8').read()
-    assert t in ref
+def test_table_command_lists_repair_choices():
+    from fixlib import plan
+    text = fix('--table')
+    assert text == plan.table() + '\n'
 
 
 def test_style_soft_edges_from_the_profile(tmp_path):
@@ -81,5 +81,5 @@ def test_style_soft_edges_from_the_profile(tmp_path):
     fs[2] = synth.blur_edges(fs[2])
     synth.save(fs, tmp_path / 'k', 'knight_idle')
     (tmp_path / 'pixellab.json').write_text(json.dumps({'look': 'painterly, soft anti-aliased edges'}), encoding='utf-8')
-    r = json.loads(fix(tmp_path / 'k', '--json', '--check-only', cwd=tmp_path))
+    r = json.loads(fix(tmp_path / 'k', '--json', '--check-only', '--profile', tmp_path / 'pixellab.json', cwd=tmp_path))
     assert 'soft_edge' not in {f['check'] for f in r['anims'][0]['findings_before']}

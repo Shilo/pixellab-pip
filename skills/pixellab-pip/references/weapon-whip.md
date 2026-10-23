@@ -1,5 +1,7 @@
 # Whip (bullwhip, chain whip, energy lash) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 From one whip test (an overhead crack, Pro Flash key poses + `animate_image`); no reference sheet yet, so the
 side lash and wrap are untested. Facing right.
 

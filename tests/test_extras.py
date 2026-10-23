@@ -49,7 +49,7 @@ class ExtrasTests(unittest.TestCase):
         runs = {item["name"]: item for item in json.loads(r.stdout)}
         self.assertEqual(set(runs), {"knight", "slime"})
         self.assertEqual(runs["knight"]["jobs"], 3)
-        self.assertEqual(runs["knight"]["spent"], 12)   # the failed job is refunded
+        self.assertEqual(runs["knight"]["spent"], 18)   # failed status alone does not prove a refund
         self.assertEqual(runs["knight"]["outcomes"], {"kept": 1, "rerolled": 1})
         self.assertEqual(runs["slime"]["spent"], 1)
 
@@ -137,6 +137,44 @@ class ExtrasTests(unittest.TestCase):
             r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=self.dir)
             self.assertEqual(r.returncode, 3, script + r.stderr)
             self.assertEqual(json.loads(r.stdout)["status"], "skipped", script)
+
+    def test_normal_strip_split_validates_size_and_preserves_existing_destinations(self):
+        sources = [self.dir / "a.png", self.dir / "b.png"]
+        for src in sources:
+            Image.new("RGBA", (4, 6), (200, 0, 0, 255)).save(src)
+        strip = self.dir / "normal.png"
+        Image.new("RGBA", (8, 6), (128, 128, 255, 255)).save(strip)
+        result = run("normal_map.py", "split", strip, *sources)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        outputs = [self.dir / "a_n.png", self.dir / "b_n.png"]
+        before = [p.read_bytes() for p in outputs]
+        self.assertTrue(all(Image.open(p).size == (4, 6) for p in outputs))
+        self.assertNotEqual(run("normal_map.py", "split", strip, *sources).returncode, 0)
+        self.assertEqual([p.read_bytes() for p in outputs], before)
+        fresh = [self.dir / "c.png", self.dir / "d.png"]
+        for src in fresh:
+            Image.new("RGBA", (4, 6)).save(src)
+        for dimensions in ((9, 6), (8, 7)):
+            Image.new("RGBA", dimensions).save(strip)
+            self.assertNotEqual(run("normal_map.py", "split", strip, *fresh).returncode, 0)
+            self.assertFalse((self.dir / "c_n.png").exists())
+
+    def test_normal_upload_gif_retains_opaque_repeated_frames(self):
+        src = self.dir / "source.png"
+        Image.new("RGBA", (4, 4), (40, 80, 120, 255)).save(src)
+        result = run("normal_map.py", "gif", self.dir / "upload.gif", src, src, src)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["frames"], 3)
+
+    @unittest.skipUnless(HAS_NUMPY, "numpy is not installed")
+    def test_normal_preview_rejects_nondivisible_strip(self):
+        sprite, normal = self.dir / "sprite.png", self.dir / "normal.png"
+        Image.new("RGBA", (16, 16)).save(sprite)
+        Image.new("RGBA", (16, 16)).save(normal)
+        out = self.dir / "preview.gif"
+        result = run("normal_map.py", "preview", out, sprite, normal, "--frames", "3")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(out.exists())
 
 
 if __name__ == "__main__":

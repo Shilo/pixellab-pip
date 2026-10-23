@@ -35,12 +35,14 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(r.returncode, 4)
         self.assertEqual(json.loads(r.stdout)["status"], "no_style")
 
-    def test_old_profile_without_style_asks(self) -> None:
+    def test_legacy_top_level_appearance_is_read_without_mutation(self) -> None:
         # a pre-merge Game Art profile: project fields and house-style words, but no chosen style
         (self.dir / "pixellab.json").write_text(json.dumps(
             {"game": "x", "out": "pixellab_out", "look": "dark fantasy pixel art", "seed": 7}), encoding="utf-8")
         r = run(self.dir, "show")
-        self.assertEqual(r.returncode, 4, r.stdout)
+        self.assertEqual(r.returncode, 0, r.stdout)
+        self.assertEqual(json.loads(r.stdout)["style"]["look"], "dark fantasy pixel art")
+        self.assertNotIn("styles", self.profile())
 
     def test_example_needs_explicit_pick(self) -> None:
         r = run(self.dir, "list")
@@ -94,6 +96,111 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(list(self.dir.glob("*.tmp")), [])
         self.profile()
 
+    def test_recursive_selection_and_optout_keep_limits_without_mutation(self) -> None:
+        image = self.dir / "hero.png"
+        Image.new("RGBA", (8, 8), (20, 40, 80, 255)).save(image)
+        profile = {"look": "old", "anchors": {"heroes": "hero.png"}, "max_cost": 0,
+                   "ask_above": 3, "custom": {"keep": True},
+                   "anim": {"frames": 8, "timing_ms": {"hit": 120, "frame": 80}},
+                   "styles": {"main": {"look": "main", "auto": True, "engine": "unknown", "anim": {"timing_ms": {"hit": 200}}},
+                              "other": {"look": "other", "anchors": {"heroes": None}, "negatives": []}},
+                   "active_style": "main"}
+        path = self.dir / "pixellab.json"
+        path.write_text(json.dumps(profile), encoding="utf-8")
+        before = path.read_bytes()
+        shown = json.loads(run(self.dir, "show").stdout)
+        self.assertEqual(shown["style"]["anim"], {"frames": 8, "timing_ms": {"hit": 200, "frame": 80}})
+        self.assertEqual(shown["style"]["anchors"], {"heroes": "hero.png"})
+        self.assertNotIn("auto", shown["style"])
+        self.assertNotIn("engine", shown["style"])
+        other = json.loads(run(self.dir, "show", "--style", "other").stdout)
+        self.assertEqual(other["name"], "other")
+        self.assertIsNone(other["style"]["anchors"]["heroes"])
+        disabled = run(self.dir, "show", "--no-style")
+        self.assertEqual(disabled.returncode, 4)
+        self.assertEqual(json.loads(disabled.stdout)["legacy_limits"], {"max_cost": 0, "ask_above": 3})
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_bad_profiles_and_limits_never_get_overwritten(self) -> None:
+        path = self.dir / "pixellab.json"
+        (self.dir / "style.json").write_text('{"look":"new"}', encoding="utf-8")
+        cases = [[], {"styles": []}, {"styles": {"bad": []}}, {"styles": {"bad": {"anchors": []}}},
+                 {"active_style": "missing"}, {"max_cost": -1}, {"max_cost": True},
+                 {"ask_above": "unknown"}, {"max_cost": float("nan")}, {"sizes": {"hero": [0, 8]}},
+                 {"anim": {"frames": []}}, {"anim": {"timing_ms": {"hit": "bad"}}}]
+        for profile in cases:
+            with self.subTest(profile=profile):
+                path.write_text(json.dumps(profile), encoding="utf-8")
+                before = path.read_bytes()
+                result = run(self.dir, "save", "new", "--from", "style.json", "--use")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(path.read_bytes(), before)
+
+    def test_save_does_not_select_or_replace_implicitly(self) -> None:
+        (self.dir / "s.json").write_text('{"look":"a"}', encoding="utf-8")
+        self.assertEqual(run(self.dir, "save", "one", "--from", "s.json").returncode, 0)
+        self.assertNotIn("active_style", self.profile())
+        before = (self.dir / "pixellab.json").read_bytes()
+        self.assertNotEqual(run(self.dir, "save", "one", "--from", "s.json").returncode, 0)
+        self.assertEqual((self.dir / "pixellab.json").read_bytes(), before)
+        self.assertEqual(run(self.dir, "save", "one", "--from", "s.json", "--replace", "--use").returncode, 0)
+        self.assertEqual(self.profile()["active_style"], "one")
+
+    def test_anchor_validation_selection_and_replacement(self) -> None:
+        (self.dir / "s.json").write_text('{"look":"a"}', encoding="utf-8")
+        run(self.dir, "save", "one", "--from", "s.json", "--use")
+        run(self.dir, "save", "two", "--from", "s.json")
+        (self.dir / "bad.png").write_text("not an image", encoding="utf-8")
+        self.assertNotEqual(run(self.dir, "anchor", "monsters", "bad.png").returncode, 0)
+        Image.new("RGBA", (8, 8), (20, 40, 80, 255)).save(self.dir / "good.png")
+        self.assertEqual(run(self.dir, "anchor", "monsters", "good.png", "--style", "two").returncode, 0)
+        self.assertNotIn("anchors", self.profile()["styles"]["one"])
+        self.assertEqual(self.profile()["active_style"], "one")
+        self.assertNotEqual(run(self.dir, "anchor", "monsters", "good.png", "--style", "two").returncode, 0)
+        self.assertEqual(run(self.dir, "anchor", "monsters", "good.png", "--style", "two", "--replace").returncode, 0)
+
+    def test_missing_anchor_and_unknown_style_are_clear_errors(self) -> None:
+        (self.dir / "pixellab.json").write_text(json.dumps(
+            {"styles": {"one": {"anchors": {"heroes": "missing.png"}}}, "active_style": "one"}), encoding="utf-8")
+        shown = run(self.dir, "show")
+        self.assertEqual(shown.returncode, 0, shown.stderr)
+        self.assertIn("heroes", json.loads(shown.stdout)["invalid_anchors"])
+        self.assertNotEqual(run(self.dir, "show", "--style", "unknown").returncode, 0)
+
+    def test_source_relative_reference_rebased_and_checked_from_other_cwd(self) -> None:
+        source = self.dir / "source"
+        source.mkdir()
+        Image.new("RGBA", (8, 8), (30, 50, 70, 255)).save(source / "hero.png")
+        (source / "style.json").write_text('{"reference":"hero.png"}', encoding="utf-8")
+        profile = self.dir / "pixellab.json"
+        result = run(source, "save", "one", "--from", "style.json", "--profile", str(profile), "--use")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.profile()["styles"]["one"]["reference"], "source/hero.png")
+        self.assertEqual(run(source, "show", "--profile", str(profile)).returncode, 0)
+        (source / "hero.png").write_text("corrupt", encoding="utf-8")
+        self.assertNotEqual(run(source, "show", "--profile", str(profile)).returncode, 0)
+
+    def test_rename_empty_name_preserves_profile(self) -> None:
+        (self.dir / "s.json").write_text('{"look":"a"}', encoding="utf-8")
+        run(self.dir, "save", "one", "--from", "s.json", "--use")
+        before = (self.dir / "pixellab.json").read_bytes()
+        self.assertNotEqual(run(self.dir, "rename", "one", "").returncode, 0)
+        self.assertEqual((self.dir / "pixellab.json").read_bytes(), before)
+
+    def test_failed_atomic_replace_preserves_profile(self) -> None:
+        import importlib.util
+        from unittest.mock import patch
+        spec = importlib.util.spec_from_file_location("style_atomic", STYLE)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        path = self.dir / "pixellab.json"
+        path.write_text('{"custom":1}', encoding="utf-8")
+        with patch.object(module.os, "replace", side_effect=OSError("failed write")):
+            with self.assertRaises(OSError):
+                module.save(str(path), {"custom": 2})
+        self.assertEqual(json.loads(path.read_text()), {"custom": 1})
+        self.assertEqual(list(self.dir.glob(".pixellab.*.tmp")), [])
+
     def test_analyze_measures_without_writing_frames(self) -> None:
         img = Image.new("RGBA", (32, 32))
         for x in range(8, 24):
@@ -107,6 +214,39 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertTrue((self.dir / "a" / "analysis.json").exists())
         self.assertFalse((self.dir / "a" / "native").exists())
+
+    def test_analyzer_does_not_infer_large_scale_from_padding(self) -> None:
+        image = Image.new("RGBA", (256, 256))
+        for x, y, color in ((13, 27, (200, 30, 40, 255)), (15, 29, (30, 200, 40, 255))):
+            image.putpixel((x, y), color)
+        source = self.dir / "padded.png"
+        image.save(source)
+        before = source.read_bytes()
+        result = subprocess.run([sys.executable, str(ANALYZE), str(source), "--out", str(self.dir / "analysis")], capture_output=True, text=True)
+        if result.returncode == 3:
+            self.skipTest("numpy missing")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads((self.dir / "analysis/analysis.json").read_text())
+        self.assertEqual(report["files"][0]["native_scale"], 1)
+        self.assertIn("advisory", report)
+        self.assertEqual(source.read_bytes(), before)
+
+    def test_analyzer_empty_art_and_existing_output_fail_without_writes(self) -> None:
+        image = Image.new("RGBA", (8, 8))
+        source = self.dir / "palette.png"
+        image.save(source)
+        result = subprocess.run([sys.executable, str(ANALYZE), str(source), "--out", str(self.dir / "empty")], capture_output=True, text=True)
+        if result.returncode == 3:
+            self.skipTest("numpy missing")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.dir / "empty").exists())
+        image.putpixel((2, 3), (120, 20, 40, 255))
+        image.save(source)
+        before = source.read_bytes()
+        result = subprocess.run([sys.executable, str(ANALYZE), str(source), "--out", str(self.dir)], capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(source.read_bytes(), before)
+        self.assertFalse((self.dir / "analysis.json").exists())
 
 
 if __name__ == "__main__":

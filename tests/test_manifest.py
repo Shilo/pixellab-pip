@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from test_helpers import REPO_ROOT, load_module
 
@@ -31,9 +32,12 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(manifest.jobs(self.run)[0]["job_id"], "a")
         self.assertEqual(manifest.jobs(self.run)[0]["waited_s"], 40)
 
-    def test_failed_job_costs_nothing(self) -> None:
+    def test_failed_status_does_not_prove_a_refund(self) -> None:
         manifest.add_job(self.run, job("a", 6))
         manifest.add_job(self.run, job("b", 9, status="failed"))
+        self.assertEqual(manifest.spent(self.run), 15)
+        self.assertEqual(manifest.committed(self.run), 15)
+        manifest.add_job(self.run, {"job_id": "b", "reported_usage": {"generations": 0}})
         self.assertEqual(manifest.spent(self.run), 6)
 
     def test_outcome_set_later(self) -> None:
@@ -67,8 +71,9 @@ class ManifestTests(unittest.TestCase):
         # could spend its budget twice
         manifest.add_job(self.run, job("a", 6))
         manifest.add_job(self.run, {"job_id": "b", "tool": "MCP animate_image", "status": "submitted",
-                                    "reported_usage": {"generations": 4}})
-        self.assertEqual(manifest.spent(self.run), 6)
+                                    "estimated_usage": {"generations": 4}})
+        with self.assertRaisesRegex(ValueError, "unknown generations"):
+            manifest.spent(self.run)
         self.assertEqual(manifest.committed(self.run), 10)
         out = subprocess.run([sys.executable, str(SCRIPT), "committed", self.run], check=True,
                              capture_output=True, text=True).stdout
@@ -108,9 +113,128 @@ class ManifestTests(unittest.TestCase):
         manifest.add_job(self.run, {"job_id": "a", "status": "ok", "waited_s": 3})
         self.assertEqual(manifest.spent(self.run), 6)
 
-    def test_null_usage_counts_as_zero(self) -> None:
+    def test_download_retries_preserve_status_and_all_saved_outputs(self) -> None:
+        manifest.add_job(self.run, job("a", 6))
+        manifest.add_job(self.run, {"job_id": "a", "status": "submitted"})
+        manifest.add_job(self.run, {"job_id": "a", "status": "ok", "outputs": ["copy/0.png", "raw/0.png"]})
+        entry = manifest.jobs(self.run)[0]
+        self.assertEqual(entry["status"], "ok")
+        self.assertEqual(entry["outputs"], ["raw/0.png", "copy/0.png"])
+        self.assertEqual(manifest.spent(self.run), 6)
+
+    def test_null_usage_is_unknown_not_zero(self) -> None:
         manifest.add_job(self.run, {"job_id": "a", "status": "ok", "reported_usage": None})
-        self.assertEqual(manifest.spent(self.run), 0)
+        for fn in (manifest.spent, manifest.committed):
+            with self.assertRaisesRegex(ValueError, "unknown generations"):
+                fn(self.run)
+
+    def test_unknown_charge_keeps_estimate_across_failure(self) -> None:
+        for status in ("submitted", "timeout", "failed", "ok"):
+            manifest.add_job(self.run, {"job_id": "a", "status": status, "estimated_usage": {"generations": 7}})
+            self.assertEqual(manifest.committed(self.run), 7)
+            with self.assertRaises(ValueError):
+                manifest.spent(self.run)
+        manifest.add_job(self.run, {"job_id": "a", "reported_usage": {"generations": 0}})
+        self.assertEqual(manifest.committed(self.run), 0)
+
+    def test_invalid_shape_or_usage_never_replaces_existing_bytes(self) -> None:
+        path = Path(self.run) / "manifest.json"
+        for bad in ({"calls": [], "audit": "keep"}, {"jobs": {}}, {"jobs": [None]},
+                    {"jobs": [job("a", 1), job("a", 2)]}):
+            raw = json.dumps(bad)
+            path.write_text(raw, encoding="utf-8")
+            with self.assertRaises(ValueError):
+                manifest.add_job(self.run, job("next", 1))
+            self.assertEqual(path.read_text(encoding="utf-8"), raw)
+        path.unlink()
+        for bad in (-1, float("nan"), float("inf"), True, "5", None):
+            with self.assertRaises(ValueError):
+                manifest.add_job(self.run, job("bad", bad))
+        self.assertFalse(path.exists())
+
+    def test_preserves_root_request_and_usage_metadata(self) -> None:
+        path = Path(self.run) / "manifest.json"
+        original = job("a", 1)
+        original["reported_usage"]["usd"] = 0.04
+        original["request"] = {"description": "a blue knight"}
+        path.write_text(json.dumps({"jobs": [original], "audit": {"keep": True}}), encoding="utf-8")
+        manifest.add_job(self.run, {"job_id": "a", "reported_usage": {"generations": 2}, "status": "ok"})
+        data = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(data["audit"], {"keep": True})
+        self.assertEqual(data["jobs"][0]["request"], original["request"])
+        self.assertEqual(data["jobs"][0]["reported_usage"], {"generations": 2, "usd": 0.04})
+        self.assertNotIn("created_at", data["jobs"][0])  # do not invent a historical date
+
+    def test_cli_estimate_is_not_reported_charge(self) -> None:
+        result = subprocess.run([sys.executable, str(SCRIPT), "add", self.run, "a", "--estimate", "5"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        entry = manifest.jobs(self.run)[0]
+        self.assertNotIn("reported_usage", entry)
+        self.assertIn("created_at", entry)
+        self.assertEqual(manifest.committed(self.run), 5)
+        self.assertEqual(manifest.main(["spent", self.run]), 2)
+
+    def test_concurrent_process_mutations_keep_all_jobs_and_outcomes(self) -> None:
+        manifest.add_job(self.run, job("base", 2))
+        snippets = [f"manifest.add_job({self.run!r}, {job(str(i), 6)!r})" for i in range(6)]
+        snippets += [f"manifest.set_outcome({self.run!r}, 'base', 'kept')",
+                     f"manifest.add_job({self.run!r}, {{'job_id': 'base', 'status': 'ok'}})"]
+        processes = []
+        for snippet in snippets:
+            code = (f"import sys,time; sys.path.insert(0,{str(SCRIPT.parent)!r}); import manifest; "
+                    "original=manifest._read; "
+                    "manifest._read=lambda *a,**k: (lambda data: (time.sleep(.1),data)[1])(original(*a,**k)); "
+                    + snippet)
+            processes.append(subprocess.Popen([sys.executable, "-c", code], stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+        for process in processes:
+            _, stderr = process.communicate(timeout=15)
+            self.assertEqual(process.returncode, 0, stderr)
+        self.assertEqual(len(manifest.jobs(self.run)), 7)
+        self.assertEqual(manifest.committed(self.run), 38)
+        self.assertEqual(manifest.jobs(self.run)[0]["outcome"], "kept")
+
+    def test_abandoned_lock_is_not_stolen(self) -> None:
+        lock = Path(self.run) / ".manifest.lock"
+        lock.touch()
+        original_timeout = manifest.LOCK_TIMEOUT
+        manifest.LOCK_TIMEOUT = 0
+        try:
+            with self.assertRaisesRegex(ValueError, "verify no writer"):
+                manifest.add_job(self.run, job("a", 1))
+        finally:
+            manifest.LOCK_TIMEOUT = original_timeout
+        self.assertTrue(lock.exists())
+
+    def test_transient_permission_error_retries_exclusive_lock_acquisition(self) -> None:
+        original_open = manifest.os.open
+        attempts = []
+
+        def deny_once(path, flags, *args, **kwargs):
+            if Path(path).name == ".manifest.lock":
+                attempts.append(flags)
+                if len(attempts) == 1:
+                    raise PermissionError(13, "temporarily unavailable", str(path))
+            return original_open(path, flags, *args, **kwargs)
+
+        with patch.object(manifest.os, "open", side_effect=deny_once):
+            manifest.add_job(self.run, job("a", 3))
+        self.assertEqual(len(attempts), 2)
+        self.assertTrue(all(flags & manifest.os.O_EXCL for flags in attempts))
+        self.assertEqual(manifest.spent(self.run), 3)
+        self.assertFalse((Path(self.run) / ".manifest.lock").exists())
+
+    def test_persistent_permission_error_preserves_unowned_lock_and_manifest(self) -> None:
+        manifest.add_job(self.run, job("a", 3))
+        path = Path(self.run) / "manifest.json"
+        before = path.read_bytes()
+        lock = Path(self.run) / ".manifest.lock"
+        lock.write_text("unowned")
+        with patch.object(manifest, "LOCK_TIMEOUT", 0), patch.object(manifest.os, "open", side_effect=PermissionError(13, "access denied")):
+            with self.assertRaisesRegex(ValueError, "check directory permissions"):
+                manifest.add_job(self.run, job("b", 4))
+        self.assertEqual(path.read_bytes(), before)
+        self.assertEqual(lock.read_text(), "unowned")
 
 
 if __name__ == "__main__":

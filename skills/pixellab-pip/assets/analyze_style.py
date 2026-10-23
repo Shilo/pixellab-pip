@@ -1,6 +1,6 @@
 """analyze_style.py <image.png|anim.gif|folder> [--out DIR] [--frames]
 Measures a pixel-art image, GIF or folder of them so its style can be written down as rules:
-native pixel scale (upscaled art is detected and shrunk back), subject size -> density, colour
+candidate pixel scale (an advisory block-pattern estimate), subject size -> density, colour
 count + palette, outline, tones per colour ramp, dithering, light direction, background; for a GIF
 also frame count, per-frame timing, holds, motion per frame and ground-line drift.
 
@@ -18,7 +18,7 @@ import colorsys
 import glob
 import json
 import os
-from _assembly import require_numpy  # noqa: E402
+from _assembly import require_numpy, preflight_outputs  # noqa: E402
 
 require_numpy()
 import numpy as np  # noqa: E402
@@ -27,7 +27,6 @@ from PIL import Image, ImageSequence  # noqa: E402
 src = sys.argv[1]
 out = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else 'style_analysis'
 FRAMES = '--frames' in sys.argv
-os.makedirs(os.path.join(out, 'native') if FRAMES else out, exist_ok=True)
 
 
 def load(path):
@@ -40,7 +39,7 @@ def load(path):
 
 
 def native_scale(a):
-    """Largest s (1-16) where the image is made of s×s blocks of one colour (upscaled pixel art)."""
+    """Candidate scale only: require exact blocks, so padding cannot hide a small detailed subject."""
     h, w = a.shape[:2]
     best = (1, 0, 0)
     for s in range(16, 1, -1):
@@ -50,7 +49,10 @@ def native_scale(a):
             for ox in range(s):
                 small = a[oy::s, ox::s]
                 up = np.repeat(np.repeat(small, s, 0), s, 1)[:h - oy, :w - ox]
-                if (up == a[oy:oy + up.shape[0], ox:ox + up.shape[1]]).all(-1).mean() > 0.97:
+                # Offsets discard border pixels, so only an aligned whole-image match is evidence.
+                if ox or oy or h % s or w % s:
+                    continue
+                if np.array_equal(up, a):
                     return s, ox, oy
     return best
 
@@ -75,6 +77,8 @@ def lum(rgb):
 
 paths = sorted(p for p in glob.glob(os.path.join(src, '*')) if p.lower().endswith(('.png', '.gif', '.webp'))) \
     if os.path.isdir(src) else [src]
+if not paths:
+    sys.exit('no PNG/GIF/WebP images to analyse')
 items = []
 for p in paths:
     frames, loop = load(p)
@@ -85,6 +89,8 @@ for p in paths:
 
 # ---- still-image measures over every frame of every file ----
 allpx = np.concatenate([f[f[..., 3] > 0][:, :3] for it in items for f in it['frames']])
+if not len(allpx):
+    sys.exit('no visible subject after advisory background analysis; inspect the original art')
 cols, cnt = np.unique(allpx, axis=0, return_counts=True)
 order = cnt.argsort()[::-1]
 cols, cnt = cols[order], cnt[order]
@@ -138,8 +144,10 @@ for it in items:
         dith += chk.sum() / max(1, ins.sum())
         # light: brightness of the top vs bottom half, left vs right half of the subject
         cy, cx = ys.mean(), xs.mean()
-        light_v += L[al & (np.arange(f.shape[0])[:, None] < cy)].mean() - L[al & (np.arange(f.shape[0])[:, None] >= cy)].mean()
-        light_h += L[al & (np.arange(f.shape[1])[None, :] < cx)].mean() - L[al & (np.arange(f.shape[1])[None, :] >= cx)].mean()
+        def mean_or_zero(values):
+            return float(values.mean()) if values.size else 0.0
+        light_v += mean_or_zero(L[al & (np.arange(f.shape[0])[:, None] < cy)]) - mean_or_zero(L[al & (np.arange(f.shape[0])[:, None] >= cy)])
+        light_h += mean_or_zero(L[al & (np.arange(f.shape[1])[None, :] < cx)]) - mean_or_zero(L[al & (np.arange(f.shape[1])[None, :] >= cx)])
         k += 1
 k = max(k, 1)
 outline_dark, outline_sel, dith, light_v, light_h = (x / k for x in (outline_dark, outline_sel, dith, light_v, light_h))
@@ -152,6 +160,8 @@ subj_h = int(np.median(heights)) if heights else 0
 density = 'low' if subj_h <= 48 else 'mid' if subj_h <= 110 else 'high'
 
 res = {
+    'advisory': 'Style, lighting, density and native scale are heuristics; inspect original art before approving rules.',
+    'analysis_preprocessing': 'Candidate exact-block subsampling and dominant opaque-border colour keying affect analysis copies only.',
     'files': [dict(path=it['path'], frames=len(it['frames']), native_scale=it['scale'], background=it['bg'],
                    size=list(it['frames'][0].shape[1::-1])) for it in items],
     'subject_px': {'height': subj_h, 'width': int(np.median(widths)) if widths else 0},
@@ -178,6 +188,7 @@ for it in items:
               for i in range(1, len(fr))]
     anims.append({
         'path': it['path'], 'frames': len(fr), 'durations_ms': d, 'median_ms': med,
+        'duration_defaulted_indices': [i for i, value in enumerate(it['dur']) if value <= 0],
         'fps_equivalent': round(1000 / med, 1), 'total_ms': int(sum(d)),
         'holds': [i for i, x in enumerate(d) if x >= 1.8 * med],
         'loops': it['loop'] is not None and it['loop'] >= 0,
@@ -186,10 +197,22 @@ for it in items:
         'effect_frames': [i for i, a in enumerate(areas) if a > 1.35 * np.median(areas)],
     })
 res['animations'] = anims
-json.dump(res, open(os.path.join(out, 'analysis.json'), 'w'), indent=1)
+outputs = [os.path.join(out, 'analysis.json'), os.path.join(out, 'palette.png')]
+if FRAMES:
+    outputs.append(os.path.join(out, 'look.png'))
+    for it in items:
+        base = os.path.splitext(os.path.basename(it['path']))[0]
+        outputs.extend(os.path.join(out, 'native', '%s_%d.png' % (base, i)) for i in range(len(it['frames'])))
+try:
+    preflight_outputs(outputs, paths)
+except ValueError as exc:
+    sys.exit(str(exc))
+os.makedirs(os.path.join(out, 'native') if FRAMES else out, exist_ok=True)
+with open(os.path.join(out, 'analysis.json'), 'w', encoding='utf-8') as handle:
+    json.dump(res, handle, indent=1, allow_nan=False)
 
 # ---- palette swatches, native frames, one look sheet ----
-sw = Image.new('RGB', (16 * min(len(palette), 16), 16 * ((len(palette) + 15) // 16) or 16), (40, 40, 48))
+sw = Image.new('RGB', (16 * max(1, min(len(palette), 16)), 16 * max(1, ((len(palette) + 15) // 16))), (40, 40, 48))
 for i, h in enumerate(palette):
     sw.paste(tuple(int(h[j:j + 2], 16) for j in (1, 3, 5)), ((i % 16) * 16, (i // 16) * 16, (i % 16) * 16 + 16, (i // 16) * 16 + 16))
 sw.save(os.path.join(out, 'palette.png'))

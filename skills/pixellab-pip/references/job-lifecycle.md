@@ -12,7 +12,7 @@ MCP `wait_for_jobs` waits for all currently active generation jobs; it does not 
 
 MCP tilesets (`create_topdown_tileset` → `get_topdown_tileset`) have no such 423/404 window — the getter reports progress directly. For REST `POST /v2/tilesets`, the create response can contain both `background_job_id` and `tileset_id` while the status is still `processing`. Poll `GET /background-jobs/{background_job_id}` first. `GET /tilesets/{tileset_id}` may return `423` while the tileset is still being generated, or `404` until the background job has completed and the tileset object has been persisted; treat those as early lifecycle lookups while the background job is still processing.
 
-For MCP image and animation jobs (`create_*`, `edit_*`, `animate_image`, ...), `python <skill-dir>/assets/fetch.py <job_id> <out> --run <run> [--frames N] [--tool T] [--generations G]` polls the job's download URL, saves the file(s) in the run folder and records the call in the run manifest (`usage-reporting.md`); exit 3 means still running, so run the same command again. It is bounded by `--timeout`, so it is safe as a background wait.
+For raw MCP image/animation results, inspect the matching `get_image` result first. Optional `python <skill-dir>/assets/fetch.py <job_id> <out> --run <run> [--frames N] [--tool T] [--estimate G]` downloads into a new destination and records exact output paths. `N` must be the expected/getter-confirmed total, including an echoed first frame where applicable; an indexed 404 never proves a shorter completed clip. Missing decoder dependencies skip before network/write. Download timeout/unavailability means consult the getter, not failed/refunded or permission to resubmit. Use `--generations` only for actual charge evidence (`usage-reporting.md`). The bounded helper is optional; existing host tools may perform equivalent verified downloads.
 
 Poll gently: a short initial delay, then back off — not tight loops. A paid async result is already bought, so do not stop while it is merely still running — follow SKILL.md step 12's poll → background-wait → handoff ladder. Stop before "done" only for a real blocker: failure, auth/credit error, or a needed user choice such as review selection.
 
@@ -23,7 +23,7 @@ Do not resubmit a paid job because a poll timed out or a `423`/`404`/`review`/st
 Detect completion by the result, not by matching a status word: `status` is a free-form string whose in-progress vocabulary is open and endpoint-specific (`processing`, `pending`, `running`, `finalizing`, … — not a fixed set), and the tileset family carries no `status` field at all. Check in this order:
 
 - **Done** — the result payload is present: the asset/image/download/rotation URL is populated (e.g. a character's `rotation_urls` is null until done), or a tileset-family getter returns HTTP 200 (see the 423/404 note above). Verify the URL or local download.
-- **Failed** — `status: "failed"` or HTTP 410 (permanent). Report it; do not retry paid work unless the user approves.
+- **Failed** — the authoritative job getter reports terminal failure. A download HTTP 410 can also mean an unavailable/expired result; consult the getter before assigning job state. Failure is not refund evidence. Report it; new paid work follows the existing approved scope.
 - **Review** — `status: "review"` (objects): selection is required; do not call it completed.
 - **Otherwise keep polling** — any in-progress status word, HTTP 423/404, or a value you do not recognize — bounded by a deadline (below). Never treat "the status isn't a word I listed" as done.
 

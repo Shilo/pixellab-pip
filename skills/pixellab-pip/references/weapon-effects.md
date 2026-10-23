@@ -1,5 +1,7 @@
 # Weapon effects (smears, slash arcs, trails, hit flashes, bursts, shockwaves, arrow trails)
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 The sources give frame counts, not times: the ms below are play timing for ~12 fps clips. How to make them: a crescent
 harvested from a 6-frame swing with the `slash_layer.py` finishing script (see `key-pose-animation.md`), a trail drawn
 through the blade tips with `blade_trail.py`, or a painted clip in `vfx_workbench`
@@ -184,11 +186,11 @@ tails (9-20 fade frames) are for showcase sheets; a fight cuts them to 3-6.
   side and wrapping toward the off hand. On north-facing frames the smear sits mostly beyond the head (the body
   overlaps its root); on south it hangs below the feet with the root over the body.
 - Make one crescent (E), rotate it for SE/NE/S/N in 45 degree steps, mirror for the west side, like
-  `dir8_finish.py` does for flashes. Rotating a pixel crescent by 45 degrees breaks its edges: snap the rotated
+  the explicit directional-composition helper does for flashes. Rotating a pixel crescent by 45 degrees breaks its edges: snap the rotated
   result back to the ramp (or rebuild the diagonal in the workbench with `start` angles ±45) and check at 3x.
 - Thrust smears just rotate (a straight wedge survives rotation). Hammer smears keep the head end on the ground
   point in every direction; for north the head lands above the body and the smear is mostly hidden by it.
-- Top-down cuts the smear to 4 frames in every direction; keep the frame count equal across all 8.
+- One top-down example uses four smear frames in each facing; suggest consistent effect timing only when that matches the requested count and style.
 
 ## Pitfalls
 - **A constant-width arc reads as a ring or a pipe** -> taper both ends, fat at the leading third.

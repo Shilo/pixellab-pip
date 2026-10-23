@@ -243,8 +243,8 @@ SCENARIOS = [
     },
     {
         "id": "route-key-pose-move",
-        "task": "I have a standing knight sprite PNG. Make an overhead sword chop attack animation for it with PixelLab.",
-        "checks": {"keyposes": r"edit[_-]image[_-]pro[_-]flash|key[- ]pose", "inbetween": r"animate[_-]image"},
+        "task": "With PixelLab, make custom reviewed wind-up and hit key poses for my standing knight PNG, then interpolate the sword chop between those exact poses.",
+        "checks": {"keyposes": r"edit[_-]image[_-]pro[_-]flash|key[- ]pose", "inbetween": r"animate[_-]image|animate-with-text-v3"},
         "refs_any": ["key-pose-animation.md"],
     },
     {
@@ -252,6 +252,30 @@ SCENARIOS = [
         "task": "Using PixelLab, make shop item icons for my game in my project's saved art style.",
         "checks": {"style": r"project_style\.py|pixellab\.json|project[- ]style"},
         "refs_any": ["project-style.md", "icon.md"],
+    },
+    {
+        "id": "inspect-without-repair",
+        "task": "Using PixelLab Pip, inspect these animation frames for flicker. Only report findings; do not repair, recolor, reorder or drop anything.",
+        "checks": {"inspection": r"--check-only", "preservation": r"unchanged|read.only|preserv|no.{0,30}(?:repair|alter)"},
+        "refs_any": ["animation-doctor.md"],
+    },
+    {
+        "id": "simple-attack",
+        "task": "With PixelLab, animate my supplied transparent knight PNG doing one simple slash, eight generated frames. I do not need edited key poses, engine export or local finishing.",
+        "checks": {"raw_animation": r"animate[_-]image|animate-with-text-v3", "count": r"frame_count.{0,12}8|eight generated"},
+        "refs_any": ["animation.md"],
+    },
+    {
+        "id": "auto-preserves-art-authority",
+        "task": "PixelLab Pip auto is already on. Make an animation from hero.png, retaining every returned frame in order and every original pixel. I have not approved local painting or altered playback. Explain how you handle a bad frame.",
+        "checks": {"preserve": r"preserv|unchanged|retain", "approval": r"approv|consent|permission|ask"},
+        "refs_any": ["auto.md", "animation.md"],
+    },
+    {
+        "id": "blueprint-as-reference",
+        "task": "Using PixelLab, create shop icons in the look of hero.blueprint.json. Use the existing hero output images only as style references; do not remake the hero or replay its workflow.",
+        "checks": {"icon_route": r"create[_-]image[_-]pro|generate-image-v2", "reference": r"style|reference"},
+        "refs_any": ["blueprint.md", "icon.md"],
     },
 ]
 

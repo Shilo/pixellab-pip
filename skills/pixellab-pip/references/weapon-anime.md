@@ -1,9 +1,11 @@
 # Anime weapons (giant swords, scythes, kunai, chibi attacks, stylish guns) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Read this for anime-style weapon moves: oversized blades and their weight, scythe grips and reaping arcs, kunai throws,
 chibi bodies in motion, exaggerated smear frames, and stylish gun poses.
 Basic katana and sword cuts: `weapon-katana.md`, `weapon-sword.md`; trail shapes: `weapon-effects.md`; the thrown-prop
-recipe, Shots and the pistol draw: `key-pose-animation.md`. Facing right throughout: right hand, right foot and the
+recipe: `key-pose-animation.md`; shots and pistol draw: `weapon-firearms.md`. Facing right throughout: right hand, right foot and the
 near side face the viewer.
 
 ## Contents
@@ -103,7 +105,7 @@ Chibi = head about as big as the rest of the body, short stubby arms and legs, w
 - Frame budget that reads anime: wind-up 1-2 (held), swing 0-1, hit + fading trail 3-5, recovery 2-3.
 
 ## Stylish gun poses
-Aim/recoil keys are in Shots and the pistol draw (`key-pose-animation.md`); these are the poses between and around them.
+Aim/recoil keys and the pistol draw are in `weapon-firearms.md`; these are the poses between and around them.
 | Pose | Visible description for the prompt | Use |
 |---|---|---|
 | Muzzle-up ready | `pistol held up beside his cheek in both hands, muzzle pointing at the sky, elbows tucked` | idle, before a shot, reload end |

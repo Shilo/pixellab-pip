@@ -4,27 +4,27 @@ Read this for a top-down or 3/4 character move (attack, shot, cast) that must pl
 
 ## Walkable Top-Down Character
 
-A player that walks in 4 or 8 facings (tested: a 4-direction farmer, 24 generations with candidates and one redo):
+A requested player walk in 4 or 8 facings (one 4-direction farmer demonstration cost 24 generations with candidates and a redo; this is not a price quote):
 
 1. Front-facing reference and rotation as in [Steps](#steps) 1-2, with `n_directions` 4 or 8; asking for the still `facing the viewer, front view` in its first prompt skips the re-pose. Download the rotation links with `python <skill-dir>/assets/fetch.py --url <link> <out.png>`.
-2. Walk with `animate_character(mode="v3")`, one call per direction, naming every held prop in `action_description` (`walks forward at a relaxed pace, the green watering can stays in the right hand`); pass the same `animation_group_id` and `animation_name` on each call so the directions stay one animation at PixelLab. The cheaper template walk (`walking-8-frames`) has no wording: it dropped a held can, changed colours and baked a flickering shadow.
-3. Record the character job with `python <skill-dir>/assets/manifest.py done <run> <job_id>` (`fetch.py` downloads image jobs only), and run the doctor per direction with `--move walk` so a loop is judged as a loop.
+2. Use the requested supported animation mode/template and agreed direction scope; custom v3 motion can name held props in `action_description` (`walks at a relaxed pace, the green watering can stays in the right hand`). Group the calls with supported `animation_group_id`/`animation_name`. One template-walk example dropped a held can and changed colours; inspect held gear rather than treating that single result as a universal template failure.
+3. Record completion/actual exposed usage under `usage-reporting.md`; do not mark a job finished merely because a download was attempted. Optional doctor inspection runs per direction with `--check-only --move walk`.
 
 ## Choose the route
 
 | Route | How | Aim |
 |---|---|---|
 | Text | `create_character(mode="v3")` rotates the reference, then `animate_character(mode="v3")` animates each direction from `action_description` | Loose: the generator picks the arm angle. |
-| Key poses | Per direction: wind-up and hit (or aim and recoil) key poses on that rotation, then interpolate between them (`end_frame_url` on `animate_character`, or `animate_image` with `first_frame_url` + `last_frame_url`) | Exact, at about two and a half times the text route's cost per direction. |
+| Requested key poses | Per direction: reviewed wind-up/hit or aim/recoil anchors, then supported interpolation; see `animation.md` for the matching raw/managed frame fields | More explicit anchors, extra paid edits; no guarantee of exact motion or fixed cost ratio. |
 
-Offer **5 directions** (south, south-east, east, north-east, north) plus mirrored west, south-west and north-west, which saves about 40%. The mirror is a local derivative and the weapon switches hands on the mirrored side; ask, and generate all 8 when the game cannot accept that.
+When useful, offer **5 generated directions** (south, south-east, east, north-east, north) plus accepted mirrors for the other three. Mirroring switches hands/asymmetric gear; disclose that and generate the requested facings when unacceptable. It reduces direction calls, not necessarily total cost by a fixed percentage.
 
 Animation cost is billed on the generated canvas, which the silhouette grows past the sprite, not on the sprite (`cost-routing.md`). Recommend 64-128 px characters for 8-direction games; a tall side-view hero sprite animates on a canvas several times as expensive.
 
 ## Steps
 
-1. **Front-facing reference.** Re-pose the still with MCP `edit_image_pro_flash`: `the same <character>, now standing straight-on facing the viewer, front view, symmetric relaxed stance, <weapon> held at the side. Same size, same colours and pixel style, feet in the same place`, `use_color_palette_correction: true`. Whatever the reference faces becomes south.
-2. **Rotate.** `create_character(mode="v3", reference_image_url=<front>, n_directions=8, view=<the game's view>)`, then `get_character` for the rotations. Check all 8 on one sheet at 3x (hair, back details, boots, the weapon in hand, `characters.md` look checklist) before animating: a drifted direction is cheapest to fix here.
+1. **Front-facing reference.** Reuse a suitable supplied/approved south-facing still. If a re-pose is actually needed, propose the supported edit route and its cost; example wording: `the same <character>, standing facing the viewer, relaxed stance, <weapon> held at the side, same size, colours and pixel style`. Do not insert a paid Pro Flash edit into every rotation request.
+2. **Rotate.** `create_character(mode="v3", reference_image_url=<front>, n_directions=<agreed 4 or 8>, view=<the game's view>)`, then `get_character` for the rotations. Check every returned facing together (hair, back details, boots, the weapon in hand, `characters.md` look checklist) before animating: a drifted direction is cheapest to fix here.
 3. **Animate one direction per call** and name the aim in screen terms. Never write "forward": it is read as screen-right in every direction (south, south-east, north-east and north all fired right).
 
    | Direction | Wording that worked |
@@ -35,6 +35,6 @@ Animation cost is billed on the generated canvas, which the silhouette grows pas
    | north-east | `keeps the back half-turned and raises the <weapon> toward the top-right of the screen, arm extended diagonally up-right away from the viewer` |
    | east | `raises the <weapon> with the arm extended straight to the right` |
 
-   Even with these words text aim stays loose (north aimed up-right, diagonals fairly flat); use the key-pose route for exact angles.
-4. **Finish as labelled derivatives**, listed in the plan: the generator paints its own wrong-coloured flash at the muzzle or blade; clear it, and replace a frame where the flash covers the body with the previous frame (a hold reads as weight) rather than erasing. Lay one `vfx_workbench` flash rotated to each direction, anchored on the muzzle. Pad every direction to the same frame count by holding the last pose, and keep the same smear frame count in all 8.
-5. **Compare** all directions in one compass-grid preview before handing over, and build one sheet per direction (`assets/make_sheet.py`).
+   In the observed test, text aim stayed loose (north aimed up-right, diagonals fairly flat). For a strict angle, offer reviewed key-pose anchors as a more explicit route; verify the result rather than promising exact motion.
+4. **Inspect all returned directions.** Wrong-coloured flashes may justify proposed scoped cleanup or a separately generated workbench effect. Any replacement hold, mirror, rotated effect or equal-count padding is an optional accepted derivative under `finishing.md`; keep the original direction count/order/timing when no such treatment was requested. A flash over the body is not permission to erase the body or copy a neighbour automatically.
+5. **Compare** every requested direction with an appropriate standard preview; a compass grid is one useful inspection layout. Build per-direction sheets (`assets/make_sheet.py`) only when requested/required by the agreed export.

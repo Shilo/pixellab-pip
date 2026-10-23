@@ -113,27 +113,9 @@ def write_text_atomic(path: Path, content: str) -> None:
             temp_path.unlink(missing_ok=True)
 
 
-LEVELS = ("ask", "plan", "auto")
-
-
-def approval_level(data: dict[str, Any]) -> dict[str, Any]:
-    """The approval level, its budget in generations and the retry cap; an old config maps `auto` to a level."""
-    level = data.get("level") if data.get("level") in LEVELS else ("auto" if data.get("auto") is True else "ask")
-    budget = data.get("budget") if isinstance(data.get("budget"), int) and not isinstance(data.get("budget"), bool) else None
-    retries = data.get("retries") if isinstance(data.get("retries"), int) and not isinstance(data.get("retries"), bool) else 0
-    return {"level": level, "budget": budget, "retries": retries}
-
-
 def write_config(key: str, enabled: bool) -> Path:
-    values: dict[str, Any] = {key: bool(enabled)}
-    if key == "auto" and "level" in read_config()[0]:   # auto on/off is the two-level form of the approval level
-        values["level"] = "auto" if enabled else "ask"
-    return write_values(values)
-
-
-def write_values(values: dict[str, Any]) -> Path:
     existing, _, _ = read_config()
-    existing.update(values)
+    existing[key] = bool(enabled)
     content = json.dumps(existing, indent=2, sort_keys=True) + "\n"
 
     candidates = [SKILL_CONFIG]
@@ -209,9 +191,7 @@ def play_sound() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="PixelLab Pip bark helper")
-    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off", "level"])
-    parser.add_argument("level", nargs="?", choices=LEVELS)
-    parser.add_argument("numbers", nargs="*", type=int, help="plan/auto: the budget in generations, then the redos")
+    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off"])
     args = parser.parse_args()
 
     result: dict[str, Any] = {
@@ -250,16 +230,6 @@ def main() -> int:
         elif args.command == "auto-off":
             result["auto"] = False
             result["config"] = str(write_config("auto", False))
-        elif args.command == "level":
-            if args.level:   # `level plan 100 2`; the per-job gate still shows the plan unless the level is auto
-                if len(args.numbers) > 2:
-                    parser.error("give at most two numbers: the budget, then the redos")
-                budget, retries = (args.numbers + [None, 0])[:2]
-                write_values({"level": args.level, "budget": budget, "retries": retries,
-                              "auto": args.level == "auto"})
-            data, source, _ = read_config()
-            result.update(approval_level(data))
-            result["config"] = str(source) if source else None
         elif args.command == "status":
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))

@@ -12,16 +12,16 @@ Read this before cleaning up or finishing generated frames locally: stray pixels
 
 ## Contract
 
-The helpers live in `assets/finish/`; resolve them to the installed skill's absolute path as in `local-asset-assembly.md`. They need numpy (most also scipy); when missing they print `{"status":"skipped","reason":"numpy/scipy not installed"}` and exit 3 — report the step as not done, never as passed. Do not install packages to run them unless the user asks.
+The helpers live in `assets/finish/`; resolve them to the installed skill's absolute path as in `local-asset-assembly.md`. They need Pillow and numpy (some also scipy); when unavailable they print a JSON `status: skipped` with the missing dependency and exit 3 — report the step as not done, never as passed. Do not install packages to run them unless the user asks.
 
-- Every helper requires `--out <dir>` and writes copies only; it refuses to write over an input. Raw PixelLab outputs stay untouched beside the finished copies. Give each step its own folder inside the run, e.g. `pixellab-pip-generations/<run>/finish/1-ground-snap/`.
-- Each run writes `<out>/derivative.json`: `helper`, `category` (`cleanup` or `new_pixels`), `inputs`, and per-frame `changes`; a re-run into the same folder keeps the earlier records under `previous`. Report every derivative as a local derivative, name the helper and its changes, and record the step as a `TASK` in the blueprint (`blueprint.md`).
-- `new_pixels` helpers add pixels that PixelLab did not draw, so their output is a labelled non-PixelLab fallback (SKILL.md Asset Integrity). Prefer a PixelLab route when one fits — `vfx_workbench` for trails and effects, `pixelart_workbench` for pixel repairs.
+- Every helper requires `--out <dir>` and writes copies only; it preflights collisions with inputs and existing outputs. Raw PixelLab outputs stay untouched beside the finished copies. Give each step its own folder inside the run, e.g. `pixellab-pip-generations/<run>/finish/1-ground-snap/`.
+- Each run writes `<out>/derivative.json`: `helper`, `category` (`cleanup` or `new_pixels`), `inputs`, and per-frame `changes`. Use a fresh output folder for each step or revised attempt; previous copies/records remain untouched. Report every derivative as a local derivative, name the helper and its changes, and record the step as a `TASK` in the blueprint (`blueprint.md`).
+- The `new_pixels` category describes a helper's capabilities, not the provenance of every operation. Compositing generated VFX or a supplied prop is a local derivative; procedural painting creates non-PixelLab content. Apply the Approval rule below to the actual transformation. Prefer a supported PixelLab route when it fits — `vfx_workbench` for effects, `pixelart_workbench` for pixel repairs.
 - Look at every output frame before calling it finished; a helper's exit 0 means it ran, not that the art is right.
 
 ## Approval
 
-The approval levels table in `auto.md` ([Approval levels](auto.md#approval-levels)) decides when each category may run. At `ask`, clean-up asks once per move and new pixels ask; at `plan`, name the steps in the plan — new-pixel steps not named there need their own approval.
+Apply SKILL.md Asset Integrity to the actual operations, not the helper category. Run only requested/accepted transformations, report their changes and keep the originals. A named accepted plan can cover its listed local derivatives/fallbacks; a cost toggle or saved style cannot. New locally painted content requires the explicit labeled non-PixelLab fallback scope. Timing substitutions/mirroring/holds also require the requested playback scope.
 
 ## Order
 

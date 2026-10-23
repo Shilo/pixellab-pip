@@ -36,13 +36,14 @@ def test_drop_a_jump_frame_and_hold_its_neighbour():
     assert len(b.frames) == 8
 
 
-def test_hurt_with_dirty_early_frames_is_reordered():
+def test_hurt_has_no_automatic_house_reorder():
     fs = synth.walk(5)
     fs[1], fs[2] = synth.bright(fs[1], 1.3), synth.bright(fs[2], 1.3)
-    b, changes, durations, order = run(anim(fs, 'hurt'))
-    assert order == [3, 4, 4, 3, 0]
-    assert np.array_equal(b.frames[0], fs[3]) and np.array_equal(b.frames[4], fs[0])
-    assert any('reordered' in c.action for c in changes)
+    a = anim(fs, 'hurt')
+    b, changes, durations, order = timing.run(a, measure.run(a)[0])
+    assert order == list(range(5))
+    assert all(np.array_equal(got, want) for got, want in zip(b.frames, fs))
+    assert not any('reorder' in c.action for c in changes)
 
 
 def test_at_most_a_third_of_the_frames_are_dropped():

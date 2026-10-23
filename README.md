@@ -35,46 +35,18 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Merge Prototype
 
-This branch merges PixelLab Pip with [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) into one
-product, as a working prototype to try before deciding anything. What it adds to Pip, for every host:
+This branch integrates useful [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) production capabilities into Pip's one portable skill:
 
-- **Animation doctor** (`assets/fix.py`, `references/animation-doctor.md`): checks frames, fixes what it can for free
-  as labelled copies, and plans priced re-rolls for the rest.
-- **Project styles** the user always chooses (`assets/project_style.py`, named examples offered), plus matching art
-  the user shows.
-- **Key-pose animation recipe** for attacks, skills and signature moves, with weapon, martial-arts, armour and effect
-  motion pages, finishing helpers that write labelled copies, and replayable production blueprints.
-- **Approval levels** `ask`, `plan` and `auto` (budget and redos), and one run record (`manifest.json`).
+- User-approved project styles and family references, with temporary selection and ordinary one-off use.
+- Animation inspection, explicitly accepted repair copies and schema-checked repair proposals.
+- Optional custom key-pose recipes, focused motion references and requested finishing/engine exports.
+- Verified local assembly/previews and history over one private manifest, with charged usage distinct from estimates.
 
-The **Claude Code edition**, `pixellab-pip-studio` (`editions/claude/`), adds the PixelLab connection set up on
-install and a side panel: welcome page, style choice, key-pose review with Approve / Redo,
-finished moves, and a live activity strip. Install it from this repository's marketplace; it installs the core
-plugin with it.
+Every host uses the existing Pip entry point and settings. `auto` remains only the cost-confirmation toggle; run budgets/retries and visual/playback changes have explicit scope. The experimental separate Studio panel and `level` command are removed.
 
-Try it in Claude Code, from this branch:
+See [integration and migration](docs/merge/README.md) and the [adversarial review/remediation plan](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-implementation-plan.md) for decisions and current validation. The earlier three prototype production demos and Claude routing benchmark remain [historical evidence](docs/merge/demo/README.md), not proof of the revised implementation or every host/engine.
 
-```bash
-claude plugin marketplace add Shilo/pixellab-pip#feat/pga-merge
-claude plugin install pixellab-pip-studio@pixellab-pip-plugins
-```
-
-Then ask as on any host, for example `/pixellab-pip animate hero.png doing an overhead axe chop`; settings use
-`/pixellab-pip setup`, `auto`, `bark` and `level` (for example `level plan 45 2`). The panel opens by itself on the
-first PixelLab call; `/pixellab-pip-panel <project name>` opens or starts a project, or shows the welcome page.
-
-**Tested so far (prototype runs):**
-- three clean end-to-end runs by fresh agents that saw only the installed plugins:
-  - a frost mage (side view);
-  - a space marine (sci-fi);
-  - a walkable top-down farmer, plus icons for the mage;
-- the spend records matched PixelLab's charge exactly in every run;
-- the Claude benchmark scored 23 of 23;
-- the panel's tests pass.
-
-Untested: the Codex path. Results, findings and fixes: [docs/merge/demo](docs/merge/demo/README.md); plan and
-rulings: [docs/merge](docs/merge/README.md).
-
-Credit: PixelLab Pip by Shilo, pixellab-game-art by lexingel.
+Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. Adopted source notices are preserved inside the skill distribution.
 
 ## Showcase
 

@@ -55,7 +55,7 @@ def test_a_fresh_clip_replaces_dearer_frame_plans(tmp_path):
     a.paths = paths
     plans = plan.make(a, [F('brightness', [6]), F('brightness', [7]), F('brightness', [8])], str(log))
     (p,) = plans
-    assert p['check'] == 'whole clip' and p['tool'] == 'animate_image' and p['cost'] == 4
+    assert p['check'] == 'whole clip' and p['tool'] == 'animate_image' and p['cost'] == 1 and p['cost_estimate']
     assert p['frames'] == list(range(9)) and p['job']['job_id'] == 'j-9'
 
 

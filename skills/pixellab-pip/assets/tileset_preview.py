@@ -20,12 +20,17 @@ ap.add_argument("sheets", nargs="+")
 ap.add_argument("--cells", type=int, default=24)
 ap.add_argument("--scale", type=int, default=2)
 a = ap.parse_args()
-from _assembly import require_numpy  # noqa: E402
+from _assembly import require_numpy, preflight_outputs  # noqa: E402
 
 require_numpy()
 import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
 
+if a.cells < 1 or a.scale < 1:
+    ap.error("--cells and --scale must be positive")
+out = Path(a.out)
+tiles_png = out.with_name(out.stem + "_tiles.png")
+preflight_outputs([out, tiles_png], a.sheets + [str(Path(p).with_suffix('.json')) for p in a.sheets])
 sets = []   # per sheet: {(NW, NE, SW, SE) as 0/1: tile image}
 for sheet in a.sheets:
     meta = Path(sheet).with_suffix(".json")
@@ -37,6 +42,9 @@ for sheet in a.sheets:
     lut = {}
     for t in tiles:
         b, c = t["bounding_box"], t["corners"]
+        if (min(b['x'], b['y']) < 0 or min(b['width'], b['height']) <= 0
+                or b['x'] + b['width'] > img.width or b['y'] + b['height'] > img.height):
+            sys.exit("tile bounding box falls outside the source sheet")
         key = tuple(int(c[k] == "upper") for k in ("NW", "NE", "SW", "SE"))
         lut.setdefault(key, img.crop((b["x"], b["y"], b["x"] + b["width"], b["y"] + b["height"])))
     missing = [k for k in np.ndindex(2, 2, 2, 2) if k not in lut]
@@ -45,6 +53,8 @@ for sheet in a.sheets:
     sets.append(lut)
 
 tw, th = sets[0][(0, 0, 0, 0)].size
+if any(t.size != (tw, th) for lut in sets for t in lut.values()):
+    sys.exit("all tiles in the chain must have identical dimensions")
 levels, cells = len(sets) + 1, a.cells
 rng = np.random.default_rng(1)
 coarse = rng.random((cells // 6 + 2, cells // 6 + 2))
@@ -76,4 +86,4 @@ for r, lut in enumerate(sets):
 out = Path(a.out)
 tiles_png = out.with_name(out.stem + "_tiles.png")
 sheet.resize((sheet.width * a.scale, sheet.height * a.scale), Image.NEAREST).save(tiles_png)
-print(f"{a.out}  {cells}x{cells} cells, {levels} terrain levels\n{tiles_png}  corners NW NE SW SE (1 = upper)")
+print(json.dumps({"written": [str(out), str(tiles_png)], "cells": cells, "terrain_levels": levels, "purpose": "inspection only; random map plus all corner combinations"}))

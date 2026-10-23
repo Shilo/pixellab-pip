@@ -14,7 +14,7 @@
     "_comment": "Three seeds of one full-body side-view character with Pro Flash, shown as a numbered contact sheet for the user to pick the canonical still. The look words, sprite size and optional style anchor come from the project style.",
     "_comment_prompt": "/pixellab-pip run the character-candidates blueprint for a hooded ranger with a longbow",
     "TASK": {
-      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). Take the look words, sprite width and height and any anchor sprite from the project style (references/project-style.md); ask if there is no project style. Resolve style anchor to {\"url\": <anchor URL>, \"usage_description\": \"match this sprite's outline weight, pixel detail, shading and palette\"} when the style names an anchor, else null. Write the character description per references/characters.md (body plan, every carried prop and which hand holds it, worn-side gear in visible terms). Width and height must be multiples of 4 from 16 to 256.",
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). Resolve look, sprite width/height and optional family anchor from the current request and any applicable project style (references/project-style.md); no profile requires no setup. Resolve only missing consequential variables. This explicit blueprint requests three candidates; ordinary character requests still start with one. Resolve style anchor to {\"url\": <anchor URL>, \"usage_description\": \"match this sprite's outline weight, pixel detail, shading and palette\"} when the style names an anchor, else null. Write the character description per references/characters.md (body plan, every carried prop and which hand holds it, worn-side gear in visible terms). Width and height must be multiples of 4 from 16 to 256. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
       "verify": "The run is approved, MCP is authenticated, every variable is resolved, and the output directory is new and empty."
     }
   },
@@ -50,9 +50,15 @@
   },
   {
     "TASK": {
-      "instruction": "Poll MCP get_image for each of the three jobs returned by the preceding calls until completed or failed; re-poll on transient errors and never resubmit. Save each image unchanged as candidate-1.png through candidate-3.png in call order. Build candidates.png with assets/contact_sheet.py at 3x, numbered from 1, and run the look checklist in references/characters.md on each. Present every candidate with its look result per references/reviewable-candidates.md and stop for the user's pick; save the chosen one unchanged as character.png.",
-      "outputs": ["candidate-1.png", "candidate-2.png", "candidate-3.png", "candidates.png", "character.png"],
-      "verify": "Three transparent candidates at the requested size match their returned payloads, candidates.png shows each once with labels 1-3, and character.png is byte-identical to the candidate the user chose."
+      "instruction": "Poll MCP get_image for each of the three jobs returned by the preceding calls until completed or failed; re-poll on transient errors and never resubmit. Save each image unchanged as candidate-1.png through candidate-3.png in call order. Build candidates.png with assets/contact_sheet.py at 3x, numbered from 1, and run the look checklist in references/characters.md on each. Present every candidate with its look result per references/reviewable-candidates.md and follow its selection/delegation rule; save the chosen one unchanged as character.png. The chosen still is this character's source only; do not persist it as a project family anchor without a separate deliberate save request.",
+      "outputs": [
+        "candidate-1.png",
+        "candidate-2.png",
+        "candidate-3.png",
+        "candidates.png",
+        "character.png"
+      ],
+      "verify": "Three transparent candidates at the requested size match their returned payloads, candidates.png shows each once with labels 1-3, and character.png is byte-identical to the candidate chosen under that selection/delegation rule."
     }
   }
 ]

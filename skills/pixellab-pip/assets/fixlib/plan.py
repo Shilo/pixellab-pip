@@ -13,7 +13,7 @@ def _pro_flash(anim, frames):
 
 def _animate(anim, frames):
     h, w = anim.frames[0].shape[:2]
-    return math.ceil(w * h * max(2, len(frames)) / 65536)
+    return math.ceil(w * h * max(4, min(16, (len(frames) + 1) // 2 * 2)) / 65536)
 
 
 PF, AN = 'edit_image_pro_flash', 'animate_image'
@@ -31,7 +31,7 @@ RULES = {
     'jump': dict(cause='an in-between left the motion path',
                  tool=AN, prompt_change='pin the path in the action ("the same arc, smoothly")', cost=_animate),
     'missing_inbetween': dict(cause='too few frames for that span of the move',
-                              tool=AN, prompt_change='animate between these two frames (first_frame + last_frame), 2-4 frames', cost=_animate),
+                              tool=AN, prompt_change='animate between these two frames (first_frame + last_frame), 4 generated frames (plus the echoed input)', cost=_animate),
     'size_pop': dict(cause='a frame was drawn at another size', tool=PF,
                      prompt_change='the same size as the reference; the reference as style image', cost=_pro_flash),
     'loop_seam': dict(cause="the loop's last frame doesn't lead back to its first",
@@ -62,8 +62,8 @@ def table() -> str:
     return '\n'.join(rows)
 
 
-def lookup_job(frame_paths, manifest_path, name=None):
-    """The newest manifest entry (Pip's run record) whose outputs hold these frames: it names the job a re-roll redoes."""
+def lookup_job(frame_paths, manifest_path):
+    """The unique manifest entry whose recorded outputs include every supplied source frame."""
     if not manifest_path or not os.path.exists(manifest_path):
         return None
     run = os.path.dirname(os.path.abspath(manifest_path))
@@ -72,20 +72,27 @@ def lookup_job(frame_paths, manifest_path, name=None):
             entries = json.load(fh).get('jobs', [])
     except (ValueError, AttributeError):
         return None
-    dirs = {os.path.normcase(os.path.abspath(os.path.dirname(p))) for p in frame_paths}
-    best = None
-    for e in entries:   # later entries are newer
-        outs = {os.path.normcase(os.path.abspath(os.path.join(run, o))) for o in e.get('outputs', [])}
-        if any(os.path.dirname(o) in dirs for o in outs) and e.get('status', 'ok') == 'ok':
-            best = e
-    return best
+    wanted = {os.path.normcase(os.path.realpath(p)) for p in frame_paths}
+    if not wanted or not isinstance(entries, list):
+        return None
+    matches = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get('outputs'), list):
+            continue
+        if not all(isinstance(o, str) for o in entry['outputs']):
+            continue
+        outs = {os.path.normcase(os.path.realpath(os.path.join(run, o))) for o in entry['outputs']}
+        if wanted <= outs and entry.get('status', 'ok') == 'ok':
+            matches.append(entry)
+    # Shared folders and conflicting ownership are not evidence of a particular source job.
+    return matches[0] if len(matches) == 1 else None
 
 
 
-def make(anim, still_failing, log_path, report='fix_report.json'):
+
+def make(anim, still_failing, log_path, report='fix_report.json', *, allow_whole_clip=True):
     """One plan per mid/high finding still failing (low ones are noted, not re-rolled)."""
-    stem = os.path.splitext(os.path.basename(anim.paths[0]))[0].rsplit('_', 1)[0] if anim.paths else anim.key.replace('/', '_')
-    job = lookup_job(anim.paths, log_path, stem)
+    job = lookup_job(anim.paths or ([anim.source] if anim.source else []), log_path)
     plans = {}
     for f in still_failing:
         if f.severity == 'low' or f.check not in RULES:
@@ -101,12 +108,31 @@ def make(anim, still_failing, log_path, report='fix_report.json'):
         plans[k] = {'check': f.check, 'frames': list(f.frames), 'why': f.note, 'cause': r['cause'], 'tool': r['tool'],
                     'prompt_change': r['prompt_change'], 'cost': int(r['cost'](anim, f.frames)), 'job': job}
     plans = list(plans.values())
-    job_cost = (job or {}).get('reported_usage', {}).get('generations', 1e9)
-    if job and 'animate_image' in job.get('tool', '') and len(plans) > 1 and sum(p['cost'] for p in plans) > job_cost:
-        plans = [{'check': 'whole clip', 'frames': list(range(len(anim.frames))), 'why': '; '.join(p['why'] for p in plans),
-                  'cause': 'cheaper than %d frame re-rolls (%d gen)' % (len(plans), sum(p['cost'] for p in plans)),
-                  'tool': 'animate_image', 'prompt_change': 'same key frames, a new seed; the action says motion only, '
-                  'and names any prop that must stay (the empty scabbard at the hip)', 'cost': int(job_cost), 'job': job}]
+    for p in plans:
+        p['cost_estimate'] = True
+        p['schema_check_required'] = True
+        if p['tool'] == AN:
+            h, w = anim.frames[0].shape[:2]
+            count = max(4, min(16, (len(p['frames']) + 1) // 2 * 2))
+            p['frame_count'] = count
+            if max(w, h) > 256 or w * h * count > 524288:
+                p['cost'] = None
+                p['requires_replan'] = 'input canvas/frame count exceeds raw v3 limits; choose an approved supported route'
+    # Offer the cheaper whole-clip retry only for an unambiguous complete raw v3 result.
+    # Historical charged usage is not a current quote.
+    if allow_whole_clip and job and job.get('tool') in ('animate_image', 'MCP animate_image') and len(plans) > 1:
+        count = len(anim.frames) - 1
+        h, w = anim.frames[0].shape[:2]
+        whole_cost = math.ceil(w * h * count / 65536)
+        if (4 <= count <= 16 and count % 2 == 0 and max(w, h) <= 256
+                and w * h * count <= 524288 and len(job.get('outputs', [])) == len(anim.paths)
+                and all(p['cost'] is not None for p in plans) and sum(p['cost'] for p in plans) > whole_cost):
+            plans = [{'check': 'whole clip', 'frames': list(range(len(anim.frames))),
+                      'why': '; '.join(p['why'] for p in plans),
+                      'cause': 'estimated cheaper than the listed frame repairs; confirm current route and inputs',
+                      'tool': AN, 'prompt_change': 'same key frames, motion-only action naming the props that must stay',
+                      'frame_count': count, 'cost': whole_cost, 'cost_estimate': True,
+                      'schema_check_required': True, 'job': job}]
     for n, p in enumerate(plans, 1):
         p['reroll'] = 'Re-roll plan %d for %s in %s' % (n, anim.key, report)   # what the user says to run it
     return plans

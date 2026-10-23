@@ -1,15 +1,27 @@
 from __future__ import annotations
 
 import json
+import io
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+from PIL import Image
 
 from test_helpers import REPO_ROOT, load_module
 
 fetch = load_module("fetch", REPO_ROOT / "skills/pixellab-pip/assets/fetch.py")
 manifest = load_module("manifest", REPO_ROOT / "skills/pixellab-pip/assets/manifest.py")
-PNG = b"\x89PNG\r\n\x1a\n" + b"x" * 8
+def image_bytes(color=(20, 40, 60, 255), fmt="PNG"):
+    buf = io.BytesIO()
+    Image.new("RGBA", (2, 2), color).save(buf, format=fmt)
+    return buf.getvalue()
+
+
+PNG = image_bytes()
 
 
 class FetchTests(unittest.TestCase):
@@ -23,26 +35,29 @@ class FetchTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_frames_saved_in_order(self) -> None:
-        fetch.get = lambda job, index=None: ("ok", PNG + bytes([index]))
+        fetch.get = lambda job, index=None, **kwargs: ("ok", image_bytes((index, 40, 60, 255)))
         self.assertEqual(fetch.try_job("j", str(self.root / "clip"), 3), "ok")
         self.assertEqual([p.name for p in sorted((self.root / "clip").iterdir())], ["0.png", "1.png", "2.png"])
-        self.assertEqual((self.root / "clip" / "2.png").read_bytes()[-1], 2)
+        with Image.open(self.root / "clip" / "2.png") as image:
+            self.assertEqual(image.getpixel((0, 0))[0], 2)
 
-    def test_short_clip_takes_frames_it_has(self) -> None:
-        fetch.get = lambda job, index=None: ("ok", PNG) if index < 3 else ("notfound", None)
-        self.assertEqual(fetch.try_job("j", str(self.root / "clip"), 5), "ok")
-        self.assertEqual(len(list((self.root / "clip").iterdir())), 3)
+    def test_missing_later_frame_never_proves_shorter_clip_complete(self) -> None:
+        fetch.get = lambda job, index=None, **kwargs: ("ok", PNG) if index < 3 else ("wait", None)
+        self.assertEqual(fetch.try_job("j", str(self.root / "clip"), 5), "wait")
+        self.assertFalse((self.root / "clip").exists())
 
-    def test_404_grace_then_failed(self) -> None:
-        self.assertEqual(fetch.settle("notfound", 5), "wait")
-        self.assertEqual(fetch.settle("notfound", 200), "failed")
-        self.assertEqual(fetch.settle("ok", 999), "ok")
+    def test_file_errors_never_prove_failure_or_refund(self) -> None:
+        import urllib.error
+        for code, status in ((404, "wait"), (410, "unavailable"), (403, "unavailable")):
+            error = urllib.error.HTTPError("https://api.pixellab.ai/", code, "file unavailable", {}, None)
+            with patch.object(fetch, "_download", side_effect=error):
+                self.assertEqual(fetch.get("a"), (status, None))
 
     def test_writes_manifest_entry(self) -> None:
-        fetch.get = lambda job, index=None: ("ok", PNG)
+        fetch.get = lambda job, index=None, **kwargs: ("ok", PNG)
         run = self.root / "run"
         rc = fetch.main(["job-1", str(run / "keys" / "A.png"), "--run", str(run), "--tool", "MCP edit_image_pro_flash",
-                         "--generations", "6", "--timeout", "0"])
+                         "--generations", "6", "--timeout", "1"])
         self.assertEqual(rc, 0)
         entry = manifest.jobs(str(run))[0]
         self.assertEqual((entry["job_id"], entry["status"], entry["reported_usage"]), ("job-1", "ok", {"generations": 6.0}))
@@ -83,13 +98,105 @@ class FetchTests(unittest.TestCase):
             fetch.OPENER.open = original
         self.assertTrue(out.exists())
         self.assertTrue(seen["ua"] and "Python-urllib" not in seen["ua"])
-        with self.assertRaises(ValueError):
-            fetch.main(["--url", "https://example.com/x.png", str(out)])
+        self.assertEqual(fetch.main(["--url", "https://example.com/x.png", str(out)]), 2)
 
     def test_rejects_non_pixellab_host(self) -> None:
         with self.assertRaises(ValueError):
             fetch.check_host("https://example.com/x.png")
         fetch.check_host(fetch.BASE % "abc")
+
+    def test_corrupt_or_wrong_format_result_writes_nothing(self) -> None:
+        for data in (b"<html>login</html>", PNG[:12], image_bytes(fmt="GIF")):
+            fetch.get = lambda job, index=None, **kwargs: ("ok", data)
+            with self.assertRaises(ValueError):
+                fetch.try_job("j", str(self.root / "raw.png"), 0)
+            self.assertFalse((self.root / "raw.png").exists())
+        with patch.object(fetch, "_download", return_value=b"<html>bad</html>"):
+            self.assertEqual(fetch.main(["--url", "https://backblaze.pixellab.ai/file/x.png",
+                                         str(self.root / "raw.png")]), 2)
+        self.assertFalse((self.root / "raw.png").exists())
+
+    def test_existing_outputs_never_overwritten_or_mixed(self) -> None:
+        clip = self.root / "clip"
+        clip.mkdir()
+        (clip / "2.png").write_bytes(PNG)
+        fetch.get = lambda *args: self.fail("existing destination reached HTTP")
+        with self.assertRaises(ValueError):
+            fetch.try_job("j", str(clip), 2)
+        self.assertEqual(list(clip.iterdir()), [clip / "2.png"])
+        raw = self.root / "raw.png"
+        raw.write_bytes(PNG)
+        with self.assertRaises(ValueError):
+            fetch.try_job("j", str(raw), 0)
+        self.assertEqual(raw.read_bytes(), PNG)
+
+    def test_exact_outputs_and_repeat_fetch_preserve_raw_bytes(self) -> None:
+        run = self.root / "run"
+        fetch.get = lambda job, index=None, **kwargs: ("ok", PNG)
+        args = ["j", str(run / "frames"), "--frames", "2", "--run", str(run), "--estimate", "7", "--timeout", "1"]
+        self.assertEqual(fetch.main(args), 0)
+        entry = manifest.jobs(str(run))[0]
+        self.assertEqual(entry["outputs"], ["frames/0.png", "frames/1.png"])
+        self.assertNotIn("reported_usage", entry)
+        self.assertEqual(entry["estimated_usage"], {"generations": 7})
+        self.assertEqual(fetch.main(args), 2)  # safe refusal, no assumption of same-job identity
+        self.assertEqual((run / "frames" / "0.png").read_bytes(), PNG)
+
+    def test_pending_and_unavailable_downloads_keep_reservations(self) -> None:
+        for status, code in (("wait", 3), ("unavailable", 2)):
+            run = self.root / status
+            fetch.get = lambda job, index=None, **kwargs: (status, None)
+            args = ["j", str(run / "raw.png"), "--run", str(run), "--estimate", "6", "--timeout", "0.02"]
+            self.assertEqual(fetch.main(args), code)
+            self.assertEqual(manifest.committed(str(run)), 6)
+            self.assertEqual(manifest.jobs(str(run))[0]["status"], "submitted")
+            self.assertFalse((run / "raw.png").exists())
+
+    def test_refetch_to_new_destination_retains_all_output_provenance(self) -> None:
+        run = self.root / "run"
+        fetch.get = lambda job, index=None, **kwargs: ("ok", PNG)
+        for name in ("raw.png", "copy.png"):
+            self.assertEqual(fetch.main(["j", str(run / name), "--run", str(run), "--generations", "6"]), 0)
+        entry = manifest.jobs(str(run))[0]
+        self.assertEqual(entry["outputs"], ["raw.png", "copy.png"])
+        fetch.get = lambda job, index=None, **kwargs: ("unavailable", None)
+        self.assertEqual(fetch.main(["j", str(run / "later.png"), "--run", str(run)]), 2)
+        self.assertEqual(manifest.jobs(str(run))[0]["status"], "ok")
+        self.assertEqual(manifest.spent(str(run)), 6)
+
+    def test_invalid_arguments_and_ledger_fail_before_http(self) -> None:
+        run = self.root / "run"
+        run.mkdir()
+        path = run / "manifest.json"
+        path.write_text('{"calls": []}', encoding="utf-8")
+        fetch.get = lambda *args: self.fail("invalid preflight reached HTTP")
+        args = ["j", str(run / "raw.png"), "--run", str(run)]
+        self.assertEqual(fetch.main(args), 2)
+        self.assertEqual(path.read_text(encoding="utf-8"), '{"calls": []}')
+        self.assertEqual(fetch.main([*args, "--frames", "0"]), 2)
+        self.assertEqual(fetch.main([*args, "--estimate", "nan"]), 2)
+        self.assertEqual(fetch.main(["j", str(self.root / "outside.png"), "--run", str(run)]), 2)
+
+    def test_missing_pillow_skips_before_network_or_writes(self) -> None:
+        script = REPO_ROOT / "skills/pixellab-pip/assets/fetch.py"
+        code = (f"import runpy,sys; sys.path.insert(0,{str(script.parent)!r}); sys.modules['PIL']=None; "
+                f"sys.argv=['fetch.py','j','raw.png','--run','run']; runpy.run_path({str(script)!r},run_name='__main__')")
+        result = subprocess.run([sys.executable, "-c", code], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 3, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["status"], "skipped")
+        self.assertEqual(list(self.root.iterdir()), [])
+
+    def test_deadline_bounds_each_frame_and_writes_no_partial_clip(self) -> None:
+        calls = []
+        def fake(job, index=None, **kwargs):
+            calls.append(kwargs["timeout"])
+            return "ok", PNG
+        fetch.get = fake
+        with patch.object(fetch.time, "monotonic", side_effect=[10, 12]):
+            status = fetch.try_job("j", str(self.root / "clip"), 2, deadline=11)
+        self.assertEqual(status, "wait")
+        self.assertEqual(calls, [1])
+        self.assertFalse((self.root / "clip").exists())
 
 
 if __name__ == "__main__":

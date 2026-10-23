@@ -1,5 +1,7 @@
 # Martial arts (punches, kicks, blocks, throws, grapples, kata) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout: the right hand, right foot and right side are NEAR the viewer.
 
 ## Contents
@@ -67,7 +69,7 @@ Facing right throughout: the right hand, right foot and right side are NEAR the 
 - **Spin (back) kick:** A = guard -> turn `back turned toward the target, looking over his shoulder` -> B = `leg
   straight out behind him toward the right, heel first, torso low, looking past his shoulder`. Stepped; the
   generator ends the spin facing left. Key the turn pose and end with a pose that states `facing right`.
-- **Flying kick:** see `key-pose-animation.md` (takeoff, chamber, kick, land, speed lines behind).
+- **Flying kick:** see the flying side kick recipe below.
 - **Knee strike:** A = `both hands up at head height as if gripping a neck` -> B = `near knee driven up and forward
   to chest height, hands pulled down to meet it, hips forward`. Impact: `hit_star` close to the body. Interpolates.
 - **Block / parry / duck (boxing guide):** parry = `open glove pushing sideways across his face`; low parry =
@@ -131,3 +133,7 @@ his forehead`; `downward block, fist swept down past his front knee`. Stepped, n
 - Grip poses grow a weapon or a cloth bundle -> `empty hands, nothing in his hands, as if gripping cloth`.
 - Mentioning the opponent adds a second figure -> describe heights (`at chin height in front of him`), never a person.
 - Speed lines painted along the limb read as a blade -> streaks behind the fist or body only (as in `key-pose-animation.md`).
+
+## Flying side kick
+
+**Flying side kick**: takeoff (crouched run-up, arms back) → chamber (airborne, kicking knee to the chest, torso leaning back) → kick (leg snapped out, heel first at head height, other leg folded, torso nearly horizontal, arms back) → land (low crouch, guard up). Needs room above and in front. Speed lines go behind the body, never along the leg (that reads as a blade) and never as in-betweens of a flying body (they smear). Ground-snap only the frames on the ground. For a kick between two poses use a 6-frame clip with `the raised knee stays up, then the lower leg snaps out; the foot never goes back to the ground`.

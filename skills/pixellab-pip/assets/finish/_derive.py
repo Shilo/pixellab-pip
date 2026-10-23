@@ -1,8 +1,7 @@
 """Shared contract for the finishing helpers: numpy/scipy skip, frame lists, copy-only output, derivative label.
 
 Every helper writes into its own `--out` folder, never over an input, and ends with `<out>/derivative.json`:
-{"helper": name, "category": "cleanup" | "new_pixels", "inputs": [paths as given], "changes": {...}}; a re-run into
-the same folder moves the earlier records to "previous".
+{"helper": name, "category": "cleanup" | "new_pixels", "inputs": [paths as given], "changes": {...}}; use a fresh output folder for each step.
 """
 import glob
 import json
@@ -12,19 +11,8 @@ import sys
 
 
 
-def require_numpy(scipy: bool = False) -> None:
-    """Exit 3 with a JSON skip report when numpy (and scipy, if asked) cannot be imported."""
-    try:
-        import numpy  # noqa: F401
-        if scipy:
-            import scipy.ndimage  # noqa: F401
-    except (ImportError, OSError):
-        print(json.dumps({"status": "skipped", "reason": "numpy/scipy not installed"}))
-        sys.exit(3)
-
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _assembly import expand  # noqa: E402,F401  (cmd/PowerShell pass *.png literally; natural order)
+from _assembly import expand, require_numpy, preflight_outputs  # noqa: E402,F401
 
 
 def _natural(s: str) -> list:
@@ -52,14 +40,16 @@ class Run:
         assert category in ("cleanup", "new_pixels")
         self.helper, self.category, self.out = helper, category, out
         self.inputs = [str(p) for p in inputs]
-        self._guard = {os.path.normcase(os.path.realpath(p)) for p in self.inputs}
         self.changes: dict = {}
+        if os.path.isdir(out) and os.listdir(out):
+            sys.exit("output folder is not empty; choose a fresh --out folder")
         os.makedirs(out, exist_ok=True)
 
     def path(self, name: str) -> str:
         p = os.path.join(self.out, name)
-        if os.path.normcase(os.path.realpath(p)) in self._guard:
-            sys.exit("refusing to overwrite the input %s: give another --out folder" % p)
+        if os.path.commonpath([os.path.realpath(p), os.path.realpath(self.out)]) != os.path.realpath(self.out):
+            sys.exit("output name escapes --out: " + name)
+        preflight_outputs([p], self.inputs)
         return p
 
     def save(self, img, name: str, **change) -> str:
@@ -74,10 +64,6 @@ class Run:
         self.changes.update(extra)
         label = {"helper": self.helper, "category": self.category, "inputs": self.inputs, "changes": self.changes}
         dest = self.path("derivative.json")
-        if os.path.exists(dest):   # a re-run into the same folder keeps the earlier records
-            with open(dest, encoding="utf-8") as fh:
-                old = json.load(fh)
-            label["previous"] = old.pop("previous", []) + [old]
         with open(dest, "w", encoding="utf-8") as fh:
             json.dump(label, fh, indent=2)
         print("derivative ->", os.path.join(self.out, "derivative.json"))

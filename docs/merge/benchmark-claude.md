@@ -1,5 +1,7 @@
 # Benchmark check on the merge branch
 
+Historical prototype benchmark, not a test of the revised implementation. See the [current integration record](README.md).
+
 Claude arm only, 1 rep, working-tree skill (`python dev-tools/skill_benchmark.py --agents claude --variants current`), 2026-10-22. Dry: no PixelLab credits.
 
 Every one of the 23 scenarios passed all its checks (the 20 upstream scenarios plus 3 new routes: animation doctor, key-pose move, styled icons). The published upstream run (2026-07-06) scored about 98%.

@@ -1,6 +1,8 @@
 # Katana (kendo cuts, iai draw details, katana sprite rhythm) as visible poses
 
-The basic kamae table, draw, noto, thrust and 3-hit combo are in `key-pose-animation.md`. Facing right throughout:
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
+Key-pose production is optional under `key-pose-animation.md`; the basic kamae and draw cycles are below. Facing right throughout:
 right hand, right foot and the near side face the viewer. The scabbard is on the LEFT (far) hip, its end sticking out
 behind toward the left of the image.
 
@@ -8,7 +10,7 @@ behind toward the left of the image.
 - [What every katana pose keeps](#what-every-katana-pose-keeps)
 - [Kendo cuts as animations (key pose A -> key pose B, trail path in screen terms)](#kendo-cuts-as-animations-key-pose-a---key-pose-b-trail-path-in-screen-terms)
 - [Other moves the sources show](#other-moves-the-sources-show)
-- [More kamae from the 15-pose chart (beyond `key-pose-animation.md`)](#more-kamae-from-the-15-pose-chart-beyond-key-pose-animationmd)
+- [More kamae from the 15-pose chart (additional guards)](#more-kamae-from-the-15-pose-chart-additional-guards)
 - [Combo strips (ink-silhouette sheet, read as game key poses)](#combo-strips-ink-silhouette-sheet-read-as-game-key-poses)
 - [Frame rhythm from three katana sprite sets](#frame-rhythm-from-three-katana-sprite-sets)
 - [Pitfalls to name in prompts](#pitfalls-to-name-in-prompts)
@@ -65,7 +67,7 @@ All four start from chudan and step in on the hit. Canvas: the raise puts the bl
   both hands straight up, blade vertical -> kneel, blade down at the side -> arm out (the flick) -> sheathe. For a
   game: draw-cut hold 3-4 frames, raise 1, cut 1, settle 2.
 
-## More kamae from the 15-pose chart (beyond `key-pose-animation.md`)
+## More kamae from the 15-pose chart (additional guards)
 | Guard | Visible description for the prompt | Use |
 |---|---|---|
 | In (upright at the shoulder) | `blade straight up in front of his near right shoulder, hilt at chest height, both elbows down` | calm ready idle, a narrower hasso |
@@ -117,3 +119,26 @@ All four start from chudan and step in on the hit. Canvas: the raise puts the bl
 - Spin cuts: the blade passes behind the body and vanishes or doubles -> step the turn key poses; the trail ring
   passes behind the hips, so draw its back half under the body.
 - Kendo armour and bamboo swords in the manuals are props of practice: ask for `steel katana`, never `bamboo sword`.
+
+## Basic kamae and draw cycles
+
+Use a stance name only with its visible description; the generator draws the description, not the term. Grip: right hand just below the guard, left hand near the pommel. Feet shoulder width, one forward, knees slightly bent. A katana is worn through the sash on the left hip (the far side) and drawn by the right hand. More guards, kendo cuts, and katana rhythm: `weapon-katana.md`, `weapon-sword.md`.
+
+| Kamae | Use | Visible description |
+|---|---|---|
+| Chudan (middle) | ready, start of a thrust | `both hands on the hilt a fist in front of his navel, blade angled up, tip at the opponent's eye or throat height, near right foot forward` (not "pointing straight forward": that draws it flat) |
+| Jodan (high) | overhead-cut wind-up | `both hands raised above his head, left hand about a fist from his forehead, blade angled up and back behind him, far left foot forward` |
+| Gedan (low) | counter, wary ready | `blade lowered, tip pointing at the ground ahead, both hands at the hips, near right foot forward` |
+| Waki (side) | sideways or rising cut wind-up | `turned side-on, hilt at his right hip, far left arm crossing his body, blade pointing down and back behind him, far left foot forward` |
+| Kasumi | parry, counter-thrust | `deep knee bend, hilt raised beside his right temple, far left arm across his chest, blade level and pointing forward, edge up` |
+| Hasso | diagonal-cut wind-up | `left shoulder toward the enemy, hilt beside his right cheek and shoulder, blade tilted back 30-45 degrees from upright, far left foot forward` |
+
+
+
+Moves as stance pairs:
+- Overhead cut: jodan or Vom Tag → follow-through low in front. Heavy diagonal: hasso or Zornhut → low on the far side. Thrust: chudan → Langort. Counter: kasumi or Ochs → Langort.
+- **Iai draw-cut**: sheathed, right hand on the hilt → the blade slides out forward, level across the CHEST at about shoulder height, right elbow high → the right arm straight out in front at chest height, one hand, scabbard end still behind. The blade is never cocked back behind the body. Paint the middle stance as its own pose. Facing left, the left-hip scabbard is on the near side and the left hand pulls it back along the hip during the draw; its trail is a level arc in front at chest height.
+- **Complete cut** (game form: draw → raise → one cut): after the draw the raise starts ONE-handed (the right hand lifts the blade overhead while the left stays at the scabbard mouth and joins at the top) → two-handed cut down and forward, ending at waist height for a light cut or tip toward the ground with the torso over the front knee for a finisher.
+- **Thrust from a sheathed idle**: show the draw first (blade out level, its own frame), then the dash; the afterimage is the draw stance, not the idle. One draw pose can serve every iai move of a character.
+- **Resheathe (noto)**: in the middle, the right hand draws the hilt back across the chest and the blade runs forward and down into the scabbard mouth at the front of the hip, the scabbard `running back toward the lower left, mouth at the front of the hip`; that bent angle is correct and only for the middle. The last frame has blade and scabbard back on one line, scabbard end raised slightly behind (the idle). Hold about 280 ms, then idle.
+- **Three-hit combo**: horizontal cut → rising cut (both hands, blade swept up and back overhead) → downward diagonal finish (blade low toward the lower front, torso over the front knee). Avoid a spinning slash: it turned the figure to a front view and dropped the scabbard.

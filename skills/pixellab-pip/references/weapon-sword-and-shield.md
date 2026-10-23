@@ -1,5 +1,7 @@
 # Sword and shield (buckler, targe, rotella, dueling shield) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 The two basic buckler wards are in [weapon-sword.md](weapon-sword.md) -> "Sword and buckler". Facing right throughout:
 sword in the right (near) hand, shield on the left (far) arm. No source shows a clear shield punch; the push below is
 built from the presses.

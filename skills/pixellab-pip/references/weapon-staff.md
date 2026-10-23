@@ -1,5 +1,7 @@
 # Staff (quarterstaff, bo, short stick, mage's staff) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Left-facing sources are mirrored: facing right, the right hand, right foot and near side face the viewer, and
 "forward" is toward the right of the image.
 

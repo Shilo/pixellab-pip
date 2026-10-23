@@ -1,5 +1,7 @@
 # Bow (longbow, yumi, short recurve) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout.
 
 ## Contents
@@ -56,11 +58,11 @@ viewer`; thumb draw = `closed fist with the thumb hooked around the string, a th
 
 ## Moves as key poses (A -> B, trail in screen terms)
 - **Quick game shot (heroes).** A = full draw (the aim), B = follow-through (string straight, no arrow, hand back
-  at the ear), like the rifle's aim/recoil in `key-pose-animation.md`. Draw from idle is one 4-frame clip (bow held
+  at the ear), like the rifle's aim/recoil in `weapon-firearms.md`. Draw from idle is one 4-frame clip (bow held
   in both hands). A -> B is an **instant cut**: in-betweens there slide the arrow forward on the string or leave it
   half-released. Damage and the streak fire on B (mark that frame as the hit).
 - **Ceremonial / kyudo.** Ready -> nock -> raise -> draw -> full draw (long hold) -> release -> follow-through, with
-  the calm timing from `key-pose-animation.md`. Hokusai's kneeling shot is the same stages with `kneeling on his back knee,
+  the optional calm timing from `style-examples.md`. Hokusai's kneeling shot is the same stages with `kneeling on his back knee,
   front knee up` held in every key pose.
 - **Reload loop (repeated shots).** Follow-through -> nock pose -> full draw. The arrow moves from the quiver to the
   string, so step that frame (`key-pose-animation.md`); don't interpolate it.

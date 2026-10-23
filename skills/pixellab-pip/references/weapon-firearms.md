@@ -1,10 +1,9 @@
 # Firearms (pistol, rifle, shotgun, sniper rifle) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Read this for gun grips, stances, reload, pump and draw cycles, run-and-gun, prone and kneeling shots, top-down
-facings and dual pistols. The aim -> recoil pair, flash clean-up and the pistol draw order live in
-`key-pose-animation.md` ([Shots, Beams, And Projectile Skills](key-pose-animation.md#shots-beams-and-projectile-skills),
-[Pistol Draw And Flying Kick](key-pose-animation.md#pistol-draw-and-flying-kick)); this page adds only what those
-don't cover. Facing right throughout: the muzzle points toward the right of the image, the stock or grip toward the left.
+facings and dual pistols. Optional key-pose production uses `key-pose-animation.md`. Facing right throughout: the muzzle points toward the right of the image, the stock or grip toward the left.
 
 ## Contents
 - [Which hand is which (facing right)](#which-hand-is-which-facing-right)
@@ -65,7 +64,7 @@ change` gives 3-4 shot poses from one base, like the bow page's kneeling draw.
 ## Cycles as key poses (reload, pump, bolt, draw)
 The gun stays in the hands through most of these, so interpolate with 4-frame clips between checked poses; step
 (don't interpolate) any frame where a magazine, shell or the gun itself changes hands
-([Carried And Worn Props](key-pose-animation.md#carried-and-worn-props)).
+([Carried And Worn Props](key-pose-animation.md#props-projectiles-and-effects)).
 - **Pump-action (shotgun):** A = shouldered aim -> B = `left hand pulled back along the barrel to just in front of
   the trigger, a spent red shell popping out of the side, flying up and toward the left` -> A again (left hand slid
   forward to the barrel end). The stock, cheek and right hand never move; only the left forearm slides along the
@@ -81,7 +80,7 @@ The gun stays in the hands through most of these, so interpolate with 4-frame cl
 - **Shell-by-shell reload (shotgun):** a loop of `left hand at the belt picking up a red shell` -> `left thumb
   pushing the shell into the bottom of the gun just in front of the trigger`, the gun held tilted across his chest.
   Generate the pair once and repeat it per shell, then one pump.
-- **Draw from holster:** order and the empty-holster rule are in `key-pose-animation.md`. Add, for a jacketed
+- **Draw from holster:** order and the empty-holster rule are below. Add, for a jacketed
   figure: `right hand sweeping the jacket back behind the hip` on the grip pose, and `finger straight along the
   side of the gun, off the trigger` until the push pose.
 - **Holster (reverse draw):** lower to pistol-low, eyes still forward, then step the gun into the holster;
@@ -132,3 +131,15 @@ The gun stays in the hands through most of these, so interpolate with 4-frame cl
 - Ejected shell or magazine copied into later frames -> say it only on its own frame, scrub copies afterward.
 - Generator flash baked into the aim or reload pose -> clear it per `key-pose-animation.md`, paint the real flash.
 - Kneel or prone variants change the arms -> `arms and gun exactly as in the original, only the legs change`.
+
+## Aim, recoil and mounted launchers
+
+**Shots** (guns, bows, wands) reach forward only: canvas with room in front, pose A = the aim (`rifle shouldered, barrel levelled toward the right, braced stance`), pose B = the recoil (`shoulder and rifle jolted back, barrel kicked up, torso rocked back onto the braced back foot`). No crescent. For a requested instant shot, the first motion frame may be the event; identify the actual contact/release before setting `--hit`. Name an energy weapon's flash colour, or the generator paints an orange gunpowder flash. A big recoil from a kneel needs the path pinned (`stays low on bent legs, never falls over`). For a take that drops the gun, propose a scoped redo with `the gun never drops below shoulder height`. An explicitly accepted local recoil derivative can be a 2 px lift of the arm band only (rows where arms and gun stick out past the body), checking the rows below stay identical.
+
+**Gear-mounted launchers** (a shoulder pod, a back cannon): the launcher moves with the recoil, so take the muzzle point per frame from the pose, not from the first frame, and start the exhaust after the recoil peak; otherwise the smoke lands on the head. Use these Shots poses, not the thrown-prop recipe.
+
+**Generator flashes on shots and beams**: shot, beam, and projectile poses come back with the effect painted in, even the charge pose. For an unwanted flash, propose removing it from the affected key pose before animating (`scrub --box` or `--clear-right <tip x>`), clear the in-betweens' own flash at the barrel tip only (a colour scrub strips hair and skin the flash lit), or reuse the previous frame where the flash sits on the body (a short hold reads as weight). An agreed replacement flash/beam can use `vfx-workbench.md` and accepted composition at the muzzle or eye (`bake_fx`).
+
+## Pistol draw
+
+**Pistol draw and shot** (holster on the near right hip): ready → grip (right hand on the holstered pistol, left hand flat at the chest centre) → clear (muzzle turns forward at chest height, left hand joins, finger along the frame) → push (both arms extend, sights just under the eyes, never above the eye line) → recoil plus a `vfx-workbench.md` muzzle flash → aim hold. The pistol moves between poses: step, do not interpolate. Say `the EMPTY holster` in every pose after the draw.

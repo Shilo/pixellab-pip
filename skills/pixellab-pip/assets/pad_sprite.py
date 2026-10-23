@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import sys
 
-from _assembly import require_pillow
+from _assembly import require_pillow, preflight_outputs
 
 if len(sys.argv) not in (6, 7) or sys.argv[1] in ("-h", "--help"):
     sys.exit(__doc__)
@@ -25,6 +25,7 @@ feet = bbox[3] if bbox else im.height   # rows below this are empty
 y = int(sys.argv[6]) if len(sys.argv) == 7 else h - feet
 if x < 0 or y < 0 or x + im.width > w or y + feet > h:
     sys.exit(f"sprite {im.width}x{feet} at ({x}, {y}) does not fit the {w}x{h} canvas")
+preflight_outputs([out], [src])
 canvas = Image.new("RGBA", (w, h))
 canvas.alpha_composite(im.crop((0, 0, im.width, feet)), (x, y))
 canvas.save(out)

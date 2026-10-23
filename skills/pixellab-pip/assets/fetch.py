@@ -1,147 +1,195 @@
-"""Wait for a PixelLab MCP image or animation job, download it into the run folder and record it in the manifest.
+"""Bounded download of an MCP raw-image job, with validated, preserved raw files.
 
-    python fetch.py <job_id> <out.png> --run <run_dir> [--tool T] [--generations G]
-    python fetch.py <job_id> <out_dir> --frames N --run <run_dir> ...      an animation: <out_dir>/0.png ..
-    python fetch.py --url <PixelLab file link> <out>      a link a tool returned (rotations, effect exports)
+    python fetch.py JOB out.png --run RUN [--tool T] [--generations ACTUAL] [--estimate RESERVED]
+    python fetch.py JOB out_dir --frames N --run RUN ...
+    python fetch.py --url RETURNED_PIXELLAB_URL out.png
 
---frames: frames to fetch (frame_count + 1 for animate_image); a clip with fewer is saved as it is.
---generations: the call's usage as PixelLab reported it at submit (Pro Flash's estimated_generations counts), recorded as
-reported_usage.generations.
---timeout S (default 100, under a shell tool's usual limit); it polls every 15 s.
-Exit 0 downloaded; 2 failed (PixelLab refunds it); 3 still running: run the same command again.
-A 404 in the first 60 s means "not registered yet"; after that, and a 410 at any time, the job failed.
-Network calls go only to PixelLab's download and file hosts; the job id or link is the key, no token is sent. Stdlib only.
+--frames is the exact count exposed by the result/getter, not a guessed maximum.
+Existing destinations are refused. Exit 0: downloaded; 2: blocked/invalid/unavailable
+(check the matching getter); 3: download not ready or dependency unavailable. HTTP
+file errors establish neither job failure nor refund. Never resubmit from this result.
 """
 from __future__ import annotations
 
 import argparse
-import os
+import io
+import json
+from pathlib import Path
 import sys
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _assembly import require_pillow  # noqa: E402
 import manifest  # noqa: E402
 
 BASE = "https://api.pixellab.ai/mcp/images/%s/download"
 HOSTS = {"api.pixellab.ai", "backblaze.pixellab.ai"}
-UA = "pixellab-pip-fetch/1 (+https://github.com/Shilo/pixellab-pip)"   # the file host refuses Python's default (403)
-GRACE_404 = 60
+UA = "pixellab-pip-fetch/1 (+https://github.com/Shilo/pixellab-pip)"
 
 
 def check_host(url: str) -> None:
     parts = urllib.parse.urlparse(url)
-    if parts.scheme != "https" or parts.hostname not in HOSTS:
-        raise ValueError("not an https PixelLab host: " + url)
+    if parts.scheme != "https" or parts.hostname not in HOSTS or parts.username or parts.password:
+        raise ValueError("requires an HTTPS PixelLab file URL without embedded credentials")
 
 
 class PixelLabOnly(urllib.request.HTTPRedirectHandler):
-    """Follows a redirect only to another allow-listed PixelLab https host."""
-
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         check_host(newurl)
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-def _download(url: str) -> bytes:
-    check_host(url)
-    with OPENER.open(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=30) as response:
-        return response.read()
-
-
 OPENER = urllib.request.build_opener(PixelLabOnly)
 
 
-def get(job: str, index: int | None = None) -> tuple[str, bytes | None]:
-    """('ok', bytes) | ('wait', None) | ('notfound', None) on a 404 | ('failed', None) on a 410."""
+def _download(url: str, *, timeout: float = 30) -> bytes:
+    check_host(url)
+    with OPENER.open(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=timeout) as response:
+        return response.read()
+
+
+def validate_image(data: bytes, suffix: str | None = None) -> None:
+    Image = require_pillow()
+    try:
+        with Image.open(io.BytesIO(data)) as image:
+            fmt = image.format
+            if fmt not in ("PNG", "GIF"):
+                raise ValueError("expected a PNG or GIF result")
+            if suffix and fmt != {".png": "PNG", ".gif": "GIF"}.get(suffix.lower()):
+                raise ValueError("downloaded image format does not match output extension")
+            image.verify()
+        with Image.open(io.BytesIO(data)) as image:
+            for index in range(getattr(image, "n_frames", 1)):
+                image.seek(index)
+                image.load()
+    except (OSError, SyntaxError) as exc:
+        raise ValueError("download is not a complete readable image") from exc
+
+
+def get(job: str, index: int | None = None, *, timeout: float = 30) -> tuple[str, bytes | None]:
     url = BASE % urllib.parse.quote(job, safe="") + ("?index=%d" % index if index is not None else "")
     try:
-        data = _download(url)
+        data = _download(url, timeout=timeout)
     except urllib.error.HTTPError as exc:
-        return ("notfound", None) if exc.code == 404 else ("failed", None) if exc.code == 410 else ("wait", None)
+        if exc.code == 404:
+            return "wait", None
+        return ("unavailable", None) if exc.code in (401, 403, 410) else ("wait", None)
     except OSError:
         return "wait", None
-    return ("ok", data) if data[:4] == b"\x89PNG" or data[:3] == b"GIF" else ("wait", None)
+    validate_image(data)
+    return "ok", data
 
 
-def settle(status: str, elapsed: float) -> str:
-    if status == "notfound":
-        return "wait" if elapsed < GRACE_404 else "failed"
-    return status
+def preflight(out: str, frames: int) -> None:
+    path = Path(out)
+    if frames < 0:
+        raise ValueError("--frames must be positive when supplied")
+    if path.exists() or path.is_symlink():
+        raise ValueError("refusing existing output; inspect the saved result or choose a new destination")
+    if not frames and path.suffix.lower() not in (".png", ".gif"):
+        raise ValueError("output must use .png or .gif")
 
 
-def try_job(job: str, out: str, frames: int) -> str:
-    """Writes the file(s) when the job is done; returns ok, wait, notfound or failed."""
-    if not frames:
-        status, data = get(job)
-        if status == "ok":
-            Path(out).parent.mkdir(parents=True, exist_ok=True)
-            Path(out).write_bytes(data)
-        return status
-    got: list[bytes] = []
-    for index in range(frames):
-        status, data = get(job, index)
-        if status == "notfound" and got:   # a shorter clip than asked for: keep what it has
-            break
+def try_job(job: str, out: str, frames: int, *, deadline: float | None = None) -> str:
+    """Save nothing until every expected image is decoded. Never overwrite a path."""
+    require_pillow()
+    preflight(out, frames)
+    got = []
+    for index in range(frames or 1):
+        remaining = 30 if deadline is None else min(30, deadline - time.monotonic())
+        if remaining <= 0:
+            return "wait"
+        status, data = get(job, index if frames else None, timeout=remaining)
         if status != "ok":
             return status
+        validate_image(data, ".png" if frames else Path(out).suffix)
         got.append(data)
-    Path(out).mkdir(parents=True, exist_ok=True)
-    for index, data in enumerate(got):
-        (Path(out) / ("%d.png" % index)).write_bytes(data)
+    path = Path(out)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if frames:
+        path.mkdir()  # exclusive directory creation prevents concurrent result mixing
+        paths = [path / ("%d.png" % index) for index in range(frames)]
+    else:
+        paths = [path]
+    for dest, data in zip(paths, got):
+        with dest.open("xb") as handle:
+            handle.write(data)
     return "ok"
 
 
-def outputs(out: str, run: str) -> list[str]:
-    paths = sorted(Path(out).glob("*.png"), key=lambda p: int(p.stem) if p.stem.isdigit() else 0) if Path(out).is_dir() else [Path(out)]
-    return [os.path.relpath(p, run).replace(os.sep, "/") for p in paths]
+def outputs(out: str, run: str, frames: int = 0) -> list[str]:
+    paths = [Path(out) / ("%d.png" % index) for index in range(frames)] if frames else [Path(out)]
+    return [p.resolve().relative_to(Path(run).resolve()).as_posix() for p in paths]
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    if argv[:1] == ["--url"] and len(argv) == 3:
-        check_host(argv[1])
-        if Path(argv[2]).exists():   # raw PixelLab outputs are never written over
-            print("refusing to overwrite " + argv[2], file=sys.stderr)
-            return 2
-        try:
+    require_pillow()  # skip before HTTP, manifests, or output changes
+    try:
+        if argv[:1] == ["--url"] and len(argv) == 3:
+            check_host(argv[1])
+            preflight(argv[2], 0)
             data = _download(argv[1])
-        except (urllib.error.URLError, OSError) as exc:
-            print("download failed: %s" % exc, file=sys.stderr)
-            return 2
-        Path(argv[2]).parent.mkdir(parents=True, exist_ok=True)
-        Path(argv[2]).write_bytes(data)
-        print(argv[2])
-        return 0
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("job")
-    ap.add_argument("out")
-    ap.add_argument("--run", required=True)
-    ap.add_argument("--frames", type=int, default=0)
-    ap.add_argument("--tool", default="")
-    ap.add_argument("--generations", type=float)
-    ap.add_argument("--timeout", type=int, default=100)
-    a = ap.parse_args(argv)
-    started = time.time()
-    while True:
-        status = settle(try_job(a.job, a.out, a.frames), time.time() - started)
-        if status in ("ok", "failed") or time.time() - started >= a.timeout:
-            break
-        time.sleep(max(0, min(15, a.timeout - (time.time() - started))))
-    if status not in ("ok", "failed"):
-        print("TIMEOUT %s - still running at PixelLab; run the same command again" % a.job)
-        return 3
-    entry = {"job_id": a.job, "tool": a.tool, "status": status, "waited_s": round(time.time() - started)}
-    if status == "ok":
-        entry["outputs"] = outputs(a.out, a.run)
-        if a.generations is not None:
-            entry["reported_usage"] = {"generations": a.generations}
-    manifest.add_job(a.run, entry)
-    print(("OK %s %s" % (a.job, a.out)) if status == "ok" else ("FAILED %s (refunded; resubmit)" % a.job))
-    return 0 if status == "ok" else 2
+            validate_image(data, Path(argv[2]).suffix)
+            Path(argv[2]).parent.mkdir(parents=True, exist_ok=True)
+            with Path(argv[2]).open("xb") as handle:
+                handle.write(data)
+            print(argv[2])
+            return 0
+        ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+        ap.add_argument("job")
+        ap.add_argument("out")
+        ap.add_argument("--run", required=True)
+        ap.add_argument("--frames", type=int)
+        ap.add_argument("--tool", default="")
+        ap.add_argument("--generations", type=float)
+        ap.add_argument("--estimate", type=float)
+        ap.add_argument("--timeout", type=float, default=100)
+        a = ap.parse_args(argv)
+        frames = a.frames or 0
+        if a.frames is not None and a.frames <= 0:
+            raise ValueError("--frames must be positive")
+        manifest.number(a.timeout)
+        if a.timeout <= 0:
+            raise ValueError("--timeout must be positive")
+        preflight(a.out, frames)
+        expected = outputs(a.out, a.run, frames)  # also reject outputs outside this run
+        if frames and Path(a.out).resolve() == Path(a.run).resolve():
+            raise ValueError("frame destination must be a new subdirectory of the run")
+        if not frames and Path(a.out).resolve() == (Path(a.run) / manifest.NAME).resolve():
+            raise ValueError("output conflicts with the manifest")
+        entry = {"job_id": a.job, "status": "submitted"}
+        if a.tool:
+            entry["tool"] = a.tool
+        for field, value in (("reported_usage", a.generations), ("estimated_usage", a.estimate)):
+            if value is not None:
+                entry[field] = {"generations": manifest.number(value)}
+        # Record identity/charge or reservation before a bounded wait can be interrupted.
+        # The locked ledger merge preserves an already recorded status and earlier saved paths.
+        manifest.add_job(a.run, entry)
+        started = time.monotonic()
+        while True:
+            status = try_job(a.job, a.out, frames, deadline=started + a.timeout)
+            elapsed = time.monotonic() - started
+            if status in ("ok", "unavailable") or elapsed >= a.timeout:
+                break
+            time.sleep(max(0, min(15, a.timeout - elapsed)))
+        update = {"job_id": a.job, "waited_s": round(elapsed), "download_status": status}
+        if status == "ok":
+            update.update(status="ok", outputs=expected)
+        manifest.add_job(a.run, update)
+        if status == "ok":
+            print("OK %s %s" % (a.job, a.out))
+            return 0
+        print("DOWNLOAD %s for %s; inspect the matching getter before continuing; do not resubmit or infer a refund"
+              % ("unavailable" if status == "unavailable" else "not ready", a.job))
+        return 2 if status == "unavailable" else 3
+    except (ValueError, OSError) as exc:
+        print("download blocked: %s" % exc, file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

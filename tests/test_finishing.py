@@ -158,8 +158,21 @@ class FinishContractTests(unittest.TestCase):
                 with self.subTest(helper=name):
                     r = run(name, "x.png", "--out", Path(tmp) / "out", env=env)
                     self.assertEqual(r.returncode, 3, r.stdout + r.stderr)
-                    self.assertEqual(json.loads(r.stdout), {"status": "skipped", "reason": "numpy/scipy not installed"})
+                    self.assertEqual(json.loads(r.stdout)["status"], "skipped")
+                    self.assertIn("numpy", json.loads(r.stdout)["reason"])
                     self.assertFalse((Path(tmp) / "out").exists())
+
+    @unittest.skipUnless(HAS_NUMPY, "numpy/scipy not installed")
+    def test_finish_skips_when_pillow_is_unavailable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            blocker = Path(tmp) / "PIL"
+            blocker.mkdir()
+            (blocker / "__init__.py").write_text('raise ImportError("Pillow blocked for the test")')
+            env = {**os.environ, "PYTHONPATH": tmp + os.pathsep + os.environ.get("PYTHONPATH", "")}
+            result = run("colormatch", "still.png", "frame.png", "--out", Path(tmp) / "out", env=env)
+            self.assertEqual(result.returncode, 3, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["status"], "skipped")
+            self.assertFalse((Path(tmp) / "out").exists())
 
     @unittest.skipUnless(HAS_NUMPY, "numpy/scipy not installed")
     def test_out_required(self) -> None:
@@ -213,15 +226,12 @@ class FinishBehaviourTests(unittest.TestCase):
     def img(self, path):
         return np.array(Image.open(path).convert("RGBA"))
 
-    def test_second_run_into_the_same_out_keeps_the_first_record(self) -> None:
-        # e2e demo: a re-run replaced derivative.json, so the first run's audit record was lost
-        src = synth.png(synth.figure(), self.t / "in/0.png")
+    def test_second_run_requires_a_fresh_folder_and_preserves_derivative(self) -> None:
+        src = case_despeckle(self.t)[0]
         self.ok("despeckle", src, "--out", self.t / "o")
-        self.ok("despeckle", src, "--out", self.t / "o", "--tol", "60")
-        label = json.loads((self.t / "o/derivative.json").read_text())
-        self.assertEqual(len(label["previous"]), 1)
-        self.assertEqual(label["previous"][0]["helper"], "despeckle")
-        self.assertNotIn("previous", label["previous"][0])
+        before = hashes(self.t / "o")
+        self.assertNotEqual(run("despeckle", src, "--out", self.t / "o", "--tol", "60").returncode, 0)
+        self.assertEqual(hashes(self.t / "o"), before)
 
     def test_blade_trail_ghost_alone_draws_on_the_trail_frames(self) -> None:
         # bloat review: the documented `--ghost` call drew nothing without an undocumented --ghost-on
@@ -365,6 +375,35 @@ class FinishBehaviourTests(unittest.TestCase):
         east = self.img(self.t / "o/east/1.png")
         self.assertEqual(tuple(east[20, 41, :3]), (255, 220, 90))      # the flash at the muzzle on the shot frame
         self.assertTrue((self.img(self.t / "o/west/1.png") == east[:, ::-1]).all())
+
+    def test_bake_fx_soft_alpha_clips_with_source_over(self):
+        body = Image.new("RGBA", (4, 4), (255, 0, 0, 255))
+        clear = Image.new("RGBA", (4, 4))
+        fx = Image.new("RGBA", (2, 2), (0, 0, 255, 128))
+        for name, image in (("body.png", body), ("clear.png", clear), ("fx.png", fx)):
+            image.save(self.t / name)
+        self.ok("bake_fx", self.t / "body.png", self.t / "clear.png", "--fx", self.t / "fx.png",
+                "--at", "0,0", "--anchor", "1,1", "--from", "1", "--out", self.t / "o")
+        got = Image.open(self.t / "o/00.png").convert("RGBA")
+        expected = body.copy()
+        expected.alpha_composite(fx, (-1, -1))
+        self.assertEqual(got.tobytes(), expected.tobytes())
+        self.ok("bake_fx", self.t / "clear.png", "--fx", self.t / "fx.png", "--at", "0,0",
+                "--anchor", "1,1", "--from", "1", "--out", self.t / "clear-out")
+        self.assertEqual(Image.open(self.t / "clear-out/00.png").getpixel((0, 0)), (0, 0, 255, 128))
+
+    def test_dir8_rotated_soft_effect_preserves_body_alpha(self):
+        src = self.t / "src"
+        src.mkdir()
+        Image.new("RGBA", (8, 8), (255, 0, 0, 255)).save(src / "0.png")
+        Image.new("RGBA", (2, 2), (0, 0, 255, 128)).save(self.t / "fx.png")
+        spec = {"speck": 0, "flash": {"sheet": "fx.png", "frame_w": 2, "anchor": [1, 1]},
+                "dirs": {"east": {"src": "src", "shot": 0, "muzzle": [3, 3], "angle": 90}}}
+        (self.t / "spec.json").write_text(json.dumps(spec))
+        self.ok("dir8_finish", self.t / "spec.json", "--out", self.t / "o")
+        pixels = list(Image.open(self.t / "o/east/0.png").getdata())
+        self.assertTrue(all(pixel[3] == 255 for pixel in pixels))
+        self.assertIn((127, 0, 128, 255), pixels)
 
 
 if __name__ == "__main__":

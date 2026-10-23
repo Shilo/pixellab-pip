@@ -128,7 +128,7 @@ def _anim(character, move, raw, paths, durations=None, source=''):
     return Anim(key='%s/%s' % (character, move), character=character, move=move, kind=kind, kind_guessed=True,
                 paths=paths, frames=frames_, offsets=offsets, sizes=[(f.shape[1], f.shape[0]) for f in raw2],
                 scale=detect_scale(frames_[0]), durations=durations, bg=bgs.pop() if len(bgs) == 1 else None,
-                source=source)
+                source=source, originals=[f.copy() for f in raw], backgrounds=[c for _, c in keyed])
 
 
 def _typical(fs):
@@ -156,8 +156,9 @@ def load(inputs, sheet=None, ref=None, move=None):
         elif sheet:
             a = _rgba(Image.open(p))
             w, h = sheet
+            if w <= 0 or h <= 0 or a.shape[1] % w or a.shape[0] % h:
+                raise ValueError("sheet dimensions must divide exactly into positive cells")
             raw = [a[y:y + h, x:x + w] for y in range(0, a.shape[0] - h + 1, h) for x in range(0, a.shape[1] - w + 1, w)]
-            raw = [f for f in raw if (f[..., 3] > 0).any()]
             ch, mv, _ = _parse(p)
             anims.append(_anim(ch, move or mv, raw, [], None, p))
             anims[-1].subdir = sub
@@ -202,23 +203,30 @@ def names(anim) -> list:
     return ['%s_%d.png' % (stem, i + 1) for i in range(len(anim.frames))]
 
 
+def output_pixels(anim, index, changed=None):
+    """Undo analysis-only keying/padding; unchanged decoded containers keep original RGBA."""
+    (x, y), (w, h) = anim.offsets[index], anim.sizes[index]
+    if changed is not None and index not in changed and anim.originals:
+        return anim.originals[index].copy()
+    pixels = anim.frames[index][y:y + h, x:x + w].copy()
+    bg = anim.backgrounds[index] if anim.backgrounds else anim.bg
+    if bg:
+        off = pixels[..., 3] == 0
+        pixels[off, :3] = bg
+        pixels[..., 3] = 255
+    return pixels
+
+
 def write(anim, out_dir, changed=None):
-    """Frames back at their own size and name. With `changed` (frame indices), unchanged frames are copied byte for
-    byte from the input file."""
+    """Preserve unchanged PNG bytes and decoded sheet/GIF pixels, not analysis-only keying."""
     out_dir = os.path.join(out_dir, anim.subdir) if anim.subdir else out_dir
     os.makedirs(out_dir, exist_ok=True)
     out = []
-    for i, (f, name) in enumerate(zip(anim.frames, names(anim))):
-        (x, y), (w, h) = anim.offsets[i], anim.sizes[i]
+    for i, name in enumerate(names(anim)):
         dst = os.path.join(out_dir, name)
         if anim.paths and changed is not None and i not in changed:
             shutil.copyfile(anim.paths[i], dst)
         else:
-            a = f[y:y + h, x:x + w].copy()
-            if anim.bg:
-                off = a[..., 3] == 0
-                a[off, :3] = anim.bg
-                a[..., 3] = 255
-            Image.fromarray(a, 'RGBA').save(dst)
+            Image.fromarray(output_pixels(anim, i, changed), 'RGBA').save(dst)
         out.append(dst)
     return out

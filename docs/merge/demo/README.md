@@ -1,5 +1,7 @@
 # Clean End-to-End Runs
 
+Historical prototype evidence, recorded before PR #11 remediation. The Studio UI/approval levels described here are no longer shipped. These results do not validate the revised head; see the [current integration record](../README.md).
+
 One headless Claude Code session with only this branch installed: the `pixellab-pip` core and the
 `pixellab-pip-studio` edition, loaded as plugins. Nobody answered questions during the run, and the older
 `pixellab-game-art` skill was moved out first. The session was told to read only the installed skill.

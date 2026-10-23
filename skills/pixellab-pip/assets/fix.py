@@ -25,12 +25,7 @@ import re
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _assembly  # noqa: E402,F401  (UTF-8-safe console)
-try:   # optional helper: without numpy/scipy it skips, as Pip's helpers do
-    import numpy  # noqa: F401
-    import scipy  # noqa: F401
-except ImportError as exc:
-    print(json.dumps({'status': 'skipped', 'reason': 'the animation doctor needs numpy and scipy (%s)' % exc}))
-    sys.exit(3)
+_assembly.require_numpy(scipy=True)
 from fixlib import frames as framesmod, measure, plan, repair, report, timing  # noqa: E402
 
 SOFT_WORDS = ('soft edge', 'soft anti', 'anti-alias', 'antialias', 'painterly', 'smooth edges', 'no outline / soft edges')
@@ -38,14 +33,14 @@ SOFT_WORDS = ('soft edge', 'soft anti', 'anti-alias', 'antialias', 'painterly', 
 
 def load_style(path):
     """Style facts the checks use, from a pixellab.json profile: top-level fields overlaid by the active style."""
-    if not path or not os.path.exists(path):
+    if not path:
         return None
-    try:
-        prof = json.load(open(path, encoding='utf-8-sig'))
-    except ValueError:
-        return None
-    st = dict(prof)
-    st.update(prof.get('styles', {}).get(prof.get('active_style', ''), {}))
+    if not os.path.isfile(path):
+        raise ValueError("no profile at the selected path: " + path)
+    from project_style import load, validate_profile, overlay
+    prof = load(path)
+    styles = validate_profile(prof)
+    st = overlay(prof, styles.get(prof.get('active_style'), {}))
     words = ' '.join(str(st.get(k, '')) for k in ('look', 'outline', 'style')).lower()
     return {'soft_edges': bool(st.get('soft_edges')) or any(w in words for w in SOFT_WORDS),
             'scale': st.get('scale'), 'palette_size': st.get('palette_size')}
@@ -99,14 +94,16 @@ def doctor(anim, accept, style, log_path, report_name, check_only, stepped=False
     # a finding with a question waiting gets no re-roll plan and doesn't hold the verdict: one "yes" fixes it for free
     pending = {(c.check, i) for c in changes if c.result == 'proposed' for i in c.frames}
     open_after = [f for f in after if not any((f.check, i) in pending for i in f.frames)]
-    plans = plan.make(fixed, open_after, log_path, report_name)
+    reroll_findings = open_after
     if keys:   # key poses the user already approved: findings stay in the report, no paid re-roll is planned
         kept = {i for i, o in enumerate(order) if o in keys}
-        plans = [p for p in plans if not set(p['frames']) <= kept]
+        reroll_findings = [dataclasses.replace(f, frames=[i for i in f.frames if i not in kept]) for f in open_after]
+        reroll_findings = [f for f in reroll_findings if f.frames]
         skipped = skipped + ['key poses %s: approved already, so no re-roll is planned - findings on them are listed; '
                              'look at them at 3x' % ', '.join(str(i + 1) for i in sorted(keys))]
+    plans = plan.make(fixed, reroll_findings, log_path, report_name, allow_whole_clip=not (keys or fx))
     return fixed, {'key': anim.key, 'kind': anim.kind, 'kind_guessed': anim.kind_guessed, 'ref_guessed': anim.ref_guessed,
-                   'scale': anim.scale, 'verdict': plan.verdict(before, open_after, changes), 'skipped': skipped,
+                   'scale': anim.scale, 'analysis_background_keyed': any(c is not None for c in anim.backgrounds), 'verdict': plan.verdict(before, open_after, changes), 'skipped': skipped,
                    'findings_before': before, 'findings_after': after, 'changes': changes, 'plans': plans,
                    'durations': durations, 'order': order, 'names': framesmod.names(anim)}
 
@@ -118,6 +115,7 @@ def main(argv=None):
     ap.add_argument('--ref', help='the standing sprite to compare against (default: the most typical frame)')
     ap.add_argument('--move', help='idle|walk|run|attack|skill|cast|hurt|death (default: from the file names)')
     ap.add_argument('--out')
+    ap.add_argument('--profile', help='selected project pixellab.json; no implicit cwd profile')
     ap.add_argument('--accept', default='', help='proposal ids to apply, e.g. c2,c5')
     ap.add_argument('--check-only', action='store_true')
     ap.add_argument('--stepped', action='store_true',
@@ -134,22 +132,32 @@ def main(argv=None):
     if not args.inputs:
         ap.error('give frames, a folder, a sheet or a GIF')
     sheet = tuple(int(v) for v in args.sheet.lower().split('x')) if args.sheet else None
+    if sheet and (len(sheet) != 2 or min(sheet) <= 0):
+        ap.error('--sheet needs positive WxH')
     anims = framesmod.load(args.inputs, sheet=sheet, ref=args.ref, move=args.move)
+    if args.accept and (len(anims) != 1 or args.check_only):
+        ap.error('--accept requires one animation and cannot be combined with --check-only; rerun that animation alone')
     if not anims:
         sys.exit('no frames found in %s' % ' '.join(args.inputs))
-    style = load_style('pixellab.json' if os.path.exists('pixellab.json') else None)   # the project style, when present
+    style = load_style(args.profile)
     out = _out_dir(args, anims)
-    outa = os.path.normcase(os.path.abspath(out))
-    for a in anims:   # raw PixelLab frames are never written: the output folder may not hold any input
-        for p in a.paths:
-            if os.path.normcase(os.path.abspath(p)).startswith(outa + os.sep):
-                ap.error('--out %s holds the input frames; choose a new folder (raw frames are never written)' % out)
-    os.makedirs(out, exist_ok=True)
     report_path = os.path.join(out, 'fix_report.json')
+    protected = [p for a in anims for p in a.paths + ([a.source] if a.source else [])] + ([args.ref] if args.ref else [])
+    destinations = [report_path, os.path.join(out, 'fix_report.txt')]
+    if not args.check_only:
+        destinations += [os.path.join(out, 'timing.json'), os.path.join(out, 'fix_sheet.png')]
+        for a in anims:
+            destinations += [os.path.join(out, a.subdir, n) for n in framesmod.names(a)]
+            destinations.append(os.path.join(out, '%s_preview.gif' % re.sub(r'\W+', '_', a.key).strip('_')))
+    try:
+        _assembly.preflight_outputs(destinations, protected)
+    except ValueError as exc:
+        ap.error(str(exc))
+    os.makedirs(out, exist_ok=True)
     accept = {a.strip() for a in args.accept.split(',') if a.strip()}
     results, rows, timings = [], [], {}
     for anim in anims:
-        near = [os.path.join(os.path.dirname(os.path.abspath(p)), d, 'manifest.json') for p in anim.paths[:1] for d in ('.', '..', '../..')]
+        near = [os.path.join(os.path.dirname(os.path.abspath(p)), d, 'manifest.json') for p in (anim.paths[:1] or [anim.source]) for d in ('.', '..', '../..')]
         log = next((p for p in near if os.path.exists(p)), None)   # the run's manifest, beside or above the frames
         fixed, res = doctor(anim, accept, style, log, report_path, args.check_only, args.stepped,
                             {int(v) - 1 for v in args.fx.split(',') if v.strip()},
@@ -157,13 +165,14 @@ def main(argv=None):
         results.append(res)
         if args.check_only:
             continue
-        changed = {i for i in range(len(anim.frames)) if not (fixed.frames[i] == anim.frames[i]).all()}
+        changed = {i for i in range(len(anim.frames)) if res['order'][i] != i or not (fixed.frames[i] == anim.frames[i]).all()}
         framesmod.write(fixed, out, changed)
         timings[anim.key] = {'order': res['order'], 'durations': res['durations']}
         flagged = {i for f in res['findings_before'] if f.severity != 'low' for i in f.frames}
         rows.append((anim.frames, fixed.frames, flagged, anim.ref))
-        report.gif(os.path.join(out, '%s_preview.gif' % re.sub(r'\W+', '_', anim.key).strip('_')), fixed.frames, res['durations'])
+        report.gif(os.path.join(out, '%s_preview.gif' % re.sub(r'\W+', '_', anim.key).strip('_')), framesmod._canvas([framesmod.output_pixels(fixed, i, changed) for i in range(len(fixed.frames))])[0], res['durations'])
     rep = report.build(results)
+    rep['check_only'] = args.check_only
     report.write_json(report_path, rep)
     with open(os.path.join(out, 'fix_report.txt'), 'w', encoding='utf-8') as fh:
         fh.write(report.text(rep))

@@ -1,5 +1,7 @@
 # War hammer (one-handed hammer, two-handed war hammer and maul, sledgehammer) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout: right hand, right foot and the near side face the viewer. Pollaxe guards and the shared
 Mordaxt binds are in [weapon-axe.md](weapon-axe.md); the one-handed raise and the shield are in
 [weapon-mace.md](weapon-mace.md).

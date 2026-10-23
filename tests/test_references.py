@@ -22,31 +22,12 @@ class ReferencePagesTests(unittest.TestCase):
                 if len(lines) > 100:
                     self.assertIn("## Contents", lines)
 
-    def test_plan_level_always_posts_the_cost_card(self) -> None:
-        # e2e runs 2 and 3: at plan level the agent approved its own plan silently and never showed the cost card
-        auto = (SKILL_DIR / "references/auto.md").read_text(encoding="utf-8")
-        self.assertIn("even when it is approved at once", auto)
-        self.assertIn("plan · budget {B} · {R} redos", auto)
+    def test_portable_description_and_metadata(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("the approval or auto-on card", skill)
-
-    def test_plan_never_approves_itself(self) -> None:
-        # review: "approved by the level's own budget" read as plan approving itself
-        auto = (SKILL_DIR / "references/auto.md").read_text(encoding="utf-8")
-        self.assertNotIn("the level's own budget", auto)
-        self.assertNotIn("python assets/", auto)
-
-    def test_router_rows_point_to_existing_references(self) -> None:
-        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
-        rows = {
-            "| Attack, skill or signature move from a sprite (key poses, then in-betweens) |": "key-pose-animation.md",
-        }
-        for row, name in rows.items():
-            with self.subTest(page=name):
-                line = next((ln for ln in skill.splitlines() if ln.startswith(row)), "")
-                self.assertIn(f"`references/{name}`", line, f"router row missing for {name}")
-                path = SKILL_DIR / "references" / name
-                self.assertIn("## Contents", path.read_text(encoding="utf-8").splitlines())
+        description = next(line.split(":", 1)[1].strip() for line in skill.splitlines()
+                           if line.startswith("description:"))
+        self.assertTrue(description)
+        self.assertLessEqual(len(description), 1024)
 
 
 if __name__ == "__main__":

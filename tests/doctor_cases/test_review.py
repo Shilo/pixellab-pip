@@ -66,9 +66,8 @@ def test_hurt_with_only_a_lasting_effect_is_asked_not_reordered():
     f, _ = measure.run(a)
     b, changes, durations, order = timing.run(a, f)
     assert order == [0, 1, 2, 3, 4]
-    assert [c.result for c in changes] == ['proposed']
-    b, changes, durations, order = timing.run(a, f, accept={changes[0].id})
-    assert order != [0, 1, 2, 3, 4]
+    assert not changes
+    assert all(np.array_equal(got, want) for got, want in zip(b.frames, fs))
 
 
 def test_verdict_is_not_ready_when_something_changed():

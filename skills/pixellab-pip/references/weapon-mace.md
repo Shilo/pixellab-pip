@@ -1,5 +1,7 @@
 # Mace, club and flail (one-handed mace, mace and shield, two-handed flails) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Left-facing plates are mirrored. Facing right throughout: right hand, right foot and the near side face the viewer.
 The horizontal swing comes from the sprite sheet only; no historical source shows it frame by frame.
 

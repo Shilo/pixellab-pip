@@ -76,7 +76,7 @@ if fl:
 def rotated(img, angle):
     s = 2 * max(img.size) + 8
     c = Image.new("RGBA", (s, s))
-    c.paste(img, (s // 2 - anchor[0], s // 2 - anchor[1]), img)
+    c.alpha_composite(img, (s // 2 - anchor[0], s // 2 - anchor[1]))
     return c.rotate(-angle, resample=Image.NEAREST), s // 2
 
 
@@ -117,7 +117,7 @@ for d, c in spec["dirs"].items():
         if shot + k >= len(frames):
             break
         img, ctr = rotated(ff, ang)
-        frames[shot + k].paste(img, (int(mx) - ctr, int(my) - ctr), img)
+        frames[shot + k].alpha_composite(img, (int(mx) - ctr, int(my) - ctr))
         notes[shot + k]["effect_frame"] = k
     for i, f in enumerate(frames):
         run.save(f, "%s/%d.png" % (d, i), **notes[i])

@@ -1,6 +1,8 @@
 # Sword (one-handed, longsword, sword and buckler) as visible poses
 
-The core longsword guards and the katana kamae are in `key-pose-animation.md`. Facing right throughout: right hand,
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
+Key-pose production is optional under `key-pose-animation.md`; katana kamae live in `weapon-katana.md`. Facing right throughout: right hand,
 right foot and the near side face the viewer.
 
 ## Contents
@@ -131,3 +133,15 @@ Fiore draws them as one diagram: descending cuts, rising cuts, level cuts and th
 - **Greatsword reach:** a blade as long as the fighter reaches about one body length ahead on a thrust or slam;
   pad the canvas in front first or the generator shortens it.
 - A one-handed sword plus a buckler: name which hand holds which, and that the buckler stays in front of the sword hand.
+
+## Core longsword guards
+
+| Longsword guard | Visible description |
+|---|---|
+| Fool's (Alber) | tip lowered toward the enemy's feet |
+| Roof (Vom Tag) | hilt at or above the right shoulder, tip up and behind (overhead wind-up) |
+| Ox (Ochs) | hands beside the head, blade level, pointing at the enemy's face |
+| Plow (Pflug) | hilt at the right hip, tip angled up at the enemy's face |
+| Side / Tail (Nebenhut) | hilt at the right hip, left arm across the body, tip low and behind |
+| Longpoint (Langort) | arms fully extended at chest height, tip at the throat (end of a thrust) |
+| Wrath (Zornhut) | hilt at the right shoulder, blade back and down behind the body, core coiled |

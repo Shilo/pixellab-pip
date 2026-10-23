@@ -1,5 +1,7 @@
 # Axe (one-handed hatchet, two-handed pollaxe, halberd) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout: right hand, right foot and the near side face the viewer. Axe throws are not covered here.
 
 ## Contents

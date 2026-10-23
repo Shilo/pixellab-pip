@@ -1,5 +1,7 @@
 # Spear (spear, pike, bayonet-style thrusts, javelin) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout: right hand, right foot and the near side face the viewer. The point is on the right side of
 the image, the butt on the left.
 

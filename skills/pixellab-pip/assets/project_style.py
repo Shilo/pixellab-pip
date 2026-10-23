@@ -1,20 +1,23 @@
 """Named art styles for a project, kept in `pixellab.json` at the project root. Standard library only.
 
-    python project_style.py show                      the active style as JSON; exit 4 {"status":"no_style"} when none
+    python project_style.py show [--style NAME | --no-style]   effective appearance and unresolved legacy limits
     python project_style.py list                      saved styles (active marked) and the example styles on offer
-    python project_style.py save <name> --from <style.json> [--use]
+    python project_style.py save <name> --from <style.json> [--use] [--replace]
     python project_style.py example "<example name>" [--as <name>] [--use]   copy an example style, only when picked
     python project_style.py use <name> | rename <old> <new> | delete <name>
     python project_style.py anchor <family> <image.png> [--style <name>]   approved reference art for an asset family
 Options: --profile <path> (default ./pixellab.json).
 
-A style is never assumed: with no saved, active style the project has none, and the agent asks the user
-(references/project-style.md). Anchor paths are stored relative to the profile's folder.
+No profile means an ordinary one-off request, not required setup. Temporary selection never writes.
+Appearance maps merge recursively; lists/scalars/null replace. Legacy limits remain restrictions
+requiring reconciliation before spending. Anchor paths are relative to the profile's folder.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import math
+import copy
 import os
 import sys
 import tempfile
@@ -66,7 +69,91 @@ def load(path: str) -> dict:
         return {}
     with open(path, encoding="utf-8-sig") as handle:
         data = json.load(handle)
-    return data if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        raise ValueError("profile/style JSON must be an object")
+    return data
+
+
+MAP_KEYS = {"sizes", "facing", "anim", "anchors"}
+LIMIT_KEYS = ("max_cost", "ask_above")
+
+
+def validate_style(style: dict) -> None:
+    if not isinstance(style, dict):
+        raise ValueError("each style must be an object")
+    for key in MAP_KEYS:
+        if key in style and style[key] is not None and not isinstance(style[key], dict):
+            raise ValueError(key + " must be an object or null")
+        if isinstance(style.get(key), dict) and any(not isinstance(k, str) or not k for k in style[key]):
+            raise ValueError(key + " keys must be nonempty strings")
+    def positive_number(value):
+        return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value) and value > 0
+    for size in (style.get("sizes") or {}).values():
+        if size is not None and not (isinstance(size, list) and len(size) == 2 and all(isinstance(v, int) and positive_number(v) for v in size)):
+            raise ValueError("sizes entries must be [width, height] positive integers or null")
+    anchors = style.get("anchors") or {}
+    for family, image in anchors.items():
+        if family not in FAMILIES or not (image is None or isinstance(image, str) and image.strip()):
+            raise ValueError("anchors need a known family and a nonempty image path or null")
+    value = (style.get("anim") or {}).get("timing_ms")
+    if value is not None and not isinstance(value, dict):
+        raise ValueError("anim.timing_ms must be an object or null")
+    if isinstance(value, dict) and any(v is not None and not positive_number(v) for v in value.values()):
+        raise ValueError("animation durations must be positive numbers or null")
+    for key in ("frames", "directions"):
+        value = (style.get("anim") or {}).get(key)
+        if value is not None and not (isinstance(value, int) and positive_number(value)):
+            raise ValueError("anim." + key + " must be a positive integer or null")
+    reference = style.get("reference")
+    if reference is not None and not (isinstance(reference, str) and reference.strip()):
+        raise ValueError("reference must be a nonempty local image path or null")
+
+
+def validate_profile(prof: dict) -> dict:
+    validate_style(prof)
+    styles = prof.get("styles", {})
+    if not isinstance(styles, dict) or any(not isinstance(n, str) or not n.strip() for n in styles):
+        raise ValueError("styles must be an object with nonempty names")
+    for style in styles.values():
+        validate_style(style)
+    active = prof.get("active_style")
+    if active is not None and (not isinstance(active, str) or active not in styles):
+        raise ValueError("active_style does not name a saved style; select a valid style explicitly")
+    for key in LIMIT_KEYS:
+        value = prof.get(key)
+        if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float))
+                                  or not math.isfinite(value) or value < 0):
+            raise ValueError(key + " is an unresolved invalid legacy limit; reconcile before spending")
+    return styles
+
+
+def overlay(base: dict, override: dict) -> dict:
+    """Appearance maps inherit by key; arrays, scalars and null replace."""
+    result = copy.deepcopy(base)
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(result.get(key), dict):
+            result[key] = overlay(result[key], value)
+        else:
+            result[key] = copy.deepcopy(value)
+    return result
+
+
+def check_image(path: str, *, require_decode: bool = False) -> bool:
+    """Validate local anchor art; ordinary profile reads need no image dependency."""
+    if not os.path.isfile(path):
+        raise ValueError("missing anchor image: " + path)
+    try:
+        from PIL import Image
+    except ImportError:
+        if require_decode:
+            raise ValueError("Pillow is needed to verify a new anchor; use an equivalent host image check instead")
+        return False
+    try:
+        with Image.open(path) as image:
+            image.verify()
+    except (OSError, ValueError) as exc:
+        raise ValueError("unreadable anchor image: " + path) from exc
+    return True
 
 
 def save(path: str, prof: dict) -> None:
@@ -95,16 +182,49 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--from", dest="source")
     ap.add_argument("--use", action="store_true")
     ap.add_argument("--as", dest="as_name")
+    selection = ap.add_mutually_exclusive_group()
+    selection.add_argument("--style")
+    selection.add_argument("--no-style", action="store_true")
+    ap.add_argument("--replace", action="store_true", help="explicitly replace an existing saved style/anchor")
     a = ap.parse_args(argv)
     prof = load(a.profile)
-    styles = prof.get("styles") if isinstance(prof.get("styles"), dict) else {}
-    active = prof.get("active_style") if prof.get("active_style") in styles else None
+    styles = validate_profile(prof)
+    active = prof.get("active_style")
+    if a.style is not None and a.style not in styles:
+        return fail("no such style: " + a.style)
+    if a.no_style and a.command != "show" or a.style is not None and a.command not in ("show", "anchor"):
+        return fail("temporary selection is only for show or anchor; use changes the active style")
 
     if a.command == "show":
-        if not active:
-            print(json.dumps({"status": "no_style", "examples": list(EXAMPLES)}))
+        if a.args:
+            return fail("usage: show [--style NAME | --no-style]")
+        selected = a.style if a.style is not None else active
+        style = {} if a.no_style else {k: prof[k] for k in STYLE_KEYS if k in prof}
+        if selected and not a.no_style:
+            style = overlay(style, {k: v for k, v in styles[selected].items() if k in STYLE_KEYS})
+        result = {"name": None if a.no_style else selected, "style": style,
+                  "legacy_limits": {k: prof[k] for k in LIMIT_KEYS if k in prof}}
+        folder = os.path.dirname(os.path.abspath(a.profile))
+        unverified = []
+        invalid = {}
+        for family, image in (style.get("anchors") or {}).items():
+            if image is not None:
+                try:
+                    if not check_image(os.path.join(folder, image)):
+                        unverified.append(family)
+                except ValueError as exc:
+                    invalid[family] = str(exc)
+        if style.get("reference") is not None and not check_image(os.path.join(folder, style["reference"])):
+            unverified.append("reference")
+        if unverified:
+            result["unverified_anchors"] = unverified
+        if invalid:
+            result["invalid_anchors"] = invalid
+        if not style:
+            result["status"] = "no_style"
+            print(json.dumps(result, indent=2, ensure_ascii=False))
             return 4
-        print(json.dumps({"name": active, "style": styles[active]}, indent=2, ensure_ascii=False))
+        print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0
     if a.command == "list":
         for name in sorted(styles):
@@ -116,7 +236,7 @@ def main(argv: list[str] | None = None) -> int:
         return name in styles
 
     if a.command in ("save", "example"):
-        if not a.args:
+        if len(a.args) != 1 or not a.args[0].strip():
             return fail("give a name")
         if a.command == "save":
             if not a.source:
@@ -131,22 +251,37 @@ def main(argv: list[str] | None = None) -> int:
             name = a.as_name or a.args[0]
         if not style:
             return fail("nothing to save: no style fields found")
+        validate_style(style)
+        if name in styles and not a.replace:
+            return fail("style already exists; replacement needs --replace")
+        # Paths in a source style file are relative to that file, not the caller's cwd.
+        if a.command == "save":
+            for key in ("anchors",):
+                for family, image in (style.get(key) or {}).items():
+                    if image is not None:
+                        source_path = os.path.join(os.path.dirname(os.path.abspath(a.source)), image)
+                        check_image(source_path, require_decode=True)
+                        style[key][family] = os.path.relpath(source_path, os.path.dirname(os.path.abspath(a.profile))).replace(os.sep, "/")
+            if style.get("reference") is not None:
+                source_path = os.path.join(os.path.dirname(os.path.abspath(a.source)), style["reference"])
+                check_image(source_path, require_decode=True)
+                style["reference"] = os.path.relpath(source_path, os.path.dirname(os.path.abspath(a.profile))).replace(os.sep, "/")
         styles[name] = style
         prof["styles"] = styles
-        if a.use or not active:
+        if a.use:
             prof["active_style"] = name
         save(a.profile, prof)
         print("saved style %r%s" % (name, ", active" if prof.get("active_style") == name else ""))
         return 0
     if a.command == "use":
-        if not a.args or not need(a.args[0]):
+        if len(a.args) != 1 or not need(a.args[0]):
             return fail("no such style")
         prof["active_style"] = a.args[0]
         save(a.profile, prof)
         print("active style: %s" % a.args[0])
         return 0
     if a.command == "rename":
-        if len(a.args) != 2 or not need(a.args[0]):
+        if len(a.args) != 2 or not need(a.args[0]) or not a.args[1].strip():
             return fail("usage: rename <old> <new> (the old style must exist)")
         old, new = a.args
         if new in styles:
@@ -158,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
         print("renamed %s -> %s" % (old, new))
         return 0
     if a.command == "delete":
-        if not a.args or not need(a.args[0]):
+        if len(a.args) != 1 or not need(a.args[0]):
             return fail("no such style")
         del styles[a.args[0]]
         if prof.get("active_style") == a.args[0]:
@@ -170,12 +305,15 @@ def main(argv: list[str] | None = None) -> int:
     if len(a.args) != 2 or a.args[0] not in FAMILIES:
         return fail("usage: anchor <%s> <image.png>" % "|".join(FAMILIES))
     family, image = a.args
-    name = active
+    name = a.style or active
     if not name or not need(name):
         return fail("no active style: save or pick one first")
-    if not os.path.isfile(image):
-        return fail("no such image: " + image)
+    check_image(image, require_decode=True)
+    if family in (styles[name].get("anchors") or {}) and not a.replace:
+        return fail("anchor already exists; replacement needs --replace")
     rel = os.path.relpath(os.path.abspath(image), os.path.dirname(os.path.abspath(a.profile))).replace(os.sep, "/")
+    if styles[name].get("anchors") is None:
+        styles[name]["anchors"] = {}
     styles[name].setdefault("anchors", {})[family] = rel
     save(a.profile, prof)
     print("anchor for %s in style %r: %s" % (family, name, rel))
@@ -183,4 +321,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, TypeError) as exc:
+        raise SystemExit(fail(str(exc)))

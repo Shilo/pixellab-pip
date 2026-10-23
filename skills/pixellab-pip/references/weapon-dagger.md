@@ -1,5 +1,7 @@
 # Dagger and knife (one-handed, forward and reverse grip) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout: right hand, right foot and the near side face the viewer. The dagger is in the right hand
 unless the prompt says otherwise.
 

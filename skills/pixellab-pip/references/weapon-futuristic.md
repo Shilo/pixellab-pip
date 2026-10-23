@@ -1,9 +1,11 @@
 # Futuristic weapons (arm cannons, energy rifles, energy blades, cyborg and robot limbs) as visible poses
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Read this for sci-fi shooters and energy-blade fighters: arm-cannon aims, run-and-shoot, rifle recoil, glowing
 blades and their trails, and mechanical arms that turn into weapons. Facing right throughout:
 muzzle and blade tip toward the right of the image. Basic shot/recoil, generator flashes and gear-mounted launchers
-are in `key-pose-animation.md` ("Shots, Beams, And Projectile Skills"); smear shapes and hit sparks are in
+are in `weapon-firearms.md`; smear shapes and hit sparks are in
 `weapon-effects.md`. This page adds only what is new for sci-fi gear.
 
 ## Contents
@@ -51,7 +53,7 @@ are in `key-pose-animation.md` ("Shots, Beams, And Projectile Skills"); smear sh
 - **The cannon is the forearm.** `no hand on the right arm, the forearm ends in the cannon barrel`; otherwise the
   generator draws a fist holding a gun.
 - **Recoil is tiny on a body-mounted cannon:** the arm kicks back ~2-3 px and the shoulder dips, legs stay
-  planted. Use the 2 px arm-band lift from `key-pose-animation.md`, not a full recoil pose.
+  planted. Use the optional 2 px arm-band lift from `weapon-firearms.md`, not a full recoil pose.
 - **Charge shot:** A = braced, B = `cannon arm pulled back to the shoulder, glowing cyan ball forming at the
   muzzle` (scrub the generator ball, paint it in `vfx_workbench` with `ring` + growing `dot`) -> release B' =
   `arm thrust forward, torso rocked back onto the rear foot`. Hold the charge ~300 ms, fire on the first motion frame.

@@ -73,11 +73,11 @@ Item-icon specifics:
 
 - Generate at the icon's final size. Drawing larger and downscaling came out muddy and speckled next to a native set.
 - Pro with `style_image_url` = **one** icon of the set and `style_copy: ["outline", "detail", "shading"]` (no `color_palette`) keeps outline weight and shading while each icon keeps its own colours; the style icon's subject can be anything. A grid of icons as the style image makes Pro wrap candidates across cell corners.
-- Pro Flash (`create_image_pro_flash`) at the final size with a same-size icon of the set as `style_image` is clean, one icon per job. Several icons on one Pro Flash canvas cost less each but come out cruder.
+- When Pro Flash was selected (`pro-flash.md`), a same-size icon as `style_image` worked well for one-icon jobs in the observed set. Several icons on one canvas came out cruder in that test; inspect the result rather than assuming a quality or cost advantage.
 - Keep one colour family per class or school in a skill set; take the families from the project style (`project-style.md`).
-- Rarity tiers edit the base icon instead of regenerating it: MCP `edit_image_pro_flash` with `Same <item>, same shape, size and position, upgraded to a <tier> version: <changes>`.
+- For requested rarity tiers, propose a supported edit of the approved base icon to retain its identity: `Same <item>, same shape, size and position, upgraded to a <tier> version: <changes>`. Use the selected route's image fields and verify continuity.
 - A status or buff icon and the skill that applies it need different subjects, or the chip reads as the skill.
-- Replacing a legacy set: list every meaning each old icon stood for first, reuse a fitting existing icon where one exists, and generate only the rest. Never ship one picture for two meanings; two similar subjects (two open books) get different subjects.
+- Replacing a legacy set: list every meaning each old icon stood for first, reuse a fitting existing icon where one exists, and generate only the rest. When distinct meanings need distinct pictures, differentiate similar subjects (such as two open books); preserve intentional reuse.
 - Icons the engine tints at runtime: `white and light grey only, greyscale, solid black outline`.
 - Picking: show candidates at 3x on the UI's own background colour. Dark iron or black objects vanish on dark panels; upright, symmetric silhouettes read better than tilted ones; skip candidates with stray sparkle pixels in the corners.
 - More failure anchors: `filling the frame` when the subject is small in the cell; say what an ambiguous silhouette must not be (`clearly a scythe, not a pickaxe`, `a lion-head shield, NOT a lion`) and name its direction (`pointing diagonally up-right`).

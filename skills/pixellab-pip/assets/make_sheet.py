@@ -11,17 +11,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 
-from _assembly import expand, require_pillow
+from _assembly import expand, require_pillow, preflight_outputs
 
 ap = argparse.ArgumentParser(description=__doc__)
 ap.add_argument("out_stem")
 ap.add_argument("frames", nargs="+")
 ap.add_argument("--durations", help="milliseconds per frame, comma-separated, one per frame")
 ap.add_argument("--fps", type=float, default=12, help="even timing when --durations is absent")
-ap.add_argument("--hit", type=int, help="0-based damage frame (default: the frame before last)")
+ap.add_argument("--hit", type=int, help="explicit 0-based contact/damage frame")
 ap.add_argument("--pad", help="X,Y: where the source sprite's top-left sits on these frames")
 ap.add_argument("--facing", choices=["left", "right"])
 ap.add_argument("--godot", nargs="?", const="", metavar="RES_DIR", help="also write .tres; RES_DIR under res://")
@@ -34,13 +35,19 @@ n = len(ims)
 w, h = ims[0].size
 if any(im.size != (w, h) for im in ims):
     sys.exit("frames differ in size; pad them to one canvas first (pad_sprite.py)")
+if not math.isfinite(a.fps) or a.fps <= 0:
+    ap.error("--fps must be positive and finite")
 dur = [int(v) for v in a.durations.split(",")] if a.durations else [round(1000 / a.fps)] * n
 if len(dur) != n or min(dur) <= 0:
     sys.exit(f"--durations needs {n} positive values, one per frame")
-hit = max(n - 2, 0) if a.hit is None else a.hit
-if not 0 <= hit < n:
+hit = a.hit
+if hit is not None and not 0 <= hit < n:
     sys.exit(f"--hit must be 0..{n - 1}")
 
+outputs = [a.out_stem + ".png", a.out_stem + ".json"] + ([a.out_stem + ".tres"] if a.godot is not None else [])
+preflight_outputs(outputs, paths)
+if a.pad:
+    px, py = (int(v) for v in a.pad.split(","))
 sheet = Image.new("RGBA", (w * n, h))
 frames = []
 for k, im in enumerate(ims):
@@ -50,7 +57,9 @@ for k, im in enumerate(ims):
                    "sourceSize": {"w": w, "h": h}, "duration": dur[k]})
 png = a.out_stem + ".png"
 sheet.save(png)
-extra = {"frame_count": n, "hit_frame": hit}
+extra = {"frame_count": n}
+if hit is not None:
+    extra["hit_frame"] = hit
 if a.pad:
     px, py = (int(v) for v in a.pad.split(","))
     extra["pad_offset"] = {"x": px, "y": py}

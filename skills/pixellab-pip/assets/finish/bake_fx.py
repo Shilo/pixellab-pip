@@ -17,6 +17,7 @@ Writes DIR/00.png ... and DIR/derivative.json; give the sheet the body timing, t
 import argparse
 import json
 import os
+import sys
 
 import _derive
 
@@ -33,6 +34,8 @@ ap.add_argument("--widen", type=int, default=0)
 ap.add_argument("--anchor", help="x,y inside the effect frame that goes on --at (default: its centre)")
 ap.add_argument("--out", required=True)
 a = ap.parse_args()
+if a.start < 1 or a.widen < 0:
+    ap.error("--from must be positive and --widen nonnegative")
 frames = _derive.expand(a.frames)
 js = a.json or os.path.splitext(a.fx)[0] + ".json"
 run = _derive.Run("bake_fx", "new_pixels", a.out, frames + [a.fx] + ([js] if os.path.exists(js) else []))
@@ -46,6 +49,8 @@ if os.path.exists(js):
     print("effect timing in its json: %s ms" % ",".join(str(f.get("duration", "?")) for f in frs))
 else:
     s = sheet.height
+    if sheet.width % s:
+        sys.exit("effect strip width must divide into square cells; supply JSON for other layouts")
     boxes = [(x, 0, x + s, s) for x in range(0, sheet.width, s)]
 fx = [sheet.crop(b) for b in boxes]
 
@@ -64,7 +69,7 @@ for i in range(n):
     if 0 <= k < len(fx):
         e = fx[k]
         ax, ay = (int(v) for v in a.anchor.split(",")) if a.anchor else (e.width // 2, e.height // 2)
-        c.paste(e, (cx - ax, cy - ay), e)   # paste (not alpha_composite) clips at the edges
+        c.alpha_composite(e, (cx - ax, cy - ay))
         change["effect_frame"] = k
     run.save(c, "%02d.png" % i, **change)
 run.done(held_frames=n - len(body), width=w)

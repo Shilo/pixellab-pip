@@ -13,7 +13,7 @@
     "_comment": "Eruption under each target (100x136, 12 frames, slight camera tilt): a ground crack ring, an upright flame, rising billow and embers. Painted, outlined workbench recipe; vfx_workbench is free for subscribers, but export saves to the user's My effects.",
     "_comment_prompt": "/pixellab-pip run the vfx-eruption-per-target blueprint for an ice spear, pale blue",
     "TASK": {
-      "instruction": "Before the first call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection with vfx_workbench visible, and create the declared output directory empty (lowest free -2 suffix if taken). Resolve main colour ramp to six hex colours from near-black to highlight in the caster's own colours, taken from the project style (references/project-style.md) or the caster sprite; ask if neither gives one.",
+      "instruction": "Before the first call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection with vfx_workbench visible, and create the declared output directory empty (lowest free -2 suffix if taken). Resolve main colour ramp to six hex colours from near-black to highlight in the caster's own colours, taken from the project style (references/project-style.md) or the caster sprite; ask if neither gives one. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
       "verify": "The run is approved, vfx_workbench is callable, the ramp has six hex colours, and the output directory is new and empty."
     }
   },
@@ -170,7 +170,7 @@
   },
   {
     "TASK": {
-      "instruction": "The export's JSON gives every frame one flat time. Write timing.json with the per-frame durations {{frame durations | default: 75, 75, 83, 100, 167, 100, 83, 83, 75, 75, 75, 83 ms}} (anticipation, fast launch, a hold on the peak, fast break-up) for the engine's clip table; do not duplicate frames for timing.",
+      "instruction": "This selected recipe includes custom engine timing, separate from the unchanged workbench export. Inspect actual export timing before choosing the derivative timing table. Write timing.json with the per-frame durations {{frame durations | default: 75, 75, 83, 100, 167, 100, 83, 83, 75, 75, 75, 83 ms}} (anticipation, fast launch, a hold on the peak, fast break-up) for the engine's clip table; do not duplicate frames for timing.",
       "inputs": [
         "effect.json"
       ],

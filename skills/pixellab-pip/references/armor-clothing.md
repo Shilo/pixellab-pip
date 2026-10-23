@@ -1,5 +1,7 @@
 # Armour and clothing in motion (plate joints, samurai armour, turnarounds, capes, robes, coats, skirts)
 
+Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
+
 Facing right throughout: a cape, train or coat tail that lags lies **toward the left of the image**.
 
 ## Contents

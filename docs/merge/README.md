@@ -1,43 +1,22 @@
-# Merge prototype: Pip × Game Art
+# Pip × Game Art integration
 
-This branch (`feat/pga-merge`) is a working prototype of PixelLab Pip merged with
-pixellab-game-art, made to be tried before either maintainer decides anything.
+One agent-agnostic Pip skill preserves selected Game Art capabilities: named project styles and approved family references, optional advanced key-pose production, animation inspection and accepted repairs, motion references, local assembly/exports, and history over one private manifest. Existing MCP/REST/editor routing and safety boundaries remain authoritative.
 
-## What it is
+The optional Claude Studio prototype and its panel command are removed from this PR. All supported hosts use the same core; describe the task after the normal skill invocation. Settings remain `setup`, `update`, `uninstall`, `auto` and `bark`. There is no second `level` permission system. Specify budget/retry constraints in the current run request; cost permission does not authorize visual changes.
 
-- **Pip, improved.** Game Art's host-neutral strengths move into Pip's one core skill, in Pip's voice and
-  under Pip's rules: an animation doctor, project styles the user always chooses, a key-pose animation
-  recipe, finishing helpers that write labelled copies, a poll-and-download helper, and motion references
-  (weapons, martial arts, armour, effects). Every Pip host gets them.
-- **A Claude edition on top.** A Claude Code plugin in `editions/claude/` that loads the same core and adds
-  a PixelLab connection set up on install and a side panel: welcome page, style menu, pose review with
-  Approve / Redo, finished moves, and a live activity strip. It adds no task commands: requests go through
-  `/pixellab-pip` as on every host.
+## Task access
 
-## Shared rules
-
-- Three approval levels: **Ask** (each paid job; the core default), **Plan** (one approval per plan, a pause
-  at pose review; the Claude edition's default) and **Auto** (a budget and a retry cap).
-- Raw PixelLab outputs are never changed; every local fix is a labelled derivative and is reported.
-- One record per run: the blueprint plus `manifest.json`.
-- The art style is always the user's choice; named example styles are offered, never applied silently.
-
-## From pixellab-game-art's commands
-
-pixellab-game-art had one slash command per task. Here there is one entry, `/pixellab-pip`: describe the task and
-`SKILL.md` routes it. Only settings keep a short word after it.
-
-| pixellab-game-art | Here |
+| Source task family | Pip access |
 |---|---|
-| `/pga-char`, `/pga-anim`, `/pga-vfx`, `/pga-bg`, `/pga-scene`, `/pga-building`, `/pga-icon`, `/pga-tiles`, `/pga-normal`, `/pga-batch` | ask for it: "make a red-haired archer", "animate hero.png doing an overhead axe chop" |
-| `/pga-fix`, `/pga-reroll` | "check these frames and fix what you can", "re-roll plan 2 in fix_report.json" |
-| `/pga-style`, `/pga-init`, `/pga-analyze` | "set up a style for this project", "match the style of this art" |
-| `/pga-prompt`, `/pga-history`, `/pga-start`, `/pga-help`, `/pga-tech` | ask: "improve this prompt", "what have I spent this month", "walk me through a first project" |
-| `/pga-level plan 45 2` | `/pixellab-pip level plan 45 2` |
-| `/pga-doctor` (setup check), `/pga-update` | `/pixellab-pip setup`, `/pixellab-pip update` |
-| `/pga-feedback` | not carried over (it shared results with pixellab-game-art's own server) |
-| `/pga-panel`, `/pga-setup` (Claude edition) | the panel opens on the first PixelLab call; `/pixellab-pip-panel` reopens it |
+| Characters, icons, backgrounds, scenes, buildings, tiles, VFX, normal maps | Describe the requested asset; the existing router chooses its surface/reference. |
+| Animation and custom key poses | Ordinary animation stays on normal raw/managed routes. Ask explicitly for custom reviewed pose stages when wanted. |
+| Check/fix | “Inspect these frames” is read-only diagnosis; “fix these defects” authorizes only the identified repair scope, with proposals for playback/effects. |
+| Init/style/analyze | Optional guided project setup, saved/temporary named styles, approved family anchors and advisory analysis. |
+| Start/batch | Optional first-project choices or a mixed CSV/text/group list, using existing routes and one approved chain. |
+| History/reroll | Query the canonical manifests; unknown old dates/charges remain unknown. Repeat a recoverable historical call/blueprint step with the requested change under normal approval. |
+| Setup/update/tech/help | Existing core setup/update and direct explanation. |
+| Feedback/model dispatch/installer | Author telemetry, automatic task-model dispatch and a second installer/updater are intentionally excluded. |
 
-## Credit
+[Migration](migration.md) covers old instructions, appearance drift, restrictive caps and pending work. [Original prototype evidence](demo/README.md) is historical, not validation of the revised head. [Review and remediation plan](../tools/pixellab-game-art-skill/pixellab-game-art-pr-11-implementation-plan.md) records current acceptance evidence and remaining empirical limits.
 
-PixelLab Pip by Shilo; pixellab-game-art by lexingel. MIT, as both projects.
+Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. The shipped skill includes the complete adopted MIT notice and pinned provenance in `THIRD_PARTY_NOTICES.md`.

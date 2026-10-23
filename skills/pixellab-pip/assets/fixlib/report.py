@@ -1,4 +1,4 @@
-"""The animation doctor's outputs: fix_report.json (for the agent), fix_report.txt (for a person), fix_sheet.png (input row,
+"""The animation doctor's outputs: fix_report.json (for the agent), fix_report.txt (for a person), fix_sheet.png (analyzed input row,
 fixed row, flagged frames outlined) and a preview GIF per animation."""
 import json
 import os
@@ -7,7 +7,7 @@ from dataclasses import asdict
 import numpy as np
 from PIL import Image, ImageDraw
 
-BG = (44, 40, 58, 255)
+BG = (0, 0, 0, 0)
 FLAG = (255, 70, 70, 255)
 ORDER = {'ready': 0, 'ready after free fixes': 1, 'needs re-rolls': 2}
 
@@ -59,7 +59,7 @@ def build(results) -> dict:
         changes = [change(c, nm) for c in r['changes']]
         plans = [_number(dict(p), nm) for p in r['plans']]
         anims.append({'key': r['key'], 'kind': r['kind'], 'kind_guessed': r['kind_guessed'], 'ref_guessed': r['ref_guessed'],
-                      'scale': r['scale'], 'verdict': r['verdict'], 'skipped': r['skipped'],
+                      'scale': r['scale'], 'analysis_background_keyed': r.get('analysis_background_keyed', False), 'verdict': r['verdict'], 'skipped': r['skipped'],
                       'durations': r.get('durations'),
                       'findings_before': [finding(f, nm) for f in r['findings_before']],
                       'changes': [c for c in changes if c['result'] != 'proposed'],
@@ -69,7 +69,8 @@ def build(results) -> dict:
     verdict = max((a['verdict'] for a in anims), key=ORDER.get, default='ready')
     return {'version': 1, 'verdict': verdict, 'anims': anims, 'look': LOOK,
             'totals': {'changes': sum(len(a['changes']) for a in anims), 'proposals': sum(len(a['proposals']) for a in anims),
-                       'plans': sum(len(a['plans']) for a in anims), 'plan_cost': sum(p['cost'] for a in anims for p in a['plans'])}}
+                       'plans': sum(len(a['plans']) for a in anims), 'plan_cost': sum(p['cost'] for a in anims for p in a['plans'] if p['cost'] is not None),
+                       'unquoted_plans': sum(p['cost'] is None for a in anims for p in a['plans'])}}
 
 
 def text(rep) -> str:
@@ -77,6 +78,8 @@ def text(rep) -> str:
     lines = ['Verdict: %s%s' % (rep['verdict'], ' - %d question%s waiting (the "ask" lines)' % (q, '' if q == 1 else 's') if q else ''), '']
     for a in rep['anims']:
         lines.append('%s - %s' % (a['key'], a['verdict']))
+        if a.get('analysis_background_keyed'):
+            lines.append('  analysis only: border background keyed for measurements/inspection; exported source backgrounds preserved')
         guessed = [w for w, g in (('move kind (%s)' % a['kind'], a['kind_guessed']), ('reference (most typical frame)', a['ref_guessed'])) if g]
         if guessed:
             lines.append('  guessed: ' + ', '.join(guessed))
@@ -87,17 +90,18 @@ def text(rep) -> str:
         for p in a['proposals']:
             lines.append('  ask (%s): %s?' % (p['id'], p['action']))
         for p in a['plans'][:6]:
-            lines.append('  re-roll frames %s (%s): %s - %s, %d gen' % (p['frames'], p['check'], p['tool'], p['prompt_change'], p['cost']))
+            lines.append('  re-roll frames %s (%s): %s - %s, ~%s gen (estimate; schema check required)' % (p['frames'], p['check'], p['tool'], p['prompt_change'], str(p['cost']) if p['cost'] is not None else 'unknown'))
         for s in a['skipped']:
             lines.append('  skipped: ' + s)
         lines.append('')
-    lines.append('Look at fix_sheet.png (reference first) before calling it ready - pixels miss these:')
+    target = 'the original inputs and reference' if rep.get('check_only') else 'fix_sheet.png (reference first)'
+    lines.append('Look at %s before calling it ready - pixels miss these:' % target)
     lines.extend('  - ' + q for q in rep.get('look', LOOK))
     lines.append('')
     t = rep['totals']
     n = lambda k, word: '%d %s%s' % (k, word, '' if k == 1 else 's')
     lines.append('%s, %s, %s (%s)' % (n(t['changes'], 'change'), n(t['proposals'], 'question'), n(t['plans'], 're-roll plan'),
-                                      n(t['plan_cost'], 'generation')))
+                                      n(t['plan_cost'], 'estimated generation')) + ('; %d plans need re-quoting' % t['unquoted_plans'] if t['unquoted_plans'] else ''))
     return '\n'.join(lines) + '\n'
 
 
@@ -129,15 +133,12 @@ def sheet(path, rows):
 
 
 def gif(path, frames, durations):
-    keep = [(f, d) for f, d in zip(frames, durations) if d > 0]
+    # Zero slots arise only from accepted timing drops. Their files remain in the derivative set.
+    from _gif import write_gif
+    keep = [(f, d) for f, d in zip(frames, durations) if d != 0]
     if not keep:
-        return
-    ims = []
-    for f, _ in keep:
-        a = f.copy()
-        a[a[..., 3] < 128] = BG
-        ims.append(Image.fromarray(a[..., :3], 'RGB'))
-    ims[0].save(path, save_all=True, append_images=ims[1:], duration=[d for _, d in keep], loop=0)
+        raise ValueError("preview has no positive-duration frames")
+    return write_gif(path, [Image.fromarray(f, 'RGBA') for f, _ in keep], [d for _, d in keep])
 
 
 def write_json(path, rep):

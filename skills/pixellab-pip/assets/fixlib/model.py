@@ -21,6 +21,8 @@ class Anim:
     durations: list = None       # ms per frame when the input had them (GIF)
     bg: tuple = None             # the solid background colour the input had, keyed to transparent
     source: str = ''             # the sheet/GIF file, when frames came from one
+    originals: list = field(default_factory=list)  # decoded input pixels before analysis keying/padding
+    backgrounds: list = field(default_factory=list)  # per-frame keyed analysis background
     subdir: str = ''             # its folder under the input folder: written to the same place under the output
 
 
