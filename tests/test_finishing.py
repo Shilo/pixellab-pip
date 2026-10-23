@@ -232,6 +232,13 @@ class FinishBehaviourTests(unittest.TestCase):
         self.assertEqual(label["previous"][0]["helper"], "despeckle")
         self.assertNotIn("previous", label["previous"][0])
 
+    def test_blade_trail_ghost_alone_draws_on_the_trail_frames(self) -> None:
+        # bloat review: the documented `--ghost` call drew nothing without an undocumented --ghost-on
+        args = case_blade_trail(self.t)
+        self.ok("blade_trail", *args, "--ghost", args[1], "--out", self.t / "o")
+        frames = json.loads((self.t / "o/derivative.json").read_text())["changes"]["frames"]
+        self.assertEqual((frames["0.png"]["ghost"], frames["1.png"]["ghost"]), (False, True))
+
     def test_despeckle_removes_lone_pixels_and_keeps_highlights(self) -> None:
         f = synth.figure().copy()
         f[30, 22] = (250, 250, 250, 255)                                # a lone white speck in the blue body

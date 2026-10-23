@@ -7,10 +7,11 @@ its head position on that path, thick at the leading edge, dark outline, steel r
 
     python blade_trail.py --frames idle.png draw.png ext.png ext.png --path "70,91 124,93 185,75" \
         --spans "x,x,0:1,0.55:1" --thick "0,0,8,5" --dither "0,0,0,1" --out DIR \
-        [--ghost idle.png --ghost-on "0,1,0,0"] [--behind] [--ramp "#8a9ab8,#d8e0ec,#ffffff"] [--outline "#282c3c"]
+        [--ghost idle.png [--ghost-on "0,1,0,0"]] [--behind] [--outline "#282c3c"]
 
 --spans: per frame "t0:t1" along the path (0 = first point, 1 = last) or "x" for no trail.
---ghost: a pose drawn 50% dithered behind the frame (the stance left behind in a flash-step).
+--ghost: a pose drawn 50% dithered behind the frame (the stance left behind in a flash-step), on every frame with a
+trail unless --ghost-on picks the frames.
 --behind: the trail goes under the body (speed lines behind a figure).
 Writes DIR/0.png ... in order and DIR/derivative.json.
 """
@@ -90,7 +91,6 @@ ap.add_argument("--thick")
 ap.add_argument("--dither")
 ap.add_argument("--ghost")
 ap.add_argument("--ghost-on")
-ap.add_argument("--ramp", help='dark to light, e.g. "#8a9ab8,#d8e0ec,#ffffff"')
 ap.add_argument("--outline", default="#282c3c")
 ap.add_argument("--behind", action="store_true")
 ap.add_argument("--out", required=True)
@@ -99,12 +99,12 @@ n = len(a.frames)
 spans = [_span(s) for s in a.spans.split(",")]
 thick = [float(v) for v in (a.thick or ",".join(["8"] * n)).split(",")]
 dither = [int(v) for v in (a.dither or ",".join(["0"] * n)).split(",")]
-gon = [int(v) for v in a.ghost_on.split(",")] if a.ghost_on else None
+gon = [int(v) for v in a.ghost_on.split(",")] if a.ghost_on else [int(sp is not None) for sp in spans]
 if not (len(spans) == len(thick) == len(dither) == n) or (gon and len(gon) != n):
     sys.exit("--spans, --thick, --dither and --ghost-on need one value per frame (%d)" % n)
 run = _derive.Run("blade_trail", "new_pixels", a.out, a.frames + ([a.ghost] if a.ghost else []))
 path = catmull([tuple(float(v) for v in p.split(",")) for p in a.path.split()])
-ramp = hexes(a.ramp) if a.ramp else [(138, 154, 184), (216, 224, 236), (255, 255, 255)]
+ramp = [(138, 154, 184), (216, 224, 236), (255, 255, 255)]   # steel, dark to light
 outline = hexes(a.outline)[0]
 ghost_img = Image.open(a.ghost) if a.ghost else None
 for i, f in enumerate(a.frames):
