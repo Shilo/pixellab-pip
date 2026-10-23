@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import { parseSnapshot, previewSvg } from './register'
+import { parseSnapshot, previewStrips } from './register'
 
 const PATH = '/project-b/review/panel.json'
 const TOOL = 'mcp__pixellab-pip__panel'
@@ -9,6 +9,7 @@ const pane = (surface: string) => ({ plugin: 'pixellab-pip', surface, component:
 // Captured from panel.build_snapshot with a real Pillow PNG and manifest; only the absolute project path is anonymized.
 const BUILDER_SNAPSHOT = {
   "version": 1,
+  "lang": "en",
   "project": "/project-b",
   "run": "pixellab-pip-generations/run",
   "created_at": "2026-10-23T20:34:36.497299Z",
@@ -31,7 +32,16 @@ const BUILDER_SNAPSHOT = {
     "request": "Compose request",
     "redo": "Request redo",
     "animate": "Request animation",
-    "refresh": "Refresh panel",
+    "open_review": "Open full review",
+    "open_failed": "Could not open full review. Ask the agent for its HTML link.",
+    "opened_review": "Requested the full review in your browser.",
+    "welcome": "Start a project or describe what you want to make.",
+    "guide": "Guided first project",
+    "guide_prompt": "Guide me through my first PixelLab project.",
+    "feedback_intro": "Please review this request for the selected project.",
+    "policy_short": "Compose a request, then send it in chat. Nothing runs from this panel.",
+    "input_unavailable": "This surface cannot edit notes. Use the full review or agent chat.",
+    "native_image_unavailable": "Open full review for this preview.",
     "setup": "Request project setup",
     "native_preview_unavailable": "This native surface or selection cannot show every preview. Open the sibling panel.html in a browser; redo and animation requests are unavailable here until every selected image can be reviewed.",
     "policy": "This snapshot does not submit work or change settings. Compose a request, then send it in the agent chat. The agent must verify the current files and apply Pip’s normal routing and approval rules.",
@@ -100,6 +110,8 @@ async function fixture() {
   return JSON.parse(JSON.stringify(BUILDER_SNAPSHOT))
 }
 
+const requestFromDraft = (value: string) => JSON.parse(value.split('```json\n')[1].split('\n```')[0])
+
 function engine(on: any, raw: () => string, surfaces = ['desktop'], fills = true) {
   const drafts: any[] = []
   const registrations: any[] = []
@@ -136,7 +148,7 @@ test('visual review requests preserve selected project B rather than session pro
   expect((await ui.find({ type: 'Text', text: /charged generations/ }))?.text).toContain('charged generations: 0')
   await ui.input({ key: 'note', text: 'Change the silhouette.' })
   await ui.press({ key: 'animate' })
-  const request = JSON.parse(h.drafts[0].text.split('PixelLab Pip panel request\n')[1])
+  const request = requestFromDraft(h.drafts[0].text)
   expect(request.project).toBe('/project-b')
   expect(request.run).toBe(s.run)
   expect(request.images[0].sha256).toBe(s.images[0].sha256)
@@ -208,11 +220,11 @@ test('localized shared labels and user feedback remain literal', async ($, on) =
   await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
   await $.tool.call({ tool: TOOL, snapshot_path: PATH })
   const ui = await $.ui.mount(pane('desktop') as any)
-  expect((await ui.find({ type: 'Text', text: /プロジェクト/ }))?.text).toContain('/project-b')
+  expect((await ui.find({ type: 'Text', text: /プロジェクト/ }))?.text).toContain('project-b')
   expect((await ui.find({ key: 'animate' }))?.props.label).toBe('アニメーションを依頼')
   await ui.input({ key: 'note', text: 'シルエットを直してください。' })
   await ui.press({ key: 'redo' })
-  expect(JSON.parse(h.drafts[0].text.split('PixelLab Pip panel request\n')[1]).note).toBe('シルエットを直してください。')
+  expect(requestFromDraft(h.drafts[0].text).note).toBe('シルエットを直してください。')
   await ui.unmount()
 })
 
@@ -252,16 +264,17 @@ test('no interactive surface returns an explicit portable fallback', async ($, o
   expect(result.result).toContain('no interactive surface')
 })
 
-test('reload reads the new digest and rejects mismatched same-length embedded content', async ($, on) => {
+test('reopening rejects mismatched same-length embedded content without a misleading reload control', async ($, on) => {
   const s = await fixture()
   let raw = JSON.stringify(s)
   engine(on, () => raw)
   await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
   await $.tool.call({ tool: TOOL, snapshot_path: PATH })
   const ui = await $.ui.mount(pane('desktop') as any)
+  expect(await ui.find({ key: 'refresh' })).toBeUndefined()
   s.images[0].sha256 = 'b'.repeat(64)
   raw = JSON.stringify(s)
-  await ui.press({ key: 'refresh' })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
   expect(await ui.find({ type: 'Text', text: /does not match its content digest/ })).toBeDefined()
   expect(await ui.find({ key: 'animate' })).toBeUndefined()
   await ui.unmount()
@@ -284,10 +297,120 @@ test('invalid snapshots reject unsafe paths, remote previews and invalid account
   expect(() => parseSnapshot(JSON.stringify(legacy))).not.toThrow()
 })
 
-test('SVG output escapes labels and refuses unsupported or oversized previews', async () => {
+test('bounded SVG strips retain supported PNGs beside GIFs and oversized images at one shared scale', async () => {
   const s = await fixture()
   s.images[0].role = '<script>&'
-  expect(previewSvg(s.images)!).toContain('&lt;script&gt;&amp;')
-  expect(previewSvg([{ ...s.images[0], data_url: 'data:image/gif;base64,R0lGODlh' }])).toBeNull()
-  expect(previewSvg([{ ...s.images[0], data_url: 'data:image/png;base64,' + 'A'.repeat(130000) }])).toBeNull()
+  const selected = [
+    { ...s.images[0], data_url: 'data:image/png;base64,' + 'A'.repeat(80000), width: 16 },
+    { ...s.images[0], data_url: 'data:image/png;base64,' + 'B'.repeat(80000), width: 32 },
+    { ...s.images[0], data_url: 'data:image/gif;base64,R0lGODlh' },
+    { ...s.images[0], data_url: 'data:image/png;base64,' + 'A'.repeat(130000) },
+  ]
+  const result = previewStrips(selected)
+  expect(result.strips.length).toBe(2)
+  expect(result.unavailable.length).toBe(2)
+  expect(result.strips[0].width).toBe(32)
+  expect(result.strips[1].width).toBe(32)
+  expect(result.strips[0].source).toContain('viewBox="0 0 32 1"')
+  expect(result.strips[1].source).toContain('viewBox="0 0 32 1"')
+  expect(result.strips[0].source).toContain('width="16"')
+  expect(result.strips[1].source).toContain('width="32"')
+  expect(result.strips.every(strip => strip.source.length <= 120000)).toBe(true)
+  expect(result.strips[0].source).not.toContain('<script>')
+})
+
+test('a mixed GIF and PNG selection retains its still preview without approving unseen animation', async ($, on) => {
+  const s = await fixture()
+  const data_url = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='
+  const bytes = Uint8Array.fromBase64(data_url.split(',')[1])
+  const sha256 = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).map(n => n.toString(16).padStart(2, '0')).join('')
+  s.images.push({ ...s.images[0], role: 'finished move', data_url, sha256 })
+  engine(on, () => JSON.stringify(s))
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  expect(await ui.find({ type: 'Svg' })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /finished move: Open full review/ })).toBeDefined()
+  expect(await ui.find({ key: 'animate' })).toBeUndefined()
+  expect(await ui.find({ key: 'open-review' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('mobile without Input keeps the view usable and directs notes to supported presentations', async ($, on) => {
+  const s = await fixture()
+  engine(on, () => JSON.stringify(s), ['mobile'])
+  await $.session.start({ cwd: '/project-a', surface: 'mobile', isInteractive: true } as any)
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('mobile') as any)
+  expect(await ui.find({ key: 'note' })).toBeUndefined()
+  expect(await ui.find({ key: 'request' })).toBeUndefined()
+  expect(await ui.find({ type: 'Text', text: /cannot edit notes/ })).toBeDefined()
+  expect(await ui.find({ key: 'open-review' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('empty onboarding composes a scoped guided draft without settings, payment or submission', async ($, on) => {
+  const s = await fixture()
+  s.run = null; s.images = []; s.manifest_sha256 = null; s.review_ready = false
+  const h = engine(on, () => JSON.stringify(s))
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  expect(await ui.find({ type: 'Text', text: /Start a project/ })).toBeDefined()
+  await ui.press({ key: 'guide' })
+  const request = requestFromDraft(h.drafts[0].text)
+  expect(h.drafts[0].text).toContain(s.labels.feedback_intro)
+  expect(request.project).toBe('/project-b')
+  expect(request.note).toBe(s.labels.guide_prompt)
+  expect(h.writes.length).toBe(0)
+  await ui.unmount()
+})
+
+test('native limit measures UTF-8 bytes rather than accepting multibyte text over 4 MiB', async () => {
+  expect(() => parseSnapshot(' '.repeat(4 * 1024 * 1024 + 1))).toThrow('4 MiB')
+  expect(() => parseSnapshot('あ'.repeat(1_400_000))).toThrow('4 MiB')
+})
+
+test('full review opener invokes only the bundled helper for the selected snapshot', async ($, on) => {
+  const s = await fixture()
+  const h = engine(on, () => JSON.stringify(s))
+  const calls: any[] = []
+  on('process.run', (_: any, e: any) => {
+    calls.push(e)
+    return { value: { exitCode: 0, stdout: '{"opened":true}', stderr: '' } }
+  })
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  await ui.press({ key: 'open-review' })
+  expect(calls.length).toBe(1)
+  expect(calls[0].argv[0]).toBe('python3')
+  expect(calls[0].argv[1]).toContain('/skills/pixellab-pip/assets/panel.py')
+  expect(calls[0].argv.slice(2)).toEqual(['open', PATH])
+  expect(h.toasts.join(' ')).toContain(s.labels.opened_review)
+  expect(h.drafts.length).toBe(0)
+  expect(h.writes.length).toBe(0)
+  await ui.unmount()
+})
+
+test('opener reports missing Python and helper refusal without a second launch attempt', async ($, on) => {
+  const s = await fixture()
+  const h = engine(on, () => JSON.stringify(s))
+  const calls: any[] = []
+  on('process.run', (_: any, e: any) => {
+    calls.push(e.argv)
+    if (calls.length === 1) throw new Error('executable not found')
+    return { value: { exitCode: 2, stdout: '', stderr: 'The selected HTML changed.' } }
+  })
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  await ui.press({ key: 'open-review' })
+  expect(calls.map(argv => argv[0])).toEqual(['python3'])
+  expect(h.toasts.join(' ')).toContain(s.labels.open_failed)
+  await ui.press({ key: 'open-review' })
+  expect(calls.length).toBe(2)
+  expect(h.toasts.join(' ')).toContain(s.labels.open_failed)
+  expect(h.drafts.length).toBe(0)
+  await ui.unmount()
 })

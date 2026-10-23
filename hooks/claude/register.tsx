@@ -1,14 +1,16 @@
 import type { Register } from 'claude-code'
-import type { PanelImage, PanelSnapshot } from '../../types'
+import type { PanelImage, PanelSnapshot } from './types'
 
 const TOOL = 'mcp__pixellab-pip__panel'
 const PANE = 'pixellab-pip-panel'
-const MAX_SNAPSHOT = 12 * 1024 * 1024
+const MAX_SNAPSHOT = 4 * 1024 * 1024
 const SVG_LIMIT = 120000
 const LABEL_KEYS = ['title', 'project', 'run', 'style', 'none', 'snapshot', 'snapshot_help', 'charged', 'committed', 'unknown',
-  'preview_alt', 'note', 'request', 'redo', 'animate', 'refresh', 'policy', 'empty_note', 'style_none',
+  'preview_alt', 'note', 'request', 'redo', 'animate', 'policy_short', 'empty_note', 'style_none',
   'draft_ready', 'draft_unavailable', 'no_images', 'native_preview_unavailable', 'setup',
-  'new_character', 'new_attack', 'new_skill', 'character_prompt', 'attack_prompt', 'skill_prompt']
+  'new_character', 'new_attack', 'new_skill', 'character_prompt', 'attack_prompt', 'skill_prompt',
+  'open_review', 'open_failed', 'opened_review', 'welcome', 'guide', 'guide_prompt', 'feedback_intro',
+  'input_unavailable', 'native_image_unavailable']
 let snapshot: PanelSnapshot | null = null
 let snapshotPath = ''
 let note = ''
@@ -23,13 +25,15 @@ const relative = (value: unknown): value is string =>
 const digest = (value: unknown): value is string => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 const amount = (value: unknown) => value === null || (typeof value === 'number' && Number.isFinite(value) && value >= 0)
 const object = (value: unknown): value is Record<string, any> => !!value && typeof value === 'object' && !Array.isArray(value)
-const xml = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]!))
 const normalized = (path: string) => /^[A-Za-z]:|^\\\\/.test(path) ? path.replace(/\\/g, '/').toLowerCase().replace(/\/$/, '') : path.replace(/\/$/, '')
+const basename = (path: string) => path.replace(/\\/g, '/').replace(/\/$/, '').split('/').pop() || path
 
 export function parseSnapshot(raw: string): PanelSnapshot {
-  if (raw.length > MAX_SNAPSHOT) throw new Error('Panel snapshot is too large; rebuild a smaller explicit selection.')
+  if (new TextEncoder().encode(raw).length > MAX_SNAPSHOT) throw new Error('Panel snapshot exceeds this host’s 4 MiB limit; use the full HTML review or rebuild a smaller explicit selection.')
   const s = JSON.parse(raw)
+  if (object(s) && s.lang === undefined) s.lang = 'en'
   if (!object(s) || s.version !== 1 || typeof s.review_ready !== 'boolean' || !absolute(s.project) || !text(s.project) ||
+      !text(s.lang, 64) || !/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(s.lang) ||
       !(s.run === null || relative(s.run)) || !text(s.created_at, 64) || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|\+00:00)$/.test(s.created_at) || !Number.isFinite(Date.parse(s.created_at)) ||
       !text(s.style) || !object(s.usage) || !amount(s.usage.charged) || !amount(s.usage.committed) ||
       !object(s.labels) || Object.keys(s.labels).length > 100 || !Object.values(s.labels).every(value => text(value, 2048) && value.trim().length > 0) ||
@@ -48,19 +52,32 @@ export function parseSnapshot(raw: string): PanelSnapshot {
   return s as PanelSnapshot
 }
 
-export function previewSvg(images: PanelImage[]): string | null {
-  if (!images.length || images.some(i => !i.data_url.startsWith('data:image/png;base64,'))) return null
-  const height = Math.max(...images.map(i => i.height))
-  const width = images.reduce((sum, i) => sum + i.width + 8, -8)
-  let x = 0
-  let body = ''
-  for (const image of images) {
-    body += `<image href="${image.data_url}" x="${x}" y="${height - image.height}" width="${image.width}" height="${image.height}"/>` +
-      `<text x="${x}" y="${height + 14}" font-size="12" fill="gray">${xml(image.role)}</text>`
-    x += image.width + 8
+export function previewStrips(images: PanelImage[]) {
+  const groups: PanelImage[][] = []
+  const unavailable: PanelImage[] = []
+  const svg = (group: PanelImage[], width: number) => {
+    const height = Math.max(...group.map(image => image.height))
+    let x = 0
+    const body = group.map(image => {
+      const element = `<image href="${image.data_url}" x="${x}" y="${height - image.height}" width="${image.width}" height="${image.height}"/>`
+      x += image.width + 8
+      return element
+    }).join('')
+    return { source: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" style="image-rendering:pixelated">${body}</svg>`, width, height, images: group }
   }
-  const result = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height + 20}" style="image-rendering:pixelated">${body}</svg>`
-  return result.length <= SVG_LIMIT ? result : null
+  const width = (group: PanelImage[]) => group.reduce((sum, image) => sum + image.width + 8, -8)
+  for (const image of images) {
+    if (!image.data_url.startsWith('data:image/png;base64,') || svg([image], image.width).source.length > SVG_LIMIT) {
+      unavailable.push(image)
+      continue
+    }
+    const last = groups[groups.length - 1]
+    if (last && svg([...last, image], width([...last, image])).source.length <= SVG_LIMIT) last.push(image)
+    else groups.push([image])
+  }
+  // Equal viewport and element widths preserve one pixel scale across all strips.
+  const sharedWidth = Math.max(1, ...groups.map(width))
+  return { strips: groups.map(group => svg(group, sharedWidth)), unavailable }
 }
 
 async function load($: any, path: string) {
@@ -99,13 +116,24 @@ async function draft($: any, action: string, s: PanelSnapshot, path: string) {
     created_at: s.created_at, manifest_sha256: s.manifest_sha256,
     images: s.images.map(({ role, path, sha256 }) => ({ role, path, sha256 })), note }
   try {
+    const sentence = s.labels.feedback_intro + ': ' + s.labels[action] + (note.trim() ? ' — ' + note.trim() : '')
     const result = await $.prompt.fill({
-      text: '\nPixelLab Pip panel request\n' + JSON.stringify(payload, null, 2), mode: 'append',
+      text: '\n' + sentence + '\n\n```json\n' + JSON.stringify(payload) + '\n```\n', mode: 'append',
     })
     $.ui.toast(result.isFilled ? s.labels.draft_ready : s.labels.draft_unavailable)
   } catch {
     $.ui.toast(s.labels.draft_unavailable)
   }
+}
+
+async function openReview($: any, s: PanelSnapshot, path: string) {
+  const args = [$.plugin.root + '/skills/pixellab-pip/assets/panel.py', 'open', path]
+  try {
+    const python = /^[A-Za-z]:|^\\\\/.test(path) ? 'python' : 'python3'
+    const result = await $.process.run([python, ...args])
+    if (result.exitCode !== 0 || JSON.parse(result.stdout).opened !== true) throw new Error('Review opener did not confirm success.')
+    $.ui.toast(s.labels.opened_review)
+  } catch { $.ui.toast(s.labels.open_failed) }
 }
 
 export const register: Register = on => {
@@ -125,7 +153,7 @@ export const register: Register = on => {
       const placed = await $.ui.open({ id: PANE, title: snapshot!.labels.title, focus: true, closeOnEscape: true })
       if (!placed.isPlaced) return { result: 'The host did not place the native panel. Open the portable HTML: ' + htmlPath + ' and return feedback in chat.' }
       const previewsUnavailable = snapshot!.images.length > 0 &&
-        (!surfaces.some((surface: string) => surface === 'desktop' || surface === 'vscode') || !previewSvg(snapshot!.images))
+        (!surfaces.some((surface: string) => surface === 'desktop' || surface === 'vscode') || previewStrips(snapshot!.images).unavailable.length > 0)
       return { result: 'PixelLab Pip snapshot panel opened. Requests become chat drafts; no paid work or settings changes were performed.' +
         (previewsUnavailable ? ' This native surface or selection cannot show every selected preview. Open the portable HTML: ' + htmlPath + ' and return feedback in chat.' : '') }
     } catch (failure: any) {
@@ -140,37 +168,43 @@ export const register: Register = on => {
   on('ui.render', { component: 'Pane' }, async ($, e, next) => {
     if (e.requestId !== PANE) return next(e)
     const { Box, Text, Button, Input, Svg } = $.ui.resolve(e) as any
+    const canInput = !!Input && e.surface !== 'mobile'
     const s = snapshot
     if (!s) return <Text>{error || 'Open /pixellab-pip panel to select a project and run.'}</Text>
     const path = snapshotPath
     const l = s.labels
-    const svg = previewSvg(s.images)
-    const visible = (e.surface === 'desktop' || e.surface === 'vscode') && !!Svg && !!svg
-    const canReview = visible && s.review_ready && !!s.run && !!s.manifest_sha256 && s.images.length > 0
+    const { strips, unavailable } = previewStrips(s.images)
+    const visible = (e.surface === 'desktop' || e.surface === 'vscode') && !!Svg
+    const canReview = visible && !unavailable.length && s.review_ready && !!s.run && !!s.manifest_sha256 && s.images.length > 0
+    const empty = !s.run && !s.images.length
     return <Box flexDirection="column" gap={1}>
       <Text bold>{l.title}</Text>
-      <Text>{l.project + ': ' + s.project + '\n' + l.run + ': ' + (s.run || l.none) + '\n' + l.style + ': ' + (s.style || l.style_none)}</Text>
-      <Text>{l.snapshot + ': ' + s.created_at + '\n' + l.snapshot_help}</Text>
+      <Text>{l.project + ': ' + basename(s.project) + '\n' + l.run + ': ' + (s.run ? basename(s.run) : l.none) + '\n' + l.style + ': ' + (s.style || l.style_none)}</Text>
+      <Text>{l.snapshot + ': ' + s.created_at}</Text>
       <Text>{l.charged + ': ' + (s.usage.charged === null ? l.unknown : s.usage.charged) +
         '\n' + l.committed + ': ' + (s.usage.committed === null ? l.unknown : s.usage.committed)}</Text>
-      {s.jobs.map((job, i) => <Text key={'job-' + i}>{[job.job_id, job.tool, job.status, job.outcome].filter(Boolean).join(' · ')}</Text>)}
       {s.warnings.map((warning, i) => <Text key={'warning-' + i}>{warning}</Text>)}
-      {visible ? <Svg source={svg!} alt={l.preview_alt} /> : <Text>{s.images.length ? l.native_preview_unavailable : l.no_images}</Text>}
-      {s.images.map((image, i) => <Text key={'image-' + i}>{image.role + ': ' + image.path + '\nSHA-256: ' + image.sha256}</Text>)}
-      <Box flexDirection="row" gap={1}>
+      {empty && <Text>{l.welcome}</Text>}
+      {visible && strips.map((strip, i) => <Box key={'strip-' + i} flexDirection="column">
+        <Svg source={strip.source} width={strip.width} height={strip.height} alt={l.preview_alt} />
+        <Text>{strip.images.map(image => image.role).join(' · ')}</Text>
+      </Box>)}
+      {(visible ? unavailable : s.images).map((image, i) => <Text key={'unavailable-' + i}>{image.role + ': ' + l.native_image_unavailable}</Text>)}
+      {!s.images.length && !empty && <Text>{l.no_images}</Text>}
+      {!visible && s.images.length > 0 && <Text>{l.native_preview_unavailable}</Text>}
+      <Button key="open-review" label={l.open_review} onPress={() => void openReview($, s, path)} />
+      {canInput && empty && <Box flexDirection="row" gap={1}>
         <Button key="new-character" label={l.new_character} onPress={() => { note = l.character_prompt; $.ui.invalidate('ui.render') }} />
         <Button key="new-attack" label={l.new_attack} onPress={() => { note = l.attack_prompt; $.ui.invalidate('ui.render') }} />
         <Button key="new-skill" label={l.new_skill} onPress={() => { note = l.skill_prompt; $.ui.invalidate('ui.render') }} />
-      </Box>
-      <Input key="note" label={l.note} value={note} onInput={(value: string) => { note = value; $.ui.invalidate('ui.render') }} onSubmit={(value: string) => { note = value; $.ui.invalidate('ui.render') }} />
-      <Button key="request" label={l.request} onPress={() => void draft($, 'request', s, path)} />
+      </Box>}
+      {canInput ? <Input key="note" label={l.note} value={note} onInput={(value: string) => { note = value; $.ui.invalidate('ui.render') }} onSubmit={(value: string) => { note = value; $.ui.invalidate('ui.render') }} /> : <Text>{l.input_unavailable}</Text>}
+      {canInput && <Button key="request" label={l.request} onPress={() => void draft($, 'request', s, path)} />}
       {canReview && <Button key="redo" label={l.redo} onPress={() => void draft($, 'redo', s, path)} />}
       {canReview && <Button key="animate" label={l.animate} onPress={() => void draft($, 'animate', s, path)} />}
-      <Button key="setup" label={l.setup} onPress={() => void draft($, 'setup', s, path)} />
-      <Button key="refresh" label={l.refresh} onPress={async () => {
-        try { await load($, path) } catch (failure: any) { snapshot = null; error = String(failure?.message || failure); $.ui.invalidate('ui.render') }
-      }} />
-      <Text dimColor>{l.policy}</Text>
+      {empty && <Button key="guide" label={l.guide} onPress={() => { note = l.guide_prompt; void draft($, 'guide', s, path) }} />}
+      {empty && <Button key="setup" label={l.setup} onPress={() => void draft($, 'setup', s, path)} />}
+      <Text dimColor>{l.policy_short}</Text>
     </Box>
   })
 }

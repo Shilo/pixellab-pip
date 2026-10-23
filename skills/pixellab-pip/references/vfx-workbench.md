@@ -9,6 +9,8 @@ Read this for animated effects through MCP `vfx_workbench` or REST `POST /vfx`. 
 - Use raw image animation when the user wants free-form motion on an existing image and does not need independently controlled parts, sprite anchoring, or game-pack clips; read [Animation](animation.md) for raw-route inputs and frame constraints. Keep managed character/object animation on its managed route.
 - Use REST `POST /vfx` when `vfx_workbench` is not visible, for code or batch integrations, or when the user wants PixelLab's own effects artist. When falling back only because MCP is unavailable, note that `vfx_workbench` is free for subscribers and offer MCP setup before the paid call.
 
+For a requested tuned recipe, bundled examples cover [single-target strikes](../blueprints/vfx-strike-single-target.blueprint.json), [party-wide waves](../blueprints/vfx-wave-across-party.blueprint.json), and [per-target eruptions](../blueprints/vfx-eruption-per-target.blueprint.json). Select and validate them under [Blueprint](blueprint.md), checking their concrete commands against live workbench help; these optional recipes do not replace ordinary route selection.
+
 ## Run the Workbench
 
 1. Confirm the live `vfx_workbench` tool is callable and the account is eligible. Begin with `argv=["describe","start"]` and `mode="low"`; put the user's request in `notes` on the first call. Read live help for the commands needed; it is the current command/schema source. High mode adds a review-oriented response, but did not change the generated recipe in the tested low/high pair. It requires a plan and observations in `notes`; do not offer it as an art-style setting.

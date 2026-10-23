@@ -6,7 +6,7 @@ Read this for a battle/level background, hub/menu backdrop, story picture, regio
 
 - `no_background: false` for every scene and background; `true` for a building sprite.
 - Match a set using the selected route's supported style/reference fields (`style-reference.md`); distinguish appearance from layout references. For Pro sizes/candidate bands see `create-image-pro.md` rather than assuming every canvas is supported.
-- A cheap pass with `create_image_pixflux` keeps the set's palette when `color_image_url` = the matching Pro image.
+- For an approved PixFlux pass matching a set's palette, use its approved palette image in `color_image_url` (or `color_image_base64` for a local image). A Pro output can supply that palette when Pro was already selected; creating one is not required.
 - Several requested regions/screens may share their approved anchor and palette. Seed selection remains the global workflow's decision.
 - Add only exclusions that fit the request: a subjectless game backdrop may exclude figures/UI/text; a story scene containing a party keeps that party; a requested sign, labeled map or framed vignette keeps those elements.
 

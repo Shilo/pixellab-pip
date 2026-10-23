@@ -2,8 +2,9 @@
 
     python panel.py PROJECT [--run PROJECT_RELATIVE_RUN]
                     [--image ROLE PROJECT_RELATIVE_IMAGE]... [--out PROJECT_RELATIVE_DIRECTORY]
-                    [--labels PROJECT_RELATIVE_JSON] [--fragment]
+                    [--labels PROJECT_RELATIVE_JSON] [--lang LANGUAGE_TAG] [--fragment]
     python panel.py verify SNAPSHOT_JSON
+    python panel.py open SNAPSHOT_JSON
 
 Select the run and images explicitly; there is no newest-file discovery. Outputs are
 fresh panel.json/panel.html files. The HTML composes requests for return to chat;
@@ -20,8 +21,10 @@ import io
 import json
 import os
 from pathlib import Path, PureWindowsPath
+import re
 import sys
 import warnings
+import webbrowser
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _assembly import load_pillow, preflight_outputs  # noqa: E402
@@ -43,9 +46,15 @@ DEFAULT_LABELS = {
     "preview_alt": "Selected preview", "preview_unavailable": "Preview could not be displayed. Open the original and rebuild the panel.",
     "no_images": "No previews selected. Ask the agent to open the panel with explicit image roles and paths.",
     "note": "Request or correction notes", "request": "Compose request", "redo": "Request redo",
-    "animate": "Request animation", "refresh": "Reload snapshot", "setup": "Request project setup",
+    "animate": "Request animation", "setup": "Request project setup",
+    "open_review": "Open full review", "open_failed": "Could not open the full review. Ask the agent for the HTML path.",
+    "opened_review": "Opened the full review in your browser.",
+    "welcome": "Start with a request, guided help, or project setup. No generation runs from this panel.",
+    "guide": "Guided help", "guide_prompt": "Help me choose the next PixelLab Pip step for this project.",
+    "feedback_intro": "PixelLab Pip request", "policy_short": "Compose in chat. Pip verifies the files and applies normal approval rules.",
+    "input_unavailable": "This surface cannot edit notes. Compose in the full review or agent chat.",
+    "native_image_unavailable": "Open full review for this preview.",
     "native_preview_unavailable": "This native surface or selection cannot show every preview. Open the sibling panel.html in a browser; redo and animation requests are unavailable here until every selected image can be reviewed.",
-    "policy": "This snapshot does not submit work or change settings. Compose a request, then send it in the agent chat. The agent must verify the current files and apply Pip’s normal routing and approval rules.",
     "empty_note": "Enter a request first.", "draft_ready": "Request composed. Send it in chat; no work has been submitted.",
     "draft_unavailable": "Could not place the request in chat. Copy it manually.",
     "usage_scope": "Selected run only", "cost_explanation": "reported charges or unresolved estimates",
@@ -121,7 +130,13 @@ def _style(root: Path, diagnostics: list[str], labels: dict) -> str:
         return labels["style_unavailable"]
 
 
-def build_snapshot(project: str, run: str | None = None, images=(), labels: str | None = None) -> dict:
+def language_tag(value: str) -> str:
+    if not isinstance(value, str) or len(value) > 63 or not re.fullmatch(r"[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*", value):
+        raise ValueError("lang must be a language tag such as en, ja, or zh-Hant")
+    return value
+
+
+def build_snapshot(project: str, run: str | None = None, images=(), labels: str | None = None, lang: str = "en") -> dict:
     root = Path(project).resolve(strict=True)
     if not root.is_dir():
         raise ValueError("project must be an existing directory")
@@ -130,7 +145,7 @@ def build_snapshot(project: str, run: str | None = None, images=(), labels: str 
     label_map = _labels(root, labels)
     diagnostics: list[str] = []
     snapshot = {
-        "version": 1, "project": str(root), "run": None,
+        "version": 1, "project": str(root), "run": None, "lang": language_tag(lang),
         "created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "style": _style(root, diagnostics, label_map), "labels": label_map,
         "usage": {"charged": None, "committed": None},
@@ -203,8 +218,7 @@ def build_snapshot(project: str, run: str | None = None, images=(), labels: str 
     return snapshot
 
 
-def verify(snapshot_path: str) -> dict:
-    """Check the selected content identity; never interpret this as spending approval."""
+def _read_snapshot(snapshot_path: str) -> tuple[Path, dict, Path]:
     snapshot_file = Path(snapshot_path).resolve(strict=True)
     data = json.loads(read_bounded(snapshot_file, MAX_TOTAL_IMAGE_BYTES * 2).decode("utf-8"))
     if not isinstance(data, dict) or data.get("version") != 1:
@@ -216,6 +230,12 @@ def verify(snapshot_path: str) -> dict:
         raise ValueError("snapshot project must be an existing canonical absolute directory")
     if not snapshot_file.is_relative_to(root):
         raise ValueError("snapshot is outside its selected project")
+    return snapshot_file, data, root
+
+
+def verify(snapshot_path: str) -> dict:
+    """Check the selected content identity; never interpret this as spending approval."""
+    _, data, root = _read_snapshot(snapshot_path)
     if data.get("run") is not None:
         run = contained(root, data["run"])
         expected = data.get("manifest_sha256")
@@ -254,7 +274,7 @@ def render(snapshot: dict, snapshot_path: Path, fragment: bool = False) -> str:
         if len(body.encode("utf-8")) >= 1_000_000:
             raise ValueError("inline panel exceeds the 1 MB renderer limit; use standalone HTML or fewer/smaller previews")
         return body
-    return '<!doctype html><html lang="en"><head><meta charset="utf-8">' \
+    return '<!doctype html><html lang="' + html.escape(language_tag(snapshot.get("lang", "en")), quote=True) + '"><head><meta charset="utf-8">' \
         '<meta name="viewport" content="width=device-width,initial-scale=1">' \
         '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; ' \
         'style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; connect-src \'none\'; ' \
@@ -262,15 +282,37 @@ def render(snapshot: dict, snapshot_path: Path, fragment: bool = False) -> str:
         '<title>' + html.escape(snapshot["labels"]["title"]) + '</title></head><body>' + body + '</body></html>\n'
 
 
+def open_review(snapshot_path: str) -> dict:
+    """Open only an unchanged standalone review produced by this helper."""
+    selected = Path(snapshot_path).absolute()
+    snapshot_file = selected.resolve(strict=True)
+    if selected != snapshot_file or snapshot_file.name != "panel.json":
+        raise ValueError("select an unredirected panel.json snapshot")
+    _, snapshot, root = _read_snapshot(str(snapshot_file))
+    private = root / "pixellab-pip-generations"
+    if private.resolve() != private or not snapshot_file.is_relative_to(private):
+        raise ValueError("panel must be in the project's unredirected private generations directory")
+    panel_file = snapshot_file.with_name("panel.html")
+    if panel_file.resolve(strict=True) != panel_file:
+        raise ValueError("panel HTML must not redirect to another file")
+    expected = render(snapshot, snapshot_file)
+    actual = read_bounded(panel_file, MAX_TOTAL_IMAGE_BYTES * 3).decode("utf-8").replace("\r\n", "\n")
+    if actual != expected:
+        raise ValueError("panel HTML differs from its standalone snapshot; rebuild the panel")
+    if not webbrowser.open(panel_file.as_uri(), new=2):
+        raise ValueError("browser could not open the panel; open panel.html manually")
+    return {"opened": True, "panel": str(panel_file)}
+
+
 def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    if argv and argv[0] == "verify":
+    if argv and argv[0] in ("verify", "open"):
         parser = argparse.ArgumentParser(description="Verify a panel snapshot against the current selected files.")
-        parser.add_argument("command", choices=["verify"])
+        parser.add_argument("command", choices=["verify", "open"])
         parser.add_argument("snapshot")
         args = parser.parse_args(argv)
         try:
-            print(json.dumps(verify(args.snapshot)))
+            print(json.dumps((verify if args.command == "verify" else open_review)(args.snapshot)))
             return 0
         except (OSError, ValueError, TypeError, KeyError) as exc:
             print(str(exc), file=sys.stderr)
@@ -281,10 +323,11 @@ def main(argv=None) -> int:
     parser.add_argument("--image", nargs=2, action="append", default=[], metavar=("ROLE", "PROJECT_RELATIVE_PATH"))
     parser.add_argument("--out")
     parser.add_argument("--labels", help="explicit project-relative JSON overrides for known UI labels; defaults are in DEFAULT_LABELS")
+    parser.add_argument("--lang", default="en", help="language tag for the supplied UI labels, e.g. en or ja")
     parser.add_argument("--fragment", action="store_true", help="HTML fragment for a verified inline renderer; not a live bridge")
     args = parser.parse_args(argv)
     try:
-        snapshot = build_snapshot(args.project, args.run, args.image, args.labels)
+        snapshot = build_snapshot(args.project, args.run, args.image, args.labels, args.lang)
         root = Path(snapshot["project"])
         private_root = contained(root, "pixellab-pip-generations")
         if private_root != root / "pixellab-pip-generations":
@@ -292,21 +335,24 @@ def main(argv=None) -> int:
         run_in_private = snapshot["run"] and contained(root, snapshot["run"]).is_relative_to(private_root)
         default_out = (snapshot["run"] + "/panel") if run_in_private else "pixellab-pip-generations/panel"
         out = contained(root, args.out or default_out)
-        if not out.is_relative_to(private_root):
-            raise ValueError("private panel outputs must stay in pixellab-pip-generations/")
+        if out == private_root or not out.is_relative_to(private_root):
+            raise ValueError("private panel outputs must use a subdirectory of pixellab-pip-generations/")
+        if out.exists() and any(out.iterdir()):
+            raise ValueError("panel output directory must be fresh or empty; existing files left unchanged")
         paths = [out / "panel.json", out / "panel.html"]
         sources = [contained(root, "pixellab.json"), *(contained(root, path) for _, path in args.image)]
         if snapshot["run"]:
             sources.append(contained(root, snapshot["run"] + "/" + manifest.NAME))
         if args.labels:
             sources.append(contained(root, args.labels))
-        preflight_outputs(paths, sources)
+        ignore = out / ".gitignore"
+        preflight_outputs([ignore, *paths], sources)
         html = render(snapshot, paths[0], args.fragment)
         out.mkdir(parents=True, exist_ok=True)
         if out.resolve() != out or not out.is_relative_to(root):
             raise ValueError("output directory changed; choose a safe project directory")
         contents = [json.dumps(snapshot, indent=2, ensure_ascii=False, allow_nan=False) + "\n", html]
-        for path, content in zip(paths, contents):
+        for path, content in zip([ignore, *paths], ["*\n", *contents]):
             fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
                 handle.write(content)

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import io
+from contextlib import redirect_stdout
+from http.client import IncompleteRead
 import subprocess
 import sys
 import tempfile
@@ -52,6 +54,29 @@ class FetchTests(unittest.TestCase):
             error = urllib.error.HTTPError("https://api.pixellab.ai/", code, "file unavailable", {}, None)
             with patch.object(fetch, "_download", side_effect=error):
                 self.assertEqual(fetch.get("a"), (status, None))
+
+    def test_truncated_http_body_keeps_reservation_and_directs_recovery(self) -> None:
+        class Resp:
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def read(self): raise IncompleteRead(b"partial", 100)
+
+        for direct in (False, True):
+            with self.subTest(direct=direct):
+                run = self.root / ("direct" if direct else "job")
+                out = run / "raw.png"
+                args = ["--url", "https://backblaze.pixellab.ai/file/result.png", str(out)] if direct else [
+                    "job-truncated", str(out), "--run", str(run), "--estimate", "7", "--timeout", "0.001"]
+                output = io.StringIO()
+                with patch.object(fetch.OPENER, "open", return_value=Resp()), redirect_stdout(output):
+                    self.assertEqual(fetch.main(args), 3)
+                self.assertIn("matching getter", output.getvalue())
+                self.assertIn("do not resubmit", output.getvalue())
+                self.assertFalse(out.exists())
+                if not direct:
+                    self.assertEqual(manifest.committed(str(run)), 7)
+                    self.assertEqual(manifest.jobs(str(run))[0]["job_id"], "job-truncated")
+                    self.assertEqual(manifest.jobs(str(run))[0]["status"], "submitted")
 
     def test_writes_manifest_entry(self) -> None:
         fetch.get = lambda job, index=None, **kwargs: ("ok", PNG)

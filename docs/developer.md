@@ -152,7 +152,7 @@ claude plugin validate .
 claude plugin test .
 ```
 
-The native tests use Claude's local engine without account sign-in or PixelLab calls. They verify integration and behavior under simulated surfaces; they do not replace live Desktop/VS Code/terminal checks. Test HTML rendering and interactions in a real browser, including narrow layouts, failed previews and localized labels. A captured snapshot is never a live-activity or billing promise. See the [design/research and acceptance record](tools/pixellab-game-art-skill/pixellab-game-art-panel-auto-reconsideration.md) for tested versions and remaining limits.
+CI also runs both commands with the published `@anthropic-ai/claude-code@2.1.303` CLI on Node 24. The native tests use Claude's local engine without account sign-in or PixelLab calls. They verify integration and behavior under simulated surfaces; they do not replace live Desktop/VS Code/terminal checks. Test HTML rendering and interactions in a real browser, including narrow layouts, failed previews and localized labels. A captured snapshot is never a live-activity or billing promise. See the [design/research and acceptance record](tools/pixellab-game-art-skill/pixellab-game-art-panel-auto-reconsideration.md) and the [challenged Claude-review response](tools/pixellab-game-art-skill/pixellab-game-art-claude-review-response.md) for tested versions and remaining limits.
 
 ## OpenCode Local Skill Testing
 

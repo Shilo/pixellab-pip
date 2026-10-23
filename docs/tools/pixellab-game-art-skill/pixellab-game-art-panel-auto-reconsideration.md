@@ -26,16 +26,16 @@ No new MCP server is required for this change: it adds dependencies, lifecycle, 
 
 ## Auto decision
 
-Retain the persistent boolean toggle. Ask and Plan already share Pip's whole-chain approval; their useful distinction is an explicit run budget and finite additional attempts, not a new permission hierarchy.
+Retain the persistent boolean toggle. A bounded plan adds an explicit run budget and finite additional attempts to the existing Auto setting, without a new permission hierarchy. The original restoration at `9ee2e8b` required approval for every bounded plan; Claude's review challenged that extra gate. The current decision below supersedes it.
 
 | Command | Scope |
 |---|---|
 | `auto`, `auto on`, `auto off` | Existing persistent cost-confirmation setting. |
 | `auto status` | Read-only actual settings and unresolved legacy-policy notice. |
-| `auto plan B [R]` | One identified requested run: generation ceiling B, at most R additional paid attempts across the chain, default zero, whole-plan approval even if standing Auto is on. No persistent mutation. |
+| `auto plan B [R] [task]` | One identified requested run: generation ceiling B, at most R additional paid attempts across the chain, default zero. Auto off asks first; Auto on runs within these limits unless the user requests approval or a dry run. No persistent mutation. |
 | `auto reset` | Explicit migration: discard exactly the prototype `level`, `budget`, `retries` fields and disable Auto, preserving unrelated configuration. Never grants spending permission. |
 
-Budget B is finite/nonnegative, including fractional generations; R is a nonnegative integer. A cap does not authorize unspecified attempts, scopes, visual delegation, locally drawn pixels or playback changes. Without an identified task, clarify the target instead of saving a latent future permission. Reuse the existing cost card, manifest evidence and conservative `committed` admission. No runner, scheduler or second plan store.
+Budget B is finite/nonnegative, including fractional generations; R is a nonnegative integer. Trailing task text may identify the run, while numeric arguments remain strict. A cap does not authorize unspecified attempts, scopes, visual delegation, locally drawn pixels or playback changes. Without an identified task, clarify the target instead of saving a latent future permission. At the cap or retry limit, stop and report remaining work rather than increase either limit. Reuse the existing cost card, locked manifest plan metadata and conservative `committed` admission. No runner, scheduler or second plan store.
 
 Legacy policy must not silently become unlimited Auto. Status exposes those three fields separately; effective Auto remains off until reconciliation. Off remains available, enabling is blocked while legacy fields remain, and reset requires an explicit accepted discard. This deliberately consolidates the useful interface without preserving cross-project installation-wide budget defaults. Existing project restrictions remain independently applicable.
 
@@ -63,7 +63,7 @@ Before acting on review feedback, verify the snapshot's selected files and manif
 | Project/style context and onboarding | Preserve visible context and scoped requests; no silent folder/style/policy creation. |
 | Request shortcuts | Preserve through request composition routed to the existing skill. |
 | Usage/activity | Show recorded selected-run observations and uncertainty. Remove invented live/session accounting. |
-| Auto-opening and four-second scan | Replace with deliberate opening and snapshot refresh; no hidden project scanning or live-state claim. |
+| Auto-opening and four-second scan | Offer visual review at the key-pose checkpoint; open deliberately and build a fresh snapshot when content changes. No hidden project scanning or live-state claim. |
 | Ask/Plan/Auto presets | Consolidate into Auto; no hardcoded 50-generation/two-redo permission. |
 | Install-time key/MCP setup | Keep canonical Pip setup, not a second credential/connector configuration. |
 
@@ -105,7 +105,9 @@ The reopened original findings now close through preserved behavior rather than 
 | R23 stale panel authority | Timestamped, hash-bound observations; canonical ledger accounting; no optimistic permission state or cached approval. Unsupported previews cannot approve unseen content. |
 | R24 edition release drift | One ordinary plugin/version owns the native adapter; no separately versioned Studio distribution. Existing real release-bump checks remain applicable. |
 
-## Current acceptance evidence and limits
+## Acceptance evidence at `9ee2e8b` and its limits
+
+These checks preceded Claude's independent findings and the subsequent corrections. They remain historical evidence for that pinned head, including its former ask-first bounded-plan behavior; they do not validate the current changes. See the [Claude review response](pixellab-game-art-claude-review-response.md) for the current findings, dispositions and verification.
 
 - Integrated `python dev-tools/qa.py`: **337 tests passed, no skips**, all repository checks passed with patched Pillow 13 and the image/scientific dependencies available. This includes the malformed-config, alternate-run, private-root and cross-host packaging regressions, plus existing release-bump/raw-skill packaging checks.
 - Actual Claude Code 2.1.303: `claude plugin validate . --json` succeeds and recognizes the explicitly selected nested module; `claude plugin test .` passes **14 native tests**. Unsupported terminal/GIF selections explicitly return the generated HTML's path to the agent, which cannot read its own rendered pane. The existing root contributor `CLAUDE.md` context warning is unrelated to the adapter. The native fixture was captured from the Python builder, with its project root anonymized.

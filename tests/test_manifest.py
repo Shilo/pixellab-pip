@@ -19,6 +19,12 @@ def job(job_id: str, gens: float, status: str = "ok") -> dict:
             "reported_usage": {"generations": gens}, "waited_s": 40, "outputs": ["raw/0.png"]}
 
 
+def bounded_plan() -> dict:
+    return {"scope": "one knight attack", "generation_cap": 12.5, "retry_limit": 2,
+            "retries_used": 0, "remaining_work": ["review exact poses", "interpolate approved poses"],
+            "approval_context": "Current user approved this named chain in the conversation."}
+
+
 class ManifestTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
@@ -31,6 +37,70 @@ class ManifestTests(unittest.TestCase):
         manifest.add_job(self.run, job("a", 6))
         self.assertEqual(manifest.jobs(self.run)[0]["job_id"], "a")
         self.assertEqual(manifest.jobs(self.run)[0]["waited_s"], 40)
+
+    def test_plan_cli_initializes_only_empty_runs_and_preserves_existing_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as source:
+            path = Path(source) / "plan.json"
+            path.write_text(json.dumps(bounded_plan()), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(SCRIPT), "plan", self.run, str(path)],
+                                    capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(json.loads(result.stdout)["authority"])
+        manifest.add_job(self.run, job("first", 3))
+        ledger = Path(self.run) / "manifest.json"
+        data = json.loads(ledger.read_text(encoding="utf-8"))
+        data["audit"] = "retain"
+        data["plan"]["old_note"] = "retain too"
+        ledger.write_text(json.dumps(data), encoding="utf-8")
+        updated = {**bounded_plan(), "retries_used": 1, "remaining_work": []}
+        manifest.set_plan(self.run, updated)
+        data = json.loads(ledger.read_text(encoding="utf-8"))
+        self.assertEqual(data["jobs"][0]["job_id"], "first")
+        self.assertEqual(data["audit"], "retain")
+        self.assertEqual(data["plan"], {**updated, "old_note": "retain too"})
+
+    def test_invalid_plan_preserves_ledger_bytes(self) -> None:
+        manifest.add_job(self.run, job("a", 3))
+        ledger = Path(self.run) / "manifest.json"
+        before = ledger.read_bytes()
+        invalid = [{**bounded_plan(), "generation_cap": value} for value in (-1, float("nan"), True, "12")]
+        invalid += [{**bounded_plan(), key: value} for key, value in
+                    (("retry_limit", 1.5), ("retry_limit", True), ("retries_used", 3),
+                     ("retries_used", -1), ("remaining_work", "unfinished"), ("remaining_work", [""]),
+                     ("scope", " "), ("approval_context", ""))]
+        invalid += [None, {"scope": "missing fields"}, {**bounded_plan(), "unexpected": 1}]
+        for plan in invalid:
+            with self.subTest(plan=plan), self.assertRaises(ValueError):
+                manifest.set_plan(self.run, plan)
+            self.assertEqual(ledger.read_bytes(), before)
+
+    def test_plan_does_not_initialize_missing_resume_accounting(self) -> None:
+        source = Path(self.run) / "existing.png"
+        source.write_bytes(b"unchanged")
+        with self.assertRaisesRegex(ValueError, "missing manifest in a nonempty run"):
+            manifest.set_plan(self.run, bounded_plan())
+        self.assertFalse((Path(self.run) / "manifest.json").exists())
+        self.assertEqual(source.read_bytes(), b"unchanged")
+
+    def test_plan_cli_invalid_input_leaves_existing_ledger_unchanged(self) -> None:
+        manifest.add_job(self.run, job("a", 4))
+        ledger = Path(self.run) / "manifest.json"
+        before = ledger.read_bytes()
+        with tempfile.TemporaryDirectory() as source:
+            path = Path(source) / "plan.json"
+            for raw in (b'{"scope":', b'[]', b' ' * (1024 * 1024 + 1)):
+                path.write_bytes(raw)
+                result = subprocess.run([sys.executable, str(SCRIPT), "plan", self.run, str(path)],
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertEqual(ledger.read_bytes(), before)
+
+    def test_unrecognized_old_plan_does_not_break_unrelated_ledger_updates(self) -> None:
+        ledger = Path(self.run) / "manifest.json"
+        ledger.write_text(json.dumps({"jobs": [], "plan": {"historical": "unknown schema"}}), encoding="utf-8")
+        manifest.add_job(self.run, job("a", 2))
+        self.assertEqual(json.loads(ledger.read_text(encoding="utf-8"))["plan"], {"historical": "unknown schema"})
 
     def test_failed_status_does_not_prove_a_refund(self) -> None:
         manifest.add_job(self.run, job("a", 6))
@@ -179,7 +249,8 @@ class ManifestTests(unittest.TestCase):
         manifest.add_job(self.run, job("base", 2))
         snippets = [f"manifest.add_job({self.run!r}, {job(str(i), 6)!r})" for i in range(6)]
         snippets += [f"manifest.set_outcome({self.run!r}, 'base', 'kept')",
-                     f"manifest.add_job({self.run!r}, {{'job_id': 'base', 'status': 'ok'}})"]
+                     f"manifest.add_job({self.run!r}, {{'job_id': 'base', 'status': 'ok'}})",
+                     f"manifest.set_plan({self.run!r}, {bounded_plan()!r})"]
         processes = []
         for snippet in snippets:
             code = (f"import sys,time; sys.path.insert(0,{str(SCRIPT.parent)!r}); import manifest; "
@@ -193,6 +264,7 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(len(manifest.jobs(self.run)), 7)
         self.assertEqual(manifest.committed(self.run), 38)
         self.assertEqual(manifest.jobs(self.run)[0]["outcome"], "kept")
+        self.assertEqual(json.loads((Path(self.run) / "manifest.json").read_text(encoding="utf-8"))["plan"], bounded_plan())
 
     def test_abandoned_lock_is_not_stolen(self) -> None:
         lock = Path(self.run) / ".manifest.lock"
@@ -222,6 +294,43 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(len(attempts), 2)
         self.assertTrue(all(flags & manifest.os.O_EXCL for flags in attempts))
         self.assertEqual(manifest.spent(self.run), 3)
+        self.assertFalse((Path(self.run) / ".manifest.lock").exists())
+
+    def test_transient_replace_denial_retries_same_prepared_file_under_lock(self) -> None:
+        manifest.add_job(self.run, job("a", 3))
+        ledger = Path(self.run) / "manifest.json"
+        before = ledger.read_bytes()
+        original_replace = manifest.os.replace
+        attempts = []
+
+        def deny_once(source, destination):
+            self.assertTrue((Path(self.run) / ".manifest.lock").exists())
+            self.assertEqual(ledger.read_bytes(), before)
+            prepared = Path(source).read_bytes()
+            attempts.append((source, destination, prepared))
+            if len(attempts) == 1:
+                raise PermissionError(13, "reader temporarily prevents replacement")
+            return original_replace(source, destination)
+
+        with patch.object(manifest.os, "replace", side_effect=deny_once):
+            manifest.set_plan(self.run, bounded_plan())
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(attempts[0], attempts[1])
+        data = json.loads(ledger.read_text(encoding="utf-8"))
+        self.assertEqual(data["jobs"][0]["job_id"], "a")
+        self.assertEqual(data["plan"], bounded_plan())
+        self.assertEqual(list(Path(self.run).glob(".manifest.*.tmp")), [])
+        self.assertFalse((Path(self.run) / ".manifest.lock").exists())
+
+    def test_persistent_replace_denial_preserves_manifest_and_cleans_owned_files(self) -> None:
+        manifest.add_job(self.run, job("a", 3))
+        ledger = Path(self.run) / "manifest.json"
+        before = ledger.read_bytes()
+        with patch.object(manifest, "LOCK_TIMEOUT", 0), patch.object(manifest.os, "replace", side_effect=PermissionError(13, "access denied")):
+            with self.assertRaisesRegex(ValueError, "existing manifest left unchanged"):
+                manifest.set_plan(self.run, bounded_plan())
+        self.assertEqual(ledger.read_bytes(), before)
+        self.assertEqual(list(Path(self.run).glob(".manifest.*.tmp")), [])
         self.assertFalse((Path(self.run) / ".manifest.lock").exists())
 
     def test_persistent_permission_error_preserves_unowned_lock_and_manifest(self) -> None:

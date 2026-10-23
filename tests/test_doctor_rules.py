@@ -15,6 +15,23 @@ FIX = REPO_ROOT / "skills/pixellab-pip/assets/fix.py"
 
 
 class DoctorRuleTests(unittest.TestCase):
+    def test_invalid_sheet_arguments_and_cells_fail_before_writes(self) -> None:
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as tmp:
+            image = Path(tmp) / "sheet.png"
+            Image.new("RGBA", (9, 8)).save(image)
+            before = image.read_bytes()
+            out = Path(tmp) / "doctor"
+            for cells in ("4x4", "fourx4", "", "4x", "0x4", "4x4x4"):
+                with self.subTest(cells=cells):
+                    result = subprocess.run([sys.executable, str(FIX), str(image), "--sheet", cells,
+                                             "--check-only", "--out", str(out)], capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn("error:", result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+                    self.assertFalse(out.exists())
+                    self.assertEqual(image.read_bytes(), before)
+
     def test_doctor_skips_without_numpy(self) -> None:
         code = ("import runpy, sys; sys.modules['numpy'] = None; sys.argv = ['fix.py', 'frames']; "
                 f"runpy.run_path({str(FIX)!r}, run_name='__main__')")

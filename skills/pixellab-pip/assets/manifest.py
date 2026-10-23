@@ -3,6 +3,7 @@
     python manifest.py add RUN JOB --tool T [--generations ACTUAL] [--estimate RESERVED]
     python manifest.py done RUN JOB
     python manifest.py outcome RUN JOB OUTCOME [NOTE]
+    python manifest.py plan RUN JSONFILE  record current-run audit metadata, not permission
     python manifest.py spent RUN...       exact reported charges; unknown exits 2
     python manifest.py committed RUN...   actual charge, otherwise estimate; unknown exits 2
 
@@ -84,7 +85,18 @@ def _write(run_dir: str, data: dict[str, Any]) -> None:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             json.dump(data, handle, indent=2, allow_nan=False)
             handle.write("\n")
-        os.replace(tmp, Path(run_dir) / NAME)
+        deadline = time.monotonic() + LOCK_TIMEOUT
+        while True:
+            try:
+                os.replace(tmp, Path(run_dir) / NAME)
+                break
+            except PermissionError as exc:
+                # Windows readers/scanners can briefly prevent replacement. Keep the
+                # transaction lock and retry this prepared file, never the mutation.
+                if time.monotonic() >= deadline:
+                    raise ValueError("cannot replace manifest; check file permissions or open readers; "
+                                     "existing manifest left unchanged") from exc
+                time.sleep(0.05)
     finally:
         if os.path.exists(tmp):
             os.unlink(tmp)
@@ -157,6 +169,32 @@ def set_outcome(run_dir: str, job_id: str, outcome: str, note: str = "") -> None
     _update_existing(run_dir, job_id, {"outcome": outcome, **({"outcome_note": note} if note else {})})
 
 
+def set_plan(run_dir: str, plan: dict[str, Any]) -> None:
+    """Record run constraints under the ledger lock; a saved plan grants no authority."""
+    fields = {"scope", "generation_cap", "retry_limit", "retries_used", "remaining_work", "approval_context"}
+    if not isinstance(plan, dict) or set(plan) != fields:
+        raise ValueError("plan needs scope, generation_cap, retry_limit, retries_used, remaining_work and approval_context")
+    for key in ("scope", "approval_context"):
+        if not isinstance(plan[key], str) or not plan[key].strip():
+            raise ValueError("plan " + key + " must be a nonempty string")
+    number(plan["generation_cap"])
+    for key in ("retry_limit", "retries_used"):
+        if type(plan[key]) is not int or plan[key] < 0:
+            raise ValueError("plan " + key + " must be a nonnegative integer")
+    if plan["retries_used"] > plan["retry_limit"]:
+        raise ValueError("plan retries_used exceeds retry_limit")
+    if not isinstance(plan["remaining_work"], list) or any(not isinstance(item, str) or not item.strip()
+                                                          for item in plan["remaining_work"]):
+        raise ValueError("plan remaining_work must be a list of nonempty strings")
+    with _transaction(run_dir):
+        if not (Path(run_dir) / NAME).exists() and any(p.name != ".manifest.lock" for p in Path(run_dir).iterdir()):
+            raise ValueError("missing manifest in a nonempty run; investigate resume accounting instead of initializing it")
+        data = _read(run_dir, missing_ok=True)
+        previous = data.get("plan")
+        data["plan"] = {**(previous if isinstance(previous, dict) else {}), **plan}
+        _write(run_dir, data)
+
+
 def _usage(job: dict[str, Any], *, estimate: bool = False) -> float:
     for key in (("reported_usage", "estimated_usage") if estimate else ("reported_usage",)):
         usage = job.get(key)
@@ -194,6 +232,9 @@ def main(argv: list[str]) -> int:
     outcome.add_argument("job")
     outcome.add_argument("outcome")
     outcome.add_argument("note", nargs="?", default="")
+    plan = commands.add_parser("plan")
+    plan.add_argument("run")
+    plan.add_argument("jsonfile")
     args = parser.parse_args(argv)
     try:
         if args.command in ("spent", "committed"):
@@ -206,6 +247,13 @@ def main(argv: list[str]) -> int:
                     entry[field] = {"generations": number(value)}
             add_job(args.run, entry)
             out = {"recorded": args.job}
+        elif args.command == "plan":
+            with open(args.jsonfile, "rb") as handle:
+                raw = handle.read(1024 * 1024 + 1)
+            if len(raw) > 1024 * 1024:
+                raise ValueError("plan metadata exceeds 1 MiB")
+            set_plan(args.run, json.loads(raw.decode("utf-8-sig")))
+            out = {"recorded": "plan", "authority": False}
         elif args.command == "done":
             _update_existing(args.run, args.job, {"status": "ok"})
             out = {"done": args.job}

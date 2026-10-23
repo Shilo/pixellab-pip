@@ -12,6 +12,7 @@ file errors establish neither job failure nor refund. Never resubmit from this r
 from __future__ import annotations
 
 import argparse
+from http.client import HTTPException
 import io
 import json
 from pathlib import Path
@@ -77,7 +78,7 @@ def get(job: str, index: int | None = None, *, timeout: float = 30) -> tuple[str
         if exc.code == 404:
             return "wait", None
         return ("unavailable", None) if exc.code in (401, 403, 410) else ("wait", None)
-    except OSError:
+    except (OSError, HTTPException):
         return "wait", None
     validate_image(data)
     return "ok", data
@@ -187,6 +188,9 @@ def main(argv: list[str] | None = None) -> int:
         print("DOWNLOAD %s for %s; inspect the matching getter before continuing; do not resubmit or infer a refund"
               % ("unavailable" if status == "unavailable" else "not ready", a.job))
         return 2 if status == "unavailable" else 3
+    except HTTPException:
+        print("DOWNLOAD not ready; inspect the matching getter before continuing; do not resubmit or infer a refund")
+        return 3
     except (ValueError, OSError) as exc:
         print("download blocked: %s" % exc, file=sys.stderr)
         return 2

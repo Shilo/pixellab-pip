@@ -39,6 +39,80 @@ class PanelTests(unittest.TestCase):
     def cli(self, *args):
         return subprocess.run([sys.executable, str(ASSETS / 'panel.py'), *map(str, args)], capture_output=True, text=True)
 
+    def test_private_ignore_is_local_and_existing_policy_is_preserved(self):
+        top_ignore = self.run.parent / '.gitignore'
+        top_ignore.write_text('keep-existing-policy\n', encoding='utf-8')
+        result = self.cli(self.root)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        out = Path(json.loads(result.stdout)['snapshot']).parent
+        self.assertEqual((out / '.gitignore').read_text(), '*\n')
+        self.assertEqual(top_ignore.read_text(), 'keep-existing-policy\n')
+        self.ledger([])
+        refused = self.cli(self.root, '--out', self.run.relative_to(self.root))
+        self.assertEqual(refused.returncode, 2)
+        self.assertFalse((self.run / '.gitignore').exists())
+        self.assertTrue((self.run / 'manifest.json').exists())
+        collision = self.run.parent / 'existing-review'
+        collision.mkdir()
+        (collision / '.gitignore').write_text('user policy\n')
+        refused = self.cli(self.root, '--out', collision.relative_to(self.root))
+        self.assertEqual(refused.returncode, 2)
+        self.assertEqual((collision / '.gitignore').read_text(), 'user policy\n')
+        self.assertFalse((collision / 'panel.json').exists())
+        refused = self.cli(self.root, '--out', 'pixellab-pip-generations')
+        self.assertEqual(refused.returncode, 2)
+        self.assertEqual(top_ignore.read_text(), 'keep-existing-policy\n')
+
+    def test_explicit_language_and_invalid_tags(self):
+        result = self.cli(self.root, '--lang', 'zh-Hant')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        paths = json.loads(result.stdout)
+        self.assertEqual(json.loads(Path(paths['snapshot']).read_text())['lang'], 'zh-Hant')
+        self.assertIn('<html lang="zh-Hant">', Path(paths['panel']).read_text())
+        for value in ['en" onclick="x', 'en_US', '', 'a' * 64]:
+            result = self.cli(self.root, '--lang', value, '--out', 'pixellab-pip-generations/invalid')
+            self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertFalse((self.run.parent / 'invalid').exists())
+
+    def test_open_only_unchanged_standalone_and_report_browser_failure(self):
+        self.ledger([])
+        image = self.image()
+        result = self.cli(self.root, '--run', self.run.relative_to(self.root), '--image', 'standing', image)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        paths = json.loads(result.stdout)
+        with patch.object(panel.webbrowser, 'open', return_value=True) as browser:
+            self.assertTrue(panel.open_review(paths['snapshot'])['opened'])
+            browser.assert_called_once_with(Path(paths['panel']).as_uri(), new=2)
+        with patch.object(panel.webbrowser, 'open', return_value=False):
+            with self.assertRaisesRegex(ValueError, 'browser could not'):
+                panel.open_review(paths['snapshot'])
+        html_file = Path(paths['panel'])
+        original = html_file.read_text(encoding='utf-8')
+        for tampered in ['<script>alert(1)</script>', panel.render(json.loads(Path(paths['snapshot']).read_text()), Path(paths['snapshot']), True)]:
+            html_file.write_text(tampered, encoding='utf-8')
+            with patch.object(panel.webbrowser, 'open') as browser:
+                with self.assertRaisesRegex(ValueError, 'differs'):
+                    panel.open_review(paths['snapshot'])
+                browser.assert_not_called()
+        html_file.write_text(original, encoding='utf-8')
+        (self.run / 'manifest.json').write_text('{"jobs":[],"changed":true}')
+        with patch.object(panel.webbrowser, 'open', return_value=True):
+            self.assertTrue(panel.open_review(paths['snapshot'])['opened'])
+        with self.assertRaisesRegex(ValueError, 'manifest'):
+            panel.verify(paths['snapshot'])
+
+    def test_open_inspection_with_unavailable_accounting_does_not_grant_review(self):
+        result = self.cli(self.root, '--run', self.run.relative_to(self.root), '--image', 'standing', self.image())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        paths = json.loads(result.stdout)
+        snapshot = json.loads(Path(paths['snapshot']).read_text())
+        self.assertFalse(snapshot['review_ready'])
+        self.assertIsNone(snapshot['manifest_sha256'])
+        with patch.object(panel.webbrowser, 'open', return_value=True):
+            self.assertTrue(panel.open_review(paths['snapshot'])['opened'])
+        with self.assertRaises(ValueError):
+            panel.verify(paths['snapshot'])
+
     def test_unknown_failed_and_pending_costs_reuse_the_ledger(self):
         self.ledger([{'job_id': 'failed', 'status': 'failed', 'reported_usage': {'generations': 4}},
                      {'job_id': 'pending', 'status': 'submitted', 'estimated_usage': {'generations': 7}}])

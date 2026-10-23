@@ -85,7 +85,7 @@ class AutoPolicyTests(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertIs(output["auto"], False)
             self.assertEqual(output["legacy_policy"], {"budget": 45})
-            self.assertEqual(output["invalid_config"], str(self.config))
+            self.assertIsNone(output["invalid_config"])
             self.assertEqual(self.run_command("auto-on")[0], 1)
             self.assertEqual(self.run_command("auto-reset")[0], 0)
             status = self.run_command("status")[1]
@@ -102,9 +102,9 @@ class AutoPolicyTests(unittest.TestCase):
                 with patch.object(bark, "safe_user_config_path", return_value=fallback):
                     output = self.run_command("status")[1]
                     self.assertIs(output["auto"], False)
-                    self.assertIs(output["requires_reconciliation"], True)
+                    self.assertIs(output["requires_reconciliation"], False)
                     self.assertEqual(output["config"], str(self.config))
-                    self.assertEqual(self.run_command("auto-on")[0], 1)
+                    self.assertIsNone(output["invalid_config"])
                 self.assertEqual(self.config.read_bytes(), original)
 
     def test_corrupt_primary_blocks_auto_and_all_settings_writes_without_data_loss(self) -> None:
@@ -127,18 +127,55 @@ class AutoPolicyTests(unittest.TestCase):
                     self.assertEqual(self.config.read_bytes(), original)
                     self.assertEqual(fallback.read_bytes(), fallback_original)
 
-    def test_shadowed_invalid_object_is_not_replaced_with_fallback_policy(self) -> None:
+    def test_malformed_bark_object_remains_active_and_explicit_repair_preserves_data(self) -> None:
         original = self.write({"bark": "invalid", "other": {"keep": 7}})
         fallback = self.config.with_name("fallback.json")
         fallback_original = b'{"auto": true, "bark": true}'
         fallback.write_bytes(fallback_original)
         with patch.object(bark, "safe_user_config_path", return_value=fallback):
-            self.assertIs(self.run_command("status")[1]["auto"], False)
-            for command in ("off", "auto-off", "auto-reset"):
-                with self.subTest(command=command):
-                    self.assertEqual(self.run_command(command)[0], 1)
-                    self.assertEqual(self.config.read_bytes(), original)
-                    self.assertEqual(fallback.read_bytes(), fallback_original)
+            status = self.run_command("status")[1]
+            self.assertIs(status["auto"], False)
+            self.assertIs(status["bark"], True)
+            self.assertIs(status["requires_reconciliation"], False)
+            self.assertIsNone(status["invalid_config"])
+            self.assertEqual(status["config"], str(self.config))
+            self.assertEqual(self.config.read_bytes(), original)
+            self.assertEqual(self.run_command("off")[0], 0)
+            self.assertEqual(json.loads(self.config.read_text()), {"bark": False, "other": {"keep": 7}})
+            self.assertEqual(fallback.read_bytes(), fallback_original)
+
+    def test_sound_typo_does_not_change_valid_auto_or_legacy_policy(self) -> None:
+        for policy in ({"auto": True}, {"auto": False}, {"auto": True, "budget": 0}):
+            with self.subTest(policy=policy):
+                original = self.write({"bark": "x", **policy})
+                status = self.run_command("status")[1]
+                self.assertIsNone(status["invalid_config"])
+                self.assertIs(status["auto"], policy["auto"] and "budget" not in policy)
+                self.assertEqual(self.config.read_bytes(), original)
+
+    def test_nonstandard_json_or_nonobject_config_cannot_enable_auto_or_be_overwritten(self) -> None:
+        for raw in ('{"auto":true,"budget":NaN}', '{"auto":true,"other":Infinity}',
+                    '{"auto":true,"other":-Infinity}', '{"auto":false,"other":1e999}',
+                    '{"auto":true,"budget":-1e999}', '[]', 'true', 'null'):
+            with self.subTest(raw=raw):
+                self.config.write_text(raw, encoding="utf-8")
+                status = self.run_command("status")[1]
+                self.assertIs(status["auto"], False)
+                self.assertEqual(status["invalid_config"], str(self.config))
+                self.assertNotIn("NaN", json.dumps(status, allow_nan=False))
+                self.assertEqual(self.run_command("auto-on")[0], 1)
+                self.assertEqual(self.config.read_text(encoding="utf-8"), raw)
+
+    def test_invalid_user_fallback_error_does_not_claim_a_priority(self) -> None:
+        fallback = self.config.with_name("user.json")
+        fallback.write_text("[]", encoding="utf-8")
+        with patch.object(bark, "safe_user_config_path", return_value=fallback):
+            result, output = self.run_command("off")
+        self.assertEqual(result, 1)
+        self.assertIn("invalid config", output["error"])
+        self.assertNotIn("higher-priority", output["error"])
+        self.assertFalse(self.config.exists())
+        self.assertEqual(fallback.read_text(encoding="utf-8"), "[]")
 
     def test_explicit_bark_repair_preserves_parsed_authoritative_policy(self) -> None:
         policy = {"auto": False, "level": "plan", "budget": 0, "other": {"keep": 7}}

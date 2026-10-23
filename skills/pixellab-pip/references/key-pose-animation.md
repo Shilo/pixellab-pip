@@ -6,7 +6,7 @@ Specialty poses belong in `weapon-*.md`, `martial-arts.md` and `armor-clothing.m
 
 ## Plan and files
 
-Plan the stages, chosen supported edit/animation routes, canvas, requested count, every paid call and any proposed local transformation before execution. Pro Flash pose editing is an explicit recipe choice under `pro-flash.md`, not a replacement default for other routes. Use the request/style's look, scale and facing rather than a house aesthetic.
+Plan the stages, chosen supported edit/animation routes, canvas, requested count, every paid call and any proposed local transformation before execution. For selected Pro Flash edits, read `pro-flash.md`. Use the request/style's look, scale and facing rather than a house aesthetic. Optional starting recipes are `../blueprints/overhead-axe-chop.blueprint.json` and `../blueprints/projectile-skill.blueprint.json`; read `blueprint.md` before adapting either to the actual request.
 
 Within the normal run folder, `raw/` can hold unchanged returned poses/clips, `keys/` reviewed pose copies, `clean/<step>/` accepted derivatives, and `final/` requested sheets/metadata/preview. Create only directories/artifacts actually needed. A joined clip must record each source index and junction handling; its derived playback is not an unchanged provider clip. No host panel depends on this layout.
 
@@ -38,6 +38,8 @@ For exaggerated fast moves, useful pose components are an explicit dynamic pose,
 ## Pose review checkpoint
 
 Show the still and the exact pose files proposed for interpolation together at a useful inspection scale and run the look checklist below. Apply the content checkpoint/delegation rule in `auto.md` → Bounded plans and resuming. Any changed pose must be reviewed again before it is used. A redo is paid work within the expressly approved retry scope, or needs additional approval.
+
+When a presentation is available, offer the interactive review in `panel.md` for this checkpoint; build its private snapshot only if that review is wanted.
 
 A localized hand/prop defect may suit masked inpaint; a missing exact line may suit supported PixelArt Workbench edits. Both require the accepted art-change scope and actual schema. Failed helper measurements are observations, not automatic authority to fix pixels or generate another take.
 

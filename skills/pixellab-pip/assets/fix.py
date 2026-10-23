@@ -130,10 +130,16 @@ def main(argv=None):
             return
     if not args.inputs:
         ap.error('give frames, a folder, a sheet or a GIF')
-    sheet = tuple(int(v) for v in args.sheet.lower().split('x')) if args.sheet else None
+    try:
+        sheet = tuple(int(v) for v in args.sheet.lower().split('x')) if args.sheet is not None else None
+    except ValueError:
+        ap.error('--sheet needs positive WxH')
     if sheet and (len(sheet) != 2 or min(sheet) <= 0):
         ap.error('--sheet needs positive WxH')
-    anims = framesmod.load(args.inputs, sheet=sheet, ref=args.ref, move=args.move)
+    try:
+        anims = framesmod.load(args.inputs, sheet=sheet, ref=args.ref, move=args.move)
+    except ValueError as exc:
+        ap.error(str(exc))
     if args.accept and (len(anims) != 1 or args.check_only):
         ap.error('--accept requires one animation and cannot be combined with --check-only; rerun that animation alone')
     if not anims:

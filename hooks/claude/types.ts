@@ -9,6 +9,7 @@ export type PanelImage = {
 
 export type PanelSnapshot = {
   version: 1;
+  lang: string;
   project: string;
   run: string | null;
   created_at: string;

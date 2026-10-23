@@ -176,7 +176,7 @@ class BarkConfigTests(unittest.TestCase):
                 bark.SKILL_CONFIG = original_skill_config
                 sys.argv = original_argv
 
-    def test_non_bool_skill_config_falls_back_to_valid_user_config(self) -> None:
+    def test_non_bool_bark_defaults_on_in_authoritative_skill_config(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             original_skill_config = bark.SKILL_CONFIG
             original_user_config_path = bark.user_config_path
@@ -192,10 +192,10 @@ class BarkConfigTests(unittest.TestCase):
 
                 data, source, invalid_source = bark.read_config()
 
-                self.assertEqual(data["bark"], False)
-                self.assertEqual(source, user_config)
-                self.assertEqual(invalid_source, bark.SKILL_CONFIG)
-                self.assertFalse(bark.bark_enabled())
+                self.assertEqual(data["bark"], "false")
+                self.assertEqual(source, bark.SKILL_CONFIG)
+                self.assertIsNone(invalid_source)
+                self.assertTrue(bark.bark_enabled())
             finally:
                 bark.SKILL_CONFIG = original_skill_config
                 bark.user_config_path = original_user_config_path

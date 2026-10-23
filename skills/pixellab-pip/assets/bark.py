@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import platform
 import shutil
@@ -51,9 +52,20 @@ def safe_user_config_path() -> Path | None:
         return None
 
 
+def reject_constant(value: str) -> None:
+    raise ValueError("nonstandard JSON constant: " + value)
+
+
+def finite_float(value: str) -> float:
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError("JSON number is outside the finite numeric range")
+    return result
+
+
 def read_json(path: Path) -> dict[str, Any] | None:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8"), parse_constant=reject_constant, parse_float=finite_float)
     except (OSError, ValueError):
         # ValueError covers json.JSONDecodeError and UnicodeDecodeError (a config
         # re-saved as UTF-16/UTF-8-BOM), so a malformed file degrades to the
@@ -67,10 +79,6 @@ def normalize_bark(value: Any) -> bool:
     return True
 
 
-def has_valid_bark_value(data: dict[str, Any]) -> bool:
-    return "bark" not in data or isinstance(data["bark"], bool)
-
-
 def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
     invalid_source: Path | None = None
     user_config = safe_user_config_path()
@@ -82,11 +90,7 @@ def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
         if path.exists():
             data = read_json(path)
             if isinstance(data, dict):
-                if has_valid_bark_value(data):
-                    return data, path, invalid_source
-                if legacy_policy(data) or "auto" in data:
-                    # A malformed sound toggle must not hide spend policy or an explicit disable.
-                    return data, path, invalid_source or path
+                return data, path, invalid_source
             if invalid_source is None:
                 invalid_source = path
     return {"bark": True}, None, invalid_source
@@ -147,7 +151,7 @@ def reset_auto() -> Path:
 def save_config(data: dict[str, Any]) -> Path:
     _, source, invalid_source = read_config()
     if invalid_source is not None and invalid_source != source:
-        raise ValueError("invalid higher-priority config must be repaired before settings writes; existing files left unchanged")
+        raise ValueError("invalid config must be repaired before settings writes; existing files left unchanged")
     content = json.dumps(data, indent=2, sort_keys=True) + "\n"
 
     candidates = [SKILL_CONFIG]
