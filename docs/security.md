@@ -14,7 +14,7 @@ Pip is designed not to:
 - delete, clear, or overwrite remote PixelLab assets without explicit approval;
 - present locally drawn or modified pixels as untouched PixelLab output.
 
-Local helpers make no network calls of their own. Pip writes generated work to the project's `pixellab-pip-generations/` directory and preferences to its own config file or documented fallback location.
+Local helpers make no network calls of their own, except `assets/fetch.py`, which downloads finished job results and links a PixelLab tool returned from PixelLab's download and file hosts (`api.pixellab.ai`, `backblaze.pixellab.ai`) and refuses any other host; it sends no token. Pip writes generated work to the project's `pixellab-pip-generations/` directory and preferences to its own config file or documented fallback location.
 
 For detailed auth and service-boundary guidance, see [PixelLab auth and security](pixellab/pixellab-auth-and-security.md).
 
