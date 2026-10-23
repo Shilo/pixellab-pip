@@ -153,7 +153,8 @@ class FinishContractTests(unittest.TestCase):
             blocker = Path(tmp) / "numpy"
             blocker.mkdir()
             (blocker / "__init__.py").write_text('raise ImportError("blocked for the test")\n', encoding="utf-8")
-            env = {**os.environ, "PYTHONPATH": tmp, "PYTHONDONTWRITEBYTECODE": "1"}
+            env = {**os.environ, "PYTHONPATH": tmp + os.pathsep + os.environ.get("PYTHONPATH", ""),
+                   "PYTHONDONTWRITEBYTECODE": "1"}
             for name in CASES:
                 with self.subTest(helper=name):
                     r = run(name, "x.png", "--out", Path(tmp) / "out", env=env)

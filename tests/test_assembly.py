@@ -6,12 +6,16 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+import PIL
 from PIL import Image, ImageSequence
+from test_helpers import load_module
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ASSETS = REPO_ROOT / "skills/pixellab-pip/assets"
+assembly = load_module("assembly_security_guard", ASSETS / "_assembly.py")
 
 
 def run(script: str, *args) -> subprocess.CompletedProcess:
@@ -161,6 +165,27 @@ class FaithfulPreviewTests(unittest.TestCase):
 
 
 class OutputIntegrityTests(unittest.TestCase):
+    def test_outdated_or_uncertain_pillow_is_blocked_before_decode(self):
+        for version in ("12.3.0", "13.0.0rc1", "13.0.0.dev0", "unknown"):
+            with self.subTest(version=version), patch.object(PIL, "__version__", version), patch.object(Image, "open", side_effect=AssertionError("decoder must not run")):
+                with self.assertRaisesRegex(ImportError, "Pillow 13.0.0"):
+                    assembly.load_pillow()
+        self.assertIs(assembly.load_pillow(), Image)
+
+    def test_all_guarded_helper_families_skip_before_old_pillow_decodes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, args in (("preview_gif.py", ["preview.gif", "input.png"]),
+                               ("normal_map.py", ["preview", "preview.gif", "input.png", "normal.png"]),
+                               ("fetch.py", ["j", "raw.png", "--run", "run"])):
+                script = ASSETS / name
+                code = (f"import PIL,runpy,sys; PIL.__version__='12.3.0'; sys.path.insert(0,{str(ASSETS)!r}); "
+                        f"sys.argv={[name, *args]!r}; runpy.run_path({str(script)!r},run_name='__main__')")
+                result = subprocess.run([sys.executable, "-c", code], cwd=root, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 3, result.stderr)
+                self.assertEqual(json.loads(result.stdout)["status"], "skipped")
+            self.assertEqual(list(root.iterdir()), [])
+
     def test_all_destinations_are_preflighted_before_source_or_sidecar_changes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

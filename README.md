@@ -222,7 +222,7 @@ Dated, nondeterministic results from 20 scenarios and three agents: official doc
 
 ## Security
 
-Pip is Markdown instructions plus small Python 3.10+ local helpers. It ships no compiled binaries, the helpers make no network calls except the job download helper, which fetches results from PixelLab's own download host, and guidance, setup, and routing work without a PixelLab token. Live generation may spend credits and requires a bearer token, but Pip never needs it pasted into chat, never automates undocumented private endpoints, asks before destructive remote changes, and labels local processing.
+Pip is Markdown instructions plus small local helpers. Standard-library helpers support Python 3.10+; image helpers use Python 3.11+ with security-patched Pillow 13 or newer. It ships no compiled binaries, the helpers make no network calls except the job download helper, which fetches results from PixelLab's own download host, and guidance, setup, and routing work without a PixelLab token. Live generation may spend credits and requires a bearer token, but Pip never needs it pasted into chat, never automates undocumented private endpoints, asks before destructive remote changes, and labels local processing.
 
 Read [Security and trust ↗](docs/security.md) for the complete access boundary, public audits, release provenance, and scanner disclosures, or [report a concern ↗](SECURITY.md).
 

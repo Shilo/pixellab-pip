@@ -136,13 +136,16 @@ class ImageInspectionTests(unittest.TestCase):
     def test_unavailable_pillow_skips_before_inspection_without_writes(self) -> None:
         environment = {**os.environ, "PYTHONPATH": str(self.root),
                        "PYTHONDONTWRITEBYTECODE": "1"}
-        for broken in (False, True):
-            with self.subTest(broken_import=broken):
-                if broken:
+        for dependency in ("missing", "broken", "outdated"):
+            with self.subTest(dependency=dependency):
+                if dependency != "missing":
                     package = self.root / "PIL"
-                    package.mkdir()
+                    package.mkdir(exist_ok=True)
                     (package / "__init__.py").write_text(
-                        'raise OSError("unavailable native imaging library")\n', encoding="utf-8")
+                        'raise OSError("unavailable native imaging library")\n' if dependency == "broken"
+                        else '__version__ = "12.3.0"\n', encoding="utf-8")
+                    if dependency == "outdated":
+                        (package / "Image.py").write_text('raise AssertionError("unsafe decoder imported")\n', encoding="utf-8")
                 before = {str(p.relative_to(self.root)): p.read_bytes()
                           for p in self.root.rglob("*") if p.is_file()}
                 result = subprocess.run(

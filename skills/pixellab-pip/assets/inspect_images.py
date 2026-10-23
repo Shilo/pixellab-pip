@@ -6,6 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 import struct
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _assembly import load_pillow  # noqa: E402
 
 
 def positive_int(value: str) -> int:
@@ -31,9 +36,10 @@ def inspect_images(
     expected_frames: int | None = None,
 ) -> dict:
     try:
-        from PIL import Image, ImageSequence
-    except (ImportError, OSError):
-        return {"skipped": "Pillow is unavailable; use equivalent host checks."}
+        Image = load_pillow()
+        from PIL import ImageSequence
+    except (ImportError, OSError) as exc:
+        return {"skipped": f"Pillow is unavailable or unsafe: {exc}; use equivalent host checks."}
 
     files, errors, total = [], [], 0
     for path in paths:

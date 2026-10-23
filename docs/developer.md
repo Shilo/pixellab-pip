@@ -32,7 +32,7 @@ python dev-tools/qa.py
 
 The gate validates tracked JSON, version consistency, Python compilation, local Markdown links, skill reference pointers, media signatures, and helper smoke tests.
 
-Local helper scripts target Python 3.10 or newer.
+Standard-library helper scripts target Python 3.10 or newer. Current image/QA dependencies require Python 3.11 or newer (Pillow 13); CI runs Python 3.14.
 
 Install the local QA dependencies first on a fresh checkout:
 

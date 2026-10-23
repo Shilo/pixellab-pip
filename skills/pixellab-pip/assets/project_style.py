@@ -22,6 +22,9 @@ import os
 import sys
 import tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _assembly import load_pillow  # noqa: E402
+
 STYLE_KEYS = ("setting", "density", "look", "palette", "palette_hex", "colors", "outline", "shading", "dither",
               "light", "view", "facing", "sizes", "negatives", "rules", "anim", "anchors", "seed", "reference",
               "analysed_from", "notes")
@@ -143,10 +146,10 @@ def check_image(path: str, *, require_decode: bool = False) -> bool:
     if not os.path.isfile(path):
         raise ValueError("missing anchor image: " + path)
     try:
-        from PIL import Image
-    except ImportError:
+        Image = load_pillow()
+    except (ImportError, OSError) as exc:
         if require_decode:
-            raise ValueError("Pillow is needed to verify a new anchor; use an equivalent host image check instead")
+            raise ValueError("A usable Pillow is needed to verify a new anchor: " + str(exc)) from exc
         return False
     try:
         with Image.open(path) as image:

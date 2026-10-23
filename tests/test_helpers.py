@@ -37,6 +37,28 @@ skill_benchmark = load_module(
 
 
 class BackgroundRemovalTests(unittest.TestCase):
+    def test_outdated_pillow_skips_before_reading_or_writing_images(self) -> None:
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            package = root / "PIL"
+            package.mkdir()
+            (package / "__init__.py").write_text('__version__ = "12.3.0"\n', encoding="utf-8")
+            (package / "Image.py").write_text('raise AssertionError("unsafe decoder imported")\n', encoding="utf-8")
+            source, target = root / "source.png", root / "target.png"
+            source.write_bytes(b"source must remain unread and unchanged")
+            result = subprocess.run(
+                [sys.executable, "-S", str(REPO_ROOT / "skills/pixellab-pip/assets/background_removal.py"),
+                 str(source), str(target)],
+                env={**os.environ, "PYTHONPATH": str(root), "PYTHONDONTWRITEBYTECODE": "1"},
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout)["status"], "skipped")
+            self.assertIn("13", result.stdout)
+            self.assertEqual(result.stderr, "")
+            self.assertEqual(source.read_bytes(), b"source must remain unread and unchanged")
+            self.assertFalse(target.exists())
+
     def test_edge_background_removed_without_repainting_sprite(self) -> None:
         Image = background_removal.Image
         with tempfile.TemporaryDirectory() as tmp:

@@ -6,11 +6,12 @@ metadata:
   requires_api_key: "false"
   api_key_env: PIXELLAB_SECRET
   api_key_note: "Optional. Guidance, setup, routing, and docs need no key. Live PixelLab generation needs a bearer token, configured in the MCP client or as PIXELLAB_SECRET for REST v2 fallback; the skill uses it only as an auth header and never reads, prints, or stores its value."
-permissions: # declared least-privilege capabilities: reads env var PIXELLAB_SECRET, runs the python command, reads/writes its own output and config files
+permissions: # local helpers read/write outputs and config; fetch.py uses only documented PixelLab download/file hosts
   - env
   - shell
   - file_read
   - file_write
+  - network
 ---
 
 # PixelLab Pip
@@ -184,7 +185,7 @@ Read each reference only when its trigger applies:
 - REST v2 prompt/field character limits: `references/prompt-limits.md`.
 - Explicit Aseprite handling, `.aseprite` workspaces, palette quantization, CLI/Lua export: `references/aseprite-cli.md`.
 - Third-party Aseprite MCP servers: `references/aseprite-mcp.md`.
-- Local decoded-image checks, atlas/spritesheet grid inspection previews, local assembly, preview GIFs, and ImageMagick: `references/local-asset-assembly.md`.
+- Before any bundled image helper: dependency/skip requirements, decoded-image checks, atlas/spritesheet grid previews, local assembly, GIFs and ImageMagick: `references/local-asset-assembly.md`.
 
 Optional broader docs: in full plugin/repo installs these resolve relative to this `SKILL.md`; raw skill installs may omit them. Read at most one matching file if runtime references are not enough; if absent, continue with `references/official-pixellab-documentation.md` and current official docs.
 

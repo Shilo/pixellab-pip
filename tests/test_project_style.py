@@ -35,6 +35,33 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(r.returncode, 4)
         self.assertEqual(json.loads(r.stdout)["status"], "no_style")
 
+    def test_outdated_pillow_preserves_profile_reads_and_blocks_new_anchor(self) -> None:
+        import os
+        package = self.dir / "PIL"
+        package.mkdir()
+        (package / "__init__.py").write_text('__version__ = "12.3.0"\n', encoding="utf-8")
+        (package / "Image.py").write_text('raise AssertionError("unsafe decoder imported")\n', encoding="utf-8")
+        image = self.dir / "hero.png"
+        Image.new("RGBA", (4, 4), (20, 40, 80, 255)).save(image)
+        profile = self.dir / "pixellab.json"
+        profile.write_text(json.dumps({"look": "town", "max_cost": 0, "anchors": {"heroes": "hero.png"},
+                                       "styles": {"town": {}}, "active_style": "town"}), encoding="utf-8")
+        before = profile.read_bytes()
+        env = {**os.environ, "PYTHONPATH": str(self.dir), "PYTHONDONTWRITEBYTECODE": "1"}
+        shown = subprocess.run([sys.executable, "-S", str(STYLE), "show"], cwd=self.dir, env=env,
+                               capture_output=True, text=True)
+        self.assertEqual(shown.returncode, 0, shown.stdout + shown.stderr)
+        data = json.loads(shown.stdout)
+        self.assertEqual(data["unverified_anchors"], ["heroes"])
+        self.assertEqual(data["legacy_limits"], {"max_cost": 0})
+        self.assertEqual(shown.stderr, "")
+        saved = subprocess.run([sys.executable, "-S", str(STYLE), "anchor", "icons", str(image)],
+                               cwd=self.dir, env=env, capture_output=True, text=True)
+        self.assertNotEqual(saved.returncode, 0)
+        self.assertIn("13", saved.stderr)
+        self.assertEqual(saved.stdout, "")
+        self.assertEqual(profile.read_bytes(), before)
+
     def test_legacy_top_level_appearance_is_read_without_mutation(self) -> None:
         # a pre-merge Game Art profile: project fields and house-style words, but no chosen style
         (self.dir / "pixellab.json").write_text(json.dumps(

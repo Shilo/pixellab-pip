@@ -22,6 +22,8 @@ Alpha/bounds are observations: a fully transparent effect frame may be intention
 
 ## Assembly Helpers
 
+Use Python 3.11+ with security-patched Pillow 13+ for bundled image helpers. Older Pillow releases have known decoder vulnerabilities. The shared guard skips before decoding when a supported stable version is unavailable. Use the host inspection/assembly fallback in that case; do not install or upgrade packages without a user request.
+
 The helpers below follow the same Python, `<skill-dir>`, and exit-code-3 skip rules as `inspect_images.py` above; inspect each helper's output/help for its result or skip report. Use a fresh destination; preflight refuses source aliases, collisions and existing output files. They place pixels without scaling or editing them (except `--scale`, nearest neighbour) and never drop, repeat, or reorder frames.
 
 - `pad_sprite.py <in> <out> W H X [Y]`: transparent padding for `animation.md`. `Y` defaults to the lowest drawn row on the bottom edge. Prints `{"offset": [x, y]}`, the placement offset `animation.md` says to record.

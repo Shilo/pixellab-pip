@@ -19,9 +19,9 @@ for _s in (sys.stdout, sys.stderr):   # Windows consoles: never crash on non-ASC
 
 def require_numpy(scipy: bool = False) -> None:
     """Print a skipped report and exit 3 when numpy or Pillow cannot be imported (never a pass)."""
+    require_pillow()
     try:
         import numpy  # noqa: F401
-        from PIL import Image  # noqa: F401
         if scipy:
             import scipy.ndimage  # noqa: F401
     except (ImportError, OSError) as exc:
@@ -29,14 +29,24 @@ def require_numpy(scipy: bool = False) -> None:
         sys.exit(3)
 
 
-def require_pillow():
-    """Return PIL.Image, or print a skipped report and exit 3 (unavailable verification, never a pass)."""
-    try:
-        from PIL import Image
-    except (ImportError, OSError):
-        print(json.dumps({"status": "skipped", "reason": "Pillow is unavailable"}))
-        sys.exit(3)
+def load_pillow():
+    """Return a patched stable PIL.Image, or raise without printing/decoding any input."""
+    import PIL
+    version = str(getattr(PIL, "__version__", "unknown"))
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:\.post\d+)?", version)
+    if match is None or tuple(map(int, match.groups())) < (13, 0, 0):
+        raise ImportError(f"Pillow 13.0.0+ stable is required for patched image decoding; installed {version}")
+    from PIL import Image
     return Image
+
+
+def require_pillow():
+    """Return patched PIL.Image, or print an unavailable-verification skip and exit 3."""
+    try:
+        return load_pillow()
+    except (ImportError, OSError) as exc:
+        print(json.dumps({"status": "skipped", "reason": f"Pillow is unavailable: {exc}"}))
+        sys.exit(3)
 
 
 def expand(paths: list[str]) -> list[str]:
