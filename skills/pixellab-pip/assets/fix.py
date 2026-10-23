@@ -1,7 +1,7 @@
-"""fix.py - the animation doctor. Measures frames against "game ready" (smooth motion, clean transitions,
-colour match, no dots or gaps, no artifacts between frames, no weird changes, crisp pixels at one scale), fixes for free
-what it can from pixels the set already has, and writes a report with exact re-roll plans for the rest. Free: no
-generations, no GPU. Originals are never written; same frame count and names out as in.
+"""Heuristic animation inspection, optional local repairs and advisory re-roll plans.
+
+Without --check-only, writes repair copies; originals remain untouched.
+Findings require visual review and do not certify art quality.
 
   python fix.py out/knight_attack_*.png                 # one animation (files, a folder, a sheet or a GIF)
   python fix.py out/                                    # a batch: every character x move in the folder
@@ -9,8 +9,7 @@ generations, no GPU. Originals are never written; same frame count and names out
   python fix.py frames/ --ref hero.png                  # compare against this standing sprite
   python fix.py frames/ --accept c2,c5                  # also apply these proposed effect fixes (asked first)
   python fix.py frames/ --check-only --json             # measure and plan only; report to stdout
-  python fix.py --table                                 # the defect -> cause -> change table (references/animation-doctor.md);
-                                                        # with frames it prints the table, then checks them as usual
+  python fix.py --table  # defect -> cause -> change guidance; with inputs, also inspects them
 
 Writes into <first input folder>_fixed/ (or --out): the fixed frames, timing.json, fix_report.json, fix_report.txt,
 fix_sheet.png and <character>_<move>_preview.gif (frames in subfolders keep their subfolder). Effects (slashes, glows) and frame drops are never changed without --accept. Every fixed frame is a local derivative

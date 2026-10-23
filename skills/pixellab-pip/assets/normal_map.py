@@ -76,7 +76,7 @@ else:
     alb = np.asarray(sprite, dtype=np.float32) / 255
     nrm = np.asarray(normal, dtype=np.float32)[..., :3] / 127.5 - 1    # OpenGL: x right, y up, z out
     if a.directx:
-        nrm[..., 1] *= -1                                               # DirectX: green points down
+        nrm[..., 1] *= -1  # DirectX: green points down
     nrm /= np.maximum(np.linalg.norm(nrm, axis=2, keepdims=True), 1e-6)
     n, fw = a.frames, sprite.width // a.frames
 

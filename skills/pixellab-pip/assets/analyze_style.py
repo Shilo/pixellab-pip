@@ -233,7 +233,7 @@ if thumbs:   # --frames: one small look sheet
     look.save(os.path.join(out, 'look.png'))
 
 print('files: %d (%s)' % (len(items), ', '.join('%s %d fr x%d %s' % (os.path.basename(f['path']), f['frames'], f['native_scale'], f['background'])
-                                              for f in res['files'])))
+        for f in res['files'])))
 print('subject ~%dx%d px -> density %s' % (subj_h, res['subject_px']['width'], density))
 print('colours %d (%d significant), saturation %.2f, brightness %.2f, %d tones per ramp' % (
     n_colours, len(sig), sat, val, tones_med))
