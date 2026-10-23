@@ -1,6 +1,6 @@
 # Local Asset Assembly
 
-Read this for local image inspection, atlas or spritesheet grid inspection previews, and local preview or assembled artifacts from PixelLab-generated frames.
+Read this for local image inspection, atlas or spritesheet grid inspection previews, engine export (spritesheet JSON, Godot `.tres`), and local preview or assembled artifacts from PixelLab-generated frames.
 
 For Aseprite-specific opening, import/export, layers, frames, tags, `.aseprite` workspace creation, or Aseprite CLI/Lua behavior, read `aseprite-cli.md` instead.
 
@@ -20,6 +20,24 @@ Missing or unusable Pillow returns a JSON `skipped` reason and exit code 3 befor
 
 Alpha/bounds are observations: a fully transparent effect frame may be intentional, edge contact does not prove clipping, and transparency does not prove the background was correctly removed. Continue visual verification. This helper does not verify GIF disposal or source-pixel fidelity; retain the GIF checks below.
 
+## Assembly Helpers
+
+The helpers below follow the same Python, `<skill-dir>`, and exit-code-3 skip rules as `inspect_images.py` above; each prints one JSON line. They place pixels without scaling or editing them (except `--scale`, nearest neighbour) and never drop, repeat, or reorder frames.
+
+- `pad_sprite.py <in> <out> W H X [Y]`: transparent padding for `animation.md`. `Y` defaults to the lowest drawn row on the bottom edge. Prints `{"offset": [x, y]}`, the placement offset `animation.md` says to record.
+- `contact_sheet.py <out.png> <images…> [--cols 10] [--scale 0.5]`: a transparent selection preview, labels `1..N` centred under each image in the given order, wrapping after `--cols`.
+- `preview_gif.py <out.gif> <frames…> [--durations ms,…|--fps N] [--scale K]`: the faithful preview for GIF Previews below. It decodes its own output and exits 1 on any count, alpha, colour, or delay mismatch; `"exact": false` means partial alpha or over 255 colours, so only count and alpha were checked.
+
+## Engine Export
+
+When the user asks for an engine-ready sheet, pack same-size frames with `make_sheet.py`:
+
+```bash
+python "<skill-dir>/assets/make_sheet.py" <out-stem> frame-*.png --durations 100,100,200 --hit 2 --pad 24,56 --facing right --godot sprites/hero
+```
+
+It writes one row `<out-stem>.png` plus Aseprite array JSON (`frames[].frame`, `duration` ms, `meta.pixellab`: `frame_count`, `hit_frame`, `pad_offset`, `facing`), which Aseprite importers in Unity and Godot read. `--godot [RES_DIR]` adds a Godot 4 `SpriteFrames` `.tres` whose texture path is `res://RES_DIR/<out-stem>.png`. Durations are metadata only: give one per frame (default even `--fps 12`); holds come from durations, never from repeated frames. Mixed frame sizes are refused: pad them first. Include `--pad`, `--facing`, `--hit`, and `--godot` only when known or requested.
+
 ## Atlas And Spritesheet Grid Inspection
 
 For every atlas or spritesheet request with known or requested cell dimensions, create a separate, clearly labeled inspection preview showing the expected cell grid. Keep the preview separate from final deliverables, never bake it into the requested asset, and never treat a correctly drawn grid as proof that the underlying content follows it.
@@ -38,7 +56,7 @@ Loop every preview GIF by default (`-loop 0`), even a one-way or non-seamless cl
 
 Transparent pixel art GIFs are disposal-sensitive: if each frame does not say how the previous frame should be cleared, some viewers accumulate old transparent-frame pixels and show trails.
 
-When using ImageMagick `magick`, put animation settings before the input frames so they apply to every frame:
+Prefer `preview_gif.py` (above) when Python and Pillow are available; it covers delay, disposal, and the coalesce comparison in Verification. Otherwise, when using ImageMagick `magick`, put animation settings before the input frames so they apply to every frame:
 
 ```powershell
 magick -delay 12 -dispose Previous -loop 0 "frame-*.png" "preview.gif"
@@ -53,6 +71,16 @@ magick "frame-*.png" -delay 12 -dispose Background -loop 0 "preview.gif"
 ```
 
 Putting `-delay`, `-dispose`, or `-loop` only after the input frames can produce frames with `Dispose: Undefined`, which is exactly the condition that causes past frames to remain visible in transparent GIF previews.
+
+## Move Showcase GIF
+
+To share a character's finished moves in one GIF (Discord, a devlog), export each move as `<name>_<move>.png` with Aseprite-style JSON beside it (`<name>_<move>.json`, see `aseprite-cli.md`), then run `python "<skill-dir>/assets/showcase_gif.py" <dir> <name> [--moves attack,skill] [--out file.gif]`. It uses the moves present, each on its own timing, on a transparent background; add `--bg discord` only when the user asks for a dark background.
+
+## Normal-Map Previews
+
+For `create_normal_map` (see `image-input-roles.md`), `assets/normal_map.py gif` packs animation frames into one GIF to upload, `split` cuts a returned strip into `<frame>_n.png`, and `preview <out.gif> <sprite.png> <normal.png> [--frames N] [--directx]` circles a light around the sprite and writes `<out>_lights.png` (lit from left, top, right). Judge the map there: areas that do not change with the light are flat or banded. Pass `--directx` for a DirectX map.
+
+These helpers need Pillow and numpy; exit 3 with a `skipped` status means the preview was not made.
 
 ## Verification
 
