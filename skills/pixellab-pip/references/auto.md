@@ -12,11 +12,32 @@ One short word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/
 $pixellab-pip auto off
 ```
 
-- `auto`: run `python assets/bark.py auto` (reads, flips, and persists the value).
-- `auto on`: run `python assets/bark.py auto-on`.
-- `auto off`: run `python assets/bark.py auto-off`.
+- `auto`: run `python <skill-dir>/assets/bark.py auto` (reads, flips, and persists the value).
+- `auto on`: run `python <skill-dir>/assets/bark.py auto-on`.
+- `auto off`: run `python <skill-dir>/assets/bark.py auto-off`.
 
 `auto` is off by default: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.`
+
+## Approval levels
+
+`auto` on/off is the two-level form of one setting, the approval level. `level` sets all three:
+
+```text
+/pixellab-pip level
+/pixellab-pip level plan 45 2      (budget 45 generations, 2 redos)
+```
+
+Run `python <skill-dir>/assets/bark.py level` to read it (the skill folder's absolute path, as in `local-asset-assembly.md`), `... level <ask|plan|auto> [<budget> <redos>]` to set it; `auto on` is `level auto`, `auto off` is `level ask`. Reply with the level, its budget and redos in one line, and say it applies to every project that uses this skill install.
+
+| Level | Paid calls | Retries | Local pixel clean-up (scrub, despeckle, ground snap, recolour) | Local new pixels (trails, baked effects) | Frame drops or reorders |
+|---|---|---|---|---|---|
+| `ask` (default) | the gate below, once per job | each needs its own approval | ask once per move | ask | proposed, the user accepts |
+| `plan` | one gate for the whole listed plan, which may span several jobs (a character, then its attack); runs to the end or to the budget | up to `retries`, inside the budget, without asking | allowed, reported | allowed when named in the plan | proposed, the user accepts |
+| `auto` | the auto-on message below, no pause | up to `retries` | allowed, reported | allowed, reported | allowed, reported |
+
+At `plan` and `auto`, before any paid call that would pass the budget, stop and ask. A plan's spend is `python <skill-dir>/assets/manifest.py committed <run> [<run>...]` over every run folder the plan wrote (a still and its moves are separate folders; finished jobs plus jobs submitted but not yet fetched).
+
+**Resuming.** When a project already has a run whose plan did not finish (a session ended mid-plan), keep working in that run folder: read its manifest, say in one line what was spent and what is left of the approved plan, fetch any `submitted` job before paying again, and count the remaining budget from `committed`. A fresh plan gets a new run folder and a new approval. At every level: the plan still pauses at its content checkpoints (the user picks among candidates; key poses are shown for approval before in-betweens are generated), destructive remote actions and overwriting files always ask, and raw PixelLab outputs are never changed (clean-up writes labelled copies).
 
 ## Config
 
@@ -24,7 +45,10 @@ $pixellab-pip auto off
 
 ```json
 {
-  "auto": false
+  "auto": false,
+  "level": "ask",
+  "budget": null,
+  "retries": 0
 }
 ```
 
@@ -32,7 +56,7 @@ The helper writes `auto` to `pixellab-pip.json` beside `SKILL.md` atomically, pr
 
 ## The cost-approval gate
 
-Fire this gate once per job, as early as feasible: after any blocking clarification and after prompt enhancement, immediately before the first paid PixelLab call. Read the `auto` setting exactly once, at this moment, and apply that one decision for the rest of the job — never re-read it mid-job.
+Fire this gate once per job, as early as feasible: after any blocking clarification and after prompt enhancement, immediately before the first paid PixelLab call. Read the approval level exactly once, at this moment (`python <skill-dir>/assets/bark.py level`; `auto` on is the `auto` level, off is `ask`), and apply that one decision for the rest of the job — never re-read it mid-job. At `auto` follow "When auto is on" below; at `ask` and `plan` post the approval message (at `plan`, once for the whole listed plan and its budget). Post it as visible text even when it is approved at once by the user's standing instruction or a delegate they named: it is the user's record of what will be spent and how each call is set up, and a plan approved without it was never shown. At `plan` the budget caps the run; it never approves the card.
 
 Plan the whole paid chain before the gate so the user approves the whole job — both the spend and how each call is set up — in one message, instead of a cost prompt between each step. This covers single jobs, multi-asset batches, and multi-shot cinematics alike. The gate replaces repeated cost-permission asks only — not the content and quality checkpoints (produce-one-candidate-first, the `south`-first animation default, ask-before-all-directions, per-shot validation). When your listed plan explicitly includes that wider scope and the user approves it, that approval also covers those scope asks, so you neither skip them silently nor ask twice.
 
@@ -51,7 +75,7 @@ The user approves both the spend and how each call is set up, so show enough of 
 
 Template:
 
-> 💳 **Approve this PixelLab run?** — **~{N} generations** *(or credits)*.
+> 💳 **Approve this PixelLab run?** — **~{N} generations** *(or credits)*. At `plan` the header adds the level: `— **~{N} generations** (plan · budget {B} · {R} redos)`.
 >
 > 1. **`{tool or endpoint}`** · {surface} · {mode/key notes} · ~{cost}
 >    - `{long prompt/description}`: "{exact text to send}" *(flag `(enhanced)` or `(rerouted)` if you changed it)*
