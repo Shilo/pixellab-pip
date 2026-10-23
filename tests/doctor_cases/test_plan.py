@@ -28,7 +28,7 @@ def test_weapon_lost_plan_finds_the_job(tmp_path):
     assert 'write the weapon into the pose' in p['prompt_change']
     assert p['cost'] == 5                                    # 48 x 56 canvas: the <= 96 px tier
     assert p['job']['job_id'] == 'j-123'
-    assert p['reroll'].startswith('/pga-reroll fix:')
+    assert p['reroll'] == 'Re-roll plan 1 for %s in fix_report.json' % a.key   # a plain request: no /pga-* command
 
 
 def test_no_log_means_no_job():

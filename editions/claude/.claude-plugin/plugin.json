@@ -1,7 +1,7 @@
 {
   "name": "pixellab-pip-studio",
   "version": "2.3.0",
-  "description": "PixelLab Pip for Claude Code: short /pga-* commands, a side panel to review key poses and finished moves, and the PixelLab connection set up on install.",
+  "description": "PixelLab Pip for Claude Code: a side panel to review key poses and finished moves, and the PixelLab connection set up on install. Use /pixellab-pip as on every host.",
   "license": "MIT",
   "author": { "name": "Shilo and lexingel" },
   "keywords": ["pixellab", "pixellab-pip", "pixel-art", "game-assets", "claude-code"],

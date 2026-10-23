@@ -1,4 +1,4 @@
-"""The free /pga-fix repairs: only pixels the set already has (the reference's colours, the character's own clean
+"""The animation doctor's free repairs: only pixels the set already has (the reference's colours, the character's own clean
 frames). Body only: effect pixels and soft effect edges are proposals, applied when their change id is accepted.
 run() returns a repaired copy and one Change per finding it acted on (result "fixed" provisionally; the caller
 re-measures and corrects it), in finding order, so ids are stable between runs."""

@@ -1,4 +1,4 @@
-"""Timing repairs for /pga-fix: drop a frame that still fails (it becomes a copy of the frame before, which is held
+"""Timing repairs for the animation doctor: drop a frame that still fails (it becomes a copy of the frame before, which is held
 longer), and the batch audit's hurt orders. The frame count and names never change, so the fixed frames still drop
 into an engine that loads a fixed number of them; durations and order are reported for engines that can use them."""
 import copy

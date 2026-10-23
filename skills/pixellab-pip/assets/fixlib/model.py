@@ -1,4 +1,4 @@
-"""The three things /pga-fix passes around: an animation, a finding about it, and a change made to it."""
+"""The three things the animation doctor passes around: an animation, a finding about it, and a change made to it."""
 from dataclasses import dataclass, field
 
 import numpy as np

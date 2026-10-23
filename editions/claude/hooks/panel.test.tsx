@@ -17,14 +17,14 @@ const DIRS: Record<string, string[]> = {
 const PANE = {
   plugin: 'pixellab-pip-studio',
   component: 'Pane',
-  requestId: 'pga-panel',
+  requestId: 'pixellab-panel',
   props: { title: 'PixelLab art', isFocused: false, bodyColumns: 60, placement: 'dock', scroll: { offset: 0, bodyRows: 40 }, view: {} },
 } as const
 
 // the engine resolves paths against the session's drive: compare in one form
 const norm = (p: string) => p.replace(/^[A-Za-z]:/, '').split('\\').join('/')
 
-function engine(on: any, submitted: string[] = []) {
+function engine(on: any, submitted: string[] = [], cwd = '/proj', opened: string[] = []) {
   const store: Record<string, unknown> = {}
   on('command.register', () => ({ value: undefined }))
   on('store.get', (_: any, e: any) => ({ value: store[e.key] }))
@@ -34,9 +34,12 @@ function engine(on: any, submitted: string[] = []) {
   })
   on('clock.every', () => ({ value: null }))
   on('clock.after', () => ({ value: null }))
-  on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('ui.open', (_: any, e: any) => {
+    opened.push(e.id)
+    return { value: { isPlaced: true } }
+  })
   on('session.start', (_: any, e: any) => ({ cwd: e.cwd }))
-  on('session.cwd', () => ({ value: '/proj' }))
+  on('session.cwd', () => ({ value: cwd }))
   on('fs.exists', (_: any, e: any) => ({ value: norm(e.path) in FILES || norm(e.path) in DIRS }))
   on('fs.read', (_: any, e: any) => (norm(e.path) in FILES ? { value: FILES[norm(e.path)] } : { error: 'missing' }))
   on('fs.list', (_: any, e: any) => ({
@@ -53,7 +56,7 @@ function engine(on: any, submitted: string[] = []) {
 test('spend comes from the run manifests, failed jobs refunded', async ($, on) => {
   engine(on)
   await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  await $.command.run({ command: 'pga-panel', args: '/proj' } as any)
+  await $.command.run({ command: 'pixellab-pip-panel', args: '/proj' } as any)
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect((await ui.find({ type: 'Text', text: /gens used/ }))?.text).toContain('10.5 gens used')
   expect((await ui.find({ type: 'Text', text: /neon/ }))?.text).toContain('neon')
@@ -61,9 +64,9 @@ test('spend comes from the run manifests, failed jobs refunded', async ($, on) =
 })
 
 test('welcome page names the style choice and the approval levels', async ($, on) => {
-  engine(on)
-  await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  await $.command.run({ command: 'pga-setup', args: '' } as any)
+  engine(on, [], '/new')
+  await $.session.start({ cwd: '/new', surface: 'desktop', isInteractive: true })
+  await $.command.run({ command: 'pixellab-pip-panel', args: '' } as any)   // a first-time user, no project here
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   const md = await ui.find({ type: 'Markdown' })
   expect(md?.text).toMatch(/choose|style/i)
@@ -74,7 +77,7 @@ test('welcome page names the style choice and the approval levels', async ($, on
 test('a PixelLab call shows in the activity strip with its cost', async ($, on) => {
   engine(on)
   await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  await $.command.run({ command: 'pga-panel', args: '/proj' } as any)
+  await $.command.run({ command: 'pixellab-pip-panel', args: '/proj' } as any)
   await $.tool.call({ tool: 'mcp__pixellab__animate_image', action: 'swing' } as any)
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   const strip = await ui.find({ type: 'Text', text: /animate_image/ })
@@ -87,7 +90,7 @@ test('a new name starts a project, quoted names with spaces kept whole', async (
   const submitted: string[] = []
   engine(on, submitted)
   await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  const r: any = await $.command.run({ command: 'pga-panel', args: '"my game"' } as any)
+  const r: any = await $.command.run({ command: 'pixellab-pip-panel', args: '"my game"' } as any)
   expect(r.text).toMatch(/New project .*my game/)      // the setup request itself is queued to the chat
 })
 
@@ -95,7 +98,7 @@ test('needs you appears when the turn ends on a cost approval', async ($, on) =>
   engine(on)
   on('turn.complete', () => ({ text: '' }))
   await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  await $.command.run({ command: 'pga-panel', args: '/proj' } as any)
+  await $.command.run({ command: 'pixellab-pip-panel', args: '/proj' } as any)
   await $.turn.complete({ reason: 'answer', answer: '💳 **Approve this PixelLab run?** — ~12 generations',
     durationMs: 5, isAborted: false, turnId: 't1' } as any)
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
@@ -105,9 +108,9 @@ test('needs you appears when the turn ends on a cost approval', async ($, on) =>
 
 test('check my setup asks for the Pip setup check', async ($, on) => {
   const submitted: string[] = []
-  engine(on, submitted)
-  await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  await $.command.run({ command: 'pga-setup', args: '' } as any)
+  engine(on, submitted, '/new')
+  await $.session.start({ cwd: '/new', surface: 'desktop', isInteractive: true })
+  await $.command.run({ command: 'pixellab-pip-panel', args: '' } as any)
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   await ui.press({ key: 'check' } as any)
   expect(submitted.join(' ')).toMatch(/PixelLab Pip/)
@@ -118,8 +121,27 @@ test('check my setup asks for the Pip setup check', async ($, on) => {
 test('the approval level shows as not set until one is chosen', async ($, on) => {
   engine(on)
   await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
-  await $.command.run({ command: 'pga-panel', args: '/proj' } as any)
+  await $.command.run({ command: 'pixellab-pip-panel', args: '/proj' } as any)
   const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
   expect((await ui.find({ type: 'Text', text: /Approval/ }))?.text).toMatch(/not set/)
+  await ui.unmount()
+})
+
+test('the first PixelLab call opens the panel by itself', async ($, on) => {
+  const opened: string[] = []
+  engine(on, [], '/proj', opened)
+  await $.session.start({ cwd: '/proj', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: 'mcp__pixellab__create_image_pro_flash', action: 'still' } as any)
+  expect(opened).toContain('pixellab-panel')
+})
+
+test('the welcome page lists the /pixellab-pip words, not /pga commands', async ($, on) => {
+  engine(on, [], '/new')
+  await $.session.start({ cwd: '/new', surface: 'desktop', isInteractive: true })
+  await $.command.run({ command: 'pixellab-pip-panel', args: '' } as any)
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  const md = await ui.find({ type: 'Markdown' })
+  expect(md?.text).toMatch(/\/pixellab-pip level/)
+  expect(md?.text).not.toMatch(/\/pga-/)
   await ui.unmount()
 })

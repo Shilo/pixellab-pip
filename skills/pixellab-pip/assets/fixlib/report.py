@@ -1,4 +1,4 @@
-"""The /pga-fix outputs: fix_report.json (for the agent), fix_report.txt (for a person), fix_sheet.png (input row,
+"""The animation doctor's outputs: fix_report.json (for the agent), fix_report.txt (for a person), fix_sheet.png (input row,
 fixed row, flagged frames outlined) and a preview GIF per animation."""
 import json
 import os

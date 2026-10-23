@@ -1,4 +1,4 @@
-"""Every number a /pga-fix check flags at. Starting values from a 797-animation batch audit (references/animation.md
+"""Every number an animation doctor check flags at. Starting values from a 797-animation batch audit (references/animation.md
 "Audit before you ship a batch"); calibrated values say so on their line."""
 # Calibrated 2026-10 on 818 shipped, hand-approved animations (one game, 96-256 px heroes and champions): checks
 # that lead to a paid re-roll (weapons, weird changes, detached, edge) flag about 2% of them; checks whose fix is free

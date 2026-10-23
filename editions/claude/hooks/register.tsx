@@ -3,7 +3,9 @@ import type { Register } from 'claude-code'
 
 import type { Move, Pose, Snapshot } from '../types'
 
-const PANE = 'pga-panel'
+const PANE = 'pixellab-panel'
+const COMMAND = 'pixellab-pip-panel'   // the panel's one command; everything else is a plain request to the skill
+let opened = false   // the panel opens by itself on the session's first PixelLab call
 const snap = atom({ plugin: 'pixellab-pip-studio', key: 'snap' } as const, null)
 const note = atom({ plugin: 'pixellab-pip-studio', key: 'note' } as const, '')
 const dirAtom = atom({ plugin: 'pixellab-pip-studio', key: 'dir' } as const, '')
@@ -47,24 +49,25 @@ Claude always shows the plan and its cost first. Pick how often it asks:
 | **Plan** (default here) | approve a whole plan once, with a budget and a few redos; it pauses only for you to check the key poses |
 | **Auto** | runs on its own inside a budget you set |
 
-Change it any time below, or with \`/pga-level\`. Deleting anything at PixelLab or overwriting files always asks.
+Change it any time below, or with \`/pixellab-pip level\`. Deleting anything at PixelLab or overwriting files always asks.
 
 ## Before you start
 
 - A [PixelLab](https://pixellab.ai) account; the plugin asked for your key when you installed it.
 - Python 3 on your computer. **Check my setup** below tells you anything missing, in plain words.
 
-## Handy commands
+## Just ask
+
+No commands to learn: say what you want in the chat, for example *make a red-haired archer*, *animate hero.png doing
+an overhead axe chop*, or *check these frames and fix what you can*. A few settings have a short form:
 
 | Type this | What it does |
 |---|---|
-| \`/pga-start\` | a guided first project, explained step by step |
-| \`/pga-char a red-haired archer\` | a new character |
-| \`/pga-anim hero.png "overhead axe chop"\` | an attack or skill animation |
-| \`/pga-fix\` | checks finished frames and fixes what it can for free |
-| \`/pga-level plan 45 2\` | approve plans once, budget 45 generations, 2 redos |
-| \`/pga-help\` | every command |
-| \`/pga-panel <name>\` | opens this panel on a project, or starts a new one |
+| \`/pixellab-pip setup\` | connect PixelLab |
+| \`/pixellab-pip level plan 45 2\` | approve plans once, budget 45 generations, 2 redos |
+| \`/pixellab-pip auto\` | switch auto on or off |
+| \`/pixellab-pip bark\` | the sound when a job finishes, on or off |
+| \`/pixellab-pip-panel <name>\` | open this panel on a project, or start a new one |
 `
 
 const SKIP = /(sheet|zoom|grid|cmp|flagged|[234]x)/i   // review sheets the skill writes next to the poses
@@ -111,7 +114,7 @@ async function scan($: any, dir: string): Promise<Snapshot> {
   const hasProfile = await $.fs.exists(join(dir, 'pixellab.json'))
   const out = join(dir, 'pixellab-pip-generations')   // Pip's run folders: <run>/keys, <run>/final, <run>/manifest.json
   if (!hasProfile && !(await $.fs.exists(out)))
-    return { ...empty, error: `No project in ${dir} yet. /pga-panel <name> starts a new one; /pga-panel <folder> opens an existing one.` }
+    return { ...empty, error: `No project in ${dir} yet. /pixellab-pip-panel <name> starts a new one; /pixellab-pip-panel <folder> opens an existing one.` }
   try {
     if (hasProfile) cfg = JSON.parse(await $.fs.read(join(dir, 'pixellab.json')))
   } catch {}
@@ -229,7 +232,7 @@ async function showWelcome($: any) {
   await $.ui.open({ id: PANE, title: 'PixelLab art' })
 }
 
-// /pga-panel <arg>: an existing project opens; a new name or folder becomes a project Claude sets up
+// /pixellab-pip-panel <arg>: an existing project opens; a new name or folder becomes a project Claude sets up
 async function openProject($: any, rawArg: string): Promise<string> {
   const cwd = await $.session.cwd()
   const arg = rawArg.trim().replace(/^"(.*)"$/, '$1')
@@ -259,23 +262,20 @@ async function openProject($: any, rawArg: string): Promise<string> {
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    await $.command.register({ name: 'pga-panel', description: 'Open the PixelLab art panel for a project folder' })
-    await $.command.register({ name: 'pga-setup', description: 'Welcome page: how PixelLab game art works and how to start' })
+    opened = false   // a new session opens the panel again on its first PixelLab call
+    await $.command.register({ name: COMMAND, description: 'Open the PixelLab art panel: a project by name or folder, or the welcome page' })
     const last = (await $.store.get('dir')) as string | undefined
     if (last && !(await read($, dirAtom))) await update($, dirAtom, () => last)
     $.clock.every(4000, () => void refresh($))
     return next(e)
   })
 
-  on('command.run', { command: 'pga-panel' }, async ($, e) => ({ text: await openProject($, e.args) }))
-
-  on('command.run', { command: 'pga-setup' }, async $ => {
-    await showWelcome($)
-    return { text: 'Welcome page opened in the PixelLab art panel.' }
+  on('command.run', { command: COMMAND }, async ($, e) => {
+    opened = true   // opened by hand: the first PixelLab call won't move it to another folder
+    return { text: await openProject($, e.args) }
   })
 
-  // /pga-start (the skill's guided first project) also opens the welcome page beside it
-  // the activity strip: every PixelLab call and wait the agent makes, with its cost
+  // the activity strip: every PixelLab call and wait the agent makes, with its cost; the first one opens the panel
   on('tool.call', async ($, e, next) => {
     if (!isPixelLab(e)) return next(e)
     await update($, activity, a => ({ ...a, step: shortName(e), since: Date.now(), running: true, needsYou: '' }))
@@ -283,6 +283,10 @@ export const register: Register = on => {
     const m = COST.exec(JSON.stringify(result ?? ''))
     const cost = m && e.tool !== 'Bash' ? Number(m[1]) : 0
     await update($, activity, a => ({ ...a, running: false, cost, spent: a.spent + cost }))
+    if (!opened) {   // after the call returns, so opening the panel never holds the call up
+      opened = true
+      await openProject($, '').catch(() => undefined)
+    }
     return result
   })
 
@@ -298,12 +302,6 @@ export const register: Register = on => {
         : ''
     await update($, activity, a => ({ ...a, running: false, needsYou }))
     return result
-  })
-
-  on('prompt.submit', async ($, e, next) => {
-    if (/^\/pga-start\b/.test(e.text.trim()) && !/\b(off|on)\s*$/.test(e.text.trim()))
-      showWelcome($).catch(() => undefined)   // the panel is a convenience: never hold up the prompt
-    return next(e)
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
@@ -344,7 +342,7 @@ export const register: Register = on => {
               <Button key="start" variant="primary" label="Start project" onPress={() => void go()} />
               <Text dimColor size="footnote">First time? Let Claude walk you through it, or check that your computer is ready.</Text>
               <Box flexDirection="row" gap={1} flexWrap="wrap">
-                <Button key="guided" variant="secondary" label="Guided first project" onPress={() => say('/pga-start')} />
+                <Button key="guided" variant="secondary" label="Guided first project" onPress={() => say('Walk me through a first PixelLab project step by step, explaining what happens at each step.')} />
                 <Button
                   key="check"
                   variant="secondary"
@@ -365,7 +363,7 @@ export const register: Register = on => {
     }
 
     const s = await read($, snap)
-    if (!s) return <Text dimColor>Run /pga-panel in a project folder (one with pixellab.json).</Text>
+    if (!s) return <Text dimColor>Run /pixellab-pip-panel in a project folder (one with pixellab.json).</Text>
     if (s.error)
       return (
         <Box flexDirection="column" gap={1}>

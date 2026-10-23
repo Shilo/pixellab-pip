@@ -1,4 +1,4 @@
-"""The /pga-fix checks. run() measures one animation and returns (findings, skipped): one Finding per check per frame,
+"""The animation doctor's checks. run() measures one animation and returns (findings, skipped): one Finding per check per frame,
 and the checks it couldn't run with the reason. Every number it flags at lives in thresholds.T."""
 import numpy as np
 from scipy import ndimage, signal

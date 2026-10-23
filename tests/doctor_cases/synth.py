@@ -1,4 +1,4 @@
-"""Synthetic pixel art for the /pga-fix tests: one small figure, a smooth walk, and defect injectors.
+"""Synthetic pixel art for the animation doctor tests: one small figure, a smooth walk, and defect injectors.
 Canvas 48x56, figure 32x48 at (8, 6): feet on row 53, head top on row 8, a 1 px staff at x = 33."""
 import os
 

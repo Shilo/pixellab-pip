@@ -1,6 +1,6 @@
 """Re-roll plans for what the free fixes couldn't cure, and the verdict. RULES is the one table of defect -> likely cause
 -> the tool and the one wording change that addresses it; references/fix.md prints it (fix.py --table), and
-/pga-reroll reads the plans this writes into fix_report.json."""
+A re-roll request names a plan this writes into fix_report.json."""
 import json
 import math
 import os
@@ -108,7 +108,7 @@ def make(anim, still_failing, log_path, report='fix_report.json'):
                   'tool': 'animate_image', 'prompt_change': 'same key frames, a new seed; the action says motion only, '
                   'and names any prop that must stay (the empty scabbard at the hip)', 'cost': int(job_cost), 'job': job}]
     for n, p in enumerate(plans, 1):
-        p['reroll'] = '/pga-reroll fix:%s %s %d' % (report, anim.key, n)
+        p['reroll'] = 'Re-roll plan %d for %s in %s' % (n, anim.key, report)   # what the user says to run it
     return plans
 
 

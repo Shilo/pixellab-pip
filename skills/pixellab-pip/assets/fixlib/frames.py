@@ -1,4 +1,4 @@
-"""Loading frames for /pga-fix: files, folders (a batch of characters x moves), sprite sheets and GIFs, all put on
+"""Loading frames for the animation doctor: files, folders (a batch of characters x moves), sprite sheets and GIFs, all put on
 one canvas per animation; and writing them back at each frame's own size and name."""
 import glob
 import os
@@ -19,7 +19,7 @@ def _natural(s):
     return [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)]
 
 
-SKIP_DIRS = ('orig',)   # colormatch.py's backups of the raw frames; *_fixed folders are /pga-fix's own output
+SKIP_DIRS = ('orig',)   # colormatch.py's backups of the raw frames; *_fixed folders are the animation doctor's own output
 
 
 def _expand(inputs):
@@ -170,7 +170,7 @@ def load(inputs, sheet=None, ref=None, move=None):
         anims.append(_anim(ch, mv, [_rgba(Image.open(p)) for p in paths], paths))
         anims[-1].subdir = sub
     seen = {}
-    for a in anims:   # two animations never share a key: the report, timing.json and /pga-reroll name them by it
+    for a in anims:   # two animations never share a key: the report, timing.json and re-roll requests name them by it
         seen.setdefault(a.key, []).append(a)
     for key, same in seen.items():
         if len(same) > 1:

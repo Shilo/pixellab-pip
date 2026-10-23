@@ -46,8 +46,8 @@ product, as a working prototype to try before deciding anything. What it adds to
   motion pages, finishing helpers that write labelled copies, and replayable production blueprints.
 - **Approval levels** `ask`, `plan` and `auto` (budget and redos), and one run record (`manifest.json`).
 
-The **Claude Code edition**, `pixellab-pip-studio` (`editions/claude/`), adds short `/pga-*` commands, the PixelLab
-connection set up on install, and a side panel: welcome page, style choice, key-pose review with Approve / Redo,
+The **Claude Code edition**, `pixellab-pip-studio` (`editions/claude/`), adds the PixelLab connection set up on
+install and a side panel: welcome page, style choice, key-pose review with Approve / Redo,
 finished moves, and a live activity strip. Install it from this repository's marketplace; it installs the core
 plugin with it.
 
@@ -58,9 +58,9 @@ claude plugin marketplace add Shilo/pixellab-pip#feat/pga-merge
 claude plugin install pixellab-pip-studio@pixellab-pip-plugins
 ```
 
-Then run `/pga-setup` for the welcome page, `/pga-panel <project name>` to open or start a project (both come from the
-edition's side panel), or `/pga-start` to begin in chat; `/pga-help` lists every command. Other hosts use the core
-skill as before (`skills/pixellab-pip/`).
+Then ask as on any host, for example `/pixellab-pip animate hero.png doing an overhead axe chop`; settings use
+`/pixellab-pip setup`, `auto`, `bark` and `level` (for example `level plan 45 2`). The panel opens by itself on the
+first PixelLab call; `/pixellab-pip-panel <project name>` opens or starts a project, or shows the welcome page.
 
 **Tested so far (prototype runs):**
 - three clean end-to-end runs by fresh agents that saw only the installed plugins:

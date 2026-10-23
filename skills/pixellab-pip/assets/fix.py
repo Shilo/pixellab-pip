@@ -1,4 +1,4 @@
-"""fix.py - the /pga-fix animation doctor. Measures frames against "game ready" (smooth motion, clean transitions,
+"""fix.py - the animation doctor. Measures frames against "game ready" (smooth motion, clean transitions,
 colour match, no dots or gaps, no artifacts between frames, no weird changes, crisp pixels at one scale), fixes for free
 what it can from pixels the set already has, and writes a report with exact re-roll plans for the rest. Free: no
 generations, no GPU. Originals are never written; same frame count and names out as in.
