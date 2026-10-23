@@ -1,0 +1,18 @@
+{
+  "name": "pixellab-pip-studio",
+  "version": "2.3.0",
+  "description": "PixelLab Pip for Claude Code: short /pga-* commands, a side panel to review key poses and finished moves, and the PixelLab connection set up on install.",
+  "license": "MIT",
+  "author": { "name": "Shilo and lexingel" },
+  "keywords": ["pixellab", "pixellab-pip", "pixel-art", "game-assets", "claude-code"],
+  "dependencies": ["pixellab-pip"],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "pixellab_key": {
+      "type": "string",
+      "title": "PixelLab API key",
+      "description": "Your PixelLab secret, kept in your system's credential store. Leave empty if PixelLab is already connected to Claude Code.",
+      "sensitive": true
+    }
+  }
+}

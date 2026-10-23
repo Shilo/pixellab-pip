@@ -8,3 +8,6 @@ pixellab-pip-generations/
 .codex/config.toml
 .agents/mcp_config.json
 .claude/handoffs/
+
+# the Claude edition ships its PixelLab server entry (the key comes from the plugin user config, never the file)
+!editions/claude/.mcp.json

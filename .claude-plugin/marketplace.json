@@ -53,6 +53,20 @@
         "mcp",
         "api"
       ]
+    },
+    {
+      "name": "pixellab-pip-studio",
+      "displayName": "PixelLab Pip Studio",
+      "version": "2.3.0",
+      "description": "PixelLab Pip for Claude Code: short commands, a review side panel, and the PixelLab connection set up on install.",
+      "license": "MIT",
+      "source": "./editions/claude",
+      "author": {
+        "name": "Shilo and lexingel"
+      },
+      "dependencies": [
+        "pixellab-pip"
+      ]
     }
   ]
 }
