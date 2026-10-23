@@ -19,6 +19,7 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Table Of Contents
 
+- [Merge Prototype](#merge-prototype)
 - [Showcase](#showcase)
 - [Features](#features)
   - [Create Pixel Art You Want](#create-pixel-art-you-want)
@@ -31,6 +32,49 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 - [Benchmark](#benchmark)
 - [Security](#security)
 - [More Documentation](#more-documentation)
+
+## Merge Prototype
+
+This branch merges PixelLab Pip with [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) into one
+product, as a working prototype to try before deciding anything. What it adds to Pip, for every host:
+
+- **Animation doctor** (`assets/fix.py`, `references/animation-doctor.md`): checks frames, fixes what it can for free
+  as labelled copies, and plans priced re-rolls for the rest.
+- **Project styles** the user always chooses (`assets/project_style.py`, named examples offered), plus matching art
+  the user shows.
+- **Key-pose animation recipe** for attacks, skills and signature moves, with weapon, martial-arts, armour and effect
+  motion pages, finishing helpers that write labelled copies, and replayable production blueprints.
+- **Approval levels** `ask`, `plan` and `auto` (budget and redos), and one run record (`manifest.json`).
+
+The **Claude Code edition**, `pixellab-pip-studio` (`editions/claude/`), adds short `/pga-*` commands, the PixelLab
+connection set up on install, and a side panel: welcome page, style choice, key-pose review with Approve / Redo,
+finished moves, and a live activity strip. Install it from this repository's marketplace; it installs the core
+plugin with it.
+
+Try it in Claude Code, from this branch:
+
+```bash
+claude plugin marketplace add Shilo/pixellab-pip#feat/pga-merge
+claude plugin install pixellab-pip-studio@pixellab-pip-plugins
+```
+
+Then run `/pga-setup` for the welcome page, `/pga-panel <project name>` to open or start a project (both come from the
+edition's side panel), or `/pga-start` to begin in chat; `/pga-help` lists every command. Other hosts use the core
+skill as before (`skills/pixellab-pip/`).
+
+**Tested so far (prototype runs):**
+- three clean end-to-end runs by fresh agents that saw only the installed plugins:
+  - a frost mage (side view);
+  - a space marine (sci-fi);
+  - a walkable top-down farmer, plus icons for the mage;
+- the spend records matched PixelLab's charge exactly in every run;
+- the Claude benchmark scored 23 of 23;
+- the panel's tests pass.
+
+Untested: the Codex path. Results, findings and fixes: [docs/merge/demo](docs/merge/demo/README.md); plan and
+rulings: [docs/merge](docs/merge/README.md).
+
+Credit: PixelLab Pip by Shilo, pixellab-game-art by lexingel.
 
 ## Showcase
 
