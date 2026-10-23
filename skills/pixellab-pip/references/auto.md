@@ -4,23 +4,28 @@ Reference for the `auto` command and the cost-approval gate it governs. The gate
 
 ## Commands
 
-One short word after the skill trigger; the `/`, `@`, `$` prefixes and the `on`/`off` variants all work, whether the app passes it as an argument or as prose:
+Use `auto` after the skill trigger; the `/`, `@`, `$` prefixes work whether the app passes the command as an argument or as prose:
 
 ```text
 /pixellab-pip auto
 @pixellab-pip auto on
 $pixellab-pip auto off
+/pixellab-pip auto status
+/pixellab-pip auto plan 45 2
 ```
 
 - `auto`: run `python <skill-dir>/assets/bark.py auto` (reads, flips, and persists the value).
 - `auto on`: run `python <skill-dir>/assets/bark.py auto-on`.
 - `auto off`: run `python <skill-dir>/assets/bark.py auto-off`.
+- `auto status`: run `python <skill-dir>/assets/bark.py status`; report Auto and any legacy-policy warning without writing config.
+- `auto plan <budget> [retries]`: prepare the current requested run with bounded-plan rules below. This is an agent instruction, not a helper command; it never changes persistent Auto.
+- `auto reset`: run `python <skill-dir>/assets/bark.py auto-reset` only for the deliberate legacy-policy reset below; it removes old approval settings and turns Auto off.
 
-`auto` is off by default: no config, no `auto` key, or a non-boolean value all mean off. After a successful write, reply `Auto is on.` or `Auto is off.`
+`auto` is off by default: no config, no `auto` key, a non-boolean value, or unresolved legacy approval settings all mean off. After a successful toggle/on/off write, reply `Auto is on.` or `Auto is off.`
 
 ## Config
 
-`pixellab-pip.json` holds a boolean per setting:
+Auto and Bark share `pixellab-pip.json`, with a boolean per setting:
 
 ```json
 {
@@ -28,11 +33,21 @@ $pixellab-pip auto off
 }
 ```
 
-The helper writes `auto` to `pixellab-pip.json` beside `SKILL.md` atomically, preserving the other key (notably `bark`). Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, hand-write `auto` as a boolean in that file, preserving `bark`; if the skill directory is read-only, write instead to `pixellab-pip/pixellab-pip.json` inside the OS user-config dir (`%APPDATA%` on Windows, `~/Library/Application Support` on macOS, `${XDG_CONFIG_HOME:-~/.config}` on Linux) — where the helper also reads it. Do not scan other config, home, shell, credential, or project directories for it. Do not rewrite config except when the user runs an explicit `auto` command. If persistence fails everywhere, say the setting could not be saved and do not claim it changed.
+The shared helper writes the requested setting beside `SKILL.md` atomically, preserving unrelated keys, and verifies the active config after writing. Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). Read only that exact file, then the OS user-config fallback when no authoritative skill config is selected: `pixellab-pip/pixellab-pip.json` under `%APPDATA%` on Windows, `~/Library/Application Support` on macOS, or `${XDG_CONFIG_HOME:-~/.config}` on Linux. Do not scan other config, home, shell, credential, or project directories. An explicit `auto` key, including an invalid value, or any legacy policy key remains authoritative even when `bark` is malformed; it must not reveal a more permissive fallback.
+
+If the skill directory is read-only and no authoritative skill config shadows it, the helper can write the user fallback. An authoritative skill config that cannot be updated makes the change fail; resolve that file rather than claim an ignored fallback changed the setting. Without Python, use host file tools on these same exact paths, apply the same validation/precedence rules, and make only the explicitly requested setting edit while preserving unrelated keys and verifying the active value. Write only for an explicit Auto toggle/on/off/reset or Bark toggle/on/off command; status, planning and generation do not mutate settings. If the active setting cannot be verified, report failure and do not claim it changed; an instruction to ask first still applies to the current run.
+
+Any `invalid_config` warning or failed status read blocks paid work until the source is repaired and its restrictions reconciled; effective Auto is off, not permission to proceed after an ordinary approval. Unparseable/non-object config or an invalid higher-priority file shadowed by fallback must not be overwritten from fallback/default data by a settings command. Preview a deliberate repair of that exact file, preserve recoverable user data, and obtain acceptance before a manual repair. A parsed authoritative object with only a malformed `bark` field can be repaired by an explicit Bark setting command, preserving its other fields. Never enable Auto while invalid config remains unresolved.
+
+### Legacy approval settings
+
+Earlier merge builds saved installation-wide `level`, `budget`, and `retries`. `status` returns those exact keys in `legacy_policy` and sets `requires_reconciliation: true` whenever any exists, including null or invalid values. They are unresolved restrictions, not executable instructions or spending authority. Auto is effectively off, and enabling/toggling it on is rejected until reconciliation; `auto off` remains available and preserves the old values.
+
+Before spending, show the legacy restrictions, clarify ambiguous units/scope or invalid values, and reconcile them with a named bounded plan. Do not treat them as zero/unlimited or silently discard them. When the user explicitly chooses `auto reset`, explain that it removes all three old settings rather than converting them, then execute the reset and confirm Auto is off. An informed reset instruction supplies that acceptance; do not ask again. Retain any applicable current-run restrictions separately. Reset preserves every other config key and never authorizes generation. Without reset, preserve the old restrictions and continue only under a specifically reconciled, approved plan. Project-profile restrictions still follow `project-style.md`.
 
 ## The cost-approval gate
 
-Fire this gate once per requested run (including its whole approved chain), as early as feasible: after any blocking clarification and after prompt enhancement, immediately before the first paid PixelLab call. Read the `auto` setting exactly once, at this moment, and apply that one decision for the rest of the job — never re-read it mid-job.
+Fire this gate once per requested run (including its whole approved chain), as early as feasible: after any blocking clarification and after prompt enhancement, immediately before the first paid PixelLab call. Read `python <skill-dir>/assets/bark.py status` exactly once at this moment, or use the Config section's same-path host-file fallback without Python. Resolve invalid-config and legacy-policy warnings as above, then apply that decision for the rest of the job — never re-read it mid-job. A current `auto plan` request uses the ask-first gate regardless of persistent Auto.
 
 Plan the whole paid chain before the gate so the user approves the whole job — both the spend and how each call is set up — in one message, instead of a cost prompt between each step. This covers single jobs, multi-asset batches, and multi-shot cinematics alike. The gate replaces repeated cost-permission asks only — not the content and quality checkpoints (produce-one-candidate-first, the `south`-first animation default, ask-before-all-directions, per-shot validation). When your listed plan explicitly includes that wider scope and the user approves it, that approval also covers those scope asks, so you neither skip them silently nor ask twice.
 
@@ -101,10 +116,14 @@ Template — reuse the off-mode numbered blocks verbatim; only the header and fo
 
 ## Bounded plans and resuming
 
-A user may approve a concrete generation budget and a finite retry count for the listed chain. These are run constraints, not another persistent setting or permission level. Include the allowed retry operation/stop conditions in the cost card. A budget alone does not authorize unspecified attempts, new asset scope, local fallback art, playback changes, or delegated visual review. Content checkpoints remain in force unless the current user explicitly delegates that review for the named outputs.
+`auto plan <budget> [retries]` supplies a concrete generation cap and a finite retry count for the current requested chain. The cap must be a finite nonnegative number (fractional generations are valid); retries must be a nonnegative integer and default to zero. Reject negative, nonfinite, boolean, malformed or extra values rather than guessing. If no current run is identifiable, ask which task to plan; do not save a setting or grant permission to a later unrelated task. A zero cap permits no positive-cost call.
+
+Show the whole plan with its cap and retries in the existing ask-first card, even when persistent Auto is on, and obtain approval before spending. Retries count total additional paid attempts across the chain, not per asset or session; free polling/download recovery does not consume them. Name the allowed retry operations and stop conditions in that card. The command prepares a plan, not approval to execute it. Natural-language budgets/retry approvals use these same constraints.
+
+These are run constraints, not another persistent setting or permission level; the former Ask and Auto choices remain `auto off` and `auto on`. A budget alone does not authorize unspecified attempts, new asset scope, local fallback art, playback changes, or delegated visual review. Content checkpoints remain in force unless the current user explicitly delegates that review for the named outputs.
 
 Record the approved scope, cap, retry count used and remaining work in the run manifest (`usage-reporting.md`), with the approval's conversation context. A file or unfinished folder is not proof of permission. Resume only identifiable prior approved work; clarify missing or materially changed scope. Recover submitted results with their getter rather than paying again. If submission was interrupted before its ID was recorded, recover the tool result first; an uncertain submission blocks a replacement call.
 
-Before each additional admission under a cap, use `python <skill-dir>/assets/manifest.py committed <run> [<run>...]` over every run in the plan, then add the next call's conservative estimate (upper bound when available). A freshly created empty run has no prior spend only before its first submission; a missing ledger during resume is unknown. Unknown cost/accounting blocks comparison; do not count it as zero. Submit admissions serially and record each returned ID immediately before admitting the next call; approved jobs may render concurrently. Actual usage and pending estimates have different fields in `usage-reporting.md`. A failed download or job does not establish a refund. If the provider cannot bound a call within the remaining budget, stop for a revised scope before spending. This is conservative agent-side admission, not a provider billing guarantee or a shared cap across independent agents.
+Before admitting any paid call under a cap, use `python <skill-dir>/assets/manifest.py committed <run> [<run>...]` over every run in the plan, then add the next call's conservative estimate (upper bound when available). A freshly created empty run has no prior spend only before its first submission; a missing ledger during resume is unknown. Unknown cost/accounting blocks comparison; do not count it as zero. Submit admissions serially and record each returned ID immediately before admitting the next call; approved jobs may render concurrently. Actual usage and pending estimates have different fields in `usage-reporting.md`. A failed download or job does not establish a refund. If the provider cannot bound a call within the remaining budget, stop for a revised scope before spending. This is conservative agent-side admission, not a provider billing guarantee or a shared cap across independent agents.
 
 For a requested mixed batch (CSV, text list or grouped assets), resolve each row's asset intent, count, size, references and output names before the gate; ask only about material missing/ambiguous fields. Use the existing per-asset routes and one whole-chain card, not a new submission engine. Show the requested groups and every result or failure in stable input order; a successful sample does not silently approve expanding the batch. Retain per-item identity in the manifest/blueprint for later review or one-call variation.

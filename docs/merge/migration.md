@@ -1,6 +1,8 @@
 # Migrating Game Art projects to Pip
 
-Pip keeps one skill and the existing `pixellab.json` project file. Ordinary requests work without a profile. The prototype Studio UI and `level` command are removed; use the existing `auto` toggle and explicit budget/retry constraints for a particular run. Changing spending confirmation does not authorize recoloring, new pixels or playback changes.
+Pip keeps one skill and the existing `pixellab.json` project file. Ordinary requests work without a profile. Use `/pixellab-pip panel` for the reworked visual review and `auto plan <budget> [retries]` for one identified bounded run. The separate Studio package and `level` command are consolidated rather than restored as parallel systems. Changing spending confirmation does not authorize recoloring, new pixels or playback changes.
+
+Prototype global `level`, `budget` and `retries` fields are restrictive unresolved policy. `auto status` exposes them and disables effective Auto until reconciled. Review the old limits, transfer applicable constraints to the identified run, and only after deliberate acceptance use `auto reset` to discard those three legacy fields and leave Auto off. Reset preserves other settings and grants no spending permission. Installation-wide budget defaults do not silently carry over or become unlimited Auto.
 
 ## Review the old installation before changing it
 

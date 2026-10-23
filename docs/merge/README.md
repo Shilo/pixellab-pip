@@ -2,7 +2,7 @@
 
 One agent-agnostic Pip skill preserves selected Game Art capabilities: named project styles and approved family references, optional advanced key-pose production, animation inspection and accepted repairs, motion references, local assembly/exports, and history over one private manifest. Existing MCP/REST/editor routing and safety boundaries remain authoritative.
 
-The optional Claude Studio prototype and its panel command are removed from this PR. All supported hosts use the same core; describe the task after the normal skill invocation. Settings remain `setup`, `update`, `uninstall`, `auto` and `bark`. There is no second `level` permission system. Specify budget/retry constraints in the current run request; cost permission does not authorize visual changes.
+All supported hosts use the same core. The useful panel is reworked under `/pixellab-pip panel`: one selected project/run snapshot, portable interactive HTML, and an optional native view in the ordinary Claude plugin. No separate Studio package, credential connector or permission cache is restored. `auto plan <budget> [retries]` provides explicit bounded-run controls within Auto instead of a second `level` permission system. Cost permission does not authorize visual changes. See the [challenged reconsideration](../tools/pixellab-game-art-skill/pixellab-game-art-panel-auto-reconsideration.md) for design, host evidence and deliberate differences from the prototype.
 
 ## Task access
 

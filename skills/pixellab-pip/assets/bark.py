@@ -25,6 +25,7 @@ ASSETS_DIR = Path(__file__).resolve().parent
 SKILL_DIR = ASSETS_DIR.parent
 SKILL_CONFIG = SKILL_DIR / "pixellab-pip.json"
 BARK_WAV = ASSETS_DIR / "bark.wav"
+LEGACY_POLICY_KEYS = ("level", "budget", "retries")
 
 
 def user_config_path() -> Path:
@@ -80,8 +81,12 @@ def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
     for path in paths:
         if path.exists():
             data = read_json(path)
-            if isinstance(data, dict) and has_valid_bark_value(data):
-                return data, path, invalid_source
+            if isinstance(data, dict):
+                if has_valid_bark_value(data):
+                    return data, path, invalid_source
+                if legacy_policy(data) or "auto" in data:
+                    # A malformed sound toggle must not hide spend policy or an explicit disable.
+                    return data, path, invalid_source or path
             if invalid_source is None:
                 invalid_source = path
     return {"bark": True}, None, invalid_source
@@ -113,10 +118,37 @@ def write_text_atomic(path: Path, content: str) -> None:
             temp_path.unlink(missing_ok=True)
 
 
+def legacy_policy(data: dict[str, Any]) -> dict[str, Any]:
+    return {key: data[key] for key in LEGACY_POLICY_KEYS if key in data}
+
+
+def auto_enabled(data: dict[str, Any], invalid_source: Path | None = None) -> bool:
+    return invalid_source is None and data.get("auto") is True and not legacy_policy(data)
+
+
 def write_config(key: str, enabled: bool) -> Path:
-    existing, _, _ = read_config()
+    existing, _, invalid_source = read_config()
+    if key == "auto" and enabled and invalid_source is not None:
+        raise ValueError("invalid config requires repair before enabling Auto; inspect status")
+    if key == "auto" and enabled and legacy_policy(existing):
+        raise ValueError("legacy approval settings require reconciliation; inspect status before explicitly choosing auto reset")
     existing[key] = bool(enabled)
-    content = json.dumps(existing, indent=2, sort_keys=True) + "\n"
+    return save_config(existing)
+
+
+def reset_auto() -> Path:
+    existing, _, _ = read_config()
+    for key in LEGACY_POLICY_KEYS:
+        existing.pop(key, None)
+    existing["auto"] = False
+    return save_config(existing)
+
+
+def save_config(data: dict[str, Any]) -> Path:
+    _, source, invalid_source = read_config()
+    if invalid_source is not None and invalid_source != source:
+        raise ValueError("invalid higher-priority config must be repaired before settings writes; existing files left unchanged")
+    content = json.dumps(data, indent=2, sort_keys=True) + "\n"
 
     candidates = [SKILL_CONFIG]
     user_config = safe_user_config_path()
@@ -125,11 +157,18 @@ def write_config(key: str, enabled: bool) -> Path:
 
     errors: list[str] = []
     for path in candidates:
+        if path != SKILL_CONFIG and read_config()[1] == SKILL_CONFIG:
+            raise RuntimeError("skill config remains authoritative but could not be updated; "
+                               "a user-config fallback would be ignored; inspect status and resolve the read-only skill config")
         try:
             write_text_atomic(path, content)
-            return path
         except OSError as exc:
             errors.append(f"{path}: {exc}")
+            continue
+        actual, source, _ = read_config()
+        if source != path or json.dumps(actual, indent=2, sort_keys=True) + "\n" != content:
+            raise RuntimeError("config write did not become the verified active setting; inspect status before continuing")
+        return path
 
     raise RuntimeError("; ".join(errors) or "could not write config")
 
@@ -191,7 +230,7 @@ def play_sound() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="PixelLab Pip bark helper")
-    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off"])
+    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off", "auto-reset"])
     args = parser.parse_args()
 
     result: dict[str, Any] = {
@@ -204,36 +243,42 @@ def main() -> int:
 
     try:
         if args.command == "bark":
-            result["bark"] = not bark_enabled()
-            result["config"] = str(write_config("bark", bool(result["bark"])))
+            enabled = not bark_enabled()
+            result["config"] = str(write_config("bark", enabled))
+            result["bark"] = enabled
             if result["bark"]:
                 result["played"] = play_sound()
         elif args.command == "on":
-            result["bark"] = True
             result["config"] = str(write_config("bark", True))
+            result["bark"] = True
             result["played"] = play_sound()
         elif args.command == "off":
-            result["bark"] = False
             result["config"] = str(write_config("bark", False))
+            result["bark"] = False
         elif args.command == "play":
             if bark_enabled():
                 result["played"] = play_sound()
             result["bark"] = bark_enabled()
         elif args.command == "auto":
-            data, _, _ = read_config()
-            current = data.get("auto") is True
-            result["auto"] = not current
-            result["config"] = str(write_config("auto", result["auto"]))
+            data, _, invalid_source = read_config()
+            enabled = not auto_enabled(data, invalid_source)
+            result["config"] = str(write_config("auto", enabled))
+            result["auto"] = enabled
         elif args.command == "auto-on":
-            result["auto"] = True
             result["config"] = str(write_config("auto", True))
+            result["auto"] = True
         elif args.command == "auto-off":
-            result["auto"] = False
             result["config"] = str(write_config("auto", False))
+            result["auto"] = False
+        elif args.command == "auto-reset":
+            result["config"] = str(reset_auto())
+            result["auto"] = False
         elif args.command == "status":
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))
-            result["auto"] = data.get("auto") is True
+            result["auto"] = auto_enabled(data, invalid_source)
+            result["legacy_policy"] = legacy_policy(data)
+            result["requires_reconciliation"] = bool(result["legacy_policy"]) or invalid_source is not None
             result["config"] = str(source) if source else None
             result["invalid_config"] = str(invalid_source) if invalid_source else None
     except Exception as exc:

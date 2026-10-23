@@ -42,7 +42,7 @@ This branch integrates useful [pixellab-game-art](https://github.com/lexingel/pi
 - Optional custom key-pose recipes, focused motion references and requested finishing/engine exports.
 - Verified local assembly/previews and history over one private manifest, with charged usage distinct from estimates.
 
-Every host uses the existing Pip entry point and settings. `auto` remains only the cost-confirmation toggle; run budgets/retries and visual/playback changes have explicit scope. The experimental separate Studio panel and `level` command are removed.
+Every host uses the existing Pip entry point. Useful `level` controls are consolidated into `auto plan <budget> [retries]` for an identified run. `/pixellab-pip panel` opens interactive project/output review through supported native Claude UI or portable HTML; unsupported hosts receive an explicit fallback. The separate Studio package and its credential connector stay removed. Spending settings never authorize visual/playback changes.
 
 See [integration and migration](docs/merge/README.md) and the [adversarial review/remediation plan](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-implementation-plan.md) for decisions and current validation. The earlier three prototype production demos and Claude routing benchmark remain [historical evidence](docs/merge/demo/README.md), not proof of the revised implementation or every host/engine.
 
@@ -200,6 +200,9 @@ Common commands:
 |---|---|
 | `pixellab-pip setup` | Connect PixelLab MCP and/or documented REST v2 fallback. |
 | `pixellab-pip auto` | Toggle Auto mode, which skips the before-you-spend confirmation. Auto is off by default, so Pip asks first. |
+| `pixellab-pip auto plan 45 2` | Plan one identified run with a maximum of 45 generations and two additional paid attempts, subject to whole-plan approval. Does not change persistent Auto. |
+| `pixellab-pip auto status` | Show actual Auto settings and any unresolved legacy level restrictions. |
+| `pixellab-pip panel` | Review selected project/run images, GIFs and usage; compose scoped requests. Native UI depends on the host; the HTML fallback requires sending feedback back to chat. |
 | `pixellab-pip bark` | Toggle the completion sound. On by default. |
 | `pixellab-pip update` | Update through the current install method. |
 | `pixellab-pip uninstall` | Remove Pip while keeping secrets and generated outputs by default. |

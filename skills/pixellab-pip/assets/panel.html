@@ -1,0 +1,133 @@
+<section id="pip-review-panel" aria-label="PixelLab Pip project review">
+  <style>
+    #pip-review-panel { color-scheme: light dark; font: 15px/1.5 system-ui,sans-serif; color: light-dark(#20252b,#edf0f3); background: light-dark(#fafafa,#20252b); padding: 16px; overflow-wrap: anywhere; }
+    #pip-review-panel * { box-sizing: border-box; }
+    #pip-review-panel h1 { margin: 0 0 8px; font-size: 21px; }
+    #pip-review-panel h2 { font-size: 17px; margin: 20px 0 8px; }
+    #pip-review-panel p { margin: 8px 0; }
+    #pip-review-panel .pip-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    #pip-review-panel button, #pip-review-panel select, #pip-review-panel textarea { font: inherit; color: inherit; background: light-dark(#fff,#303940); border: 1px solid light-dark(#737b84,#adb7bf); border-radius: 4px; padding: 7px 10px; max-width: 100%; }
+    #pip-review-panel button { cursor: pointer; }
+    #pip-review-panel button:disabled { opacity: .6; cursor: default; }
+    #pip-review-panel textarea { display: block; width: 100%; min-height: 90px; resize: vertical; }
+    #pip-review-panel .pip-images { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+    #pip-review-panel figure { margin: 8px 0; max-width: 100%; }
+    #pip-review-panel .pip-image-box { overflow: auto; max-width: 100%; background: repeating-conic-gradient(#bbb 0% 25%,#eee 0% 50%) 50% / 16px 16px; }
+    #pip-review-panel img { display: block; image-rendering: pixelated; max-width: none; }
+    #pip-review-panel figcaption { margin-top: 4px; font-size: 13px; }
+    #pip-review-panel .pip-warning { border-left: 3px solid light-dark(#9a6400,#ffd181); padding-left: 10px; }
+    #pip-review-panel table { width: 100%; border-collapse: collapse; }
+    #pip-review-panel th, #pip-review-panel td { padding: 5px 8px; text-align: left; border-bottom: 1px solid light-dark(#ccc,#58616a); overflow-wrap: anywhere; }
+    #pip-review-panel #pip-jobs-wrap { overflow: auto; }
+    #pip-review-panel #pip-request { min-height: 150px; }
+    #pip-review-panel [hidden] { display: none !important; }
+  </style>
+  <h1 data-pip-label="title">PixelLab Pip review panel</h1>
+  <p id="pip-context"></p>
+  <p id="pip-freshness"></p>
+  <p id="pip-usage"></p>
+  <p id="pip-style"></p>
+  <div id="pip-warnings" class="pip-warning" role="status"></div>
+  <h2 data-pip-label="previews">Selected previews</h2>
+  <div class="pip-row"><label for="pip-zoom" data-pip-label="scale">Shared pixel scale</label><select id="pip-zoom"><option value="1">1×</option><option value="2">2×</option><option value="3" selected>3×</option><option value="4">4×</option></select></div>
+  <div id="pip-images" class="pip-images"></div>
+  <h2 data-pip-label="jobs">Selected run jobs</h2>
+  <div id="pip-jobs-wrap"><table><thead><tr><th scope="col" data-pip-label="job">Job</th><th scope="col" data-pip-label="tool">Tool</th><th scope="col" data-pip-label="status">Status</th><th scope="col" data-pip-label="outcome">Outcome</th></tr></thead><tbody id="pip-jobs"></tbody></table></div>
+  <h2 data-pip-label="compose_heading">Compose a request</h2>
+  <p data-pip-label="policy">This snapshot does not submit work or change settings. Compose a request, then send it in the agent chat. The agent must verify the current files and apply Pip’s normal routing and approval rules.</p>
+  <div class="pip-row"><button type="button" data-pip-note="character_prompt" data-pip-label="new_character">New character</button><button type="button" data-pip-note="attack_prompt" data-pip-label="new_attack">New attack</button><button type="button" data-pip-note="skill_prompt" data-pip-label="new_skill">New skill</button></div>
+  <label for="pip-note" data-pip-label="note">Request or correction notes</label><textarea id="pip-note"></textarea>
+  <div class="pip-row"><button type="button" id="pip-compose" data-pip-label="request">Compose request</button><button type="button" id="pip-redo" data-pip-label="redo">Request redo</button><button type="button" id="pip-animate" data-pip-label="animate">Request animation</button><button type="button" id="pip-setup" data-pip-label="setup">Request project setup</button></div>
+  <p id="pip-feedback" aria-live="polite"></p>
+  <label for="pip-request" data-pip-label="feedback_label">Request to send in chat</label><textarea id="pip-request" readonly></textarea>
+  <button type="button" id="pip-copy" data-pip-label="copy_request">Copy request</button>
+  <button type="button" id="pip-send" data-pip-label="send_request" hidden>Send request to chat</button>
+  <script type="application/json" id="pip-panel-data">__PANEL_DATA__</script>
+  <script>
+    (() => {
+      const root = document.getElementById('pip-review-panel');
+      const find = id => root.querySelector('#' + id);
+      const config = JSON.parse(find('pip-panel-data').textContent);
+      const s = config.snapshot;
+      const l = s.labels;
+      const text = (id, value) => { find(id).textContent = value; };
+      root.setAttribute('aria-label', l.title);
+      for (const element of root.querySelectorAll('[data-pip-label]')) element.textContent = l[element.dataset.pipLabel];
+      find('pip-note').placeholder = l.note_placeholder;
+      text('pip-context', l.project + ': ' + s.project + ' · ' + l.run + ': ' + (s.run || l.none));
+      text('pip-freshness', l.snapshot + ': ' + s.created_at + ' · ' + l.snapshot_help);
+      const amount = value => value === null ? l.unknown : String(value);
+      text('pip-usage', l.usage_scope + ': ' + amount(s.usage.charged) + ' ' + l.charged + '; ' + amount(s.usage.committed) + ' ' + l.committed + ' (' + l.cost_explanation + ').');
+      text('pip-style', l.style + ': ' + s.style);
+      for (const warning of s.warnings) {
+        const p = document.createElement('p'); p.textContent = warning; find('pip-warnings').append(p);
+      }
+      find('pip-warnings').hidden = !s.warnings.length;
+      const rendered = [];
+      let loaded = 0;
+      let imageFailed = false;
+      let composedAction = null;
+      const cannotReview = s.review_ready !== true;
+      const updateReview = () => {
+        const disabled = cannotReview || imageFailed || loaded !== s.images.length;
+        find('pip-redo').disabled = disabled; find('pip-animate').disabled = disabled;
+        if (disabled && (composedAction === 'redo' || composedAction === 'animate')) {
+          find('pip-request').value = ''; composedAction = null;
+        }
+      };
+      for (const image of s.images) {
+        const figure = document.createElement('figure');
+        const box = document.createElement('div'); box.className = 'pip-image-box';
+        const img = document.createElement('img'); img.alt = image.role;
+        img.addEventListener('load', () => { loaded += 1; updateReview(); });
+        img.addEventListener('error', () => { imageFailed = true; updateReview(); text('pip-feedback', l.preview_unavailable); });
+        img.src = image.data_url;
+        const caption = document.createElement('figcaption'); caption.textContent = image.role + ' · ' + image.path + ' · ' + image.width + '×' + image.height;
+        box.append(img); figure.append(box, caption); find('pip-images').append(figure); rendered.push({img, image});
+      }
+      if (!s.images.length) text('pip-images', l.no_images);
+      const zoom = () => {
+        const scale = Number(find('pip-zoom').value);
+        for (const {img, image} of rendered) { img.style.width = image.width * scale + 'px'; img.style.height = image.height * scale + 'px'; }
+      };
+      find('pip-zoom').addEventListener('change', zoom); zoom();
+      for (const job of s.jobs) {
+        const row = document.createElement('tr');
+        for (const key of ['job_id', 'tool', 'status', 'outcome']) { const td = document.createElement('td'); td.textContent = job[key] || l.not_recorded; row.append(td); }
+        find('pip-jobs').append(row);
+      }
+      updateReview();
+      if (cannotReview) text('pip-feedback', l.review_blocked);
+      const compose = action => {
+        const note = find('pip-note').value.trim();
+        if ((action === 'redo' || action === 'animate') && find('pip-animate').disabled) { text('pip-feedback', l.review_blocked); return; }
+        if (action === 'request' && !note) { text('pip-feedback', l.empty_note); return; }
+        const request = {action, project:s.project, run:s.run, snapshot_path:config.snapshot_path, created_at:s.created_at, manifest_sha256:s.manifest_sha256,
+          images:s.images.map(({role,path,sha256}) => ({role,path,sha256})), note};
+        find('pip-request').value = 'PixelLab Pip panel request\n' + JSON.stringify(request, null, 2);
+        composedAction = action;
+        text('pip-feedback', l.draft_ready);
+      };
+      for (const [id, action] of [['pip-compose','request'],['pip-redo','redo'],['pip-animate','animate'],['pip-setup','setup']]) find(id).addEventListener('click', () => compose(action));
+      for (const button of root.querySelectorAll('[data-pip-note]')) button.addEventListener('click', () => { find('pip-note').value = l[button.dataset.pipNote]; find('pip-note').focus(); });
+      find('pip-copy').addEventListener('click', async () => {
+        const value = find('pip-request').value;
+        if (!value) { text('pip-feedback', l.copy_empty); return; }
+        try { await navigator.clipboard.writeText(value); text('pip-feedback', l.copied); }
+        catch { find('pip-request').focus(); find('pip-request').select(); text('pip-feedback', l.copy_unavailable); }
+      });
+      const bridgeAvailable = config.inline === true && typeof window.openai?.sendFollowUpMessage === 'function';
+      find('pip-send').hidden = !bridgeAvailable;
+      if (bridgeAvailable) find('pip-send').addEventListener('click', async () => {
+        const prompt = find('pip-request').value;
+        if (!prompt) { text('pip-feedback', l.copy_empty); return; }
+        find('pip-send').disabled = true;
+        try {
+          await window.openai.sendFollowUpMessage({prompt, title:l.send_title.slice(0,250)});
+          text('pip-feedback', l.host_handoff);
+        } catch { text('pip-feedback', l.send_unavailable); }
+        finally { find('pip-send').disabled = false; }
+      });
+    })();
+  </script>
+</section>

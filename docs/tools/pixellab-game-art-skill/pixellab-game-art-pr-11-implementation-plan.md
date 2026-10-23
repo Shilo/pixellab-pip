@@ -1,5 +1,7 @@
 # PR #11 remediation plan and acceptance record
 
+**Decision update:** the user reopened the removal of the visual panel and structured level controls. The [challenged panel/Auto reconsideration](pixellab-game-art-panel-auto-reconsideration.md) supersedes those deletion recommendations. The implementation/acceptance record below describes the earlier reviewed head; it is not evidence that deleting useful visual interaction was the correct product decision or that the new work has passed verification.
+
 Baseline: `feat/pga-merge`, `e5313285523216ce8faa06cf241cc8bed8cce32e`. This plan implements the [29-finding review](pixellab-game-art-pr-11-review.md). Implementation starts only after independent plan challenges have been reconciled here.
 
 ## Intended product

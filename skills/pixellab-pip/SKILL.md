@@ -1,6 +1,6 @@
 ---
 name: pixellab-pip
-description: Use when PixelLab (Pixel Lab) or Pip skill context is present for setup/auth, MCP/API routing, sprites, characters, tilesets/maps, icons/UI/fonts, backgrounds, image edits, animation/VFX, talking portraits, skeleton/template motion, cinematics, project art styles, animation inspection/repair, blueprints/replay, Aseprite/Pixelorama, Game Builder, troubleshooting or generations/credit budgets. Covers MCP, public REST v2, website/editor assistance and explicit legacy v1 integration. Also use for explicit skill setup, update, uninstall, auto and bark commands. Do not trigger for Python pip/package management or generic image/pixel-art requests without PixelLab intent.
+description: Use when PixelLab (Pixel Lab) or Pip skill context is present for setup/auth, MCP/API routing, sprites, characters, tilesets/maps, icons/UI/fonts, backgrounds, image edits, animation/VFX, talking portraits, skeleton/template motion, cinematics, project art styles, animation inspection/repair, blueprints/replay, Aseprite/Pixelorama, Game Builder, troubleshooting or generations/credit budgets. Covers MCP, public REST v2, website/editor assistance and explicit legacy v1 integration. Also use for explicit skill setup, update, uninstall, auto, panel and bark commands. Do not trigger for Python pip/package management or generic image/pixel-art requests without PixelLab intent.
 license: MIT
 metadata:
   requires_api_key: "false"
@@ -21,8 +21,8 @@ Classify the request, choose the supported PixelLab surface, then act. Answer qu
 ## Workflow
 
 1. Classify intent; values combine, such as `animate + cost_sensitive`:
-   `question | setup | update | uninstall | bark | auto | create asset | edit/transform | animate | pixelart_workbench | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | game_builder | aseprite_integration | blueprint/recipe`.
-   A standalone `setup`, `update`, `uninstall`, `bark`, or `auto` word after an explicit skill invocation, such as `/pixellab-pip setup`, `@pixellab-pip bark off`, is that intent: for setup read `references/setup.md`, for update read `references/update.md`, for uninstall read `references/uninstall.md`, for bark read `references/bark.md`, for auto read `references/auto.md`.
+   `question | setup | update | uninstall | bark | auto | panel | create asset | edit/transform | animate | pixelart_workbench | prompt_enhancement | cost_sensitive | integrate/code | check balance/status | troubleshoot docs/API | website/editor assistance | game_builder | aseprite_integration | blueprint/recipe`.
+   A standalone command word after an explicit skill invocation, such as `/pixellab-pip setup` or `@pixellab-pip bark off`, is that intent: for setup read `references/setup.md`, for update read `references/update.md`, for uninstall read `references/uninstall.md`, for bark read `references/bark.md`, for auto read `references/auto.md`, for panel read `references/panel.md`.
 2. Classify the target:
    `general_image | skill_icon | item_icon | background | character | portrait_character | font | object | effect_vfx | ui | whole_map | map_image | map_object | top_down_tileset | sidescroller_tileset | multi_shape_tileset | path_tiles | building_kit | isometric_tile | tile_variants | animation | existing_image`.
    Fitted visual additions to an existing character image, such as hair, facial features, wearables, accessories, or held gear, are `existing_image` paperdoll edits, not standalone `object` requests, unless the user explicitly wants a separate unattached prop.
@@ -153,6 +153,7 @@ Read each reference only when its trigger applies:
 - Remove an installed Pip: `references/uninstall.md`.
 - Persistent completion sound toggle: `references/bark.md`.
 - Cost-approval gate before paid calls, the `auto` on/off toggle and explicitly bounded run budgets/retries: `references/auto.md`.
+- Interactive project/output review and `/pixellab-pip panel`: `references/panel.md`.
 - Safe post-processing when `no_background: true` fails: `references/background-removal.md`.
 - Skill/ability and inventory item icon sheets: `references/icon.md`.
 - Create Image Pro, exact hex palettes or color caps on any route, native-size multi-output batches, exact grids, below-32px cells: `references/create-image-pro.md`.
@@ -252,7 +253,7 @@ If no bearer token is configured, stop before generation and offer the setup wiz
 
 For questions, answer with: recommended surface/endpoint, why it fits, warnings for unsupported alternatives, and a verification note only when the answer depends on an unverified current fact.
 
-For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Before the first credit-spending call, apply the cost-approval gate in `references/auto.md`: unless the persistent `auto` setting is on or the call belongs to an already approved chain, plan the whole paid chain, then in one message show every predicted paid call, its material inputs (including the exact prompt text), and a rough total for approval. For destructive remote actions, follow Destructive Remote Actions. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
+For tasks, generate only when the user clearly requested it and token plus tooling are configured. For nontrivial work, produce one candidate first, report it, and continue only if asked. Before the first credit-spending call, read and apply the cost-approval gate in `references/auto.md`, including whole-chain planning and current-run constraints. For destructive remote actions, follow Destructive Remote Actions. Refuse unsupported automation and reroute to the closest documented MCP/REST option or a visible manual website flow. Locally authored non-PixelLab visual content requires explicit request or approval and a non-PixelLab-fallback label.
 
 Capture a balance snapshot before a nontrivial paid call when available. After live PixelLab work, read `references/usage-reporting.md` and use its report layout; verify the output against the user's explicit constraints before calling it final, and say plainly when verification failed instead of silently salvaging. Do not paste secrets, raw base64, full response JSON, or internal IDs unless needed for pending status, follow-up, or debugging.
 

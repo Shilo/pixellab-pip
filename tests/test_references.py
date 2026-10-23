@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import json
 import unittest
 from pathlib import Path
 
@@ -12,6 +13,17 @@ WEAPON_PAGES = sorted(p.name for p in (SKILL_DIR / "references").glob("weapon-*.
 
 
 class ReferencePagesTests(unittest.TestCase):
+    def test_claude_panel_modules_do_not_enter_other_hosts_default_hooks(self) -> None:
+        config = json.loads((REPO_ROOT / '.claude-plugin/plugin.json').read_text(encoding='utf-8'))
+        selected = REPO_ROOT / config['hooks']
+        definition = json.loads(selected.read_text(encoding='utf-8'))
+        self.assertTrue(definition['modules'])
+        for module in definition['modules']:
+            self.assertTrue((selected.parent / module).is_file())
+        default = REPO_ROOT / 'hooks/hooks.json'
+        if default.exists():
+            self.assertNotIn('modules', json.loads(default.read_text(encoding='utf-8')))
+
     def test_weapon_pages_linked_and_have_toc(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
         for name in WEAPON_PAGES:
