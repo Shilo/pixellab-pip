@@ -235,6 +235,24 @@ SCENARIOS = [
         "checks": {"edit": r"edit[_-]image|edit[_-]images[_-]v2|inpaint|paperdoll|image[- ]edit|existing[_-]image|edit.{0,20}(?:base|existing|character)"},
         "refs_any": ["paperdolling.md"],
     },
+    {
+        "id": "route-animation-doctor",
+        "task": "These PixelLab animation frames flicker and in one frame the sword vanished. Can you check and fix them?",
+        "checks": {"doctor": r"fix\.py|animation[- ]doctor"},
+        "refs_any": ["animation-doctor.md"],
+    },
+    {
+        "id": "route-key-pose-move",
+        "task": "I have a standing knight sprite PNG. Make an overhead sword chop attack animation for it with PixelLab.",
+        "checks": {"keyposes": r"edit[_-]image[_-]pro[_-]flash|key[- ]pose", "inbetween": r"animate[_-]image"},
+        "refs_any": ["key-pose-animation.md"],
+    },
+    {
+        "id": "route-styled-icons",
+        "task": "Using PixelLab, make shop item icons for my game in my project's saved art style.",
+        "checks": {"style": r"project_style\.py|pixellab\.json|project[- ]style"},
+        "refs_any": ["project-style.md", "icon.md"],
+    },
 ]
 
 
