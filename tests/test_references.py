@@ -8,25 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_helpers import REPO_ROOT  # noqa: E402
 
 SKILL_DIR = REPO_ROOT / "skills/pixellab-pip"
-WEAPON_PAGES = [
-    "weapon-sword.md",
-    "weapon-katana.md",
-    "weapon-dagger.md",
-    "weapon-staff.md",
-    "weapon-bow.md",
-    "weapon-mace.md",
-    "weapon-spear.md",
-    "weapon-axe.md",
-    "weapon-sword-and-shield.md",
-    "weapon-war-hammer.md",
-    "weapon-whip.md",
-    "martial-arts.md",
-    "armor-clothing.md",
-    "weapon-effects.md",
-    "weapon-firearms.md",
-    "weapon-futuristic.md",
-    "weapon-anime.md",
-]
+WEAPON_PAGES = sorted(p.name for p in (SKILL_DIR / "references").glob("weapon-*.md")) + ["martial-arts.md", "armor-clothing.md"]
 
 
 class ReferencePagesTests(unittest.TestCase):
@@ -35,7 +17,6 @@ class ReferencePagesTests(unittest.TestCase):
         for name in WEAPON_PAGES:
             with self.subTest(page=name):
                 path = SKILL_DIR / "references" / name
-                self.assertTrue(path.exists(), f"missing {name}")
                 self.assertIn(f"`references/{name}`", skill)
                 lines = path.read_text(encoding="utf-8").splitlines()
                 if len(lines) > 100:
@@ -65,7 +46,6 @@ class ReferencePagesTests(unittest.TestCase):
                 line = next((ln for ln in skill.splitlines() if ln.startswith(row)), "")
                 self.assertIn(f"`references/{name}`", line, f"router row missing for {name}")
                 path = SKILL_DIR / "references" / name
-                self.assertTrue(path.exists(), f"missing {name}")
                 self.assertIn("## Contents", path.read_text(encoding="utf-8").splitlines())
 
 

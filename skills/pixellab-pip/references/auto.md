@@ -37,7 +37,7 @@ Run `python <skill-dir>/assets/bark.py level` to read it (the skill folder's abs
 
 At `plan` and `auto`, before any paid call that would pass the budget, stop and ask. A plan's spend is `python <skill-dir>/assets/manifest.py committed <run> [<run>...]` over every run folder the plan wrote (a still and its moves are separate folders; finished jobs plus jobs submitted but not yet fetched).
 
-**Resuming.** When a project already has a run whose plan did not finish (a session ended mid-plan), keep working in that run folder: read its manifest, say in one line what was spent and what is left of the approved plan, fetch any `submitted` job before paying again, and count the remaining budget from `committed`. A fresh plan gets a new run folder and a new approval. At every level: the plan still pauses at its content checkpoints (the user picks among candidates; key poses are shown for approval before in-betweens are generated), destructive remote actions and overwriting files always ask, and raw PixelLab outputs are never changed (clean-up writes labelled copies).
+**Resuming.** When a project already has a run whose plan did not finish (a session ended mid-plan), keep working in that run folder: read its manifest, say in one line what was spent and what is left of the approved plan, fetch any `submitted` job before paying again, and count the remaining budget from `committed`. A fresh plan gets a new run folder and a new approval. At every level: the plan still pauses at its content checkpoints (the user picks among candidates; key poses are shown for approval before in-betweens are generated).
 
 ## Config
 

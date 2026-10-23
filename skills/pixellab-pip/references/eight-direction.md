@@ -6,10 +6,9 @@ Read this for a top-down or 3/4 character move (attack, shot, cast) that must pl
 
 A player that walks in 4 or 8 facings (tested: a 4-direction farmer, 24 generations with candidates and one redo):
 
-1. Ask for the still **front-facing** in the first prompt (`facing the viewer, front view`), so step 1 below is not needed.
-2. Rotate it: `create_character(mode="v3", reference_image_url=<still>, n_directions=4 or 8)`. Download the rotation links with `python <skill-dir>/assets/fetch.py --url <link> <out.png>` and check them on one sheet at 3x: the held prop in the same hand in every view.
-3. Walk with `animate_character(mode="v3")`, one call per direction, naming every held prop in `action_description` (`walks forward at a relaxed pace, the green watering can stays in the right hand`); pass the same `animation_group_id` and `animation_name` on each call so the directions stay one animation at PixelLab. The cheaper template walk (`walking-8-frames`) has no wording: it dropped a held can, changed colours and baked a flickering shadow.
-4. Record the character job with `python <skill-dir>/assets/manifest.py done <run> <job_id>` (`fetch.py` downloads image jobs only), and run the doctor per direction with `--move walk` so a loop is judged as a loop.
+1. Front-facing reference and rotation as in [Steps](#steps) 1-2, with `n_directions` 4 or 8; asking for the still `facing the viewer, front view` in its first prompt skips the re-pose. Download the rotation links with `python <skill-dir>/assets/fetch.py --url <link> <out.png>`.
+2. Walk with `animate_character(mode="v3")`, one call per direction, naming every held prop in `action_description` (`walks forward at a relaxed pace, the green watering can stays in the right hand`); pass the same `animation_group_id` and `animation_name` on each call so the directions stay one animation at PixelLab. The cheaper template walk (`walking-8-frames`) has no wording: it dropped a held can, changed colours and baked a flickering shadow.
+3. Record the character job with `python <skill-dir>/assets/manifest.py done <run> <job_id>` (`fetch.py` downloads image jobs only), and run the doctor per direction with `--move walk` so a loop is judged as a loop.
 
 ## Choose the route
 

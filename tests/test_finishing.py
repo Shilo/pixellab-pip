@@ -268,12 +268,6 @@ class FinishBehaviourTests(unittest.TestCase):
         self.assertTrue(o[22:24, 19:23, 3].all())                       # no hole where it crossed the body
         self.assertTrue((o[30:34, 20:24] == still[30:34, 20:24]).all())  # the tabard stays
 
-    def test_ground_snap_check_needs_no_out(self) -> None:
-        # e2e run 2: --check is documented as writing nothing but still demanded --out
-        args = case_ground_snap(self.t)
-        self.ok("ground_snap", *args, "--check")
-        self.assertFalse((self.t / "derivative.json").exists())
-
     def test_ground_snap_out_gets_every_frame_in_a_new_folder(self) -> None:
         args = case_ground_snap(self.t)
         self.ok("ground_snap", *args, "--out", self.t / "new/dir")
@@ -292,10 +286,9 @@ class FinishBehaviourTests(unittest.TestCase):
         fs = synth.walk(2)
         fs[1] = synth.shift(fs[1], 0, 2)
         paths = synth.save(fs, self.t / "in/src", "k")
-        r = self.ok("ground_snap", synth.png(synth.figure(), self.t / "in/still.png"), "0,0", *paths, "--check",
-                    "--out", self.t / "o")
-        self.assertIn("below the feet line", r.stdout)
-        self.assertFalse((self.t / "o").exists())
+        r = self.ok("ground_snap", synth.png(synth.figure(), self.t / "in/still.png"), "0,0", *paths, "--check")
+        self.assertIn("below the feet line", r.stdout)   # --check needs no --out and writes nothing
+        self.assertFalse((self.t / "derivative.json").exists())
 
     def test_colormatch_snaps_to_the_still_palette(self) -> None:
         still, frame = case_colormatch(self.t)

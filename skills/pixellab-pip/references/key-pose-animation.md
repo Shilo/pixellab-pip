@@ -80,7 +80,7 @@ The same <look line>, <pose core>, <facing>. Exactly the same body size as the o
 - **Pose B (hit)** is the follow-through at the end of the blow.
 - **Directions in screen terms**: say `toward the right of the image`, never "his right" or "forward", in every pose, and again in the `action`.
 - **Held props**: name each prop's SIDE in screen terms in every pose (`the staff upright on the left side of the image, close against his robe, staff arm bent with the fist at waist height`), never a fixed POSITION (`exactly where it was` freezes the prop while the body moves and stretches the arm to reach it). Say the gripping hand is joined to the body at normal arm length. One-handed weapon or mismatched arms: name which arm holds it by its look and say the other hand is empty.
-- **Worn props**: describe what is visible, not where it is worn: `worn on the far hip: only the hilt shows in front of the sash, the scabbard end pokes out behind his back`. After a draw, say `the EMPTY scabbard` / `the EMPTY holster` in every later pose, or a second weapon appears.
+- **Worn props**: describe what is visible, not where it is worn (`characters.md`). After a draw, say `the EMPTY scabbard` / `the EMPTY holster` in every later pose, or a second weapon appears.
 - **Props in colours the sprite lacks**: palette correction and colour matching turn them into the sprite's colours. Pose without the prop and lay it on afterwards (a locally painted layer, named in the plan), or recolour the prop region afterwards.
 - **One weapon, one tip**: `one clean straight steel blade with a single sharp tip` fixes forked tips; give lengths in body terms (`hilt as long as his forearm`). For the weapon the generator tends to swap to, end with `the weapon is clearly a <weapon>, never a <the other>`.
 - **Raised-arm end poses** drop the weapon in about half the casters: write it into the pose (`raising the staff high in both hands`).
@@ -222,13 +222,9 @@ Moves as stance pairs:
 
 ## Clean-Up Order And Effects
 
-Per move, always in this order; the helpers are in `finishing.md` and write labelled copies, never over the raw frames:
+Per move, in the order and with the helpers in `finishing.md`. For key-pose moves: poses drift up to about 20 px, so snap every grounded frame; for waist-up bosses match a body band, and do not snap a slam that lowers the body on purpose. Check the weapon at 3× after cleaning.
 
-1. **Ground-snap** every grounded frame to the standing sprite's feet line (poses drift up to about 20 px). Not for jumps or flyers; skip smoke-only and other effect-only frames; for waist-up bosses match a body band, and do not snap a slam that lowers the body on purpose.
-2. **Clean**: lone pixels (`despeckle`), off-palette flashes and detached pieces (`scrub --keep-main`), same-hue streaks (`recolor_trail --to none`). Check the weapon at 3× after.
-3. **Trails and effects**: crescents, trails, flown props, baked effects. A trail laid before the snap ends up below the feet line.
-
-Effects choice: blades get a crescent slash (harvested from a 6-frame take of the same poses, or recoloured from the generator's own streaks), shown on the mid-cleave frame and faded on the next, never with the full blade and full crescent on one frame; blunt weapons get a line smear, dust at the head, and a one-frame rebound; spells may keep the generator's streaks recoloured to an element. Shapes, frame counts, and fades per effect: `weapon-effects.md`. A weapon that already trails its own glow gives no crescent: skip it. Animated effects themselves: `vfx-workbench.md`. Locally painted layers are new pixels: they must be named in the approved plan (`auto.md`) and reported.
+Effects choice: blades get a crescent slash (harvested from a 6-frame take of the same poses, or recoloured from the generator's own streaks), shown on the mid-cleave frame and faded on the next, never with the full blade and full crescent on one frame; blunt weapons get a line smear, dust at the head, and a one-frame rebound; spells may keep the generator's streaks recoloured to an element. Shapes, frame counts, and fades per effect: `weapon-effects.md`. A weapon that already trails its own glow gives no crescent: skip it. Animated effects themselves: `vfx-workbench.md`.
 
 ## Timing
 
