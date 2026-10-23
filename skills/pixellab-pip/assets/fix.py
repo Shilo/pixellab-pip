@@ -23,13 +23,8 @@ import json
 import os
 import re
 import sys
-for _s in (sys.stdout, sys.stderr):   # Windows consoles: never crash on non-ASCII text
-    try:
-        _s.reconfigure(encoding='utf-8', errors='replace')
-    except Exception:
-        pass
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _assembly  # noqa: E402,F401  (UTF-8-safe console)
 try:   # optional helper: without numpy/scipy it skips, as Pip's helpers do
     import numpy  # noqa: F401
     import scipy  # noqa: F401

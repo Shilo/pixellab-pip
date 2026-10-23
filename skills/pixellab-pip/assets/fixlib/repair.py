@@ -8,30 +8,11 @@ import numpy as np
 from scipy import ndimage
 
 from fixlib import measure
+from fixlib.colour import group_of
 from fixlib.model import Change
 from fixlib.thresholds import T
 
 COLOUR = ('brightness', 'palette', 'colour_count')
-HUES = [('red', 0, 40), ('orange', 40, 70), ('yellow', 70, 110), ('green', 110, 170), ('teal', 170, 220),
-        ('blue', 220, 275), ('purple', 275, 330), ('pink', 330, 360)]
-
-
-def group_of(rgb: np.ndarray) -> np.ndarray:
-    """Colour group per colour: skin, white/grey/black neutrals, or a hue family (OKLCH)."""
-    lab = measure.oklab(rgb)
-    l, c = lab[:, 0], np.hypot(lab[:, 1], lab[:, 2])
-    h = np.degrees(np.arctan2(lab[:, 2], lab[:, 1])) % 360
-    out = np.empty(len(rgb), dtype=object)
-    for i in range(len(rgb)):
-        if c[i] < 0.035 or (c[i] < 0.07 and l[i] >= 0.62 and 50 <= h[i] <= 110):
-            out[i] = 'white' if l[i] >= 0.62 else ('black' if l[i] < 0.38 else 'grey')
-        elif 30 <= h[i] <= 75 and 0.06 <= c[i] <= 0.13 and 0.55 <= l[i] <= 0.85:
-            out[i] = 'skin'
-        else:
-            out[i] = next(n for n, a, b in HUES if a <= h[i] < b)
-    return out
-
-
 def snap(px: np.ndarray, ref_cols: np.ndarray) -> np.ndarray:
     """Each colour to the nearest reference colour of its own group (any group when the reference has none)."""
     if not len(px):

@@ -23,12 +23,11 @@ ap.add_argument("--scale", type=int, default=2)
 ap.add_argument("--bg", choices=("none", "discord"), default="none")
 ap.add_argument("--out")
 a = ap.parse_args()
-try:
-    import numpy as np
-    from PIL import Image, ImageDraw, ImageFont
-except ImportError as exc:
-    print(json.dumps({"status": "skipped", "reason": f"needs numpy and Pillow: {exc}"}))
-    sys.exit(3)
+from _assembly import require_numpy  # noqa: E402
+
+require_numpy()
+import numpy as np  # noqa: E402
+from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 folder, prefix = Path(a.dir), a.name
 ORDER = ["idle", "walk", "run", "attack", "skill", "cast", "hurt", "death"]

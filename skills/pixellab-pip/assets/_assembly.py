@@ -1,4 +1,4 @@
-"""Shared by the assembly helpers: the Pillow skip contract and frame-path expansion."""
+"""Shared by the local helpers: a UTF-8-safe console, the Pillow/numpy skip contract and frame-path expansion."""
 
 from __future__ import annotations
 
@@ -6,6 +6,23 @@ import glob
 import json
 import re
 import sys
+
+
+for _s in (sys.stdout, sys.stderr):   # Windows consoles: never crash on non-ASCII text
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+
+def require_numpy() -> None:
+    """Print a skipped report and exit 3 when numpy or Pillow cannot be imported (never a pass)."""
+    try:
+        import numpy  # noqa: F401
+        from PIL import Image  # noqa: F401
+    except (ImportError, OSError) as exc:
+        print(json.dumps({"status": "skipped", "reason": f"needs numpy and Pillow: {exc}"}))
+        sys.exit(3)
 
 
 def require_pillow():

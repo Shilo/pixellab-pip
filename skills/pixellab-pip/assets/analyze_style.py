@@ -11,23 +11,18 @@ the user's art is never changed. The words (genre, mood, materials) come from lo
   python analyze_style.py ref.gif --out style_analysis
 """
 import sys
-for _s in (sys.stdout, sys.stderr):   # Windows consoles: never crash on non-ASCII text
-    try:
-        _s.reconfigure(encoding='utf-8', errors='replace')
-    except Exception:
-        pass
+import _assembly  # noqa: E402,F401  (UTF-8-safe console)
 if len(sys.argv) < 2 or sys.argv[1] in ('-h', '--help'):
     sys.exit(__doc__)
 import colorsys
 import glob
 import json
 import os
-try:
-    import numpy as np
-    from PIL import Image, ImageSequence
-except ImportError as exc:
-    print(json.dumps({'status': 'skipped', 'reason': 'needs numpy and Pillow (%s)' % exc}))
-    sys.exit(3)
+from _assembly import require_numpy  # noqa: E402
+
+require_numpy()
+import numpy as np  # noqa: E402
+from PIL import Image, ImageSequence  # noqa: E402
 
 src = sys.argv[1]
 out = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else 'style_analysis'

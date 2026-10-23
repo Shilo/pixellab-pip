@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import os
 import subprocess
@@ -11,24 +10,16 @@ import unittest
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+from test_helpers import REPO_ROOT, load_module
+
 FINISH = REPO_ROOT / "skills/pixellab-pip/assets/finish"
-
-
-def load_module(name: str, path: Path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"could not load {path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 try:
     import numpy as np
     import scipy.ndimage  # noqa: F401
     from PIL import Image
-    synth = load_module("finish_synth", REPO_ROOT / "tests/finish_synth.py")
+    synth = load_module("synth", REPO_ROOT / "tests/doctor_cases/synth.py")
     HAS_NUMPY = True
 except ImportError:
     HAS_NUMPY = False

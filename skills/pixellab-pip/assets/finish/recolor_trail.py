@@ -39,6 +39,8 @@ RAMPS = {   # dark -> bright
 HUES = {"red": (330, 20), "orange": (15, 45), "yellow": (40, 70), "green": (70, 170),
         "cyan": (170, 200), "blue": (200, 255), "purple": (255, 330)}
 
+BODY_GAP = 4   # trail pixels sit at least this far from non-hue body pixels
+
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument("dir")
 ap.add_argument("frames", nargs="+")
@@ -49,9 +51,7 @@ ap.add_argument("--ref", help="the standing sprite: hue pixels not in its palett
 ap.add_argument("--tol", type=float, default=30)
 ap.add_argument("--outside-keys", action="store_true",
                 help="trail = hue pixels outside the two key poses' silhouettes (frame 0 and the last frame)")
-ap.add_argument("--above", type=int, default=0, help="only rows above this y count (keeps low cloak tails out)")
 ap.add_argument("--from-scrub", metavar="DIR", help="scrub.py's --out folder: what it cleared is the trail")
-ap.add_argument("--body-gap", type=int, default=4, help="trail pixels must be this far from non-hue body pixels")
 ap.add_argument("--thick", type=int, default=5, help="solid areas of the hue at least this thick are kept")
 a = ap.parse_args()
 if a.hue == "any" and not a.ref and not a.from_scrub:
@@ -68,7 +68,7 @@ if a.outside_keys:
     kp = [os.path.join(a.dir, "0.png"), os.path.join(a.dir, "%d.png" % max(nums))]
     inputs += kp
     k0, k1 = (np.array(Image.open(p).convert("RGBA"))[..., 3] > 0 for p in kp)
-    keys = ndimage.binary_dilation(k0 | k1, iterations=a.body_gap)
+    keys = ndimage.binary_dilation(k0 | k1, iterations=BODY_GAP)
 run = _derive.Run("recolor_trail", "cleanup", a.out, list(dict.fromkeys(inputs)))
 lo, hi = tuple(float(v) for v in a.hue.split(",")) if "," in a.hue else HUES.get(a.hue, (0, 360))
 refpal = None
@@ -91,7 +91,7 @@ for f, path in zip(names, paths):
         inhue = op & (s > 0.35) & ((deg >= lo) & (deg <= hi) if lo < hi else ((deg >= lo) | (deg <= hi)))
     solid = ndimage.binary_opening(inhue, structure=np.ones((a.thick, a.thick)))
     solid = ndimage.binary_dilation(solid, iterations=2) & inhue        # keep the whole tabard, not just its core
-    body = ndimage.binary_dilation(op & ~inhue, iterations=a.body_gap)  # skin, armour, hair, sword...
+    body = ndimage.binary_dilation(op & ~inhue, iterations=BODY_GAP)  # skin, armour, hair, sword...
     trail = inhue & ~solid & ~body
     if refpal is not None:   # colour test against the original sprite beats the shape test
         px = x[..., :3][inhue].astype(np.int32)
@@ -103,8 +103,6 @@ for f, path in zip(names, paths):
     if a.from_scrub:
         sc = np.array(Image.open(os.path.join(a.from_scrub, f + "_s.png")).convert("RGBA"))
         trail = op & (sc[..., 3] == 0)
-    if a.above:
-        trail[a.above:] = False
     lum = 0.299 * rgb[..., 0] + 0.587 * rgb[..., 1] + 0.114 * rgb[..., 2]
     if trail.any() and a.to == "none":
         # where the streak crosses the body (an axe head, the torso) deleting it would punch a hole: keep those

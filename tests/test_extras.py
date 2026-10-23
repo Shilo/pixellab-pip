@@ -132,7 +132,7 @@ class ExtrasTests(unittest.TestCase):
         for script, args in (("tileset_preview.py", ["m.png", "s.png"]),
                              ("normal_map.py", ["preview", "o.gif", "s.png", "n.png"]),
                              ("showcase_gif.py", [".", "k"])):
-            code = ("import runpy, sys; sys.modules['numpy'] = None; "
+            code = (f"import runpy, sys; sys.path.insert(0, {str(ASSETS)!r}); sys.modules['numpy'] = None; "   # as `python script.py` sees it
                     f"sys.argv = [{script!r}] + {args!r}; runpy.run_path({str(ASSETS / script)!r}, run_name='__main__')")
             r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=self.dir)
             self.assertEqual(r.returncode, 3, script + r.stderr)

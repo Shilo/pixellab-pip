@@ -12,10 +12,8 @@
 Needs Pillow and numpy; without them prints a skipped status and exits 3.
 """
 import argparse
-import glob
 import json
 import math
-import re
 import sys
 from pathlib import Path
 
@@ -27,21 +25,11 @@ ap.add_argument("--frames", type=int, default=1)
 ap.add_argument("--scale", type=int, default=2)
 ap.add_argument("--directx", action="store_true")
 a = ap.parse_args()
-try:
-    import numpy as np
-    from PIL import Image
-except ImportError as exc:
-    print(json.dumps({"status": "skipped", "reason": f"needs numpy and Pillow: {exc}"}))
-    sys.exit(3)
+from _assembly import expand, require_numpy  # noqa: E402
 
-
-def expand(paths):
-    """cmd/PowerShell pass *.png literally: expand it here, in natural order (2.png before 10.png)."""
-    out = []
-    for p in paths:
-        hits = glob.glob(p) if ("*" in p or "?" in p) else []
-        out += sorted(hits, key=lambda s: [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", s)]) or [p]
-    return out
+require_numpy()
+import numpy as np  # noqa: E402
+from PIL import Image  # noqa: E402
 
 
 if a.cmd == "gif":

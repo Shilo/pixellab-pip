@@ -3,23 +3,13 @@ and the checks it couldn't run with the reason. Every number it flags at lives i
 import numpy as np
 from scipy import ndimage, signal
 
+from fixlib.colour import oklab  # noqa: F401  (repair and the tests use measure.oklab)
 from fixlib.frames import detect_scale
 from fixlib.model import Finding
 from fixlib.thresholds import T
 
 EIGHT = np.ones((3, 3), bool)
 GROUNDED_SKIP = {'death'}
-
-
-def oklab(rgb: np.ndarray) -> np.ndarray:
-    """sRGB 0-255 (..., 3) to OKLab."""
-    c = rgb.astype(np.float64) / 255
-    c = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
-    lms = c @ np.array([[0.4122214708, 0.2119034982, 0.0883024619], [0.5363325363, 0.6806995451, 0.2817188376],
-                        [0.0514459929, 0.1073969566, 0.6299787005]])
-    lms = np.cbrt(lms)
-    return lms @ np.array([[0.2104542553, 1.9779984951, 0.0259040371], [0.7936177850, -2.4285922050, 0.7827717662],
-                           [-0.0040720468, 0.4505937099, -0.8086757660]])
 
 
 def luma(rgb: np.ndarray) -> np.ndarray:

@@ -1,7 +1,7 @@
 """Paint a random test map from top-down 16-tile Wang tilesets the way an engine autotiles them, so seams,
 wrong corners and a chain that does not match show up before the tiles go into a game.
 
-    python tileset_preview.py <out.png> <sheet.png> [<sheet2.png> ...] [--cells 24] [--seed 1] [--scale 2]
+    python tileset_preview.py <out.png> <sheet.png> [<sheet2.png> ...] [--cells 24] [--scale 2]
 
 Each sheet needs its metadata beside it as <sheet>.json (the `/mcp/tilesets/{id}/image` sheet and its
 `/metadata` JSON, per references/tileset.md). Several sheets = a chain in order (sea>beach, then beach>grass):
@@ -18,15 +18,13 @@ ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDe
 ap.add_argument("out")
 ap.add_argument("sheets", nargs="+")
 ap.add_argument("--cells", type=int, default=24)
-ap.add_argument("--seed", type=int, default=1)
 ap.add_argument("--scale", type=int, default=2)
 a = ap.parse_args()
-try:
-    import numpy as np
-    from PIL import Image, ImageDraw
-except ImportError as exc:
-    print(json.dumps({"status": "skipped", "reason": f"needs numpy and Pillow: {exc}"}))
-    sys.exit(3)
+from _assembly import require_numpy  # noqa: E402
+
+require_numpy()
+import numpy as np  # noqa: E402
+from PIL import Image, ImageDraw  # noqa: E402
 
 sets = []   # per sheet: {(NW, NE, SW, SE) as 0/1: tile image}
 for sheet in a.sheets:
@@ -48,7 +46,7 @@ for sheet in a.sheets:
 
 tw, th = sets[0][(0, 0, 0, 0)].size
 levels, cells = len(sets) + 1, a.cells
-rng = np.random.default_rng(a.seed)
+rng = np.random.default_rng(1)
 coarse = rng.random((cells // 6 + 2, cells // 6 + 2))
 field = np.asarray(Image.fromarray((coarse * 255).astype(np.uint8)).resize((cells + 1, cells + 1), Image.BICUBIC),
                    dtype=np.float32) / 255

@@ -10,11 +10,6 @@ import os
 import re
 import sys
 
-for _s in (sys.stdout, sys.stderr):   # Windows consoles: never crash on non-ASCII text
-    try:
-        _s.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
 
 
 def require_numpy(scipy: bool = False) -> None:

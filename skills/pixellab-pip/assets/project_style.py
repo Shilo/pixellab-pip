@@ -95,7 +95,6 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--from", dest="source")
     ap.add_argument("--use", action="store_true")
     ap.add_argument("--as", dest="as_name")
-    ap.add_argument("--style")
     a = ap.parse_args(argv)
     prof = load(a.profile)
     styles = prof.get("styles") if isinstance(prof.get("styles"), dict) else {}
@@ -171,7 +170,7 @@ def main(argv: list[str] | None = None) -> int:
     if len(a.args) != 2 or a.args[0] not in FAMILIES:
         return fail("usage: anchor <%s> <image.png>" % "|".join(FAMILIES))
     family, image = a.args
-    name = a.style or active
+    name = active
     if not name or not need(name):
         return fail("no active style: save or pick one first")
     if not os.path.isfile(image):

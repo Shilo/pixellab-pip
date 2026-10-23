@@ -114,6 +114,12 @@ def solid_bg(f, rgb):
     return g
 
 
+def png(a, path):
+    os.makedirs(os.path.dirname(str(path)), exist_ok=True)
+    Image.fromarray(a, "RGBA").save(path)
+    return str(path)
+
+
 def save(frames, folder, stem):
     os.makedirs(folder, exist_ok=True)
     out = []
