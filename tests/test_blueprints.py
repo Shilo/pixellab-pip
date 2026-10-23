@@ -477,5 +477,50 @@ class BlueprintShapeTests(unittest.TestCase):
             )
 
 
+BUNDLED = REPO_ROOT / "skills/pixellab-pip/blueprints"
+PRODUCTION_BLUEPRINTS = (
+    "overhead-axe-chop",
+    "character-candidates",
+    "projectile-skill",
+    "vfx-strike-single-target",
+    "vfx-wave-across-party",
+    "vfx-eruption-per-target",
+)
+FORBIDDEN_KEYS = {
+    "cost", "costs", "est_cost", "generations", "spent", "reported_usage",
+    "balance", "job_id", "job_ids", "background_job_id",
+}
+
+
+def iter_keys(value: object):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield key
+            yield from iter_keys(item)
+    elif isinstance(value, list):
+        for item in value:
+            yield from iter_keys(item)
+
+
+class ProductionBlueprintTests(unittest.TestCase):
+    def test_production_blueprints_validate_and_stay_portable(self) -> None:
+        import json
+        import re
+
+        for name in PRODUCTION_BLUEPRINTS:
+            with self.subTest(blueprint=name):
+                path = BUNDLED / f"{name}.blueprint.json"
+                self.assertTrue(path.exists(), f"missing {path.name}")
+                text = path.read_text(encoding="utf-8")
+                data = json.loads(text)
+                qa.validate_blueprint_data(data, path.name)
+                steps = data if isinstance(data, list) else [data]
+                calls = [k for step in steps for k in step if k.startswith(("MCP ", "POST /v2/"))]
+                self.assertTrue(calls, "needs at least one PixelLab call")
+                bad = {k for k in iter_keys(data) if k.casefold() in FORBIDDEN_KEYS}
+                self.assertFalse(bad, f"cost/job keys: {bad}")
+                self.assertIsNone(re.search(r"(?<![A-Za-z])[A-Za-z]:[\\/]|/Users/|/home/", text), "machine path")
+
+
 if __name__ == "__main__":
     unittest.main()

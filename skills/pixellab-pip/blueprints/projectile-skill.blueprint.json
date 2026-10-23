@@ -1,0 +1,132 @@
+[
+  {
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/projectile-skill",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "A thrown-prop skill in one sheet: three key poses (wind-up with the prop, release, empty-hand follow-through), two interpolated clips, the prop flown across the frames after release and a vfx_workbench impact. Side view facing right. Flying the prop and baking the impact add local pixels, so both are derivative steps that need the user's approval at their approval level.",
+    "_comment_prompt": "/pixellab-pip run the projectile-skill blueprint: the necromancer throws an exploding lollipop",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). Copy {{standing sprite}} in as standing.png; it must face right. Paste it unscaled onto a transparent {{canvas width | default: 192}}x{{canvas height | default: 200}} canvas at x={{pad x | default: 48}} with its lowest drawn row on the bottom edge (assets/pad_sprite.py), save padded.png and record the offset in pad.json. Stop if it does not fit or width x height x 6 exceeds 524288.",
+      "outputs": ["standing.png", "padded.png", "pad.json"],
+      "verify": "padded.png has the canvas size, its opaque pixels equal standing.png at the recorded offset, and the output folder is new and inside the project."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, wind-up of a throw: the throwing arm drawn back behind the head holding {{thrown prop}}, the other arm forward for balance, weight on the back foot. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image with the job_id returned by the immediately preceding call until completed or failed; never resubmit. Save the image unchanged as keys/key-a.png.",
+      "outputs": ["keys/key-a.png"],
+      "verify": "keys/key-a.png is transparent and the same size as padded.png."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, the release of a throw: the throwing arm extended forward toward the right of the image with the hand open and empty, the thrown object already gone, weight shifting onto the front foot. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job as above and save the image unchanged as keys/key-b.png.",
+      "outputs": ["keys/key-b.png"],
+      "verify": "keys/key-b.png is transparent and the same size as padded.png."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, follow-through after a throw: the throwing arm swung down across the body, hand open and empty, torso turned forward, front knee bent. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job as above and save the image unchanged as keys/key-c.png. Show standing.png and the three key poses in order at 3x and run the look checklist in references/characters.md: the prop in hand only in key-a, both hands empty after it, each hand joined to an arm, every worn prop on the side it is worn, nothing touches the canvas edge. Report the result and ask whether to animate (the next two paid calls, already in the approved run) or re-roll a pose (a new paid call needing its own approval). Stop unless the user approves.",
+      "inputs": ["standing.png", "keys/key-a.png", "keys/key-b.png"],
+      "outputs": ["keys/key-c.png"],
+      "verify": "Three key poses exist at the padded size, the look check was reported, and the user approved continuing."
+    }
+  },
+  {
+    "MCP animate_image": {
+      "first_frame_base64": "keys/key-a.png",
+      "last_frame_base64": "keys/key-b.png",
+      "action": "swings the arm forward and lets go in one fast throw, stepping onto the front foot",
+      "frame_count": 6,
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the seven returned images unchanged in order as clip-1/frame-00.png through clip-1/frame-06.png (frame-00 is the echoed key-a).",
+      "outputs": ["clip-1/frame-00.png", "clip-1/frame-06.png"],
+      "verify": "Seven same-size transparent frames are saved in returned order."
+    }
+  },
+  {
+    "MCP animate_image": {
+      "first_frame_base64": "keys/key-b.png",
+      "last_frame_base64": "keys/key-c.png",
+      "action": "the empty throwing arm follows through down across the body as the weight settles forward",
+      "frame_count": 4,
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the five returned images unchanged as clip-2/frame-00.png through clip-2/frame-04.png. The move is clip-1 frames 00-06 then clip-2 frames 01-04 (clip-2 frame-00 is the echoed key-b input).",
+      "outputs": ["clip-2/frame-00.png", "clip-2/frame-04.png"],
+      "verify": "Five same-size transparent frames are saved in returned order."
+    }
+  },
+  {
+    "MCP vfx_workbench": {
+      "argv": ["start", "--fps", "12"],
+      "notes": "Impact for a thrown {{thrown prop}} hitting one target, side view, in the caster's colours."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "With the step id returned by the immediately preceding call, render the strike recipe from the bundled vfx-strike-single-target blueprint with its main ramp set to {{impact colour ramp}}, check frames 2, 5, 8 and 10, and export it as {{effect name | default: Thrown Prop Impact}}. Save the exported PNG and JSON unchanged as fx/impact.png and fx/impact.json.",
+      "outputs": ["fx/impact.png", "fx/impact.json"],
+      "verify": "The export exists, its frames are transparent, and the peak frame is the largest."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Derivative step; run it only when the user's approval level allows new local pixels (references/auto.md), else ask. Into derived/, never over the raw frames: on each in-between after the release, remove any generator-drawn copy of the prop (keep the body as the largest connected piece); copy the prop from key-a onto the release frame and the frames after it, moving {{prop step per frame | default: 18,-4}} pixels a frame with a quarter turn a frame; then lay fx/impact.png's frames onto the frame where the prop reaches the target, widening the canvas on the right only and holding the last body frame until the effect ends. Report every change and label the frames as derivatives.",
+      "inputs": ["keys/key-a.png", "clip-1/frame-06.png", "clip-2/frame-04.png", "fx/impact.png"],
+      "outputs": ["derived/move.json"],
+      "verify": "Raw clip frames are unchanged, derived/ holds one frame per move frame plus the held effect frames, and derived/move.json lists each frame's source, the prop path and the impact frame."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Assemble the derived frames in order into final/skill.png and final/skill.json (assets/make_sheet.py) with body durations {{body durations | default: the throw rhythm in references/key-pose-animation.md}} followed by the effect durations from the vfx-strike-single-target blueprint, the impact frame marked as the hit, the pad offset from pad.json and facing right. Also ship final/body.png (the raw body frames only), final/prop.png and fx/impact.png for engines that spawn the projectile themselves. Write final/skill.gif with the same delays, infinite looping and disposal Previous, then run the animation doctor with the flight frames passed as effect frames.",
+      "inputs": ["derived/move.json", "pad.json"],
+      "outputs": ["final/skill.png", "final/skill.json", "final/skill.gif", "final/body.png", "final/prop.png"],
+      "verify": "Each sheet cell matches its source frame pixel-for-pixel, no frame is duplicated for timing, the coalesced GIF equals the frames, and the doctor report was shown."
+    }
+  }
+]

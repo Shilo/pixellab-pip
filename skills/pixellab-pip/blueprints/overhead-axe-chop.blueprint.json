@@ -1,0 +1,80 @@
+[
+  {
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/overhead-axe-chop",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "Overhead two-handed axe chop from a side-view sprite facing right: two key poses (wind-up, hit) painted on a padded canvas, a pause to approve them, then animate_image between them. A 256x256 canvas gives a long haft room and caps the clip at 8 generated frames.",
+    "_comment_prompt": "/pixellab-pip run the overhead-axe-chop blueprint on hero.png",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). Copy {{standing sprite}} in as standing.png; it must face right. Paste it unscaled onto a transparent {{canvas width | default: 256}}x{{canvas height | default: 256}} canvas at x={{pad x | default: 72}} with its lowest drawn row on the bottom edge (assets/pad_sprite.py does this), save padded.png and record the paste offset in pad.json. Stop if the sprite does not fit, the canvas breaks the animate_image limit (width x height x 8 <= 524288, at most 256 per side), or any check fails.",
+      "outputs": ["standing.png", "padded.png", "pad.json"],
+      "verify": "padded.png has the canvas size, every opaque pixel equals standing.png at the recorded offset, and the output folder is new and inside the project."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, wind-up of an overhead chop: holding one {{weapon | default: two-handed greataxe}} with both hands together at the end of the haft over the shoulder, the axe head up behind the head, edge facing up toward the upper left of the image, torso arched back, very long stride, front knee bent, back leg straight. The same axe head, same size, the haft as long as in the original. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image with the job_id returned by the immediately preceding call until completed or failed; re-poll on transient errors and never resubmit. Save the image unchanged as keys/key-a.png.",
+      "outputs": ["keys/key-a.png"],
+      "verify": "keys/key-a.png is a transparent PNG with the same dimensions as padded.png."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, the hit of an overhead chop: torso folded forward over the deep front knee, both arms extended low in front, holding one {{weapon | default: two-handed greataxe}}, the axe head at knee height in front, edge facing toward the lower right of the image, back heel lifted. The same axe head, same size, the haft as long as in the original. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job as above and save the image unchanged as keys/key-b.png. Show standing.png, key-a.png and key-b.png side by side at 3x and run the look checklist in references/characters.md: one axe, both hands on the haft and joined to the arms, the edge direction as described, head size and haft length match the standing sprite, nothing touches the canvas edge. Report the result and ask whether to animate (the next paid call, already in the approved run) or re-roll a pose (a new paid call that needs its own approval). Stop before the next step unless the user approves.",
+      "inputs": ["standing.png", "keys/key-a.png"],
+      "outputs": ["keys/key-b.png"],
+      "verify": "Both key poses exist at the padded size, the look check was reported, and the user approved continuing."
+    }
+  },
+  {
+    "MCP animate_image": {
+      "first_frame_base64": "keys/key-a.png",
+      "last_frame_base64": "keys/key-b.png",
+      "action": "brings the raised axe over the head and down in front in one heavy fast chop, folding forward into the deep lunge",
+      "frame_count": 8,
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save all returned images unchanged in order as frames/frame-00.png onward; frame-00 is the echoed first frame. Run the animation doctor (references/animation-doctor.md) on the frames with standing.png as the reference and the first and last frames marked as approved key poses, writing into doctor/ only, and report its verdict and look list without changing any source frame.",
+      "inputs": ["standing.png"],
+      "outputs": ["frames/frame-00.png", "frames/frame-01.png", "frames/frame-02.png", "frames/frame-03.png", "frames/frame-04.png", "frames/frame-05.png", "frames/frame-06.png", "frames/frame-07.png", "frames/frame-08.png", "doctor/fix_report.json"],
+      "verify": "Nine readable transparent frames of identical size are saved in returned order, the doctor report exists, and no source frame was modified."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Assemble frame-00 through frame-08 in order, without resizing or repainting, into final/axe-chop.png as one row with final/axe-chop.json in Aseprite sheet format (assets/make_sheet.py), with per-frame durations {{frame durations | default: 160 ms on frame 1, 140 ms on the last (hit) frame, 60 ms otherwise}}, the pad offset from pad.json, facing right and the hit frame index. Write final/axe-chop.gif with those delays, infinite looping and disposal Previous. Coalesce the GIF and compare every rendered frame with its source PNG.",
+      "inputs": ["pad.json", "frames/frame-00.png", "frames/frame-08.png"],
+      "outputs": ["final/axe-chop.png", "final/axe-chop.json", "final/axe-chop.gif"],
+      "verify": "The sheet has nine cells matching their sources pixel-for-pixel, timing lives only in durations (no duplicated frames), and the coalesced GIF frames equal the source frames."
+    }
+  }
+]

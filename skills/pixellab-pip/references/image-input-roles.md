@@ -23,7 +23,7 @@ exists, use the equivalent REST route; never silently shrink or quantize a user 
 
 When a public PixelLab tool accepts an image URL and the source has no usable URL, REST `POST /uploads` accepts a PNG, JPEG, or image Pillow reads as multipart `file` and returns a temporary `ref`. Pass that `ref` only to fields documented to accept an image URL. The bearer-authenticated upload runs no generation and is not charged; it is hidden after three days and deleted a day later. Do not use it for fields that specifically require a base64 image.
 
-For a local image without a PixelLab API token, MCP `get_upload_url` returns a user-bound upload URL valid for 15 minutes; upload the file with multipart `file` to its `POST /uploads/{ticket}` destination, then use the returned `upload:<id>` only in documented image-URL fields. This is a separate short-lived ticket flow.
+For a local image without a PixelLab API token, MCP `get_upload_url` returns a user-bound upload URL valid for 15 minutes; upload the file with multipart `file` to its `POST /uploads/{ticket}` destination, then use the returned `upload:<id>` only in documented image-URL fields. This is a separate short-lived ticket flow: an expired ticket answers 401, so get a new URL for each upload rather than reusing one. When `curl` is unavailable or blocked, send the same multipart POST with the language's standard HTTP library.
 
 ## Goal Router
 

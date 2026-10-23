@@ -1,0 +1,138 @@
+[
+  {
+    "_pixellab": {
+      "output_directory": "pixellab-pip-generations/vfx-strike-single-target",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "One-target strike played over the victim (112x112, 12 frames): a slash arc, a lit billow of outlined puffs and rising motes. Built for an attacker striking toward the right. Painted, outlined workbench recipe; vfx_workbench is free for subscribers, but export saves to the user's My effects.",
+    "_comment_prompt": "/pixellab-pip run the vfx-strike-single-target blueprint for an ice spear, pale blue",
+    "TASK": {
+      "instruction": "Before the first call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection with vfx_workbench visible, and create the declared output directory empty (lowest free -2 suffix if taken). Resolve main colour ramp to six hex colours from near-black to highlight in the caster's own colours, taken from the project style (references/project-style.md) or the caster sprite; ask if neither gives one.",
+      "verify": "The run is approved, vfx_workbench is callable, the ramp has six hex colours, and the output directory is new and empty."
+    }
+  },
+  {
+    "MCP vfx_workbench": {
+      "argv": [
+        "start",
+        "--fps",
+        "12"
+      ],
+      "notes": "Strike effect: {{effect description}}, caster facing {{caster facing | default: right}}."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "With the step id returned by the immediately preceding call, call vfx_workbench with argv [<step id>, \"render\", <this task's render object as one JSON string>]. When the caster faces left, set recipe mirror to \"x\" (remove it when the template already mirrors and the caster faces right). For a thrust use an arc with points and corners smooth; for claws claws 3 and spacing 7; for a slam add a squashed ring. Each change returns a new step id; patch with set, remove, add_layer or remove_layer ops and pass \"frames\" (1-based) to re-render only key frames 2, 5, 8 and 10. Then export with --name {{effect name}}. Save the exported GIF, sheet PNG and JSON unchanged as effect.gif, effect.png and effect.json.",
+      "render": {
+        "recipe": {
+          "canvas": {
+            "w": 112,
+            "h": 112
+          },
+          "frames": 12,
+          "fps": 12,
+          "loop": false,
+          "origin": [
+            56,
+            62
+          ],
+          "ramps": {
+            "main": "{{main colour ramp}}"
+          },
+          "outline": {
+            "mode": "dark"
+          },
+          "tones": 5,
+          "detail": 0.1,
+          "shading": "lit",
+          "layers": [
+            {
+              "id": "swing",
+              "type": "arc",
+              "profile": "slash",
+              "x": 52,
+              "y": 52,
+              "radius": 30,
+              "start": -130,
+              "sweep": 180,
+              "thickness": 7,
+              "life": [
+                0.0,
+                0.42
+              ],
+              "z": "front"
+            },
+            {
+              "id": "billow",
+              "type": "puffs",
+              "mode": "burst",
+              "x": 56,
+              "y": 62,
+              "radius": 24,
+              "count": 6,
+              "throw": 0.55,
+              "rise": 0.5,
+              "thin": 0.45,
+              "lump": 0.4,
+              "billow": 1.0,
+              "highlight": 0.65,
+              "life": [
+                0.18,
+                1.0
+              ],
+              "z": "back"
+            },
+            {
+              "id": "motes",
+              "type": "particles",
+              "mode": "rise",
+              "x": 56,
+              "y": 66,
+              "radius": 18,
+              "count": 12,
+              "speed": 40,
+              "size": [
+                2,
+                3
+              ],
+              "shape": "dot",
+              "lifespan": 0.7,
+              "fade_out": 0.4,
+              "life": [
+                0.35,
+                1.0
+              ],
+              "z": "front",
+              "outline": true
+            }
+          ]
+        }
+      },
+      "outputs": [
+        "effect.gif",
+        "effect.png",
+        "effect.json"
+      ],
+      "verify": "The peak frame is the largest and most solid, the last frames are mostly empty, the colours are the ramp's, nothing reads as a box or a pipe, and the saved files match the export."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "The export's JSON gives every frame one flat time. Write timing.json with the per-frame durations {{frame durations | default: 67, 50, 50, 67, 83, 83, 183, 92, 83, 75, 75, 83 ms}} (anticipation, fast launch, a hold on the peak, fast break-up) for the engine's clip table; do not duplicate frames for timing.",
+      "inputs": [
+        "effect.json"
+      ],
+      "outputs": [
+        "timing.json"
+      ],
+      "verify": "timing.json lists exactly 12 durations in frame order."
+    }
+  }
+]
