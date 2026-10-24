@@ -23,6 +23,7 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 - [Showcase](#showcase)
 - [Features](#features)
   - [Create Pixel Art You Want](#create-pixel-art-you-want)
+  - [Build Game-Ready Art](#build-game-ready-art)
   - [Protect Your Art And Credits](#protect-your-art-and-credits)
   - [Bring Characters To Life](#bring-characters-to-life)
   - [Save, Clean Up, And Reuse Your Art](#save-clean-up-and-reuse-your-art)
@@ -68,6 +69,21 @@ Use me when you need to create, edit, animate, integrate, or troubleshoot PixelL
 | Attached images | Pip works out what each attached file is for — the image to edit, a character to match, a style to copy, a color palette, a mask, or the first frame of an animation — and asks first when guessing wrong would cost you credits. |
 | Pick from generated variations | Some PixelLab tools return several versions of one asset. Pip lists them as a numbered menu and waits for your pick before saving or continuing, unless you tell it to choose. |
 | Prompt preparation | Pip turns rough wording, your images, styles, palettes, and constraints into a clear PixelLab-ready description, using PixelLab's own prompt enhancer when the tool has one. It shows anything it adds before you pay, and sends wording you give exactly as-is. You can opt out any time. |
+
+### Build Game-Ready Art
+
+| Feature | What it does |
+|---|---|
+| Project art styles | Save your game's look once — look words, palette, reference art per asset type, and an optional seed — and every new asset matches it. Start from a named example or genre, your own words, or art to match; nothing applies unless you choose it. See [Project Styles ↗](docs/usage.md#project-styles). |
+| Animation doctor | Checks animation frames for jumps, flicker, stray pixels, size pops, and lost weapons, fixes what it can for free on copies, and plans paid re-rolls of only the frames that failed, with your approval. |
+| Game-ready exports | Packs frames into sprite sheets with Aseprite JSON or a Godot `SpriteFrames` resource (play once or loop), plus preview and showcase GIFs, contact sheets, and tileset test maps. |
+| Finishing tools | Snaps frames to the ground, clears stray pixels and flashes, matches colours, makes recolour variants, and adds slashes, trails, thrown props, and effects — always on copies, with a record of every change. |
+| Run budgets | `/pixellab-pip auto plan <budget> [retries]` caps the credits and retries for one run; `auto status` shows your current setting. |
+| Review panel | `/pixellab-pip panel` shows a project's styles, results, and costs side by side for quick review, and drafts your follow-up request. |
+| Run history and re-rolls | Pip keeps a cost record per run, separating charged from estimated usage, so you can see what you made and what it cost and re-roll any past result. |
+| Attack and motion guides | Opt-in key-pose attacks, 8-direction moves, giant bosses, 14 weapon types, martial arts, armour and cloth, and weapon effects. |
+| Production recipes | Ready-to-run blueprints for character candidates, an overhead axe chop, a projectile skill, and strike, wave, and eruption effects. |
+| Credit savers | Offers a 1-generation layout draft before an expensive Pro image, and the closest alternative when a tool isn't in your PixelLab plan. |
 
 ### Protect Your Art And Credits
 
