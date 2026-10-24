@@ -28,6 +28,8 @@ No new MCP server is required for this change: it adds dependencies, lifecycle, 
 
 Retain the persistent boolean toggle. A bounded plan adds an explicit run budget and finite additional attempts to the existing Auto setting, without a new permission hierarchy. The original restoration at `9ee2e8b` required approval for every bounded plan; Claude's review challenged that extra gate. The current decision below supersedes it.
 
+**Later change:** the prototype `level`, `budget` and `retries` handling and `auto reset` were removed after this record, because no Pip release ever wrote those keys (AGENTS.md: no compatibility paths without a current requirement). Anyone who ran the prototype should check `pixellab-pip.json` and remove those keys. The `auto status` legacy notice, `auto reset` and the legacy-policy paragraph below describe the earlier decision.
+
 | Command | Scope |
 |---|---|
 | `auto`, `auto on`, `auto off` | Existing persistent cost-confirmation setting. |

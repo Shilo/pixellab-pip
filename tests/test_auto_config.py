@@ -90,7 +90,7 @@ class AutoPolicyTests(unittest.TestCase):
     def test_failed_replacement_preserves_config_and_cleans_prepared_file(self) -> None:
         for winerror, expected_attempts in ((5, 2), (None, 1)):
             with self.subTest(winerror=winerror):
-                original = self.write({"auto": False, "budget": 0, "other": 7})
+                original = self.write({"auto": False, "other": 7})
                 denied = PermissionError("replacement denied")
                 if winerror is not None:
                     denied.winerror = winerror
@@ -102,9 +102,6 @@ class AutoPolicyTests(unittest.TestCase):
                 self.assertEqual(replace.call_count, expected_attempts)
                 self.assertEqual(self.config.read_bytes(), original)
                 self.assertFalse(list(self.config.parent.glob("*.tmp")))
-
-
-
 
     def test_invalid_auto_with_malformed_bark_stays_authoritative(self) -> None:
         fallback = self.config.with_name("fallback.json")
@@ -120,7 +117,7 @@ class AutoPolicyTests(unittest.TestCase):
                 self.assertEqual(self.config.read_bytes(), original)
 
     def test_corrupt_primary_blocks_auto_and_all_settings_writes_without_data_loss(self) -> None:
-        original = b'{"auto": false, "budget": 45,'
+        original = b'{"auto": false, "other": 45,'
         self.config.write_bytes(original)
         fallback = self.config.with_name("fallback.json")
         fallback_original = b'{"auto": true, "bark": true}'
@@ -153,7 +150,6 @@ class AutoPolicyTests(unittest.TestCase):
             self.assertEqual(self.run_command("off")[0], 0)
             self.assertEqual(json.loads(self.config.read_text()), {"bark": False, "other": {"keep": 7}})
             self.assertEqual(fallback.read_bytes(), fallback_original)
-
 
     def test_nonstandard_json_or_nonobject_config_cannot_enable_auto_or_be_overwritten(self) -> None:
         for raw in ('{"auto":true,"budget":NaN}', '{"auto":true,"other":Infinity}',
@@ -189,20 +185,24 @@ class AutoPolicyTests(unittest.TestCase):
         self.assertIsNone(status["invalid_config"])
         self.assertIs(status["auto"], False)
 
-
-
     def test_failed_enable_does_not_claim_changed_auto(self) -> None:
-        for command, data in (("auto-on", {"auto": False}),):
-            with self.subTest(command=command):
-                original = self.write(data)
-                with patch.object(bark, "write_text_atomic", side_effect=PermissionError("read-only")):
-                    result, output = self.run_command(command)
-                self.assertEqual(result, 1)
-                self.assertIs(output["ok"], False)
-                self.assertNotIn("auto", output)
-                self.assertIsNone(output["config"])
-                self.assertEqual(self.config.read_bytes(), original)
+        original = self.write({"auto": False})
+        with patch.object(bark, "write_text_atomic", side_effect=PermissionError("read-only")):
+            result, output = self.run_command("auto-on")
+        self.assertEqual(result, 1)
+        self.assertIs(output["ok"], False)
+        self.assertNotIn("auto", output)
+        self.assertIsNone(output["config"])
+        self.assertEqual(self.config.read_bytes(), original)
 
+    def test_sound_typo_does_not_change_valid_auto(self) -> None:
+        for auto in (True, False):
+            with self.subTest(auto=auto):
+                original = self.write({"bark": "x", "auto": auto})
+                status = self.run_command("status")[1]
+                self.assertIsNone(status["invalid_config"])
+                self.assertIs(status["auto"], auto)
+                self.assertEqual(self.config.read_bytes(), original)
 
     def test_read_only_authoritative_config_cannot_report_shadowed_fallback_success(self) -> None:
         fallback = self.config.with_name("user.json")

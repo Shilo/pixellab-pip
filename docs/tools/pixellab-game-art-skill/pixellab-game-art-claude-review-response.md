@@ -4,6 +4,8 @@ Review input: Claude's independent review of `9ee2e8bb97ebc6dd5cd5ddf322b2e36915
 
 Three independent reviewers challenged the Auto/config, panel/host and helper/routing findings before implementation. A finding's defect, severity and proposed fix are separate judgments. This record supersedes affected decisions in the earlier panel/Auto reconsideration; earlier validation remains historical evidence for its pinned revision.
 
+**Later change:** the prototype `level`, `budget` and `retries` handling and `auto reset` were removed after this record, because no Pip release ever wrote those keys (AGENTS.md: no compatibility paths without a current requirement). Anyone who ran the prototype should check `pixellab-pip.json` and remove those keys. F7, FINAL-06 and related rows below describe the earlier decision.
+
 ## Plan and finding dispositions
 
 | Finding | Challenged conclusion and implemented resolution |

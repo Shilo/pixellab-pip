@@ -30,7 +30,7 @@ A bare first-run `bark` usually toggles bark off and plays nothing; use `bark on
 }
 ```
 
-Use the helper for ordinary Bark writes; it preserves other settings and verifies persistence. For manual/no-Python handling or a persistence/config error, read only [Auto → Config](auto.md#config) for the shared storage, precedence, repair and fallback procedure. A Bark command changes only `bark`, never Auto or legacy restrictions. On failure, do not claim the setting changed.
+Use the helper for ordinary Bark writes; it preserves other settings and verifies persistence. For manual/no-Python handling or a persistence/config error, read only [Auto → Config](auto.md#config) for the shared storage, precedence, repair and fallback procedure. A Bark command changes only `bark`, never Auto. On failure, do not claim the setting changed.
 
 ## When To Play
 
