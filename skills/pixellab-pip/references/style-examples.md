@@ -18,6 +18,26 @@ under "no medieval weapons") from that call.
 
 After picking, the user can change any field; the saved style is theirs from then on.
 
+## Genre word sets
+
+Prompt words from Game Art's genre presets, untested in Pip: no sizes, view or timing, so take those from the user or
+a view example above. Fill the same fields for the user's own genre words ("frozen viking saga"). To keep one, write
+`setting`, `look`, `palette`, `negatives`, the weapons as a `rules` entry and the chosen view/sizes to a style JSON,
+then `save NAME --from` it (`project-style.md`).
+
+| Genre | Look | Palette | Weapons and tech (when none is named) | Negatives |
+|---|---|---|---|---|
+| high-fantasy | bright high fantasy pixel art, heroic, clean | royal blue, gold, emerald, warm white | swords, staves, longbows | no modern objects, no guns |
+| cyberpunk | cyberpunk pixel art, neon rim light, rainy night, high contrast | magenta, cyan, deep navy, acid yellow | smart pistols, SMGs, cyber katanas, implants | no medieval armour |
+| steampunk | steampunk pixel art, brass and copper, rivets, steam | brass, copper, sepia, soot black | flintlocks, clockwork rifles, brass gauntlets | no plastic, no neon |
+| post-apoc | post-apocalyptic pixel art, dusty, rusted, scrap-built | rust, khaki, bleached sand, olive | makeshift rifles, pipe weapons, scrap armour | no clean new gear |
+| modern | modern-day pixel art, realistic proportions, everyday clothes | natural, urban greys, one accent | modern firearms, tools | no fantasy armour, no magic glow |
+| horror | horror pixel art, deep shadows, unsettling | sickly green, bone white, dried-blood red, black | improvised weapons, lanterns | no bright cheerful colours |
+| western | western frontier pixel art, sunbaked, dusty | sand, burnt orange, leather brown, sky blue | revolvers, lever-action rifles, lassos | no modern guns, no armour plates |
+
+Dark fantasy, cozy and sci-fi words are in the examples above. Their weapons: swords, bows, crossbows, black-powder
+guns only if named · tools, wands, slingshots · blaster rifles, plasma pistols, energy blades.
+
 ## Side-view dark fantasy production example
 
 

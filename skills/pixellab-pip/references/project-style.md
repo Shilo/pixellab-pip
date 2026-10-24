@@ -21,7 +21,7 @@ Recursive map inheritance deliberately differs from Game Art's shallow field ove
 
 ## Optional setup and deliberate saves
 
-When the user requests a reusable project look, offer words (genre/mood/palette/view), supplied art, or a named example from `style-examples.md`. Ask only missing consequential choices, including engine/output needs when relevant. A beginner may choose one first asset and request a short explanation or an optional draft; disclose its cost through the existing paid plan. No fixed starter bundle, draft, persistent beginner mode or mandatory setup.
+When the user requests a reusable project look, offer words (genre/mood/palette/view), supplied art, or a named example or genre word set from `style-examples.md`. Ask only missing consequential choices, including engine/output needs when relevant. A beginner may choose one first asset and request a short explanation or an optional draft; disclose its cost through the existing paid plan. No fixed starter bundle, draft, persistent beginner mode or mandatory setup.
 
 For supplied PNG/GIF/folder art, `assets/analyze_style.py <source> --out <fresh-directory>` optionally measures palette/scale/timing. Its inferred density, outline, light and scale are advisory. Inspect the original art; show proposed style values with their sources. `--frames` produces analysis copies with inferred subsampling/background keying and a labeled inspection sheet, never faithful source replacements. Do not save measurements or start a draft until requested/accepted.
 
