@@ -219,6 +219,23 @@ class FinishBehaviourTests(unittest.TestCase):
     def tearDown(self) -> None:
         self._tmp.cleanup()
 
+    def test_find_muzzle_locates_the_flash_frame_and_muzzle(self) -> None:
+        clip = self.t / "shot"
+        clip.mkdir()
+        for i in range(4):
+            px = np.zeros((40, 40, 4), np.uint8)
+            px[10:30, 10:20] = (60, 40, 40, 255)        # body
+            px[15, 20:29] = (200, 200, 210, 255)        # light gun barrel ending at x=28
+            if i == 2:
+                px[12:20, 29:37] = (255, 220, 60, 255)  # the generator's flash at the barrel
+            Image.fromarray(px, "RGBA").save(clip / f"{i}.png")
+        before = hashes(clip)
+        r = run("find_muzzle", clip)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("shot frame 2", r.stdout)
+        self.assertIn("muzzle ~(29, 15)", r.stdout)
+        self.assertEqual(hashes(clip), before)
+
     def ok(self, helper, *args):
         r = run(helper, *args)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)

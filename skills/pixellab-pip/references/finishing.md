@@ -102,6 +102,8 @@ For multi-direction shots: clears named boxes, drops detached specks, puts a `vf
 python dir8_finish.py spec.json --out finish/dirs
 ```
 
+To fill each direction's `shot`, `muzzle` and `clear`, `find_muzzle.py <frames_dir>` (read-only) guesses them from the generator's own flash and prints a spec line; check it on the frame, and read the muzzle by eye when the flash covers the body or the gun.
+
 ## New-pixel helpers
 
 ### slash_layer
