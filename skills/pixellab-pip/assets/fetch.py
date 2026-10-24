@@ -5,7 +5,7 @@
     python fetch.py --url RETURNED_PIXELLAB_URL out.png
 
 Pass exactly the download links the job's getter (e.g. `get_image`) returned, in order;
-two or more links save numbered frames into out_dir.
+two or more links save frame-00.png onward into the new out_dir.
 Existing destinations are refused. Exit 0: downloaded; 2: blocked/invalid/unavailable
 (check the matching getter); 3: download not ready or dependency unavailable. HTTP
 file errors establish neither job failure nor refund. Never resubmit from this result.
@@ -22,6 +22,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import warnings
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _assembly import require_pillow  # noqa: E402
@@ -29,6 +30,7 @@ import manifest  # noqa: E402
 
 HOSTS = {"api.pixellab.ai", "backblaze.pixellab.ai"}
 UA = "pixellab-pip-fetch/1 (+https://github.com/Shilo/pixellab-pip)"
+MAX_BYTES = 32 * 1024 * 1024
 
 
 def check_host(url: str) -> None:
@@ -49,25 +51,34 @@ OPENER = urllib.request.build_opener(PixelLabOnly)
 def _download(url: str, *, timeout: float = 30) -> bytes:
     check_host(url)
     with OPENER.open(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=timeout) as response:
-        return response.read()
+        data = response.read(MAX_BYTES + 1)
+    if len(data) > MAX_BYTES:
+        raise ValueError("download exceeds %d MiB" % (MAX_BYTES // (1024 * 1024)))
+    return data
 
 
 def validate_image(data: bytes, suffix: str | None = None) -> None:
     Image = require_pillow()
     try:
-        with Image.open(io.BytesIO(data)) as image:
-            fmt = image.format
-            if fmt not in ("PNG", "GIF"):
-                raise ValueError("expected a PNG or GIF result")
-            if suffix and fmt != {".png": "PNG", ".gif": "GIF"}.get(suffix.lower()):
-                raise ValueError("downloaded image format does not match output extension")
-            image.verify()
-        with Image.open(io.BytesIO(data)) as image:
-            for index in range(getattr(image, "n_frames", 1)):
-                image.seek(index)
-                image.load()
-    except (OSError, SyntaxError) as exc:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            _validate(Image, data, suffix)
+    except (OSError, SyntaxError, Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
         raise ValueError("download is not a complete readable image") from exc
+
+
+def _validate(Image, data: bytes, suffix: str | None) -> None:
+    with Image.open(io.BytesIO(data)) as image:
+        fmt = image.format
+        if fmt not in ("PNG", "GIF"):
+            raise ValueError("expected a PNG or GIF result")
+        if suffix and fmt != {".png": "PNG", ".gif": "GIF"}.get(suffix.lower()):
+            raise ValueError("downloaded image format does not match output extension")
+        image.verify()
+    with Image.open(io.BytesIO(data)) as image:
+        for index in range(getattr(image, "n_frames", 1)):
+            image.seek(index)
+            image.load()
 
 
 def get(url: str, *, timeout: float = 30) -> tuple[str, bytes | None]:
@@ -89,6 +100,8 @@ def preflight(out: str, frames: int) -> None:
         raise ValueError("refusing existing output; inspect the saved result or choose a new destination")
     if not frames and path.suffix.lower() not in (".png", ".gif"):
         raise ValueError("output must use .png or .gif")
+    if frames and path.suffix.lower() in (".png", ".gif"):
+        raise ValueError("several links save frames into a new folder; give a folder path, not an image name")
 
 
 def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
@@ -110,7 +123,7 @@ def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
     path.parent.mkdir(parents=True, exist_ok=True)
     if frames:
         path.mkdir()  # exclusive directory creation prevents concurrent result mixing
-        paths = [path / ("%d.png" % index) for index in range(frames)]
+        paths = frame_paths(path, frames)
     else:
         paths = [path]
     for dest, data in zip(paths, got):
@@ -119,8 +132,12 @@ def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
     return "ok"
 
 
+def frame_paths(folder: Path, frames: int) -> list[Path]:
+    return [folder / ("frame-%02d.png" % index) for index in range(frames)]
+
+
 def outputs(out: str, run: str, frames: int = 0) -> list[str]:
-    paths = [Path(out) / ("%d.png" % index) for index in range(frames)] if frames else [Path(out)]
+    paths = frame_paths(Path(out), frames) if frames else [Path(out)]
     return [p.resolve().relative_to(Path(run).resolve()).as_posix() for p in paths]
 
 

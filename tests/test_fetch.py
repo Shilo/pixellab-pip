@@ -44,8 +44,8 @@ class FetchTests(unittest.TestCase):
     def test_frames_saved_in_order(self) -> None:
         fetch.get = lambda url, **kwargs: ("ok", image_bytes((int(url[-1]), 40, 60, 255)))
         self.assertEqual(fetch.try_job(links(3), str(self.root / "clip")), "ok")
-        self.assertEqual([p.name for p in sorted((self.root / "clip").iterdir())], ["0.png", "1.png", "2.png"])
-        with Image.open(self.root / "clip" / "2.png") as image:
+        self.assertEqual([p.name for p in sorted((self.root / "clip").iterdir())], ["frame-00.png", "frame-01.png", "frame-02.png"])
+        with Image.open(self.root / "clip" / "frame-02.png") as image:
             self.assertEqual(image.getpixel((0, 0))[0], 2)
 
     def test_missing_later_frame_never_proves_shorter_clip_complete(self) -> None:
@@ -64,7 +64,7 @@ class FetchTests(unittest.TestCase):
         class Resp:
             def __enter__(self): return self
             def __exit__(self, *args): return False
-            def read(self): raise IncompleteRead(b"partial", 100)
+            def read(self, n=-1): raise IncompleteRead(b"partial", 100)
 
         for direct in (False, True):
             with self.subTest(direct=direct):
@@ -111,6 +111,22 @@ class FetchTests(unittest.TestCase):
         self.assertEqual((entry["job_id"], entry["status"], entry["reported_usage"]), ("job-1", "ok", {"generations": 6.0}))
         self.assertEqual(entry["outputs"], ["keys/A.png"])
 
+    def test_oversized_download_bomb_or_image_named_clip_writes_nothing(self) -> None:
+        class Resp:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self, n=-1): return b"x" * n
+
+        with patch.object(fetch.OPENER, "open", return_value=Resp()), patch.object(fetch, "MAX_BYTES", 10):
+            with self.assertRaisesRegex(ValueError, "exceeds"):
+                fetch._download(LINK)
+        with patch.object(Image, "MAX_IMAGE_PIXELS", 2), self.assertRaises(ValueError):
+            fetch.validate_image(PNG)
+        fetch.get = lambda *args, **kwargs: self.fail("image-named clip reached HTTP")
+        with self.assertRaises(ValueError):
+            fetch.try_job(links(2), str(self.root / "clip.png"))
+        self.assertFalse((self.root / "clip.png").exists())
+
     def test_redirects_and_plain_http_stay_on_pixellab(self) -> None:
         # review: only the first URL was checked; a redirect could leave PixelLab, and http was accepted
         with self.assertRaises(ValueError):
@@ -132,7 +148,7 @@ class FetchTests(unittest.TestCase):
         class Resp:
             def __enter__(self): return self
             def __exit__(self, *a): return False
-            def read(self): return PNG
+            def read(self, n=-1): return PNG
 
         original = fetch.OPENER.open
         def fake(req, timeout=30):
@@ -171,11 +187,11 @@ class FetchTests(unittest.TestCase):
     def test_existing_outputs_never_overwritten_or_mixed(self) -> None:
         clip = self.root / "clip"
         clip.mkdir()
-        (clip / "2.png").write_bytes(PNG)
+        (clip / "frame-01.png").write_bytes(PNG)
         fetch.get = lambda *args: self.fail("existing destination reached HTTP")
         with self.assertRaises(ValueError):
             fetch.try_job(links(2), str(clip))
-        self.assertEqual(list(clip.iterdir()), [clip / "2.png"])
+        self.assertEqual(list(clip.iterdir()), [clip / "frame-01.png"])
         raw = self.root / "raw.png"
         raw.write_bytes(PNG)
         with self.assertRaises(ValueError):
@@ -189,11 +205,11 @@ class FetchTests(unittest.TestCase):
                 "--estimate", "7", "--timeout", "1"]
         self.assertEqual(fetch.main(args), 0)
         entry = manifest.jobs(str(run))[0]
-        self.assertEqual(entry["outputs"], ["frames/0.png", "frames/1.png"])
+        self.assertEqual(entry["outputs"], ["frames/frame-00.png", "frames/frame-01.png"])
         self.assertNotIn("reported_usage", entry)
         self.assertEqual(entry["estimated_usage"], {"generations": 7})
         self.assertEqual(fetch.main(args), 2)  # safe refusal, no assumption of same-job identity
-        self.assertEqual((run / "frames" / "0.png").read_bytes(), PNG)
+        self.assertEqual((run / "frames" / "frame-00.png").read_bytes(), PNG)
 
     def test_pending_and_unavailable_downloads_keep_reservations(self) -> None:
         for status, code in (("wait", 3), ("unavailable", 2)):
