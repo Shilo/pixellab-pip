@@ -182,3 +182,43 @@ Vanilla 24%).
       tilesets, cinematics, paperdolls, blueprints). Treat routing as a supporting point.
 - [ ] Be honest that for a strong model doing a quick one-off asset, MCP plus
       `search_help` may be enough.
+
+### 9. Challenge the Game Art migration guidance
+
+Context: PR #11 (branch `feat/pga-merge`) merges selected features of the separate
+[PixelLab Game Art](https://github.com/lexingel/pixellab-game-art) skill into Pip. It added
+migration guidance for users replacing a Game Art install:
+
+- `skills/pixellab-pip/references/setup.md`, section "Migrating an existing Game Art
+  installation" (about 300 tokens of the file's ~4,800)
+- `skills/pixellab-pip/references/project-style.md`, section "Legacy limits and
+  migration"
+- `docs/merge/migration.md` (human guide, about 690 words), linked from
+  `docs/merge/README.md`, which `README.md` links to
+
+The doubt: this is backwards compatibility for another project's users, and there may be
+too few of them to justify the extra rules. That points to removing the runtime sections
+and possibly `docs/merge/migration.md`.
+
+Before deciding, weigh these points against removal:
+
+- The token cost is small. `setup.md` loads only for setup requests, not on every
+  generation.
+- Part of the section protects credit control. Game Art installs may leave instruction
+  blocks (for example in `AGENTS.md`) saying never to ask permission. Those outrank a
+  skill and would silently bypass Pip's cost-approval gate. If the section goes, keep a
+  one-line version of that warning in `setup.md`.
+- If Game Art is retired and points its users to Pip, those users are the main audience
+  for this guidance.
+
+Tasks:
+
+- [ ] Find out whether Game Art will be retired or redirect users to Pip, and roughly
+      how many users it has (stars, forks, issues on the GitHub repo). Ask the user or
+      Game Art's maintainer if it isn't public.
+- [ ] Don't change this until PR #11 is merged. Never merge PR #11 as part of this task.
+- [ ] If the audience is small: remove the setup.md section and the migration half of the
+      project-style.md section, keep the one-line "old instructions can bypass the cost
+      gate" warning, remove `docs/merge/migration.md` and its links, and run QA.
+- [ ] If the audience is real: shorten the section to its safety and approval rules and
+      keep the human guide.
