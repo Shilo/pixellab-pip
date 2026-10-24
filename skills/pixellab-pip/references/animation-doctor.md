@@ -40,7 +40,7 @@ piece: pass those frames as `--fx` too.
 
 The first and last frame of a clip are usually the key poses you already checked at 3x. `--keys 1,11` keeps their
 findings in the report but plans no paid re-roll for them (a slam pose with the ground debris asked for read as
-broken, and the doctor planned 9 generations to redraw it). The report says so under `skipped`.
+broken, and the doctor planned a paid redraw). The report says so under `skipped`.
 
 ## Verdict
 
@@ -70,7 +70,7 @@ For intentionally airborne moves, use the appropriate explicit inspection option
 
 The helper groups repair suggestions for affected frames. It may propose one `whole clip` plan only for exact known raw-v3 ownership when the current conservative clip estimate is cheaper than individual repairs and no approved keys or excluded effect frames would be swept into that retry. This compares estimates, not historical charges.
 
-A plan names the frames to redo (only those), the tool, the change to make and its cost; `job` is the original
+A plan names the frames to redo (only those), the tool, the change to make and its cost (Pro Flash costs are measured size tiers, not quotes: get the live estimate per `pro-flash.md` before approval); `job` is the original
 generation from the run's `manifest.json` when it records one. A re-roll is paid: follow `auto.md` and the current approved scope. Treat reported repair costs as estimates and validate the selected tool/size/frame controls against its current schema before approval; a diagnostic plan never authorizes payment.
 
 ## Defect guidance

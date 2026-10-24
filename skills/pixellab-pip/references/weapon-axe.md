@@ -99,7 +99,7 @@ to the back hand at the top, back up the haft on the impact. Draw the top of the
 - Tested canvas for a two-handed greataxe on a ~100x200 hero (tested): **256x256, sprite at
   x≈72, y=56** - room behind for the over-the-shoulder wind-up and in front for the hit. A 192x256 canvas leaves
   24 px behind: too little. 256x256 takes at most 8 generated frames per clip (`frame_count` 8 = 9 frames with
-  the key poses); for more, splice two clips that share a frame. Poses cost 9 each.
+  the key poses); for more, splice two clips that share a frame.
 
 ## Frame rhythm (Muybridge photos and the axe sprite)
 - **Hatchet chop, 10 photos:** 6 frames lifting (slow, the head rising past the ear to behind the head) -> ONE

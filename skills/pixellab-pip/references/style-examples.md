@@ -26,8 +26,8 @@ Optional production values reported for the selected "Side-view dark fantasy" ex
 | Setting | Value |
 |---|---|
 | Hero sprite | 96×200, facing right |
-| Overhead pad | 192×256, sprite at (24, 56); poses 9 each |
-| Front-only pad | 192×200, sprite at (24, 0); poses 6 each |
+| Overhead pad | 192×256, sprite at (24, 56) |
+| Front-only pad | 192×200, sprite at (24, 0) |
 | Boss pad | 256×256, feet on the bottom edge |
 | Swing example | `frame_count` 10 (11 returned frames) on 192×256; an extra six-frame crescent source is optional separately approved work |
 | Light timing (heroes) | 60 ms per frame, wind-up 160 ms, hit 140 ms, settle 120 ms |
