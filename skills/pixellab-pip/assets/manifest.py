@@ -3,7 +3,7 @@
     python manifest.py add RUN JOB --tool T [--generations ACTUAL] [--estimate RESERVED]
     python manifest.py done RUN JOB
     python manifest.py outcome RUN JOB OUTCOME [NOTE]
-    python manifest.py plan RUN JSONFILE  record current-run audit metadata, not permission
+    python manifest.py plan RUN JSONFILE  record current-run audit metadata, not permission (JSONFILE - = stdin)
     python manifest.py spent RUN...       exact reported charges; unknown exits 2
     python manifest.py committed RUN...   actual charge, otherwise estimate; unknown exits 2
 
@@ -250,8 +250,11 @@ def main(argv: list[str]) -> int:
             add_job(args.run, entry)
             out = {"recorded": args.job}
         elif args.command == "plan":
-            with open(args.jsonfile, "rb") as handle:
-                raw = handle.read(1024 * 1024 + 1)
+            if args.jsonfile == "-":   # stdin: parallel agents never share a temp plan file
+                raw = sys.stdin.buffer.read(1024 * 1024 + 1)
+            else:
+                with open(args.jsonfile, "rb") as handle:
+                    raw = handle.read(1024 * 1024 + 1)
             if len(raw) > 1024 * 1024:
                 raise ValueError("plan metadata exceeds 1 MiB")
             set_plan(args.run, json.loads(raw.decode("utf-8-sig")))

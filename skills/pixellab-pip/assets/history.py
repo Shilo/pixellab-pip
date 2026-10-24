@@ -84,10 +84,15 @@ def main(argv=None) -> int:
     parser.add_argument("--job")
     parser.add_argument("--tool")
     args = parser.parse_args(argv)
+    if args.runs <= 0:
+        parser.error("--runs must be positive")
     try:
-        rows = history(args.root, args.runs, since=args.since, until=args.until, job=args.job, tool=args.tool)
+        rows = history(args.root, sys.maxsize, since=args.since, until=args.until, job=args.job, tool=args.tool)
     except ValueError as exc:
         parser.error(str(exc))
+    ledgers = [row for row in rows if "error" not in row]
+    hidden = len(ledgers) - args.runs   # say so: a silent cut made an older run look missing
+    rows = ledgers[:args.runs] + [row for row in rows if "error" in row]
     if args.json:
         print(json.dumps(rows, indent=2))
     elif not rows:
@@ -102,6 +107,8 @@ def main(argv=None) -> int:
             print("%s: %s jobs, %s, %s; date %s%s" %
                   (row["name"], row["jobs"], cost, outcomes, row["created_at"] or "unknown",
                    "; %s undated jobs" % row["unknown_dates"] if row["unknown_dates"] else ""))
+        if hidden > 0:
+            print("%d older matching runs not shown; use --runs %d to list them" % (hidden, len(ledgers)))
         older = [r["name"] for r in rows if "jobs list" in r.get("error", "")]   # a manifest from before the ledger
         broken = [n for n in skipped if n not in older]
         for names, text in ((older, "are older Pip manifests, not run ledgers"),

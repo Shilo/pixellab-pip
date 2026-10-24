@@ -59,6 +59,13 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(data["audit"], "retain")
         self.assertEqual(data["plan"], {**updated, "old_note": "retain too"})
 
+    def test_plan_cli_reads_stdin(self) -> None:
+        # live test: parallel agents sharing a fixed plan.json recorded each other's plans
+        result = subprocess.run([sys.executable, str(SCRIPT), "plan", self.run, "-"],
+                                input=json.dumps(bounded_plan()), capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads((Path(self.run) / "manifest.json").read_text(encoding="utf-8"))["plan"], bounded_plan())
+
     def test_invalid_plan_preserves_ledger_bytes(self) -> None:
         manifest.add_job(self.run, job("a", 3))
         ledger = Path(self.run) / "manifest.json"

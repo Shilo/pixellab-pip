@@ -39,7 +39,7 @@ n = a.colors
 if a.palette == "auto":
     px = np.concatenate([np.array(Image.open(f).convert("RGBA")).reshape(-1, 4) for f in files])
     px = px[px[:, 3] > 0][:, :3]
-    q = Image.fromarray(px.reshape(1, -1, 3).astype(np.uint8)).quantize(colors=n or 16, method=Image.MEDIANCUT, dither=0)
+    q = Image.fromarray(px.reshape(1, -1, 3).astype(np.uint8)).quantize(colors=n or 16, method=Image.MAXCOVERAGE, dither=0)   # median cut drops small accents (a belt, straps)
     pal = np.array(q.getpalette()[:3 * (n or 16)]).reshape(-1, 3)
 elif a.palette.endswith(".json"):
     pal = np.array(hexes(json.load(open(a.palette, encoding="utf-8"))["colours"]["palette"]))

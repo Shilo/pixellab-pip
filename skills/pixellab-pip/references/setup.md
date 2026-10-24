@@ -95,7 +95,7 @@ Verify only after the user approves a no-credit check; never spend credits durin
 - **MCP**: `get_balance` when tools are exposed — verifies MCP auth without generating.
 - **REST v2**: `GET /balance` with `Authorization: Bearer <PIXELLAB_SECRET>` — never print auth headers or full JSON.
 - **Tool availability**: list or identify PixelLab MCP tools (match by suffix if prefixed) without generation calls.
-- **Old Game Art project file**: if the active project root has Game Art's `pixellab.json`, offer to rename it to `pixellab-pip-style.json` (a write: get approval; if both exist, ask which to keep). Pip never reads the old name.
+- **Old Game Art project file**: if the active project root has Game Art's `pixellab.json`, offer to rename it to `pixellab-pip-style.json` (a write: ask for this rename itself, even when the user asked to get the project ready; if both exist, ask which to keep). Pip never reads the old name.
 
 Check `PIXELLAB_SECRET` presence without outputting, logging, measuring, transforming, or inspecting the value — test only whether it is non-empty and emit a status word such as `set`/`not set`, never the value, and pass the value only to the approved check. For a readiness note before mode selection, check only whether the live `PIXELLAB_SECRET` environment variable is visible to the current process and whether PixelLab MCP tools are already visible in this session (already-loaded tools only — no config inspection); do not inspect project-local secret files, broad config directories, or recursive paths.
 

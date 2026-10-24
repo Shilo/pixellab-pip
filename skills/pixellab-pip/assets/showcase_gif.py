@@ -11,6 +11,7 @@ the user asks for one. Default output <dir>/<name>_showcase.gif; a relative
 """
 import argparse
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -70,7 +71,9 @@ def bbox(frames):
 
 
 CLEAR = a.bg == "none"
-BG, pad, lab, T = ((0, 0, 0, 0) if CLEAR else (43, 45, 49, 255)), 12, 26, 4000
+BG, pad, lab = ((0, 0, 0, 0) if CLEAR else (43, 45, 49, 255)), 12, 26
+T = math.lcm(*(sum(du) for _, du in anims))   # every move ends its cycle together: the GIF loops seamlessly
+T = T if T <= 10000 else 4000   # ponytail: unrelated timings fall back to a 4 s window that cuts moves mid-cycle
 crops = [bbox(fr) for fr, _ in anims]
 H = max(b[3] for b in crops)
 W = sum(b[2] - b[0] for b in crops) + pad * (len(anims) + 1)

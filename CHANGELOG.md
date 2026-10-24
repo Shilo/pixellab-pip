@@ -5,6 +5,25 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Releases before 3.0.0 are on
 [GitHub Releases](https://github.com/Shilo/pixellab-pip/releases).
 
+## [Unreleased]
+
+Fixes from the 3.0 live test ([research spike](docs/pixellab/pixellab-pip-3.0-live-test-research-spike.md)).
+
+### Fixed
+
+- **Showcase GIFs loop cleanly.** A move whose cycle did not divide the fixed 4-second window was cut mid-swing and
+  snapped back on every loop; the GIF now lasts until every move ends its cycle together.
+- **History says when runs are hidden.** The search showed only the newest 10 runs without saying so, so an older
+  run looked missing; it now reports how many older matching runs were left out.
+- **Despeckle keeps one-pixel eyes and runes.** `--ref <still>` keeps lone pixels that the clean still already has.
+  Without it, the default flattened dozens of real details per frame.
+- **Auto palettes keep small accent colours.** `apply_palette auto` turned a knight's brown belt and straps grey; it
+  now uses max-coverage quantization.
+- **Parallel runs keep their own plans.** `manifest.py plan RUN -` reads the plan from stdin, so agents working at
+  the same time no longer record each other's plans through a shared temp file.
+- Thrown-prop attacks now make the open-hand release pose before animating, because interpolation never let go of
+  the prop. Setup asks before renaming an old Game Art `pixellab.json`, even when asked to get a project ready.
+
 ## [3.0.0] - 2026-10-23
 
 Pip 3.0 brings the production workflows of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) by

@@ -15,9 +15,9 @@ generations** for the whole spike.
   reference was never borrowed for other asset families, request-level overrides (view, size, facing) won, and
   `--no-style` / one-off `--style` left the saved file untouched. Caps and retry limits were never exceeded; testers
   stopped at review gates (pose review, candidate pick, failed draft) instead of spending further.
-- **Pip defects:** I-4 and I-5 fixed during the spike (uncommitted, held for 3.0.1 so `main` keeps matching the
-  v3.0.0 tag until ClawHub publishes it); I-2, I-6, I-7 and I-8 open; I-1 low. I-3 closed (tileset cost is 3, as
-  documented).
+- **Pip defects:** all fixed after the spike (see Issues and the changelog's Unreleased section). I-3 closed
+  with no change: the tileset cost is 3, as documented. The fixes change skill files, so they reach `main` only
+  after ClawHub publishes 3.0.0 from the v3.0.0 tag.
 - **Not live-tested, and why:** broken settings file and plan-refusal fallback (editing the skill's own settings is
   blocked as self-modification, and this Tier 3 account has every tool); failed-job no-retry (a paid failure cannot
   be forced safely; the two failed throw clips did confirm no automatic re-run); muzzle finder and 8-direction shot
@@ -127,17 +127,30 @@ which every tester accepts.
 
 ### Issues
 
-- **I-1 (low):** setup renamed the old Game Art file without asking. `setup.md` step 5 already says "a write: get approval"; the tester treated "get my project ready" as consent. Consider wording it as "ask before renaming, even when the user asked to get ready".
-- **I-2 (low, test setup):** the lava golem's `manifest.json` got the knight animation's plan. Both testers wrote `plan.json` to the same shared scratch folder, and the second overwrote it before the first ran `manifest.py plan`. Spending was unaffected; only the audit record was wrong. It happened again between the neon and axe-chop testers (the neon tester noticed and repaired its own manifest), and a third time when the axe-chop run's plan got the sword-repair tester's scope merged with its own remaining work (`set_plan` merges into the existing plan). Any parallel agents sharing a temp folder can hit it, so this is worth fixing in Pip (a fourth hit: the tileset run's plan scope came from the normal-map tester): let `manifest.py plan` read the JSON from stdin, or tell agents to use a run-specific file name. A unique plan-file name (or writing it inside the run folder) would avoid it.
+- **I-1 (low, fixed after the spike):** setup renamed the old Game Art file without asking. `setup.md` step 5 already says "a write: get approval"; the tester treated "get my project ready" as consent. Consider wording it as "ask before renaming, even when the user asked to get ready".
+- **I-2 (low, fixed after the spike):** the lava golem's `manifest.json` got the knight animation's plan. Both testers wrote `plan.json` to the same shared scratch folder, and the second overwrote it before the first ran `manifest.py plan`. Spending was unaffected; only the audit record was wrong. It happened again between the neon and axe-chop testers (the neon tester noticed and repaired its own manifest), and a third time when the axe-chop run's plan got the sword-repair tester's scope merged with its own remaining work (`set_plan` merges into the existing plan). Any parallel agents sharing a temp folder can hit it, so this is worth fixing in Pip (a fourth hit: the tileset run's plan scope came from the normal-map tester): let `manifest.py plan` read the JSON from stdin, or tell agents to use a run-specific file name. A unique plan-file name (or writing it inside the run folder) would avoid it.
 - **I-3 (closed, no change needed):** the tileset tester estimated about 8 generations per `create_topdown_tileset` call from a balance delta taken while other testers were spending. Measured alone (B4-3), one standard 32px tileset cost exactly 3, matching `cost-routing.md`'s "1-4 (usually 3 or 4)". The MCP getter still reports no per-call usage, so ledgers keep estimates for tilesets.
-- **I-4 (medium, fixed in this spike):** `showcase_gif.py` always rendered a fixed 4-second window. A single move whose cycle does not divide 4 s (the 9-frame slash at 83 ms is 750 ms) was cut mid-swing and snapped back to frame 0 on every loop. The tester's patch renders the least common multiple of the move cycles, so every move ends together, and falls back to 4 s only when that exceeds 10 s; `tests/test_extras.py` now checks a GIF holds exactly one cycle.
-- **I-5 (medium, fixed in this spike):** `history.py` cut its text output to the newest 10 runs without saying so. The history tester's search missed the original skeleton (the oldest run) and found it only by browsing folders. The output now ends with "N older matching runs not shown; use --runs M to list them"; `tests/test_history.py` covers it.
-- **I-6 (low, open):** `despeckle.py` at its default `--tol 90` changes 13-36 pixels on each of the rogue's clean 64px standing rotations (reproduced by the lead), i.e. it flattens real one-pixel details, not only in-between noise. The tester needed `--tol 250`. Options for 3.0.1: a stricter default, or `finishing.md` telling agents to check the count on a clean key frame first.
-- **I-7 (low, open):** `apply_palette.py auto --colors 16` keeps the 16 most common colours, so small but important accents vanish: on the knight every brown (93 of 8,249 pixels: belt and straps) turned grey (reproduced by the lead). A hue-preserving pick (for example median cut over hue groups) or a note to supply a palette when accents matter would fix it.
-- **I-8 (medium, open):** thrown props. `key-pose-animation.md` lists the stages (wind-up holding → release with open hand → empty-hand follow-through), but does not say that interpolation will not release a held prop, so the tester animated straight from the hold and spent 14 generations on two clips that never let go. Make the rule explicit: generate or edit the open-hand release pose first (with the prop already in the air), then interpolate to it and fly the prop with `throw_prop`.
+- **I-4 (medium, fixed):** `showcase_gif.py` always rendered a fixed 4-second window. A single move whose cycle does not divide 4 s (the 9-frame slash at 83 ms is 750 ms) was cut mid-swing and snapped back to frame 0 on every loop. The tester's patch renders the least common multiple of the move cycles, so every move ends together, and falls back to 4 s only when that exceeds 10 s; `tests/test_extras.py` now checks a GIF holds exactly one cycle.
+- **I-5 (medium, fixed):** `history.py` cut its text output to the newest 10 runs without saying so. The history tester's search missed the original skeleton (the oldest run) and found it only by browsing folders. The output now ends with "N older matching runs not shown; use --runs M to list them"; `tests/test_history.py` covers it.
+- **I-6 (low, fixed after the spike):** `despeckle.py` at its default `--tol 90` changes 13-36 pixels on each of the rogue's clean 64px standing rotations (reproduced by the lead), i.e. it flattens real one-pixel details, not only in-between noise. The tester needed `--tol 250`. Options for 3.0.1: a stricter default, or `finishing.md` telling agents to check the count on a clean key frame first.
+- **I-7 (low, fixed after the spike):** `apply_palette.py auto --colors 16` keeps the 16 most common colours, so small but important accents vanish: on the knight every brown (93 of 8,249 pixels: belt and straps) turned grey (reproduced by the lead). A hue-preserving pick (for example median cut over hue groups) or a note to supply a palette when accents matter would fix it.
+- **I-8 (medium, fixed after the spike):** thrown props. `key-pose-animation.md` lists the stages (wind-up holding → release with open hand → empty-hand follow-through), but does not say that interpolation will not release a held prop, so the tester animated straight from the hold and spent 14 generations on two clips that never let go. Make the rule explicit: generate or edit the open-hand release pose first (with the prop already in the air), then interpolate to it and fly the prop with `throw_prop`.
 
 ### PixelLab-side observations (not Pip defects)
 
 - **P-1:** `create_image_pixflux` at 256x400 and 288x400 returned an opaque grey background twice although `no_background: true` was sent (recorded in the blueprint). Smaller transparent PixFlux and Pixen calls in this spike came back transparent.
 - **P-2:** `animate_character` template walks and runs dropped the rogue's long cloak on the north-facing directions three times (walk N/NE, run N); skeleton-v3 kept it.
 - **P-3:** ClawHub held release 3.0.0 in pending publication because its own ClawScan step never ran ([openclaw/clawhub#4046](https://github.com/openclaw/clawhub/issues/4046)); 3.0.0 was released on GitHub with the new `github_only` workflow mode, and ClawHub follows with a resume run.
+
+### Fixes after the spike
+
+- I-1: `setup.md` asks for the rename itself, even when the user asked to get the project ready.
+- I-2: `manifest.py plan RUN -` reads the plan from stdin; `usage-reporting.md` points agents at it and warns against
+  shared plan-file names.
+- I-6: `despeckle.py --ref <still>` keeps lone pixels in the still's own lone-pixel colours. On the rogue's 32 run
+  frames this cut flagged pixels from 538 to 31, and the test eye now survives. Tolerance alone could not help: a
+  1 px eye differs from skin as much as noise does.
+- I-7: `apply_palette.py auto` uses max-coverage quantization. On the knight it kept 79 of 93 brown pixels warm
+  (median cut: 0), at a similar mean colour error.
+- I-8: `key-pose-animation.md` says interpolation does not release a held prop and has the open-hand release pose
+  made first.

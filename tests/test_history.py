@@ -36,6 +36,11 @@ class HistoryTests(unittest.TestCase):
         rows = history.history(str(self.root), 1, job='job-00')
         self.assertEqual(rows[0]['name'], 'run-00')
         self.assertEqual(rows[0]['entries'][0]['job_id'], 'job-00')
+        # live test: the default 10 hid an older run without saying so
+        out = io.StringIO()
+        with redirect_stdout(out):
+            history.main(['--root', str(self.root)])
+        self.assertIn('5 older matching runs not shown; use --runs 15 to list them', out.getvalue())
 
     def test_date_bounds_are_inclusive_and_do_not_use_mtime(self):
         self.add('old', 'a', '2026-01-01T23:59:59Z')

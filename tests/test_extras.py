@@ -106,6 +106,8 @@ class ExtrasTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr)
         with Image.open(self.dir / "k_showcase.gif") as gif:
             self.assertGreaterEqual(gif.n_frames, 3)
+            # one whole 300 ms cycle, so the loop never restarts a move mid-swing
+            self.assertEqual(sum(gif.seek(i) or gif.info["duration"] for i in range(gif.n_frames)), 300)
             # e2e demo: final GIFs carry no baked background unless asked (Asset Integrity)
             self.assertEqual(gif.convert("RGBA").getpixel((0, 0))[3], 0)
         # review: half-transparent edge pixels were blended onto the magenta key and came out pink

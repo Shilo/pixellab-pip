@@ -292,7 +292,25 @@ class FinishBehaviourTests(unittest.TestCase):
         self.assertTrue((o[24:26, 20:22, :3] == 250).all())
         self.assertEqual(o[3, 3, 3], 0)
         label = json.loads((self.t / "o/derivative.json").read_text())
-        self.assertEqual(label["changes"]["frames"]["0.png"], {"specks": 3, "strays": 1})   # the speck + the two 1 px eyes
+        self.assertEqual(label["changes"]["frames"]["0.png"], {"specks": 3, "strays": 1, "kept_as_detail": 0})   # the speck + the two 1 px eyes
+        # live test: a 1 px eye is the same shape as a speck, so only the clean still tells them apart
+        self.ok("despeckle", self.t / "in/0.png", "--ref", synth.png(synth.figure(), self.t / "in/still.png"), "--out", self.t / "r")
+        o = self.img(self.t / "r/0.png")
+        self.assertEqual(tuple(o[30, 22, :3]), synth.BLUE)
+        self.assertEqual(tuple(o[15, 22, :3]), synth.OUT)                 # the eye survives
+        label = json.loads((self.t / "r/derivative.json").read_text())
+        self.assertEqual(label["changes"]["frames"]["0.png"], {"specks": 1, "strays": 1, "kept_as_detail": 2})
+
+    def test_auto_palette_keeps_a_small_accent_colour(self) -> None:
+        # live test: median cut spent all 16 colours on the steel armour and turned the brown belt grey
+        f = np.zeros((40, 40, 4), np.uint8)
+        for y in range(40):
+            f[y, :, :3] = (40 + y * 4, 50 + y * 4, 60 + y * 4)          # 40 steel greys fill the figure
+        f[..., 3] = 255
+        f[18:21, 10:14, :3] = (120, 70, 30)                             # a 12 px brown belt
+        self.ok("apply_palette", "auto", synth.png(f, self.t / "in/0.png"), "--colors", "4", "--out", self.t / "o")
+        belt = self.img(self.t / "o/0.png")[19, 11, :3].astype(int)
+        self.assertGreater(belt[0], belt[1] + 15)                       # still warm, not grey
 
     def test_scrub_clears_a_box_on_one_key_pose(self) -> None:
         f = synth.figure().copy()

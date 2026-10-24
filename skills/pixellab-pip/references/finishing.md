@@ -50,10 +50,10 @@ python scrub.py pose.png --box 29,10,47,16 --out finish/2-scrub
 
 ### despeckle
 
-Gives each pixel unlike all 8 neighbours their median colour and makes opaque pixels with no opaque neighbour transparent; two or more alike pixels (highlights, eye glints) stay. On detailed art with single-pixel runes or texture, check the per-frame counts in `derivative.json`: dozens of changes on a clean frame mean it is eating detail, so raise `--tol` or skip it.
+Gives each pixel unlike all 8 neighbours their median colour and makes opaque pixels with no opaque neighbour transparent; two or more alike pixels (highlights, eye glints) stay. A one-pixel eye or rune looks exactly like a speck, so pass the clean still the frames came from as `--ref` whenever one exists: lone pixels in the still's own lone-pixel colours are kept (`kept_as_detail`). Without a reference, check the per-frame counts in `derivative.json`: dozens of changes on a clean frame mean it is eating detail, so add `--ref`, raise `--tol` or skip it.
 
 ```bash
-python despeckle.py "frames/*.png" --out finish/3-despeckle [--tol 90]
+python despeckle.py "frames/*.png" --out finish/3-despeckle [--ref still.png] [--tol 90]
 ```
 
 ### colormatch
