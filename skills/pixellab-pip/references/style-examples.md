@@ -35,7 +35,7 @@ then `save NAME --from` it (`project-style.md`).
 | horror | horror pixel art, deep shadows, unsettling | sickly green, bone white, dried-blood red, black | improvised weapons, lanterns | no bright cheerful colours |
 | western | western frontier pixel art, sunbaked, dusty | sand, burnt orange, leather brown, sky blue | revolvers, lever-action rifles, lassos | no modern guns, no armour plates |
 
-Dark fantasy, cozy and sci-fi words are in the examples above. Their weapons: swords, bows, crossbows, black-powder
+Dark fantasy, cozy and sci-fi words are in those examples' values (`project_style.py`). Their weapons: swords, bows, crossbows, black-powder
 guns only if named · tools, wands, slingshots · blaster rifles, plasma pistols, energy blades.
 
 ## Side-view dark fantasy production example
