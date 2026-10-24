@@ -30,6 +30,8 @@ v1.4.3 repo. Those parts are marked "new" below.
 | VFX templates (strike, wave, eruption) | `blueprints/vfx-*.blueprint.json`, `vfx-workbench.md` | Same recipes as replayable blueprints. |
 | "Draft first" before an expensive Pro image | `create-image-pro.md` | An offer in the approval card, never a default. |
 | Tools that need a higher PixelLab plan, and their fallbacks | `job-lifecycle.md` (REST Error Handling) | Fallbacks only; the tier numbers and job limits were left out because they go stale. |
+| 7 genre presets (high fantasy, cyberpunk, steampunk, post-apocalyptic, modern, horror, western) | `style-examples.md` → Genre word sets | Word sets only (look, palette, era weapons, negatives), marked untested and offered, never defaults; saved with `project_style.py save --from`. |
+| Front-facing giant boss tips | `characters.md` (waist-up still), `key-pose-animation.md` (Front-facing giant bosses), `finishing.md` (ground_snap warning) | Same decisions; generation costs left out. |
 | The 21 `/pga-*` commands | Plain requests through `/pixellab-pip`; mapping in `docs/merge/README.md` | Batch runs became the mixed-batch rule in `auto.md`; rerolls became the historical-reroll rule in `usage-reporting.md`. |
 
 ## Left out on purpose
@@ -58,9 +60,7 @@ These are not in the PR. Re-add one only when the trigger in the last column hap
 | Spend per command and per day (`cost_report.py`) | Totals across runs by command and date | Users ask for spend reports beyond per-run totals; extend `history.py`, don't add a second ledger. |
 | Reading old Game Art `log.jsonl` history | History from before the merge | A migrating user needs old Game Art history in Pip; a one-off read-only importer would do. |
 | Plan levels and concurrency table | Jobs allowed at once per plan | PixelLab documents these numbers officially; they currently come only from its help agent. |
-| 6 of the 10 genre presets | Untested word lists (cyberpunk, western, horror...) | A preset is tested like the 4 kept examples; add it to `style-examples.md` and `project_style.py` together. |
 | Usage stats and "why" notes (`stats.md`, `rationale.md`) | Background for `/pga-tech` | Never at runtime; copy into `docs/` if the history is wanted. |
-| Giant front-facing boss tips | Waist-up bosses, naming sides by the image, 11 frames in 256 px, on-screen scale | Bosses become a common request; about 5 lines in `key-pose-animation.md`. |
 | Most verbatim example prompts | Full prompts per asset type | A reference page shows an agent picking worse wording without them. |
 | `--draft` / `--n` / `--size` options | Command flags | Not needed: plain requests, candidate batches and the draft offer cover them. |
 
