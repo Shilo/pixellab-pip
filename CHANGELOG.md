@@ -5,7 +5,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Releases before 3.0.0 are on
 [GitHub Releases](https://github.com/Shilo/pixellab-pip/releases).
 
-## [3.0.0] - Unreleased
+## [3.0.0] - 2026-10-23
 
 Pip 3.0 brings the production workflows of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) by
 lexingel into Pip's single, agent-agnostic skill: project art styles, animation checks and repair, finishing tools,
