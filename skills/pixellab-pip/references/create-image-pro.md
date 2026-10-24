@@ -6,6 +6,8 @@ Create Image Pro / MCP `create_image_pro` (+ `get_image`) / REST `generate-image
 
 Prefer Pro when user instructions must be followed closely; it follows the user's description more closely than Pixen/v3/new, at higher cost and with a different character style.
 
+When the layout or composition of a Pro image is uncertain, the approval card may offer a 1-generation `create_image_pixflux` draft at the same size first. It previews layout and pose, not Pro's style or detail; it is an offer, never a default, and the Pro call keeps its own approval.
+
 MCP `create_image_pro` and REST `generate-image-v2` both remove the background by default (`no_background` defaults to `true`). Send `no_background: false` when the user wants an opaque, full-bleed image, scene, or sheet.
 
 ## Exact Palette Control
