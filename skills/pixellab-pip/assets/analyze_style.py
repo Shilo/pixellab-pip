@@ -41,20 +41,13 @@ def load(path):
 def native_scale(a):
     """Candidate scale only: require exact blocks, so padding cannot hide a small detailed subject."""
     h, w = a.shape[:2]
-    best = (1, 0, 0)
     for s in range(16, 1, -1):
-        if h < 4 * s or w < 4 * s:
+        # Offsets discard border pixels, so only an aligned whole-image match is evidence.
+        if h < 4 * s or w < 4 * s or h % s or w % s:
             continue
-        for oy in range(s):
-            for ox in range(s):
-                small = a[oy::s, ox::s]
-                up = np.repeat(np.repeat(small, s, 0), s, 1)[:h - oy, :w - ox]
-                # Offsets discard border pixels, so only an aligned whole-image match is evidence.
-                if ox or oy or h % s or w % s:
-                    continue
-                if np.array_equal(up, a):
-                    return s, ox, oy
-    return best
+        if np.array_equal(np.repeat(np.repeat(a[::s, ::s], s, 0), s, 1), a):
+            return s, 0, 0
+    return 1, 0, 0
 
 
 def key_background(a):

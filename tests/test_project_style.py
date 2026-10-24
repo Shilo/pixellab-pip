@@ -257,6 +257,14 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(report["files"][0]["native_scale"], 1)
         self.assertIn("advisory", report)
         self.assertEqual(source.read_bytes(), before)
+        small = Image.new("RGBA", (8, 8))
+        for x, y, color in ((1, 2, (200, 30, 40, 255)), (5, 6, (30, 200, 40, 255))):
+            small.putpixel((x, y), color)
+        small.resize((32, 32), Image.NEAREST).save(self.dir / "upscaled.png")
+        result = subprocess.run([sys.executable, str(ANALYZE), str(self.dir / "upscaled.png"), "--out", str(self.dir / "up")],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads((self.dir / "up/analysis.json").read_text())["files"][0]["native_scale"], 4)
 
     def test_analyzer_empty_art_and_existing_output_fail_without_writes(self) -> None:
         image = Image.new("RGBA", (8, 8))
