@@ -1,4 +1,4 @@
-"""Named art styles for a project, kept in `pixellab.json` at the project root. Standard library only.
+"""Named art styles for a project, kept in `pixellab-pip-style.json` at the project root. Standard library only.
 
     python project_style.py show [--style NAME | --no-style]   effective appearance and unresolved legacy limits
     python project_style.py list                      saved styles (active marked) and the example styles on offer
@@ -6,7 +6,7 @@
     python project_style.py example "<example name>" [--as <name>] [--use]   copy an example style, only when picked
     python project_style.py use <name> | rename <old> <new> | delete <name>
     python project_style.py anchor <family> <image.png> [--style <name>]   approved reference art for an asset family
-Options: --profile <path> (default ./pixellab.json).
+Options: --profile <path> (default ./pixellab-pip-style.json).
 
 No profile means an ordinary one-off request, not required setup. Temporary selection never writes.
 Appearance maps merge recursively; lists/scalars/null replace. Legacy limits remain restrictions
@@ -161,7 +161,7 @@ def check_image(path: str, *, require_decode: bool = False) -> bool:
 
 def save(path: str, prof: dict) -> None:
     folder = os.path.dirname(os.path.abspath(path))
-    fd, tmp = tempfile.mkstemp(dir=folder, prefix=".pixellab.", suffix=".tmp")
+    fd, tmp = tempfile.mkstemp(dir=folder, prefix=".pixellab-pip-style.", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             json.dump(prof, handle, indent=2, ensure_ascii=False)
@@ -181,7 +181,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=("show", "list", "save", "example", "use", "rename", "delete", "anchor"))
     ap.add_argument("args", nargs="*")
-    ap.add_argument("--profile", default="pixellab.json")
+    ap.add_argument("--profile", default="pixellab-pip-style.json")
     ap.add_argument("--from", dest="source")
     ap.add_argument("--use", action="store_true")
     ap.add_argument("--as", dest="as_name")

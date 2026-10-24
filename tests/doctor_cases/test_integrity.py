@@ -164,13 +164,13 @@ def test_doctor_does_not_load_another_projects_cwd_style(tmp_path):
     two = tmp_path / 'b'
     one.mkdir()
     two.mkdir()
-    (one / 'pixellab.json').write_text(json.dumps({'look': 'soft anti-aliased edges'}))
-    (two / 'pixellab.json').write_text(json.dumps({'look': 'hard edges'}))
+    (one / 'pixellab-pip-style.json').write_text(json.dumps({'look': 'soft anti-aliased edges'}))
+    (two / 'pixellab-pip-style.json').write_text(json.dumps({'look': 'hard edges'}))
     previous = os.getcwd()
     try:
         os.chdir(one)
         assert load_style(None) is None
-        assert load_style(str(two / 'pixellab.json'))['soft_edges'] is False
+        assert load_style(str(two / 'pixellab-pip-style.json'))['soft_edges'] is False
     finally:
         os.chdir(previous)
 

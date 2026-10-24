@@ -131,7 +131,7 @@ class PanelTests(unittest.TestCase):
         snapshot = json.loads(Path(paths['snapshot']).read_text(encoding='utf-8'))
         self.assertIsNone(snapshot['run'])
         self.assertEqual(snapshot['usage'], {'charged': None, 'committed': None})
-        self.assertFalse((self.root / 'pixellab.json').exists())
+        self.assertFalse((self.root / 'pixellab-pip-style.json').exists())
         self.assertFalse((self.root / 'manifest.json').exists())
         self.assertEqual(set(paths), {'snapshot', 'panel'})
         self.assertNotIn('base64', result.stdout)
@@ -141,7 +141,7 @@ class PanelTests(unittest.TestCase):
         other = self.run.parent / 'newer'
         other.mkdir()
         (other / 'manifest.json').write_text('{"jobs":[{"job_id":"wrong"}]}', encoding='utf-8')
-        (self.root / 'pixellab.json').write_text(json.dumps({'active_style': 'chosen', 'styles': {'chosen': {'notes': 'private direction'}}}), encoding='utf-8')
+        (self.root / 'pixellab-pip-style.json').write_text(json.dumps({'active_style': 'chosen', 'styles': {'chosen': {'notes': 'private direction'}}}), encoding='utf-8')
         snapshot = panel.build_snapshot(str(self.root), str(self.run.relative_to(self.root)))
         self.assertEqual(snapshot['style'], 'chosen')
         self.assertEqual([j['job_id'] for j in snapshot['jobs']], ['old'])
@@ -216,7 +216,7 @@ class PanelTests(unittest.TestCase):
         self.assertEqual(len(data['warnings']), 2)
 
     def test_corrupt_profile_and_manifest_are_visible_and_preserved(self):
-        profile = self.root / 'pixellab.json'
+        profile = self.root / 'pixellab-pip-style.json'
         profile.write_text('{invalid', encoding='utf-8')
         ledger = self.run / 'manifest.json'
         ledger.write_text('{invalid', encoding='utf-8')
@@ -289,7 +289,7 @@ class PanelTests(unittest.TestCase):
 
     def test_accounting_and_style_warnings_do_not_block_prepared_review_requests(self):
         self.ledger([{'job_id': 'unknown', 'status': 'failed'}])
-        (self.root / 'pixellab.json').write_text('{invalid', encoding='utf-8')
+        (self.root / 'pixellab-pip-style.json').write_text('{invalid', encoding='utf-8')
         relative = self.image()
         run = str(self.run.relative_to(self.root))
         snapshot = panel.build_snapshot(str(self.root), run, [('hero', relative)])
@@ -319,7 +319,7 @@ class PanelTests(unittest.TestCase):
         for path, content in before.items():
             self.assertEqual(path.read_bytes(), content)
         self.assertFalse((alternate / 'panel').exists())
-        self.assertFalse((self.root / 'pixellab.json').exists())
+        self.assertFalse((self.root / 'pixellab-pip-style.json').exists())
 
     def test_private_generation_root_cannot_redirect_outputs_into_tracked_art(self):
         with tempfile.TemporaryDirectory() as temporary:

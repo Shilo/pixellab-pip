@@ -28,7 +28,7 @@ class ProjectStyleTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def profile(self) -> dict:
-        return json.loads((self.dir / "pixellab.json").read_text(encoding="utf-8"))
+        return json.loads((self.dir / "pixellab-pip-style.json").read_text(encoding="utf-8"))
 
     def test_no_style_exit_4(self) -> None:
         r = run(self.dir, "show")
@@ -36,7 +36,7 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(json.loads(r.stdout)["status"], "no_style")
 
     def test_missing_reference_is_listed_and_missing_source_is_named(self) -> None:
-        (self.dir / "pixellab.json").write_text(json.dumps({"look": "town", "reference": "art/old.png"}), encoding="utf-8")
+        (self.dir / "pixellab-pip-style.json").write_text(json.dumps({"look": "town", "reference": "art/old.png"}), encoding="utf-8")
         r = run(self.dir, "show")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn("reference", json.loads(r.stdout)["invalid_anchors"])
@@ -52,7 +52,7 @@ class ProjectStyleTests(unittest.TestCase):
         (package / "Image.py").write_text('raise AssertionError("unsafe decoder imported")\n', encoding="utf-8")
         image = self.dir / "hero.png"
         Image.new("RGBA", (4, 4), (20, 40, 80, 255)).save(image)
-        profile = self.dir / "pixellab.json"
+        profile = self.dir / "pixellab-pip-style.json"
         profile.write_text(json.dumps({"look": "town", "max_cost": 0, "anchors": {"heroes": "hero.png"},
                                        "styles": {"town": {}}, "active_style": "town"}), encoding="utf-8")
         before = profile.read_bytes()
@@ -73,7 +73,7 @@ class ProjectStyleTests(unittest.TestCase):
 
     def test_legacy_top_level_appearance_is_read_without_mutation(self) -> None:
         # a pre-merge Game Art profile: project fields and house-style words, but no chosen style
-        (self.dir / "pixellab.json").write_text(json.dumps(
+        (self.dir / "pixellab-pip-style.json").write_text(json.dumps(
             {"game": "x", "out": "pixellab_out", "look": "dark fantasy pixel art", "seed": 7}), encoding="utf-8")
         r = run(self.dir, "show")
         self.assertEqual(r.returncode, 0, r.stdout)
@@ -84,7 +84,7 @@ class ProjectStyleTests(unittest.TestCase):
         r = run(self.dir, "list")
         self.assertEqual(r.returncode, 0)
         self.assertIn("Side-view dark fantasy", r.stdout)            # offered...
-        self.assertFalse((self.dir / "pixellab.json").exists())       # ...but nothing written
+        self.assertFalse((self.dir / "pixellab-pip-style.json").exists())       # ...but nothing written
         r = run(self.dir, "example", "Side-view dark fantasy", "--use")
         self.assertEqual(r.returncode, 0, r.stderr)
         shown = json.loads(run(self.dir, "show").stdout)
@@ -111,7 +111,7 @@ class ProjectStyleTests(unittest.TestCase):
         run(self.dir, "save", "one", "--from", "s.json", "--use")
         sub = self.dir / "deep" / "er"
         sub.mkdir(parents=True)
-        r = run(sub, "anchor", "heroes", str(self.dir / "art" / "hero.png"), "--profile", str(self.dir / "pixellab.json"))
+        r = run(sub, "anchor", "heroes", str(self.dir / "art" / "hero.png"), "--profile", str(self.dir / "pixellab-pip-style.json"))
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertEqual(self.profile()["styles"]["one"]["anchors"]["heroes"], "art/hero.png")
         r = run(self.dir, "anchor", "heroes", "missing.png")
@@ -141,7 +141,7 @@ class ProjectStyleTests(unittest.TestCase):
                    "styles": {"main": {"look": "main", "auto": True, "engine": "unknown", "anim": {"timing_ms": {"hit": 200}}},
                               "other": {"look": "other", "anchors": {"heroes": None}, "negatives": []}},
                    "active_style": "main"}
-        path = self.dir / "pixellab.json"
+        path = self.dir / "pixellab-pip-style.json"
         path.write_text(json.dumps(profile), encoding="utf-8")
         before = path.read_bytes()
         shown = json.loads(run(self.dir, "show").stdout)
@@ -158,7 +158,7 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(path.read_bytes(), before)
 
     def test_bad_profiles_and_limits_never_get_overwritten(self) -> None:
-        path = self.dir / "pixellab.json"
+        path = self.dir / "pixellab-pip-style.json"
         (self.dir / "style.json").write_text('{"look":"new"}', encoding="utf-8")
         cases = [[], {"styles": []}, {"styles": {"bad": []}}, {"styles": {"bad": {"anchors": []}}},
                  {"active_style": "missing"}, {"max_cost": -1}, {"max_cost": True},
@@ -176,9 +176,9 @@ class ProjectStyleTests(unittest.TestCase):
         (self.dir / "s.json").write_text('{"look":"a"}', encoding="utf-8")
         self.assertEqual(run(self.dir, "save", "one", "--from", "s.json").returncode, 0)
         self.assertNotIn("active_style", self.profile())
-        before = (self.dir / "pixellab.json").read_bytes()
+        before = (self.dir / "pixellab-pip-style.json").read_bytes()
         self.assertNotEqual(run(self.dir, "save", "one", "--from", "s.json").returncode, 0)
-        self.assertEqual((self.dir / "pixellab.json").read_bytes(), before)
+        self.assertEqual((self.dir / "pixellab-pip-style.json").read_bytes(), before)
         self.assertEqual(run(self.dir, "save", "one", "--from", "s.json", "--replace", "--use").returncode, 0)
         self.assertEqual(self.profile()["active_style"], "one")
 
@@ -196,7 +196,7 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(run(self.dir, "anchor", "monsters", "good.png", "--style", "two", "--replace").returncode, 0)
 
     def test_missing_anchor_and_unknown_style_are_clear_errors(self) -> None:
-        (self.dir / "pixellab.json").write_text(json.dumps(
+        (self.dir / "pixellab-pip-style.json").write_text(json.dumps(
             {"styles": {"one": {"anchors": {"heroes": "missing.png"}}}, "active_style": "one"}), encoding="utf-8")
         shown = run(self.dir, "show")
         self.assertEqual(shown.returncode, 0, shown.stderr)
@@ -208,7 +208,7 @@ class ProjectStyleTests(unittest.TestCase):
         source.mkdir()
         Image.new("RGBA", (8, 8), (30, 50, 70, 255)).save(source / "hero.png")
         (source / "style.json").write_text('{"reference":"hero.png"}', encoding="utf-8")
-        profile = self.dir / "pixellab.json"
+        profile = self.dir / "pixellab-pip-style.json"
         result = run(source, "save", "one", "--from", "style.json", "--profile", str(profile), "--use")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(self.profile()["styles"]["one"]["reference"], "source/hero.png")
@@ -221,9 +221,9 @@ class ProjectStyleTests(unittest.TestCase):
     def test_rename_empty_name_preserves_profile(self) -> None:
         (self.dir / "s.json").write_text('{"look":"a"}', encoding="utf-8")
         run(self.dir, "save", "one", "--from", "s.json", "--use")
-        before = (self.dir / "pixellab.json").read_bytes()
+        before = (self.dir / "pixellab-pip-style.json").read_bytes()
         self.assertNotEqual(run(self.dir, "rename", "one", "").returncode, 0)
-        self.assertEqual((self.dir / "pixellab.json").read_bytes(), before)
+        self.assertEqual((self.dir / "pixellab-pip-style.json").read_bytes(), before)
 
     def test_failed_atomic_replace_preserves_profile(self) -> None:
         import importlib.util
@@ -231,13 +231,13 @@ class ProjectStyleTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("style_atomic", STYLE)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        path = self.dir / "pixellab.json"
+        path = self.dir / "pixellab-pip-style.json"
         path.write_text('{"custom":1}', encoding="utf-8")
         with patch.object(module.os, "replace", side_effect=OSError("failed write")):
             with self.assertRaises(OSError):
                 module.save(str(path), {"custom": 2})
         self.assertEqual(json.loads(path.read_text()), {"custom": 1})
-        self.assertEqual(list(self.dir.glob(".pixellab.*.tmp")), [])
+        self.assertEqual(list(self.dir.glob(".pixellab-pip-style.*.tmp")), [])
 
     def test_analyze_measures_without_writing_frames(self) -> None:
         img = Image.new("RGBA", (32, 32))

@@ -1,10 +1,10 @@
 # Project Style
 
-Read this for discovered `pixellab.json`, saved/temporary style selection, reference-art analysis, or optional project onboarding. Appearance preferences fill gaps in the current request; they grant no execution authority. The selected project root is the user's workspace/project, not the skill install or a detached process's working directory. Do not search parent/home folders for profiles.
+Read this for discovered `pixellab-pip-style.json`, saved/temporary style selection, reference-art analysis, or optional project onboarding. Appearance preferences fill gaps in the current request; they grant no execution authority. The selected project root is the user's workspace/project, not the skill install or a detached process's working directory. Do not search parent/home folders for profiles.
 
 ## Read and select
 
-Read `<selected-root>/pixellab.json` before generation when it exists. With Python, use `python <skill-dir>/assets/project_style.py show --profile <profile>`; add `--style NAME` for a temporary named selection or `--no-style` to opt out of saved appearance for this job. Neither writes. Without Python, read that exact JSON with the host's file tool and apply the same rules; no helper installation is required just to use a style.
+Read `<selected-root>/pixellab-pip-style.json` before generation when it exists. With Python, use `python <skill-dir>/assets/project_style.py show --profile <profile>`; add `--style NAME` for a temporary named selection or `--no-style` to opt out of saved appearance for this job. Neither writes. Without Python, read that exact JSON with the host's file tool and apply the same rules; no helper installation is required just to use a style.
 
 - No profile or effective appearance: continue the ordinary one-off request without required setup or a house look. The helper's exit 4 means `no_style`, not failure or permission to ignore returned `legacy_limits`.
 - Precedence: applicable top-level appearance, overlaid by the temporary named style or `active_style`, then current-request overrides. Only appearance fields participate; map values merge recursively, lists/scalars/null replace. For example, a named `anchors.icons` preserves a top-level `anchors.heroes`; `anchors: null` clears the whole map.
@@ -31,4 +31,4 @@ Use the writer only for an explicitly requested save/change:
 - `use NAME` changes future active selection; temporary `show --style NAME` does not. Saving without `--use` never switches the project. `list`, `rename OLD NEW`, and `delete NAME` manage named styles; deleting the active style leaves it unselected.
 - `anchor FAMILY <image> [--style NAME]` saves an approved family reference, validating the image first. Replacing an existing anchor requires deliberate acceptance and `--replace`. A candidate pick or a one-job reference is not a persistent save request.
 
-Every command accepts `--profile <selected-root>/pixellab.json`. Preserve unrelated JSON fields and the original file on failure. A current request naming a look does not itself authorize saving it. If Python is unavailable, an explicitly approved host-file edit may perform the same narrow change after validating and previewing it; do not discard unknown fields.
+Every command accepts `--profile <selected-root>/pixellab-pip-style.json`. Preserve unrelated JSON fields and the original file on failure. A current request naming a look does not itself authorize saving it. If Python is unavailable, an explicitly approved host-file edit may perform the same narrow change after validating and previewing it; do not discard unknown fields.

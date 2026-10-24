@@ -77,7 +77,7 @@ These are not in the PR. Re-add one only when the trigger in the last column hap
 
 ## What changes for an existing Pip user
 
-- A `pixellab.json` in the project root is read before generating.
+- A `pixellab-pip-style.json` in the project root is read before generating. Game Art projects rename their `pixellab.json` to it; the old name is not read.
 - Image helpers, including the two that already existed, need Pillow 13 (Python 3.11+); older Pillow has nine known
   security advisories, so they skip instead.
 - New commands: `panel`, `auto status`, `auto plan`.

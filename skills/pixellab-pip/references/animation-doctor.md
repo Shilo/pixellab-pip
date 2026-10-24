@@ -64,7 +64,7 @@ Effects (slashes, glows, smoke) and soft effect edges are never changed on their
 changes. Ask the user **one** question listing each proposal with its recommended fix, e.g.
 "Frame 3 has a flash that appears in no other frame - remove it? (recommended) / keep it". Then re-run `fix.py`
 with the same unchanged inputs, one animation only, a fresh output location and `--accept c2,c5`. Acceptance IDs are local to that animation; never apply them to a batch. A lasting effect (2+ frames) is reported as information only: keep it.
-For intentionally airborne moves, use the appropriate explicit inspection options and visual review; a ground-line heuristic cannot prove a defect. When the selected project profile says soft edges are intended, pass `--profile <selected-root>/pixellab.json`; the helper does not search the process working directory. Without this explicit path it uses no saved style facts.
+For intentionally airborne moves, use the appropriate explicit inspection options and visual review; a ground-line heuristic cannot prove a defect. When the selected project profile says soft edges are intended, pass `--profile <selected-root>/pixellab-pip-style.json`; the helper does not search the process working directory. Without this explicit path it uses no saved style facts.
 
 ## Re-roll plans
 

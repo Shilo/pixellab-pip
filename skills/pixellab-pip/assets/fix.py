@@ -31,7 +31,7 @@ SOFT_WORDS = ('soft edge', 'soft anti', 'anti-alias', 'antialias', 'painterly', 
 
 
 def load_style(path):
-    """Style facts the checks use, from a pixellab.json profile: top-level fields overlaid by the active style."""
+    """Style facts the checks use, from a pixellab-pip-style.json profile: top-level fields overlaid by the active style."""
     if not path:
         return None
     if not os.path.isfile(path):
@@ -118,7 +118,7 @@ def main(argv=None):
     ap.add_argument('--ref', help='the standing sprite to compare against (default: the most typical frame)')
     ap.add_argument('--move', help='idle|walk|run|attack|skill|cast|hurt|death (default: from the file names)')
     ap.add_argument('--out')
-    ap.add_argument('--profile', help='selected project pixellab.json; no implicit cwd profile')
+    ap.add_argument('--profile', help='selected project pixellab-pip-style.json; no implicit cwd profile')
     ap.add_argument('--accept', default='', help='proposal ids to apply, e.g. c2,c5')
     ap.add_argument('--check-only', action='store_true')
     ap.add_argument('--stepped', action='store_true',

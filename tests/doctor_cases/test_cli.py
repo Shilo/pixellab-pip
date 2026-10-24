@@ -80,8 +80,8 @@ def test_style_soft_edges_from_the_profile(tmp_path):
     fs = synth.walk(6)
     fs[2] = synth.blur_edges(fs[2])
     synth.save(fs, tmp_path / 'k', 'knight_idle')
-    (tmp_path / 'pixellab.json').write_text(json.dumps({'look': 'painterly, soft anti-aliased edges'}), encoding='utf-8')
-    r = json.loads(fix(tmp_path / 'k', '--json', '--check-only', '--profile', tmp_path / 'pixellab.json', cwd=tmp_path))
+    (tmp_path / 'pixellab-pip-style.json').write_text(json.dumps({'look': 'painterly, soft anti-aliased edges'}), encoding='utf-8')
+    r = json.loads(fix(tmp_path / 'k', '--json', '--check-only', '--profile', tmp_path / 'pixellab-pip-style.json', cwd=tmp_path))
     assert 'soft_edge' not in {f['check'] for f in r['anims'][0]['findings_before']}
 
 

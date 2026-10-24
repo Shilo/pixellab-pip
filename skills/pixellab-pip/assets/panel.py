@@ -111,7 +111,7 @@ def _labels(root: Path, path: str | None) -> dict:
 
 
 def _style(root: Path, diagnostics: list[str], labels: dict) -> str:
-    profile = contained(root, "pixellab.json")
+    profile = contained(root, "pixellab-pip-style.json")
     if not profile.exists():
         return labels["style_none"]
     try:
@@ -340,7 +340,7 @@ def main(argv=None) -> int:
         if out.exists() and any(out.iterdir()):
             raise ValueError("panel output directory must be fresh or empty; existing files left unchanged")
         paths = [out / "panel.json", out / "panel.html"]
-        sources = [contained(root, "pixellab.json"), *(contained(root, path) for _, path in args.image)]
+        sources = [contained(root, "pixellab-pip-style.json"), *(contained(root, path) for _, path in args.image)]
         if snapshot["run"]:
             sources.append(contained(root, snapshot["run"] + "/" + manifest.NAME))
         if args.labels:
