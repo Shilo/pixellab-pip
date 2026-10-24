@@ -2,10 +2,10 @@
 
 Optional pose/rhythm examples for selected choreography; execution scope follows `key-pose-animation.md`, and local operations follow `finishing.md`.
 
-The sources give frame counts, not times: the ms below are play timing for ~12 fps clips. How to make them: a crescent
-harvested from a 6-frame swing with the `slash_layer.py` finishing script (see `key-pose-animation.md`), a trail drawn
-through the blade tips with `blade_trail.py`, or a painted clip in `vfx_workbench`
-([vfx-workbench.md](vfx-workbench.md)). This page says which, per effect.
+The sources give frame counts, not times: the ms below are play timing for ~12 fps clips. How to make them: a painted clip in
+`vfx_workbench` ([vfx-workbench.md](vfx-workbench.md)) first; a crescent harvested from a 6-frame swing with the
+`slash_layer.py` finishing script (see `key-pose-animation.md`); or, only as an approved, labelled local fallback
+(`finishing.md`), a trail drawn through the blade tips with `blade_trail.py`. This page says which suits each effect.
 
 ## Contents
 - [What every weapon effect keeps](#what-every-weapon-effect-keeps)

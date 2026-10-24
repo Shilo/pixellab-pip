@@ -6,8 +6,8 @@ From one whip test (an overhead crack, Pro Flash key poses + `animate_image`); n
 side lash and wrap are untested. Facing right.
 
 ## What every pose keeps
-- **Name the holding arm by its look** in every pose (`her black-gloved right arm holds the whip handle`) and say the
-  other hand is empty. A character with one arm that differs (a chrome cyber arm, a gauntlet) swapped the whip into
+- **Name the holding arm by its look** in every pose (`characters.md`: `her black-gloved right arm holds the whip
+  handle`). A character with one arm that differs (a chrome cyber arm, a gauntlet) swapped the whip into
   that arm until both poses named it.
 - **The handle stays in the fist; the lash is the moving prop.** Name the lash's length and its tip
   (`a long black leather lash, about her height, ending in a glowing magenta tip`) in every pose, or it shortens.
@@ -33,12 +33,12 @@ side lash and wrap are untested. Facing right.
 
 ## Frame rhythm
 - The hit is the first frame where the lash is straight; the 10-frame clip held that pose 3 frames in a row (8-10) -
-  keep one at 140 ms and give the others 60, or cut them.
+  propose keeping one at 140 ms and giving the others 60, or cutting them (only if the user agrees).
 - Wind-up hold 160 ms, the roll over the head 60 ms a frame, crack 140, settle 120.
 
 ## Pitfalls to name in prompts / check at 3x
 - **The tip drifts back to the hand** in the mid in-betweens, so the lash reads as a loop from the hand back to the
   hand (frames 4-6 of the test). Put the path in the action: `the lash rolls forward over her head in one wave, the
-  tip always the farthest point from her hand`; if it still loops, re-roll that span as a short splice (4 frames).
+  tip always the farthest point from her hand`; if it still loops, propose re-rolling that span as a short splice (4 frames), a paid call under `auto.md`.
 - **The whip changes hands** for a frame (the cyber arm held it in frame 7): name the arm in the action as well.
 - **Face goes grey in wide poses**: `the same pale face` in both poses.
