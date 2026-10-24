@@ -12,6 +12,8 @@ Read this before cleaning up or finishing generated frames locally: stray pixels
 
 ## Contract
 
+Quote frame wildcards (`"raw/*.png"`) so the helper sorts `0.png .. 10.png` in number order; a shell that expands them first puts `10.png` before `2.png`.
+
 The helpers live in `assets/finish/`; resolve them to the installed skill's absolute path as in `local-asset-assembly.md`. They need Pillow and numpy (some also scipy); when unavailable they print a JSON `status: skipped` with the missing dependency and exit 3 — report the step as not done, never as passed. Do not install packages to run them unless the user asks.
 
 - Every helper requires `--out <dir>` and writes copies only; it preflights collisions with inputs and existing outputs. Raw PixelLab outputs stay untouched beside the finished copies. Give each step its own folder inside the run, e.g. `pixellab-pip-generations/<run>/finish/1-ground-snap/`.
@@ -34,7 +36,7 @@ Ground-snap → clean (scrub, despeckle, colormatch, palette and recolour) → t
 Moves floating frames down so their lowest pixel sits on the standing sprite's feet line (pad offset + the sprite's lowest row); `--out` gets every frame, moved or not. Frames already below the line are copied unchanged and flagged "below the feet line" — look at them (a robe or an effect hangs lower). `--fx 5,6` leaves feetless frames (smoke-only) alone, counted from 1 in the list given. `--check` prints the gaps and writes nothing. Only for grounded moves, never jumps or flyers. It trusts the lowest opaque pixel: when that is not the anchor (sparks or a burst under the body, a body rising out of a crack), run `--check`, look, and leave those frames out with `--fx` or don't snap.
 
 ```bash
-python ground_snap.py hero.png 24,56 raw/*.png --out finish/1-ground-snap [--fx 5,6] [--check]
+python ground_snap.py hero.png 24,56 "raw/*.png" --out finish/1-ground-snap [--fx 5,6] [--check]
 ```
 
 ### scrub
@@ -51,7 +53,7 @@ python scrub.py pose.png --box 29,10,47,16 --out finish/2-scrub
 Gives each pixel unlike all 8 neighbours their median colour and makes opaque pixels with no opaque neighbour transparent; two or more alike pixels (highlights, eye glints) stay. On detailed art with single-pixel runes or texture, check the per-frame counts in `derivative.json`: dozens of changes on a clean frame mean it is eating detail, so raise `--tol` or skip it.
 
 ```bash
-python despeckle.py frames/*.png --out finish/3-despeckle [--tol 90]
+python despeckle.py "frames/*.png" --out finish/3-despeckle [--tol 90]
 ```
 
 ### colormatch
@@ -59,7 +61,7 @@ python despeckle.py frames/*.png --out finish/3-despeckle [--tol 90]
 Scales each frame's brightness to the standing sprite's, then snaps every pixel to the sprite's own colours. Use when key poses or in-betweens drifted in colour.
 
 ```bash
-python colormatch.py hero.png frames/*.png --out finish/4-colormatch
+python colormatch.py hero.png "frames/*.png" --out finish/4-colormatch
 ```
 
 ### apply_palette
@@ -67,7 +69,7 @@ python colormatch.py hero.png frames/*.png --out finish/4-colormatch
 Snaps every opaque pixel to the nearest colour of a fixed palette (hex list, `.hex`/`.txt`, swatch `.png`, or `auto --colors N`). For PixelLab-side reduction prefer `reduce_colors` (SKILL.md router).
 
 ```bash
-python apply_palette.py "#1a1c2c,#5d275d,#b13e53" frames/*.png --out finish/4-palette
+python apply_palette.py "#1a1c2c,#5d275d,#b13e53" "frames/*.png" --out finish/4-palette
 ```
 
 ### recolor_trail
@@ -83,7 +85,7 @@ python recolor_trail.py raw 3 4 5 --hue red --to none --ref hero.png --out finis
 A colour variant: colour groups (skin, neutrals, hue families) move to named colours or `#rrggbb` while each pixel keeps its place on the ramp; the still and every frame get the same mapping; skin stays unless named. `--groups` lists the groups and writes nothing.
 
 ```bash
-python recolor_groups.py hero.png frames/*.png --swap red=indigo --out variant
+python recolor_groups.py hero.png "frames/*.png" --swap red=indigo --out variant
 ```
 
 ### recolor_like
@@ -91,7 +93,7 @@ python recolor_groups.py hero.png frames/*.png --swap red=indigo --out variant
 Recolours frames drawn in an old still's colours into a new still's (same pose), keeping the old contrast; reports repeated frames. `--keep-thin REDRAWN_DIR` pastes the recoloured thin parts (blades, staffs) over a redraw.
 
 ```bash
-python recolor_like.py old/still.png new/still.png old/attack_*.png --out new-colours
+python recolor_like.py old/still.png new/still.png "old/attack_*.png" --out new-colours
 ```
 
 ### dir8_finish
@@ -128,7 +130,7 @@ python throw_prop.py release.png --onto f4.png f5.png f6.png --step 40,-17 [--tu
 Composites a `vfx_workbench` export onto the body frames from frame `--from N`, centred on `--at x,y`, or with the effect's own pixel `--anchor x,y` (the projectile's start inside the effect image, not the export's origin field) placed there; `--widen W` adds room on the right. When the effect outlasts the body, the last body frame is held and `held_frames` is reported — say so.
 
 ```bash
-python bake_fx.py body/*.png --fx burst.png --at 250,70 --from 9 [--anchor 3,14] [--widen 320] --out finish/5-fx
+python bake_fx.py "body/*.png" --fx burst.png --at 250,70 --from 9 [--anchor 3,14] [--widen 320] --out finish/5-fx
 ```
 
 ### blade_trail
