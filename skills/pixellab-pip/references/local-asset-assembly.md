@@ -35,10 +35,10 @@ The helpers below follow the same Python, `<skill-dir>`, and exit-code-3 skip ru
 When the user asks for an engine-ready sheet, pack same-size frames with `make_sheet.py`:
 
 ```bash
-python "<skill-dir>/assets/make_sheet.py" <out-stem> frame-*.png --durations 100,100,200 --hit 2 --pad 24,56 --facing right --godot sprites/hero
+python "<skill-dir>/assets/make_sheet.py" <out-stem> "frame-*.png" --durations 100,100,200 --hit 2 --pad 24,56 --facing right --godot sprites/hero
 ```
 
-It writes one row `<out-stem>.png` plus Aseprite array JSON (`frames[].frame`, `duration` ms, `meta.pixellab`: `frame_count`, optional `hit_frame`, `pad_offset`, `facing`), which Aseprite importers in Unity and Godot read. `--godot [RES_DIR]` adds a Godot 4 `SpriteFrames` `.tres` whose texture path is `res://RES_DIR/<out-stem>.png`. Durations are metadata only: give one per frame (default even `--fps 12`); holds come from durations, never from repeated frames. Mixed frame sizes are refused: pad them first. Include `--pad`, `--facing`, `--hit`, and `--godot` only when known or requested.
+It writes one row `<out-stem>.png` plus Aseprite array JSON (`frames[].frame`, `duration` ms, `meta.pixellab`: `frame_count`, optional `hit_frame`, `pad_offset`, `facing`), which Aseprite importers in Unity and Godot read. `--godot [RES_DIR]` adds a Godot 4 `SpriteFrames` `.tres` (plays once; add `--loop` for idles and walks) whose texture path is `res://RES_DIR/<out-stem>.png`. Durations are metadata only: give one per frame (default even `--fps 12`); holds come from durations, never from repeated frames. Mixed frame sizes are refused: pad them first. Include `--pad`, `--facing`, `--hit`, and `--godot` only when known or requested.
 
 ## Atlas And Spritesheet Grid Inspection
 

@@ -12,7 +12,7 @@ import json
 import math
 import sys
 
-from _assembly import expand, require_pillow, preflight_outputs
+from _assembly import expand, open_still, require_pillow, preflight_outputs
 
 args = sys.argv[2:]
 if not args or sys.argv[1] in ("-h", "--help"):
@@ -42,7 +42,7 @@ rows = []
 for group in groups:
     row = []
     for path in group:
-        im = Image.open(path).convert("RGBA")
+        im = open_still(path)
         if scale != 1.0:
             im = im.resize((max(1, int(im.width * scale)), max(1, int(im.height * scale))), Image.NEAREST)
         row.append(im)

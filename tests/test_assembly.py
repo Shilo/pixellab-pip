@@ -83,7 +83,7 @@ class MakeSheetTests(unittest.TestCase):
                 cell = sheet.crop((rect["x"], rect["y"], rect["x"] + rect["w"], rect["y"] + rect["h"]))
                 self.assertEqual(list(cell.getdata()), list(source.getdata()))
 
-    def test_hit_hold_moves_to_hit(self) -> None:
+    def test_durations_hit_and_loop_are_recorded_as_given(self) -> None:
         # durations are the caller's metadata: the hold stays where given and the hit frame is recorded
         with tempfile.TemporaryDirectory() as tmp:
             paths = save_frames(Path(tmp), [frame((k * 40, 0, 0, 255)) for k in range(5)])
@@ -98,6 +98,10 @@ class MakeSheetTests(unittest.TestCase):
             tres = stem.with_suffix(".tres").read_text()
             self.assertIn('path="res://sprites/hero/k_attack.png"', tres)
             self.assertEqual(tres.count('"texture": SubResource('), 5)
+            self.assertIn('"loop": false', tres)
+            looped = Path(tmp) / "k_idle"
+            self.assertEqual(run("make_sheet.py", looped, *paths, "--godot", "--loop").returncode, 0)
+            self.assertIn('"loop": true', looped.with_suffix(".tres").read_text())
 
     def test_sheet_refuses_mixed_sizes_and_bad_durations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -105,6 +109,11 @@ class MakeSheetTests(unittest.TestCase):
             self.assertNotEqual(run("make_sheet.py", Path(tmp) / "a", *paths).returncode, 0)
             self.assertNotEqual(run("make_sheet.py", Path(tmp) / "b", paths[0], "--durations", "1,2").returncode, 0)
             self.assertNotEqual(run("make_sheet.py", Path(tmp) / "c", paths[0], "--hit", "1").returncode, 0)
+            gif = Path(tmp) / "anim.gif"
+            frame((255, 0, 0, 255)).save(gif, save_all=True, append_images=[frame((0, 0, 255, 255))])
+            r = run("make_sheet.py", Path(tmp) / "d", gif)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertIn("has 2 frames", r.stdout + r.stderr)   # review: only the first frame was kept, silently
 
 
 class ContactSheetTests(unittest.TestCase):

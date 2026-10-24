@@ -15,7 +15,7 @@ import math
 import os
 import sys
 
-from _assembly import expand, require_pillow, preflight_outputs
+from _assembly import expand, open_still, require_pillow, preflight_outputs
 
 ap = argparse.ArgumentParser(description=__doc__)
 ap.add_argument("out_stem")
@@ -26,11 +26,12 @@ ap.add_argument("--hit", type=int, help="explicit 0-based contact/damage frame")
 ap.add_argument("--pad", help="X,Y: where the source sprite's top-left sits on these frames")
 ap.add_argument("--facing", choices=["left", "right"])
 ap.add_argument("--godot", nargs="?", const="", metavar="RES_DIR", help="also write .tres; RES_DIR under res://")
+ap.add_argument("--loop", action="store_true", help="the Godot animation loops (idle, walk); default plays once")
 a = ap.parse_args()
 Image = require_pillow()
 
 paths = expand(a.frames)
-ims = [Image.open(p).convert("RGBA") for p in paths]
+ims = [open_still(p) for p in paths]
 n = len(ims)
 w, h = ims[0].size
 if any(im.size != (w, h) for im in ims):
@@ -82,8 +83,8 @@ if a.godot is not None:
                   f'region = Rect2({r["x"]}, {r["y"]}, {r["w"]}, {r["h"]})', ""]
     anim = ", ".join('{"duration": %.3f, "texture": SubResource("f%d")}' % (d / base, k) for k, d in enumerate(dur))
     name = os.path.basename(a.out_stem)
-    lines += ["[resource]", 'animations = [{"frames": [%s], "loop": false, "name": &"%s", "speed": %.3f}]'
-              % (anim, name, 1000.0 / base)]
+    lines += ["[resource]", 'animations = [{"frames": [%s], "loop": %s, "name": &"%s", "speed": %.3f}]'
+              % (anim, "true" if a.loop else "false", name, 1000.0 / base)]
     with open(a.out_stem + ".tres", "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     written.append(a.out_stem + ".tres")

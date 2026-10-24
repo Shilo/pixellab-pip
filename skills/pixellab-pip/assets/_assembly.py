@@ -49,6 +49,14 @@ def require_pillow():
         sys.exit(3)
 
 
+def open_still(path: str):
+    """One RGBA image; an animated input would silently lose every frame after the first, so refuse it."""
+    with require_pillow().open(path) as im:
+        if getattr(im, "n_frames", 1) > 1:
+            sys.exit("%s has %d frames; pass its frames as separate images" % (path, im.n_frames))
+        return im.convert("RGBA")
+
+
 def expand(paths: list[str]) -> list[str]:
     """Expand * and ? that cmd/PowerShell pass literally, in natural order (2.png before 10.png)."""
     out = []

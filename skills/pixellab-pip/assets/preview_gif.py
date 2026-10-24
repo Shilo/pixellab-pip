@@ -16,7 +16,7 @@ import json
 import math
 import sys
 
-from _assembly import expand, require_pillow, preflight_outputs
+from _assembly import expand, open_still, require_pillow, preflight_outputs
 
 ap = argparse.ArgumentParser(description=__doc__)
 ap.add_argument("out")
@@ -30,7 +30,7 @@ Image = require_pillow()
 paths = expand(a.frames)
 if a.scale < 1 or not math.isfinite(a.fps) or a.fps <= 0:
     ap.error("--scale and --fps must be positive")
-fs = [Image.open(p).convert("RGBA") for p in paths]
+fs = [open_still(p) for p in paths]
 fs = [f.resize((f.width * a.scale, f.height * a.scale), Image.NEAREST) for f in fs]
 ms = [int(v) for v in a.durations.split(",")] if a.durations else [round(1000 / a.fps)] * len(fs)
 if len(ms) != len(fs):

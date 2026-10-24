@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import sys
 
-from _assembly import require_pillow, preflight_outputs
+from _assembly import open_still, require_pillow, preflight_outputs
 
 if len(sys.argv) not in (6, 7) or sys.argv[1] in ("-h", "--help"):
     sys.exit(__doc__)
@@ -19,7 +19,7 @@ Image = require_pillow()
 
 src, out = sys.argv[1], sys.argv[2]
 w, h, x = (int(v) for v in sys.argv[3:6])
-im = Image.open(src).convert("RGBA")
+im = open_still(src)
 bbox = im.getbbox()
 feet = bbox[3] if bbox else im.height   # rows below this are empty
 y = int(sys.argv[6]) if len(sys.argv) == 7 else h - feet
