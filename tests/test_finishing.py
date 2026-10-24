@@ -220,16 +220,27 @@ class FinishBehaviourTests(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_blank_reference_is_refused_before_any_output(self) -> None:
-        # review: a blank still crashed colormatch/recolor_groups and left an --out folder that blocked the retry
+        # review: a blank reference crashed with a traceback; it is now refused with a clear message, no output
         Image.new("RGBA", (8, 8)).save(self.t / "blank.png")
         Image.new("RGBA", (8, 8), (200, 40, 40, 255)).save(self.t / "frame.png")
-        for helper, extra in (("colormatch", []), ("recolor_groups", ["--swap", "red=indigo"])):
+        Image.new("RGBA", (8, 8), (200, 40, 40, 100)).save(self.t / "ghost.png")
+        for helper, args in (("colormatch", ["blank.png", "frame.png"]),
+                             ("recolor_groups", ["blank.png", "frame.png", "--swap", "red=indigo"]),
+                             ("ground_snap", ["blank.png", "0,0", "frame.png"])):
             with self.subTest(helper=helper):
                 out = self.t / ("out-" + helper)
-                r = run(helper, self.t / "blank.png", self.t / "frame.png", *extra, "--out", out)
+                r = run(helper, *(self.t / p if p.endswith(".png") else p for p in args), "--out", out)
                 self.assertNotEqual(r.returncode, 0)
                 self.assertIn("no visible pixels", r.stdout + r.stderr)
                 self.assertFalse(out.exists())
+        # a semi-transparent reference still counts (colormatch reads alpha > 0)
+        self.assertEqual(run("colormatch", self.t / "ghost.png", self.t / "frame.png", "--out", self.t / "g").returncode, 0)
+        # scrub needs only one visible key frame: a clip that fades to empty is still accepted
+        clip = self.t / "clip"
+        clip.mkdir()
+        for n, colour in enumerate(((200, 40, 40, 255), (200, 40, 40, 255), (0, 0, 0, 0))):
+            Image.new("RGBA", (8, 8), colour).save(clip / f"{n}.png")
+        self.assertEqual(run("scrub", clip, "1", "--out", self.t / "s").returncode, 0)
 
     def test_find_muzzle_locates_the_flash_frame_and_muzzle(self) -> None:
         clip = self.t / "shot"

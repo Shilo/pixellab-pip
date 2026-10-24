@@ -69,6 +69,8 @@ if a.outside_keys:
     inputs += kp
     k0, k1 = (np.array(Image.open(p).convert("RGBA"))[..., 3] > 0 for p in kp)
     keys = ndimage.binary_dilation(k0 | k1, iterations=BODY_GAP)
+if a.ref:
+    _derive.require_visible(a.ref)
 run = _derive.Run("recolor_trail", "cleanup", a.out, list(dict.fromkeys(inputs)))
 lo, hi = tuple(float(v) for v in a.hue.split(",")) if "," in a.hue else HUES.get(a.hue, (0, 360))
 refpal = None

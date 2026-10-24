@@ -28,6 +28,8 @@ ap.add_argument("--facing", choices=["left", "right"])
 ap.add_argument("--godot", nargs="?", const="", metavar="RES_DIR", help="also write .tres; RES_DIR under res://")
 ap.add_argument("--loop", action="store_true", help="the Godot animation loops (idle, walk); default plays once")
 a = ap.parse_args()
+if a.loop and a.godot is None:
+    ap.error("--loop only applies to the Godot .tres; add --godot")
 Image = require_pillow()
 
 paths = expand(a.frames)

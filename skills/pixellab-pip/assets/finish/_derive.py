@@ -33,13 +33,15 @@ def frames(d: str, names: list) -> list:
     return out
 
 
-def require_visible(*paths: str) -> None:
-    """Refuse a blank reference before any output folder exists: it has no colours or body to compare against."""
+def require_visible(*paths: str, alpha: int = 1) -> None:
+    """Refuse references with no pixel at `alpha` or above (the threshold the caller reads with) before any output
+    exists: there are no colours or body to compare against. One visible reference among several is enough."""
     from PIL import Image
     for p in paths:
         with Image.open(p) as im:
-            if im.convert("RGBA").getextrema()[3][1] < 128:
-                sys.exit("reference has no visible pixels (alpha >= 128): " + p)
+            if im.convert("RGBA").getextrema()[3][1] >= alpha:
+                return
+    sys.exit("reference has no visible pixels (alpha >= %d): %s" % (alpha, ", ".join(paths)))
 
 
 class Run:

@@ -31,6 +31,7 @@ ap.add_argument("--check", action="store_true")
 ap.add_argument("--fx", default="", help="positions (from 1) of frames with no feet on purpose: left alone")
 a = ap.parse_args()
 frames = _derive.expand(a.frames)
+_derive.require_visible(a.sprite)
 st = np.array(Image.open(a.sprite).convert("RGBA"))[..., 3] > 0
 feet = int(a.pad.split(",")[1]) + int(np.nonzero(st.any(1))[0].max())
 fx = {int(v) - 1 for v in a.fx.split(",") if v.strip()}

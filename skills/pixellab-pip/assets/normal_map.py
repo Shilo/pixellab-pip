@@ -25,7 +25,7 @@ ap.add_argument("--frames", type=int, default=1)
 ap.add_argument("--scale", type=int, default=2)
 ap.add_argument("--directx", action="store_true")
 a = ap.parse_args()
-from _assembly import expand, require_numpy, require_pillow, preflight_outputs
+from _assembly import expand, open_still, require_numpy, require_pillow, preflight_outputs
 from _gif import write_gif  # noqa: E402
 
 if a.cmd == "preview":
@@ -41,7 +41,7 @@ if a.frames < 1 or a.scale < 1:
 if a.cmd == "gif":
     paths = expand(a.inputs)
     preflight_outputs([a.out], paths)
-    frames = [Image.open(f).convert("RGBA") for f in paths]
+    frames = [open_still(f) for f in paths]
     w, h = frames[0].size
     if any(f.size != (w, h) for f in frames):
         sys.exit("frames differ in size: pad them to one canvas first")
@@ -50,7 +50,7 @@ if a.cmd == "gif":
     print(json.dumps(result))
 
 elif a.cmd == "split":
-    strip, names = Image.open(a.out).convert("RGBA"), expand(a.inputs)
+    strip, names = open_still(a.out), expand(a.inputs)
     w = strip.width // len(names)
     if w * len(names) != strip.width:
         sys.exit(f"strip is {strip.width} px wide, not a multiple of {len(names)} frames")
@@ -66,7 +66,7 @@ elif a.cmd == "split":
 else:
     if len(a.inputs) != 2:
         sys.exit("preview takes <out.gif> <sprite.png> <normal.png>")
-    sprite, normal = (Image.open(p).convert("RGBA") for p in a.inputs)
+    sprite, normal = (open_still(p) for p in a.inputs)
     if sprite.size != normal.size:
         sys.exit(f"sprite {sprite.size} and map {normal.size} differ in size")
     if sprite.width % a.frames:
