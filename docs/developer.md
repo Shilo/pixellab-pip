@@ -34,7 +34,7 @@ The gate validates tracked JSON, version consistency, Python compilation, local 
 
 Local helper scripts target Python 3.10 or newer.
 
-Install the local QA dependencies first on a fresh checkout:
+Install the local QA dependencies first on a fresh checkout (Python 3.11 or newer, which the security-patched Pillow 13 requires):
 
 ```powershell
 python -m pip install -r requirements-dev.txt
