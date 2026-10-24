@@ -13,6 +13,7 @@ file errors establish neither job failure nor refund. Never resubmit from this r
 from __future__ import annotations
 
 import argparse
+import contextlib
 from http.client import HTTPException
 import io
 import json
@@ -85,12 +86,10 @@ def get(url: str, *, timeout: float = 30) -> tuple[str, bytes | None]:
     try:
         data = _download(url, timeout=timeout)
     except urllib.error.HTTPError as exc:
-        if exc.code == 404:
-            return "wait", None
-        return ("unavailable", None) if exc.code in (401, 403, 410) else ("wait", None)
+        # Not found yet, timeouts, rate limits and server errors can clear; other client errors never do.
+        return ("wait", None) if exc.code in (404, 408, 429) or exc.code >= 500 else ("unavailable", None)
     except (OSError, HTTPException):
         return "wait", None
-    validate_image(data)
     return "ok", data
 
 
@@ -121,14 +120,22 @@ def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
         got.append(data)
     path = Path(out)
     path.parent.mkdir(parents=True, exist_ok=True)
-    if frames:
-        path.mkdir()  # exclusive directory creation prevents concurrent result mixing
-        paths = frame_paths(path, frames)
-    else:
-        paths = [path]
-    for dest, data in zip(paths, got):
-        with dest.open("xb") as handle:
-            handle.write(data)
+    paths = frame_paths(path, frames) if frames else [path]
+    created: list[Path] = []
+    try:
+        if frames:
+            path.mkdir()  # exclusive directory creation prevents concurrent result mixing
+            created.append(path)
+        for dest, data in zip(paths, got):
+            with dest.open("xb") as handle:
+                created.insert(0, dest)
+                handle.write(data)
+    except OSError:
+        # A failed write (disk full, locked file) leaves no partial output that would block a retry.
+        for item in created:
+            with contextlib.suppress(OSError):
+                item.rmdir() if item.is_dir() else item.unlink()
+        raise
     return "ok"
 
 

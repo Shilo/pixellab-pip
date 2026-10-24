@@ -55,7 +55,8 @@ class FetchTests(unittest.TestCase):
 
     def test_file_errors_never_prove_failure_or_refund(self) -> None:
         import urllib.error
-        for code, status in ((404, "wait"), (410, "unavailable"), (403, "unavailable")):
+        for code, status in ((404, "wait"), (429, "wait"), (503, "wait"), (410, "unavailable"),
+                             (403, "unavailable"), (400, "unavailable"), (422, "unavailable")):
             error = urllib.error.HTTPError("https://api.pixellab.ai/", code, "file unavailable", {}, None)
             with patch.object(fetch, "_download", side_effect=error):
                 self.assertEqual(fetch.get(LINK), (status, None))
@@ -126,6 +127,21 @@ class FetchTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             fetch.try_job(links(2), str(self.root / "clip.png"))
         self.assertFalse((self.root / "clip.png").exists())
+
+    def test_failed_write_leaves_no_partial_output(self) -> None:
+        fetch.get = lambda url, **kwargs: ("ok", PNG)
+        real_open = Path.open
+
+        def flaky_open(self, *args, **kwargs):
+            if self.name == "frame-01.png":
+                raise OSError(28, "No space left on device")
+            return real_open(self, *args, **kwargs)
+
+        clip = self.root / "clip"
+        with patch.object(Path, "open", flaky_open), self.assertRaises(OSError):
+            fetch.try_job(links(3), str(clip))
+        self.assertFalse(clip.exists())  # frame-00.png and the folder were removed, so a retry works
+        self.assertEqual(fetch.try_job(links(3), str(clip)), "ok")
 
     def test_redirects_and_plain_http_stay_on_pixellab(self) -> None:
         # review: only the first URL was checked; a redirect could leave PixelLab, and http was accepted
