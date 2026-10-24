@@ -21,8 +21,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
   `manifest.py`. Older manifests are kept untouched and listed separately by history; new calls go in a new run folder.
 - **Coming from Game Art:** rename a project's `pixellab.json` to `pixellab-pip-style.json` (`setup` offers to do it).
   The old name is not read, and the `/pga-*` commands are replaced by plain requests to `/pixellab-pip`.
-- **A broken settings file means Auto is off.** If `pixellab-pip.json` cannot be read, Pip asks before spending until an
-  explicit `auto` or `bark` command replaces the file.
+- **A broken settings file means Auto is off.** If `pixellab-pip.json` cannot be read, Pip asks before spending until
+  an explicit `auto on`, `auto off` or `bark` command replaces the file.
 
 ### Added
 
