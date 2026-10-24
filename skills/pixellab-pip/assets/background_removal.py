@@ -20,11 +20,10 @@ from collections import Counter, deque
 from pathlib import Path
 from typing import Any
 
-try:
-    from PIL import Image
-except ImportError as exc:  # pragma: no cover - exercised by missing runtime
-    print(f"error: Pillow is required: {exc}", file=sys.stderr)
-    sys.exit(3)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _assembly import require_pillow  # noqa: E402
+
+Image = require_pillow()
 
 
 RGBA = tuple[int, int, int, int]

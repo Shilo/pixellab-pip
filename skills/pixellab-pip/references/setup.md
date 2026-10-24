@@ -95,6 +95,7 @@ Verify only after the user approves a no-credit check; never spend credits durin
 - **MCP**: `get_balance` when tools are exposed — verifies MCP auth without generating.
 - **REST v2**: `GET /balance` with `Authorization: Bearer <PIXELLAB_SECRET>` — never print auth headers or full JSON.
 - **Tool availability**: list or identify PixelLab MCP tools (match by suffix if prefixed) without generation calls.
+- **Old Game Art project file**: if the active project root has Game Art's `pixellab.json`, offer to rename it to `pixellab-pip-style.json` (a write: get approval; if both exist, ask which to keep). Pip never reads the old name.
 
 Check `PIXELLAB_SECRET` presence without outputting, logging, measuring, transforming, or inspecting the value — test only whether it is non-empty and emit a status word such as `set`/`not set`, never the value, and pass the value only to the approved check. For a readiness note before mode selection, check only whether the live `PIXELLAB_SECRET` environment variable is visible to the current process and whether PixelLab MCP tools are already visible in this session (already-loaded tools only — no config inspection); do not inspect project-local secret files, broad config directories, or recursive paths.
 
@@ -129,3 +130,9 @@ Report outcome briefly: detected mode; readiness (ready, partially ready, not co
 - Do not call undocumented internal endpoints (website or Aseprite extension) as setup verification.
 - Do not claim SDK support, MCP tool availability, pricing, limits, or endpoint behavior without checking when those facts matter.
 - Do not require Pip-specific behavior from apps that only support generic MCP or REST.
+
+## Migrating an existing Game Art installation
+
+When the user is replacing Game Art or known old task/project instructions are present, inspect only the named installation/project paths, read-only first. Identify old core/task skills, optional task-agent configs, and recognizable installed `AGENTS.md`/host instruction blocks that say never to ask or bypass Pip. A lower-priority skill cannot neutralize higher-priority installed instructions. Show a proposed scoped removal/replacement and preserve user edits; obtain explicit approval before deleting old components or editing those instruction blocks. Ambiguous ownership blocks cleanup, not a reason to erase the whole file. No silent coexistence or automatic migration.
+
+Rename the old project file as in step 5. Before the first paid migrated run, show the effective style (`project-style.md`): Pip merges nested style settings, has no unstored house defaults, and promises no exact visual match, so offer to pin the user's approved values or anchors and resolve any legacy caps (`project-style.md` → Legacy limits). Do not copy credential values: configure the existing `PIXELLAB_SECRET`/host secret mechanism if needed. Resume old jobs from recorded IDs before replacing a generation. Human migration examples: `../../../docs/merge/migration.md` (optional background; these operational boundaries apply even without that file).

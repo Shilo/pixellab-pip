@@ -37,6 +37,28 @@ skill_benchmark = load_module(
 
 
 class BackgroundRemovalTests(unittest.TestCase):
+    def test_outdated_pillow_skips_before_reading_or_writing_images(self) -> None:
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            package = root / "PIL"
+            package.mkdir()
+            (package / "__init__.py").write_text('__version__ = "12.3.0"\n', encoding="utf-8")
+            (package / "Image.py").write_text('raise AssertionError("unsafe decoder imported")\n', encoding="utf-8")
+            source, target = root / "source.png", root / "target.png"
+            source.write_bytes(b"source must remain unread and unchanged")
+            result = subprocess.run(
+                [sys.executable, "-S", str(REPO_ROOT / "skills/pixellab-pip/assets/background_removal.py"),
+                 str(source), str(target)],
+                env={**os.environ, "PYTHONPATH": str(root), "PYTHONDONTWRITEBYTECODE": "1"},
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout)["status"], "skipped")
+            self.assertIn("13", result.stdout)
+            self.assertEqual(result.stderr, "")
+            self.assertEqual(source.read_bytes(), b"source must remain unread and unchanged")
+            self.assertFalse(target.exists())
+
     def test_edge_background_removed_without_repainting_sprite(self) -> None:
         Image = background_removal.Image
         with tempfile.TemporaryDirectory() as tmp:
@@ -154,7 +176,7 @@ class BarkConfigTests(unittest.TestCase):
                 bark.SKILL_CONFIG = original_skill_config
                 sys.argv = original_argv
 
-    def test_non_bool_skill_config_falls_back_to_valid_user_config(self) -> None:
+    def test_non_bool_bark_defaults_on_in_authoritative_skill_config(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             original_skill_config = bark.SKILL_CONFIG
             original_user_config_path = bark.user_config_path
@@ -170,10 +192,10 @@ class BarkConfigTests(unittest.TestCase):
 
                 data, source, invalid_source = bark.read_config()
 
-                self.assertEqual(data["bark"], False)
-                self.assertEqual(source, user_config)
-                self.assertEqual(invalid_source, bark.SKILL_CONFIG)
-                self.assertFalse(bark.bark_enabled())
+                self.assertEqual(data["bark"], "false")
+                self.assertEqual(source, bark.SKILL_CONFIG)
+                self.assertIsNone(invalid_source)
+                self.assertTrue(bark.bark_enabled())
             finally:
                 bark.SKILL_CONFIG = original_skill_config
                 bark.user_config_path = original_user_config_path

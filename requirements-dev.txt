@@ -1,3 +1,6 @@
 # Pillow: required by the image-helper and tileset-simulator tests in tests/
 # (run by dev-tools/qa.py).
 Pillow==13.0.0
+# numpy + scipy: the optional animation doctor and finishing helpers (they skip without them).
+numpy==2.4.0
+scipy==1.17.1

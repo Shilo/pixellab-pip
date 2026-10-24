@@ -1,0 +1,173 @@
+[
+  {
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/projectile-skill",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "A thrown-prop skill in one sheet: three key poses (wind-up with the prop, release, empty-hand follow-through), two interpolated clips, the prop flown across the frames after release and a vfx_workbench impact. Side view facing right. Prop extraction/flight, impact composition and timeline extension are optional derivatives whose exact operations must be explicitly accepted for this job; Auto is only a cost gate.",
+    "_comment_prompt": "/pixellab-pip run the projectile-skill blueprint: the necromancer throws an exploding lollipop",
+    "TASK": {
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). Copy {{standing sprite}} in as standing.png; it must face right. Paste it unscaled onto a transparent {{canvas width | default: 192}}x{{canvas height | default: 200}} canvas at x={{pad x | default: 48}} with its lowest drawn row on the bottom edge (assets/pad_sprite.py), save padded.png and record the offset in pad.json. Stop if it does not fit or width x height x 6 exceeds 524288. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
+      "outputs": [
+        "standing.png",
+        "padded.png",
+        "pad.json"
+      ],
+      "verify": "padded.png has the canvas size, its opaque pixels equal standing.png at the recorded offset, and the output folder is new and inside the project."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, wind-up of a throw: the throwing arm drawn back behind the head holding {{thrown prop}}, the other arm forward for balance, weight on the back foot. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image with the job_id returned by the immediately preceding call until completed or failed; never resubmit. Save the image unchanged as keys/key-a.png.",
+      "outputs": [
+        "keys/key-a.png"
+      ],
+      "verify": "keys/key-a.png is transparent and the same size as padded.png."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, the release of a throw: the throwing arm extended forward toward the right of the image with the hand open and empty, the thrown object already gone, weight shifting onto the front foot. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job as above and save the image unchanged as keys/key-b.png.",
+      "outputs": [
+        "keys/key-b.png"
+      ],
+      "verify": "keys/key-b.png is transparent and the same size as padded.png."
+    }
+  },
+  {
+    "MCP edit_image_pro_flash": {
+      "image_base64": "padded.png",
+      "method": "text",
+      "description": "The same {{character description}}, follow-through after a throw: the throwing arm swung down across the body, hand open and empty, torso turned forward, front knee bent. Same size, same colours and pixel style, feet in the same place, no background.",
+      "no_background": true,
+      "use_color_palette_correction": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job as above and save the image unchanged as keys/key-c.png. Show standing.png and the three key poses in order at 3x and run the look checklist in references/characters.md: the prop in hand only in key-a, both hands empty after it, each hand joined to an arm, every worn prop on the side it is worn, nothing touches the canvas edge. Report the look result. Continue to interpolation only after this content checkpoint is approved, or when the current user explicitly delegated review of these exact key poses and they pass that review. Otherwise ask whether to animate the next already-approved calls or correct a pose. Any paid correction must fit an expressly approved retry scope or receive new spending approval.",
+      "inputs": [
+        "standing.png",
+        "keys/key-a.png",
+        "keys/key-b.png"
+      ],
+      "outputs": [
+        "keys/key-c.png"
+      ],
+      "verify": "Three key poses exist at the padded size, the look check was reported, and continuation has approved or explicitly delegated content review."
+    }
+  },
+  {
+    "MCP animate_image": {
+      "first_frame_base64": "keys/key-a.png",
+      "last_frame_base64": "keys/key-b.png",
+      "action": "swings the arm forward and lets go in one fast throw, stepping onto the front foot",
+      "frame_count": 6,
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the seven returned images unchanged in order as clip-1/0.png through clip-1/6.png (0.png is the echoed key-a).",
+      "outputs": [
+        "clip-1/0.png",
+        "clip-1/6.png"
+      ],
+      "verify": "Seven same-size transparent frames are saved in returned order."
+    }
+  },
+  {
+    "MCP animate_image": {
+      "first_frame_base64": "keys/key-b.png",
+      "last_frame_base64": "keys/key-c.png",
+      "action": "the empty throwing arm follows through down across the body as the weight settles forward",
+      "frame_count": 4,
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the five returned images unchanged as clip-2/0.png through clip-2/4.png. The move is clip-1 frames 0-6 then clip-2 frames 1-4 (clip-2 0.png is the echoed key-b input).",
+      "outputs": [
+        "clip-2/0.png",
+        "clip-2/4.png"
+      ],
+      "verify": "Five same-size transparent frames are saved in returned order."
+    }
+  },
+  {
+    "MCP vfx_workbench": {
+      "argv": [
+        "start",
+        "--fps",
+        "12"
+      ],
+      "notes": "Impact for a thrown {{thrown prop}} hitting one target, side view, in the caster's colours."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "With the step id returned by the immediately preceding call, render the strike recipe from the bundled vfx-strike-single-target blueprint with its main ramp set to {{impact colour ramp}}, check frames 2, 5, 8 and 10, and export it as {{effect name | default: Thrown Prop Impact}}. Save the exported PNG and JSON unchanged as fx/impact.png and fx/impact.json.",
+      "outputs": [
+        "fx/impact.png",
+        "fx/impact.json"
+      ],
+      "verify": "The export exists, its frames are transparent, and the peak frame is the largest."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Derivative step; execute only after the user accepts this exact composition scope, independently of Auto. Preserve every raw frame. Review and approve the semantic prop extraction/mask from key-a; largest-component filtering alone cannot identify it. Into derived/, remove only the agreed generator prop pixels after release, compose the verified source prop along {{prop step per frame | default: 18,-4}} with the agreed rotation, then compose the exported impact using source-over alpha at the agreed contact point. Propose any canvas widening or extra held body frames and their exact durations before applying them. Record source indices, mask, placements, rotation and playback changes in derived/move.json. Stop for an ambiguous extraction or unaccepted transform; do not draw replacement pixels locally as an inferred fix.",
+      "inputs": [
+        "keys/key-a.png",
+        "clip-1/6.png",
+        "clip-2/4.png",
+        "fx/impact.png"
+      ],
+      "outputs": [
+        "derived/move.json"
+      ],
+      "verify": "Raw clip frames are unchanged, derived/ holds one frame per move frame plus the held effect frames, and derived/move.json lists each frame's source, the prop path and the impact frame."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Assemble only the accepted derived timeline into final/skill.png and final/skill.json (assets/make_sheet.py), using {{body durations | default: 80 ms per returned body frame}} and accepted impact timing. Mark --hit only at the confirmed contact/release event, record pad offset and facing, and use assets/preview_gif.py for final/skill.gif as a labeled looping preview. Decode and verify frame order, count, alpha and representable durations; disclose any GIF limitation rather than silently altering art. Separate body-only, prop and effect exports are optional when requested for engine delivery, not additional mandatory formats. Inspect the accepted timeline with the doctor --check-only and the matching reference; label effect frames with --fx. If the user requires a play-once artifact, use an available supported export that preserves that behavior or report the limitation before delivering; the standard preview helper always loops.",
+      "inputs": [
+        "derived/move.json",
+        "pad.json"
+      ],
+      "outputs": [
+        "final/skill.png",
+        "final/skill.json",
+        "final/skill.gif"
+      ],
+      "verify": "Each sheet cell matches its source frame pixel-for-pixel, no frame is duplicated for timing, the decoded GIF preserves representable source pixels and the accepted timeline, or its limit is reported, and the doctor report was shown."
+    }
+  }
+]

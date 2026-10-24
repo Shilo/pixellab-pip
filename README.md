@@ -19,6 +19,7 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Table Of Contents
 
+- [Game Art Integration](#game-art-integration)
 - [Showcase](#showcase)
 - [Features](#features)
   - [Create Pixel Art You Want](#create-pixel-art-you-want)
@@ -31,6 +32,21 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 - [Benchmark](#benchmark)
 - [Security](#security)
 - [More Documentation](#more-documentation)
+
+## Game Art Integration
+
+Pip 3.0 includes the main production tools of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) in the same single skill:
+
+- Project art styles you choose, saved in `pixellab-pip-style.json`, with reference art per asset type.
+- An animation doctor that finds bad frames, fixes copies for free and plans paid re-rolls of only what failed, with your approval.
+- Optional key-pose attacks, weapon and fighting guides, finishing tools and engine-ready sprite sheets.
+- A cost record per run, history for re-rolls, and `/pixellab-pip panel` to review results.
+
+Everything goes through the usual `/pixellab-pip` entry point and the usual ask-before-spending rules. `auto plan <budget> [retries] [task]` sets a credit and retry limit for one run. Coming from Game Art? Run `/pixellab-pip setup` to rename your old project file.
+
+See the [changelog](CHANGELOG.md), [what came over and what didn't](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-merge-status.md), and [integration notes](docs/merge/README.md).
+
+Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. Adopted source notices are preserved inside the skill distribution.
 
 ## Showcase
 
@@ -184,6 +200,9 @@ Common commands:
 |---|---|
 | `pixellab-pip setup` | Connect PixelLab MCP and/or documented REST v2 fallback. |
 | `pixellab-pip auto` | Toggle Auto mode, which skips the before-you-spend confirmation. Auto is off by default, so Pip asks first. |
+| `pixellab-pip auto plan 45 2` | Bound one identified run to 45 generations and two additional paid attempts. Auto off asks first; Auto on runs within those limits. Supports trailing task text and leaves persistent Auto unchanged. |
+| `pixellab-pip auto status` | Show the actual Auto setting and any invalid-config warning. |
+| `pixellab-pip panel` | Review selected project/run images and usage; compose scoped requests. Supported native Claude views show PNGs; the full HTML review adds GIF playback and zoom. Browser feedback is copied back to chat unless a verified host bridge is available. |
 | `pixellab-pip bark` | Toggle the completion sound. On by default. |
 | `pixellab-pip update` | Update through the current install method. |
 | `pixellab-pip uninstall` | Remove Pip while keeping secrets and generated outputs by default. |
@@ -206,13 +225,16 @@ Dated, nondeterministic results from 20 scenarios and three agents: official doc
 
 ## Security
 
-Pip is Markdown instructions plus two small Python 3.10+ local helpers. It ships no compiled binaries, the helpers make no network calls, and guidance, setup, and routing work without a PixelLab token. Live generation may spend credits and requires a bearer token, but Pip never needs it pasted into chat, never automates undocumented private endpoints, asks before destructive remote changes, and labels local processing.
+Pip is Markdown instructions plus small local helpers. Standard-library helpers support Python 3.10+; image helpers use Python 3.11+ with security-patched Pillow 13 or newer. It ships no compiled binaries, the helpers make no network calls except the job download helper, which fetches results from PixelLab's own download host, and guidance, setup, and routing work without a PixelLab token. Live generation may spend credits and requires a bearer token, but Pip never needs it pasted into chat, never automates undocumented private endpoints, asks before destructive remote changes, and labels local processing.
+
+The ordinary Claude plugin also registers an optional native review adapter whose user-clicked full-review button runs the bundled `panel.py open` through local Python and may launch the host's browser; it submits no paid work or settings changes.
 
 Read [Security and trust ↗](docs/security.md) for the complete access boundary, public audits, release provenance, and scanner disclosures, or [report a concern ↗](SECURITY.md).
 
 ## More Documentation
 
 - [Resources ↗](docs/resources.md) — official PixelLab links and related tools.
+- [Changelog ↗](CHANGELOG.md) — what changed in each release.
 - [Developer guide ↗](docs/developer.md) — repository structure, local development, testing, and releases.
 - [More guides ↗](docs/README.md) — research, integration background, and every specialized guide.
 - [MIT License ↗](LICENSE)

@@ -2,6 +2,17 @@
 
 Read this for tilesets, isometric tiles, tile variants, and ambiguous tile requests.
 
+## Contents
+
+- [MCP Route Inputs](#mcp-route-inputs)
+- [Human Label To API Mapping](#human-label-to-api-mapping)
+- [Generation Controls](#generation-controls)
+- [Strict 1-bit / Exact Palette Work](#strict-1-bit--exact-palette-work)
+- [Fetching Results (top-down)](#fetching-results-top-down)
+- [Autotile Preview (top-down)](#autotile-preview-top-down)
+- [Chaining Terrains (top-down)](#chaining-terrains-top-down)
+- [Ground Textures And Loose Variants](#ground-textures-and-loose-variants)
+
 ## MCP Route Inputs
 
 Multi-shape connectable terrain transition:
@@ -101,3 +112,16 @@ On the MCP route, poll `get_topdown_tileset(tileset_id)` — it returns status, 
 The background job `last_response` may include full-sheet `image` and `quantized_image` fields; treat these as previews, not the final sheet. Save/show `image` as the primary preview (more likely to match the final tiles) and `quantized_image` as secondary. These fields may be base64 raw RGBA buffers rather than PNG, so decode and convert before writing PNGs. Public REST docs expose no tileset ZIP/export endpoint for Wang, dual-grid 15-tileset, or 3x3 formats; use the returned tile PNGs for local packaging only when the user asks.
 
 The detailed `get_topdown_tileset` section of the public MCP guide documents direct downloads for a completed top-down tileset, despite the guide's opening overview saying character downloads are the only direct HTTP endpoints: `GET /mcp/tilesets/{id}/image` returns the sheet (add `?inline=true` to return bytes instead of a CDN redirect), and `GET /mcp/tilesets/{id}/metadata` returns tile metadata including `bounding_box`, `corners`, and `pattern_4x4`. These are MCP-documented HTTP helpers, not REST v2 endpoints. They require no authentication; the UUID is the access key, so keep it private. While generation is pending, either route returns 423 with `Retry-After`.
+
+## Autotile Preview (top-down)
+
+When a seam/test-map preview is requested or needed for an observed problem on a 16-tile top-down set, save the `/mcp/tilesets/{id}/image` sheet and its `/metadata` JSON side by side as `<sheet>.png` + `<sheet>.json`, then run `python "<skill-dir>/assets/tileset_preview.py" map.png <sheet>.png [<next-sheet>.png ...]` (a chain in order, e.g. sea>beach then beach>grass). It paints a random autotiled map and `map_tiles.png` with each tile's corners; check seams and the diagonal tiles `0110`/`1001`, which a random map rarely shows. It rejects 25-tile sets. Exit 3 with a `skipped` status means Pillow or numpy is missing: report the preview as not run. A broken or thin bank on `0110`/`1001` is a finding, not retry authority; propose a new paid run of that set with another `boundary_seed`, or `connect_diagonals: true` when the game wants the two corners joined. For 25-tile cliff sets and Godot import, read PixelLab's MCP resource `pixellab://docs/godot/wang-tilesets`.
+
+## Chaining Terrains (top-down)
+
+A chain such as `sea > beach > grass` is one tileset per touching pair, in order; terrains that never touch need no set. Submit the first set; the submit returns its base tile ids. When it has finished, submit the next with `lower_base_tile_id` = the previous set's **upper** base tile id and `lower_description` repeating that terrain's words exactly, so the shared terrain matches on both sides. Report the base tile ids; extending the chain later needs them. One optional measured Pro-pair configuration at 32 px (not defaults): `transition_size: 0.25`, `boundary_amplitude: 0.15` (a natural meandering edge), `step_slope: 1` (a soft earthy bank; 0 is a cliff). Each terrain is one material plus one detail, with no objects or characters (they repeat on every tile).
+
+## Ground Textures And Loose Variants
+
+- A seamless ground texture that is not an autotile set: MCP `create_image_pixflux` with `view: "high top-down"`, `color_image_url` = the region's background for its palette, and `seamless tileable top-down ground texture ... even lighting, no objects`. Calm a noisy or streaky texture with `init_image_url` = the previous result at `init_image_strength` 40-90 (it is how much of the input is kept; this low keeps only the composition) and `flat even texture, no streaks`.
+- Independent ground variants with `create_tiles_pro` (no `tile_feature`): a numbered list in `description`, `1). dark cracked basalt ground 2). basalt with thin glowing ember cracks ...`.

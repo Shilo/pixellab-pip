@@ -2,6 +2,16 @@
 
 Use this reference for skill/ability/spell/action-bar/hotbar icons, inventory item/equipment/loot/pickup/consumable icons, and emojis, single or sheets, including transparent, no-border, and split-PNG requests.
 
+## Contents
+
+- [Route](#route)
+- [Canvas Sizing](#canvas-sizing)
+- [Prompt Pattern](#prompt-pattern)
+- [Matching An Existing Set](#matching-an-existing-set)
+- [UI Pieces](#ui-pieces)
+- [Request Body](#request-body)
+- [Verification](#verification)
+
 ## Route
 
 Route by icon size first:
@@ -58,6 +68,23 @@ Item-icon specifics:
 
 - Prefer category coverage over an exact 64-item list for the first candidate; long exact lists over-constrain and produce noisier results. If exact coverage is required, run it as a follow-up candidate and compare.
 - Do not over-prompt outline instructions unless the user asks for a specific outline style; spotty or broken contours are a failed candidate, not a prompt-patch target.
+
+## Matching An Existing Set
+
+- Generate at the icon's final size. Drawing larger and downscaling came out muddy and speckled next to a native set.
+- Pro with `style_image_url` = **one** icon of the set and `style_copy: ["outline", "detail", "shading"]` (no `color_palette`) keeps outline weight and shading while each icon keeps its own colours; the style icon's subject can be anything. A grid of icons as the style image makes Pro wrap candidates across cell corners.
+- When Pro Flash was selected (`pro-flash.md`), a same-size icon as `style_image` worked well for one-icon jobs in the observed set. Several icons on one canvas came out cruder in that test; inspect the result rather than assuming a quality or cost advantage.
+- Keep one colour family per class or school in a skill set; take the families from the project style (`project-style.md`).
+- For requested rarity tiers, propose a supported edit of the approved base icon to retain its identity: `Same <item>, same shape, size and position, upgraded to a <tier> version: <changes>`. Use the selected route's image fields and verify continuity.
+- A status or buff icon and the skill that applies it need different subjects, or the chip reads as the skill.
+- Replacing a legacy set: list every meaning each old icon stood for first, reuse a fitting existing icon where one exists, and generate only the rest. When distinct meanings need distinct pictures, differentiate similar subjects (such as two open books); preserve intentional reuse.
+- Icons the engine tints at runtime: `white and light grey only, greyscale, solid black outline`.
+- Picking: show candidates at 3x on the UI's own background colour. Dark iron or black objects vanish on dark panels; upright, symmetric silhouettes read better than tilted ones; skip candidates with stray sparkle pixels in the corners.
+- More failure anchors: `filling the frame` when the subject is small in the cell; say what an ambiguous silhouette must not be (`clearly a scythe, not a pickaxe`, `a lion-head shield, NOT a lion`) and name its direction (`pointing diagonally up-right`).
+
+## UI Pieces
+
+For the UI itself (`create_ui_asset`): a result that comes back as a sheet of many frames needs `isolated single shape not a UI kit sheet` plus `pieces` to pin the geometry; pass `style_image_base64` from the game's existing UI to match it. Describe the frame material and trim and an empty interior (`plain empty face for a text label`, `empty hollow centre for an icon`).
 
 ## Request Body
 

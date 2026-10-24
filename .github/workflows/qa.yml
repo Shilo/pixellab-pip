@@ -29,3 +29,14 @@ jobs:
       - name: Run QA checks
         shell: bash
         run: python dev-tools/qa.py
+
+      - name: Setup Node for native adapter tests
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+
+      - name: Validate and test native Claude adapter offline
+        shell: bash
+        run: |
+          npx --yes --package @anthropic-ai/claude-code@2.1.303 claude plugin validate .
+          npx --yes --package @anthropic-ai/claude-code@2.1.303 claude plugin test .

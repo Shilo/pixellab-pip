@@ -33,5 +33,6 @@
     "tilesets",
     "api"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "hooks": "./hooks/claude/hooks.json"
 }

@@ -1,6 +1,8 @@
 # Security Policy
 
-PixelLab Pip is an Agent Skill: plain-Markdown routing instructions plus two small local Python helpers (a completion sound and a background-removal check). It ships no compiled binaries and makes no hidden network calls. It uses your PixelLab token only as an auth header for PixelLab's own API and is designed never to read, print, log, or store the token's value.
+PixelLab Pip is an Agent Skill: plain-Markdown routing instructions plus small local Python helpers (a completion sound, image checks, a run manifest, and a job download helper). It ships no compiled binaries and makes no hidden network calls; the download helper fetches finished results from PixelLab's own host only. It uses your PixelLab token only as an auth header for PixelLab's own API and is designed never to read, print, log, or store the token's value.
+
+The ordinary Claude plugin also registers an optional native review adapter; its user-clicked full-review button runs the bundled `panel.py open` through local Python and may launch the host's browser, without paid work or settings changes.
 
 ## Reporting a vulnerability
 

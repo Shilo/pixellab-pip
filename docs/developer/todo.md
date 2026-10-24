@@ -2,6 +2,10 @@
 
 Tracked future work. Not runtime routing; see `../../AGENTS.md` for placement rules.
 
+## Deferred: "keep every user detail" prompt rule (from Game Art)
+
+Game Art's prompt improver had an explicit rule: never drop a user detail; turn vague words into drawable ones. Pip did not adopt it because it is probably redundant: SKILL.md Text Preparation already builds the prompt from the request, keeps "only details that change output" (a user-stated detail is meant to change output), and trims "without changing intent", and capable agents keep stated details anyway. Redundant instructions cost context and invite conflicts. Revisit only if a benchmark or real run shows Pip dropping a user-stated detail for brevity; then add one clause to SKILL.md Text Preparation, not a new section.
+
 ## Finish aura testing
 
 Complete the remaining paid prompt tests in

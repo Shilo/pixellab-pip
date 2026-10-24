@@ -1,0 +1,229 @@
+[
+  {
+    "_pixellab": {
+      "output_directory": "pixellab-pip-generations/vfx-wave-across-party",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "Sweep across a whole group (360x140, 14 frames): a wide swing arc, a stream, a mid cloud, a big end cloud and embers along the path. Built pointing right and mirrored for a caster on the right; scale it in the engine so the end cloud lands on the farthest target. Painted, outlined workbench recipe; vfx_workbench is free for subscribers, but export saves to the user's My effects.",
+    "_comment_prompt": "/pixellab-pip run the vfx-wave-across-party blueprint for an ice spear, pale blue",
+    "TASK": {
+      "instruction": "Before the first call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection with vfx_workbench visible, and create the declared output directory empty (lowest free -2 suffix if taken). Resolve main colour ramp to six hex colours from near-black to highlight in the caster's own colours, taken from the project style (references/project-style.md) or the caster sprite; ask if neither gives one. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
+      "verify": "The run is approved, vfx_workbench is callable, the ramp has six hex colours, and the output directory is new and empty."
+    }
+  },
+  {
+    "MCP vfx_workbench": {
+      "argv": [
+        "start",
+        "--fps",
+        "12"
+      ],
+      "notes": "Wave effect: {{effect description}}, caster facing {{caster facing | default: right}}."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "With the step id returned by the immediately preceding call, call vfx_workbench with argv [<step id>, \"render\", <this task's render object as one JSON string>]. When the caster faces left, set recipe mirror to \"x\" (remove it when the template already mirrors and the caster faces right). One long stream reads as a pipe: after the first render, replace the single stream layer with three overlapping cartoon shape streams with staggered life [0.12,0.78], [0.19,0.84], [0.26,0.88]. Each change returns a new step id; patch with set, remove, add_layer or remove_layer ops and pass \"frames\" (1-based) to re-render only key frames 2, 5, 8 and 10. Then export with --name {{effect name}}. Save the exported GIF, sheet PNG and JSON unchanged as effect.gif, effect.png and effect.json.",
+      "render": {
+        "recipe": {
+          "canvas": {
+            "w": 360,
+            "h": 140
+          },
+          "frames": 14,
+          "fps": 12,
+          "loop": false,
+          "origin": [
+            40,
+            72
+          ],
+          "ramps": {
+            "main": "{{main colour ramp}}"
+          },
+          "outline": {
+            "mode": "dark"
+          },
+          "tones": 5,
+          "detail": 0.1,
+          "shading": "lit",
+          "mirror": "x",
+          "layers": [
+            {
+              "id": "swing",
+              "type": "arc",
+              "profile": "slash",
+              "x": 40,
+              "y": 70,
+              "radius": 34,
+              "start": -150,
+              "sweep": 210,
+              "thickness": 9,
+              "life": [
+                0.0,
+                0.3
+              ],
+              "z": "front"
+            },
+            {
+              "id": "stream",
+              "type": "shape",
+              "closed": false,
+              "points": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  70,
+                  -6
+                ],
+                [
+                  150,
+                  2
+                ],
+                [
+                  230,
+                  -4
+                ]
+              ],
+              "x": 60,
+              "y": 72,
+              "smooth": 1,
+              "fill": "cartoon",
+              "width": 16,
+              "taper": 0.3,
+              "spacing": 0.9,
+              "drift": 60,
+              "reveal": {
+                "keys": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    0.45,
+                    1
+                  ]
+                ],
+                "ease": "out"
+              },
+              "dissolve": {
+                "keys": [
+                  [
+                    0,
+                    0
+                  ],
+                  [
+                    0.55,
+                    0
+                  ],
+                  [
+                    1,
+                    1
+                  ]
+                ]
+              },
+              "life": [
+                0.14,
+                0.8
+              ],
+              "z": "back"
+            },
+            {
+              "id": "cloud",
+              "type": "puffs",
+              "mode": "burst",
+              "x": 290,
+              "y": 70,
+              "radius": 36,
+              "count": 9,
+              "throw": 0.6,
+              "rise": 0.3,
+              "thin": 0.5,
+              "lump": 0.4,
+              "billow": 1.0,
+              "highlight": 0.65,
+              "life": [
+                0.32,
+                1.0
+              ],
+              "z": "back"
+            },
+            {
+              "id": "midcloud",
+              "type": "puffs",
+              "mode": "burst",
+              "x": 190,
+              "y": 72,
+              "radius": 22,
+              "count": 6,
+              "throw": 0.5,
+              "rise": 0.3,
+              "thin": 0.5,
+              "lump": 0.4,
+              "billow": 1.0,
+              "highlight": 0.65,
+              "life": [
+                0.26,
+                0.9
+              ],
+              "z": "back"
+            },
+            {
+              "id": "embers",
+              "type": "particles",
+              "mode": "burst",
+              "x": 220,
+              "y": 70,
+              "line": 180,
+              "line_angle": 0,
+              "count": 34,
+              "speed": 40,
+              "direction": -80,
+              "spread": 160,
+              "gravity": 40,
+              "size": [
+                2,
+                4
+              ],
+              "shape": "dot",
+              "lifespan": 0.8,
+              "fade_out": 0.3,
+              "life": [
+                0.55,
+                1.0
+              ],
+              "z": "front",
+              "outline": true
+            }
+          ]
+        },
+        "fit_canvas": true
+      },
+      "outputs": [
+        "effect.gif",
+        "effect.png",
+        "effect.json"
+      ],
+      "verify": "The peak frame is the largest and most solid, the last frames are mostly empty, the colours are the ramp's, nothing reads as a box or a pipe, and the saved files match the export."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "This selected recipe includes custom engine timing, separate from the unchanged workbench export. Inspect actual export timing before choosing the derivative timing table. Write timing.json with the per-frame durations {{frame durations | default: 100, 75, 75, 83, 83, 83, 92, 200, 100, 83, 79, 79, 79, 83 ms}} (anticipation, fast launch, a hold on the peak, fast break-up) for the engine's clip table; do not duplicate frames for timing.",
+      "inputs": [
+        "effect.json"
+      ],
+      "outputs": [
+        "timing.json"
+      ],
+      "verify": "timing.json lists exactly 14 durations in frame order."
+    }
+  }
+]

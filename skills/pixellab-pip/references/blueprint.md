@@ -6,6 +6,8 @@ recipe for a PixelLab workflow: exact PixelLab request bodies plus any agent tas
 reproduce the result. It is not the manifest, which is the private audit/resume record
 (`usage-reporting.md`).
 
+When the user supplies a blueprint only as the visual source for a different asset, use the reference-versus-replay distinction in SKILL.md; the recreation procedure below applies only to actual replay. Missing output images are not permission to regenerate a reference.
+
 Keep writing canonical and reading semantic. Pip writes the compact standard below so recipes stay
 predictable and efficient. When reading, accept understandable extensions and equivalent shapes;
 validate every recognized field, infer unfamiliar syntax only when its meaning is clear, and ask or

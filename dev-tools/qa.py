@@ -680,7 +680,7 @@ def check_skill_reference_files() -> None:
     skill = REPO_ROOT / "skills/pixellab-pip/SKILL.md"
     text = skill.read_text(encoding="utf-8")
     refs = sorted(set(re.findall(r"`(references/[^`]+\.md)`", text)))
-    missing = [ref for ref in refs if not (skill.parent / ref).exists()]
+    missing = [ref for ref in refs if not list(skill.parent.glob(ref.replace("<name>", "*")))]
     if missing:
         raise AssertionError("missing SKILL.md reference files: " + ", ".join(missing))
 

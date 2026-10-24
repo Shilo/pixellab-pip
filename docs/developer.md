@@ -10,6 +10,7 @@ Last reviewed: 2026-07-05.
 - [Dependency Updates](#dependency-updates)
 - [Codex Local Plugin Testing](#codex-local-plugin-testing)
 - [Claude Code Local Plugin Testing](#claude-code-local-plugin-testing)
+- [Panel Testing](#panel-testing)
 - [OpenCode Local Skill Testing](#opencode-local-skill-testing)
 - [PixelLab Docs Drift Checks](#pixellab-docs-drift-checks)
 - [PixelLab MCP Tileset Simulator](#pixellab-mcp-tileset-simulator)
@@ -18,6 +19,7 @@ Last reviewed: 2026-07-05.
 - [Skill File Sizing](#skill-file-sizing)
 - [TODO ↗](developer/todo.md)
 - [Async Helper Plan ↗](developer/async-helper-plan.md)
+- [Changelog](#changelog)
 - [Publishing](#publishing)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
@@ -32,9 +34,9 @@ python dev-tools/qa.py
 
 The gate validates tracked JSON, version consistency, Python compilation, local Markdown links, skill reference pointers, media signatures, and helper smoke tests.
 
-Local helper scripts target Python 3.10 or newer.
+Standard-library helper scripts target Python 3.10 or newer. Current image/QA dependencies require Python 3.11 or newer (Pillow 13); CI runs Python 3.14.
 
-Install the local QA dependencies first on a fresh checkout (Python 3.11 or newer, which the security-patched Pillow 13 requires):
+Install the local QA dependencies first on a fresh checkout:
 
 ```powershell
 python -m pip install -r requirements-dev.txt
@@ -138,6 +140,20 @@ claude plugin list --json
 ```
 
 `development local` should show a version containing `+claude.dev-` and a `directory` marketplace source. `production remote` should show the GitHub marketplace source and the normal release version.
+
+## Panel Testing
+
+The main skill routes `/pixellab-pip panel` to its on-demand panel reference. The raw skill includes the snapshot/HTML helper; the ordinary Claude manifest explicitly selects `hooks/claude/hooks.json` for its native view. There is no root default `hooks/hooks.json` exposing Claude modules to Codex/other hosts' hook discovery, and no separate Studio install, command namespace or PixelLab connector. A skill-only symlink does not install the Claude native adapter.
+
+Run the normal Python QA plus the actual native validator/test runner when changing the adapter:
+
+```text
+python dev-tools/qa.py
+claude plugin validate .
+claude plugin test .
+```
+
+CI also runs both commands with the published `@anthropic-ai/claude-code@2.1.303` CLI on Node 24. The native tests use Claude's local engine without account sign-in or PixelLab calls. They verify integration and behavior under simulated surfaces; they do not replace live Desktop/VS Code/terminal checks. Test HTML rendering and interactions in a real browser, including narrow layouts, failed previews and localized labels. A captured snapshot is never a live-activity or billing promise. See the [design/research and acceptance record](tools/pixellab-game-art-skill/pixellab-game-art-panel-auto-reconsideration.md) and the [challenged Claude-review response](tools/pixellab-game-art-skill/pixellab-game-art-claude-review-response.md) for tested versions and remaining limits.
 
 ## OpenCode Local Skill Testing
 
@@ -271,6 +287,10 @@ Full guide: [Reference Files](developer/reference-files.md).
 Recommended lengths (lines/tokens) for `SKILL.md` and every `references/*.md`, the authorities behind them, current measurements, and what to do when a file is over. Sizing is a maintainer review signal, not a CI gate.
 
 Full guide: [Skill File Sizing](developer/skill-file-sizing.md).
+
+## Changelog
+
+Record user-facing changes in [CHANGELOG.md](../CHANGELOG.md) ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) sections: Breaking changes, Added, Changed, Removed, Fixed, Security). Add them under the upcoming version while you work; when releasing, replace `Unreleased` with the release date and add its compare link at the bottom.
 
 ## Publishing
 

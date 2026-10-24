@@ -30,7 +30,7 @@ A bare first-run `bark` usually toggles bark off and plays nothing; use `bark on
 }
 ```
 
-The helper writes `bark` to `pixellab-pip.json` beside `SKILL.md` atomically, preserving the other key (notably `auto`). Do not hand-edit the JSON — the read-modify-write is what a short-turn agent corrupts (misreading the current value flips the toggle backwards). If Python is unavailable, hand-write `bark` as a boolean in that file, preserving `auto`; if the skill directory is read-only, write instead to `pixellab-pip/pixellab-pip.json` inside the OS user-config dir (`%APPDATA%` on Windows, `~/Library/Application Support` on macOS, `${XDG_CONFIG_HOME:-~/.config}` on Linux) — where the helper also reads it. Do not scan other config, home, shell, credential, or project directories for it. Do not rewrite config except when the user runs an explicit `bark` command. If persistence fails everywhere, say the setting could not be saved and do not claim it changed.
+Use the helper for ordinary Bark writes; it preserves other settings and verifies persistence. For manual/no-Python handling or a persistence/config error, read only [Auto → Config](auto.md#config) for the shared storage, precedence, repair and fallback procedure. A Bark command changes only `bark`, never Auto. On failure, do not claim the setting changed.
 
 ## When To Play
 

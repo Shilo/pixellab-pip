@@ -11,11 +11,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import platform
 import shutil
 import subprocess
 import tempfile
+import time
 import wave
 from pathlib import Path
 from typing import Any
@@ -50,12 +52,23 @@ def safe_user_config_path() -> Path | None:
         return None
 
 
+def reject_constant(value: str) -> None:
+    raise ValueError("nonstandard JSON constant: " + value)
+
+
+def finite_float(value: str) -> float:
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError("JSON number is outside the finite numeric range")
+    return result
+
+
 def read_json(path: Path) -> dict[str, Any] | None:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8-sig"), parse_constant=reject_constant, parse_float=finite_float)
     except (OSError, ValueError):
         # ValueError covers json.JSONDecodeError and UnicodeDecodeError (a config
-        # re-saved as UTF-16/UTF-8-BOM), so a malformed file degrades to the
+        # re-saved as UTF-16), so a malformed file degrades to the
         # graceful invalid-config path instead of an uncaught traceback.
         return None
 
@@ -64,10 +77,6 @@ def normalize_bark(value: Any) -> bool:
     if isinstance(value, bool):
         return value
     return True
-
-
-def has_valid_bark_value(data: dict[str, Any]) -> bool:
-    return "bark" not in data or isinstance(data["bark"], bool)
 
 
 def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
@@ -80,7 +89,7 @@ def read_config() -> tuple[dict[str, Any], Path | None, Path | None]:
     for path in paths:
         if path.exists():
             data = read_json(path)
-            if isinstance(data, dict) and has_valid_bark_value(data):
+            if isinstance(data, dict):
                 return data, path, invalid_source
             if invalid_source is None:
                 invalid_source = path
@@ -106,17 +115,43 @@ def write_text_atomic(path: Path, content: str) -> None:
         ) as handle:
             temp_path = Path(handle.name)
             handle.write(content)
-        temp_path.replace(path)
+        deadline = time.monotonic() + 1
+        while True:
+            try:
+                temp_path.replace(path)
+                break
+            except PermissionError as exc:
+                # Windows readers/scanners may briefly deny replacement. Retry
+                # only this prepared file, never the setting mutation or toggle.
+                if getattr(exc, "winerror", None) not in (5, 32, 33) or time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.05)
         temp_path = None
     finally:
         if temp_path is not None:
             temp_path.unlink(missing_ok=True)
 
 
+def auto_enabled(data: dict[str, Any], invalid_source: Path | None = None) -> bool:
+    return invalid_source is None and data.get("auto") is True
+
+
 def write_config(key: str, enabled: bool) -> Path:
-    existing, _, _ = read_config()
+    existing, _, invalid_source = read_config()
+    if invalid_source is not None:
+        # An explicit command replaces the unreadable file; a fallback's `auto` must never carry over into it.
+        existing.pop("auto", None)
     existing[key] = bool(enabled)
-    content = json.dumps(existing, indent=2, sort_keys=True) + "\n"
+    path = save_config(existing)
+    if key == "auto":
+        data, _, still_invalid = read_config()
+        if auto_enabled(data, still_invalid) is not bool(enabled):
+            raise RuntimeError("an unreadable config still keeps Auto off; repair " + str(still_invalid))
+    return path
+
+
+def save_config(data: dict[str, Any]) -> Path:
+    content = json.dumps(data, indent=2, sort_keys=True) + "\n"
 
     candidates = [SKILL_CONFIG]
     user_config = safe_user_config_path()
@@ -125,11 +160,18 @@ def write_config(key: str, enabled: bool) -> Path:
 
     errors: list[str] = []
     for path in candidates:
+        if path != SKILL_CONFIG and read_config()[1] == SKILL_CONFIG:
+            raise RuntimeError("skill config remains authoritative but could not be updated; "
+                               "a user-config fallback would be ignored; inspect status and resolve the read-only skill config")
         try:
             write_text_atomic(path, content)
-            return path
         except OSError as exc:
             errors.append(f"{path}: {exc}")
+            continue
+        actual, source, _ = read_config()
+        if source != path or json.dumps(actual, indent=2, sort_keys=True) + "\n" != content:
+            raise RuntimeError("config write did not become the verified active setting; inspect status before continuing")
+        return path
 
     raise RuntimeError("; ".join(errors) or "could not write config")
 
@@ -204,36 +246,41 @@ def main() -> int:
 
     try:
         if args.command == "bark":
-            result["bark"] = not bark_enabled()
-            result["config"] = str(write_config("bark", bool(result["bark"])))
+            enabled = not bark_enabled()
+            result["config"] = str(write_config("bark", enabled))
+            result["bark"] = enabled
             if result["bark"]:
                 result["played"] = play_sound()
         elif args.command == "on":
-            result["bark"] = True
             result["config"] = str(write_config("bark", True))
+            result["bark"] = True
             result["played"] = play_sound()
         elif args.command == "off":
-            result["bark"] = False
             result["config"] = str(write_config("bark", False))
+            result["bark"] = False
         elif args.command == "play":
             if bark_enabled():
                 result["played"] = play_sound()
             result["bark"] = bark_enabled()
         elif args.command == "auto":
-            data, _, _ = read_config()
-            current = data.get("auto") is True
-            result["auto"] = not current
-            result["config"] = str(write_config("auto", result["auto"]))
+            data, _, invalid_source = read_config()
+            if invalid_source is not None:
+                # Its intended value is unknown, so a toggle could turn Auto on by accident.
+                raise ValueError("config is unreadable; say auto on or auto off instead of toggling")
+            enabled = not auto_enabled(data, invalid_source)
+            result["config"] = str(write_config("auto", enabled))
+            result["auto"] = enabled
         elif args.command == "auto-on":
-            result["auto"] = True
             result["config"] = str(write_config("auto", True))
+            result["auto"] = True
         elif args.command == "auto-off":
-            result["auto"] = False
             result["config"] = str(write_config("auto", False))
+            result["auto"] = False
         elif args.command == "status":
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))
-            result["auto"] = data.get("auto") is True
+            result["auto"] = auto_enabled(data, invalid_source)
+            result["bark_value_ignored"] = "bark" in data and not isinstance(data["bark"], bool)
             result["config"] = str(source) if source else None
             result["invalid_config"] = str(invalid_source) if invalid_source else None
     except Exception as exc:

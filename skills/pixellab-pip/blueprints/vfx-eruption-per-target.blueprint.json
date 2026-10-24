@@ -1,0 +1,183 @@
+[
+  {
+    "_pixellab": {
+      "output_directory": "pixellab-pip-generations/vfx-eruption-per-target",
+      "output_collision_policy": "create_unique",
+      "mcp_server": {
+        "name": "PixelLab",
+        "url": "https://api.pixellab.ai/mcp",
+        "transport": "http",
+        "docs_url": "https://api.pixellab.ai/mcp/docs"
+      }
+    },
+    "_comment": "Eruption under each target (100x136, 12 frames, slight camera tilt): a ground crack ring, an upright flame, rising billow and embers. Painted, outlined workbench recipe; vfx_workbench is free for subscribers, but export saves to the user's My effects.",
+    "_comment_prompt": "/pixellab-pip run the vfx-eruption-per-target blueprint for an ice spear, pale blue",
+    "TASK": {
+      "instruction": "Before the first call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection with vfx_workbench visible, and create the declared output directory empty (lowest free -2 suffix if taken). Resolve main colour ramp to six hex colours from near-black to highlight in the caster's own colours, taken from the project style (references/project-style.md) or the caster sprite; ask if neither gives one. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
+      "verify": "The run is approved, vfx_workbench is callable, the ramp has six hex colours, and the output directory is new and empty."
+    }
+  },
+  {
+    "MCP vfx_workbench": {
+      "argv": [
+        "start",
+        "--fps",
+        "12"
+      ],
+      "notes": "Eruption effect: {{effect description}}, caster facing {{caster facing | default: right}}."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "With the step id returned by the immediately preceding call, call vfx_workbench with argv [<step id>, \"render\", <this task's render object as one JSON string>]. When the caster faces left, set recipe mirror to \"x\" (remove it when the template already mirrors and the caster faces right). For a falling-star variant build a path from above with a ribbon trail and a glow head, never a rising pillar. Each change returns a new step id; patch with set, remove, add_layer or remove_layer ops and pass \"frames\" (1-based) to re-render only key frames 2, 5, 8 and 10. Then export with --name {{effect name}}. Save the exported GIF, sheet PNG and JSON unchanged as effect.gif, effect.png and effect.json.",
+      "render": {
+        "recipe": {
+          "canvas": {
+            "w": 100,
+            "h": 136
+          },
+          "frames": 12,
+          "fps": 12,
+          "loop": false,
+          "origin": [
+            50,
+            124
+          ],
+          "camera": {
+            "tilt": 0.15
+          },
+          "ramps": {
+            "main": "{{main colour ramp}}"
+          },
+          "outline": {
+            "mode": "dark"
+          },
+          "tones": 5,
+          "detail": 0.1,
+          "shading": "lit",
+          "layers": [
+            {
+              "id": "crack",
+              "type": "ring",
+              "plane": "ground",
+              "x": 50,
+              "y": 124,
+              "radius": {
+                "from": 6,
+                "to": 34
+              },
+              "width": 2,
+              "soft": 1,
+              "life": [
+                0.0,
+                0.32
+              ],
+              "z": "back"
+            },
+            {
+              "id": "flame",
+              "type": "flame",
+              "plane": "upright",
+              "x": 50,
+              "y": 124,
+              "width": 26,
+              "height": {
+                "keys": [
+                  [
+                    0,
+                    6
+                  ],
+                  [
+                    0.25,
+                    70
+                  ],
+                  [
+                    0.6,
+                    56
+                  ],
+                  [
+                    1,
+                    10
+                  ]
+                ]
+              },
+              "tongues": 3,
+              "spread": 1.0,
+              "taper": 0.6,
+              "curl": 0.4,
+              "flicker": 0.5,
+              "cycles": 2,
+              "life": [
+                0.06,
+                0.72
+              ],
+              "z": "back"
+            },
+            {
+              "id": "billow",
+              "type": "puffs",
+              "mode": "burst",
+              "x": 50,
+              "y": 70,
+              "radius": 20,
+              "count": 6,
+              "throw": 0.4,
+              "rise": 0.9,
+              "thin": 0.5,
+              "lump": 0.4,
+              "billow": 1.0,
+              "highlight": 0.65,
+              "life": [
+                0.32,
+                1.0
+              ],
+              "z": "back"
+            },
+            {
+              "id": "embers",
+              "type": "particles",
+              "mode": "rise",
+              "x": 50,
+              "y": 116,
+              "radius": 16,
+              "count": 16,
+              "speed": 80,
+              "wobble": 3,
+              "size": [
+                2,
+                3
+              ],
+              "shape": "dot",
+              "lifespan": 0.6,
+              "fade_out": 0.4,
+              "life": [
+                0.25,
+                1.0
+              ],
+              "z": "front",
+              "outline": true
+            }
+          ]
+        }
+      },
+      "outputs": [
+        "effect.gif",
+        "effect.png",
+        "effect.json"
+      ],
+      "verify": "The peak frame is the largest and most solid, the last frames are mostly empty, the colours are the ramp's, nothing reads as a box or a pipe, and the saved files match the export."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "This selected recipe includes custom engine timing, separate from the unchanged workbench export. Inspect actual export timing before choosing the derivative timing table. Write timing.json with the per-frame durations {{frame durations | default: 75, 75, 83, 100, 167, 100, 83, 83, 75, 75, 75, 83 ms}} (anticipation, fast launch, a hold on the peak, fast break-up) for the engine's clip table; do not duplicate frames for timing.",
+      "inputs": [
+        "effect.json"
+      ],
+      "outputs": [
+        "timing.json"
+      ],
+      "verify": "timing.json lists exactly 12 durations in frame order."
+    }
+  }
+]
