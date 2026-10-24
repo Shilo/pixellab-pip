@@ -501,7 +501,9 @@ def check_workflows() -> None:
         "resume_version",
         "resume_previous_latest",
         '"${GITHUB_REF_NAME}" != "main"',
-        'git diff --quiet "$tag_commit" "$GITHUB_SHA" -- skills/pixellab-pip',
+        'git restore --source="$RELEASE_TAG" --worktree -- skills/pixellab-pip',
+        'git diff --quiet "$RELEASE_TAG" -- skills/pixellab-pip',
+        "Cannot resume: ${tag} manifests are at ${tag_version}.",
         "already exists; restoring latest and verifying its stored files.",
         'inspect "$skill_ref" --version "$RELEASE_VERSION" --json',
         "from urllib.request import HTTPRedirectHandler, Request, build_opener",
@@ -563,6 +565,14 @@ def check_workflows() -> None:
     ):
         if required not in release_workflow:
             raise AssertionError(f"release-skill.yml is missing release security gate: {required}")
+    if not (
+        release_workflow.find("- name: Run QA checks")
+        < release_workflow.find("- name: Use the tagged skill files")
+        < release_workflow.find("- name: Run skill security scan")
+        < release_workflow.find("- name: Build skill archive")
+    ):
+        # a resume must scan, zip and publish the tag's files, so main can change while a registry catches up
+        raise AssertionError("release-skill.yml must switch a resume to the tag's skill files before scanning and building")
     for step in ("Resolve ClawHub publisher and previous latest", "Publish and verify exact ClawHub version",
                  "Scan the published ClawHub version", "Promote the audited ClawHub version"):
         # github_only must skip every ClawHub write; the other ClawHub steps key off these steps' outputs

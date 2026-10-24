@@ -102,8 +102,9 @@ jobs:
               echo "Cannot resume: ${tag} is not on main's history."
               exit 1
             fi
-            if ! git diff --quiet "$tag_commit" "$GITHUB_SHA" -- skills/pixellab-pip; then
-              echo "Cannot resume: the current skill files differ from ${tag}."
+            tag_version="$(git show "${tag_commit}:plugin.json" | python -c 'import json, sys; print(json.load(sys.stdin)["version"])')"
+            if [ "$tag_version" != "$RESUME_VERSION" ]; then
+              echo "Cannot resume: ${tag} manifests are at ${tag_version}."
               exit 1
             fi
           fi
@@ -125,6 +126,21 @@ jobs:
       - name: Run QA checks
         shell: bash
         run: python dev-tools/qa.py
+
+      # A resume publishes the tag's skill files, never main's, so main can move on while a registry catches up.
+      # Worktree only: the index keeps main's files, so the badge commit below can never revert skill files.
+      - name: Use the tagged skill files
+        if: inputs.resume_version != ''
+        env:
+          RELEASE_TAG: v${{ inputs.resume_version }}
+        shell: bash
+        run: |
+          git restore --source="$RELEASE_TAG" --worktree -- skills/pixellab-pip
+          if ! git diff --quiet "$RELEASE_TAG" -- skills/pixellab-pip; then
+            echo "The working tree does not match ${RELEASE_TAG}'s skill files."
+            exit 1
+          fi
+          echo "Releasing the skill files of ${RELEASE_TAG}."
 
       - name: Run skill security scan
         shell: bash
@@ -255,9 +271,6 @@ jobs:
           }
           if (inputVersion && inputVersion === oldVersion) {
             throw new Error(`Requested version ${inputVersion} is already the current version.`);
-          }
-          if (resumeVersion && resumeVersion !== oldVersion) {
-            throw new Error(`Cannot resume ${resumeVersion}: repository manifests are at ${oldVersion}.`);
           }
           const newVersion = resumeVersion || inputVersion || bumpVersion(oldVersion);
           const updatedFiles = [];
@@ -435,6 +448,8 @@ jobs:
           done
 
       - name: Point security badges at this release
+        # README badges follow the newest release; resuming an older tag leaves them alone.
+        if: steps.bump.outputs.resume != 'true' || steps.bump.outputs.old_version == steps.bump.outputs.new_version
         env:
           PROV_URL: ${{ steps.attest.outputs.attestation-url }}
           VT_ANALYSIS: ${{ steps.virustotal.outputs.url }}
