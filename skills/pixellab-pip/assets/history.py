@@ -102,10 +102,13 @@ def main(argv=None) -> int:
             print("%s: %s jobs, %s, %s; date %s%s" %
                   (row["name"], row["jobs"], cost, outcomes, row["created_at"] or "unknown",
                    "; %s undated jobs" % row["unknown_dates"] if row["unknown_dates"] else ""))
-        if skipped:
-            print("%d manifests are not run ledgers (older Pip format or unreadable), so their calls are not "
-                  "searched or counted: %s%s" % (len(skipped), ", ".join(skipped[:5]),
-                                                 ", +%d more" % (len(skipped) - 5) if len(skipped) > 5 else ""))
+        older = [r["name"] for r in rows if "jobs list" in r.get("error", "")]   # a manifest from before the ledger
+        broken = [n for n in skipped if n not in older]
+        for names, text in ((older, "are older Pip manifests, not run ledgers"),
+                            (broken, "are unreadable run ledgers that need checking")):
+            if names:
+                print("%d manifests %s; their calls are not searched or counted: %s%s"
+                      % (len(names), text, ", ".join(names[:5]), ", +%d more" % (len(names) - 5) if len(names) > 5 else ""))
     return 0
 
 

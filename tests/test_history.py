@@ -91,8 +91,14 @@ class HistoryTests(unittest.TestCase):
             history.main(['--root', str(self.root)])
         text = out.getvalue()
         self.assertIn('valid: 1 jobs', text)
-        self.assertIn('11 manifests are not run ledgers', text)
+        self.assertIn('11 manifests are older Pip manifests', text)
         self.assertNotIn('invalid manifest', text)
+        (self.root / 'broken').mkdir()
+        (self.root / 'broken' / 'manifest.json').write_text('{"jobs":', encoding='utf-8')
+        out = io.StringIO()
+        with redirect_stdout(out):
+            history.main(['--root', str(self.root)])
+        self.assertIn('1 manifests are unreadable run ledgers that need checking; their calls are not searched or counted: broken', out.getvalue())
 
 
 if __name__ == '__main__':
