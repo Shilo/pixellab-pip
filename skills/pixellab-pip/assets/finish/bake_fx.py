@@ -12,7 +12,7 @@ e.g. where a beam starts: --at <the eye> --anchor <the export's origin>).
 the last body frame, that frame is held until the effect ends - the body freezes for that long (reported as
 held_frames; fine for a held beam or a cast).
 --widen W: grow every frame to W pixels wide, the new room on the right; feet and the pad offset stay put.
-Writes DIR/00.png ... and DIR/derivative.json; give the sheet the body timing, then the effect's own frame times.
+Writes DIR/0.png ... and DIR/derivative.json; give the sheet the body timing, then the effect's own frame times.
 """
 import argparse
 import json
@@ -71,6 +71,6 @@ for i in range(n):
         ax, ay = (int(v) for v in a.anchor.split(",")) if a.anchor else (e.width // 2, e.height // 2)
         c.alpha_composite(e, (cx - ax, cy - ay))
         change["effect_frame"] = k
-    run.save(c, "%02d.png" % i, **change)
+    run.save(c, "%d.png" % i, **change)
 run.done(held_frames=n - len(body), width=w)
 print("%d frames (%d body + %d held) -> %s" % (n, len(body), n - len(body), a.out))

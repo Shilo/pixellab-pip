@@ -74,20 +74,20 @@
   },
   {
     "TASK": {
-      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save all returned images unchanged in order as frames/frame-00.png onward; frame-00 is the echoed first frame. Run the animation doctor with --check-only (references/animation-doctor.md) on the frames with padded.png as the reference and the first and last frames marked as approved key poses, writing into doctor/ only, and report its verdict and look list without changing any source frame.",
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save all returned images unchanged in order as frames/0.png onward; 0.png is the echoed first frame. Run the animation doctor with --check-only (references/animation-doctor.md) on the frames with padded.png as the reference and the first and last frames marked as approved key poses, writing into doctor/ only, and report its verdict and look list without changing any source frame.",
       "inputs": [
         "padded.png"
       ],
       "outputs": [
-        "frames/frame-00.png",
-        "frames/frame-01.png",
-        "frames/frame-02.png",
-        "frames/frame-03.png",
-        "frames/frame-04.png",
-        "frames/frame-05.png",
-        "frames/frame-06.png",
-        "frames/frame-07.png",
-        "frames/frame-08.png",
+        "frames/0.png",
+        "frames/1.png",
+        "frames/2.png",
+        "frames/3.png",
+        "frames/4.png",
+        "frames/5.png",
+        "frames/6.png",
+        "frames/7.png",
+        "frames/8.png",
         "doctor/fix_report.json"
       ],
       "verify": "Nine readable transparent frames of identical size are saved in returned order, the doctor report exists, and no source frame was modified."
@@ -95,11 +95,11 @@
   },
   {
     "TASK": {
-      "instruction": "Assemble frame-00 through frame-08 in order, without resizing or repainting, into final/axe-chop.png as one row with final/axe-chop.json in Aseprite sheet format (assets/make_sheet.py), with per-frame durations {{frame durations | default: 160 ms on frame 0, 140 ms on the last contact frame, 60 ms otherwise}}, the pad offset from pad.json, facing right and the hit frame index. Write final/axe-chop.gif as a labeled looping preview with those delays using assets/preview_gif.py. Decode and compare count, order, alpha and representable timing with the source PNGs; stop and report a GIF representation limit rather than silently quantizing colours, alpha or timing. If the user requires a play-once artifact, use an available supported export that preserves that behavior or report the limitation before delivering; the standard preview helper always loops.",
+      "instruction": "Assemble 0.png through 8.png in order, without resizing or repainting, into final/axe-chop.png as one row with final/axe-chop.json in Aseprite sheet format (assets/make_sheet.py), with per-frame durations {{frame durations | default: 160 ms on frame 0, 140 ms on the last contact frame, 60 ms otherwise}}, the pad offset from pad.json, facing right and the hit frame index. Write final/axe-chop.gif as a labeled looping preview with those delays using assets/preview_gif.py. Decode and compare count, order, alpha and representable timing with the source PNGs; stop and report a GIF representation limit rather than silently quantizing colours, alpha or timing. If the user requires a play-once artifact, use an available supported export that preserves that behavior or report the limitation before delivering; the standard preview helper always loops.",
       "inputs": [
         "pad.json",
-        "frames/frame-00.png",
-        "frames/frame-08.png"
+        "frames/0.png",
+        "frames/8.png"
       ],
       "outputs": [
         "final/axe-chop.png",

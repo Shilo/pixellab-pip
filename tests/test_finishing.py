@@ -365,7 +365,7 @@ class FinishBehaviourTests(unittest.TestCase):
         (self.t / "in/beam.json").write_text(json.dumps({"frames": [{"frame": {"x": 0, "y": 0, "w": 20, "h": 10}}]}))
         self.ok("bake_fx", *paths, "--fx", self.t / "in/beam.png", "--at", "30,12", "--anchor", "2,5", "--from", "1",
                 "--out", self.t / "o")
-        self.assertEqual(tuple(self.img(self.t / "o/00.png")[12, 30]), (255, 0, 200, 255))
+        self.assertEqual(tuple(self.img(self.t / "o/0.png")[12, 30]), (255, 0, 200, 255))
 
     def test_slash_layer_apply_with_offset(self) -> None:
         frame = synth.png(synth.figure(), self.t / "in/3.png")
@@ -402,13 +402,13 @@ class FinishBehaviourTests(unittest.TestCase):
             image.save(self.t / name)
         self.ok("bake_fx", self.t / "body.png", self.t / "clear.png", "--fx", self.t / "fx.png",
                 "--at", "0,0", "--anchor", "1,1", "--from", "1", "--out", self.t / "o")
-        got = Image.open(self.t / "o/00.png").convert("RGBA")
+        got = Image.open(self.t / "o/0.png").convert("RGBA")
         expected = body.copy()
         expected.alpha_composite(fx, (-1, -1))
         self.assertEqual(got.tobytes(), expected.tobytes())
         self.ok("bake_fx", self.t / "clear.png", "--fx", self.t / "fx.png", "--at", "0,0",
                 "--anchor", "1,1", "--from", "1", "--out", self.t / "clear-out")
-        self.assertEqual(Image.open(self.t / "clear-out/00.png").getpixel((0, 0)), (0, 0, 255, 128))
+        self.assertEqual(Image.open(self.t / "clear-out/0.png").getpixel((0, 0)), (0, 0, 255, 128))
 
     def test_dir8_rotated_soft_effect_preserves_body_alpha(self):
         src = self.t / "src"

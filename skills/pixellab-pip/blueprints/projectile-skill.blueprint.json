@@ -93,10 +93,10 @@
   },
   {
     "TASK": {
-      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the seven returned images unchanged in order as clip-1/frame-00.png through clip-1/frame-06.png (frame-00 is the echoed key-a).",
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the seven returned images unchanged in order as clip-1/0.png through clip-1/6.png (0.png is the echoed key-a).",
       "outputs": [
-        "clip-1/frame-00.png",
-        "clip-1/frame-06.png"
+        "clip-1/0.png",
+        "clip-1/6.png"
       ],
       "verify": "Seven same-size transparent frames are saved in returned order."
     }
@@ -112,10 +112,10 @@
   },
   {
     "TASK": {
-      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the five returned images unchanged as clip-2/frame-00.png through clip-2/frame-04.png. The move is clip-1 frames 00-06 then clip-2 frames 01-04 (clip-2 frame-00 is the echoed key-b input).",
+      "instruction": "Poll MCP get_image for the immediately preceding job until completed or failed; never resubmit. Save the five returned images unchanged as clip-2/0.png through clip-2/4.png. The move is clip-1 frames 0-6 then clip-2 frames 1-4 (clip-2 0.png is the echoed key-b input).",
       "outputs": [
-        "clip-2/frame-00.png",
-        "clip-2/frame-04.png"
+        "clip-2/0.png",
+        "clip-2/4.png"
       ],
       "verify": "Five same-size transparent frames are saved in returned order."
     }
@@ -145,8 +145,8 @@
       "instruction": "Derivative step; execute only after the user accepts this exact composition scope, independently of Auto. Preserve every raw frame. Review and approve the semantic prop extraction/mask from key-a; largest-component filtering alone cannot identify it. Into derived/, remove only the agreed generator prop pixels after release, compose the verified source prop along {{prop step per frame | default: 18,-4}} with the agreed rotation, then compose the exported impact using source-over alpha at the agreed contact point. Propose any canvas widening or extra held body frames and their exact durations before applying them. Record source indices, mask, placements, rotation and playback changes in derived/move.json. Stop for an ambiguous extraction or unaccepted transform; do not draw replacement pixels locally as an inferred fix.",
       "inputs": [
         "keys/key-a.png",
-        "clip-1/frame-06.png",
-        "clip-2/frame-04.png",
+        "clip-1/6.png",
+        "clip-2/4.png",
         "fx/impact.png"
       ],
       "outputs": [
