@@ -1,0 +1,29 @@
+[
+  {
+    "_pixellab": {
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/level-up-effect",
+      "output_collision_policy": "create_unique"
+    },
+    "_comment": "Transparent wordless celebratory level-up and power-increase effect candidates.",
+    "TASK": {
+      "instruction": "Resolve variables. Treat the supplied effect theme, including comma-separated text, as one value and one generation call. Apply one requested size to both dimensions or split WIDTHxHEIGHT. Require explicit run approval and an authenticated PixelLab MCP connection, then create the declared unique empty output directory.",
+      "verify": "The request is approved, MCP is authenticated, and the output directory is new and empty."
+    }
+  },
+  {
+    "MCP create_image_pro": {
+      "description": "fully contained symmetrical wordless celebratory {{effect theme | default: power-up}} status effect above a round ground aura",
+      "width": "{{effect width | default: 64}}",
+      "height": "{{effect height | default: 64}}",
+      "no_background": true
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Poll MCP get_image with the returned job_id until completed or failed; never resubmit. Save every returned image unchanged and in order as candidate-1.png through candidate-N.png. Assemble all candidates once in a compact row-major candidates.png without resizing, repainting, margins, or spacing, then present every numbered candidate.",
+      "outputs": ["candidates.png"],
+      "verify": "Count, dimensions, transparency, order, and sheet cells match the returned images exactly."
+    }
+  }
+]

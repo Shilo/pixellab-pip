@@ -13,7 +13,7 @@
   },
   {
     "MCP create_image_pro": {
-      "description": "fully contained broad {{aura theme | default: energy}} aura rising along the rear edge of a round ground aura",
+      "description": "fully contained broad upright {{aura theme | default: energy}} aura rising along both sides behind a round ground aura",
       "width": "{{aura width | default: 64}}",
       "height": "{{aura height | default: 64}}",
       "no_background": true
