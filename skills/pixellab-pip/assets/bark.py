@@ -264,6 +264,9 @@ def main() -> int:
             result["bark"] = bark_enabled()
         elif args.command == "auto":
             data, _, invalid_source = read_config()
+            if invalid_source is not None:
+                # Its intended value is unknown, so a toggle could turn Auto on by accident.
+                raise ValueError("config is unreadable; say auto on or auto off instead of toggling")
             enabled = not auto_enabled(data, invalid_source)
             result["config"] = str(write_config("auto", enabled))
             result["auto"] = enabled

@@ -176,6 +176,15 @@ class AutoPolicyTests(unittest.TestCase):
                 self.assertEqual(self.run_command("auto-on")[0], 0)
                 self.assertEqual(json.loads(self.config.read_text()), {"auto": True, "bark": True})
 
+    def test_toggle_refuses_an_unreadable_config(self) -> None:
+        # review: a broken file that meant "on" toggled to Auto on and dropped its other keys
+        original = b'{"auto": true, "keep": 5,'
+        self.config.write_bytes(original)
+        result, output = self.run_command("auto")
+        self.assertEqual(result, 1)
+        self.assertIn("auto on or auto off", output["error"])
+        self.assertEqual(self.config.read_bytes(), original)
+
     def test_invalid_user_fallback_is_replaced_by_a_new_skill_config(self) -> None:
         fallback = self.config.with_name("user.json")
         fallback.write_text("[]", encoding="utf-8")
