@@ -138,16 +138,19 @@ def auto_enabled(data: dict[str, Any], invalid_source: Path | None = None) -> bo
 
 def write_config(key: str, enabled: bool) -> Path:
     existing, _, invalid_source = read_config()
-    if key == "auto" and enabled and invalid_source is not None:
-        raise ValueError("invalid config requires repair before enabling Auto; inspect status")
+    if invalid_source is not None:
+        # An explicit command replaces the unreadable file; a fallback's `auto` must never carry over into it.
+        existing.pop("auto", None)
     existing[key] = bool(enabled)
-    return save_config(existing)
+    path = save_config(existing)
+    if key == "auto":
+        data, _, still_invalid = read_config()
+        if auto_enabled(data, still_invalid) is not bool(enabled):
+            raise RuntimeError("an unreadable config still keeps Auto off; repair " + str(still_invalid))
+    return path
 
 
 def save_config(data: dict[str, Any]) -> Path:
-    _, source, invalid_source = read_config()
-    if invalid_source is not None and invalid_source != source:
-        raise ValueError("invalid config must be repaired before settings writes; existing files left unchanged")
     content = json.dumps(data, indent=2, sort_keys=True) + "\n"
 
     candidates = [SKILL_CONFIG]
@@ -274,6 +277,7 @@ def main() -> int:
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))
             result["auto"] = auto_enabled(data, invalid_source)
+            result["bark_value_ignored"] = "bark" in data and not isinstance(data["bark"], bool)
             result["config"] = str(source) if source else None
             result["invalid_config"] = str(invalid_source) if invalid_source else None
     except Exception as exc:
