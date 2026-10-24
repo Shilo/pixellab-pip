@@ -25,7 +25,7 @@ class ReferencePagesTests(unittest.TestCase):
         if default.exists():
             self.assertNotIn('modules', json.loads(default.read_text(encoding='utf-8')))
 
-    def test_weapon_pages_linked_and_have_toc(self) -> None:
+    def test_fighting_pages_have_toc_and_extra_pages_are_linked(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
         for name in WEAPON_PAGES:
             with self.subTest(page=name):
@@ -42,7 +42,7 @@ class ReferencePagesTests(unittest.TestCase):
         on_disk = {p.stem[len("weapon-"):] for p in (SKILL_DIR / "references").glob("weapon-*.md")}
         self.assertEqual(set(re.findall(r"`([a-z-]+)`", listed)), on_disk)
 
-    def test_portable_description_and_metadata(self) -> None:
+    def test_description_fits_the_spec_limit(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
         description = next(line.split(":", 1)[1].strip() for line in skill.splitlines()
                            if line.startswith("description:"))
