@@ -2,7 +2,7 @@
 
 Historical prototype evidence, recorded before PR #11 remediation. The Studio UI/approval levels described here are no longer shipped. These results do not validate the revised head; see the [current integration record](../README.md).
 
-The demo images are generated-art artifacts supplied with the prototype contribution; the source-code MIT notice does not itself establish a separate art licence, and none was supplied. Treat them as review evidence and obtain the contributor's permission/appropriate rights before independent redistribution.
+The generated images from these runs are not included: no art licence was supplied for them.
 
 One headless Claude Code session with only this branch installed: the `pixellab-pip` core and the
 `pixellab-pip-studio` edition, loaded as plugins. Nobody answered questions during the run, and the older
@@ -26,14 +26,6 @@ that bursts on impact. I want game-ready sprite sheets and a showcase GIF."
 | Spend accuracy | every estimate matched the charge; the manifests summed to the balance change exactly |
 | Approval behaviour | one plan approval (~69 generations plus redos); content pauses at the candidate pick and the key-pose review; both redos used on one attack pose (canvas-edge cut, then a half-length staff) |
 | Doctor verdict | "ready" on both moves; the look checklist passed with the minor problems listed below |
-
-| Candidates | Attack key poses | Skill key poses |
-|---|---|---|
-| ![candidates](candidates.png) | ![attack poses](attack-poses.png) | ![skill poses](skill-poses.png) |
-
-| Attack | Skill (shard and burst baked in) |
-|---|---|
-| ![attack](attack.gif) | ![skill](skill.gif) |
 
 **Run folder per move:** `raw/`, `keys/`, `clean/<n>-<step>/`, `fx/`, `final/`, plus `manifest.json` and a
 blueprint. **Delivered:** the sheets with Aseprite JSON, preview GIFs, a body-only skill sheet plus the effect sheet
@@ -109,10 +101,6 @@ The style was the "Side-view sci-fi" example, its first real test.
 | Spend accuracy | the manifests' `committed` total equalled the balance change |
 | Doctor | both moves "ready"; no `head_change` or `prop_drift` findings |
 
-| Attack | Skill (rocket and blast baked in) |
-|---|---|
-| ![attack](marine-attack.gif) | ![skill](marine-skill.gif) |
-
 **Run-1 fixes seen working:**
 - the stdlib upload fallback ran when `curl` was blocked;
 - the level reply named the install-wide scope;
@@ -131,10 +119,6 @@ Two requests in one session, with a 60-generation cap.
 | Wall time | 21 min |
 | PixelLab spend | 54 generations: farmer 24 (candidates, rotation, two walks), icons 30 |
 | Result | a 4-direction farmer with an 8-frame walk per direction; six 32x32 icons that share the mage's outline and shading |
-
-| Farmer walk (south) | Frost mage icons |
-|---|---|
-| ![farmer](farmer-walk.gif) | ![icons](frost-icons.png) |
 
 - **Farmer walk:** the template walk dropped the watering can. A v3 walk that names the can kept it in all 32 frames.
 - **Icons:** they used a 32x32 crop of the mage's staff crystal as the style reference. That kept the outline and shading
