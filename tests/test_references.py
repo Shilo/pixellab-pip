@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -29,14 +30,17 @@ class ReferencePagesTests(unittest.TestCase):
         for name in WEAPON_PAGES:
             with self.subTest(page=name):
                 path = SKILL_DIR / "references" / name
-                if name.startswith("weapon-"):
-                    self.assertIn("`references/weapon-<name>.md`", skill)
-                    self.assertIn(f"`{name[len('weapon-'):-len('.md')]}`", skill)
-                else:
+                if not name.startswith("weapon-"):
                     self.assertIn(f"`references/{name}`", skill)
                 lines = path.read_text(encoding="utf-8").splitlines()
                 if len(lines) > 100:
                     self.assertIn("## Contents", lines)
+
+    def test_weapon_name_pattern_lists_exactly_the_weapon_pages(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        listed = skill.split("`references/weapon-<name>.md`, where `<name>` is ", 1)[1].split(";", 1)[0]
+        on_disk = {p.stem[len("weapon-"):] for p in (SKILL_DIR / "references").glob("weapon-*.md")}
+        self.assertEqual(set(re.findall(r"`([a-z-]+)`", listed)), on_disk)
 
     def test_portable_description_and_metadata(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
