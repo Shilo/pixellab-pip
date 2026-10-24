@@ -7,8 +7,8 @@ Date bounds include both UTC calendar dates and select recorded job creation tim
 Unknown dates do not match a date query. Filters apply before the newest-N limit;
 counts/costs describe matching calls. Historical manifests without dates remain
 searchable by job/tool, with dates and unavailable costs labeled unknown.
-Unreadable ledgers take precedence over dated runs within the same --runs limit;
-their unknown contents cannot be assumed to fall outside a filter.
+Manifests that are not run ledgers (older Pip manifests or unreadable files) are listed
+after the runs and never count toward --runs; their calls are not searched or totalled.
 """
 from __future__ import annotations
 
@@ -39,12 +39,12 @@ def history(root: str, runs: int, *, since: date | None = None, until: date | No
         raise ValueError("--runs must be positive")
     if since and until and since > until:
         raise ValueError("--since must be on or before --until")
-    out = []
+    out, skipped = [], []
     for path in Path(root).glob("*/" + manifest.NAME):
         try:
             entries = manifest.jobs(str(path.parent))
         except (ValueError, OSError) as exc:
-            out.append({"name": path.parent.name, "error": str(exc), "created_at": None})
+            skipped.append({"name": path.parent.name, "error": str(exc), "created_at": None})
             continue
         matches = []
         for entry in entries:
@@ -70,7 +70,8 @@ def history(root: str, runs: int, *, since: date | None = None, until: date | No
                     "outcomes": dict(Counter(j["outcome"] for j in matches if j.get("outcome"))),
                     "entries": [{k: j[k] for k in ("job_id", "tool", "status", "created_at", "outcome", "outputs") if k in j}
                                 for j in matches]})
-    return sorted(out, key=lambda r: ("error" in r, r["created_at"] or "", r["name"]), reverse=True)[:runs]
+    runs_out = sorted(out, key=lambda r: (r["created_at"] or "", r["name"]), reverse=True)[:runs]
+    return runs_out + sorted(skipped, key=lambda r: r["name"])
 
 
 def main(argv=None) -> int:
@@ -92,15 +93,19 @@ def main(argv=None) -> int:
     elif not rows:
         print("no matching runs with %s under %s" % (manifest.NAME, args.root))
     else:
+        skipped = [row["name"] for row in rows if "error" in row]
         for row in rows:
             if "error" in row:
-                print("%s: invalid manifest (%s)" % (row["name"], row["error"]))
                 continue
             cost = "unknown charged generations" if row["spent"] is None else "%g charged generations" % row["spent"]
             outcomes = ", ".join("%s %s" % (v, k) for k, v in sorted(row["outcomes"].items())) or "not judged"
             print("%s: %s jobs, %s, %s; date %s%s" %
                   (row["name"], row["jobs"], cost, outcomes, row["created_at"] or "unknown",
                    "; %s undated jobs" % row["unknown_dates"] if row["unknown_dates"] else ""))
+        if skipped:
+            print("%d manifests are not run ledgers (older Pip format or unreadable), so their calls are not "
+                  "searched or counted: %s%s" % (len(skipped), ", ".join(skipped[:5]),
+                                                 ", +%d more" % (len(skipped) - 5) if len(skipped) > 5 else ""))
     return 0
 
 

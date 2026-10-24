@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from contextlib import redirect_stdout
 from datetime import date
+import io
 import json
 from pathlib import Path
 import tempfile
@@ -74,6 +76,23 @@ class HistoryTests(unittest.TestCase):
         rows = {r['name']: r for r in history.history(str(self.root), 10)}
         self.assertIn('error', rows['bad'])
         self.assertEqual(rows['valid']['spent'], 2)
+
+    def test_older_manifests_never_push_runs_out_of_the_limit(self):
+        # review: 11 older-format manifests filled --runs 10 and hid the one real run
+        for i in range(11):
+            (self.root / ('old%02d' % i)).mkdir()
+            (self.root / ('old%02d' % i) / 'manifest.json').write_text('{"calls": []}', encoding='utf-8')
+        self.add('valid', 'a')
+        rows = history.history(str(self.root), 10)
+        self.assertEqual(rows[0]['name'], 'valid')
+        self.assertEqual(sum('error' in r for r in rows), 11)
+        out = io.StringIO()
+        with redirect_stdout(out):
+            history.main(['--root', str(self.root)])
+        text = out.getvalue()
+        self.assertIn('valid: 1 jobs', text)
+        self.assertIn('11 manifests are not run ledgers', text)
+        self.assertNotIn('invalid manifest', text)
 
 
 if __name__ == '__main__':
