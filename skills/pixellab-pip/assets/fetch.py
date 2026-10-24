@@ -5,7 +5,7 @@
     python fetch.py --url RETURNED_PIXELLAB_URL out.png
 
 Pass exactly the download links the job's getter (e.g. `get_image`) returned, in order;
-two or more links save frame-00.png onward into the new out_dir.
+two or more links save 0.png onward into the new out_dir (the finishing helpers' frame names).
 Existing destinations are refused. Exit 0: downloaded; 2: blocked/invalid/unavailable
 (check the matching getter); 3: download not ready or dependency unavailable. HTTP
 file errors establish neither job failure nor refund. Never resubmit from this result.
@@ -140,7 +140,7 @@ def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
 
 
 def frame_paths(folder: Path, frames: int) -> list[Path]:
-    return [folder / ("frame-%02d.png" % index) for index in range(frames)]
+    return [folder / ("%d.png" % index) for index in range(frames)]
 
 
 def outputs(out: str, run: str, frames: int = 0) -> list[str]:

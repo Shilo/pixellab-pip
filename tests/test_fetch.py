@@ -44,8 +44,8 @@ class FetchTests(unittest.TestCase):
     def test_frames_saved_in_order(self) -> None:
         fetch.get = lambda url, **kwargs: ("ok", image_bytes((int(url[-1]), 40, 60, 255)))
         self.assertEqual(fetch.try_job(links(3), str(self.root / "clip")), "ok")
-        self.assertEqual([p.name for p in sorted((self.root / "clip").iterdir())], ["frame-00.png", "frame-01.png", "frame-02.png"])
-        with Image.open(self.root / "clip" / "frame-02.png") as image:
+        self.assertEqual([p.name for p in sorted((self.root / "clip").iterdir())], ["0.png", "1.png", "2.png"])
+        with Image.open(self.root / "clip" / "2.png") as image:
             self.assertEqual(image.getpixel((0, 0))[0], 2)
 
     def test_missing_later_frame_never_proves_shorter_clip_complete(self) -> None:
@@ -133,14 +133,14 @@ class FetchTests(unittest.TestCase):
         real_open = Path.open
 
         def flaky_open(self, *args, **kwargs):
-            if self.name == "frame-01.png":
+            if self.name == "1.png":
                 raise OSError(28, "No space left on device")
             return real_open(self, *args, **kwargs)
 
         clip = self.root / "clip"
         with patch.object(Path, "open", flaky_open), self.assertRaises(OSError):
             fetch.try_job(links(3), str(clip))
-        self.assertFalse(clip.exists())  # frame-00.png and the folder were removed, so a retry works
+        self.assertFalse(clip.exists())  # 0.png and the folder were removed, so a retry works
         self.assertEqual(fetch.try_job(links(3), str(clip)), "ok")
 
     def test_redirects_and_plain_http_stay_on_pixellab(self) -> None:
@@ -203,11 +203,11 @@ class FetchTests(unittest.TestCase):
     def test_existing_outputs_never_overwritten_or_mixed(self) -> None:
         clip = self.root / "clip"
         clip.mkdir()
-        (clip / "frame-01.png").write_bytes(PNG)
+        (clip / "1.png").write_bytes(PNG)
         fetch.get = lambda *args: self.fail("existing destination reached HTTP")
         with self.assertRaises(ValueError):
             fetch.try_job(links(2), str(clip))
-        self.assertEqual(list(clip.iterdir()), [clip / "frame-01.png"])
+        self.assertEqual(list(clip.iterdir()), [clip / "1.png"])
         raw = self.root / "raw.png"
         raw.write_bytes(PNG)
         with self.assertRaises(ValueError):
@@ -221,11 +221,11 @@ class FetchTests(unittest.TestCase):
                 "--estimate", "7", "--timeout", "1"]
         self.assertEqual(fetch.main(args), 0)
         entry = manifest.jobs(str(run))[0]
-        self.assertEqual(entry["outputs"], ["frames/frame-00.png", "frames/frame-01.png"])
+        self.assertEqual(entry["outputs"], ["frames/0.png", "frames/1.png"])
         self.assertNotIn("reported_usage", entry)
         self.assertEqual(entry["estimated_usage"], {"generations": 7})
         self.assertEqual(fetch.main(args), 2)  # safe refusal, no assumption of same-job identity
-        self.assertEqual((run / "frames" / "frame-00.png").read_bytes(), PNG)
+        self.assertEqual((run / "frames" / "0.png").read_bytes(), PNG)
 
     def test_pending_and_unavailable_downloads_keep_reservations(self) -> None:
         for status, code in (("wait", 3), ("unavailable", 2)):
