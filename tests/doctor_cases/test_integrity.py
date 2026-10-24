@@ -52,6 +52,51 @@ def test_batch_accept_is_rejected_before_writing(tmp_path):
     assert not (tmp_path / 'out').exists()
 
 
+def test_frame_exclusions_are_validated_for_the_entire_batch_before_writes(tmp_path):
+    src = tmp_path / 'frames'
+    synth.save(synth.walk(3), src, 'hero_walk')
+    synth.save(synth.walk(2), src, 'hero_idle')
+    before = {p: p.read_bytes() for p in src.glob('*.png')}
+    for flag in ('--fx', '--keys'):
+        for value in ('x', '0', '-1', '1,,2', '3'):
+            out = tmp_path / 'out'
+            result = cli(src, flag, value, '--out', out)
+            assert result.returncode == 2, result.stderr
+            assert flag in result.stderr and 'Traceback' not in result.stderr
+            assert not out.exists()
+    assert all(p.read_bytes() == data for p, data in before.items())
+    result = cli(src, '--fx', '1,2', '--keys', '1', '--check-only', '--out', tmp_path / 'checked')
+    assert result.returncode == 0, result.stderr
+
+
+def test_zero_delay_gif_is_inspectable_but_not_silently_retimed_or_dropped(tmp_path):
+    source = tmp_path / 'hero_walk.gif'
+    images = [Image.fromarray(synth.shift(synth.figure(), offset, 0)) for offset in (0, 1, 2)]
+    images[0].save(source, save_all=True, append_images=images[1:], duration=[100, 100, 200], disposal=2)
+    # Pillow's encoder omits the delay extension for duration=0. Keep an explicit
+    # zero-delay extension to exercise the source value without inventing timing.
+    data = bytearray(source.read_bytes())
+    extension = data.find(b'\x21\xf9\x04', data.find(b'\x21\xf9\x04') + 1)
+    assert extension >= 0
+    data[extension + 4:extension + 6] = b'\x00\x00'
+    source.write_bytes(data)
+    before = source.read_bytes()
+    (a,) = frames.load([str(source)])
+    assert a.durations == [100, 0, 200] and len(a.frames) == 3
+    for extra in ([], ['--stepped']):
+        out = tmp_path / 'repair'
+        result = cli(source, '--out', out, *extra)
+        assert result.returncode == 2 and 'zero-delay' in result.stderr
+        assert 'Traceback' not in result.stderr and not out.exists()
+    out = tmp_path / 'inspection'
+    result = cli(source, '--check-only', '--out', out)
+    assert result.returncode == 0, result.stderr
+    data = json.loads((out / 'fix_report.json').read_text(encoding='utf-8'))
+    assert data['anims'][0]['durations'] == [100, 0, 200]
+    assert sorted(p.name for p in out.iterdir()) == ['fix_report.json', 'fix_report.txt']
+    assert source.read_bytes() == before
+
+
 def test_inspection_report_points_to_existing_inputs(tmp_path):
     paths = synth.save(synth.walk(3), tmp_path / 'frames', 'hero_walk')
     out = tmp_path / 'inspection'

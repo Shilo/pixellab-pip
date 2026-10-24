@@ -17,6 +17,7 @@ import platform
 import shutil
 import subprocess
 import tempfile
+import time
 import wave
 from pathlib import Path
 from typing import Any
@@ -65,10 +66,10 @@ def finite_float(value: str) -> float:
 
 def read_json(path: Path) -> dict[str, Any] | None:
     try:
-        return json.loads(path.read_text(encoding="utf-8"), parse_constant=reject_constant, parse_float=finite_float)
+        return json.loads(path.read_text(encoding="utf-8-sig"), parse_constant=reject_constant, parse_float=finite_float)
     except (OSError, ValueError):
         # ValueError covers json.JSONDecodeError and UnicodeDecodeError (a config
-        # re-saved as UTF-16/UTF-8-BOM), so a malformed file degrades to the
+        # re-saved as UTF-16), so a malformed file degrades to the
         # graceful invalid-config path instead of an uncaught traceback.
         return None
 
@@ -115,7 +116,17 @@ def write_text_atomic(path: Path, content: str) -> None:
         ) as handle:
             temp_path = Path(handle.name)
             handle.write(content)
-        temp_path.replace(path)
+        deadline = time.monotonic() + 1
+        while True:
+            try:
+                temp_path.replace(path)
+                break
+            except PermissionError as exc:
+                # Windows readers/scanners may briefly deny replacement. Retry
+                # only this prepared file, never the setting mutation or toggle.
+                if getattr(exc, "winerror", None) not in (5, 32, 33) or time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.05)
         temp_path = None
     finally:
         if temp_path is not None:

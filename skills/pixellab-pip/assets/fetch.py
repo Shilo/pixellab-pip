@@ -192,7 +192,8 @@ def main(argv: list[str] | None = None) -> int:
         print("DOWNLOAD not ready; inspect the matching getter before continuing; do not resubmit or infer a refund")
         return 3
     except (ValueError, OSError) as exc:
-        print("download blocked: %s" % exc, file=sys.stderr)
+        print("download blocked: %s; inspect the matching getter and any saved outputs; "
+              "do not resubmit or infer a refund" % exc, file=sys.stderr)
         return 2
 
 

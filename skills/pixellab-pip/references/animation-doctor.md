@@ -56,6 +56,7 @@ Every change is listed with `fixed` or `still failing` (re-measured after fixing
 by holding its neighbour, reordering frames) are proposals like effect changes, since they repeat or move frames
 PixelLab returned; with `--accept` they are applied and listed; `timing.json` has the order and per-frame durations
 (a 0 ms frame is a dropped one kept as a copy, for engines that load a fixed frame count).
+Input GIF zero-delay frames remain unchanged in `--check-only` reports. Repair output is refused before writing because its verified preview requires positive durations; choose playback timing explicitly through `local-asset-assembly.md` rather than treating a source zero delay as an accepted drop or inventing a delay.
 
 ## Proposals: ask before touching effects
 

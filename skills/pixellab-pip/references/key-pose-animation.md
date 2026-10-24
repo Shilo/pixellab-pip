@@ -37,6 +37,8 @@ For exaggerated fast moves, useful pose components are an explicit dynamic pose,
 
 ## Pose review checkpoint
 
+Apply `SKILL.md` → Auth And Execution's first-candidate checkpoint before expanding pose generation, with approved wider scope handled by `auto.md` → The cost-approval gate. The joint review here is the checkpoint before interpolation, not a substitute for that earlier checkpoint.
+
 Show the still and the exact pose files proposed for interpolation together at a useful inspection scale and run the look checklist below. Apply the content checkpoint/delegation rule in `auto.md` → Bounded plans and resuming. Any changed pose must be reviewed again before it is used. A redo is paid work within the expressly approved retry scope, or needs additional approval.
 
 When a presentation is available, offer the interactive review in `panel.md` for this checkpoint; build its private snapshot only if that review is wanted.

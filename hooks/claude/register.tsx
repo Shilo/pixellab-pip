@@ -5,6 +5,7 @@ const TOOL = 'mcp__pixellab-pip__panel'
 const PANE = 'pixellab-pip-panel'
 const MAX_SNAPSHOT = 4 * 1024 * 1024
 const SVG_LIMIT = 120000
+const PREVIEW_WIDTH = 320
 const LABEL_KEYS = ['title', 'project', 'run', 'style', 'none', 'snapshot', 'snapshot_help', 'charged', 'committed', 'unknown',
   'preview_alt', 'note', 'request', 'redo', 'animate', 'policy_short', 'empty_note', 'style_none',
   'draft_ready', 'draft_unavailable', 'no_images', 'native_preview_unavailable', 'setup',
@@ -72,12 +73,14 @@ export function previewStrips(images: PanelImage[]) {
       continue
     }
     const last = groups[groups.length - 1]
-    if (last && svg([...last, image], width([...last, image])).source.length <= SVG_LIMIT) last.push(image)
+    if (last && width([...last, image]) <= PREVIEW_WIDTH / 2 &&
+        svg([...last, image], width([...last, image])).source.length <= SVG_LIMIT) last.push(image)
     else groups.push([image])
   }
-  // Equal viewport and element widths preserve one pixel scale across all strips.
+  // One integer scale keeps small sprites readable without changing relative pixel sizes.
   const sharedWidth = Math.max(1, ...groups.map(width))
-  return { strips: groups.map(group => svg(group, sharedWidth)), unavailable }
+  const scale = Math.max(1, Math.min(4, Math.floor(PREVIEW_WIDTH / sharedWidth)))
+  return { strips: groups.map(group => ({ ...svg(group, sharedWidth), scale })), unavailable }
 }
 
 async function load($: any, path: string) {
@@ -130,7 +133,7 @@ async function openReview($: any, s: PanelSnapshot, path: string) {
   const args = [$.plugin.root + '/skills/pixellab-pip/assets/panel.py', 'open', path]
   try {
     const python = /^[A-Za-z]:|^\\\\/.test(path) ? 'python' : 'python3'
-    const result = await $.process.run([python, ...args])
+    const result = await $.process.run([python, ...args], { cwd: $.plugin.root })
     if (result.exitCode !== 0 || JSON.parse(result.stdout).opened !== true) throw new Error('Review opener did not confirm success.')
     $.ui.toast(s.labels.opened_review)
   } catch { $.ui.toast(s.labels.open_failed) }
@@ -186,13 +189,13 @@ export const register: Register = on => {
       {s.warnings.map((warning, i) => <Text key={'warning-' + i}>{warning}</Text>)}
       {empty && <Text>{l.welcome}</Text>}
       {visible && strips.map((strip, i) => <Box key={'strip-' + i} flexDirection="column">
-        <Svg source={strip.source} width={strip.width} height={strip.height} alt={l.preview_alt} />
+        <Svg source={strip.source} width={strip.width * strip.scale} height={strip.height * strip.scale} alt={l.preview_alt} />
         <Text>{strip.images.map(image => image.role).join(' · ')}</Text>
       </Box>)}
       {(visible ? unavailable : s.images).map((image, i) => <Text key={'unavailable-' + i}>{image.role + ': ' + l.native_image_unavailable}</Text>)}
       {!s.images.length && !empty && <Text>{l.no_images}</Text>}
       {!visible && s.images.length > 0 && <Text>{l.native_preview_unavailable}</Text>}
-      <Button key="open-review" label={l.open_review} onPress={() => void openReview($, s, path)} />
+      {e.surface !== 'mobile' && <Button key="open-review" label={l.open_review} onPress={() => void openReview($, s, path)} />}
       {canInput && empty && <Box flexDirection="row" gap={1}>
         <Button key="new-character" label={l.new_character} onPress={() => { note = l.character_prompt; $.ui.invalidate('ui.render') }} />
         <Button key="new-attack" label={l.new_attack} onPress={() => { note = l.attack_prompt; $.ui.invalidate('ui.render') }} />
@@ -202,7 +205,7 @@ export const register: Register = on => {
       {canInput && <Button key="request" label={l.request} onPress={() => void draft($, 'request', s, path)} />}
       {canReview && <Button key="redo" label={l.redo} onPress={() => void draft($, 'redo', s, path)} />}
       {canReview && <Button key="animate" label={l.animate} onPress={() => void draft($, 'animate', s, path)} />}
-      {empty && <Button key="guide" label={l.guide} onPress={() => { note = l.guide_prompt; void draft($, 'guide', s, path) }} />}
+      {empty && <Button key="guide" label={l.guide} onPress={() => { if (!note.trim()) note = l.guide_prompt; void draft($, 'guide', s, path) }} />}
       {empty && <Button key="setup" label={l.setup} onPress={() => void draft($, 'setup', s, path)} />}
       <Text dimColor>{l.policy_short}</Text>
     </Box>

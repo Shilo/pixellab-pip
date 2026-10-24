@@ -1,6 +1,8 @@
 # Security And Trust
 
-PixelLab Pip is a Markdown Agent Skill with small local Python helpers for completion sound and conservative background-removal validation. It contains no compiled binaries. Guidance, routing, prompt preparation, and setup planning work without a PixelLab token.
+PixelLab Pip is a Markdown Agent Skill with local Python helpers for sound, asset processing, accounting and restricted downloads. It contains no compiled binaries. Guidance, routing, prompt preparation, and setup planning work without a PixelLab token.
+
+The ordinary Claude plugin registers an optional native review adapter at session startup; its user-clicked full-review button invokes the bundled `panel.py open` through local Python to validate and open a private standalone review in the host's browser, without paid work or settings changes.
 
 ## What Pip Can Access
 

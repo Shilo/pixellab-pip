@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import io
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from http.client import IncompleteRead
 import subprocess
 import sys
@@ -66,10 +66,13 @@ class FetchTests(unittest.TestCase):
                 run = self.root / ("direct" if direct else "job")
                 out = run / "raw.png"
                 args = ["--url", "https://backblaze.pixellab.ai/file/result.png", str(out)] if direct else [
-                    "job-truncated", str(out), "--run", str(run), "--estimate", "7", "--timeout", "0.001"]
+                    "job-truncated", str(out), "--run", str(run), "--estimate", "7", "--timeout", "1"]
                 output = io.StringIO()
-                with patch.object(fetch.OPENER, "open", return_value=Resp()), redirect_stdout(output):
+                with patch.object(fetch.OPENER, "open", return_value=Resp()) as download, \
+                        patch.object(fetch, "time") as clock, redirect_stdout(output):
+                    clock.monotonic.side_effect = [0, 0, 1]
                     self.assertEqual(fetch.main(args), 3)
+                download.assert_called_once()
                 self.assertIn("matching getter", output.getvalue())
                 self.assertIn("do not resubmit", output.getvalue())
                 self.assertFalse(out.exists())
@@ -77,6 +80,20 @@ class FetchTests(unittest.TestCase):
                     self.assertEqual(manifest.committed(str(run)), 7)
                     self.assertEqual(manifest.jobs(str(run))[0]["job_id"], "job-truncated")
                     self.assertEqual(manifest.jobs(str(run))[0]["status"], "submitted")
+                    self.assertEqual(manifest.jobs(str(run))[0]["download_status"], "wait")
+
+    def test_blocked_result_keeps_credit_reservation_and_explains_recovery(self) -> None:
+        run = self.root / "blocked"
+        out = run / "raw.png"
+        stderr = io.StringIO()
+        with patch.object(fetch, "_download", return_value=b"<html>login required</html>"), redirect_stderr(stderr):
+            self.assertEqual(fetch.main(["job-html", str(out), "--run", str(run), "--estimate", "7"]), 2)
+        self.assertIn("matching getter", stderr.getvalue())
+        self.assertIn("saved outputs", stderr.getvalue())
+        self.assertIn("do not resubmit or infer a refund", stderr.getvalue())
+        self.assertFalse(out.exists())
+        self.assertEqual(manifest.committed(str(run)), 7)
+        self.assertEqual(manifest.jobs(str(run))[0]["status"], "submitted")
 
     def test_writes_manifest_entry(self) -> None:
         fetch.get = lambda job, index=None, **kwargs: ("ok", PNG)

@@ -50,6 +50,63 @@ class AutoPolicyTests(unittest.TestCase):
         self.assertNotIn("private value", json.dumps(output))
         self.assertEqual(self.config.read_bytes(), original)
 
+    def test_utf8_bom_config_stays_authoritative_and_preserves_restrictions(self) -> None:
+        data = {"auto": True, "bark": False, "budget": 0, "other": {"keep": 7}}
+        original = b"\xef\xbb\xbf" + json.dumps(data).encode("utf-8")
+        self.config.write_bytes(original)
+        fallback = self.config.with_name("fallback.json")
+        fallback.write_text('{"auto": true}', encoding="utf-8")
+        with patch.object(bark, "safe_user_config_path", return_value=fallback):
+            status = self.run_command("status")[1]
+            self.assertEqual(status["config"], str(self.config))
+            self.assertIsNone(status["invalid_config"])
+            self.assertIs(status["auto"], False)
+            self.assertIs(status["bark"], False)
+            self.assertEqual(status["legacy_policy"], {"budget": 0})
+            self.assertEqual(self.config.read_bytes(), original)
+            self.assertEqual(self.run_command("auto-on")[0], 1)
+            self.assertEqual(self.run_command("off")[0], 0)
+        self.assertEqual(json.loads(self.config.read_text()), data)
+        self.assertEqual(fallback.read_text(), '{"auto": true}')
+
+    def test_transient_windows_replace_denial_reuses_prepared_toggle(self) -> None:
+        self.write({"auto": False, "other": {"keep": 7}})
+        real_replace = Path.replace
+        attempts = []
+        denied = PermissionError("temporarily held by a Windows reader")
+        denied.winerror = 5
+
+        def replace(source, target):
+            attempts.append((source, source.read_bytes()))
+            if len(attempts) == 1:
+                raise denied
+            return real_replace(source, target)
+
+        with patch.object(Path, "replace", new=replace), patch.object(bark.time, "sleep"):
+            result, output = self.run_command("auto")
+        self.assertEqual(result, 0, output)
+        self.assertIs(output["auto"], True)
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(attempts[0], attempts[1])
+        self.assertEqual(json.loads(self.config.read_text()), {"auto": True, "other": {"keep": 7}})
+        self.assertFalse(list(self.config.parent.glob("*.tmp")))
+
+    def test_failed_replacement_preserves_config_and_cleans_prepared_file(self) -> None:
+        for winerror, expected_attempts in ((5, 2), (None, 1)):
+            with self.subTest(winerror=winerror):
+                original = self.write({"auto": False, "budget": 0, "other": 7})
+                denied = PermissionError("replacement denied")
+                if winerror is not None:
+                    denied.winerror = winerror
+                with patch.object(Path, "replace", side_effect=denied) as replace, \
+                        patch.object(bark.time, "monotonic", side_effect=[0, 0, 1]), \
+                        patch.object(bark.time, "sleep"):
+                    with self.assertRaises(PermissionError):
+                        bark.write_text_atomic(self.config, '{"auto":true}')
+                self.assertEqual(replace.call_count, expected_attempts)
+                self.assertEqual(self.config.read_bytes(), original)
+                self.assertFalse(list(self.config.parent.glob("*.tmp")))
+
     def test_any_legacy_key_requires_reconciliation_including_invalid_values(self) -> None:
         for policy in ({"level": "auto"}, {"level": "unknown"}, {"budget": 45},
                        {"budget": None}, {"budget": -1}, {"retries": 0},
@@ -201,7 +258,7 @@ class AutoPolicyTests(unittest.TestCase):
         retained = {"bark": False, "other": {"budget": 9}, "auto_budget": 8}
         self.write({"auto": True, "level": "plan", "budget": 45, "retries": 2, **retained})
         result, output = self.run_command("auto-reset")
-        self.assertEqual(result, 0)
+        self.assertEqual(result, 0, output)
         self.assertIs(output["auto"], False)
         self.assertEqual(json.loads(self.config.read_text()), {"auto": False, **retained})
         self.assertIs(self.run_command("status")[1]["requires_reconciliation"], False)

@@ -4,6 +4,24 @@ The runtime weapon, fighting and armour pages (`skills/pixellab-pip/references/`
 These are the public works and reference sheets each page was described from. They are kept here because they add no
 agent decision at runtime.
 
+The index below records the supplied contribution's source descriptions; it is not an independent verification of every unnamed sketch sheet's provenance. Later pages without a supplied source list are identified explicitly rather than assigned invented citations.
+
+## weapon-anime.md
+
+Adapted from the later PR #11 production contribution at `e531328`. No external reference-sheet bibliography was supplied for this page; its exaggerated choreography examples are advisory rather than independently calibrated results.
+
+## weapon-firearms.md
+
+Adapted from the same PR #11 contribution. No page-specific external source list was supplied. Grip, recoil and reload descriptions are animation guidance, not a verified catalogue of firearm mechanisms.
+
+## weapon-futuristic.md
+
+Adapted from the same PR #11 contribution. Its fictional arm-cannon, energy-weapon and mechanical-limb choreography has no supplied external reference-sheet bibliography or universal physical calibration.
+
+## weapon-whip.md
+
+The contributed page reports one Pro Flash key-pose/`animate_image` overhead-crack experiment and explicitly says there is no reference sheet. Side-lash and wrap variations were untested. These are the contributor's reported observations, not a new reproduction of that experiment.
+
 ## weapon-axe.md
 
 Fiore dei Liberi (pollaxe), Talhoffer 1467 (Mordaxt), P. H. Mair (halberd), Muybridge 1887 (hatchet and pick swings), a CC BY-SA axe-swing sprite, and four axe and halberd sketch sheets.

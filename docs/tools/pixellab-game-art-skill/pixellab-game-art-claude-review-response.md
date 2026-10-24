@@ -61,3 +61,54 @@ Focused verification used genuine Pillow 13: 23 Auto/Bark tests, 28 manifest tes
 Real headless Edge decoded four previews including GIF, changed shared zoom, composed identity-bound feedback with literal script-looking notes, and made no page network requests or runtime exceptions. Desktop and narrow screenshots were inspected. The actual HTML-template DOM test passed localized notes, explicit bridge click, missing-bridge/standalone fallback and failed-preview invalidation. These browser/DOM checks do not claim live native painting or live inline confirmation.
 
 The first integrated QA's Windows replacement failure is retained as diagnostic evidence, not reported as a pass. Full repository QA and the published checks on the final commit are the final acceptance gates; their exact-head results are recorded on [PR #11](https://github.com/Shilo/pixellab-pip/pull/11). The PR remains unmerged, and no paid PixelLab call or real user-settings edit was made for this review.
+
+## Final Claude review: challenged closeout
+
+The final Claude report reviewed `d14d437deeb0673ff4b18068ce19d2c260269a77`: 353 Python tests, 20 native tests and exact-head CI had passed. It performed no new test runs. Its findings were independently challenged before implementation, including its optional recommendations. No further general Claude review round is planned; Codex owns implementation and final verification. Earlier acceptance records remain tied to their old heads.
+
+| Final finding | Resolution and rationale |
+|---|---|
+| FINAL-01 | Fixed conflicting retry authority. Global/cost routes point to the canonical bounded-plan allowance; cinematic cards state both cap and allowed re-rolls. A cap alone authorizes no retries. |
+| FINAL-02 | Fixed ambiguous whole-chain language. Auto suppresses cost prompts only; content checkpoints still stop execution unless explicitly delegated. An Auto-on card is not content/scope approval. |
+| FINAL-03 | Fixed native readability with a shared integer scale bounded from 1 to 4. Rejected the report's incorrect 288px expectation: three 48px poses plus two 8px gaps form 160px, rendered at 2× as 320×96 for 48px height. A later four-pose counterexample led to bounded row grouping: four 48px poses use two rows at that same 2× scale. Tests assert actual `Svg` properties. A truly wide canvas can still require 1×; full HTML offers shared zoom. |
+| FINAL-04 | Fixed omitted `--tool` erasing the recorded tool during a charge update. Existing final-status preservation already worked; the regression now checks identity, estimate, actual charge and status together. |
+| FINAL-05 | Fixed generic blocked-download recovery text. It directs inspection of getters/saved outputs and prohibits resubmission or refund assumptions, including invalid returned image data. |
+| FINAL-06 | Rejected ordinary Auto writes deleting restrictive legacy keys. `auto on` names a boolean setting, not consent to discard an existing cap; reporting deletion afterward does not supply that consent. Retained informed reset and clarified that one explicit instruction to discard old limits and enable Auto executes reset then on in the same turn, without another confirmation. |
+| FINAL-07 | Prepared the corrected PR description for publication after final-head verification. It distinguishes native PNG scaling, HTML GIF/zoom, the optional bundled renderer bridge, current tests and historical benchmarks. |
+| FINAL-08 | Replaced branch/prototype wording with durable integration wording and pointed current-validation links to this record. Historical plans/demos stay labeled historical. |
+| FINAL-09 | Disclosed the optional startup-registered Claude adapter and its user-clicked local Python/browser opener in README and both security documents. |
+| FINAL-10 | Retained the bridge with evidence: installed bundled `visualize:visualize` 1.0.55, `SKILL.md`, Composition, line 101 explicitly documents asking Codex through `window.openai.sendFollowUpMessage({prompt,title})`. The runtime reference cites this portable contract identifier. This is not a general public Codex API guarantee or live-host verification; actual-capability/click checks and copy fallback remain mandatory. |
+| FINAL-11 | No separately defined finding was supplied under this ID. Its mention in FINAL-07 is treated as a report cross-reference error, not an invented implementation requirement. All supplied bridge/claim corrections are covered by FINAL-07/10. |
+| FINAL-12 | Strengthened the truncated-response test: it deterministically reaches the download/getter catch, asserts a real mocked download attempt and `download_status: wait`, and verifies preserved reservation and no output. |
+
+### Optional items and remaining scope
+
+| Item | Challenged disposition |
+|---|---|
+| A3 | Accept UTF-8 BOM JSON with `utf-8-sig`, preserving primary-file authority and restrictive values. Corrupt/nonfinite data still fails closed. |
+| A5 | Clarify explicitly approved, previewed host edits may change/remove legacy project limits. Appearance commands still do not erase them. |
+| A2 | Reject stdin plan input without a demonstrated need. Existing bounded JSON-file input satisfies the current workflow; no unused interface added. |
+| N3 | Run the fixed bundled opener from the plugin root through the documented `cwd` option. This reduces session-directory executable exposure; it is not a guarantee about every configured PATH. |
+| N5 | Guided help preserves a typed note rather than replacing it. |
+| N6 | Hide the host-browser launch button on mobile; do not pretend it opens a browser on the remote viewing device. |
+| H5 | Validate all `--fx`/`--keys` values and bounds across all selected animations before output creation. |
+| H6 | Reject the proposed silent zero-delay-to-100ms rewrite. Check-only preserves every source frame and zero timing; repair fails before writes and explains that positive preview timing needs an explicit choice through existing assembly guidance. This avoids source-frame dropping, invented timing and late partial output. |
+| H7 | Put unreadable-ledger diagnostics ahead of dated results within the same history limit; disclose that priority rather than silently hiding unknown accounting. |
+| P04 | Index the four missing weapon pages using supplied provenance and explicit missing-bibliography limits. Do not invent external sources or claim new calibration. |
+| P05 | Disclose that prototype demo art has no separately supplied art licence. The adopted source notice explicitly excludes generated/supplied art; no new redistribution grant is invented. |
+| P06 | Local native validation uses the [documented nonessential-traffic option](https://code.claude.com/docs/en/env-vars). Retain the existing pinned native CI commands; the optional CI environment change is deferred rather than expanding publishing permissions for a nonessential change. Model/account calls remain unnecessary. |
+| P07 | Pin the already-tested NumPy 2.4.0 and SciPy 1.17.1 development dependencies for reproducible QA. Their [NumPy](https://pypi.org/project/numpy/2.4.0/) and [SciPy](https://pypi.org/project/scipy/1.17.1/) metadata support Python 3.11+ and reported no package advisories when checked; that is not a permanent security guarantee. |
+| P09 | Mark the four later CLI benchmark scenarios as unrun at the revised head. Reviewed the actual benchmark additions: they extend heuristic routing checks, not proof of complete execution or safety. |
+| `find_muzzle` | Record deliberate omission after reading the source: it guesses a shot/muzzle/clear box from bright blobs in contiguous numbered PNGs and requires visual confirmation anyway. Existing explicit shot/muzzle inputs preserve the production route; no current need justifies importing another uncalibrated heuristic. |
+
+The final report's dropped N2/N4/N7/N8/H2/H8 suggestions remain unnecessary: no interpreter retries, extra toast-path machinery, Enter-to-draft, duplicate candidate routing, lock stealing or audit-as-authority enforcement was added. Native release-workflow tests remain unnecessary because that release packages the raw skill. These omissions do not remove applicable correctness boundaries.
+
+A fresh independent whole-PR audit found an additional palette defect: when one visible color exceeded 99% and another color existed, style analysis could discard every significant color and report zero saturation/brightness. The cumulative cutoff now includes the color crossing the coverage threshold. A transparent-border real-image regression checks the dominant blue palette/swatch, measured saturation/brightness and unchanged source; the auditor reran its original failing fixture successfully after the fix. An offline routing evaluator also checked Auto/content review, zero retries, legacy enable/reset, zero-delay GIF inspection and unsupported mobile previews; the initial-candidate and joint pose checkpoints are kept distinct.
+
+A subsequent full-QA pass exposed an intermittent Windows settings-replacement failure, reproduced once in 500 synthetic resets as an access denial during atomic replacement. The writer now briefly retries only that same prepared replacement for Windows access/sharing errors; it never repeats the toggle, changes config precedence or claims an unverified setting. Persistent and unrelated permission failures preserve the original file and clean the owned temporary file. All 21 Auto tests and 2,000 reset repetitions passed afterward; the failed QA run remains diagnostic evidence, not an acceptance pass.
+
+### Security and evidence reconciliation
+
+Ordinary authenticated GitHub API access confirmed nine open default-branch alerts, all in `requirements-dev.txt` for Pillow, with first patched version 13.0.0. The PR already pins 13.0.0 and centrally guards decoding; the open main-branch alerts are not newly introduced vulnerabilities. See the provider's [13.0.0 security fixes](https://pillow.readthedocs.io/en/stable/releasenotes/13.0.0.html). Alert closure is a GitHub/default-branch event, not something claimed before merge. The PR remains unmerged.
+
+Live native painting, actual host-browser launching, inline confirmation/cancellation, provider art quality, real engine imports and private threshold calibration remain unverified. They are separated from deterministic tests, actual standalone-browser checks and documented optional host contracts. The final audit rechecks the original R01–R29 and the 22 task families against current code; it does not turn old prototype demonstrations or missing private data into new proof. Final integrated QA/native results and published checks apply only to the final committed head, as recorded on the PR.

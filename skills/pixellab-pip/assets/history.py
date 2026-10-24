@@ -7,6 +7,8 @@ Date bounds include both UTC calendar dates and select recorded job creation tim
 Unknown dates do not match a date query. Filters apply before the newest-N limit;
 counts/costs describe matching calls. Historical manifests without dates remain
 searchable by job/tool, with dates and unavailable costs labeled unknown.
+Unreadable ledgers take precedence over dated runs within the same --runs limit;
+their unknown contents cannot be assumed to fall outside a filter.
 """
 from __future__ import annotations
 
@@ -68,7 +70,7 @@ def history(root: str, runs: int, *, since: date | None = None, until: date | No
                     "outcomes": dict(Counter(j["outcome"] for j in matches if j.get("outcome"))),
                     "entries": [{k: j[k] for k in ("job_id", "tool", "status", "created_at", "outcome", "outputs") if k in j}
                                 for j in matches]})
-    return sorted(out, key=lambda r: (r["created_at"] or "", r["name"]), reverse=True)[:runs]
+    return sorted(out, key=lambda r: ("error" in r, r["created_at"] or "", r["name"]), reverse=True)[:runs]
 
 
 def main(argv=None) -> int:

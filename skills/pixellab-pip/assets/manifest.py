@@ -241,7 +241,9 @@ def main(argv: list[str]) -> int:
             fn = spent if args.command == "spent" else committed
             out = {args.command: sum(fn(run) for run in dict.fromkeys(args.runs))}
         elif args.command == "add":
-            entry = {"job_id": args.job, "tool": args.tool, "status": "submitted"}
+            entry = {"job_id": args.job, "status": "submitted"}
+            if args.tool:
+                entry["tool"] = args.tool
             for field, value in (("reported_usage", args.generations), ("estimated_usage", args.estimate)):
                 if value is not None:
                     entry[field] = {"generations": number(value)}

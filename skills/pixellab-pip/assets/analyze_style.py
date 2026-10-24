@@ -95,7 +95,7 @@ cols, cnt = np.unique(allpx, axis=0, return_counts=True)
 order = cnt.argsort()[::-1]
 cols, cnt = cols[order], cnt[order]
 n_colours = len(cols)
-sig = cols[np.cumsum(cnt) / cnt.sum() <= 0.99] if n_colours > 1 else cols   # ignore the 1% tail of stray pixels
+sig = cols[(np.cumsum(cnt) - cnt) / cnt.sum() < 0.99]   # include the colour that reaches 99%, omit the remaining tail
 palette = ['#%02x%02x%02x' % tuple(c) for c in (sig if len(sig) <= 64 else cols[:32])]
 
 hsv = np.array([colorsys.rgb_to_hsv(*(c / 255.0)) for c in sig]) if len(sig) else np.zeros((0, 3))

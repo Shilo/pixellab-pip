@@ -19,7 +19,7 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Table Of Contents
 
-- [Merge Prototype](#merge-prototype)
+- [Game Art Integration](#game-art-integration)
 - [Showcase](#showcase)
 - [Features](#features)
   - [Create Pixel Art You Want](#create-pixel-art-you-want)
@@ -33,9 +33,9 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 - [Security](#security)
 - [More Documentation](#more-documentation)
 
-## Merge Prototype
+## Game Art Integration
 
-This branch integrates useful [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) production capabilities into Pip's one portable skill:
+Pip integrates useful [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) production capabilities into one portable skill:
 
 - User-approved project styles and family references, with temporary selection and ordinary one-off use.
 - Animation inspection, explicitly accepted repair copies and schema-checked repair proposals.
@@ -44,7 +44,7 @@ This branch integrates useful [pixellab-game-art](https://github.com/lexingel/pi
 
 Every host uses the existing Pip entry point. Useful `level` controls are consolidated into `auto plan <budget> [retries] [task]` for an identified run: Auto off asks first; Auto on runs within the limits unless the user requests approval or a dry run. `/pixellab-pip panel` opens interactive project/output review through supported native Claude UI or portable HTML; unsupported hosts receive an explicit fallback. The separate Studio package and its credential connector stay removed. Spending settings never authorize visual/playback changes.
 
-See [integration and migration](docs/merge/README.md) and the [adversarial review/remediation plan](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-implementation-plan.md) for decisions and current validation. The earlier three prototype production demos and Claude routing benchmark remain [historical evidence](docs/merge/demo/README.md), not proof of the revised implementation or every host/engine.
+See [integration and migration](docs/merge/README.md) and the [review response and current validation](docs/tools/pixellab-game-art-skill/pixellab-game-art-claude-review-response.md). The earlier three prototype production demos and Claude routing benchmark remain [historical evidence](docs/merge/demo/README.md), not proof of the revised implementation or every host/engine.
 
 Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. Adopted source notices are preserved inside the skill distribution.
 
@@ -226,6 +226,8 @@ Dated, nondeterministic results from 20 scenarios and three agents: official doc
 ## Security
 
 Pip is Markdown instructions plus small local helpers. Standard-library helpers support Python 3.10+; image helpers use Python 3.11+ with security-patched Pillow 13 or newer. It ships no compiled binaries, the helpers make no network calls except the job download helper, which fetches results from PixelLab's own download host, and guidance, setup, and routing work without a PixelLab token. Live generation may spend credits and requires a bearer token, but Pip never needs it pasted into chat, never automates undocumented private endpoints, asks before destructive remote changes, and labels local processing.
+
+The ordinary Claude plugin also registers an optional native review adapter whose user-clicked full-review button runs the bundled `panel.py open` through local Python and may launch the host's browser; it submits no paid work or settings changes.
 
 Read [Security and trust ↗](docs/security.md) for the complete access boundary, public audits, release provenance, and scanner disclosures, or [report a concern ↗](SECURITY.md).
 

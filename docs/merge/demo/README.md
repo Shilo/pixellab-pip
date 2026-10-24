@@ -2,6 +2,8 @@
 
 Historical prototype evidence, recorded before PR #11 remediation. The Studio UI/approval levels described here are no longer shipped. These results do not validate the revised head; see the [current integration record](../README.md).
 
+The demo images are generated-art artifacts supplied with the prototype contribution; the source-code MIT notice does not itself establish a separate art licence, and none was supplied. Treat them as review evidence and obtain the contributor's permission/appropriate rights before independent redistribution.
+
 One headless Claude Code session with only this branch installed: the `pixellab-pip` core and the
 `pixellab-pip-studio` edition, loaded as plugins. Nobody answered questions during the run, and the older
 `pixellab-game-art` skill was moved out first. The session was told to read only the installed skill.

@@ -43,7 +43,7 @@ Any `invalid_config` warning or failed status read blocks paid work until the so
 
 Earlier merge builds saved installation-wide `level`, `budget`, and `retries`. `status` exposes them as `legacy_policy` and sets `requires_reconciliation: true` when any exists, including null or invalid values. Auto stays off, enabling is rejected, and ordinary Auto off/Bark commands preserve these restrictions.
 
-Before spending, clarify the old restrictions' units/scope and reconcile them with a named approved plan; never infer zero/unlimited. Explain that `auto reset` deliberately discards all three settings and turns Auto off, preserving other keys. An informed explicit reset supplies acceptance; do not ask again. Reset grants no spending authority or release from applicable current-run restrictions. Without reset, retain them and use only the reconciled plan. Project-profile restrictions follow `project-style.md`.
+Before spending, clarify the old restrictions' units/scope and reconcile them with a named approved plan; never infer zero/unlimited. Explain that `auto reset` deliberately discards all three settings and turns Auto off, preserving other keys. An informed explicit reset supplies acceptance; do not ask again. If the user explicitly requests discarding those limits and enabling Auto, run reset then on in the same turn; no separate confirmation is needed. Reset grants no spending authority or release from applicable current-run restrictions. Without reset, retain them and use only the reconciled plan. Project-profile restrictions follow `project-style.md`.
 
 ## The cost-approval gate
 
@@ -91,16 +91,16 @@ Filled example:
 
 Handle the reply by intent, not literal tokens — infer what the user means from whatever they write (any wording, any language) and map it to one of these:
 
-- yes / ok / approve / continue → run the approved chain, with no further per-call permission asks.
-- "auto" → run the `auto` command (turn it on and persist it), then continue the chain without re-prompting. This reply approves the current job; if the setting cannot be persisted, still continue and report that separately rather than re-asking.
+- yes / ok / approve / continue → run the approved chain, with no further cost-permission asks; keep its content checkpoints.
+- "auto" → run the `auto` command (turn it on and persist it), then continue the chain without cost re-prompting. This reply approves the current job's listed scope, with content checkpoints intact; if the setting cannot be persisted, still continue the approved job and report that separately rather than re-asking.
 - change → adjust, and re-show the block only if the paid plan materially changed; otherwise proceed.
 - decline / no → stop before spending.
 
-Ask only once. After approval, run the whole approved chain without re-gating. If the plan later turns into a paid call the user did not approve — a different route, an extra retry or candidate, a batch expansion — that new spend needs its own brief approval. Free or local work (downloads, assembly, verification, balance/status reads, and the like) is never gated.
+Ask for cost approval only once. After approval, run the whole approved chain without cost re-gating, retaining content checkpoints. If the plan later turns into a paid call the user did not approve — a different route, an extra retry or candidate, a batch expansion — that new spend needs its own brief approval. Free or local work (downloads, assembly, verification, balance/status reads, and the like) is never gated.
 
 ### When auto is on — run, but show what's happening
 
-Don't pause and don't gate per call, but still show the plan. Once, early (before or at the first paid call), post the same numbered list of predicted paid calls as the off-mode message above — identical per-call inputs, rough per-call and total cost, `(enhanced)`/`(rerouted)` flags, and the same localization rules. Only the framing changes: the ⚡ auto header replaces the 💳 approval header, the reply prompt is dropped, and a disable tip replaces the enable tip. Then run the whole chain without re-prompting.
+Don't pause for cost approval or gate per call, but still show the plan. Once, early (before or at the first paid call), post the same numbered list of predicted paid calls as the off-mode message above — identical per-call inputs, rough per-call and total cost, `(enhanced)`/`(rerouted)` flags, and the same localization rules. Only the framing changes: the ⚡ auto header replaces the 💳 approval header, the reply prompt is dropped, and a disable tip replaces the enable tip. Then run the whole chain without cost re-prompting; content checkpoints still stop the chain, and an Auto-on card is not scope or content approval.
 
 Template — reuse the off-mode numbered blocks verbatim; only the header and footer differ:
 

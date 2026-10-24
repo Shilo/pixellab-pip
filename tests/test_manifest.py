@@ -245,6 +245,18 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(manifest.committed(self.run), 5)
         self.assertEqual(manifest.main(["spent", self.run]), 2)
 
+    def test_cli_usage_update_preserves_tool_estimate_and_finished_status(self) -> None:
+        for args in (["add", self.run, "a", "--tool", "animate_image", "--estimate", "4"],
+                     ["done", self.run, "a"], ["add", self.run, "a", "--generations", "4"]):
+            result = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        (entry,) = manifest.jobs(self.run)
+        self.assertEqual(entry["tool"], "animate_image")
+        self.assertEqual(entry["status"], "ok")
+        self.assertEqual(entry["reported_usage"], {"generations": 4})
+        self.assertEqual(entry["estimated_usage"], {"generations": 4})
+        self.assertEqual(manifest.spent(self.run), 4)
+
     def test_concurrent_process_mutations_keep_all_jobs_and_outcomes(self) -> None:
         manifest.add_job(self.run, job("base", 2))
         snippets = [f"manifest.add_job({self.run!r}, {job(str(i), 6)!r})" for i in range(6)]

@@ -144,6 +144,18 @@ def main(argv=None):
         ap.error('--accept requires one animation and cannot be combined with --check-only; rerun that animation alone')
     if not anims:
         sys.exit('no frames found in %s' % ' '.join(args.inputs))
+    indexes = {}
+    for flag, value in (('--fx', args.fx), ('--keys', args.keys)):
+        try:
+            indexes[flag] = {int(v.strip()) - 1 for v in value.split(',')} if value else set()
+        except ValueError:
+            ap.error('%s needs comma-separated positive frame numbers' % flag)
+        if any(i < 0 or any(i >= len(a.frames) for a in anims) for i in indexes[flag]):
+            ap.error('%s frame numbers must exist in every selected animation' % flag)
+    if not args.check_only and any(a.durations and any(d <= 0 for d in a.durations) for a in anims):
+        ap.error('GIF contains zero-delay frames; use --check-only to inspect it. '
+                 'Choose positive preview timing explicitly via local-asset-assembly.md before repair; '
+                 'source timing is unchanged')
     style = load_style(args.profile)
     out = _out_dir(args, anims)
     report_path = os.path.join(out, 'fix_report.json')
@@ -165,8 +177,7 @@ def main(argv=None):
         near = [os.path.join(os.path.dirname(os.path.abspath(p)), d, 'manifest.json') for p in (anim.paths[:1] or [anim.source]) for d in ('.', '..', '../..')]
         log = next((p for p in near if os.path.exists(p)), None)   # the run's manifest, beside or above the frames
         fixed, res = doctor(anim, accept, style, log, report_path, args.check_only, args.stepped,
-                            {int(v) - 1 for v in args.fx.split(',') if v.strip()},
-                            {int(v) - 1 for v in args.keys.split(',') if v.strip()})
+                            indexes['--fx'], indexes['--keys'])
         results.append(res)
         if args.check_only:
             continue

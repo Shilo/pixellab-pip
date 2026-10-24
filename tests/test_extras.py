@@ -56,6 +56,41 @@ class ExtrasTests(unittest.TestCase):
         r = run("history.py", "--root", root, "--json", "--runs", "1")
         self.assertEqual(len(json.loads(r.stdout)), 1)
 
+    def test_history_run_limit_does_not_hide_corrupt_ledgers(self) -> None:
+        root = self.dir / "history"
+        manifest.add_job(str(root / "recent"), {"job_id": "new", "tool": "animate_image",
+                         "created_at": "2026-01-02T12:00:00Z", "reported_usage": {"generations": 4}})
+        broken = root / "broken"
+        broken.mkdir()
+        path = broken / "manifest.json"
+        path.write_text('{"jobs":', encoding="utf-8")
+        before = path.read_bytes()
+        for filters in ([], ["--tool", "animate_image"], ["--since", "2026-01-01"]):
+            result = run("history.py", "--root", root, "--json", "--runs", "1", *filters)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            (row,) = json.loads(result.stdout)
+            self.assertEqual(row["name"], "broken")
+            self.assertIn("error", row)
+        self.assertEqual(path.read_bytes(), before)
+
+    @unittest.skipUnless(HAS_NUMPY, "numpy is not installed")
+    def test_style_analysis_keeps_dominant_color_over_99_percent(self) -> None:
+        source = self.dir / "reference.png"
+        image = Image.new("RGBA", (34, 34))
+        image.paste((0, 0, 255, 255), (1, 1, 33, 33))
+        image.putpixel((2, 2), (255, 0, 0, 255))
+        image.save(source)
+        before = source.read_bytes()
+        out = self.dir / "analysis"
+        result = run("analyze_style.py", source, "--out", out)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads((out / "analysis.json").read_text(encoding="utf-8"))
+        self.assertEqual(data["colours"], {"count": 2, "significant": 1, "palette": ["#0000ff"]})
+        self.assertEqual((data["saturation"], data["brightness"]), (1, 1))
+        with Image.open(out / "palette.png") as palette:
+            self.assertEqual(palette.getpixel((0, 0)), (0, 0, 255))
+        self.assertEqual(source.read_bytes(), before)
+
     @unittest.skipUnless(HAS_NUMPY, "numpy is not installed")
     def test_showcase_finds_existing_moves(self) -> None:
         # only attack + skill exist: the default move list must not ask for idle

@@ -2,6 +2,8 @@
 
 Historical prototype benchmark, not a test of the revised implementation. See the [current integration record](README.md).
 
+The later scenarios `inspect-without-repair`, `simple-attack`, `auto-preserves-art-authority` and `blueprint-as-reference` have not been run through the CLI benchmark at the revised head. Offline reviewer exercises and regex checks do not replace those agent runs; the results below apply only to the original 23-scenario prototype run.
+
 Claude arm only, 1 rep, working-tree skill (`python dev-tools/skill_benchmark.py --agents claude --variants current`), 2026-10-22. Dry: no PixelLab credits.
 
 Every one of the 23 scenarios passed all its checks (the 20 upstream scenarios plus 3 new routes: animation doctor, key-pose move, styled icons). The published upstream run (2026-07-06) scored about 98%.

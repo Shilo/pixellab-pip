@@ -311,6 +311,7 @@ test('bounded SVG strips retain supported PNGs beside GIFs and oversized images 
   expect(result.unavailable.length).toBe(2)
   expect(result.strips[0].width).toBe(32)
   expect(result.strips[1].width).toBe(32)
+  expect(result.strips.map(strip => strip.scale)).toEqual([4, 4])
   expect(result.strips[0].source).toContain('viewBox="0 0 32 1"')
   expect(result.strips[1].source).toContain('viewBox="0 0 32 1"')
   expect(result.strips[0].source).toContain('width="16"')
@@ -345,7 +346,7 @@ test('mobile without Input keeps the view usable and directs notes to supported 
   expect(await ui.find({ key: 'note' })).toBeUndefined()
   expect(await ui.find({ key: 'request' })).toBeUndefined()
   expect(await ui.find({ type: 'Text', text: /cannot edit notes/ })).toBeDefined()
-  expect(await ui.find({ key: 'open-review' })).toBeDefined()
+  expect(await ui.find({ key: 'open-review' })).toBeUndefined()
   await ui.unmount()
 })
 
@@ -371,6 +372,51 @@ test('native limit measures UTF-8 bytes rather than accepting multibyte text ove
   expect(() => parseSnapshot('あ'.repeat(1_400_000))).toThrow('4 MiB')
 })
 
+test('small poses render at a readable shared integer scale in actual Svg props', async ($, on) => {
+  const s = await fixture()
+  const pose = { ...s.images[0], width: 48, height: 48,
+    data_url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAaElEQVR4nNXOMQ0AIADAsLETnRhHCYjgIKuCjr3mIUziJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJE7iJM7fgVcXU1MCrlQyGAQAAAAASUVORK5CYII=',
+    sha256: '32413e3d6f6501bf3839bdffd5e5ab612f3307a2a48b78e82019b93d52d9ac46' }
+  s.images = ['standing', 'wind-up', 'hit'].map(role => ({ ...pose, role }))
+  engine(on, () => JSON.stringify(s))
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  const svg = await ui.find({ type: 'Svg' })
+  // Three 48px images plus two 8px gaps have viewBox width 160: 2x => 320, not 288.
+  expect(svg?.props.source).toContain('viewBox="0 0 160 48"')
+  expect(svg?.props.width).toBe(320)
+  expect(svg?.props.height).toBe(96)
+  expect(await ui.find({ key: 'animate' })).toBeDefined()
+  s.images.push({ ...pose, role: 'follow-through' })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const rows = await ui.findAll({ type: 'Svg' })
+  expect(rows.length).toBe(2)
+  for (const row of rows) {
+    expect(row.props.source).toContain('viewBox="0 0 160 48"')
+    expect(row.props.width).toBe(320)
+    expect(row.props.height).toBe(96)
+  }
+  await ui.unmount()
+  const large = previewStrips([{ ...pose, width: 1024, height: 512 }]).strips[0]
+  expect(large.scale).toBe(1)
+  expect(large.width).toBe(1024)
+})
+
+test('guided onboarding retains a typed request instead of replacing it', async ($, on) => {
+  const s = await fixture()
+  s.run = null; s.images = []; s.manifest_sha256 = null; s.review_ready = false
+  const h = engine(on, () => JSON.stringify(s))
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  await ui.input({ key: 'note', text: 'Guide a top-down forest project.' })
+  await ui.press({ key: 'guide' })
+  expect(requestFromDraft(h.drafts[0].text).note).toBe('Guide a top-down forest project.')
+  expect(h.writes.length).toBe(0)
+  await ui.unmount()
+})
+
 test('full review opener invokes only the bundled helper for the selected snapshot', async ($, on) => {
   const s = await fixture()
   const h = engine(on, () => JSON.stringify(s))
@@ -387,6 +433,7 @@ test('full review opener invokes only the bundled helper for the selected snapsh
   expect(calls[0].argv[0]).toBe('python3')
   expect(calls[0].argv[1]).toContain('/skills/pixellab-pip/assets/panel.py')
   expect(calls[0].argv.slice(2)).toEqual(['open', PATH])
+  expect(calls[0].init.cwd + '/skills/pixellab-pip/assets/panel.py').toBe(calls[0].argv[1])
   expect(h.toasts.join(' ')).toContain(s.labels.opened_review)
   expect(h.drafts.length).toBe(0)
   expect(h.writes.length).toBe(0)
