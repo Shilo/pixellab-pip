@@ -135,8 +135,12 @@ jobs:
           RELEASE_TAG: v${{ inputs.resume_version }}
         shell: bash
         run: |
+          rm -rf skills/pixellab-pip
           git restore --source="$RELEASE_TAG" --worktree -- skills/pixellab-pip
-          if ! git diff --quiet "$RELEASE_TAG" -- skills/pixellab-pip; then
+          # Compare against a scratch index of the tag: files main deleted or renamed after the tag are untracked here.
+          export GIT_INDEX_FILE="$RUNNER_TEMP/release-tag.index"
+          git read-tree "$RELEASE_TAG"
+          if ! git diff --quiet -- skills/pixellab-pip || [ -n "$(git ls-files --others -- skills/pixellab-pip)" ]; then
             echo "The working tree does not match ${RELEASE_TAG}'s skill files."
             exit 1
           fi
@@ -1121,6 +1125,7 @@ jobs:
           RELEASE_TAG: ${{ steps.bump.outputs.tag }}
           ASSET_NAME: ${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip
           PREVIOUS_TAG: ${{ steps.previous_tag.outputs.previous_tag }}
+          LATEST_FLAG: ${{ steps.bump.outputs.old_version != steps.bump.outputs.new_version && steps.bump.outputs.resume == 'true' && '--latest=false' || '' }}
         shell: bash
         run: |
           notes_args=(--generate-notes)
@@ -1160,7 +1165,7 @@ jobs:
             else
               gh release upload "$tag" "$asset"
             fi
-            gh release edit "$tag" --title "PixelLab Pip Skill $tag"
+            gh release edit "$tag" --title "PixelLab Pip Skill $tag" $LATEST_FLAG   # an older resumed tag never takes Latest
           else
             if ! grep -Eqi 'release not found|HTTP 404|Not Found' "$release_error"; then
               cat "$release_error"
@@ -1215,6 +1220,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VT_ANALYSIS: ${{ steps.virustotal.outputs.url }}
           GITHUB_ONLY: ${{ inputs.github_only }}
+          LATEST_FLAG: ${{ steps.bump.outputs.old_version != steps.bump.outputs.new_version && steps.bump.outputs.resume == 'true' && '--latest=false' || '' }}
         shell: bash
         run: |
           ver="${{ steps.bump.outputs.new_version }}"
@@ -1250,4 +1256,4 @@ jobs:
           """
           path.write_text(f"{body.rstrip()}\n\n{section.strip()}\n", encoding="utf-8")   # blank line: `---` under text renders as a heading
           PY
-          gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md
+          gh release edit "${{ steps.bump.outputs.tag }}" --notes-file notes.md $LATEST_FLAG
