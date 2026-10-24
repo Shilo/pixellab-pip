@@ -9,7 +9,7 @@ Read this for an explicitly requested standalone still character, candidates, co
 | Explicit Pro Flash standalone still | MCP `create_image_pro_flash` with the appropriate approved family anchor as `style_image`, when available | See `pro-flash.md` for supported sizes, costs and limits; observed detail/facing successes are scoped examples, not a new default. |
 | Many candidates at once, sprite ≤170 px | MCP `create_image_pro` (4 candidates at 86-170 px) | Ignores facing; a mirrored copy is a local derivative, so ask before mirroring. |
 | Cheap standalone still/draft or palette reference | MCP `create_image_pixflux` with `color_image_url` when appropriate | A palette reference influences colour; use the canonical palette routes for a hard constraint. |
-| Detailed redraw of an existing sprite | MCP `create_image_pro` with `reference_images` = the old sprite and `style_copy` | Keeps the subject, sharpens the art. |
+| Detailed redraw of an existing sprite | MCP `create_image_pro` with `reference_images` = the old sprite (usage: the subject to redraw) | Keeps the subject, sharpens the art. |
 | Managed character or multiple facings | Main router and `preset-skeleton-template-animation.md`; `eight-direction.md` for requested multi-direction moves | v3 supports quadrupeds with a matching south-facing reference/template; text-only creation is humanoid-only. |
 
 `style_image.usage_description` that worked: `match this sprite's outline weight, pixel detail, shading and palette`.

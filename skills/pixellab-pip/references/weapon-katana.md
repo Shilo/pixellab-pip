@@ -122,7 +122,7 @@ All four start from chudan and step in on the hit. Canvas: the raise puts the bl
 
 ## Basic kamae and draw cycles
 
-Use a stance name only with its visible description; the generator draws the description, not the term. Grip: right hand just below the guard, left hand near the pommel. Feet shoulder width, one forward, knees slightly bent. A katana is worn through the sash on the left hip (the far side) and drawn by the right hand. More guards, kendo cuts, and katana rhythm: `weapon-katana.md`, `weapon-sword.md`.
+Use a stance name only with its visible description; the generator draws the description, not the term. Grip: right hand just below the guard, left hand near the pommel. Feet shoulder width, one forward, knees slightly bent. A katana is worn through the sash on the left hip (the far side) and drawn by the right hand. Shared sword rhythm: `weapon-sword.md`.
 
 | Kamae | Use | Visible description |
 |---|---|---|
