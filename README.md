@@ -201,7 +201,7 @@ Common commands:
 | `pixellab-pip setup` | Connect PixelLab MCP and/or documented REST v2 fallback. |
 | `pixellab-pip auto` | Toggle Auto mode, which skips the before-you-spend confirmation. Auto is off by default, so Pip asks first. |
 | `pixellab-pip auto plan 45 2` | Bound one identified run to 45 generations and two additional paid attempts. Auto off asks first; Auto on runs within those limits. Supports trailing task text and leaves persistent Auto unchanged. |
-| `pixellab-pip auto status` | Show actual Auto settings and any unresolved legacy level restrictions. |
+| `pixellab-pip auto status` | Show the actual Auto setting and any invalid-config warning. |
 | `pixellab-pip panel` | Review selected project/run images and usage; compose scoped requests. Supported native Claude views show PNGs; the full HTML review adds GIF playback and zoom. Browser feedback is copied back to chat unless a verified host bridge is available. |
 | `pixellab-pip bark` | Toggle the completion sound. On by default. |
 | `pixellab-pip update` | Update through the current install method. |

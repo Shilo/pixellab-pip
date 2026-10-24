@@ -27,7 +27,6 @@ ASSETS_DIR = Path(__file__).resolve().parent
 SKILL_DIR = ASSETS_DIR.parent
 SKILL_CONFIG = SKILL_DIR / "pixellab-pip.json"
 BARK_WAV = ASSETS_DIR / "bark.wav"
-LEGACY_POLICY_KEYS = ("level", "budget", "retries")
 
 
 def user_config_path() -> Path:
@@ -133,29 +132,15 @@ def write_text_atomic(path: Path, content: str) -> None:
             temp_path.unlink(missing_ok=True)
 
 
-def legacy_policy(data: dict[str, Any]) -> dict[str, Any]:
-    return {key: data[key] for key in LEGACY_POLICY_KEYS if key in data}
-
-
 def auto_enabled(data: dict[str, Any], invalid_source: Path | None = None) -> bool:
-    return invalid_source is None and data.get("auto") is True and not legacy_policy(data)
+    return invalid_source is None and data.get("auto") is True
 
 
 def write_config(key: str, enabled: bool) -> Path:
     existing, _, invalid_source = read_config()
     if key == "auto" and enabled and invalid_source is not None:
         raise ValueError("invalid config requires repair before enabling Auto; inspect status")
-    if key == "auto" and enabled and legacy_policy(existing):
-        raise ValueError("legacy approval settings require reconciliation; inspect status before explicitly choosing auto reset")
     existing[key] = bool(enabled)
-    return save_config(existing)
-
-
-def reset_auto() -> Path:
-    existing, _, _ = read_config()
-    for key in LEGACY_POLICY_KEYS:
-        existing.pop(key, None)
-    existing["auto"] = False
     return save_config(existing)
 
 
@@ -245,7 +230,7 @@ def play_sound() -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="PixelLab Pip bark helper")
-    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off", "auto-reset"])
+    parser.add_argument("command", choices=["status", "bark", "on", "off", "play", "auto", "auto-on", "auto-off"])
     args = parser.parse_args()
 
     result: dict[str, Any] = {
@@ -285,15 +270,10 @@ def main() -> int:
         elif args.command == "auto-off":
             result["config"] = str(write_config("auto", False))
             result["auto"] = False
-        elif args.command == "auto-reset":
-            result["config"] = str(reset_auto())
-            result["auto"] = False
         elif args.command == "status":
             data, source, invalid_source = read_config()
             result["bark"] = normalize_bark(data.get("bark", True))
             result["auto"] = auto_enabled(data, invalid_source)
-            result["legacy_policy"] = legacy_policy(data)
-            result["requires_reconciliation"] = bool(result["legacy_policy"]) or invalid_source is not None
             result["config"] = str(source) if source else None
             result["invalid_config"] = str(invalid_source) if invalid_source else None
     except Exception as exc:
