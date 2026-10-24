@@ -1,10 +1,11 @@
 """Bounded download of an MCP raw-image job, with validated, preserved raw files.
 
-    python fetch.py JOB out.png --run RUN [--tool T] [--generations ACTUAL] [--estimate RESERVED]
-    python fetch.py JOB out_dir --frames N --run RUN ...
+    python fetch.py JOB out.png --run RUN --url LINK [--tool T] [--generations ACTUAL] [--estimate RESERVED]
+    python fetch.py JOB out_dir --run RUN --url LINK0 --url LINK1 ...
     python fetch.py --url RETURNED_PIXELLAB_URL out.png
 
---frames is the exact count exposed by the result/getter, not a guessed maximum.
+Pass exactly the download links the job's getter (e.g. `get_image`) returned, in order;
+two or more links save numbered frames into out_dir.
 Existing destinations are refused. Exit 0: downloaded; 2: blocked/invalid/unavailable
 (check the matching getter); 3: download not ready or dependency unavailable. HTTP
 file errors establish neither job failure nor refund. Never resubmit from this result.
@@ -26,7 +27,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _assembly import require_pillow  # noqa: E402
 import manifest  # noqa: E402
 
-BASE = "https://api.pixellab.ai/mcp/images/%s/download"
 HOSTS = {"api.pixellab.ai", "backblaze.pixellab.ai"}
 UA = "pixellab-pip-fetch/1 (+https://github.com/Shilo/pixellab-pip)"
 
@@ -70,8 +70,7 @@ def validate_image(data: bytes, suffix: str | None = None) -> None:
         raise ValueError("download is not a complete readable image") from exc
 
 
-def get(job: str, index: int | None = None, *, timeout: float = 30) -> tuple[str, bytes | None]:
-    url = BASE % urllib.parse.quote(job, safe="") + ("?index=%d" % index if index is not None else "")
+def get(url: str, *, timeout: float = 30) -> tuple[str, bytes | None]:
     try:
         data = _download(url, timeout=timeout)
     except urllib.error.HTTPError as exc:
@@ -86,24 +85,23 @@ def get(job: str, index: int | None = None, *, timeout: float = 30) -> tuple[str
 
 def preflight(out: str, frames: int) -> None:
     path = Path(out)
-    if frames < 0:
-        raise ValueError("--frames must be positive when supplied")
     if path.exists() or path.is_symlink():
         raise ValueError("refusing existing output; inspect the saved result or choose a new destination")
     if not frames and path.suffix.lower() not in (".png", ".gif"):
         raise ValueError("output must use .png or .gif")
 
 
-def try_job(job: str, out: str, frames: int, *, deadline: float | None = None) -> str:
-    """Save nothing until every expected image is decoded. Never overwrite a path."""
+def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
+    """Save nothing until every returned link is decoded. Never overwrite a path."""
     require_pillow()
+    frames = len(urls) if len(urls) > 1 else 0
     preflight(out, frames)
     got = []
-    for index in range(frames or 1):
+    for url in urls:
         remaining = 30 if deadline is None else min(30, deadline - time.monotonic())
         if remaining <= 0:
             return "wait"
-        status, data = get(job, index if frames else None, timeout=remaining)
+        status, data = get(url, timeout=remaining)
         if status != "ok":
             return status
         validate_image(data, ".png" if frames else Path(out).suffix)
@@ -144,15 +142,15 @@ def main(argv: list[str] | None = None) -> int:
         ap.add_argument("job")
         ap.add_argument("out")
         ap.add_argument("--run", required=True)
-        ap.add_argument("--frames", type=int)
+        ap.add_argument("--url", action="append", required=True)
         ap.add_argument("--tool", default="")
         ap.add_argument("--generations", type=float)
         ap.add_argument("--estimate", type=float)
         ap.add_argument("--timeout", type=float, default=100)
         a = ap.parse_args(argv)
-        frames = a.frames or 0
-        if a.frames is not None and a.frames <= 0:
-            raise ValueError("--frames must be positive")
+        for url in a.url:
+            check_host(url)
+        frames = len(a.url) if len(a.url) > 1 else 0
         manifest.number(a.timeout)
         if a.timeout <= 0:
             raise ValueError("--timeout must be positive")
@@ -173,7 +171,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest.add_job(a.run, entry)
         started = time.monotonic()
         while True:
-            status = try_job(a.job, a.out, frames, deadline=started + a.timeout)
+            status = try_job(a.url, a.out, deadline=started + a.timeout)
             elapsed = time.monotonic() - started
             if status in ("ok", "unavailable") or elapsed >= a.timeout:
                 break

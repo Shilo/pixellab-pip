@@ -177,7 +177,7 @@ class OutputIntegrityTests(unittest.TestCase):
             root = Path(tmp)
             for name, args in (("preview_gif.py", ["preview.gif", "input.png"]),
                                ("normal_map.py", ["preview", "preview.gif", "input.png", "normal.png"]),
-                               ("fetch.py", ["j", "raw.png", "--run", "run"])):
+                               ("fetch.py", ["j", "raw.png", "--run", "run", "--url", "https://backblaze.pixellab.ai/file/x.png"])):
                 script = ASSETS / name
                 code = (f"import PIL,runpy,sys; PIL.__version__='12.3.0'; sys.path.insert(0,{str(ASSETS)!r}); "
                         f"sys.argv={[name, *args]!r}; runpy.run_path({str(script)!r},run_name='__main__')")
