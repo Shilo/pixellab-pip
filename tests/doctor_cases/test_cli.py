@@ -83,3 +83,17 @@ def test_style_soft_edges_from_the_profile(tmp_path):
     (tmp_path / 'pixellab.json').write_text(json.dumps({'look': 'painterly, soft anti-aliased edges'}), encoding='utf-8')
     r = json.loads(fix(tmp_path / 'k', '--json', '--check-only', '--profile', tmp_path / 'pixellab.json', cwd=tmp_path))
     assert 'soft_edge' not in {f['check'] for f in r['anims'][0]['findings_before']}
+
+
+def test_default_output_stays_beside_input_files(tmp_path):
+    # review: a sheet in the project root wrote to <project>_fixed, outside the project
+    import argparse
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('fix_cli', FIX)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    out = lambda first: mod._out_dir(argparse.Namespace(out=None, inputs=[str(first)]), [])
+    (tmp_path / 'clip').mkdir()
+    assert out(tmp_path / 'clip') == str(tmp_path / 'clip') + '_fixed'
+    assert out(tmp_path / 'sheet.png') == str(tmp_path / 'sheet_fixed')
+    assert out(tmp_path / 'clip' / '*.png') == str(tmp_path / 'clip' / 'frames_fixed')

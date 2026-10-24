@@ -11,7 +11,7 @@ Findings require visual review and do not certify art quality.
   python fix.py frames/ --check-only --json             # measure and plan only; report to stdout
   python fix.py --table  # defect -> cause -> change guidance; with inputs, also inspects them
 
-Writes into <first input folder>_fixed/ (or --out): the fixed frames, timing.json, fix_report.json, fix_report.txt,
+Writes into <input folder>_fixed/, or <name>_fixed/ beside input files (or --out): the fixed frames, timing.json, fix_report.json, fix_report.txt,
 fix_sheet.png and <character>_<move>_preview.gif (frames in subfolders keep their subfolder). Effects (slashes, glows) and frame drops are never changed without --accept. Every fixed frame is a local derivative
 of PixelLab's output, reported as such.
 Needs Pillow, numpy, scipy.
@@ -49,8 +49,12 @@ def _out_dir(args, anims):
     if args.out:
         return args.out
     first = args.inputs[0].rstrip('/\\')
-    folder = first if os.path.isdir(first) else os.path.dirname(os.path.abspath(first.replace('*', 'x')))
-    return folder.rstrip('/\\') + '_fixed'
+    if os.path.isdir(first):
+        return first + '_fixed'
+    # Beside the file(s), never next to their folder: a file in the project root must not write outside it.
+    folder, name = os.path.split(os.path.abspath(first))
+    stem = re.sub(r'[*?]', '', os.path.splitext(name)[0]).strip('_-. ') or 'frames'
+    return os.path.join(folder, stem + '_fixed')
 
 
 STEPPED_SKIP = ('jump', 'missing_inbetween', 'loop_seam', 'size_pop', 'weird_change', 'weapon_lost', 'broken_thin', 'ground')
