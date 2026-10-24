@@ -234,6 +234,7 @@ Read [Security and trust ↗](docs/security.md) for the complete access boundary
 ## More Documentation
 
 - [Resources ↗](docs/resources.md) — official PixelLab links and related tools.
+- [Changelog ↗](CHANGELOG.md) — what changed in each release.
 - [Developer guide ↗](docs/developer.md) — repository structure, local development, testing, and releases.
 - [More guides ↗](docs/README.md) — research, integration background, and every specialized guide.
 - [MIT License ↗](LICENSE)

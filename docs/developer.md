@@ -19,6 +19,7 @@ Last reviewed: 2026-07-05.
 - [Skill File Sizing](#skill-file-sizing)
 - [TODO ↗](developer/todo.md)
 - [Async Helper Plan ↗](developer/async-helper-plan.md)
+- [Changelog](#changelog)
 - [Publishing](#publishing)
 - [Tileset Research Notes](#tileset-research-notes)
 - [Repository Layout](#repository-layout)
@@ -286,6 +287,10 @@ Full guide: [Reference Files](developer/reference-files.md).
 Recommended lengths (lines/tokens) for `SKILL.md` and every `references/*.md`, the authorities behind them, current measurements, and what to do when a file is over. Sizing is a maintainer review signal, not a CI gate.
 
 Full guide: [Skill File Sizing](developer/skill-file-sizing.md).
+
+## Changelog
+
+Record user-facing changes in [CHANGELOG.md](../CHANGELOG.md) ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) sections: Breaking changes, Added, Changed, Removed, Fixed, Security). Add them under the upcoming version while you work; when releasing, replace `Unreleased` with the release date and add its compare link at the bottom.
 
 ## Publishing
 
