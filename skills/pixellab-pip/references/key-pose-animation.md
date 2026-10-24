@@ -25,7 +25,7 @@ Within the normal run folder, `raw/` can hold unchanged returned poses/clips, `k
 - Overhead swings/slams/leaps need room above and in front; long weapons swung over a shoulder may also need room behind. Thrusts/shots mainly need forward room; lunges may need rear room for cape/back leg. Size from the actual silhouette and motion, not a fixed multiple for every sprite.
 - Check current operation sizes/costs using `pro-flash.md`; a capability response is not a cost quote. The animation route's canvas/frame budget also applies after padding. Inspect pose borders for clipping; padding cannot guarantee containment.
 - Pose template: `The same <identity and visible gear>, <pose core>, <screen facing>. Same body size, colours and pixel style, <anchor> in the same place, no background` when transparent art is requested.
-- Name a physical anchor suited to the move: feet/back foot for grounded stances, robe base for a floating body, grounded coils for a serpent. Do not later snap intentionally airborne/lowered parts to an inferred footline.
+- Name a physical anchor suited to the move: feet/back foot for grounded stances, robe base for a floating body, grounded coils for a serpent, the crack for a boss rising out of one. Do not later snap intentionally airborne/lowered parts to an inferred footline.
 - Wind-up: name where weapon/fist ends and how the torso coils (`fist cocked high beside the far shoulder, torso rotated away`); a vague arm-back phrase can return idle. Contact/follow-through: name the end of the motion and body lean.
 - Name carried gear by visible hand/side, not an assumed anatomy convention (`staff on the left side of the image, fist at waist height`). A fixed prop POSITION can freeze it and stretch the arm; describe grip and path instead. Worn props describe what is visible; a drawn weapon leaves an EMPTY scabbard/holster.
 - Name every armor piece and cloth colour/length when continuity matters (`armor-clothing.md`). New prop colours may be lost by palette correction; preserve them in the request or propose a separately accepted correction instead of silently normalizing them away.
@@ -69,6 +69,10 @@ For source flashes, ground drift or colour drift, choose only relevant operation
 - Hurt example: peak recoil with head/torso back, arms away, named weapon still gripped. Motion-only `head and torso jerk back and away` avoids a prompt that requests an impact burst. There-and-back or idle→recoil hold→idle are optional playback treatments; a roughly 300 ms peak is one example, not an automatic reorder/hold. Preserve deliberate carried-gear posture.
 - Death example: a defeated last pose; `no step` if the body must collapse in place. A sheathed swordsman can sink to one knee with hand still on the hilt. Joining clean hurt/collapse frames is an accepted derivative, not a replacement raw take.
 - Telegraph example: an approved four-generated-frame transition from still to the attack's wind-up; the engine can hold that pose when requested.
+
+## Front-facing giant bosses
+
+A boss fought from both sides faces the viewer, so its blows go sideways and down: left swipe, right swipe and two-handed slam, each a wind-up and a hit pose (still: `characters.md`). Ground: lowest-pixel snapping failed here (`finishing.md` → ground_snap); for swipes, an accepted hand-measured offset that matches the crack's colour band to the still worked. Don't snap slams: fists and burst cover the crack. Idle: motion words only (`shoulders lift and lower by a few pixels, hands don't move`); `breathes, glow pulsing` washed the frames white. On screen, a 256 px boss beside ~150 px heroes needed about 1.4× to read as a giant; with whole-pixel engine scaling, show 1× and a fractional boss-only scale before choosing.
 
 ## Timing and look checklist
 

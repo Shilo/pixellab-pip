@@ -31,7 +31,7 @@ Ground-snap → clean (scrub, despeckle, colormatch, palette and recolour) → t
 
 ### ground_snap
 
-Moves floating frames down so their lowest pixel sits on the standing sprite's feet line (pad offset + the sprite's lowest row); `--out` gets every frame, moved or not. Frames already below the line are copied unchanged and flagged "below the feet line" — look at them (a robe or an effect hangs lower). `--fx 5,6` leaves feetless frames (smoke-only) alone, counted from 1 in the list given. `--check` prints the gaps and writes nothing. Only for grounded moves, never jumps or flyers.
+Moves floating frames down so their lowest pixel sits on the standing sprite's feet line (pad offset + the sprite's lowest row); `--out` gets every frame, moved or not. Frames already below the line are copied unchanged and flagged "below the feet line" — look at them (a robe or an effect hangs lower). `--fx 5,6` leaves feetless frames (smoke-only) alone, counted from 1 in the list given. `--check` prints the gaps and writes nothing. Only for grounded moves, never jumps or flyers. It trusts the lowest opaque pixel: when that is not the anchor (sparks or a burst under the body, a body rising out of a crack), run `--check`, look, and leave those frames out with `--fx` or don't snap.
 
 ```bash
 python ground_snap.py hero.png 24,56 raw/*.png --out finish/1-ground-snap [--fx 5,6] [--check]
