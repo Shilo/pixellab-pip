@@ -563,6 +563,13 @@ def check_workflows() -> None:
     ):
         if required not in release_workflow:
             raise AssertionError(f"release-skill.yml is missing release security gate: {required}")
+    for step in ("Resolve ClawHub publisher and previous latest", "Publish and verify exact ClawHub version",
+                 "Scan the published ClawHub version", "Promote the audited ClawHub version"):
+        # github_only must skip every ClawHub write; the other ClawHub steps key off these steps' outputs
+        if not re.search(r"- name: " + re.escape(step) + r"\n(?:\s+id: \w+\n)?\s+if: \$\{\{ !inputs\.github_only \}\}\n", release_workflow):
+            raise AssertionError(f"release-skill.yml must skip '{step}' when github_only is set")
+    if "github_only skips ClawHub; leave resume_previous_latest and withdraw_clawhub_versions empty." not in release_workflow:
+        raise AssertionError("release-skill.yml must refuse ClawHub-only inputs with github_only")
     if not re.search(
         r"- name: Preserve failed ClawHub scan diagnostics\n"
         r"\s+if: failure\(\) && hashFiles\('dist/clawhub-scan-\*\.zip'\) != ''\n"
