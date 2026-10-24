@@ -175,7 +175,7 @@ Read each reference only when its trigger applies:
 - Official PixelLab doc URLs and boundaries: `references/official-pixellab-documentation.md`.
 - Generation reports and manifests after PixelLab calls: `references/usage-reporting.md`.
 - Per-generation blueprint (PixelLab calls + agent tasks), recreation, and sharing: `references/blueprint.md`.
-- Async jobs, MCP review state, rate limits, download expiry: `references/job-lifecycle.md`.
+- Async jobs, MCP review state, rate limits, download expiry, tools refused by the user's plan: `references/job-lifecycle.md`.
 - Preset/template/skeleton character animations: `references/preset-skeleton-template-animation.md`.
 - Raw animation, interpolation, outfit transfer, idle-loop risk: `references/animation.md`.
 - Weapon, fighting, armour/cloth and weapon-effect motion (visible pose wording, key poses, frame rhythm, pitfalls): `references/weapon-<name>.md`, where `<name>` is `sword`, `katana`, `dagger`, `staff`, `bow`, `mace`, `spear`, `axe`, `sword-and-shield`, `war-hammer`, `whip`, `firearms` (pistols, rifles, shotguns), `futuristic` (arm cannons, energy blades), `anime` (giant swords, scythes, kunai, chibi) or `effects`; plus `references/martial-arts.md` and `references/armor-clothing.md`. Read only the page for the weapon or effect at hand.
