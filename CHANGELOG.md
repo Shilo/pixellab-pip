@@ -61,7 +61,6 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 ### Removed
 
 - Image helpers no longer run on Pillow older than 13.
-- History no longer reads free-form manifests as runs.
 
 ### Security
 
