@@ -70,6 +70,20 @@ The Bark preference persists in `pixellab-pip.json` beside the installed `SKILL.
 
 The bundled sound is `assets/bark.wav` inside the installed skill. Pip falls back to a native success or alert sound if the helper cannot play it.
 
+### Project Styles
+
+```text
+/pixellab-pip set up an art style for this project
+/pixellab-pip list my styles
+/pixellab-pip use my neon style
+/pixellab-pip show my current style
+/pixellab-pip make these icons without my saved style
+```
+
+Save your game's look once (look, palette, reference art per asset type, optional seed) and Pip applies it to every new asset. There is no special command word: ask in plain language. Start from a named example (side-view dark fantasy, top-down cozy, top-down 8-direction, side-view sci-fi), a genre such as cyberpunk or western, your own words, or art to match. Nothing is saved or applied unless you choose it.
+
+Styles live in `pixellab-pip-style.json` in your project root; commit it to share the look with your team. Asking for another style or none affects only that request. Coming from Game Art? Run `/pixellab-pip setup` to rename the old `pixellab.json`.
+
 ### Update
 
 ```text

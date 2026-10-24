@@ -204,6 +204,7 @@ Common commands:
 | `pixellab-pip auto status` | Show the actual Auto setting and any invalid-config warning. |
 | `pixellab-pip panel` | Review selected project/run images and usage; compose scoped requests. Supported native Claude views show PNGs; the full HTML review adds GIF playback and zoom. Browser feedback is copied back to chat unless a verified host bridge is available. |
 | `pixellab-pip bark` | Toggle the completion sound. On by default. |
+| `pixellab-pip use my <name> style` | Pick, show, list or save a project art style you choose; plain wording works. See the [usage guide](docs/usage.md#project-styles). |
 | `pixellab-pip update` | Update through the current install method. |
 | `pixellab-pip uninstall` | Remove Pip while keeping secrets and generated outputs by default. |
 
