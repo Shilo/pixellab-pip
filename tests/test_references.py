@@ -29,7 +29,11 @@ class ReferencePagesTests(unittest.TestCase):
         for name in WEAPON_PAGES:
             with self.subTest(page=name):
                 path = SKILL_DIR / "references" / name
-                self.assertIn(f"`references/{name}`", skill)
+                if name.startswith("weapon-"):
+                    self.assertIn("`references/weapon-<name>.md`", skill)
+                    self.assertIn(f"`{name[len('weapon-'):-len('.md')]}`", skill)
+                else:
+                    self.assertIn(f"`references/{name}`", skill)
                 lines = path.read_text(encoding="utf-8").splitlines()
                 if len(lines) > 100:
                     self.assertIn("## Contents", lines)
