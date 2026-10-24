@@ -18,7 +18,6 @@ Read `<selected-root>/pixellab-pip-style.json` before generation when it exists.
 
 The helper returns top-level `max_cost` and `ask_above` separately as `legacy_limits`, including zero. Non-null values are restrictive, unresolved legacy settings, not approved spending. Before paid work, clarify their units/scope and reconcile them with the current bounded plan under `auto.md`; retain the stricter applicable restriction until the user explicitly changes it. An explicitly approved, previewed host-file edit may change or remove those two fields while preserving unrelated data and validating the result. Invalid/unknown values block spending rather than become zero/unlimited. Do not infer a refund or remaining budget from saved appearance.
 
-
 ## Optional setup and deliberate saves
 
 When the user requests a reusable project look, offer words (genre/mood/palette/view), supplied art, or a named example or genre word set from `style-examples.md`. Ask only missing consequential choices, including engine/output needs when relevant. A beginner may choose one first asset and request a short explanation or an optional draft; disclose its cost through the existing paid plan. No fixed starter bundle, draft, persistent beginner mode or mandatory setup.

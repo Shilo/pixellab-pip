@@ -35,10 +35,10 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Game Art Integration
 
-Pip 3.0 includes the production tools of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) in the same single skill:
+Pip 3.0 includes the main production tools of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) in the same single skill:
 
 - Project art styles you choose, saved in `pixellab-pip-style.json`, with reference art per asset type.
-- An animation doctor that finds bad frames, fixes copies for free and re-rolls only what failed.
+- An animation doctor that finds bad frames, fixes copies for free and plans paid re-rolls of only what failed, with your approval.
 - Optional key-pose attacks, weapon and fighting guides, finishing tools and engine-ready sprite sheets.
 - A cost record per run, history for re-rolls, and `/pixellab-pip panel` to review results.
 

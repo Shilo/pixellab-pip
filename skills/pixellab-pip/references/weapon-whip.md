@@ -6,8 +6,8 @@ From one whip test (an overhead crack, Pro Flash key poses + `animate_image`); n
 side lash and wrap are untested. Facing right.
 
 ## What every pose keeps
-- **Name the holding arm by its look** in every pose (`characters.md`: `her black-gloved right arm holds the whip
-  handle`). A character with one arm that differs (a chrome cyber arm, a gauntlet) swapped the whip into
+- **Name the holding arm by its look** in every pose (rule: `characters.md`; e.g. `her black-gloved right arm holds
+  the whip handle`). A character with one arm that differs (a chrome cyber arm, a gauntlet) swapped the whip into
   that arm until both poses named it.
 - **The handle stays in the fist; the lash is the moving prop.** Name the lash's length and its tip
   (`a long black leather lash, about her height, ending in a glowing magenta tip`) in every pose, or it shortens.

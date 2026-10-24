@@ -65,9 +65,9 @@ The sources give frame counts, not times: the ms below are play timing for ~12 f
 - **Frames:** full wedge (tip at full reach) -> wedge half as long, pulled toward the tip -> 2-3 px tick at the tip
   -> gone; the spear slides back over 2 more frames. Painted version (trail sheet row 4): a small line, then a
   feathered spearhead flare 3 frames, then 2 frames of sparks drifting off the tip.
-- **Make it:** `blade_trail.py` with a 2-point straight `--path` from the hand to the tip, `--spans` 0:1 -> 0.5:1 ->
-  0.85:1, thick 5 -> 3 -> 2. Workbench: `arc` with `points` + `corners:"smooth"`, or the `thrust_streak` part
-  (size ~2 at hero scale), plus 4-6 `streak` particles at the tip from life 0.5.
+- **Make it:** workbench `arc` with `points` + `corners:"smooth"`, or the `thrust_streak` part (size ~2 at hero
+  scale), plus 4-6 `streak` particles at the tip from life 0.5. Approved local fallback: `blade_trail.py` with a
+  2-point straight `--path` from the hand to the tip, `--spans` 0:1 -> 0.5:1 -> 0.85:1, thick 5 -> 3 -> 2.
 - **Timing:** 1 frame full on the hit, 2 frames shrink at 60 ms. 3 frames total.
 
 ## Blunt smash smear (hammer, mace, club)
@@ -78,7 +78,8 @@ The sources give frame counts, not times: the ms below are play timing for ~12 f
   head lifts a few pixels while a short tick of smear remains -> follow-through (head flat on the ground, 2 frames) ->
   recover. Impact dust: 2-3 small grey puffs and 2-4 single-pixel debris dots either side of the head on the smear
   and rebound frames, then the dots drift outward.
-- **Make it:** `blade_trail.py` with the head as the path end, `--thick 3` (a line, not a crescent), no `--dither`;
+- **Make it:** smear (approved local fallback) `blade_trail.py` with the head as the path end, `--thick 3` (a line,
+  not a crescent), no `--dither`;
   impact = workbench `puffs` (radius 8-10, count 3, low throw) + `chunk` particles (count 6, floor, bounce 0.3).
   If the 6-frame swing drew no crescent, skip `slash_layer` (blunt weapons get a line smear, not a crescent).
 - **Timing:** smear 1 frame (hit, 140 ms), rebound 1 frame 60 ms, follow-through hold 2 frames 120 ms.
@@ -92,9 +93,9 @@ The sources give frame counts, not times: the ms below are play timing for ~12 f
   frames 3-5), a half arc that grows from its head and loses its tail, and a soft smoky arc that loses its core
   first. Row 5: a diagonal slit that widens into an eye shape with a dark core and closes again (a slash through
   the air / a cut in space, 6 frames).
-- **Make it:** stepped key poses + `blade_trail.py` (`--spans` per frame, `--ghost` for the 50% dithered stance left
-  behind in a flash step). Rotating spin: workbench `arc` with sweep 300+ animated over its life, or a `ribbon` on
-  a circular path. The slit: a `shape` lens with a dark core, width keyed 0 -> max -> 0.
+- **Make it:** rotating spin: workbench `arc` with sweep 300+ animated over its life, or a `ribbon` on a circular
+  path. Flash-step cuts: stepped key poses + `blade_trail.py` as an approved local fallback (`--spans` per frame,
+  `--ghost` for the 50% dithered stance left behind). The slit: a `shape` lens with a dark core, width keyed 0 -> max -> 0.
 - **Timing:** smear 1 frame each, blade-line frames 60 ms each, between cuts no hold. A 2-cut combo is ~10-13
   frames total (draw 2-3, cut A 1 + 2, cut B 1 + 2, settle/sheathe 3-5).
 
