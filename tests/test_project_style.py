@@ -35,6 +35,15 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(r.returncode, 4)
         self.assertEqual(json.loads(r.stdout)["status"], "no_style")
 
+    def test_missing_reference_is_listed_and_missing_source_is_named(self) -> None:
+        (self.dir / "pixellab.json").write_text(json.dumps({"look": "town", "reference": "art/old.png"}), encoding="utf-8")
+        r = run(self.dir, "show")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("reference", json.loads(r.stdout)["invalid_anchors"])
+        r = run(self.dir, "save", "town", "--from", "typo.json")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("not found", r.stdout + r.stderr)
+
     def test_outdated_pillow_preserves_profile_reads_and_blocks_new_anchor(self) -> None:
         import os
         package = self.dir / "PIL"
@@ -205,7 +214,9 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertEqual(self.profile()["styles"]["one"]["reference"], "source/hero.png")
         self.assertEqual(run(source, "show", "--profile", str(profile)).returncode, 0)
         (source / "hero.png").write_text("corrupt", encoding="utf-8")
-        self.assertNotEqual(run(source, "show", "--profile", str(profile)).returncode, 0)
+        shown = run(source, "show", "--profile", str(profile))
+        self.assertEqual(shown.returncode, 0, shown.stderr)
+        self.assertIn("unreadable", json.loads(shown.stdout)["invalid_anchors"]["reference"])
 
     def test_rename_empty_name_preserves_profile(self) -> None:
         (self.dir / "s.json").write_text('{"look":"a"}', encoding="utf-8")

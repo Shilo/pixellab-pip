@@ -210,15 +210,14 @@ def main(argv: list[str] | None = None) -> int:
         folder = os.path.dirname(os.path.abspath(a.profile))
         unverified = []
         invalid = {}
-        for family, image in (style.get("anchors") or {}).items():
+        images = [*(style.get("anchors") or {}).items(), ("reference", style.get("reference"))]
+        for family, image in images:
             if image is not None:
                 try:
                     if not check_image(os.path.join(folder, image)):
                         unverified.append(family)
                 except ValueError as exc:
                     invalid[family] = str(exc)
-        if style.get("reference") is not None and not check_image(os.path.join(folder, style["reference"])):
-            unverified.append("reference")
         if unverified:
             result["unverified_anchors"] = unverified
         if invalid:
@@ -244,6 +243,8 @@ def main(argv: list[str] | None = None) -> int:
         if a.command == "save":
             if not a.source:
                 return fail("save needs --from <style.json>")
+            if not os.path.isfile(a.source):
+                return fail("style file not found: " + a.source)
             src = load(a.source)
             style = {k: src[k] for k in STYLE_KEYS if k in src}
             name = a.args[0]
