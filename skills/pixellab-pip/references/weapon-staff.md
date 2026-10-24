@@ -101,7 +101,7 @@ Left-facing sources are mirrored: facing right, the right hand, right foot and n
   4 frames lowering while the glow fades. For a facing-right cast: A = `staff upright at his near side, head at
   shoulder height` -> B = `staff raised so the crystal head is above his head`; keep the body still and put the
   light in `charge_up` + `magic_orb` at the head, never painted by the animation (it flickers).
-- Same timing as in `key-pose-animation.md`: held wind-up, one fast hit frame, longer settle.
+- Timing: `key-pose-animation.md`.
 
 ## Pitfalls to name in prompts
 - Staff length changes between poses -> `the same length as in the original, both ends visible` + wider canvas.

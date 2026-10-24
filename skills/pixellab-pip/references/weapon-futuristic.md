@@ -19,8 +19,8 @@ are in `weapon-firearms.md`; smear shapes and hit sparks are in
 - [Pitfalls to name in prompts](#pitfalls-to-name-in-prompts)
 
 ## What every futuristic pose keeps
-- **Name the weapon arm by its look in every pose** (`his chrome right forearm ends in a thick teal cannon`), and
-  say the other hand is a normal hand. A mismatched arm is the first thing in-betweens swap (as on `weapon-whip.md`).
+- **Name the weapon arm by its look in every pose** (`characters.md`: `his chrome right forearm ends in a thick teal
+  cannon`). A mismatched arm is the first thing in-betweens swap (as on `weapon-whip.md`).
 - **The gun or cannon is rigid and keeps its size.** `same cannon, same length and thickness as in the original`.
   Big sci-fi guns grow or shrink more than swords because they have no clear silhouette edge; check at 3x.
 - **The aim line is level unless you say otherwise.** Good shooting frames hold the barrel at chest or

@@ -113,7 +113,7 @@ Fiore draws them as one diagram: descending cuts, rising cuts, level cuts and th
   back to guard. Alternate high and low crescents for combos.
 - **Stab, 8 frames:** 2 frames pulling back, 3 frames holding the extended thrust with a short streak, 2-3 back.
 - The shield stays on the front arm in every frame; the trail is the only effect.
-- Same timing as in `key-pose-animation.md`: hold the wind-up, one fast hit frame, longer settle.
+- Timing: `key-pose-animation.md`.
 - **Keyframe sheet (frame numbers at film rate):** swing = ready hold 6 -> raise 4 -> held at the top 3 (a "moving
   hold": body still drifting, blade still) -> down 5-8 -> hit, body stops. Chop = hit key -> swung back across with
   a step back (7) -> raised with a hop back (8) -> overhead, heel up (7) -> down to level (4). About two thirds of

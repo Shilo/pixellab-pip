@@ -112,7 +112,7 @@ e.g. 40,-17 px per frame), then a thin streak behind it with `blade_trail.py`. F
 - 1 carry frame (shaft diagonal, point up-right) -> 2 frames pulling to hip level -> 2 frames extending -> 3 frames
   holding the extension -> back. The point travels only a short way; the thrust reads from arms and lean, not
   from a huge reach. The hit is the first extended frame; the hold sells it.
-- Same timing as in `key-pose-animation.md`: hold the wind-up, one fast hit frame, longer settle.
+- Timing: `key-pose-animation.md`.
 
 ## Pitfalls to name in prompts
 - Shaft grows or shrinks between poses -> `same length as in the original`, check at 3x beside the idle.

@@ -2,7 +2,7 @@
 
 Optional named starting points when the user wants style setup (`project-style.md`). Each name says what it is for. They
 are offers, never defaults: write one only when the user picks it, with
-`python assets/project_style.py example "<name>" --use` (add `--as <name>` to rename). `project_style.py` holds the
+`python <skill-dir>/assets/project_style.py example "<name>" --use` (add `--as <name>` to rename). `project_style.py` holds the
 exact field values.
 
 | Example | Made for | Evidence scope |
@@ -20,7 +20,7 @@ After picking, the user can change any field; the saved style is theirs from the
 
 ## Genre word sets
 
-Prompt words from Game Art's genre presets, untested in Pip: no sizes, view or timing, so take those from the user or
+Genre prompt words, untested: no sizes, view or timing, so take those from the user or
 a view example above. Fill the same fields for the user's own genre words ("frozen viking saga"). To keep one, write
 `setting`, `look`, `palette`, `negatives`, the weapons as a `rules` entry and the chosen view/sizes to a style JSON,
 then `save NAME --from` it (`project-style.md`).
