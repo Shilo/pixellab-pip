@@ -35,16 +35,16 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Game Art Integration
 
-Pip integrates useful [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) production capabilities into one portable skill:
+Pip 3.0 includes the production tools of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) in the same single skill:
 
-- User-approved project styles and family references, with temporary selection and ordinary one-off use.
-- Animation inspection, explicitly accepted repair copies and schema-checked repair proposals.
-- Optional custom key-pose recipes, focused motion references and requested finishing/engine exports.
-- Verified local assembly/previews and history over one private manifest, with charged usage distinct from estimates.
+- Project art styles you choose, saved in `pixellab-pip-style.json`, with reference art per asset type.
+- An animation doctor that finds bad frames, fixes copies for free and re-rolls only what failed.
+- Optional key-pose attacks, weapon and fighting guides, finishing tools and engine-ready sprite sheets.
+- A cost record per run, history for re-rolls, and `/pixellab-pip panel` to review results.
 
-Every host uses the existing Pip entry point. Useful `level` controls are consolidated into `auto plan <budget> [retries] [task]` for an identified run: Auto off asks first; Auto on runs within the limits unless the user requests approval or a dry run. `/pixellab-pip panel` opens interactive project/output review through supported native Claude UI or portable HTML; unsupported hosts receive an explicit fallback. The separate Studio package and its credential connector stay removed. Spending settings never authorize visual/playback changes.
+Everything goes through the usual `/pixellab-pip` entry point and the usual ask-before-spending rules. `auto plan <budget> [retries] [task]` sets a credit and retry limit for one run. Coming from Game Art? Run `/pixellab-pip setup` to rename your old project file.
 
-See [integration and migration](docs/merge/README.md) and the [review response and current validation](docs/tools/pixellab-game-art-skill/pixellab-game-art-claude-review-response.md). The earlier three prototype production demos and Claude routing benchmark remain [historical evidence](docs/merge/demo/README.md), not proof of the revised implementation or every host/engine.
+See the [changelog](CHANGELOG.md), [what came over and what didn't](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-merge-status.md), and [integration notes](docs/merge/README.md).
 
 Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. Adopted source notices are preserved inside the skill distribution.
 

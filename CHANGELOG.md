@@ -34,8 +34,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 - **Finishing tools**, which write copies and record what they changed: ground snap, scrub, despeckle, colour match,
   palette, recolour (by group, trail, or like another character), slash layer, blade trail, thrown prop, baked effect,
   8-direction shot finish and a muzzle finder.
-- **Previews and export:** sprite sheets with Aseprite JSON or Godot `.tres`, padding, preview and showcase GIFs,
-  contact sheets, a tileset test map, and normal-map packing with a lit preview.
+- **Previews and export:** sprite sheets with Aseprite JSON or Godot `.tres` (play once or `--loop`), padding,
+  preview and showcase GIFs, contact sheets, a tileset test map, and normal-map packing with a lit preview.
 - **Run tools:** `fetch.py` downloads finished results, `manifest.py` keeps a locked cost record per run (charged and
   estimated kept apart), and `history.py` searches past runs for re-rolls.
 - **Auto limits:** `auto plan <budget> [retries] [task]` caps one run's generations and retries; `auto status` shows
@@ -57,10 +57,6 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 - The skill description fits the Agent Skills 1,024-character limit and keeps its trigger words; `requires_api_key`
   metadata is now a string.
 - The Claude Code plugin registers the panel add-on, and CI also runs Claude Code's plugin validation.
-
-### Removed
-
-- Image helpers no longer run on Pillow older than 13.
 
 ### Security
 
