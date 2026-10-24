@@ -143,6 +143,28 @@ class FetchTests(unittest.TestCase):
         self.assertFalse(clip.exists())  # 0.png and the folder were removed, so a retry works
         self.assertEqual(fetch.try_job(links(3), str(clip)), "ok")
 
+    def test_url_failed_write_leaves_no_partial_file(self) -> None:
+        out = self.root / "raw.png"
+        real_open = Path.open
+
+        class Full:
+            def __init__(self, handle): self.handle = handle
+            def __enter__(self): return self
+            def __exit__(self, *a): self.handle.close(); return False
+            def write(self, data):
+                self.handle.write(data[:4])
+                raise OSError(28, "No space left on device")
+
+        def flaky_open(self, mode="r", *args, **kwargs):
+            handle = real_open(self, mode, *args, **kwargs)
+            return Full(handle) if "x" in mode else handle
+
+        with patch.object(fetch, "_download", return_value=PNG):
+            with patch.object(Path, "open", flaky_open):
+                self.assertEqual(fetch.main(["--url", LINK, str(out)]), 2)
+            self.assertFalse(out.exists())  # the truncated file was removed, so a retry works
+            self.assertEqual(fetch.main(["--url", LINK, str(out)]), 0)
+
     def test_redirects_and_plain_http_stay_on_pixellab(self) -> None:
         # review: only the first URL was checked; a redirect could leave PixelLab, and http was accepted
         with self.assertRaises(ValueError):

@@ -118,7 +118,12 @@ def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
             return status
         validate_image(data, ".png" if frames else Path(out).suffix)
         got.append(data)
-    path = Path(out)
+    write(Path(out), got, frames)
+    return "ok"
+
+
+def write(path: Path, got: list[bytes], frames: int = 0) -> None:
+    """Write new files only; a failed write leaves nothing behind that would block a retry."""
     path.parent.mkdir(parents=True, exist_ok=True)
     paths = frame_paths(path, frames) if frames else [path]
     created: list[Path] = []
@@ -131,12 +136,10 @@ def try_job(urls: list[str], out: str, *, deadline: float | None = None) -> str:
                 created.insert(0, dest)
                 handle.write(data)
     except OSError:
-        # A failed write (disk full, locked file) leaves no partial output that would block a retry.
-        for item in created:
+        for item in created:   # disk full, locked file: remove what this call made
             with contextlib.suppress(OSError):
                 item.rmdir() if item.is_dir() else item.unlink()
         raise
-    return "ok"
 
 
 def frame_paths(folder: Path, frames: int) -> list[Path]:
@@ -157,9 +160,7 @@ def main(argv: list[str] | None = None) -> int:
             preflight(argv[2], 0)
             data = _download(argv[1])
             validate_image(data, Path(argv[2]).suffix)
-            Path(argv[2]).parent.mkdir(parents=True, exist_ok=True)
-            with Path(argv[2]).open("xb") as handle:
-                handle.write(data)
+            write(Path(argv[2]), [data])
             print(argv[2])
             return 0
         ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
