@@ -201,7 +201,7 @@ class FinishContractTests(unittest.TestCase):
                 self.assertTrue(any(p.suffix == ".png" for p in (t / "out").rglob("*")))
 
     @unittest.skipUnless(HAS_NUMPY, "numpy/scipy not installed")
-    def test_refuses_to_write_over_an_input(self) -> None:
+    def test_refuses_an_out_folder_that_holds_the_input(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             p = Path(case_despeckle(Path(tmp))[0])
             raw = p.read_bytes()
@@ -326,9 +326,11 @@ class FinishBehaviourTests(unittest.TestCase):
         fs = synth.walk(2)
         fs[1] = synth.shift(fs[1], 0, 2)
         paths = synth.save(fs, self.t / "in/src", "k")
-        r = self.ok("ground_snap", synth.png(synth.figure(), self.t / "in/still.png"), "0,0", *paths, "--check")
+        still = synth.png(synth.figure(), self.t / "in/still.png")
+        before = hashes(self.t)
+        r = self.ok("ground_snap", still, "0,0", *paths, "--check")
         self.assertIn("below the feet line", r.stdout)   # --check needs no --out and writes nothing
-        self.assertFalse((self.t / "derivative.json").exists())
+        self.assertEqual(hashes(self.t), before)
 
     def test_colormatch_snaps_to_the_still_palette(self) -> None:
         still, frame = case_colormatch(self.t)
