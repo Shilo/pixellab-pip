@@ -33,6 +33,15 @@ def frames(d: str, names: list) -> list:
     return out
 
 
+def require_visible(*paths: str) -> None:
+    """Refuse a blank reference before any output folder exists: it has no colours or body to compare against."""
+    from PIL import Image
+    for p in paths:
+        with Image.open(p) as im:
+            if im.convert("RGBA").getextrema()[3][1] < 128:
+                sys.exit("reference has no visible pixels (alpha >= 128): " + p)
+
+
 class Run:
     """One helper run: the --out folder, the inputs it must never overwrite, and the changes it reports."""
 

@@ -219,6 +219,18 @@ class FinishBehaviourTests(unittest.TestCase):
     def tearDown(self) -> None:
         self._tmp.cleanup()
 
+    def test_blank_reference_is_refused_before_any_output(self) -> None:
+        # review: a blank still crashed colormatch/recolor_groups and left an --out folder that blocked the retry
+        Image.new("RGBA", (8, 8)).save(self.t / "blank.png")
+        Image.new("RGBA", (8, 8), (200, 40, 40, 255)).save(self.t / "frame.png")
+        for helper, extra in (("colormatch", []), ("recolor_groups", ["--swap", "red=indigo"])):
+            with self.subTest(helper=helper):
+                out = self.t / ("out-" + helper)
+                r = run(helper, self.t / "blank.png", self.t / "frame.png", *extra, "--out", out)
+                self.assertNotEqual(r.returncode, 0)
+                self.assertIn("no visible pixels", r.stdout + r.stderr)
+                self.assertFalse(out.exists())
+
     def test_find_muzzle_locates_the_flash_frame_and_muzzle(self) -> None:
         clip = self.t / "shot"
         clip.mkdir()

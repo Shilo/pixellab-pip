@@ -75,6 +75,7 @@ if not nums:
 keys = [os.path.join(a.src, "%d.png" % k) for k in (0, max(nums))]   # the two key poses: first and last frame
 names = _derive.frames(a.src, a.frames)
 paths = [os.path.join(a.src, f + ".png") for f in names]
+_derive.require_visible(*keys)
 run = _derive.Run("scrub", "cleanup", a.out, list(dict.fromkeys(keys + paths)))
 pal = set()
 for k in keys:

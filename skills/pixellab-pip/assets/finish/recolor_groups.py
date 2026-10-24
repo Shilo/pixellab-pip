@@ -117,6 +117,7 @@ if __name__ == "__main__":
         print("colours:", ", ".join(sorted(NAMED)))
         raise SystemExit(0)
     files = [a.still] + _derive.expand(a.frames)
+    _derive.require_visible(a.still)
     run = _derive.Run("recolor_groups", "cleanup", a.out, files)
     swaps = parse(a.swap)
     swap = Swap(still, swaps)

@@ -97,3 +97,22 @@ def test_default_output_stays_beside_input_files(tmp_path):
     assert out(tmp_path / 'clip') == str(tmp_path / 'clip') + '_fixed'
     assert out(tmp_path / 'sheet.png') == str(tmp_path / 'sheet_fixed')
     assert out(tmp_path / 'clip' / '*.png') == str(tmp_path / 'clip' / 'frames_fixed')
+
+
+def test_empty_frames_never_become_the_reference(tmp_path):
+    # review: an empty first frame became the "typical" reference and the checks crashed on it
+    from fixlib import frames as framesmod
+    empty = np.zeros((8, 8, 4), np.uint8)
+    body = empty.copy()
+    body[2:6, 2:6] = (200, 40, 40, 255)
+    assert framesmod._typical([empty, body, body]) is not empty
+    try:
+        framesmod._typical([empty, empty])
+    except ValueError as exc:
+        assert 'empty' in str(exc)
+    else:
+        raise AssertionError('all-empty frames must be refused')
+    Image.fromarray(empty, 'RGBA').save(tmp_path / 'blank.png')
+    r = subprocess.run([sys.executable, FIX, str(tmp_path / 'blank.png'), '--ref', str(tmp_path / 'blank.png'),
+                        '--check-only', '--out', str(tmp_path / 'o')], capture_output=True, text=True)
+    assert r.returncode == 2 and 'no visible pixels' in r.stderr and not (tmp_path / 'o').exists()

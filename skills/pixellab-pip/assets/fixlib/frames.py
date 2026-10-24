@@ -132,8 +132,11 @@ def _anim(character, move, raw, paths, durations=None, source=''):
 
 
 def _typical(fs):
-    med = np.median(np.stack([f.astype(float) for f in fs]), 0)
-    return fs[min(range(len(fs)), key=lambda i: np.abs(fs[i].astype(float) - med).sum())]
+    seen = [i for i, f in enumerate(fs) if (f[..., 3] >= 128).any()]   # an empty frame is never the reference
+    if not seen:
+        raise ValueError('every frame is empty; nothing to compare')
+    med = np.median(np.stack([fs[i].astype(float) for i in seen]), 0)
+    return fs[min(seen, key=lambda i: np.abs(fs[i].astype(float) - med).sum())]
 
 
 def load(inputs, sheet=None, ref=None, move=None):
@@ -181,6 +184,8 @@ def load(inputs, sheet=None, ref=None, move=None):
         for a in anims:
             a.kind, a.kind_guessed = MOVES.get(move, 'oneshot'), False
     given = key_background(_rgba(Image.open(ref)))[0] if ref else None
+    if given is not None and not (given[..., 3] >= 128).any():
+        raise ValueError('--ref has no visible pixels (alpha >= 128): ' + ref)
     by_char = {}
     for a in anims:
         by_char.setdefault(a.character, []).append(a)
