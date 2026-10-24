@@ -250,7 +250,7 @@ SCENARIOS = [
     {
         "id": "route-styled-icons",
         "task": "Using PixelLab, make shop item icons for my game in my project's saved art style.",
-        "checks": {"style": r"project_style\.py|pixellab\.json|project[- ]style"},
+        "checks": {"style": r"project_style\.py|pixellab-pip-style\.json|project[- ]style"},
         "refs_any": ["project-style.md", "icon.md"],
     },
     {
