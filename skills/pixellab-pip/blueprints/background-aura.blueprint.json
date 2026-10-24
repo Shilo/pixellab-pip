@@ -5,7 +5,7 @@
       "output_directory": "pixellab-pip-generations/background-aura",
       "output_collision_policy": "create_unique"
     },
-    "_comment": "Transparent upright background-aura candidates; open-center results may also be used as front overlays.",
+    "_comment": "Provisional transparent background-aura candidates; the prompt can also produce symbols and bottom-edge clipping.",
     "TASK": {
       "instruction": "Resolve variables. Treat the supplied aura theme, including comma-separated text, as one value and one generation call. Apply one requested size to both dimensions or split WIDTHxHEIGHT. Require explicit run approval and an authenticated PixelLab MCP connection, then create the declared unique empty output directory.",
       "verify": "The request is approved, MCP is authenticated, and the output directory is new and empty."
@@ -13,7 +13,7 @@
   },
   {
     "MCP create_image_pro": {
-      "description": "fully contained {{aura theme | default: energy}} power-up aura rising along both sides and connecting above tall central space",
+      "description": "fully contained broad {{aura theme | default: energy}} aura forming an upright rear layer",
       "width": "{{aura width | default: 64}}",
       "height": "{{aura height | default: 64}}",
       "no_background": true

@@ -13,7 +13,7 @@
   },
   {
     "MCP create_image_pro": {
-      "description": "fully contained {{aura theme | default: energy}} power-up aura rising along both sides and connecting above tall open central space",
+      "description": "fully contained {{aura theme | default: energy}} power-up aura rising along both sides of open central space",
       "width": "{{aura width | default: 64}}",
       "height": "{{aura height | default: 64}}",
       "no_background": true

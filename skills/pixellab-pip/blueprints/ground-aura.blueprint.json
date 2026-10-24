@@ -13,7 +13,7 @@
   },
   {
     "MCP create_image_pro": {
-      "description": "fully contained round {{aura theme | default: energy}} ground aura beneath tall open vertical space",
+      "description": "fully contained round {{aura theme | default: energy}} ground aura beneath open vertical space",
       "width": "{{aura width | default: 64}}",
       "height": "{{aura height | default: 64}}",
       "no_background": true
