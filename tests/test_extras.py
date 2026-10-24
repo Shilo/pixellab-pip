@@ -68,9 +68,10 @@ class ExtrasTests(unittest.TestCase):
         for filters in ([], ["--tool", "animate_image"], ["--since", "2026-01-01"]):
             result = run("history.py", "--root", root, "--json", "--runs", "1", *filters)
             self.assertEqual(result.returncode, 0, result.stderr)
-            (row,) = json.loads(result.stdout)
-            self.assertEqual(row["name"], "broken")
-            self.assertIn("error", row)
+            runs, broken_row = json.loads(result.stdout)   # the run fills --runs 1; the broken ledger is still listed
+            self.assertEqual(runs["name"], "recent")
+            self.assertEqual(broken_row["name"], "broken")
+            self.assertIn("error", broken_row)
         self.assertEqual(path.read_bytes(), before)
 
     @unittest.skipUnless(HAS_NUMPY, "numpy is not installed")
