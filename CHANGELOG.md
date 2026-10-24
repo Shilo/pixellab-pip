@@ -26,9 +26,9 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 ### Added
 
-- **Project art styles** in `pixellab-pip-style.json`: named styles, approved reference art per asset family, 4 starting
-  setups plus 7 untested genre word sets, and optional analysis of art you already have. Nothing applies unless you
-  choose it.
+- **Project art styles** in `pixellab-pip-style.json`: named styles, approved reference art per asset family, an
+  optional fixed seed, 4 starting setups (including Game Art's side-view dark fantasy look) plus 7 untested genre word
+  sets, and optional analysis of art you already have. Nothing applies unless you choose it.
 - **Animation doctor** (`fix.py`): finds jumps, flicker, stray pixels, size pops and lost weapons; fixes what it can
   for free on copies; plans paid re-rolls of only the frames that failed.
 - **Finishing tools**, which write copies and record what they changed: ground snap, scrub, despeckle, colour match,
