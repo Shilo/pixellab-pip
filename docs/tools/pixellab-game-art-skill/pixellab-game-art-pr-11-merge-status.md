@@ -32,7 +32,7 @@ v1.4.3 repo. Those parts are marked "new" below.
 | Tools that need a higher PixelLab plan, and their fallbacks | `job-lifecycle.md` (REST Error Handling) | Fallbacks only; the tier numbers and job limits were left out because they go stale. |
 | 7 genre presets (high fantasy, cyberpunk, steampunk, post-apocalyptic, modern, horror, western) | `style-examples.md` → Genre word sets | Word sets only (look, palette, era weapons, negatives), marked untested and offered, never defaults; saved with `project_style.py save --from`. |
 | Front-facing giant boss tips | `characters.md` (waist-up still), `key-pose-animation.md` (Front-facing giant bosses), `finishing.md` (ground_snap warning) | Same decisions; generation costs left out. |
-| The 21 `/pga-*` commands | Plain requests through `/pixellab-pip`; mapping in `docs/merge/README.md` | Batch runs became the mixed-batch rule in `auto.md`; rerolls became the historical-reroll rule in `usage-reporting.md`. |
+| The 22 `/pga-*` commands | Plain requests through `/pixellab-pip`; mapping in `docs/merge/README.md` | Batch runs became the mixed-batch rule in `auto.md`; rerolls became the historical-reroll rule in `usage-reporting.md`. |
 
 ## Left out on purpose
 
@@ -98,6 +98,6 @@ These are not in the PR. Re-add one only when the trigger in the last column hap
 
 ## Merge
 
-- Squash-merge with a `Co-authored-by` credit for lexingel. A merge commit would bring the removed unlicensed demo
-  images, the abandoned prototype "Studio" edition and personal commit emails into `main`'s history.
+- The branch history still contains the demo images removed in `e2908b4`, because no art licence was supplied for
+  them. A merge keeps that history, so confirm lexingel's permission to publish them before merging.
 - No version bump in the PR; versions change only in the separate release commit.
