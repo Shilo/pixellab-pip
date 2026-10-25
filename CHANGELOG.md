@@ -17,6 +17,9 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
   top-down height, `view`, borders and no-effect controls follow the new contract; MCP sidescroller Pro mode is
   supported. Normal maps default to the 0.1-generation Lite mode, oversized transparent Pixen requests are known to be
   refused, text-only animals can use Pro Flash, and several cost and job-wait details are current.
+- **Refresh the MCP/REST parity guide.** Rechecked the live official docs (102 REST path templates / 113 operations,
+  118 MCP tools) and labeled full, partial and absent coverage. The guide now identifies 29 REST operations without a
+  full MCP match (16 partial, 13 none) and 40 MCP tools without REST workflow counterparts.
 
 ### Fixed
 
