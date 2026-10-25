@@ -106,7 +106,7 @@ Manual alternative: use your agent's plugin or extension uninstall command, or d
 
 For most users, run `/pixellab-pip setup` and choose **MCP + API**. MCP connects PixelLab tools directly to the assistant; API fallback lets Pip use documented REST v2 routes when MCP is unavailable or does not expose the needed capability.
 
-Standard-library local helpers require Python 3.10 or newer. Image helpers use Python 3.11 or newer with security-patched Pillow 13 or newer; other optional image dependencies are documented by the selected helper.
+Standard-library local helpers require Python 3.10 or newer. Image helpers use Python 3.11 or newer with security-patched Pillow 13 or newer; see [Optional local helper dependencies](../README.md#optional-local-helper-dependencies) for NumPy, SciPy, and install commands.
 
 | Wizard mode | Use it when | What Pip does |
 |---|---|---|

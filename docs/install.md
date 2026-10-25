@@ -4,6 +4,8 @@ Use the [README quick start](../README.md#install) for the shortest path. This g
 
 After any install, restart or reload the agent if required, then run PixelLab Pip setup using the prefix your agent supports: `/pixellab-pip setup`, `@pixellab-pip setup`, or `$pixellab-pip setup`.
 
+Pip's local Python helpers are optional. To enable them, follow [Optional local helper dependencies](../README.md#optional-local-helper-dependencies).
+
 ## Agent-Assisted Install (Recommended)
 
 Easiest for most people: copy the protected [agent-assisted install prompt](../README.md#agent-assisted-install-recommended) from the README. It tells your agent to read this full guide before choosing the correct marketplace, plugin, extension, or skill route.

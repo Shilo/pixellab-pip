@@ -8,7 +8,7 @@ Local assembly only assembles, previews, format-converts, or verifies existing P
 
 ## Local Image Inspection
 
-Prefer available host tools when they already provide equivalent all-frame checks. This skill's `assets/inspect_images.py` is an optional reusable implementation, not a prerequisite for PixelLab work. Use it only with a known usable Python interpreter. If Python cannot launch, skip the helper; do not install Python or Pillow solely for inspection. Use equivalent host checks where available and report any checks left unverified. Resolve the helper to an absolute path in the installed skill; keep the working directory at the generation's run folder so relative input paths resolve there. In this example, replace `<skill-dir>` with that installation's absolute directory:
+Prefer available host tools when they already provide equivalent all-frame checks. This skill's `assets/inspect_images.py` is an optional reusable implementation, not a prerequisite for PixelLab work. Use it only with a known usable Python interpreter. If Python cannot launch, skip the helper. Use equivalent host checks where available and report any checks left unverified. Resolve the helper to an absolute path in the installed skill; keep the working directory at the generation's run folder so relative input paths resolve there. In this example, replace `<skill-dir>` with that installation's absolute directory:
 
 ```bash
 python "<skill-dir>/assets/inspect_images.py" frame-00.png frame-01.png --expect-size 64x64 --expect-frames 2
@@ -22,7 +22,7 @@ Alpha/bounds are observations: a fully transparent effect frame may be intention
 
 ## Assembly Helpers
 
-Use Python 3.11+ with security-patched Pillow 13+ for bundled image helpers. Older Pillow releases have known decoder vulnerabilities. The shared guard skips before decoding when a supported stable version is unavailable. Use the host inspection/assembly fallback in that case; do not install or upgrade packages without a user request.
+Use Python 3.11+ with security-patched Pillow 13+ for bundled image helpers. Older Pillow releases have known decoder vulnerabilities. The shared guard skips before decoding when a supported stable version is unavailable. Use the host inspection/assembly fallback in that case.
 
 The helpers below follow the same Python, `<skill-dir>`, and exit-code-3 skip rules as `inspect_images.py` above; inspect each helper's output/help for its result or skip report. Use a fresh destination; preflight refuses source aliases, collisions and existing output files. They place pixels without scaling or editing them (except `--scale`, nearest neighbour) and never drop, repeat, or reorder frames.
 

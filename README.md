@@ -210,6 +210,45 @@ Common commands:
 
 The leading `/`, `@`, or `$` depends on your agent. Read the [usage and setup guide ↗](docs/usage.md) for command behavior, MCP/API modes, token safety, and more examples.
 
+### Optional local helper dependencies
+
+Routing and PixelLab generation need no Python. Pip's optional local helpers do; when something is missing they skip, and Pip tells you which package or check was skipped.
+
+| Needs | Helpers |
+|---|---|
+| Python `3.10` or newer | Completion sound (bark), run history, and manifests. |
+| Python `3.11` or newer and Pillow `13.0.0` or newer (the security minimum) | Image checks, downloads, sheets, GIFs, panel previews, style anchor images, and background removal. |
+| Also NumPy | Style analysis, normal maps, tileset previews, showcase GIFs, and finishing. |
+| Also SciPy | The animation doctor and some finishing helpers. |
+
+`/pixellab-pip setup` connects PixelLab MCP/API access and credentials; it never installs Python or packages. If you need Python, get it from [python.org](https://www.python.org/downloads/).
+
+To enable every helper, check that `python3 --version` shows `3.11` or newer, then run:
+
+```bash
+python3 -m pip install --user "Pillow>=13" numpy scipy
+```
+
+On Windows, use `python` instead of `python3`. Inside an active virtual environment, drop `--user`.
+
+If `pip` stops with `externally-managed-environment` (Homebrew Python, recent Debian or Ubuntu), use a virtual environment instead:
+
+```bash
+python3 -m venv ~/.pixellab-pip-venv
+```
+
+```bash
+~/.pixellab-pip-venv/bin/python -m pip install "Pillow>=13" numpy scipy
+```
+
+Then start your agent from a shell where it is active (`source ~/.pixellab-pip-venv/bin/activate`), or tell your agent to use `~/.pixellab-pip-venv/bin/python`.
+
+Or ask your agent:
+
+```text
+Install PixelLab Pip's optional helper packages (Pillow 13 or newer, NumPy, SciPy) for the Python you use to run Pip's helpers: user-wide, or into the virtual environment if one is active. Do not install Python, use sudo, or use --break-system-packages. If no Python 3.11 or newer is found, or pip stops with externally-managed-environment, stop and tell me my options.
+```
+
 ## Benchmark
 
 Pip is tested on plain-language routing scenarios against the official MCP docs alone and an agent with no added PixelLab context. The benchmark is dry: it spends no PixelLab credits.

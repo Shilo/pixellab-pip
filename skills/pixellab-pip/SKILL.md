@@ -251,7 +251,7 @@ If web access is unavailable, answer from this skill and say which current claim
 
 If no bearer token is configured, stop before generation and offer the setup wizard: the user opens `https://www.pixellab.ai/account` after signing in, copies the value labeled `Secret`, and stores it locally as `PIXELLAB_SECRET` or in app secret settings — never pasted into chat. For Manual setup, link `https://www.pixellab.ai/mcp` and stop. PixelLab UI/docs may call this value an API key, API token, or secret; for REST/MCP bearer auth, call it a bearer token.
 
-A Python launcher that fails before Python starts does not mean Python is missing: on Windows, try each `where.exe python3` and `where.exe python` result and use the first that passes `--version`. Never install Python.
+A Python launcher that fails before Python starts does not mean Python is missing: on Windows, try each `where.exe python3` and `where.exe python` result and use the first that passes `--version`. Never install Python. When a helper skips with exit 3 for a missing or outdated package, report the step as not done and name that package from the skip reason; install packages only when the user asks.
 
 For questions, answer with: recommended surface/endpoint, why it fits, warnings for unsupported alternatives, and a verification note only when the answer depends on an unverified current fact.
 

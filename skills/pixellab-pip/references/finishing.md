@@ -14,7 +14,7 @@ Read this before cleaning up or finishing generated frames locally: stray pixels
 
 Quote frame wildcards (`"raw/*.png"`) so the helper sorts `0.png .. 10.png` in number order; a shell that expands them first puts `10.png` before `2.png`.
 
-The helpers live in `assets/finish/`; resolve them to the installed skill's absolute path as in `local-asset-assembly.md`. They need Pillow and numpy (some also scipy); when unavailable they print a JSON `status: skipped` with the missing dependency and exit 3 — report the step as not done, never as passed. Do not install packages to run them unless the user asks.
+The helpers live in `assets/finish/`; resolve them to the installed skill's absolute path as in `local-asset-assembly.md`. They need Pillow and numpy (some also scipy); when unavailable they print a JSON `status: skipped` with the missing dependency and exit 3.
 
 - Every helper requires `--out <dir>` and writes copies only; it preflights collisions with inputs and existing outputs. Raw PixelLab outputs stay untouched beside the finished copies. Give each step its own folder inside the run, e.g. `pixellab-pip-generations/<run>/finish/1-ground-snap/`.
 - Each run writes `<out>/derivative.json`: `helper`, `category` (`cleanup` or `new_pixels`), `inputs`, and per-frame `changes`. Use a fresh output folder for each step or revised attempt; previous copies/records remain untouched. Report every derivative as a local derivative, name the helper and its changes, and record the step as a `TASK` in the blueprint (`blueprint.md`).
