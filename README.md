@@ -19,7 +19,6 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 
 ## Table Of Contents
 
-- [Game Art Integration](#game-art-integration)
 - [Showcase](#showcase)
 - [Features](#features)
   - [Create Pixel Art You Want](#create-pixel-art-you-want)
@@ -33,21 +32,6 @@ An unofficial Agent Skill for [PixelLab ↗](https://www.pixellab.ai/) that turn
 - [Benchmark](#benchmark)
 - [Security](#security)
 - [More Documentation](#more-documentation)
-
-## Game Art Integration
-
-Pip 3.0 includes the main production tools of [pixellab-game-art](https://github.com/lexingel/pixellab-game-art) in the same single skill:
-
-- Project art styles you choose, saved in `pixellab-pip-style.json`, with reference art per asset type.
-- An animation doctor that finds bad frames, fixes copies for free and plans paid re-rolls of only what failed, with your approval.
-- Optional key-pose attacks, weapon and fighting guides, finishing tools and engine-ready sprite sheets.
-- A cost record per run, history for re-rolls, and `/pixellab-pip panel` to review results.
-
-Everything goes through the usual `/pixellab-pip` entry point and the usual ask-before-spending rules. `auto plan <budget> [retries] [task]` sets a credit and retry limit for one run. Coming from Game Art? Run `/pixellab-pip setup` to rename your old project file.
-
-See the [changelog](CHANGELOG.md), [what came over and what didn't](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-merge-status.md), and [integration notes](docs/merge/README.md).
-
-Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. Adopted source notices are preserved inside the skill distribution.
 
 ## Showcase
 
