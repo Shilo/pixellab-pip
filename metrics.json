@@ -1,12 +1,12 @@
 {
-  "observed_at": "2026-10-24T10:55:57+00:00",
+  "observed_at": "2026-10-25T11:23:35+00:00",
   "downloads": {
-    "clawhub": 1566,
-    "github_release_assets": 45,
-    "total": 1611
+    "clawhub": 1573,
+    "github_release_assets": 46,
+    "total": 1619
   },
   "clones": {
-    "count": 1933,
+    "count": 2401,
     "period": "last 14 days"
   }
 }
