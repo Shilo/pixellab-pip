@@ -2,7 +2,7 @@
 
 Read this for PixelLab bearer-token handling, UI naming, and reusing MCP auth for Pip's REST v2 fallback. For where the Secret comes from and how to store it, follow SKILL.md's Auth And Execution and `setup.md`; this file adds the security rules and lookup order.
 
-PixelLab uses one account-level bearer token for both public REST v2 and PixelLab MCP; store it in `PIXELLAB_SECRET`. Use one canonical env var — do not create aliases. Official examples may say `YOUR_API_TOKEN` or `YOUR_SECRET`; put that same token in `PIXELLAB_SECRET`.
+PixelLab uses one account-level bearer token for both public REST v2 and PixelLab MCP; store it in `PIXELLAB_SECRET`. Use one canonical env var, with no aliases. Official examples may say `YOUR_API_TOKEN` or `YOUR_SECRET`; put that same token in `PIXELLAB_SECRET`.
 
 Use it as:
 
@@ -14,9 +14,9 @@ In previews, `<PIXELLAB_SECRET>` is a private local secret reference — never a
 
 ## Token handling
 
-- Never print, echo, log, summarize, measure, transform, validate, or reuse a token value from chat or config output. Never ask the user to paste it into chat. If a token appears in chat or tool output, do not repeat it; tell the user to treat it as exposed and replace it before continuing.
+- Never print, echo, log, summarize, measure, transform, validate, or reuse a token value from chat or config output.
 - Never put the token in an agent-run or assistant-shell command, including Claude Code or Codex CLI shell escapes and Codex-readable integrated-terminal commands. Even when the user's local shell runs the command from inside an assistant session, the command text may be visible to the session, saved in transcripts/logs, or kept in command history.
-- A user-run command with a literal token is allowed only as an explicit manual fallback in a normal external terminal, after warning that the token may be stored in local config or shell history. Show placeholders only; never run it, never put the real token in generated text, and never ask the user to paste it into chat.
+- A user-run command with a literal token is allowed only as an explicit manual fallback in a normal external terminal, after warning that the token may be stored in local config or shell history. Show placeholders only; never run it or put the real token in generated text.
 - `setx`, `export`, PowerShell `$env:`, and `ENV=value command` are not inherently forbidden — the risk is the literal Secret appearing in command text. Offer the user both ways to set the `PIXELLAB_SECRET` user variable and let them pick:
   - **Settings dialog (friendliest, keeps the Secret out of shell history).** On Windows: open Start, type `environment variables`, and click the top result — it may be called **Edit the system environment variables** or **Edit environment variables for your account**; both reach the same place. If it opens the **System Properties** window, click the **Environment Variables…** button on the **Advanced** tab. In the top **User variables** section (labeled with your username) click **New**, set the name to `PIXELLAB_SECRET` and the value to the Secret, then click **OK**, **OK**. A User variable needs no admin rights, even though that window mentions Administrator. macOS has no built-in environment-variable dialog, so on macOS/Linux use the command option below (or a secret manager such as macOS Keychain).
   - **One-line command.** On Windows, `setx PIXELLAB_SECRET "<paste-secret>"` in a normal external terminal (persists to the user environment). On macOS/Linux, add the line `export PIXELLAB_SECRET="<paste-secret>"` to your shell profile (`~/.zshrc` on macOS, `~/.bashrc` on Linux) and open a new terminal; a bare `export` typed into the current shell is session-only and reads as "not set" after restart (and a profile export reaches shell-launched apps, not Finder/Dock-launched ones — for a Dock-launched app, use its own secret settings or launch it from that terminal). The Secret is then stored in plaintext — command history for `setx`, the profile file for the export line — so never run it yourself and never fill in a real token.
@@ -33,7 +33,7 @@ If PixelLab MCP is already configured, reuse its credential source when safe:
 
 ## Where to look, and where not to
 
-Inspect only the specific config paths the user names or approves after a token-free explanation. Do not scan broad home/auth/credential/config directories, shell history, OS credential stores, project or repository trees, or existing `.env*` files — tool output can leak secrets. Do not recursively search for token/secret/auth/env names.
+Inspect only the specific config paths the user names or approves after a token-free explanation. Do not scan broad home/auth/credential/config directories, shell history, OS credential stores or password managers, project or repository trees, or existing `.env*` files — tool output can leak secrets. Do not recursively search for token/secret/auth/env names.
 
 Before writing environment settings, OS credential-store/secret-store entries, MCP app config, shell profiles, or loader-backed project-local secret files, follow `setup.md`: explain the destination, show a token-free preview or secret reference, and get explicit approval.
 

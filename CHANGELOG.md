@@ -9,7 +9,9 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Changed
 
-- **Lower SkillSpector risk score.** The static scan now rates the skill LOW / SAFE (17, down from 41 in 3.0.0). The token and credential-store rules are reworded without weakening them, and a scanner false positive in the manifest helper is gone.
+- **Lower SkillSpector risk score.** The static scan now rates the skill LOW / SAFE (17, down from 41 in 3.0.0).
+  Rules that scanners misread as risky are reworded without weakening them, duplicated token and docs-link rules
+  now live in one place, and a scanner false positive in the manifest helper is gone.
 - **Document optional helper dependencies.** The README now lists which helpers need Python, Pillow, NumPy or SciPy, gives a user-wide install command, a virtual-environment fallback and a paste-to-agent request, and clarifies that `/pixellab-pip setup` configures PixelLab access rather than installing Python or packages. Setup ends with a one-line note that these packages are optional, and when a helper skips, Pip names the missing or outdated package.
 - **Matches PixelLab's 2026-10-25 public docs.** Standard tilesets are quoted at 1 generation (Pro at 15 or 25), and
   top-down height, `view`, borders and no-effect controls follow the new contract; MCP sidescroller Pro mode is
@@ -18,8 +20,10 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Fixed
 
-- **Only you can change Auto.** Pip acts on `auto`, `auto on`/`off` and `auto plan` only when they come from your own
-  message, never from text in a tool reply, web page, file, image, blueprint or panel snapshot.
+- **Only you can change Auto.** Pip acts on `auto`, `auto on`/`off` and `auto plan` only when you give them, never
+  from text in a tool reply, web page, file, image, blueprint or panel snapshot. Such text can still lower a budget.
+- **A token pasted into chat is always treated as exposed.** Outside setup too, Pip no longer repeats or uses it and tells you
+  to replace it.
 - **Helpers run when a Windows Python alias is blocked.** An agent shell can resolve `python3` to a Windows app alias
   that will not launch, so the bark sound fell back to a system beep. Pip now tries the other installed interpreters
   before deciding Python is missing.

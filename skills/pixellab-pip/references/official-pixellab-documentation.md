@@ -1,6 +1,6 @@
 # Official PixelLab Documentation
 
-Read this when a needed endpoint, tool, field, price, limit, SDK detail, or exact request/response schema is missing or unclear in the skill. Official docs can change after this skill ships; prefer the skill for routing and refresh docs only for the gap. Refresh triggers and the URL shortlist are in SKILL.md (Current Docs Refresh) — this file adds the annotated link table and the surface boundaries below.
+Read this when a needed endpoint, tool, field, price, limit, SDK detail, or exact request/response schema is missing or unclear in the skill. Official docs can change after this skill ships; prefer the skill for routing and refresh docs only for the gap. Refresh triggers are in SKILL.md (Current Docs Refresh); this file is the canonical link table and adds the surface boundaries below.
 
 ## Links
 
@@ -10,7 +10,8 @@ Read this when a needed endpoint, tool, field, price, limit, SDK detail, or exac
 | `https://api.pixellab.ai/v2/docs` | Interactive REST v2 API docs. | Good for exact endpoint parameters; less useful for high-level agent routing. |
 | `https://api.pixellab.ai/v2/redoc` | REST v2 ReDoc reference pages linked from `llms.txt`. | Browseable operation docs; still use OpenAPI for machine-readable schemas. |
 | `https://api.pixellab.ai/v2/llms.txt` | LLM-friendly REST v2 endpoint index and auth summary. | Curated index only; it intentionally points to OpenAPI/interactive docs for full endpoint parameters, enum values, and request/response shapes. |
-| `https://api.pixellab.ai/v2/openapi.json` | Machine-readable REST v2 schema. | Requires parsing; current skill summarizes only stable routing. |
+| `https://api.pixellab.ai/v2/openapi.json` | Machine-readable REST v2 schema. | Exact schema checks only; read a field's existence, type, or default from the raw JSON, not a prose summary. |
+| `https://api.pixellab.ai/v1/openapi.json` | Legacy v1 schema. | Legacy checks only; never for new work. |
 | `https://www.pixellab.ai/mcp` | Human Vibe Coding setup page for MCP clients. | Setup-oriented; its "Available Tools" list can be abbreviated and should not be treated as the full tool inventory. |
 | `https://api.pixellab.ai/mcp` | Hosted MCP server URL. | This is a service endpoint, not documentation. Use through an MCP-capable client. |
 | `https://api.pixellab.ai/mcp/docs` | LLM-readable MCP tool guide and authoritative public MCP tool inventory. | MCP tools are not REST endpoints; do not curl tool names. |

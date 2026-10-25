@@ -739,7 +739,8 @@ def run_unit_tests() -> None:
 # excessive_agency `EA4`, and tool_misuse `TM1`; re-check them when that pin is bumped.
 # Not guarded: the project's accepted
 # by-design findings (documented api.pixellab.ai URLs, the MIT notice text, the bark.py
-# subprocess), intentionally kept. Reword safety prose only when the new text is at least as strict.
+# subprocess), intentionally kept. Reword safety prose only when the new text is at least as strict
+# and as clear to an agent; never reword a rule only to dodge a scanner.
 SECURITY_TRIGGER_PATTERNS = [
     (r"echo\s+.*>>?\s*.*\.bashrc", "backdoor_persistence: echo-append to .bashrc"),
     (r"echo\s+.*>>?\s*.*\.profile", "backdoor_persistence: echo-append to .profile"),

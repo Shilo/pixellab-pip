@@ -43,7 +43,7 @@ ClawHub's registry audit runs a newer SkillSpector with model-based checks. Its 
 
 - **Incomplete referenced-artifact analysis (`AE1`):** a scanner coverage notice, not detected hidden content. Ordinary prose trips it, such as the `${XDG_CONFIG_HOME:-~/.config}` settings path or the words "remove" and "DELETE" beside code spans. Every referenced file ships as readable Markdown with no hidden characters, comments, or encoded content.
 - **MCP config access (`AS2`):** the setup wizard adds the PixelLab entry to an app's MCP config only when the user names that app, after a token-free preview and explicit approval. Broad config and secret scans are forbidden.
-- **Autonomous decision making (`EA2`):** phrase matches on safety rules such as "Do not post-process PixelLab output into a claimed final asset without explicit approval".
+- **Autonomous decision making (`EA2`):** phrase matches on safety rules that tell the agent when it must, or need not, ask before acting.
 - **Description mismatch (`TP4`) and language policy (`SQP-3`):** model checks that compare one local helper script with the whole skill description, or flag English prompt preparation that already shows the translation and asks for approval before any non-English request is sent.
 
 ## Report A Concern

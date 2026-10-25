@@ -128,7 +128,7 @@ Report outcome briefly: detected mode; readiness (ready, partially ready, not co
 
 - Do not scrape browser storage or session cookies, or use website/Supabase/browser session tokens for REST or MCP.
 - Do not call undocumented internal endpoints (website or Aseprite extension) as setup verification.
-- Do not claim SDK support, MCP tool availability, pricing, limits, or endpoint behavior without checking when those facts matter.
+- Check SDK support, MCP tool availability, pricing, limits, or endpoint behavior before claiming them when those facts matter.
 - Do not require Pip-specific behavior from apps that only support generic MCP or REST.
 
 ## Migrating an existing Game Art installation

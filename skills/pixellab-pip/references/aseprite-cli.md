@@ -87,7 +87,8 @@ Prefer direct CLI when no custom sprite construction is needed; use `--save-as` 
 
 ```powershell
 & $AsepritePath --version
-& $AsepritePath "asset.png"                                             # open visibly (after approval)
+# Open visibly (after approval):
+& $AsepritePath "asset.png"
 & $AsepritePath -b "source.aseprite" --save-as "frame-{frame}.png"      # PNG frames
 & $AsepritePath -b --tag "Walk" "source.aseprite" --save-as "walk.gif"  # tagged GIF
 & $AsepritePath -b "source.aseprite" --sheet "sheet.png" --data "sheet.json" --sheet-type rows
