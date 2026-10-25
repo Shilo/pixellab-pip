@@ -101,7 +101,7 @@ Check `PIXELLAB_SECRET` presence without outputting, logging, measuring, transfo
 
 After the check, report success/failure, the surface checked, and whether credentials were found; summarize any balance without raw headers or full JSON. On failure, name the likely layer: missing env var, app not reloaded, auth rejected, network failure, endpoint unavailable, or tool mismatch.
 
-**Never scan broad locations.** Do not scan home, auth, shell history, keychain, credential, config, project, or repository directories, and do not recursively search for token/secret/auth/env names. Inspect credential-bearing config only at exact paths the user named or approved after you explain why. Non-secret readiness checks may inspect only active-workspace files needed for the task.
+**Never scan broad locations** — follow `credentials.md` (Where to look, and where not to). Non-secret readiness checks may inspect only active-workspace files needed for the task.
 
 ## 6. Output
 

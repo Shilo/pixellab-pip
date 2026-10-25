@@ -738,9 +738,8 @@ def run_unit_tests() -> None:
 # release-skill.yml) — malware.yar `backdoor_persistence`, agent_snooping `AS1`,
 # excessive_agency `EA4`, and tool_misuse `TM1`; re-check them when that pin is bumped.
 # Not guarded: the project's accepted
-# by-design findings (documented api.pixellab.ai URLs, bearer-token-handling rules, the bark.py
-# subprocess), intentionally kept — including `EA2`, whose "never ask the user to paste a token"
-# phrasing is load-bearing safety prose that must not be reworded to dodge a regex.
+# by-design findings (documented api.pixellab.ai URLs, the MIT notice text, the bark.py
+# subprocess), intentionally kept. Reword safety prose only when the new text is at least as strict.
 SECURITY_TRIGGER_PATTERNS = [
     (r"echo\s+.*>>?\s*.*\.bashrc", "backdoor_persistence: echo-append to .bashrc"),
     (r"echo\s+.*>>?\s*.*\.profile", "backdoor_persistence: echo-append to .profile"),

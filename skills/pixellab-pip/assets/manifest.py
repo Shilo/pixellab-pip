@@ -183,8 +183,8 @@ def set_plan(run_dir: str, plan: dict[str, Any]) -> None:
             raise ValueError("plan " + key + " must be a nonnegative integer")
     if plan["retries_used"] > plan["retry_limit"]:
         raise ValueError("plan retries_used exceeds retry_limit")
-    if not isinstance(plan["remaining_work"], list) or any(not isinstance(item, str) or not item.strip()
-                                                          for item in plan["remaining_work"]):
+    work = plan["remaining_work"]
+    if not isinstance(work, list) or any(not isinstance(item, str) or not item.strip() for item in work):
         raise ValueError("plan remaining_work must be a list of nonempty strings")
     with _transaction(run_dir):
         if not (Path(run_dir) / NAME).exists() and any(p.name != ".manifest.lock" for p in Path(run_dir).iterdir()):

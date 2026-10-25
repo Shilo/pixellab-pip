@@ -33,15 +33,15 @@ If PixelLab MCP is already configured, reuse its credential source when safe:
 
 ## Where to look, and where not to
 
-Inspect only the specific config paths the user names or approves after a token-free explanation. Do not scan broad home/auth/config directories, shell history, keychains, project trees, or existing `.env*` files — tool output can leak secrets. Do not recursively search for token/secret/auth/env names.
+Inspect only the specific config paths the user names or approves after a token-free explanation. Do not scan broad home/auth/credential/config directories, shell history, OS credential stores, project or repository trees, or existing `.env*` files — tool output can leak secrets. Do not recursively search for token/secret/auth/env names.
 
-Before writing environment settings, keychain/secret-store entries, MCP app config, shell profiles, or loader-backed project-local secret files, follow `setup.md`: explain the destination, show a token-free preview or secret reference, and get explicit approval.
+Before writing environment settings, OS credential-store/secret-store entries, MCP app config, shell profiles, or loader-backed project-local secret files, follow `setup.md`: explain the destination, show a token-free preview or secret reference, and get explicit approval.
 
 `.env`/`.env.local` do not auto-inject variables into Codex, Claude, Pip, MCP clients, terminals, or the OS; they work only when a specific helper, dotenv loader, or wrapper reads them. Do not present them as MCP-ready or Pip-ready by themselves. ClawHub `pixellab-ai` reads such a file only when its helper gets an explicit `--env-file` flag; Pip ships no loader at all, so copying the file pattern alone is not enough. Before writing `PIXELLAB_SECRET` to any project-local file, explain the loader or wrapper that will read it, show a token-free preview, and get approval. Inspect an existing `.env`/`.env.local` only to troubleshoot when the user names that exact file, approves inspection, and confirms the purpose; if unclear, ask first. Make it a targeted presence/format check, not a full-file read that loads the value into context. Never print or copy values from it.
 
 Fallback order:
 
 1. Assistant/editor/app secret settings, app secret store, or user-scoped OS environment variable named `PIXELLAB_SECRET`.
-2. Hidden local prompt that writes user-scoped env/keychain config.
+2. Hidden local prompt that writes user-scoped env/OS credential-store config.
 3. A project-local `.env`/`.env.local`, only when a specific loader or wrapper explicitly loads it — not a default MCP or Pip path.
 4. Avoid existing `.env*` files, committed MCP config, generated docs, shell history, chat transcript, and copied browser session tokens. Do not read existing `.env*` files unless the user names the exact file, approves inspection, and confirms the purpose is troubleshooting.

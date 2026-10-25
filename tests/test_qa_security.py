@@ -51,7 +51,7 @@ class SecurityTriggerPatternTests(unittest.TestCase):
             "Never print, echo, log a token value",
             "Codex writes a global user `config.toml`",
             "infinite looping, and explicit disposal",
-            "Never ask users to paste the PixelLab bearer token into chat",
+            "Never request the PixelLab bearer token in chat",
             "The cancellation route uses HTTP `DELETE` on `/background-jobs/{job_id}`:",
             "Poll `GET /background-jobs/{job_id}`.",
         ):
