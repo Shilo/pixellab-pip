@@ -16,6 +16,10 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Fixed
 
+- **Helpers run when a Windows Python alias is blocked.** An agent shell can resolve `python3` to a Windows app alias
+  that will not launch, so the bark sound fell back to a system beep. Pip now tries the other installed interpreters
+  before deciding Python is missing.
+
 Fixes from the 3.0 live test ([research spike](docs/pixellab/pixellab-pip-3.0-live-test-research-spike.md)).
 
 - **Showcase GIFs loop cleanly.** A move whose cycle did not divide the fixed 4-second window was cut mid-swing and
