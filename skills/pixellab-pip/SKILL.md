@@ -235,7 +235,7 @@ Use one enhancement path per call. Inline `enhance_prompt` flags exist on `creat
 
 ## Current Docs Refresh
 
-Route from this skill first. Refresh official docs only when a needed tool, endpoint, field, schema, SDK detail, auth step, price/limit, or model/mode claim is missing or unclear. Start lightweight (REST v2 `llms.txt`, MCP docs); fetch `openapi.json` only for exact schemas. Links and their limits: `references/official-pixellab-documentation.md`.
+Route from this skill first. Refresh official docs only when a needed tool, endpoint, field, schema, SDK detail, auth step, price/limit, or model/mode claim is missing or unclear. Start lightweight (REST v2 `llms.txt`, MCP docs); fetch `openapi.json` only for exact schemas, reading a field's existence, type, or default from the raw JSON, not a prose summary. Links and their limits: `references/official-pixellab-documentation.md`.
 
 If web access is unavailable, answer from this skill and say which current claim could not be freshly verified.
 
