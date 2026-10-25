@@ -216,10 +216,12 @@ Routing and PixelLab generation need no Python. Pip's optional local helpers do;
 
 | Needs | Helpers |
 |---|---|
-| Python `3.10` or newer | Completion sound (bark), run history, and manifests. |
-| Python `3.11` or newer and Pillow `13.0.0` or newer (the security minimum) | Image checks, downloads, sheets, GIFs, panel previews, style anchor images, and background removal. |
-| Also NumPy | Style analysis, normal maps, tileset previews, showcase GIFs, and finishing. |
-| Also SciPy | The animation doctor and some finishing helpers. |
+| Python `3.10`+ | Completion sound (bark), run history, and manifests. |
+| Python `3.11`+, Pillow `13.0.0`+ | Image checks, downloads, sheets, GIFs, panel previews, style anchor images, and background removal. |
+| Python `3.11`+, Pillow `13.0.0`+, NumPy | Style analysis, normal maps, tileset previews, showcase GIFs, and finishing. |
+| Python `3.11`+, Pillow `13.0.0`+, NumPy, SciPy | The animation doctor and some finishing helpers. |
+
+Pillow `13.0.0` is the security minimum; older releases have known image-decoding vulnerabilities.
 
 `/pixellab-pip setup` connects PixelLab MCP/API access and credentials; it never installs Python or packages. If you need Python, get it from [python.org](https://www.python.org/downloads/).
 
