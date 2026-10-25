@@ -1,6 +1,6 @@
 # Tilesets
 
-Last reviewed: 2026-07-06.
+Last reviewed: 2026-10-25 (tileset contract note; results from 2026-07-06).
 
 <table>
   <tr>
@@ -301,7 +301,7 @@ Top-down and sidescroller tileset tools work best when the request describes bro
 
 Strict 1-bit examples should be documented as workflows when local palette clamping or Aseprite outline processing is part of the accepted result. The PixelLab output provides the shape and tileset structure; local processing provides exact two-color variants.
 
-`outline`, `shading`, and `detail` are useful style controls, but they are not deterministic placement controls. For material placement, tune `lower_description`, `upper_description`, `transition_description`, and `transition_size` first.
+`outline`, `shading`, and `detail` were useful style controls, but they are not deterministic placement controls. Since the 2026-10-25 docs, standard tilesets run on Pixen and `outline`, `text_guidance_scale`, `tile_strength`, and `tileset_adherence*` have no effect, so replaying these blueprints will not reproduce the results. For material placement, tune `lower_description`, `upper_description`, `transition_description`, and `transition_size` first.
 
 ## Showcase Assets
 

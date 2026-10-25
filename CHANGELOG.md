@@ -7,9 +7,16 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
-Fixes from the 3.0 live test ([research spike](docs/pixellab/pixellab-pip-3.0-live-test-research-spike.md)).
+### Changed
+
+- **Matches PixelLab's 2026-10-25 public docs.** Standard tilesets are quoted at 1 generation (Pro at 15 or 25), and
+  top-down height, `view`, borders and no-effect controls follow the new contract; MCP sidescroller Pro mode is
+  supported. Normal maps default to the 0.1-generation Lite mode, oversized transparent Pixen requests are known to be
+  refused, text-only animals can use Pro Flash, and several cost and job-wait details are current.
 
 ### Fixed
+
+Fixes from the 3.0 live test ([research spike](docs/pixellab/pixellab-pip-3.0-live-test-research-spike.md)).
 
 - **Showcase GIFs loop cleanly.** A move whose cycle did not divide the fixed 4-second window was cut mid-swing and
   snapped back on every loop; the GIF now lasts until every move ends its cycle together.

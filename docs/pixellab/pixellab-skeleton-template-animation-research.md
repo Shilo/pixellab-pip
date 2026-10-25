@@ -14,7 +14,7 @@ The managed character animation schema now documents `mode="pixminimax"` on REST
 
 ## 2026-10-08 Contract Addendum
 
-The refreshed MCP guide lists text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. Pip defaults quadruped creation to v3 with a supplied reference; text-only Pro is an opt-in after the user accepts its size-based cost. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions. REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
+The refreshed MCP guide lists text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. Pip defaults quadruped creation to v3 with a supplied reference; text-only Pro is an opt-in after the user accepts its size-based cost. Since 2026-10-25 the MCP guide also recommends `create_character_pro_flash(template_id=...)` for a text-only quadruped (6 generations at 64px), which Pip offers as a second opt-in. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions. REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
 
 ## 2026-10-15 Contract Addendum
 
@@ -367,7 +367,7 @@ Current public REST v2 exposes these skeleton-related primitives:
 
 | REST route/schema | Public role |
 | --- | --- |
-| `POST /v2/estimate-skeleton` | Estimate keypoints from an image. OpenAPI response is `keypoints: Keypoint[]`. |
+| `POST /v2/estimate-skeleton` | Estimate keypoints from an image. OpenAPI response is `keypoints: Keypoint[]`. Since 2026-10-25 it accepts any image up to 256×256 (padded internally, coordinates returned as fractions of the sent image), costs 0.1 generation, and refuses a fully transparent image with 422. |
 | `POST /v2/animate-with-skeleton-v3` | Generate 3–15 frames from `first_frame`, its 18-joint `first_frame_keypoints`, and a full 18-joint `keypoints` sequence; up to 256×256, beta. The refreshed REST/MCP descriptions no longer state a Tier 1 gate. |
 | `POST /v2/animate-with-skeleton` | Legacy three-frame route with `reference_image`, `image_size`, nested `skeleton_keypoints`, and optional `init_images`, `inpainting_images`, `mask_images`, `color_image`, `view`, `direction`, and `guidance_scale`. |
 | `POST /v2/create-image-bitforge` | Skeleton-guided single-image generation via `skeleton_keypoints` and `skeleton_guidance_scale`. |

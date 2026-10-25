@@ -6,8 +6,8 @@ Read this for sprite/animation normal maps and optional preparation, splitting o
 
 - MCP accepts documented PixelLab image/animation references, PNG/GIF URLs/base64 and animation strips. Prefer an existing reference/URL; do not force download/re-upload or GIF conversion. A managed animation reference already identifies its frames. The descriptor documents strips, but how an arbitrary MCP strip's frame count is detected has not been empirically verified here; do not invent a `frames` parameter.
 - REST uses an encoded image: one sprite, or an equal-cell horizontal PNG strip plus explicit `frames`. Verify dimensions/frame count before sending it.
-- Set `kind` when known (`character`, `object`, `topdown`, `side`, `iso`, `ui`). The current MCP default is `mode="lite"` (documented 0.1 generation); `pro` plans parts (documented 0.5 generation). Mode prices are estimates until actual usage is exposed. Do not silently upgrade modes or assume Pro is always necessary.
-- Use OpenGL convention for engines expecting green-up and DirectX for engines expecting green-down, such as Unreal; preserve an explicit user convention. Tune strength/shape/detail only for a stated problem, using controls the selected schema actually exposes.
+- Both surfaces take `kind` and `mode`. Set `kind` when known (`character`, `object`, `topdown`, `side`, `iso`, `ui`), above all for sidescroller, isometric, and UI art, which are easy to misread. The default `mode="lite"` (0.1 generation) works from the art alone; `pro` (0.5 generation) plans each part. Do not silently upgrade modes or assume Pro is always necessary.
+- Use OpenGL convention for engines expecting green-up and DirectX for engines expecting green-down, such as Unreal; preserve an explicit user convention. Tune `strength`, `outline_rounding`, `part_shapes`, `surface_detail`, or `detail_softness` only for a stated problem; each omitted one starts from the `kind` default, and a completed REST job reports all five in `last_response.look`.
 
 ## Optional preparation and inspection
 

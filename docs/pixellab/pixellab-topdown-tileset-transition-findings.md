@@ -1,6 +1,6 @@
 # PixelLab Top-Down Tileset Transition Findings
 
-Last reviewed: 2026-10-15.
+Last reviewed: 2026-10-25.
 
 > **2026-10-15 public-contract note:** REST and MCP now document additional Pro boundary controls: `roundness`, `boundary_amplitude`/`boundary_seed`, `step_slope`, and `connect_diagonals`. They were not covered by the live-generation tests recorded here; the results below do not establish their visual quality or behavior. See the [tileset reference](../../skills/pixellab-pip/references/tileset.md) for eligibility and defaults.
 
@@ -27,7 +27,7 @@ Pro mode was also materially more expensive in the live test. Four accepted Pro 
 
 ## Current Public Contract And Historical Values
 
-The 2026-08-09 public REST/MCP refresh added optional `shape_style: "square" | "round"` to top-down tilesets. Both public surfaces document its 0–1 `transition_size` behavior and an extended 4x8 layout above 0.5. REST additionally says `shape_style` supports square 16px or 32px tiles and restricts omitted-`shape_style` `transition_size` to the four values below; MCP does not document those restrictions.
+The 2026-08-09 public REST/MCP refresh added optional `shape_style: "square" | "round"` to top-down tilesets. Both public surfaces document its 0–1 `transition_size` behavior and an extended 4x8 layout above 0.5. REST additionally says `shape_style` supports square 16px or 32px tiles and restricts omitted-`shape_style` `transition_size` to the four values below; MCP does not document those restrictions. Since the 2026-10-25 refresh, both surfaces describe `transition_size` as upper-terrain height: standard (now Pixen-based, `round` borders unless `shape_style: "square"`) takes any value from 0 to 1 and makes a 25-tile 4x8 sheet above 0.5 with 16px tiles only, while Pro uses 0, 0.25, 0.5, or 1.0 and makes 25 tiles from 0.5.
 
 The following is the historical validation result from the pre-`shape_style` live tests, not a claim about the new shaped-layout mode:
 

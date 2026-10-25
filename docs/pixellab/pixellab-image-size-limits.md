@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-19 (MCP Pixen transparency area and REST `/vfx` sprite limits added).
+Last reviewed: 2026-10-25 (Pixen transparency refusal, `estimate-skeleton` any-size input, and standard top-down tile limits).
+
+> **2026-10-25 API refresh.** REST `create-image-pixen` and MCP `create_image_pixen` now say `no_background: true` is allowed up to 65,536 px of area (for example 256×256 or 512×128) and larger canvases are refused with it on, replacing the 2026-10-19 "returns opaque" wording. REST `POST /estimate-skeleton` now accepts any image up to 256×256: it pads internally to the next 16/32/64/128/256 square and returns coordinates as fractions of the image you sent. Standard top-down tilesets (now Pixen-based) accept any `transition_size` from 0 to 1, but values above 0.5 need 16px tiles. `portrait-character-pro` dropped its "2K" render wording for 128/160.
 
 > **2026-10-19 API refresh.** MCP `create_image_pixen` now says `no_background` transparency holds only up to about 65,536 px of canvas area (for example 256×256 or 512×128); larger canvases currently return fully opaque. REST `POST /vfx` accepts an optional PNG or GIF sprite up to 512×512 per frame and 32 frames, and says to crop or pad rather than rescale pixel art. The raw MCP and REST PixMiniMax descriptions no longer state a Tier 1 gate.
 
@@ -182,7 +184,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 
 | Endpoint | Field | Allowed values | Notes |
 |---|---|---|---|
-| `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 32, 64]`, default 16 | `standard` mode: 16/32. `pro` mode: 16/32/64 plus shape controls. Optional `shape_style` (`square`/`round`) supports 16/32 only. |
+| `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 32, 64]`, default 16 | `standard` mode: 16/32, and 16 only when `transition_size` is above 0.5 (25-tile 4x8 layout). `pro` mode: 16/32/64 plus shape controls. `shape_style` (`square`/`round`, standard-only, `round` when omitted) supports 16/32 only. |
 | `create-tileset-sidescroller` / `tilesets-sidescroller` | `tile_size` (w/h) | `enum [16, 32]`, default 16 | No 64 option. |
 | `create-tiles-pro` | `tile_size` (int) | 16–**128**, default 32 | Schema, prose, and the MCP tool agree since the 2026-09-08 refresh (the schema previously allowed 256). Connectable sets (`tile_feature`) have tighter per-shape ranges, and square top-down roads are exactly 32. 32 recommended. `tile_height` 16–256 for non-square; `style_images` override shape/size. |
 | `create-isometric-tile` | `image_size` | 16×16 to 64×64 | Sizes above 24×24 documented as better. `isometric_tile_size` default 16 (recommended 16 or 32). |
@@ -225,7 +227,7 @@ The two AI-rotation pipelines floor at 32 **over REST**; the two template/skelet
 | MCP `create_character(mode="pro")` | 56×56 | 17×28 | 23 | **No — size silently ignored.** A 28px-tall subject; REST pro at *32* returns a 60×60 canvas, so 16 is being inflated to ~28–30 |
 
 The 2026-07 probe found that only the legacy character-standard route respected a 16px request. Pip no longer recommends that mode. In the same probe, v3 produced a muddy downscaled render and Pro returned a larger character than requested; Pro Flash lists 16×16 experimentally, but its character quality has not been verified. No current Pip route is confirmed to produce a clean, exact-16px managed character.
-| `portrait-character-pro` | `result_size` | `enum [16, 32, 48, 64, 128, 160]`, default 64 | | 128/160 render at 2K (cost more). |
+| `portrait-character-pro` | `result_size` | `enum [16, 32, 48, 64, 128, 160]`, default 64 | | 128/160 are drawn with extra detail (cost more). |
 
 ## REST v2 Limits — Animation And Rotation
 
@@ -246,17 +248,16 @@ The 2026-07 probe found that only the legacy character-standard route respected 
 | `generate-8-rotations-v2` | `image_size` | 32×32 | 168×168 | |
 | `generate-8-rotations-v3` | `first_frame` | — | 256×256 | |
 | `rotate` | `image_size` | 16×16 | 200×200 | Schema is a continuous 16–200 range, but the endpoint prose lists **only 16/32/64/128** as supported. See the discrete-size caveat below. |
-| `estimate-skeleton` | `image` | — | — | **No size field and no schema bound** (takes a bare base64 image). Prose lists supported sizes as **16/32/64/128/256** only. |
+| `estimate-skeleton` | `image` | — | 256×256 | **No size field and no schema bound** (takes a bare base64 image). Since 2026-10-25 the prose accepts any size up to 256×256, padded internally to the next 16/32/64/128/256 square, with coordinates returned relative to your image. A fully transparent image is refused (422). |
 
 ### Discrete-Size Prose vs Continuous Schema
 
-Four skeleton/rotation endpoints describe their supported sizes as a **discrete list**, while their schema declares a **continuous range**:
+Three skeleton/rotation endpoints describe their supported sizes as a **discrete list**, while their schema declares a **continuous range**:
 
 | Endpoint | Prose list | Schema range |
 |---|---|---|
 | `rotate` | 16, 32, 64, 128 | 16–200 continuous |
 | `animate-with-skeleton` | 16, 32, 64, 128, 256 | 16–256 continuous |
-| `estimate-skeleton` | 16, 32, 64, 128, 256 | no bound declared |
 | `animate-with-text` (v1) | 64 only | fixed 64 (agrees) |
 
 An in-between size (48, 96, 150) is **accepted at validation** — untested whether it *generates*. The Aseprite pickers for Rotate and Animate-with-skeleton offer exactly these lists, so they may mirror PixelLab's intent rather than invent a limit; the "fake block" rows below still hold for what the API *accepts*. Prefer a listed size for skeleton/rotation work.
@@ -312,7 +313,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 16–256 / 24–168 | matches (both floors lowered in the 2026-09-08 refresh) |
 | `create_map_object` | `width` / `height` | **`null`** — mandatory in basic mode, auto-detected from `background_image` | 32–400 | bound matches; **default diverges** — REST `map-objects` defaults `image_size` to 128×128, MCP has none. MCP prose also carries the mode split REST omits: basic max 400×400, inpainting max 192×192 |
 | `create_image_pixflux` | `width` / `height` | 128 / 128 (or the init image's size) | 16–400 | Matches REST `create-image-pixflux`'s `image_size`; init images may use URL or base64. MCP prose adds a total-area rule REST omits: 32×32 to 400×400 |
-| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, and since the 2026-09-08 refresh both also document the square requirement whenever either side is below 32 (previously REST only). Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose). Since 2026-10-19 MCP also says `no_background` transparency holds only up to about 65,536 px of area; larger canvases return opaque. |
+| `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, and since the 2026-09-08 refresh both also document the square requirement whenever either side is below 32 (previously REST only). Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose). Since 2026-10-25 both surfaces say `no_background: true` is allowed up to 65,536 px of area and larger canvases are refused with it on (2026-10-19 MCP said they returned opaque). |
 | `create_image_pro` | `width` / `height` | 128 / 128 | 16–**no maximum declared**; prose: "Max depends on aspect ratio (512x512 square, 688x384 for 16:9)" | Prose gives only two aspect buckets; REST `generate-image-v2` declares width ≤ 792 / height ≤ 688 — verify against REST if an aspect outside square/16:9 is needed |
 | `edit_image` | each target image URL/base64 | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` |
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |

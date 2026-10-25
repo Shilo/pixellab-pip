@@ -1,6 +1,6 @@
 # PixelLab Credit Output Estimation Spike
 
-Last reviewed: 2026-10-15 (managed animation batch-pricing clarification; the catalog arithmetic below remains a 2026-07-16 historical snapshot).
+Last reviewed: 2026-10-25 (standard tileset pricing note; 2026-10-15 managed animation batch-pricing clarification; the catalog arithmetic below remains a 2026-07-16 historical snapshot).
 
 > **Important prefix: this is an estimation and may not be accurate.**
 >
@@ -33,7 +33,7 @@ Observed regimes, quoted against Tier 1 first month (`$0.0060/generation`, the w
 - Pro Tools = near break-even; roughly `0.77-1.36x` across all plans, with the tenure bracket deciding the sign.
 - Tilesets = credits win on every plan, roughly `0.44-0.90x`.
 
-Sweeping all `124` published priced rows: at first-month Tier 1 the subscription wins only `63/124`; at the deepest tenure bracket it wins `119/124`. **Even at the deepest discount, tilesets remain credits-only — the only family that loses on all 12 plans.** The fifth loser at max discount is `animate-with-text-v3` `@256`/8 frames, which is not a tileset. See [Every Endpoint At Maximum Discount](#every-endpoint-at-maximum-discount). Tier choice is worth only `2.3%` and is dominated by utilization, tenure, and billing period — see [Choosing A Tier: Volume, Not Unit Rate](#choosing-a-tier-volume-not-unit-rate).
+Sweeping all `124` published priced rows: at first-month Tier 1 the subscription wins only `63/124`; at the deepest tenure bracket it wins `119/124`. **Even at the deepest discount, tilesets remain credits-only — the only family that loses on all 12 plans.** (2026-10-25: MCP now prices standard tilesets at 1 generation, which likely reverses this tileset finding; the arithmetic below is the original snapshot.) The fifth loser at max discount is `animate-with-text-v3` `@256`/8 frames, which is not a tileset. See [Every Endpoint At Maximum Discount](#every-endpoint-at-maximum-discount). Tier choice is worth only `2.3%` and is dominated by utilization, tenure, and billing period — see [Choosing A Tier: Volume, Not Unit Rate](#choosing-a-tier-volume-not-unit-rate).
 
 These bands overlap and are not a strict ranking — `generate-8-rotations-v3` `@64` at `5.6x` outranks template animation at `64`/dir at `5.4x`, and the same route `@256` drops to `0.79x`. Size drives more variation than family does. Three caveats bound the whole table: the figures assume **full allowance utilization** (see [Utilization Breaks These Rates](#utilization-breaks-these-rates)); every max-discount figure assumes a **tenure bracket you must earn over months**; and Tier 1 physically cannot reach `12` of the `124` rows (see [Outside the arithmetic](#outside-the-arithmetic)). Generation counts are **published by PixelLab, not inferred**.
 

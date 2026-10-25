@@ -209,9 +209,11 @@ class HelperCliSmokeTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "Fields not exposed.*seed"):
             tileset_sim.validate_request("create_topdown_tileset", {**top, "seed": 1}, 16, 16)
 
-        side = {"lower_description": "stone", "transition_description": "grass", "tile_size": 32, "seed": 1}
+        side = {"lower_description": "stone", "transition_description": "grass", "tile_size": 32, "seed": 1, "mode": "pro", "enhance": False}
         self.assertEqual(tileset_sim.tile_size_from_request("create_sidescroller_tileset", side), (32, 32))
         tileset_sim.validate_request("create_sidescroller_tileset", side, 32, 32)
+        with self.assertRaisesRegex(SystemExit, "25-tile 4x8"):
+            tileset_sim.validate_request("create_topdown_tileset", {**top, "transition_size": 0.75}, 16, 16)
 
     def test_tileset_simulator_recognizes_shape_style_as_documented_but_unsupported(self) -> None:
         request = {

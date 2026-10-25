@@ -88,9 +88,13 @@ MCP_TOOLS = {
             "tileset_adherence_freedom",
             "text_guidance_scale",
             "seed",
+            "mode",
+            "enhance",
         },
         "defaults": {
             "tile_size": {"width": 16, "height": 16},
+            "mode": "standard",
+            "enhance": True,
             "transition_size": 0.0,
             "detail": None,
             "shading": None,
@@ -473,11 +477,13 @@ def validate_request(
             f"{tool} transition_size {raw_transition} is not one of PixelLab's documented guidepost values; "
             "the compact renderer uses the numeric value directly."
         )
+    mode = request_value(tool, request, "mode")
+    if mode not in {"standard", "pro"}:
+        raise SystemExit(f"{tool} mode must be standard or pro.")
     if tool == "create_topdown_tileset":
-        mode = request_value(tool, request, "mode")
         shape_style = request_value(tool, request, "shape_style")
-        if mode not in {"standard", "pro"}:
-            raise SystemExit("create_topdown_tileset mode must be standard or pro.")
+        if mode == "standard" and shape_style is None:
+            warnings.append("Standard top-down draws round borders when shape_style is omitted; the compact renderer does not model that geometry.")
         if shape_style not in {None, "square", "round"}:
             raise SystemExit("create_topdown_tileset shape_style must be square, round, or null.")
         if mode == "standard" and tile_width == 64:
@@ -521,10 +527,10 @@ def validate_request(
                 "This is a documented top-down shape_style request, but this compact simulator does not model square "
                 "or round boundary geometry."
             )
-        if raw_transition >= 1.0:
+        if raw_transition > 0.5:
             raise SystemExit(
-                "This is a valid top-down tileset request shape, but transition_size 1.0 can export an expanded "
-                "23-tile/4x8-style sheet that this compact simulator does not render."
+                "This is a valid top-down tileset request shape, but standard transition_size above 0.5 exports a "
+                "25-tile 4x8 sheet (16px tiles only) that this compact simulator does not render."
             )
     return warnings
 

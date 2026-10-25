@@ -1,6 +1,6 @@
 # PixelLab 1-Bit Tileset Optimization Workflow
 
-Last reviewed: 2026-08-09.
+Last reviewed: 2026-10-25.
 
 Purpose: explain how to test PixelLab top-down and sidescroller tileset prompts when the target is a beautiful 1-bit style: black terrain masses with intentional white edge, rim, ledge, or boundary pixels.
 
@@ -12,7 +12,7 @@ Stop spending large prompt-only batches on PixelLab tilesets for strict 1-bit or
 
 As of the latest 2026-07-03 tests, top-down and sidescroller should be handled differently.
 
-For top-down 1-bit wall/floor or cave work, use REST `create-tileset` with black lower terrain, black upper terrain, `transition_size: 0.5`, a compact `transition_reference_image`, and no `color_image`. Judge the raw result by whether lighter pixels sit on the wall/floor boundary; then palette-clamp only after the generated shape is acceptable. There are now two useful top-down branches: `topdown-cave-rim-ref-a` for a sparse contour, and `topdown-b-cave-rim-production-ref` for a bolder high-contrast ledge/cap.
+For top-down 1-bit wall/floor or cave work, use REST `create-tileset` with black lower terrain, black upper terrain, `transition_size: 0.5`, a compact `transition_reference_image`, and no `color_image` (measured before standard switched to Pixen on 2026-10-25; re-verify on the current model). Judge the raw result by whether lighter pixels sit on the wall/floor boundary; then palette-clamp only after the generated shape is acceptable. There are now two useful top-down branches: `topdown-cave-rim-ref-a` for a sparse contour, and `topdown-b-cave-rim-production-ref` for a bolder high-contrast ledge/cap.
 
 For sidescroller 1-bit platform work, do not spend more runs trying to make `lower_description` carry white contour pixels. `transition_size: 0.0` can produce a clean dark platform body, but it suppresses white rims. `transition_description` is required for bright white top/edge pixels, but PixelLab tends to treat those pixels as a top cap or surface material rather than a sparse outline. Unlike top-down, the sidescroller route has not shown a reliable way to request a consistent white outline around the entire connected tileset shape. The best current production path is PixelLab for the platform silhouette and cap style, then Aseprite's built-in FX Outline with `place="inside"` and 4 sides only, followed by an optional black/white clamp.
 
@@ -43,9 +43,9 @@ If the user needs a production-ready strict 1-bit tileset, prefer one of these r
 
 PixelLab publicly documents `Create Tileset` as a tool that generates tilesets from textures or text descriptions and can export to Wang, dual-grid 15-tileset, and 3x3 layouts. Its top-down mode asks for inner/outer terrain descriptions, while sidescroller mode uses center/top tile descriptions.
 
-Current MCP docs describe top-down tilesets as 16 corner-combination Wang tilesets (25 at `transition_size: 1.0`), with `transition_size` as a float that cites `0.0`, `0.25`, `0.5`, or `1.0`. `shape_style: "square" | "round"` instead documents a 0–1 range and an extended 4x8 sheet above 0.5. REST, but not MCP, limits an omitted `shape_style` to the four cited values. They describe sidescroller tilesets as 16 transparent platform tiles, where `lower_description` is the platform material and `transition_description` is the decorative top layer.
+Before 2026-10-25, MCP docs described top-down tilesets as 16 corner-combination Wang tilesets (25 at `transition_size: 1.0`), with `transition_size` as a float that cites `0.0`, `0.25`, `0.5`, or `1.0`. `shape_style: "square" | "round"` instead documents a 0–1 range and an extended 4x8 sheet above 0.5. REST, but not MCP, limited an omitted `shape_style` to the four cited values. Since the 2026-10-25 refresh, both surfaces describe `transition_size` as upper-terrain height: standard (now Pixen-based, `round` borders unless `shape_style: "square"`) takes any value from 0 to 1 and makes a 25-tile 4x8 sheet above 0.5 with 16px tiles only, while Pro uses 0, 0.25, 0.5, or 1.0 and makes 25 tiles from 0.5. They describe sidescroller tilesets as 16 transparent platform tiles, where `lower_description` is the platform material and `transition_description` is the decorative top layer.
 
-Current REST v2 schema exposes the same core fields and also exposes reference and palette controls that MCP may not expose: `lower_reference_image`, `upper_reference_image`, `transition_reference_image`, and `color_image`. Those controls are useful later, but they change the experiment from text-only MCP prompt testing.
+Current REST v2 schema exposes the same core fields and also exposes reference and palette controls that MCP may not expose: `lower_reference_image`, `upper_reference_image`, `transition_reference_image`, and `color_image`. Those controls are useful later, but they change the experiment from text-only MCP prompt testing. Since 2026-10-25 REST says top-down `color_image` has no effect; the sidescroller schema still describes it as a palette reference.
 
 DualGrid references agree on the important structural idea: the visible tile samples four neighboring terrain cells. A compact 16-tile sheet covers all corner combinations. PixelLab's observed compact 15-tileset order is documented in `pixellab-dualgrid-tileset-export-system.md`.
 
