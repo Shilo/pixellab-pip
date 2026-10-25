@@ -9,7 +9,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Changed
 
-- **Document optional helper dependencies.** The README now lists which helpers need Python, Pillow, NumPy or SciPy, gives a user-wide install command, a virtual-environment fallback and a paste-to-agent request, and clarifies that `/pixellab-pip setup` configures PixelLab access rather than installing Python or packages. When a helper skips, Pip names the missing or outdated package.
+- **Document optional helper dependencies.** The README now lists which helpers need Python, Pillow, NumPy or SciPy, gives a user-wide install command, a virtual-environment fallback and a paste-to-agent request, and clarifies that `/pixellab-pip setup` configures PixelLab access rather than installing Python or packages. Setup ends with a one-line note that these packages are optional, and when a helper skips, Pip names the missing or outdated package.
 - **Matches PixelLab's 2026-10-25 public docs.** Standard tilesets are quoted at 1 generation (Pro at 15 or 25), and
   top-down height, `view`, borders and no-effect controls follow the new contract; MCP sidescroller Pro mode is
   supported. Normal maps default to the 0.1-generation Lite mode, oversized transparent Pixen requests are known to be

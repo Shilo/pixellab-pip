@@ -122,7 +122,7 @@ Compact templates (`[account step]` = the account-step sentence from section 2; 
 - **Manual**: "Open `https://www.pixellab.ai/mcp` and follow PixelLab's instructions. I will stop here."
 - **Manual with auth**: "Open `https://www.pixellab.ai/mcp` and follow PixelLab's instructions. If it asks for auth, [account step] I will stop here."
 
-Report outcome briefly: detected mode; readiness (ready, partially ready, not configured, blocked, unknown); credential location type (env var, app secret setting, secret store, literal config value, or not found — never the value); next safe step; any proposed write with destination and token handling; reload need; and what the no-credit check verified.
+Report outcome briefly: detected mode; readiness (ready, partially ready, not configured, blocked, unknown); credential location type (env var, app secret setting, secret store, literal config value, or not found — never the value); next safe step; any proposed write with destination and token handling; reload need; and what the no-credit check verified. Outside Manual mode, end with one optional note: some local helpers, such as image checks and animation fixes, need Python and extra packages; PixelLab generation works without them. Mention only; never check for or install them during setup.
 
 ## Setup guardrails
 

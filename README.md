@@ -223,7 +223,7 @@ Routing and PixelLab generation need no Python. Pip's optional local helpers do;
 
 Pillow `13.0.0` is the security minimum; older releases have known image-decoding vulnerabilities.
 
-`/pixellab-pip setup` connects PixelLab MCP/API access and credentials; it never installs Python or packages. If you need Python, get it from [python.org](https://www.python.org/downloads/).
+`/pixellab-pip setup` connects PixelLab MCP/API access and credentials; it mentions these optional packages but never checks for or installs them. If you need Python, get it from [python.org](https://www.python.org/downloads/).
 
 To enable every helper, check that `python3 --version` shows `3.11` or newer, then run:
 
