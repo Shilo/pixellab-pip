@@ -1,11 +1,10 @@
-# Shipped skill and adopted source notice
+# Third-Party Notices
 
-Adapted pixellab-game-art material: https://github.com/lexingel/pixellab-game-art, supplied v1.4.3 revision `8b407e9cee6e3c8c7d8e5d89edde74cc18acd23f`. Later animation-doctor/production contributions arrived through PR #11 at `e5313285523216ce8faa06cf241cc8bed8cce32e`; its private calibration corpus was not supplied. This notice covers copied/adapted source and documentation, not generated or supplied art.
+## [pixellab-game-art](https://github.com/lexingel/pixellab-game-art)
 
 MIT License
 
-Copyright (c) 2026 Shilo (PixelLab Pip)
-Copyright (c) 2026 lexingel (adopted pixellab-game-art material)
+Copyright (c) 2026 lexingel
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

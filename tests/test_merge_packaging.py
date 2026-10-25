@@ -49,7 +49,6 @@ class MergePackagingTests(unittest.TestCase):
                 archive.write(REPO_ROOT / name, "pixellab-pip/" + name.removeprefix(prefix))
         with zipfile.ZipFile(payload) as archive:
             notice = archive.read("pixellab-pip/THIRD_PARTY_NOTICES.md").decode("utf-8")
-        self.assertIn("Copyright (c) 2026 Shilo", notice)
         self.assertIn("Copyright (c) 2026 lexingel", notice)
         self.assertIn("Permission is hereby granted, free of charge", notice)
         self.assertIn("THE SOFTWARE IS PROVIDED", notice)

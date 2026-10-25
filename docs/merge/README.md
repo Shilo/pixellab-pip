@@ -19,4 +19,4 @@ All supported hosts use the same core. The useful panel is reworked under `/pixe
 
 [Migration](migration.md) covers old instructions, appearance drift, restrictive caps and pending work. [Original prototype evidence](demo/README.md) is historical, not validation of the revised head. The [review response](../tools/pixellab-game-art-skill/pixellab-game-art-claude-review-response.md) records current acceptance evidence and remaining empirical limits; the [original remediation plan](../tools/pixellab-game-art-skill/pixellab-game-art-pr-11-implementation-plan.md) preserves earlier decisions and validation.
 
-Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. The shipped skill includes the complete adopted MIT notice and pinned provenance in `THIRD_PARTY_NOTICES.md`.
+Credit: PixelLab Pip by Shilo; pixellab-game-art by lexingel. The shipped skill includes the complete adopted MIT notice in `THIRD_PARTY_NOTICES.md`.
