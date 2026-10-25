@@ -61,7 +61,7 @@ Run the bundled helper from the skill directory first; it always prints JSON:
 python assets/bark.py play
 ```
 
-If `python` fails, follow the Python launcher rule in `SKILL.md` before treating the helper as unable to run. Do not install audio tools. The helper output includes `bark` and `played`, and `status` may include `config` or `invalid_config`. If `bark` is `true` and `played` is `false`, or the helper exits with code `2`, use the native fallback below.
+The helper output includes `bark` and `played`, and `status` may include `config` or `invalid_config`. If `bark` is `true` and `played` is `false`, or the helper exits with code `2`, use the native fallback below.
 
 If the helper cannot load or run, fall back to a native success or alert sound that needs no bundled WAV, other audio file, MCP, or install step:
 
