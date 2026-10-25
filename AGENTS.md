@@ -17,3 +17,4 @@ Content placement (progressive discovery):
 
 Validate every edit: `python dev-tools/qa.py` (includes the unit tests).
 Commits: conventional `<type>[optional scope]: <description>`.
+Record user-facing changes under `[Unreleased]` in CHANGELOG.md; release steps: docs/developer.md#changelog.
