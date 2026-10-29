@@ -1,0 +1,160 @@
+{
+  "scanner_version": "2.12.0",
+  "scanner_commit": "95a52d89fa16f608f0b18ccee76b0918ea4b7eef",
+  "clawscan_commit": "e14f9960cc290d47f99fd3416b0589bbc0080f24",
+  "patch_sha256": "098bbb4544bb91c982b430da6be1a56311cebd42a708bc2fe7bc3daaa7059bee",
+  "baseline_commit": "5bbc5dd17db3277086495e5860c1a81c30480fca",
+  "risk_assessment": {
+    "score": 17,
+    "severity": "LOW",
+    "recommendation": "CAUTION",
+    "max_issue_severity": "MEDIUM"
+  },
+  "findings": [
+    {
+      "id": "AST4",
+      "path": "assets/bark.py",
+      "severity": "MEDIUM",
+      "count": 1
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/character-candidates.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/knight.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/overhead-axe-chop.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/portrait-head-shoulders-mvp.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/projectile-skill.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/rpg-maker-character.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/vfx-eruption-per-target.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/vfx-strike-single-target.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "blueprints/vfx-wave-across-party.blueprint.json",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "references/blueprint.md",
+      "severity": "MEDIUM",
+      "count": 2
+    },
+    {
+      "id": "E1",
+      "path": "references/official-pixellab-documentation.md",
+      "severity": "MEDIUM",
+      "count": 7
+    },
+    {
+      "id": "E1",
+      "path": "references/preset-skeleton-template-animation.md",
+      "severity": "MEDIUM",
+      "count": 4
+    },
+    {
+      "id": "E1",
+      "path": "references/prompt-limits.md",
+      "severity": "MEDIUM",
+      "count": 1
+    },
+    {
+      "id": "E1",
+      "path": "references/setup.md",
+      "severity": "MEDIUM",
+      "count": 5
+    }
+  ],
+  "ledger_exceptions": [
+    {
+      "outcome": "partial",
+      "phase": "reference_resolution",
+      "reason_code": "reference_missing",
+      "path": "SKILL.md",
+      "count": 4
+    }
+  ],
+  "scope_exclusions": [
+    {
+      "outcome": "out_of_scope",
+      "phase": "static",
+      "reason_code": "binary_content",
+      "path": "assets/bark.wav",
+      "count": 1
+    }
+  ],
+  "analyzer_statuses": {
+    "artifact_integrity": "completed",
+    "behavioral_ast": "completed",
+    "behavioral_taint_tracking": "completed",
+    "bundled_execution_surface": "not_applicable",
+    "mcp_least_privilege": "completed",
+    "mcp_rug_pull": "completed",
+    "mcp_tool_poisoning": "completed",
+    "meta_analyzer": "disabled",
+    "semantic_developer_intent": "disabled",
+    "semantic_quality_policy": "disabled",
+    "semantic_security_discovery": "disabled",
+    "static_patterns_agent_snooping": "completed",
+    "static_patterns_anti_refusal": "completed",
+    "static_patterns_data_exfiltration": "completed",
+    "static_patterns_deserialization": "completed",
+    "static_patterns_excessive_agency": "completed",
+    "static_patterns_harmful_content": "completed",
+    "static_patterns_memory_poisoning": "completed",
+    "static_patterns_output_handling": "completed",
+    "static_patterns_privilege_escalation": "completed",
+    "static_patterns_prompt_injection": "completed",
+    "static_patterns_rogue_agent": "completed",
+    "static_patterns_ssrf": "completed",
+    "static_patterns_supply_chain": "completed",
+    "static_patterns_system_prompt_leakage": "completed",
+    "static_patterns_tool_misuse": "completed",
+    "static_yara": "completed"
+  },
+  "notes": [
+    "Comparison baseline only: all raw findings remain visible; this is not a suppression file.",
+    "AST4: completion sound uses a fixed audio-player argument list with a timeout.",
+    "E1: documented PixelLab service URLs preserve portable setup and supported routing.",
+    "Four SKILL.md reference-resolution notices concern runtime/local names, not omitted bundled files.",
+    "The WAV is intentionally retained; this static analyzer cannot inspect binary sound content.",
+    "Known partial coverage and LOW/CAUTION do not establish a complete hosted audit or safety guarantee."
+  ]
+}

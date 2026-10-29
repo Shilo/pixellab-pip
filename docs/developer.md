@@ -46,6 +46,8 @@ python -m pip install -r requirements-dev.txt --require-hashes
 
 The user-facing security story lives in [Security And Trust](security.md): the SkillSpector skill audit (Code Scanning tab), the ClawHub independent registry audit, the VirusTotal malware scan, and the Sigstore build-provenance attestation. The README keeps a short trust summary, while `SECURITY.md` holds the vulnerability-reporting policy.
 
+Follow [Scanner Maintenance](developer/scanner-maintenance.md) for the reviewed risk baseline, the additional ClawHub-compatible static CI check, and the before/after review procedure. These development checks add no installed-skill work.
+
 ### OpenSSF Scorecard (maintainer-only)
 
 [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) runs weekly for repo-hygiene tracking, but is intentionally kept off the README and out of the Code Scanning tab. Its checks describe repository practices, not an install-safety verdict. `Maintained` reflects recent activity; `Code-Review` reflects review history and can improve through collaborator-reviewed changes. Review each check's evidence: branch protection and required CI checks, least-privilege workflow tokens, dependency pins and hashes, and release provenance are actionable safeguards. Packaging, signing, or fuzzing checks can also have detection or applicability limits; investigate those limits before adding machinery just to raise the aggregate.
@@ -58,7 +60,7 @@ The user-facing security story lives in [Security And Trust](security.md): the S
 
 [Dependabot Merge](../.github/workflows/dependabot-merge.yml) verifies the bot's metadata and requires exactly one signed Dependabot commit, then merges minor/patch updates only after Repository QA, SkillSpector skill audit, and HOL Plugin Scanner all succeed for that commit. Failed, skipped, missing, or ambiguous checks cannot authorize a merge. A changed commit, draft, closed PR, or different target branch aborts the attempt; a pending check has a 20-minute deadline. Failed or timed-out attempts leave the PR open for investigation or a workflow rerun.
 
-The merge workflow runs its inline CI gate with its write token and does not check out repository code. Its explicit CI gate does not change branch rules or interfere with the release workflow's direct pushes to `main`.
+The merge workflow runs its inline CI gate with its write token and does not check out repository code. It also waits for the SkillSpector risk regression check. Its explicit CI gate does not change branch rules or interfere with the release workflow's direct pushes to `main`.
 
 ## Codex Local Plugin Testing
 

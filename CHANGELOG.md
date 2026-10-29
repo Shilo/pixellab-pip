@@ -31,6 +31,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Security
 
+- **Watch for scanner regressions.** A separate pinned ClawHub-compatible static CI check compares risk, findings and coverage with the reviewed baseline and retains the full report. Maintainer guidance requires behavior checks and independent review for scanner-driven changes; the shipped skill is unchanged.
 - **Clarify ClawHub release preflight.** Document the CLI's automatic MIT-0 rights affirmation and the distinction
   between local model-based audit evidence and the hosted release verdict.
 - **Keep local files out of release archives.** The ZIP builder now checks the selected release source's

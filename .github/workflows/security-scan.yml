@@ -52,3 +52,107 @@ jobs:
         run: |
           echo "SkillSpector exited nonzero (risk score above its failure threshold, or scan error)."
           exit 1
+
+  scanner-regression:
+    name: SkillSpector risk regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Read reviewed scanner pins
+        id: pins
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          baseline = json.loads(Path("dev-tools/scanner-baseline.json").read_text())
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              for name, length in (("scanner_commit", 40), ("clawscan_commit", 40), ("patch_sha256", 64)):
+                  value = baseline[name]
+                  if not isinstance(value, str) or not re.fullmatch("[0-9a-f]{%d}" % length, value):
+                      raise ValueError("Invalid reviewed scanner pin: " + name)
+                  print(name + "=" + value, file=output)
+          PY
+
+      - name: Checkout pinned SkillSpector source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: NVIDIA/SkillSpector
+          ref: ${{ steps.pins.outputs.scanner_commit }}
+          path: .local/scanner-source
+          persist-credentials: false
+
+      - name: Verify upstream ClawScan patch and install isolated scanner
+        env:
+          SCANNER_COMMIT: ${{ steps.pins.outputs.scanner_commit }}
+          CLAWSCAN_COMMIT: ${{ steps.pins.outputs.clawscan_commit }}
+          PATCH_SHA256: ${{ steps.pins.outputs.patch_sha256 }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import os
+          from pathlib import Path
+          import subprocess
+          import urllib.request
+
+          source = Path(".local/scanner-source")
+          actual = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
+          if actual != os.environ["SCANNER_COMMIT"]:
+              raise ValueError("Scanner source revision mismatch")
+          url = "https://raw.githubusercontent.com/openclaw/clawscan/" + os.environ["CLAWSCAN_COMMIT"] + "/docker/clawscan-runtime/patches/skillspector-responses.patch"
+          with urllib.request.urlopen(url, timeout=60) as response:
+              patch = response.read()
+          if hashlib.sha256(patch).hexdigest() != os.environ["PATCH_SHA256"]:
+              raise ValueError("Upstream scanner patch hash mismatch")
+          patch_path = (Path(os.environ["RUNNER_TEMP"]) / "skillspector-upstream.patch").resolve()
+          patch_path.write_bytes(patch)
+          for flags in (("--check",), (), ("--reverse", "--check")):
+              subprocess.run(["git", "apply", *flags, str(patch_path)], cwd=source, check=True)
+          PY
+          python -m venv "$RUNNER_TEMP/skillspector"
+          "$RUNNER_TEMP/skillspector/bin/python" -m pip install "$GITHUB_WORKSPACE/.local/scanner-source"
+          mkdir -p .local/scanner-results
+
+      - name: Scan with ClawHub-compatible static rules
+        id: scan
+        working-directory: ${{ runner.temp }}
+        env:
+          SKILLSPECTOR_BUILD_REVISION: ${{ steps.pins.outputs.scanner_commit }}
+        shell: bash
+        # Stdout avoids SkillSpector 2.12.0's Windows --output problem in local reproductions.
+        run: >-
+          "$RUNNER_TEMP/skillspector/bin/skillspector" scan "$GITHUB_WORKSPACE/skills/pixellab-pip"
+          --no-llm --format json
+          > "$GITHUB_WORKSPACE/.local/scanner-results/report.json"
+          2> "$GITHUB_WORKSPACE/.local/scanner-results/stderr.txt"
+
+      - name: Check reviewed risk and coverage baseline
+        if: always() && steps.scan.outcome != 'skipped'
+        shell: bash
+        run: python dev-tools/check_scanner.py .local/scanner-results/report.json
+
+      - name: Preserve full scanner report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: skillspector-risk-regression
+          path: .local/scanner-results/
+          include-hidden-files: true
+          retention-days: 14

@@ -16,5 +16,6 @@ Content placement (progressive discovery):
 - .local/ — temporary agent-generated or cache files.
 
 Validate every edit: `python dev-tools/qa.py` (includes the unit tests).
+For scanner-related maintenance or changes to the shipped skill, follow [Scanner Maintenance](docs/developer/scanner-maintenance.md).
 Commits: conventional `<type>[optional scope]: <description>`.
 Record user-facing changes under `[Unreleased]` in CHANGELOG.md; release steps: docs/developer.md#changelog.

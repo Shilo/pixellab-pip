@@ -62,6 +62,7 @@ jobs:
           REQUIRED_CHECKS = {
               "Repository QA": "Quality Assurance",
               "SkillSpector skill audit": "Skill Security Audit",
+              "SkillSpector risk regression": "Skill Security Audit",
               "HOL Plugin Scanner": "HOL Plugin Scanner",
           }
 
@@ -132,7 +133,7 @@ jobs:
                       )
                   )
                   if checks_passed(pr, expected_head):
-                      print("All three required CI checks succeeded for the expected commit.")
+                      print("All required CI checks succeeded for the expected commit.")
                       return
                   time.sleep(15)
               raise RuntimeError("CI did not finish within 20 minutes; leave the PR open.")

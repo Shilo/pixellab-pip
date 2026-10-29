@@ -57,10 +57,26 @@ class DependabotMergeTests(unittest.TestCase):
 
     def test_all_required_checks_must_succeed(self):
         self.assertTrue(merge.checks_passed(passing_pr(), "expected"))
-        for status in ("QUEUED", "IN_PROGRESS"):
+        for index in range(len(merge.REQUIRED_CHECKS)):
+            for status in ("QUEUED", "IN_PROGRESS"):
+                pr = passing_pr()
+                pr["statusCheckRollup"][index]["status"] = status
+                with self.subTest(check=index, status=status):
+                    self.assertFalse(merge.checks_passed(pr, "expected"))
+
+    def test_scanner_regression_is_required_before_merge(self):
+        self.assertEqual(merge.REQUIRED_CHECKS["SkillSpector risk regression"], "Skill Security Audit")
+        for result in (None, "FAILURE", "SKIPPED"):
             pr = passing_pr()
-            pr["statusCheckRollup"][0]["status"] = status
-            self.assertFalse(merge.checks_passed(pr, "expected"))
+            checks = pr["statusCheckRollup"]
+            check = next(check for check in checks if check["name"] == "SkillSpector risk regression")
+            if result is None:
+                checks.remove(check)
+                self.assertFalse(merge.checks_passed(pr, "expected"))
+            else:
+                check["conclusion"] = result
+                with self.subTest(result=result), self.assertRaises(RuntimeError):
+                    merge.checks_passed(pr, "expected")
 
     def test_missing_duplicate_and_wrong_workflow_checks_do_not_pass(self):
         for change in ("missing", "duplicate", "wrong_workflow", "wrong_type"):
