@@ -65,7 +65,7 @@ animate_character(
 )
 ```
 
-To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only MCP mode that accepts a reference sprite; from scratch it outputs 8 directions, while a reference allows `n_directions` 4 or 8. Prefer the URL form over inline base64 (MCP clients truncate large inline base64). Default quadruped creation to v3 with a south-facing reference and matching `body_type="quadruped"` and `template`; v3 without a reference is humanoid-only. If the user requires a text-only quadruped, explain that v3 does not support it and offer Pro Flash (see `pro-flash.md`) or Pro only as opt-ins after disclosing their cost. Use either only after the user explicitly chooses it. With a v3 reference, set `n_directions` to 4 or 8 and pass a south-facing sprite as `reference_image_url`. Supply other views through `direction_images` to preserve them exactly and generate only missing directions. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. Directions must match their labels and use the reference canvas size. REST `create-character-v3` supports the corresponding quadruped reference with matching `template_id`. Then animate the returned `character_id` once the character completes. Fall back to REST when MCP is unavailable or REST's matching `template_id`, `no_background`, or `enhance_prompt` fields matter.
+To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only MCP mode that accepts a reference sprite; from scratch it outputs 8 directions, while a reference allows `n_directions` 4 or 8. Prefer the URL form over inline base64 (MCP clients truncate large inline base64). Default quadruped creation to v3 with a south-facing reference and matching `body_type="quadruped"` and `template`; v3 without a reference is humanoid-only. If the user requires a text-only quadruped, explain that v3 does not support it and offer Pro Flash (see `pro-flash.md`) or Pro only as opt-ins after disclosing their cost. Use either only after the user explicitly chooses it. With a v3 reference, set `n_directions` to 4 or 8 and pass a south-facing sprite as `reference_image_url`. Supply other views through `direction_images` to preserve them exactly and generate only missing directions. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. Directions must match their labels and use the reference canvas size. If the MCP client cannot send an object for `direction_images`, send that same object JSON-encoded as a string. REST `create-character-v3` supports the corresponding quadruped reference with matching `template_id`. Then animate the returned `character_id` once the character completes. Fall back to REST when MCP is unavailable or REST's matching `template_id`, `no_background`, or `enhance_prompt` fields matter.
 
 For a text-only quadruped when the user explicitly chooses Pro after cost disclosure:
 
@@ -284,63 +284,63 @@ Choose the template family by body plan and stance, not species. Map human/perso
 
 ## Preset Animation IDs
 
-Use exact ids. Do not send labels such as "Walk (8 frames)". This catalog was last verified against the website Add Animation bundle on 2026-06-30. Official REST docs expose the `template_animation_id` field but no stable public enum endpoint; refresh visible MCP tool docs or official docs before claiming "all available animations" or building long-lived integrations.
+Use exact ids. Do not send labels such as "Walk (8 frames)". The humanoid ids and frame counts below are verified against the refreshed public MCP guide; the quadruped lists retain the 2026-06-30 website catalog and should be checked with `get_character` for the selected template. Official REST docs expose the `template_animation_id` field but no stable public enum endpoint; refresh visible MCP tool docs or official docs before claiming "all available animations" or building long-lived integrations.
 
 Ordered by likely request frequency, mannequin/humanoid first because most player, NPC, human, and biped requests map there.
 
 ### mannequin
 
-```text
-walk
-walk-1
-walk-2
-walking
-walking-2
-walking-3
-walking-4
-walking-5
-walking-6
-walking-7
-walking-8
-walking-9
-walking-10
-walking-4-frames
-walking-6-frames
-walking-8-frames
-running-4-frames
-running-6-frames
-running-8-frames
-running-slide
-crouched-walking
-crouching
-sad-walk
-scary-walk
-breathing-idle
-fight-stance-idle-8-frames
-backflip
-front-flip
-getting-up
-jumping-1
-jumping-2
-running-jump
-two-footed-jump
-cross-punch
-lead-jab
-surprise-uppercut
-hurricane-kick
-roundhouse-kick
-high-kick
-flying-kick
-leg-sweep
-fireball
-taking-punch
-falling-back-death
-drinking
-picking-up
-pull-heavy-object
-pushing
-throw-object
-```
+| Template id | Frames |
+|---|---|
+| `walk` | 6 |
+| `walk-1` | 6 |
+| `walk-2` | 6 |
+| `walking` | 6 |
+| `walking-2` | 4 |
+| `walking-3` | 6 |
+| `walking-4` | 6 |
+| `walking-5` | 4 |
+| `walking-6` | 6 |
+| `walking-7` | 6 |
+| `walking-8` | 6 |
+| `walking-9` | 6 |
+| `walking-10` | 6 |
+| `walking-4-frames` | 4 |
+| `walking-6-frames` | 6 |
+| `walking-8-frames` | 8 |
+| `running-4-frames` | 4 |
+| `running-6-frames` | 6 |
+| `running-8-frames` | 8 |
+| `running-slide` | 6 |
+| `crouched-walking` | 6 |
+| `crouching` | 5 |
+| `sad-walk` | 8 |
+| `scary-walk` | 8 |
+| `breathing-idle` | 4 |
+| `fight-stance-idle-8-frames` | 8 |
+| `backflip` | 10 |
+| `front-flip` | 6 |
+| `getting-up` | 5 |
+| `jumping-1` | 9 |
+| `jumping-2` | 8 |
+| `running-jump` | 8 |
+| `two-footed-jump` | 7 |
+| `cross-punch` | 6 |
+| `lead-jab` | 3 |
+| `surprise-uppercut` | 7 |
+| `hurricane-kick` | 4 |
+| `roundhouse-kick` | 7 |
+| `high-kick` | 7 |
+| `flying-kick` | 6 |
+| `leg-sweep` | 7 |
+| `fireball` | 6 |
+| `taking-punch` | 6 |
+| `falling-back-death` | 7 |
+| `drinking` | 6 |
+| `picking-up` | 5 |
+| `pull-heavy-object` | 6 |
+| `pushing` | 6 |
+| `throw-object` | 7 |
 
 ### dog
 
@@ -472,11 +472,16 @@ Common label mappings and exact-id passthroughs:
 | "dog fast walk" | `fast-walk` |
 | "humanoid walk 8 frames" | `walking-8-frames` |
 | "fight idle" | `fight-stance-idle-8-frames` |
+| Humanoid hurt, recoil, stagger, hit | `taking-punch` |
+| Humanoid death / recovery | `falling-back-death` / `getting-up` as separately requested clips |
+| Humanoid dash, dodge, sprint | Offer `running-slide` or `running-jump` when that motion fits |
+| Humanoid cast, spell, magic | `fireball` when that motion fits |
 
-If an animation exists for one template family but not another, say so and offer the closest same-family option. Do not silently substitute `walking-8-frames` for a quadruped `walk-8-frames` or vice versa.
+Do not invent ids such as `hurt`, `dashing`, `casting`, `backstep-dodge`, `shooting`, or `staff-spin-attack`: MCP says they are rejected before queueing. If no preset fits, offer custom v3 action text instead. If an animation exists for one template family but not another, say so and offer the closest same-family option. Do not silently substitute `walking-8-frames` for a quadruped `walk-8-frames` or vice versa.
 
 ## Frame Count
 
+- The humanoid table gives the exact output count in template mode and the pose count in managed Skeleton v3. Use those pose counts with the pricing schedule in `cost-routing.md`.
 - Preset template mode owns its frame count through the selected template id; do not set `frame_count` expecting it to override `walking-8-frames`.
 - V3 custom mode uses `frame_count` 4–16, even only, default 8. Managed PixMiniMax mode uses multiples of 4 from 4–40, default 8. Both store the reference frame as frame 0 unless `keep_first_frame=false`; details in `animation.md`.
 - Report the actual returned frame count if it differs from the id or expectation.

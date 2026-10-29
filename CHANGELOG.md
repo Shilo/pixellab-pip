@@ -9,6 +9,8 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Changed
 
+- **Sync PixelLab's 2026-10-29 UTC public contracts.** Font glyph sizes add 12px and 24px; correct stale REST font pricing to 15 generations. Pro Flash costs now follow MCP's size ladder and separate rotations, with free capability-based price checks and explicit REST wording differences. Preset frame counts, supported motion names, MCP seed/input limits, Pro canvas buckets, tile batching, map compatibility, terrain seams, and generation-time guidance follow the refreshed docs. Route/tool inventory counts remain unchanged.
+
 - **Lower SkillSpector risk score.** CI's pinned SkillSpector 2.3.9 rates the skill LOW / SAFE (17, down from 41 in 3.0.0).
   Rules that scanners misread as risky are reworded without weakening them, duplicated token and docs-link rules
   now live in one place, and a scanner false positive in the manifest helper is gone. ClawScan-patched SkillSpector

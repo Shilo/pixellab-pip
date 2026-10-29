@@ -20,6 +20,10 @@ The refreshed MCP guide lists text-only quadrupeds for standard and Pro characte
 
 The refreshed REST docs and MCP guide retain template mode's nominal cost of 1 generation per direction, but clarify that canvases over about 100px are billed per rendering batch. REST `/animate-character` documents up to 3 batches at 128px, 5 at 180px, and one per clip frame at 256px; MCP says the receipt gives the batch ceiling. MCP managed `animate_character` v3 also documents `width × height × frame_count ≤ 8 × 256 × 256` (at most 8 frames on a 256px canvas; 16 frames fit up to about 180px). The REST managed-animation schema does not publish this pixel budget. These are public-contract changes only; no animation jobs were run.
 
+## 2026-10-29 UTC Contract Addendum
+
+The public MCP guide now gives all 49 humanoid template ids with exact frame counts and examples of rejected invented ids; the unchanged id set matches the existing humanoid catalog. The [operational template reference](../../skills/pixellab-pip/references/preset-skeleton-template-animation.md#preset-animation-ids) owns the frame table and motion-name mappings. Template mode has no frame-count override; managed Skeleton v3 uses that same pose count for its frame-based price. MCP `create_character` explicitly has no seed, and its `direction_images` description permits a JSON-encoded string when the client cannot send an object. Quadruped option lists below remain dated website findings. No paid tests were run.
+
 ## Executive Summary
 
 PixelLab has two broad animation categories with four related but distinct workflows:
@@ -644,7 +648,7 @@ User wants only to import/export/edit frames in Aseprite
 
 ## Open Questions And Risks
 
-1. Public docs do not expose a dedicated template catalog endpoint. The website bundle currently exposes the option lists, and MCP docs summarize template families, but official stability for every website option id should be treated as medium confidence.
+1. Public docs do not expose a dedicated template catalog endpoint. Since the 2026-10-29 UTC refresh, MCP documents the complete humanoid id/frame-count set; quadruped lists below remain dated website evidence and should be checked with `get_character` for the selected template.
 2. `/v2/animate-character` prose contains an older frame-count note, while the current schema and `/v2/characters/animations` description say v3 custom mode supports even 4-16 frames. Prefer schema over stale prose.
 3. The website first-party animation flow has richer internal fields such as calibration images and frozen first-frame anchors, but it is not a public automation contract.
 4. Aseprite extension local skeleton references strongly imply skeleton-guided presets, but those files can be updated by the extension updater and are not public API guarantees.

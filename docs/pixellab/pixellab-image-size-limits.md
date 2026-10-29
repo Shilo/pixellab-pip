@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-25 (Pixen transparency refusal, `estimate-skeleton` any-size input, and standard top-down tile limits).
+Last reviewed: 2026-10-29 (UTC snapshot: font sizes and MCP bounds/aspect clarification).
+
+> **2026-10-29 UTC refresh.** REST `generate-font-pro` and MCP `create_font` add native 12px and 24px glyphs (8/12/16/24/32/64). MCP now prints numeric bounds on existing parameters; this does not establish when server enforcement began. Its `create_image_pro` width description now lists all ten nearest-aspect size buckets, including 21:9 792×336; the per-axis declaration still has no upper bound.
 
 > **2026-10-25 API refresh.** REST `create-image-pixen` and MCP `create_image_pixen` now say `no_background: true` is allowed up to 65,536 px of area (for example 256×256 or 512×128) and larger canvases are refused with it on, replacing the 2026-10-19 "returns opaque" wording. REST `POST /estimate-skeleton` now accepts any image up to 256×256: it pads internally to the next 16/32/64/128/256 square and returns coordinates as fractions of the image you sent. Standard top-down tilesets (now Pixen-based) accept any `transition_size` from 0 to 1, but values above 0.5 need 16px tiles. `portrait-character-pro` dropped its "2K" render wording for 128/160.
 
@@ -71,8 +73,8 @@ Not live-tested (would cost credits, because the value is valid and starts a rea
 
 ## Bottom Line
 
-- **Minimum is `16` almost everywhere; several routes floor at `32`.** No image/tile/icon endpoint accepts a dimension below `16`. The only exceptions are `remove-background` (per-axis min `1`) and font `glyph_px` (`enum` includes `8`). (`inpaint-v3` has no schema floor at all, but its prose floor is `32` — see its row.)
-- **`8px` icons, items, and tilesets are not supported** (empirically confirmed — see verification section). Every relevant *generation* field has a schema minimum of `16` (or an `enum` of `[16, 32, 64]`), so an `8px` request is rejected with a `422` at validation, not padded up. The only place `8` is a legal value on a *generation* route is `generate-font-pro.glyph_px` (`enum [8, 16, 32, 64]`); the non-generation utility route `remove-background` also accepts `8` (its per-axis min is `1`), but that is post-processing an existing image, not generating one.
+- **From-scratch icon, item, and tile creation generally starts at `16px`; several routes floor at `32`.** This is not a universal image-processing floor: font glyphs support native `8` and `12`, normal maps accept `8×8` frames, and background removal has a per-axis minimum of `1`. Pixen editing declares target width/height ≥1 with multiples-of-four constraints; that schema is not proof of a tested tiny edit result. See the route rows for input-area and target rules.
+- **From-scratch `8px` icons, items, and tilesets are not supported by the dedicated creation routes** (see the validation probes). Font `glyph_px` instead accepts `[8, 12, 16, 24, 32, 64]`. Do not extend the creation-route floor to image editing or post-processing.
 - **`16px` icons, items, and tilesets are supported at the API level.** The remaining `16px` risk is semantic quality for non-tile item sprites (they drift larger), already characterized in the 16px spike — not a hard-limit problem.
 - **The `32x32` minimum users hit in the PixelLab Aseprite extension is a client-side editor limit,** not an API floor. Different editor tools apply different local minimums.
 - Maxima vary widely and are often larger than the product wording implies (for example `generate-image-v2` per-axis max is `792×688`, not `512`). `create-tiles-pro` used to **validate** up to `256` while its own prose and the MCP tool both said `128`; the 2026-09-08 schema lowered the field maximum to `128`, so all three now agree and the conflict is closed.
@@ -289,7 +291,7 @@ An in-between size (48, 96, 150) is **accepted at validation** — untested whet
 |---|---|---|---|---|
 | `create-ui-asset` | `image_size` | **192×192** | 688×688 | Default 256×256; max per axis aspect-dependent (square 512, tall/wide 688). Highest minimum in the API. |
 | `generate-ui-v2` | `image_size` | 16×16 | width 792, height 688 | Default 256×256; 16 to aspect-ratio max. |
-| `generate-font-pro` | `glyph_px` | `enum [8, 16, 32, 64]`, default 16 | | **Only field in the API that accepts `8`** — 8px generates a rough-but-usable glyph atlas (tested). Native bitmap size per glyph. |
+| `generate-font-pro` | `glyph_px` | `enum [8, 12, 16, 24, 32, 64]`, default 16 | | Native `8` and `12` below 16; 8px generated a rough-but-usable glyph atlas in the historical test. |
 | `characters/{id}/portrait` | image | 16×16 | 256×256 | Non-square portrait attachment is centered on a transparent square canvas. |
 | `vocal-animation` raw portrait input | image | Not documented | 256×256 | The current contract publishes only the maximum; do not infer the attachment minimum. |
 | `map-objects` | `image_size` | 32×32 | 400×400 | Default 128×128. Basic mode max area 400×400; inpainting mode max area 192×192. |
@@ -309,12 +311,12 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | `create_tiles_pro` | `tile_size` | 32 | **16–128** | Matches REST since the 2026-09-08 refresh, when the REST schema dropped from 256 to 128. `tile_height` 16–256 on both |
 | `create_ui_asset` | `width` / `height` | 256 | 192–688 | matches |
 | `create_portrait_character` | `result_size` | 64 | enum 16/32/48/64/128/160 | matches |
-| `create_font` | `glyph_px` | 16 | enum 8/16/32/64 | matches; retired `image_size` is absent on both surfaces |
+| `create_font` | `glyph_px` | 16 | enum 8/12/16/24/32/64 | matches; retired `image_size` is absent on both surfaces |
 | `create_1_direction_object` / `create_8_direction_object` | `size` | 64 (prose; schema `null`) | 16–256 / 24–168 | matches (both floors lowered in the 2026-09-08 refresh) |
 | `create_map_object` | `width` / `height` | **`null`** — mandatory in basic mode, auto-detected from `background_image` | 32–400 | bound matches; **default diverges** — REST `map-objects` defaults `image_size` to 128×128, MCP has none. MCP prose also carries the mode split REST omits: basic max 400×400, inpainting max 192×192 |
 | `create_image_pixflux` | `width` / `height` | 128 / 128 (or the init image's size) | 16–400 | Matches REST `create-image-pixflux`'s `image_size`; init images may use URL or base64. MCP prose adds a total-area rule REST omits: 32×32 to 400×400 |
 | `create_image_pixen` | `width` / `height` | 128 / 128 | 16–768 | Range matches REST `create-image-pixen`; both current contracts require multiples of 4, and since the 2026-09-08 refresh both also document the square requirement whenever either side is below 32 (previously REST only). Live MCP verification on 2026-07-27 accepted 17×20 before the current MCP rule was documented, then failed the background job with internal 500. Both cap total area at 512×512 (prose). Since 2026-10-25 both surfaces say `no_background: true` is allowed up to 65,536 px of area and larger canvases are refused with it on (2026-10-19 MCP said they returned opaque). |
-| `create_image_pro` | `width` / `height` | 128 / 128 | 16–**no maximum declared**; prose: "Max depends on aspect ratio (512x512 square, 688x384 for 16:9)" | Prose gives only two aspect buckets; REST `generate-image-v2` declares width ≤ 792 / height ≤ 688 — verify against REST if an aspect outside square/16:9 is needed |
+| `create_image_pro` | `width` / `height` | 128 / 128 | 16–**no maximum declared** per axis; prose lists ten nearest-aspect buckets | MCP now gives 1:1 512×512, 5:4 576×464, 4:3 600×448, 3:2 632×424, 16:9 688×384, 21:9 792×336, plus 4:5 464×576, 3:4 448×600, 2:3 424×632, 9:16 384×688. Check both dimensions against the nearest pair; 704×304 fits 21:9 |
 | `edit_image` | each target image URL/base64 | — | **max 512×512 each** | Matches REST `edit-images-v2` (Pro, 32–512), not base `edit-image` |
 | `inpaint_image` | target image URL/base64 | — | **32×32 to 512×512** | Matches REST `inpaint-v3` (Pro), not base `inpaint` |
 | `animate_image` | first frame URL/base64 | — | **max 256×256** | Matches REST `animate-with-text-v3`'s frame cap |
@@ -339,14 +341,14 @@ The Pro Flash MCP page lists `width`/`height` but not their full validation boun
 | `16px` standalone item/icon **semantics** | Partial | Item sprites drift larger; full-cell tiles/textures reliable, transparent item sprites experimental. See [`pixellab-16px-item-sprite-generation-spike.md`](pixellab-16px-item-sprite-generation-spike.md). |
 | `16px` character | No verified current Pip route for clean, exact-size output | The legacy character-standard route matched 16px in a historical probe, but Pip no longer recommends it. MCP Pro Flash lists 16×16 experimentally, with no live quality result here; current native presets also include 48×48 and 128×128. |
 | `16px` object | One direction is schema-supported; eight directions are not on the older object route | `create-1-direction-object` minimum fell to 16 in the 2026-09-08 schema refresh; `create-8-direction-object` minimum is 24. The earlier 32px rejection probes predate that change. Pro Flash also lists experimental 16×16 for one or eight directions and now lists native 48×48 and 128×128, but neither output is live-verified. |
-| `8px` icons / items | **No** | `generate-image-v2` and all image routes have schema min 16 → request rejected. |
+| From-scratch `8px` icons / items | **No** on dedicated creation routes | `generate-image-v2` and the other from-scratch image generators start at 16px; image-processing routes have separate bounds. |
 | `8px` tilesets | **No** | Top-down/sidescroller `tile_size` enum is `[16,32,64]`/`[16,32]`; `create-tiles-pro` min 16; isometric min 16×16. All reject 8. |
-| `8px` font glyphs | Yes | `generate-font-pro.glyph_px` enum includes 8 — the only 8px-native path in the API. |
+| `8px` font glyphs | Yes | `generate-font-pro.glyph_px` enum includes 8 — a native 8px glyph-creation path. |
 
 Conclusion for the goal:
 
 - **`16px` is fully achievable** for icons, items, and tilesets at the API level; the only open question is `16px` semantic quality for non-tile item sprites, already researched.
-- **`8px` is not achievable** for icons, items, or tilesets through any documented endpoint — the hard minimum is `16`, enforced at request validation. If `8px` game assets are required, the paths are: (a) generate at `16px`+ and downscale locally with honest post-processing reporting, or (b) use `generate-font-pro` with `glyph_px: 8` when the assets are genuinely glyph-like.
+- **From-scratch `8px` icon, item, and tileset creation is unavailable on the dedicated creation routes** — their hard minimum is `16`, enforced at request validation. This does not establish the bounds of edits or image-processing operations. If `8px` game assets are required, the paths are: (a) generate at `16px`+ and downscale locally with honest post-processing reporting, or (b) use `generate-font-pro` with `glyph_px: 8` when the assets are genuinely glyph-like.
 
 ## Follow-Up Tests (All Resolved 2026-07-11)
 
@@ -355,11 +357,11 @@ Every generation-time rule left open was probed; all resolved, almost all via fr
 - **`create-image-pixen` generation-time rules (validation-enforced, free `422`):** width/height must be a **multiple of 4**, and if either side is below 32 the canvas must be square. Total area is capped at `512×512`; `16×16` remains valid and generated in the live probe. Thus `16×64` is no longer schema-valid even though each axis independently fits the old range.
 - **`create-image-pixflux` at `16×16`: rejected** — `422` "Canvas must be size 32x32 area or larger". Pixflux's real floor is a **32×32 area**, *unlike* pixen (16); the per-axis schema min 16 is overridden by the area rule at validation.
 - **`generate-image-v2` aspect max is enforced:** `600×600` → `400` "image_size must be between 16x16 and 512x512 for this aspect ratio". The square max is `512×512` (the per-axis `792`/`688` apply only at extreme aspect ratios).
-- **`glyph_px: 8` fonts: generate** a real **TTF font** plus a glyph-atlas preview image. The historical live call cost about `$0.095`; current documented pricing is fixed at 25 generations or at least `$0.125`. The 8px output was partially legible but rough. The retired `image_size: 2K` control is no longer available.
+- **`glyph_px: 8` fonts: generate** a real **TTF font** plus a glyph-atlas preview image. The historical live call cost about `$0.095`; current documented pricing is fixed at 15 generations or at least `$0.115`. The 8px output was partially legible but rough. The retired `image_size: 2K` control is no longer available.
 - **`remove-background` at `8×8`: works** (HTTP 200, ~$0.005) — cleanly removed a solid background and kept the foreground at 8×8; the `1×1` floor is real.
 - **`16px` non-tile item/icon semantic quality** is a quality question (not a limit), characterized in the [16px item spike](pixellab-16px-item-sprite-generation-spike.md), which also has a palette-clamp demo (over-shaded pixel art clamps cleanly to ~16–24 colors while keeping shape).
 
-Those 2026-07 follow-up limits were resolved; the newer Pro Flash bounds and 16px output quality have not been live-probed here. Do not promote an `8px` icon/item/tileset claim — it is confirmed rejected; the only 8px-native path is font `glyph_px: 8`.
+Those 2026-07 follow-up limits were resolved; the newer Pro Flash bounds and 16px output quality have not been live-probed here. Do not promote a from-scratch `8px` icon/item/tileset creation claim — those dedicated routes reject it; use font `glyph_px: 8` only when the requested assets are glyphs; image-processing routes have their own limits.
 
 ## Related
 

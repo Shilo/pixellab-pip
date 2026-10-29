@@ -27,6 +27,6 @@ Preserve `text` / `text_to_speak` exactly: it is dialogue content, not a visual 
 
 Talking GIF timing uses `frame_ms` 20–500 (default 90) and `hold_ms` 0–5000 (default 600); GIF timing is rounded to 10 ms. REST accepts either a managed character or inline visemes; MCP accepts a managed character or `from_job_id` from raw portrait generation. The synchronous response is the final GIF, so save and verify it directly. An MCP `from_job_id` remains available for 8 hours after completion; persist needed output before it expires.
 
-The lip-sync plan returns ordered frames with `viseme`, `column`, `duration_ms`, and `text_offset`. With a managed character it also includes the grid URL and row metadata. REST stateless mode takes `viseme_count`; MCP intentionally has no stateless form. REST timing bounds are `frame_ms` 1–5000 and `hold_ms` 0–10000; both default to 90/600.
+The lip-sync plan returns ordered frames with `viseme`, `column`, `duration_ms`, and `text_offset`. With a managed character it also includes the grid URL and row metadata. REST stateless mode takes `viseme_count`; MCP intentionally has no stateless form. Both surfaces bound timing to `frame_ms` 1–5000 and `hold_ms` 0–10000; defaults are 90/600.
 
 Verify portrait dimensions and centering, transparency, requested mood, expected viseme count, full completion, frame order and duration, and the dialogue offsets before reporting success.

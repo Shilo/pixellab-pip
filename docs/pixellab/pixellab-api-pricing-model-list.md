@@ -1,6 +1,6 @@
 # PixelLab API Pricing and Model List
 
-Last reviewed: 2026-10-25.
+Last reviewed: 2026-10-29 (UTC public-contract refresh; catalog USD rows retain their original evidence).
 
 This is a quick reference for public PixelLab API endpoint labels, plugin labels, model/tool families, and official estimated USD prices. Treat prices as estimates: PixelLab states that prices vary with GPU processing time. For exact schemas, verify against the live REST v2 docs or OpenAPI.
 
@@ -19,6 +19,10 @@ Primary sources:
 - Official USD estimates and API `usage.generations` / credit deltas are distinct reporting units unless PixelLab documents a conversion for the selected route.
 - Approximate generation observations are route-specific: most base/`new`/`v3` image routes are about 1 generation; a dated live check measured `enhance-pixen-prompt` at 0.05; `estimate-skeleton` is documented at 0.1 per call since 2026-10-25; the OpenAPI estimates image-to-text at about 0.09 for a typical image; standard top-down and sidescroller tilesets dropped from about 3 to 1 generation on 2026-10-25, when MCP documented that standard runs on Pixen (Pro tilesets cost 15, or 25 for top-down tiles above 32px); and Pro Tools cost 10/15/25 generations by the announced image-size bands. Do not generalize the Pixen enhancer measurement to every enhancer. Size- and frame-driven routes (`create-character-v3`, `generate-8-rotations-v3`, `animate-with-text-v3`, PixMiniMax, and Skeleton v3) need route-specific estimates — see [cost-routing.md](../../skills/pixellab-pip/references/cost-routing.md). These generation observations are separate from the USD estimates recorded below.
 - Prompt-enhancement endpoints are separately priced when called or enabled through an endpoint option.
+
+## Current Public-Contract Clarifications
+
+The 2026-10-29 UTC MCP guide documents Pro Flash creation/edit/inpaint at 5/6/9 generations by longest side, plus a separate rotation charge for eight-view creation. The existing MCP capability lookup now documents free exact-size price splits; REST still has a separate provisional cost route and unchanged five-generation first-image prose. Use the [Pro Flash reference](../../skills/pixellab-pip/references/pro-flash.md) for the ladder, reuse, and quote limits. UI and Pro edits now specify square 10/15/25 bands at 256 and 341px, with aspect-adjusted non-square pricing; see [cost routing](../../skills/pixellab-pip/references/cost-routing.md). MCP estimates one-direction object creation at 2–3 minutes, UI at 2–4 minutes, and MCP/REST tiles-pro at 1–2 minutes. Font sizes add 12 and 24px on both surfaces. The refreshed REST font price is 15 generations or at least `$0.115`, correcting the stale 25/`$0.125` row below; that price was already present in the previous OpenAPI snapshot, so it is not a newly detected upstream price change.
 
 ## Version 0.4.123 Product Update
 
@@ -73,14 +77,14 @@ The current public REST/MCP docs use the Pro Flash display name. It has not been
 
 | Operation | REST v2 | MCP | Billing and output distinction |
 |---|---|---|---|
-| Create one image | `POST /create-image-pro-flash` | `create_image_pro_flash` | One image per call; Version 0.4.123 advertises 4–6 generations, while REST describes a provisional five-generation first-image estimate. Older Pro may return a size-dependent batch. |
+| Create one image | `POST /create-image-pro-flash` | `create_image_pro_flash` | One image per call; MCP documents the size ladder in the [Pro Flash reference](../../skills/pixellab-pip/references/pro-flash.md). REST retains its provisional five-generation first-image estimate. Older Pro may return a size-dependent batch. |
 | Create character | `POST /create-character-pro-flash` | `create_character_pro_flash` | First south-facing image plus eight V3 views; using an owned prior `source_image_id` avoids the new-image stage, not the rotations. |
 | Create object | `POST /create-object-pro-flash` | `create_object_pro_flash` | One or eight directions. Finalizing one direction from an already-paid source image is documented as free; eight directions still incur rotation charges. |
-| Edit one image | `POST /edit-image-pro-flash` | `edit_image_pro_flash` | Keeps the input's native canvas dimensions; no published fixed cost here. |
-| Masked edit | `POST /inpaint-image-pro-flash` | `inpaint_image_pro_flash` | Source and mask must share native size; no published fixed cost here. Exact outside-mask preservation is claimed, not live-verified. |
+| Edit one image | `POST /edit-image-pro-flash` | `edit_image_pro_flash` | Keeps the input's native canvas dimensions; MCP prices it by the source canvas using the creation ladder. |
+| Masked edit | `POST /inpaint-image-pro-flash` | `inpaint_image_pro_flash` | Source and mask must share native size; MCP uses the source-canvas creation ladder, not mask area. Exact outside-mask preservation is claimed, not live-verified. |
 | Image to pixel art | `POST /image-to-pixelart-pro-flash` | `image_to_pixelart_pro_flash` | 6 generations per image; detects native pixel scale/output size and has no size parameter. |
 
-Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count for a provisional estimate before a paid call, and `GET /v2/pro-flash/capabilities` (or MCP `get_pro_flash_capabilities`) to check dimensions. The public MCP inventory has no cost-estimator tool. Actual usage comes from the completed job, not the provisional number. The live capability endpoint required bearer auth during this review, so no account-specific response or paid probe is included.
+Use MCP `get_pro_flash_capabilities` with operation, width, height, and direction count for a free exact-size price split and native dimensions. REST uses `GET /v2/pro-flash/cost` for the provisional estimate and `GET /v2/pro-flash/capabilities` for dimensions; MCP has no separate cost-estimator tool. Actual usage comes from the completed job, not the provisional number. The live capability endpoint required bearer auth during this review, so no account-specific response or paid probe is included.
 
 ## Image Operations
 
@@ -144,7 +148,7 @@ Use `GET /v2/pro-flash/cost` with operation, width, height, and direction count 
 | Animate object | `POST /v2/objects/{object_id}/animations` | Object animation, per direction | v3 4 frames `64x64 $0.0129`, `128x128 $0.0144`; Pro up to `128x128 $0.095`, up to `168x168 $0.185` |
 | Create object state | `POST /v2/objects/{object_id}/states` | Object variant/state | single-direction up to `168x168 $0.095`; 8-direction up to `84x84 $0.095`, up to `112x112 $0.125`, up to `168x168 $0.185` |
 | Create tiles (Pro) | `POST /v2/create-tiles-pro` | Multiple tile variations; also the shared endpoint behind MCP's `create_path_tiles` (`tile_feature: "roads"`) and `create_building_kit` (`tile_feature: "building"`), which have no REST route or pricing row of their own | tile up to `42x42 $0.095`; up to `56x56 $0.125`; up to `85x85 $0.185`; MCP `create_path_tiles`/`create_building_kit` likely bill on this same Pro rung — unconfirmed, no separate USD row exists to check against |
-| Generate pixel font (Pro) | `POST /v2/generate-font-pro` | Pro bitmap font generation | Generate a font atlas / pixel font from description and font controls | fixed 25 subscription generations, or at least `$0.125` when billed to credits |
+| Generate pixel font (Pro) | `POST /v2/generate-font-pro` | Pro bitmap font generation | Generate a font atlas / pixel font from description and font controls | fixed 15 subscription generations, or at least `$0.115` when billed to credits |
 
 ## Prompt Enhancement
 

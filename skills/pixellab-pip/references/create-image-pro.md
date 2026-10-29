@@ -10,6 +10,8 @@ When the layout or composition of a Pro image is uncertain, the approval card ma
 
 MCP `create_image_pro` and REST `generate-image-v2` both remove the background by default (`no_background` defaults to `true`). Send `no_background: false` when the user wants an opaque, full-bleed image, scene, or sheet.
 
+MCP canvas caps follow the nearest supported aspect ratio: 1:1 512×512, 5:4 576×464, 4:3 600×448, 3:2 632×424, 16:9 688×384, 21:9 792×336, plus the portrait pairs 4:5 464×576, 3:4 448×600, 2:3 424×632, and 9:16 384×688. Check both dimensions against the nearest pair; an area check alone is insufficient. For example, 704×304 fits the 21:9 bucket. REST uses aspect-dependent limits too; inspect its raw schema/prose for exact integration claims.
+
 ## Exact Palette Control
 
 MCP uses `palette` (2–256 hex colors), optional `palette_name`, and `max_colors` (2–64 per image); REST uses `target_palette.colors`, optional `name`, `max_colors`, and beta `smart`. The palette colors constrain every result pixel; `max_colors` only caps the count. REST `smart` requires `colors`, is for single images, adds about 15–60 seconds, and is refused for animation; MCP documents no `smart` equivalent.

@@ -192,7 +192,7 @@ Selected official-source checks from 2026-10-14:
 - The MCP guide documents **VFX Workbench as free for subscribers**. Game Art also describes broad free-trial/all-plan operation. Access on a particular trial or credits-only account was not checked; do not equate zero generation cost with universal eligibility.
 - Official template-animation pricing includes **size-dependent batches**, not a universal one generation per direction. Game Art's short template notes omit that qualification.
 - Official v3 character guidance allows **quadrupeds with a south-facing reference and matching template**; the from-scratch generator is humanoid-only. Game Art's short “humanoid-only” comparison should be read in that narrower context.
-- Official `get_pro_flash_capabilities` documents sizes, controls, and output counts. Its signature is not evidence that it returns a price quote. REST separately exposes `/pro-flash/cost`; Pip distinguishes that provisional estimate from reported usage.
+- The 2026-10-29 UTC MCP guide now explicitly documents a free exact-size price split through `get_pro_flash_capabilities`, alongside sizes, controls, and output counts. REST separately exposes `/pro-flash/cost`; Pip distinguishes provisional quotes from completed-job usage.
 
 These checks use the [official MCP guide](https://api.pixellab.ai/mcp/docs) and [REST schema](https://api.pixellab.ai/v2/openapi.json). They do not re-verify every upstream price, wait time, subscription limit, or historical observation.
 
