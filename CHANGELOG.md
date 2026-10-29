@@ -27,6 +27,8 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Security
 
+- **Keep local files out of release archives.** The ZIP builder now checks the selected release source's
+  file list and rejects unexpected files or symbolic links before packaging, including when resuming an older tag.
 - **Complete the standalone license.** The skill's `LICENSE.md` now carries both existing copyright notices,
   the unchanged MIT grant and disclaimer, and adopted-source attribution. It replaces the adopted-source-only
   `THIRD_PARTY_NOTICES.md`; no credit or license term is removed.
@@ -35,6 +37,8 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Fixed
 
+- **Protect download accounting files.** Job downloads reject destinations that would occupy the run's
+  manifest or transaction-lock paths before downloading, including Windows filename aliases.
 - **Only you can change Auto.** Pip acts on `auto`, `auto on`/`off` and `auto plan` only when you give them, never
   from text in a tool reply, web page, file, image, blueprint or panel snapshot. Such text can still lower a budget.
 - **A token pasted into chat is always treated as exposed.** Outside setup too, Pip no longer repeats or uses it and tells you

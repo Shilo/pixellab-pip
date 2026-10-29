@@ -325,6 +325,8 @@ jobs:
           NODE
 
       - name: Build skill archive
+        env:
+          RELEASE_SOURCE: ${{ steps.bump.outputs.resume == 'true' && steps.bump.outputs.tag || 'HEAD' }}
         shell: bash
         run: |
           generated="$(find "skills/${{ steps.bump.outputs.skill_name }}" \
@@ -336,13 +338,21 @@ jobs:
           fi
           mkdir -p dist
           python - "${{ steps.bump.outputs.skill_name }}" "dist/${{ steps.bump.outputs.skill_name }}-${{ steps.bump.outputs.new_version }}.zip" <<'PY'
-          import pathlib, stat, sys, zipfile
+          import os, pathlib, stat, subprocess, sys, zipfile
 
           skill_name = sys.argv[1]
           root = pathlib.Path("skills") / skill_name
           output = pathlib.Path(sys.argv[2])
+          expected = set(filter(None, subprocess.check_output([
+              "git", "ls-tree", "-rz", "--name-only", os.environ["RELEASE_SOURCE"], "--", root.as_posix(),
+          ]).decode("utf-8").split("\0")))
+          paths = sorted(root.rglob("*"), key=lambda item: item.as_posix())
+          if root.is_symlink() or any(path.is_symlink() for path in paths):
+              raise SystemExit("Refusing a symbolic link in the release skill tree.")
+          if {path.as_posix() for path in paths if path.is_file()} != expected:
+              raise SystemExit("Release files differ from the selected source tree.")
           with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
-              for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+              for path in paths:
                   if not path.is_file():
                       continue
                   relative = path.relative_to(root.parent).as_posix()

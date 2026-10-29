@@ -283,6 +283,113 @@ class FetchTests(unittest.TestCase):
         self.assertEqual(fetch.main([*args, "--estimate", "nan"]), 2)
         self.assertEqual(fetch.main(["j", str(self.root / "outside.png"), "--run", str(run), "--url", LINK]), 2)
 
+    def test_run_metadata_destinations_fail_before_network_or_ledger_changes(self) -> None:
+        names = ["manifest.json", ".manifest.lock"]
+        if sys.platform == "win32":
+            names += ["MANIFEST.JSON", ".MANIFEST.LOCK", "manifest.json.", ".manifest.lock.", ".manifest.lock ",
+                      "manifest.json:payload.png", ".manifest.lock:payload.png"]
+        fetch.get = lambda *args, **kwargs: self.fail("run metadata destination reached HTTP")
+        for existing in (False, True):
+            for index, name in enumerate(names):
+                for suffix, count in (("", 1), ("", 2), ("/raw.png", 1), ("/frames", 2)):
+                    with self.subTest(existing=existing, name=name, suffix=suffix):
+                        run = self.root / ("case-%s-%d-%d" % (existing, index, count))
+                        # Reuse only for repeated blocked destinations; no output may be created.
+                        if existing and not run.exists():
+                            manifest.add_job(str(run), {"job_id": "earlier", "estimated_usage": {"generations": 7}})
+                        ledger = run / manifest.NAME
+                        before = ledger.read_bytes() if existing else None
+                        args = ["j", str(run / (name + suffix)), "--run", str(run)]
+                        for url in links(count):
+                            args.extend(["--url", url])
+                        with redirect_stderr(io.StringIO()):
+                            self.assertEqual(fetch.main(args), 2)
+                        if existing:
+                            self.assertEqual(ledger.read_bytes(), before)
+                            manifest.add_job(str(run), {"job_id": "earlier", "status": "submitted"})
+                            self.assertEqual(manifest.committed(str(run)), 7)
+                        else:
+                            self.assertFalse(run.exists())
+                        self.assertFalse((run / ".manifest.lock").exists())
+
+    def test_metadata_names_below_normal_output_folders_remain_valid(self) -> None:
+        names = ["manifest.json", ".manifest.lock"]
+        if sys.platform != "win32":
+            names += ["MANIFEST.JSON", ".MANIFEST.LOCK", "manifest.json.", ".manifest.lock."]
+        fetch.get = lambda *args, **kwargs: ("ok", PNG)
+        for index, name in enumerate(names):
+            for count in (1, 2):
+                with self.subTest(name=name, count=count):
+                    run = self.root / ("valid-%d-%d" % (index, count))
+                    out = run / "ordinary" / name / ("raw.png" if count == 1 else "frames")
+                    args = ["j", str(out), "--run", str(run)]
+                    for url in links(count):
+                        args.extend(["--url", url])
+                    with redirect_stdout(io.StringIO()):
+                        self.assertEqual(fetch.main(args), 0)
+                    paths = fetch.frame_paths(out, count) if count > 1 else [out]
+                    self.assertEqual([p.read_bytes() for p in paths], [PNG] * count)
+                    self.assertEqual(manifest.jobs(str(run))[0]["status"], "ok")
+
+    def test_run_itself_is_not_an_output(self) -> None:
+        run = self.root / "run.png"
+        fetch.get = lambda *args, **kwargs: self.fail("run-root destination reached HTTP")
+        for count in (1, 2):
+            args = ["j", str(run), "--run", str(run)]
+            for url in links(count):
+                args.extend(["--url", url])
+            with redirect_stderr(io.StringIO()):
+                self.assertEqual(fetch.main(args), 2)
+            self.assertFalse(run.exists())
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows short-name aliases")
+    def test_short_manifest_alias_is_rechecked_before_http(self) -> None:
+        import ctypes
+        for existing in (False, True):
+            for count in (1, 2):
+                with self.subTest(existing=existing, count=count):
+                    run = self.root / ("short-%s-%d" % (existing, count))
+                    manifest.add_job(str(run), {"job_id": "earlier", "estimated_usage": {"generations": 7}})
+                    ledger = run / manifest.NAME
+                    buffer = ctypes.create_unicode_buffer(32768)
+                    size = ctypes.windll.kernel32.GetShortPathNameW(str(ledger), buffer, len(buffer))
+                    if not size or Path(buffer.value).name == manifest.NAME:
+                        self.skipTest("Filesystem short-name aliases unavailable")
+                    short = Path(buffer.value).name
+                    if not existing:
+                        ledger.unlink()
+                    before = ledger.read_bytes() if existing else None
+                    out = run / (short + ":payload.png" if count == 1 else short + "/frames")
+                    args = ["j", str(out), "--run", str(run), "--estimate", "9"]
+                    for url in links(count):
+                        args.extend(["--url", url])
+                    fetch.get = lambda *args, **kwargs: self.fail("short metadata alias reached HTTP")
+                    with redirect_stderr(io.StringIO()):
+                        self.assertEqual(fetch.main(args), 2)
+                    entry = next((job for job in manifest.jobs(str(run)) if job["job_id"] == "j"), None)
+                    if entry is None:
+                        self.assertTrue(existing)
+                        self.assertEqual(ledger.read_bytes(), before)
+                    else:
+                        self.assertEqual(entry["estimated_usage"], {"generations": 9})
+                        self.assertNotIn("outputs", entry)
+                        manifest.add_job(str(run), {"job_id": "j", "status": "submitted"})
+                    self.assertEqual(manifest.committed(str(run)), (7 if existing else 0) + (9 if entry else 0))
+                    self.assertFalse(out.exists())
+
+    def test_unrelated_short_names_and_colon_outputs_remain_valid(self) -> None:
+        names = ["legit~1.png", "ordinary:preview.png"]
+        if sys.platform != "win32":
+            names += ["MANIFEST.JSON/preview.png", ".MANIFEST.LOCK/preview.png", "manifest.json:preview.png"]
+        fetch.get = lambda *args, **kwargs: ("ok", PNG)
+        for index, name in enumerate(names):
+            with self.subTest(name=name):
+                run = self.root / ("ordinary-%d" % index)
+                out = run / name
+                with redirect_stdout(io.StringIO()):
+                    self.assertEqual(fetch.main(["j", str(out), "--run", str(run), "--url", LINK]), 0)
+                self.assertEqual(out.read_bytes(), PNG)
+
     def test_missing_pillow_skips_before_network_or_writes(self) -> None:
         script = REPO_ROOT / "skills/pixellab-pip/assets/fetch.py"
         code = (f"import runpy,sys; sys.path.insert(0,{str(script.parent)!r}); sys.modules['PIL']=None; "

@@ -151,6 +151,14 @@ def outputs(out: str, run: str, frames: int = 0) -> list[str]:
     return [p.resolve().relative_to(Path(run).resolve()).as_posix() for p in paths]
 
 
+def check_metadata(relative: Path) -> Path:
+    if sys.platform == "win32":
+        relative = Path(*(part.split(":", 1)[0].rstrip(" .") for part in relative.parts))
+    if any(relative.is_relative_to(name) for name in (manifest.NAME, ".manifest.lock")):
+        raise ValueError("output conflicts with run metadata")
+    return relative
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     require_pillow()  # skip before HTTP, manifests, or output changes
@@ -181,10 +189,9 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("--timeout must be positive")
         preflight(a.out, frames)
         expected = outputs(a.out, a.run, frames)  # also reject outputs outside this run
-        if frames and Path(a.out).resolve() == Path(a.run).resolve():
-            raise ValueError("frame destination must be a new subdirectory of the run")
-        if not frames and Path(a.out).resolve() == (Path(a.run) / manifest.NAME).resolve():
-            raise ValueError("output conflicts with the manifest")
+        relative = check_metadata(Path(expected[0]).parent if frames else Path(expected[0]))
+        if relative == Path("."):
+            raise ValueError("output must be a new path inside the run")
         entry = {"job_id": a.job, "status": "submitted"}
         if a.tool:
             entry["tool"] = a.tool
@@ -194,6 +201,10 @@ def main(argv: list[str] | None = None) -> int:
         # Record identity/charge or reservation before a bounded wait can be interrupted.
         # The locked ledger merge preserves an already recorded status and earlier saved paths.
         manifest.add_job(a.run, entry)
+        if sys.platform == "win32" and relative.parts:
+            # The new ledger can establish an 8.3 alias that did not exist at preflight.
+            root = (Path(a.run) / relative.parts[0]).resolve().relative_to(Path(a.run).resolve())
+            check_metadata(root)
         started = time.monotonic()
         while True:
             status = try_job(a.url, a.out, deadline=started + a.timeout)
