@@ -212,3 +212,112 @@ def test_ambiguous_body_recolour_remains_repairable_after_approval():
     repaired, _, after = fix(a, {primary.id})
     assert not np.array_equal(repaired.frames[3], a.frames[3])
     assert not any(f.check in repair.COLOUR and 3 in f.frames for f in after)
+
+
+def test_enclosed_effect_repairs_require_their_original_approval_ids():
+    for check in ('holes', 'bg_leak'):
+        fs = synth.walk(6)
+        bg = (255, 0, 255) if check == 'bg_leak' else None
+        for i in (2, 3, 4):
+            fs[i] = synth.flash(fs[i], (1, 8, 15, 44), CYAN)
+            if bg is not None:
+                fs[i] = synth.flash(fs[i], (5, 12, 11, 18), bg)
+        holes = [(y, x) for y in range(10, 42, 2) for x in range(3, 14, 2)][:45]
+        if check == 'holes':
+            for y, x in holes:
+                fs[3][y, x] = 0
+        a = anim(fs, bg=bg)
+        before = [f.copy() for f in a.frames]
+        findings, _ = measure.run(a)
+        assert any(f.check == check for f in findings)
+        assert any(f.check == 'effect' for f in findings)
+        pending, changes, _ = fix(a)
+        proposals = [c for c in changes if c.check == check]
+        assert proposals and all(c.result == 'proposed' for c in proposals)
+        assert all(np.array_equal(x, y) for x, y in zip(before, pending.frames))
+        accepted, applied, _ = fix(a, {c.id for c in proposals})
+        assert [(c.id, c.check, c.frames) for c in changes] == [(c.id, c.check, c.frames) for c in applied]
+        assert all(c.result == 'fixed' for c in applied if c.check == check)
+        if check == 'holes':
+            assert all(tuple(accepted.frames[3][y, x]) == (*CYAN, 255) for y, x in holes)
+        else:
+            assert all((accepted.frames[i][12:18, 5:11] == (*CYAN, 255)).all() for i in (2, 3, 4))
+        assert all(np.array_equal(x, y) for x, y in zip(before, a.frames))
+
+
+def test_enclosed_body_repairs_remain_automatic_with_unrelated_effects():
+    for check in ('holes', 'bg_leak'):
+        fs = synth.walk(6)
+        bg = (255, 0, 255) if check == 'bg_leak' else None
+        fs[3] = synth.pinholes(fs[3]) if bg is None else synth.speck(fs[3], (20, 24), bg, 6)
+        for i in (2, 3, 4):
+            fs[i] = synth.flash(fs[i], (1, 8, 8, 18), CYAN)
+        a = anim(fs, bg=bg)
+        b, changes, after = fix(a)
+        assert any(c.check == check and c.result == 'fixed' for c in changes)
+        assert not any(c.check == check and c.result == 'proposed' for c in changes)
+        assert not any(f.check == check for f in after)
+        for i in (2, 3, 4):
+            assert np.array_equal(b.frames[i][8:18, 1:8], a.frames[i][8:18, 1:8])
+
+
+def test_attached_soft_effect_borders_require_approval_without_shifting_ids():
+    for alpha in (90, 170):
+        fs = synth.walk(6)
+        ring = np.zeros(fs[0].shape[:2], bool)
+        ring[22:33, 28:41] = True
+        ring[23:32, 29:40] = False
+        for i in range(len(fs)):
+            fs[i] = synth.flash(fs[i], (29, 23, 40, 32), CYAN)
+            fs[i][ring, :3], fs[i][ring, 3] = CYAN, alpha
+        a = anim(fs)
+        before = [f.copy() for f in a.frames]
+        assert any(f.check == 'effect' for f in measure.run(a)[0])
+        pending, changes, _ = fix(a)
+        proposals = [c for c in changes if c.check == 'soft_edge']
+        assert proposals and all(c.result == 'proposed' for c in proposals)
+        assert all(np.array_equal(x, y) for x, y in zip(before, pending.frames))
+        accepted, applied, _ = fix(a, {c.id for c in proposals})
+        assert [(c.id, c.check, c.frames) for c in changes] == [(c.id, c.check, c.frames) for c in applied]
+        for old, repaired in zip(before, accepted.frames):
+            expected = old.copy()
+            expected[..., 3] = np.where(old[..., 3] >= 128, 255, 0)
+            assert np.array_equal(repaired, expected)
+        assert all(np.array_equal(x, y) for x, y in zip(before, a.frames))
+
+
+def test_body_soft_edges_next_to_an_unchanged_effect_stay_automatic():
+    fs = [synth.flash(synth.blur_edges(f), (29, 23, 40, 32), CYAN) for f in synth.walk(6)]
+    a = anim(fs)
+    before = [f.copy() for f in a.frames]
+    b, changes, _ = fix(a)
+    assert any(f.check == 'effect' for f in measure.run(a)[0])
+    assert all(c.result == 'fixed' for c in changes if c.check == 'soft_edge')
+    for old, repaired in zip(before, b.frames):
+        expected = old.copy()
+        expected[..., 3] = np.where(old[..., 3] >= 128, 255, 0)
+        assert np.array_equal(repaired, expected)
+    assert all(np.array_equal(x, y) for x, y in zip(before, a.frames))
+
+
+def test_thin_part_repair_requires_approval_for_copied_source_effects():
+    fs = synth.walk(9)
+    for i in (3, 4, 6, 7):
+        fs[i] = synth.flash(fs[i], (38, 9, 39, 51), CYAN)
+        fs[i] = synth.flash(fs[i], (29, 29, 39, 30), CYAN)
+    fs[5] = synth.drop_staff(fs[5])
+    a = anim(fs)
+    before = [f.copy() for f in a.frames]
+    findings, _ = measure.run(a)
+    assert any(f.check == 'weapon_lost' and f.frames == [5] for f in findings)
+    assert any(f.check == 'effect' for f in findings)
+    pending, changes, _ = fix(a)
+    proposal = next(c for c in changes if c.check == 'weapon_lost' and c.frames == [5])
+    assert proposal.result == 'proposed'
+    assert np.array_equal(pending.frames[5], before[5])
+    accepted, applied, _ = fix(a, {proposal.id})
+    assert [(c.id, c.check, c.frames) for c in changes] == [(c.id, c.check, c.frames) for c in applied]
+    assert any(c.id == proposal.id and c.result == 'fixed' for c in applied)
+    assert ((accepted.frames[5][..., :3] == CYAN).all(-1) & (accepted.frames[5][..., 3] > 0)).any()
+    assert ((accepted.frames[5][..., :3] == synth.STAFF).all(-1) & (accepted.frames[5][..., 3] > 0)).any()
+    assert all(np.array_equal(x, y) for x, y in zip(before, a.frames))

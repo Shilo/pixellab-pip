@@ -113,6 +113,26 @@ def _soft_regions(a, main):
     return body, soft & ~body
 
 
+def _effect_pixels(anim, a):
+    """The detector's effect components, their enclosed holes and matching soft border."""
+    one = copy.copy(anim)
+    one.frames = [a]
+    lab, ids = measure._effect_pieces(one, [measure.Frame(a)])[0]
+    effect = np.isin(lab, ids)
+    background = ((a[..., :3] == anim.bg).all(-1) if anim.bg is not None
+                  else np.zeros(a.shape[:2], bool))
+    effect &= ~background
+    effect = ndimage.binary_fill_holes(effect)
+    soft = (a[..., 3] > 0) & (a[..., 3] < 128)
+    if effect.any() and soft.any():
+        visible = a.copy()
+        visible[soft, 3] = 255
+        one.frames = [visible]
+        effect |= (ndimage.binary_dilation(effect, measure.EIGHT) & soft
+                   & ~measure.body_mask(one, 0) & ~background)
+    return effect
+
+
 def run(anim, findings, accept=frozenset(), style=None):
     b = copy.copy(anim)
     b.frames = [f.copy() for f in anim.frames]
@@ -137,6 +157,23 @@ def run(anim, findings, accept=frozenset(), style=None):
         c = Change('c%d' % n, check, frames, action, result)
         changes.append(c)
         return c
+
+    def local_change(check, i, candidate, action, source_effect=None):
+        c = new(check, [i], action)
+        changed = np.any(candidate != b.frames[i], axis=2)
+        if changed.any():
+            effect = _effect_pixels(b, b.frames[i])
+            # Hardening preserves RGB and the opaque silhouette; changed pixels are no longer soft.
+            if check != 'soft_edge':
+                effect |= _effect_pixels(b, candidate)
+            if source_effect is not None:
+                effect |= source_effect
+            if (changed & effect).any():
+                c.action += '; change may also alter effect pixels'
+                c.result = 'proposed'
+        if c.result != 'proposed' or c.id in accept:
+            b.frames[i] = candidate
+            c.result = 'fixed'
 
     def whole_frame(check, i, candidate, action):
         c = new(check, [i], action)
@@ -191,10 +228,13 @@ def run(anim, findings, accept=frozenset(), style=None):
             elif not original_rest.any():
                 body |= rest
                 rest = np.zeros_like(rest)
-            if original_body.any():   # the character's own soft outline: hardened (free)
-                a[body, 3] = np.where(a[body, 3] >= 128, 255, 0)
-                new('soft_edge', [i], ('hard edges on the character in frame %d (no half-transparent pixels)'
-                                     if body.any() else 'body soft edges in frame %d already resolved') % (i + 1))
+            if original_body.any():   # preserve the original action slot; ask if it also touches an effect
+                candidate = a.copy()
+                candidate[body, 3] = np.where(candidate[body, 3] >= 128, 255, 0)
+                local_change('soft_edge', i, candidate,
+                             ('hard edges on the character in frame %d (no half-transparent pixels)'
+                              if body.any() else 'body soft edges in frame %d already resolved') % (i + 1))
+                a = b.frames[i]
             if original_rest.any():   # soft pixels away from the body are an effect (a glow): asked first
                 c = new('soft_edge', [i], ('harden the soft edges of the effect in frame %d'
                                          if rest.any() else 'effect soft edges in frame %d already resolved') % (i + 1),
@@ -207,13 +247,16 @@ def run(anim, findings, accept=frozenset(), style=None):
             a[measure.loose_specks(fr, rl) & measure.body_mask(b, i)] = 0
             new('specks', [i], 'removed %d px of loose specks from frame %d' % (f.measured, i + 1))
         elif f.check == 'holes':
-            _fill_from_neighbours(a, measure.pinholes(a[..., 3] >= 128))
-            new('holes', [i], 'filled the pinholes in frame %d' % (i + 1))
+            candidate = a.copy()
+            _fill_from_neighbours(candidate, measure.pinholes(a[..., 3] >= 128))
+            local_change('holes', i, candidate, 'filled the pinholes in frame %d' % (i + 1))
         elif f.check == 'bg_leak':
             on = a[..., 3] >= 128
             leak = ndimage.binary_fill_holes(on) & (a[..., :3] == anim.bg).all(-1) & on
-            _fill_from_neighbours(a, leak)
-            new('bg_leak', [i], 'painted over the background colour inside frame %d' % (i + 1))
+            candidate = a.copy()
+            _fill_from_neighbours(candidate, leak)
+            local_change('bg_leak', i, candidate,
+                         'painted over the background colour inside frame %d' % (i + 1))
         elif f.check in ('weapon_lost', 'broken_thin'):
             src = next((j for d in (1, -1, 2, -2) for j in [i + d] if 0 <= j < len(b.frames) and j not in weapon), None)
             if src is None:
@@ -225,8 +268,12 @@ def run(anim, findings, accept=frozenset(), style=None):
                         for dy in range(-3, 4) for dx in range(-3, 4)), key=lambda t: (t[0], -abs(t[1]) - abs(t[2])))
             gs = _shift(g, best[1], best[2])
             thin = measure._thin(gs[..., 3] >= 128)
-            a[thin] = gs[thin]
-            new(f.check, [i], 'copied the thin parts (weapon, staff) into frame %d from frame %d' % (i + 1, src + 1))
+            candidate = a.copy()
+            candidate[thin] = gs[thin]
+            source_effect = _shift(_effect_pixels(anim, g), best[1], best[2]) & thin
+            local_change(f.check, i, candidate,
+                         'copied the thin parts (weapon, staff) into frame %d from frame %d' % (i + 1, src + 1),
+                         source_effect)
         elif f.check in COLOUR:
             if i in colour_done:
                 primary = colour_done[i]
