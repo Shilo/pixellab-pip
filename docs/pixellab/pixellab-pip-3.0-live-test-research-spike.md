@@ -16,8 +16,8 @@ generations** for the whole spike.
   `--no-style` / one-off `--style` left the saved file untouched. Caps and retry limits were never exceeded; testers
   stopped at review gates (pose review, candidate pick, failed draft) instead of spending further.
 - **Pip defects:** all fixed after the spike (see Issues and the changelog's Unreleased section). I-3 closed
-  with no change: the tileset cost is 3, as documented. The fixes change skill files, so they reach `main` only
-  after ClawHub publishes 3.0.0 from the v3.0.0 tag.
+  with no change: the tileset cost is 3, as documented. The fixes change skill files, so they ship in the release
+  after 3.0.0.
 - **Not live-tested, and why:** broken settings file and plan-refusal fallback (editing the skill's own settings is
   blocked as self-modification, and this Tier 3 account has every tool); failed-job no-retry (a paid failure cannot
   be forced safely; the two failed throw clips did confirm no automatic re-run); muzzle finder and 8-direction shot
@@ -140,7 +140,7 @@ which every tester accepts.
 
 - **P-1:** `create_image_pixflux` at 256x400 and 288x400 returned an opaque grey background twice although `no_background: true` was sent (recorded in the blueprint). Smaller transparent PixFlux and Pixen calls in this spike came back transparent.
 - **P-2:** `animate_character` template walks and runs dropped the rogue's long cloak on the north-facing directions three times (walk N/NE, run N); skeleton-v3 kept it.
-- **P-3:** ClawHub held release 3.0.0 in pending publication because its own ClawScan step never ran ([openclaw/clawhub#4046](https://github.com/openclaw/clawhub/issues/4046)); 3.0.0 was released on GitHub with the new `github_only` workflow mode, and ClawHub follows with a resume run.
+- **P-3 (resolved):** ClawHub held release 3.0.0 in pending publication because its SkillSpector stage rejected the skill's long, code-heavy Markdown and its WAV asset as incomplete inspection ([openclaw/clawhub#4046](https://github.com/openclaw/clawhub/issues/4046)). 3.0.0 was released on GitHub with the new `github_only` workflow mode; after scanner fixes ([ClawScan #124](https://github.com/openclaw/clawscan/pull/124), [#125](https://github.com/openclaw/clawscan/pull/125)), ClawHub maintainers published the original upload on 2026-10-28 with a benign review.
 
 ### Fixes after the spike
 
