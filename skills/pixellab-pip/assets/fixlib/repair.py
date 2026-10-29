@@ -103,6 +103,16 @@ def _rescale(a: np.ndarray, factor: float) -> np.ndarray:
     return out
 
 
+def _soft_regions(a, main):
+    soft = (a[..., 3] > 0) & (a[..., 3] < 255)
+    if not soft.any():
+        return soft, soft.copy()
+    if main is None:
+        main = measure.Frame(a).main
+    body = ndimage.binary_dilation(main, measure.EIGHT, iterations=1) & soft
+    return body, soft & ~body
+
+
 def run(anim, findings, accept=frozenset(), style=None):
     b = copy.copy(anim)
     b.frames = [f.copy() for f in anim.frames]
@@ -117,6 +127,9 @@ def run(anim, findings, accept=frozenset(), style=None):
     weapon = {i for i, cs in by_frame.items() if cs & {'weapon_lost', 'broken_thin'}}
     changes, colour_done, n = [], {}, 0
     phase = None
+    effect_frames = {i for f in findings if f.region == 'effect' for i in f.frames}
+    whole_frame_risk = {}
+    original_soft = {}
 
     def new(check, frames, action, result='fixed'):
         nonlocal n
@@ -124,6 +137,25 @@ def run(anim, findings, accept=frozenset(), style=None):
         c = Change('c%d' % n, check, frames, action, result)
         changes.append(c)
         return c
+
+    def whole_frame(check, i, candidate, action):
+        c = new(check, [i], action)
+        if i not in whole_frame_risk:
+            whole_frame_risk[i] = i in effect_frames
+            if not whole_frame_risk[i]:
+                original = anim.frames[i]
+                frame = measure.Frame(original)
+                original_soft[i] = body_soft, effect_soft = _soft_regions(original, frame.main)
+                # Reuse the doctor's candidates, including uncertain detached parts;
+                # classify the original, not pixels changed by an earlier repair.
+                whole_frame_risk[i] = bool((frame.on & ~frame.main).any() or effect_soft.any()
+                    or (frame.on & ~measure.body_mask(anim, i) & ~body_soft).any())
+        if whole_frame_risk[i] and not np.array_equal(candidate, b.frames[i]):
+            c.action += '; whole-frame change may also alter effects'
+            c.result = 'proposed'
+        if c.result != 'proposed' or c.id in accept:
+            b.frames[i] = candidate
+            c.result = 'fixed'
 
     for f in findings:
         i = f.frames[0]
@@ -133,31 +165,46 @@ def run(anim, findings, accept=frozenset(), style=None):
                 good = next((j for j in range(len(b.frames)) if not by_frame.get(j, set()) & {'grid', 'mixels'}), i)
                 phase = _phase(anim.frames[good], k) if k > 1 else (0, 0)
             if k > 1:
-                b.frames[i] = _vote(a, k, phase)
-                new(f.check, [i], 'put frame %d back on the %d px grid (most common colour per block)' % (i + 1, k))
+                whole_frame(f.check, i, _vote(a, k, phase),
+                            'put frame %d back on the %d px grid (most common colour per block)' % (i + 1, k))
         elif f.check == 'size':
             r = f.measured
             factor = 1 / round(r) if r > 1 else round(1 / r)
             if round(r if r > 1 else 1 / r) >= 2 and T['size_lo'] <= r * factor <= T['size_hi']:
-                b.frames[i] = _rescale(a, factor)
-                new('size', [i], 'rescaled frame %d by a whole factor (x%s)' % (i + 1, factor if factor >= 1 else '1/%d' % round(1 / factor)))
+                whole_frame('size', i, _rescale(a, factor),
+                            'rescaled frame %d by a whole factor (x%s)' % (i + 1, factor if factor >= 1 else '1/%d' % round(1 / factor)))
             else:
                 new('size', [i], 'frame %d is %d%% off size; no whole-factor rescale fits' % (i + 1, round(abs(r - 1) * 100)), 'still failing')
         elif f.check == 'soft_edge':
-            soft = (a[..., 3] > 0) & (a[..., 3] < 255)
-            body = ndimage.binary_dilation(measure.Frame(a).main, measure.EIGHT, iterations=1) & soft
-            if body.any():   # the character's own soft outline: hardened (free)
+            body, rest = _soft_regions(a, None)
+            if np.array_equal(a[..., 3], anim.frames[i][..., 3]):
+                original_body, original_rest = body, rest
+            else:
+                if i not in original_soft:
+                    original_soft[i] = _soft_regions(anim.frames[i], None)
+                original_body, original_rest = original_soft[i]
+            # Keep the original action slots even when an accepted whole-frame
+            # change already resolved a soft region, so later --accept IDs stay put.
+            if not original_body.any():
+                rest |= body
+                body = np.zeros_like(body)
+            elif not original_rest.any():
+                body |= rest
+                rest = np.zeros_like(rest)
+            if original_body.any():   # the character's own soft outline: hardened (free)
                 a[body, 3] = np.where(a[body, 3] >= 128, 255, 0)
-                new('soft_edge', [i], 'hard edges on the character in frame %d (no half-transparent pixels)' % (i + 1))
-            rest = soft & ~body
-            if rest.any():   # soft pixels away from the body are an effect (a glow): asked first
-                c = new('soft_edge', [i], 'harden the soft edges of the effect in frame %d' % (i + 1), 'proposed')
+                new('soft_edge', [i], ('hard edges on the character in frame %d (no half-transparent pixels)'
+                                     if body.any() else 'body soft edges in frame %d already resolved') % (i + 1))
+            if original_rest.any():   # soft pixels away from the body are an effect (a glow): asked first
+                c = new('soft_edge', [i], ('harden the soft edges of the effect in frame %d'
+                                         if rest.any() else 'effect soft edges in frame %d already resolved') % (i + 1),
+                        'proposed' if rest.any() else 'fixed')
                 if c.id in accept:
                     a[rest, 3] = np.where(a[rest, 3] >= 128, 255, 0)
                     c.result = 'fixed'
         elif f.check == 'specks':
             fr = measure.Frame(a)
-            a[measure.loose_specks(fr, rl)] = 0
+            a[measure.loose_specks(fr, rl) & measure.body_mask(b, i)] = 0
             new('specks', [i], 'removed %d px of loose specks from frame %d' % (f.measured, i + 1))
         elif f.check == 'holes':
             _fill_from_neighbours(a, measure.pinholes(a[..., 3] >= 128))
@@ -198,8 +245,8 @@ def run(anim, findings, accept=frozenset(), style=None):
             a[target, :3] = snap(px, ref_cols)
             colour_done[i] = new(f.check, [i], 'matched frame %d to the reference colours and brightness' % (i + 1)).id
         elif f.check == 'ground':
-            b.frames[i] = _shift(a, 0, int(f.measured))
-            new('ground', [i], 'moved frame %d down %d px onto the ground line' % (i + 1, f.measured))
+            whole_frame('ground', i, _shift(a, 0, int(f.measured)),
+                        'moved frame %d down %d px onto the ground line' % (i + 1, f.measured))
         elif f.check == 'flash':
             c = new('flash', [i], 'remove the one-frame effect in frame %d' % (i + 1), 'proposed')
             if c.id in accept:

@@ -46,6 +46,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Fixed
 
+- **Preserve effect approval during local repairs.** Whole-frame grid, size and ground-line repairs with effect candidates use the existing approval proposals. Speck cleanup stays within the detected body, and proposal IDs remain stable when an earlier accepted repair resolves a later change. Body-only repairs remain automatic; originals stay untouched.
 - **Protect download accounting files.** Job downloads reject destinations that would occupy the run's
   manifest or transaction-lock paths before downloading, including Windows filename aliases.
 - **Only you can change Auto.** Pip acts on `auto`, `auto on`/`off` and `auto plan` only when you give them, never
