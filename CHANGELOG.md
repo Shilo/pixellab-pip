@@ -5,7 +5,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Releases before 3.0.0 are on
 [GitHub Releases](https://github.com/Shilo/pixellab-pip/releases).
 
-## [Unreleased]
+## [3.1.0] - 2026-10-29
 
 ### Changed
 
@@ -133,4 +133,5 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
+[3.1.0]: https://github.com/Shilo/pixellab-pip/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/Shilo/pixellab-pip/compare/v2.3.0...v3.0.0
