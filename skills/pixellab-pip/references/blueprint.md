@@ -129,7 +129,7 @@ Resolve the entire workflow in memory before normal preflight:
 
 1. Use a value explicitly supplied or overridden in the current request.
 2. Otherwise use a value confidently inferred from the request and relevant conversation context.
-3. Otherwise use the declared default without asking; resolve a nested fallback only at this point.
+3. Otherwise use the declared default instead of prompting; resolve a nested fallback only at this point.
 4. Otherwise ask for every unresolved variable in one concise prompt.
 
 User values such as `false`, `0`, or an empty string are explicit values, not missing values to

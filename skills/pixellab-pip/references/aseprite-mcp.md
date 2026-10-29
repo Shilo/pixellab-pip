@@ -2,7 +2,7 @@
 
 Read this only when the user explicitly asks for a third-party Aseprite MCP server or MCP-based Aseprite tooling. For ordinary Aseprite CLI/Lua file handling, use `aseprite-cli.md`.
 
-Third-party Aseprite MCP servers are an optional escalation, not the default PixelLab-to-Aseprite route. Use one only when it adds real value beyond documented CLI/Lua — for example many small iterative draw/layer/cel/palette/animation operations, or curated visual-QA tools that are safer or clearer than a custom script. For import/export/package tasks already covered by CLI/Lua, stay with CLI/Lua.
+Third-party Aseprite MCP servers are an optional escalation, not the default PixelLab-to-Aseprite route. Use one only when it adds real value compared with documented CLI/Lua — for example many small iterative draw/layer/cel/palette/animation operations, or curated visual-QA tools that are safer or clearer than a custom script. For import/export/package tasks already covered by CLI/Lua, stay with CLI/Lua.
 
 ## Safety delta over aseprite-cli.md
 
