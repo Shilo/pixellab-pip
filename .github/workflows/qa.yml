@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Python dependencies
         shell: bash
-        run: python -m pip install -r requirements-dev.txt
+        run: python -m pip install -r requirements-dev.txt --require-hashes
 
       - name: Run QA checks
         shell: bash

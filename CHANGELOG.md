@@ -9,11 +9,12 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Changed
 
-- **Lower SkillSpector risk score.** The static scan now rates the skill LOW / SAFE (17, down from 41 in 3.0.0).
+- **Lower SkillSpector risk score.** CI's pinned SkillSpector 2.3.9 rates the skill LOW / SAFE (17, down from 41 in 3.0.0).
   Rules that scanners misread as risky are reworded without weakening them, duplicated token and docs-link rules
   now live in one place, and a scanner false positive in the manifest helper is gone. ClawScan-patched SkillSpector
-  2.12.0 static analysis falls from 59 (HIGH) to 43 (MEDIUM / CAUTION) after clarifying blueprint defaults, the
-  config toggle warning, and the Aseprite MCP comparison; the hosted model-based audit has not been rerun.
+  2.12.0 static analysis falls from 59 (HIGH) to 21 (MEDIUM / CAUTION) after clarifying blueprint defaults, the
+  config toggle warning, the Aseprite MCP comparison, and setup's scope/schema/preview paragraphs. Uninstall
+  directory wording is clearer too; all paths and safety rules remain. The hosted model-based audit has not been rerun.
 - **Document optional helper dependencies.** The README now lists which helpers need Python, Pillow, NumPy or SciPy, gives a user-wide install command, a virtual-environment fallback and a paste-to-agent request, and clarifies that `/pixellab-pip setup` configures PixelLab access rather than installing Python or packages. Setup ends with a one-line note that these packages are optional, and when a helper skips, Pip names the missing or outdated package.
 - **Matches PixelLab's 2026-10-25 public docs.** Standard tilesets are quoted at 1 generation (Pro at 15 or 25), and
   top-down height, `view`, borders and no-effect controls follow the new contract; MCP sidescroller Pro mode is
@@ -22,6 +23,11 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 - **Refresh the MCP/REST parity guide.** Rechecked the live official docs (102 REST path templates / 113 operations,
   118 MCP tools) and labeled full, partial and absent coverage. The guide now identifies 29 REST operations without a
   full MCP match (16 partial, 13 none) and 40 MCP tools without REST workflow counterparts.
+
+### Security
+
+- **Verify QA package downloads.** The existing dependency versions now include SHA-256 hashes for every currently published
+  wheel and source archive. QA and release installs require hash verification without narrowing platform support.
 
 ### Fixed
 

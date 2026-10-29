@@ -467,10 +467,10 @@ def check_workflows() -> None:
         raise AssertionError("qa.yml must set up Python explicitly")
     if "actions/setup-python@" not in release_workflow:
         raise AssertionError("release-skill.yml must set up Python explicitly before QA")
-    if "python -m pip install -r requirements-dev.txt" not in qa_workflow:
-        raise AssertionError("qa.yml must install requirements-dev.txt before QA")
-    if "python -m pip install -r requirements-dev.txt" not in release_workflow:
-        raise AssertionError("release-skill.yml must install requirements-dev.txt before QA")
+    if "python -m pip install -r requirements-dev.txt --require-hashes" not in qa_workflow:
+        raise AssertionError("qa.yml must hash-verify requirements-dev.txt before QA")
+    if "python -m pip install -r requirements-dev.txt --require-hashes" not in release_workflow:
+        raise AssertionError("release-skill.yml must hash-verify requirements-dev.txt before QA")
     if "actions/setup-node@" not in release_workflow:
         raise AssertionError("release-skill.yml must set up Node.js explicitly before version bump")
     if release_workflow.find("actions/setup-node@") > release_workflow.find("node <<'NODE'"):

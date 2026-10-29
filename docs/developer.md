@@ -39,7 +39,7 @@ Standard-library helper scripts target Python 3.10 or newer. Image helpers requi
 Install the local QA dependencies first on a fresh checkout:
 
 ```powershell
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements-dev.txt --require-hashes
 ```
 
 ## Security Checks
@@ -48,11 +48,13 @@ The user-facing security story lives in [Security And Trust](security.md): the S
 
 ### OpenSSF Scorecard (maintainer-only)
 
-[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) runs weekly for repo-hygiene tracking, but is intentionally kept off the README and out of the Code Scanning tab. The score reads low and largely **cannot** be raised on a solo project: Scorecard measures supply-chain maturity for widely-depended-upon libraries, and its heaviest checks — `Code-Review` (requires a second developer to approve pull requests) and `Maintained` (penalizes repos under 90 days old) — are structurally unreachable for a one-person, mostly-Markdown skill, so they sit near zero no matter the effort. Read it as a rough hygiene signal (branch protection, workflow permissions, pinned dependencies), not a safety verdict — the SkillSpector skill audit is the check that actually matters here.
+[OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) runs weekly for repo-hygiene tracking, but is intentionally kept off the README and out of the Code Scanning tab. Its checks describe repository practices, not an install-safety verdict. `Maintained` reflects recent activity; `Code-Review` reflects review history and can improve through collaborator-reviewed changes. Review each check's evidence: branch protection and required CI checks, least-privilege workflow tokens, dependency pins and hashes, and release provenance are actionable safeguards. Packaging, signing, or fuzzing checks can also have detection or applicability limits; investigate those limits before adding machinery just to raise the aggregate.
 
 ## Dependency Updates
 
 [Dependabot](../.github/dependabot.yml) checks GitHub Actions and Python dependencies weekly, grouping minor and patch updates into one PR per ecosystem. Major updates remain separate for manual review.
+
+`requirements-dev.txt` pins the QA packages and includes SHA-256 hashes for every currently published wheel and source archive of each pinned version. Both the QA and release workflows require hash verification. For a version bump, regenerate the hashes from that release's published artifacts, preserve all platform coverage, and verify a clean install plus repository QA. Keeping only the maintainer's local wheel hash would break installs on other supported platforms.
 
 [Dependabot Merge](../.github/workflows/dependabot-merge.yml) verifies the bot's metadata and requires exactly one signed Dependabot commit, then merges minor/patch updates only after Repository QA, SkillSpector skill audit, and HOL Plugin Scanner all succeed for that commit. Failed, skipped, missing, or ambiguous checks cannot authorize a merge. A changed commit, draft, closed PR, or different target branch aborts the attempt; a pending check has a 20-minute deadline. Failed or timed-out attempts leave the PR open for investigation or a workflow rerun.
 

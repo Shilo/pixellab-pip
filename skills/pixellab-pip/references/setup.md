@@ -54,7 +54,11 @@ Scope is agent-specific: default to a global/user install so PixelLab works in e
   - Antigravity IDE: **Agent panel ... → MCP Servers → Manage MCP Servers → View raw config**.
   - Antigravity CLI: `/mcp` for status, reload, and logs; use its `mcp_config.json` for manual server definitions.
 
-  Use Antigravity's global `mcp_config.json` opened through its UI, or workspace `.agents/mcp_config.json` when the user explicitly wants project scope. Remote servers require `serverUrl` — never use legacy `url` or `httpUrl`. Token-free preview (display only; `<PIXELLAB_SECRET>` is a placeholder, not documented environment-variable interpolation):
+  Use Antigravity's global `mcp_config.json` opened through its UI, or workspace `.agents/mcp_config.json` when the user explicitly wants project scope.
+
+  Remote servers require `serverUrl` — never use legacy `url` or `httpUrl`.
+
+  Token-free preview (display only; `<PIXELLAB_SECRET>` is a placeholder, not documented environment-variable interpolation):
 
   ```json
   {
