@@ -1,6 +1,6 @@
 # Publishing checklist
 
-Where to publish PixelLab Pip for discovery, as both an **Agent Skill** and an **Agent Plugin**, plus the current status of each target. Do the open boxes in §1–§2 once; the rest is automatic, in review, or deliberately skipped.
+Where to publish PixelLab Pip for discovery, as both an **Agent Skill** and an **Agent Plugin**, plus the current status of each target. Do the open boxes in §1–§2 once; the rest is automatic, in review, or deliberately skipped. Before a ClawHub release, complete the [release preflight](#clawhub-release-preflight).
 
 **Priority rule:** High traffic → do it regardless of effort. Medium → only if low-effort (auto-index or a paste-URL form). Low → automatic only, else skip. "Traffic" is a reasoned tier from a visible signal (list-repo stars, catalog size, brand), not analytics.
 
@@ -13,6 +13,12 @@ heilcheng listing verified 2026-10-15; other target statuses retain their 2026-0
 - **Passive (will crawl on its own):** FindSkills, SkillsMD, claudemarketplaces.com, Gemini CLI gallery.
 - **Skipped (broken/low-value):** awesomeskill.ai (broken auth), ClaudeSkills.info (submit API returns HTTP 500).
 - **Later:** VoltAgent (needs install traction), github/awesome-copilot (optional PR).
+
+## ClawHub release preflight
+
+**Licence declaration.** ClawHub's [publication policy](https://github.com/openclaw/clawhub/blob/c9a9fe2ed4c43990df52ea7bf8becbcf2c5890c8/docs/skill-format.md#license) requires MIT-0 and allows no per-skill override. The release workflow's pinned CLI automatically sends the rights acceptance when publishing; the [CLI source](https://github.com/openclaw/clawhub/blob/c9a9fe2ed4c43990df52ea7bf8becbcf2c5890c8/packages/clawhub/src/cli/commands/publish.ts#L239) submits `acceptLicenseTerms: true`. Confirm the rights needed for that declaration cover the project and adopted material before submitting. Preserve the repository and standalone skill's MIT terms and attribution while resolving this question; do not infer additional grants from collaborator status or invent a licence override flag. An existing MIT-0 listing label is insufficient evidence: [metadata backfill can assign it without changing the uploaded files](https://github.com/openclaw/clawhub/blob/c9a9fe2ed4c43990df52ea7bf8becbcf2c5890c8/convex/lib/skillBackfill.ts#L28). These technical facts do not establish licence compatibility or incompatibility.
+
+**Audit evidence.** [ClawHub includes A.I.G findings as supporting evidence](https://github.com/openclaw/clawhub/blob/c9a9fe2ed4c43990df52ea7bf8becbcf2c5890c8/docs/security-audits.md#aig) in its final ClawScan review. The release workflow already verifies the exact version's successful audit and benign, high-confidence final verdict; retain that gate. [Standalone A.I.G](https://github.com/Tencent/AI-Infra-Guard/blob/a5c5a72c2e5b88fc6e5b27e0c86110943c4d350b/skill-scan/skill_scan/main.py) can inspect a local folder using a real model backend, including a compatible locally hosted model, but has no built-in no-LLM mode. Use a fresh scanner environment and scratch directory with native environment-based authentication, avoiding existing `.env` files or key values in command arguments. A local result is additional evidence, not the hosted verdict, and a different model is a different assessment. Keep unrun model checks explicitly pending; do not add a separate requirement that every supporting A.I.G finding be absent.
 
 ---
 

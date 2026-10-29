@@ -31,6 +31,8 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Security
 
+- **Clarify ClawHub release preflight.** Document the CLI's automatic MIT-0 rights affirmation and the distinction
+  between local model-based audit evidence and the hosted release verdict.
 - **Keep local files out of release archives.** The ZIP builder now checks the selected release source's
   file list and rejects unexpected files or symbolic links before packaging, including when resuming an older tag.
 - **Complete the standalone license.** The skill's `LICENSE.md` now carries both existing copyright notices,
