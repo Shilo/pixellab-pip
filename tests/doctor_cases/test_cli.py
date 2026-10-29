@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 import subprocess
 import sys
 
@@ -21,6 +22,32 @@ def fix(*args, cwd=None):
 
 def report(out):
     return json.load(open(os.path.join(out, 'fix_report.json'), encoding='utf-8'))
+
+
+def test_colour_approval_cannot_redirect_a_later_timing_approval(tmp_path):
+    fs = synth.walk(12)
+    fs[3] = synth.bright(fs[3], 1.3)
+    for i in (3, 4, 5):
+        fs[i] = synth.flash(fs[i], (2, 2, 9, 9), (0, 0, 0))
+    for i in (6, 9):
+        fs[i] = synth.bright(fs[i], 1.9)
+    source = synth.save(fs, tmp_path / 'frames', 'hero_attack')
+    originals = [Path(path).read_bytes() for path in source]
+    reference = synth.png(synth.figure(), tmp_path / 'reference.png')
+    fix(tmp_path / 'frames', '--ref', reference, '--out', tmp_path / 'pending')
+    pending = report(tmp_path / 'pending')['anims'][0]
+    colour = next(c for c in pending['proposals'] if c['check'] in ('brightness', 'palette', 'colour_count'))
+    drop = next(c for c in pending['proposals'] if c['check'] == 'timing' and c['frames'] == [7])
+    assert not any(p['check'] in ('brightness', 'palette', 'colour_count') for p in pending['plans'])
+    fix(tmp_path / 'frames', '--ref', reference, '--accept', colour['id'] + ',' + drop['id'],
+        '--out', tmp_path / 'accepted')
+    accepted = report(tmp_path / 'accepted')['anims'][0]
+    drops = [c for c in accepted['changes'] if c['check'] == 'timing' and c['result'] == 'fixed']
+    assert len(drops) == 1 and drops[0]['id'] == drop['id'] and drops[0]['frames'] == [7]
+    assert accepted['durations'][6] == 0 and accepted['durations'][9] > 0
+    with Image.open(tmp_path / 'accepted' / 'hero_attack_10.png') as image:
+        assert np.array_equal(np.asarray(image), fs[9])
+    assert all(Path(path).read_bytes() == before for path, before in zip(source, originals))
 
 
 def test_clean_set_is_ready_and_untouched(tmp_path):

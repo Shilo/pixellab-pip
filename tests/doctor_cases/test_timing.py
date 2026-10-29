@@ -84,4 +84,21 @@ def test_ids_continue_after_repairs():
     a = anim(fs)
     f, _ = measure.run(a)
     _, changes, _, _ = timing.run(a, f, start=3)
-    assert changes[0].id == 'c4'
+    assert changes and len({c.id for c in changes}) == len(changes)
+    assert all(int(c.id[1:]) > 3 for c in changes)
+
+
+def test_timing_approval_ids_do_not_move_when_another_frame_stops_failing():
+    fs = synth.walk(12)
+    for i in (3, 8):
+        fs[i] = synth.shift(fs[i], 8, 0)
+    a = anim(fs)
+    findings, _ = measure.run(a)
+    _, original, _, _ = timing.run(a, findings, start=3)
+    target = next(c for c in original if c.frames == [8] and c.result == 'proposed')
+    remaining = [f for f in findings if 3 not in f.frames]
+    _, changed, durations, order = timing.run(a, remaining, start=3, accept={target.id})
+    actual = next(c for c in changed if c.id == target.id)
+    assert actual.frames == [8] and actual.result == 'fixed'
+    assert durations[8] == 0 and order[8] == 7
+    assert len({c.id for c in changed}) == len(changed)

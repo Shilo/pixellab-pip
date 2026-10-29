@@ -63,8 +63,8 @@ Input GIF zero-delay frames remain unchanged in `--check-only` reports. Repair o
 Effects (slashes, glows, smoke) and soft effect edges are never changed on their own. They come back as `proposed`
 changes. Ask the user **one** question listing each proposal with its recommended fix, e.g.
 "Frame 3 has a flash that appears in no other frame - remove it? (recommended) / keep it". Then re-run `fix.py`
-with the same unchanged inputs, one animation only, a fresh output location and `--accept c2,c5`. Acceptance IDs are local to that animation; never apply them to a batch. A lasting effect (2+ frames) is reported as information only: keep it.
-Whole-frame grid, size and ground-line repairs are also proposals when the original frame contains effect candidates or uncertain detached parts; accepting one includes that whole-frame scope. Use `--fx` to exclude known effect frames even when their colours resemble the body.
+with the same helper version and unchanged inputs, one animation only, a fresh output location and `--accept c2,c5`. Acceptance IDs are local to that animation; never apply them to a batch. A lasting effect (2+ frames) is reported as information only: keep it.
+Whole-frame grid, size and ground-line repairs are also proposals when the original frame contains effect candidates or uncertain detached parts; accepting one includes that whole-frame scope. Colour corrections that may alter effect candidates use one proposal for the frame; related colour checks wait for that same approval. Use `--fx` to exclude known effect frames even when their colours resemble the body.
 For intentionally airborne moves, use the appropriate explicit inspection options and visual review; a ground-line heuristic cannot prove a defect. When the selected project profile says soft edges are intended, pass `--profile <selected-root>/pixellab-pip-style.json`; the helper does not search the process working directory. Without this explicit path it uses no saved style facts.
 
 ## Re-roll plans

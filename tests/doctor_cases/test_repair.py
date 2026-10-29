@@ -175,3 +175,40 @@ def test_body_specks_are_removed_without_erasing_a_lasting_effect():
     for i in (2, 3, 4):
         assert np.array_equal(b.frames[i][2:7, 40:44], a.frames[i][2:7, 40:44])
     assert not np.array_equal(b.frames[3], a.frames[3])
+
+
+def test_colour_repair_requires_its_primary_approval_before_changing_an_effect():
+    fs = synth.walk(6)
+    fs[3] = synth.bright(fs[3], 1.3)
+    for i in (2, 3, 4):
+        fs[i] = synth.flash(fs[i], (2, 2, 9, 9), (0, 0, 0))
+    a = anim(fs)
+    before = [frame.copy() for frame in a.frames]
+    b, changes, _ = fix(a)
+    proposals = [c for c in changes if c.check in repair.COLOUR and c.result == 'proposed']
+    assert len(proposals) == 1
+    primary = proposals[0]
+    alias = next(c for c in changes if c.check in repair.COLOUR and c.id != primary.id)
+    assert alias.result == 'still failing' and primary.id in alias.action
+    assert np.array_equal(b.frames[3], before[3])
+    alias_only, unchanged, _ = fix(a, {alias.id})
+    assert np.array_equal(alias_only.frames[3], before[3])
+    assert any(c.id == primary.id and c.result == 'proposed' for c in unchanged)
+    accepted, applied, _ = fix(a, {primary.id})
+    assert not np.array_equal(accepted.frames[3][2:9, 2:9], before[3][2:9, 2:9])
+    assert all(c.result == 'fixed' for c in applied if c.check in repair.COLOUR)
+    assert all(np.array_equal(old, new) for old, new in zip(before, a.frames))
+
+
+def test_ambiguous_body_recolour_remains_repairable_after_approval():
+    fs = synth.walk(6)
+    on = fs[3][..., 3] > 0
+    fs[3][on, :3] = np.clip(fs[3][on, :3].astype(int) - 90, 0, 255)
+    a = anim(fs)
+    assert measure.body_mask(a, 3).sum() < on.sum()
+    pending, changes, _ = fix(a)
+    primary = next(c for c in changes if c.check in repair.COLOUR and c.result == 'proposed')
+    assert np.array_equal(pending.frames[3], a.frames[3])
+    repaired, _, after = fix(a, {primary.id})
+    assert not np.array_equal(repaired.frames[3], a.frames[3])
+    assert not any(f.check in repair.COLOUR and 3 in f.frames for f in after)

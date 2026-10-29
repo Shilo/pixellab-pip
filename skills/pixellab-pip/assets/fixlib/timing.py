@@ -18,7 +18,7 @@ def run(anim, findings, start=0, accept=frozenset()):
     changes = []
 
     def new(frames, action, result):
-        changes.append(Change('c%d' % (start + len(changes) + 1), 'timing', frames, action, result))
+        changes.append(Change('c%d' % (start + frames[0] + 1), 'timing', frames, action, result))
 
     bad = sorted({i for f in findings if f.check in DROPPABLE and f.severity == 'high' for i in f.frames})
     budget = n // 3
@@ -27,11 +27,9 @@ def run(anim, findings, start=0, accept=frozenset()):
         geometry_differs = i > 0 and (anim.sizes[i] != anim.sizes[i - 1] or anim.offsets[i] != anim.offsets[i - 1])
         blocked = (anim.kind == 'oneshot' and i in (0, n - 1)) or geometry_differs
         if blocked or i == 0 or not clean[i - 1] or budget == 0:
-            changes.append(Change('c%d' % (start + len(changes) + 1), 'timing', [i],
-                                  'frame %d still fails and could not be dropped (%s)' % (
-                                      i + 1, 'different frame geometry' if geometry_differs else 'first/last frame of the move' if blocked or i == 0 else
-                                      'the frame before it is bad too' if not clean[i - 1] else 'already dropped a third'),
-                                  'still failing'))
+            new([i], 'frame %d still fails and could not be dropped (%s)' % (
+                    i + 1, 'different frame geometry' if geometry_differs else 'first/last frame of the move' if blocked or i == 0 else
+                    'the frame before it is bad too' if not clean[i - 1] else 'already dropped a third'), 'still failing')
             continue
         clean[i] = True
         budget -= 1

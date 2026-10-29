@@ -5,6 +5,13 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Releases before 3.0.0 are on
 [GitHub Releases](https://github.com/Shilo/pixellab-pip/releases).
 
+## [Unreleased]
+
+### Fixed
+
+- **Keep colour repairs within the approved scope.** Colour corrections that would change effect or uncertain pixels now wait for the existing primary approval; related diagnostics stay pending without suggesting paid retries for the same colour correction. Confident body-only corrections remain automatic, and the original full correction remains available after approval.
+- **Keep frame-drop approvals attached to their frames.** Timing change IDs use the original frame identity, so resolving an earlier defect cannot move a later approval to another frame. IDs retain the existing `c`-number format.
+
 ## [3.1.0] - 2026-10-29
 
 ### Changed

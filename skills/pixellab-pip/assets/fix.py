@@ -95,7 +95,9 @@ def doctor(anim, accept, style, log_path, report_name, check_only, stepped=False
         if c.result == 'fixed' and c.check != 'timing' and any((c.check, (i,)) in still for i in c.frames):
             c.result = 'still failing'
     # a finding with a question waiting gets no re-roll plan and doesn't hold the verdict: one "yes" fixes it for free
-    pending = {(c.check, i) for c in changes if c.result == 'proposed' for i in c.frames}
+    pending = {(check, i) for c in changes if c.result == 'proposed'
+               for check in (repair.COLOUR if c.check in repair.COLOUR else (c.check,))
+               for i in c.frames}
     open_after = [f for f in after if not any((f.check, i) in pending for i in f.frames)]
     reroll_findings = open_after
     if keys:   # key poses the user already approved: findings stay in the report, no paid re-roll is planned

@@ -229,7 +229,11 @@ def run(anim, findings, accept=frozenset(), style=None):
             new(f.check, [i], 'copied the thin parts (weapon, staff) into frame %d from frame %d' % (i + 1, src + 1))
         elif f.check in COLOUR:
             if i in colour_done:
-                new(f.check, [i], 'colours of frame %d fixed together with %s' % (i + 1, colour_done[i]))
+                primary = colour_done[i]
+                action = ('colours of frame %d fixed together with %s' if primary.result == 'fixed'
+                          else 'colours of frame %d await approval of %s' if primary.result == 'proposed'
+                          else 'colours of frame %d not fixed together with %s') % (i + 1, primary.id)
+                new(f.check, [i], action, 'fixed' if primary.result == 'fixed' else 'still failing')
                 continue
             on = a[..., 3] >= 128
             target = on.copy()
@@ -238,12 +242,20 @@ def run(anim, findings, accept=frozenset(), style=None):
             lum = measure.luma(px).mean() if len(px) else 0
             if lum and lum / ref_luma > 1 + T['washed']:
                 new(f.check, [i], 'frame %d is washed out; colour matching would turn it muddy - drop or re-roll it' % (i + 1), 'still failing')
-                colour_done[i] = changes[-1].id
+                colour_done[i] = changes[-1]
                 continue
             if lum and f.check != 'colour_count':
                 px = np.clip(px.astype(float) * (ref_luma / lum), 0, 255).astype(np.uint8)
-            a[target, :3] = snap(px, ref_cols)
-            colour_done[i] = new(f.check, [i], 'matched frame %d to the reference colours and brightness' % (i + 1)).id
+            repaired = snap(px, ref_cols)
+            c = new(f.check, [i], 'matched frame %d to the reference colours and brightness' % (i + 1))
+            changed = np.any(repaired != a[target, :3], axis=1)
+            if changed.any() and (changed & ~measure.body_mask(b, i)[target]).any():
+                c.action += '; colour change may also alter effect pixels'
+                c.result = 'proposed'
+            if c.result != 'proposed' or c.id in accept:
+                a[target, :3] = repaired
+                c.result = 'fixed'
+            colour_done[i] = c
         elif f.check == 'ground':
             whole_frame('ground', i, _shift(a, 0, int(f.measured)),
                         'moved frame %d down %d px onto the ground line' % (i + 1, f.measured))
