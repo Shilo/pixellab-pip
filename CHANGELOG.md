@@ -12,9 +12,10 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 - **Lower SkillSpector risk score.** CI's pinned SkillSpector 2.3.9 rates the skill LOW / SAFE (17, down from 41 in 3.0.0).
   Rules that scanners misread as risky are reworded without weakening them, duplicated token and docs-link rules
   now live in one place, and a scanner false positive in the manifest helper is gone. ClawScan-patched SkillSpector
-  2.12.0 static analysis falls from 59 (HIGH) to 21 (MEDIUM / CAUTION) after clarifying blueprint defaults, the
-  config toggle warning, the Aseprite MCP comparison, and setup's scope/schema/preview paragraphs. Uninstall
-  directory wording is clearer too; all paths and safety rules remain. The hosted model-based audit has not been rerun.
+  2.12.0 static analysis falls from 59 (HIGH) to 17 (LOW / CAUTION) after clarifying blueprint defaults, the
+  config toggle warning, the Aseprite MCP comparison, setup's scope/schema/preview paragraphs, and standalone
+  license packaging. Uninstall directory wording is clearer too; all paths and safety rules remain. The hosted
+  model-based audit has not been rerun, and a LOW score alone does not guarantee a clean registry badge.
 - **Document optional helper dependencies.** The README now lists which helpers need Python, Pillow, NumPy or SciPy, gives a user-wide install command, a virtual-environment fallback and a paste-to-agent request, and clarifies that `/pixellab-pip setup` configures PixelLab access rather than installing Python or packages. Setup ends with a one-line note that these packages are optional, and when a helper skips, Pip names the missing or outdated package.
 - **Matches PixelLab's 2026-10-25 public docs.** Standard tilesets are quoted at 1 generation (Pro at 15 or 25), and
   top-down height, `view`, borders and no-effect controls follow the new contract; MCP sidescroller Pro mode is
@@ -26,6 +27,9 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Security
 
+- **Complete the standalone license.** The skill's `LICENSE.md` now carries both existing copyright notices,
+  the unchanged MIT grant and disclaimer, and adopted-source attribution. It replaces the adopted-source-only
+  `THIRD_PARTY_NOTICES.md`; no credit or license term is removed.
 - **Verify QA package downloads.** The existing dependency versions now include SHA-256 hashes for every currently published
   wheel and source archive. QA and release installs require hash verification without narrowing platform support.
 

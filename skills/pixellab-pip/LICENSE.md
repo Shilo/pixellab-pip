@@ -1,9 +1,6 @@
-# Third-Party Notices
-
-## [pixellab-game-art](https://github.com/lexingel/pixellab-game-art)
-
 MIT License
 
+Copyright (c) 2026 Shilo
 Copyright (c) 2026 lexingel
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,3 +20,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+This license covers PixelLab Pip, including material adopted from
+[pixellab-game-art](https://github.com/lexingel/pixellab-game-art).

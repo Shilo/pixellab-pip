@@ -40,7 +40,7 @@ class MergePackagingTests(unittest.TestCase):
                 if "version" in data:
                     self.assertEqual(data["version"], "99.0.1", name)
 
-    def test_skill_package_preserves_adopted_notice(self):
+    def test_skill_package_preserves_complete_license(self):
         payload = io.BytesIO()
         prefix = "skills/pixellab-pip/"
         names = subprocess.check_output(["git", "ls-files", prefix], cwd=REPO_ROOT, text=True).splitlines()
@@ -48,10 +48,18 @@ class MergePackagingTests(unittest.TestCase):
             for name in names:
                 archive.write(REPO_ROOT / name, "pixellab-pip/" + name.removeprefix(prefix))
         with zipfile.ZipFile(payload) as archive:
-            notice = archive.read("pixellab-pip/THIRD_PARTY_NOTICES.md").decode("utf-8")
-        self.assertIn("Copyright (c) 2026 lexingel", notice)
-        self.assertIn("Permission is hereby granted, free of charge", notice)
-        self.assertIn("THE SOFTWARE IS PROVIDED", notice)
+            notice = archive.read("pixellab-pip/LICENSE.md").decode("utf-8").replace("\r\n", "\n")
+        project_license = (REPO_ROOT / "LICENSE").read_text(encoding="utf-8")
+        copyrights = [line.partition(" (adopted ")[0]
+                      for line in project_license.splitlines() if line.startswith("Copyright ")]
+        self.assertGreaterEqual(len(copyrights), 2)
+        for copyright_notice in copyrights:
+            self.assertIn(copyright_notice + "\n", notice)
+        grant_start = "Permission is hereby granted"
+        full_mit_body = grant_start + project_license.split(grant_start, 1)[1]
+        self.assertIn(full_mit_body.strip(), notice)
+        self.assertEqual(notice.count(grant_start), 1)
+        self.assertIn("https://github.com/lexingel/pixellab-game-art", notice)
 
 
 if __name__ == "__main__":
