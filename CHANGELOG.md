@@ -14,7 +14,9 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
   now live in one place, and a scanner false positive in the manifest helper is gone. ClawScan-patched SkillSpector
   2.12.0 static analysis falls from 59 (HIGH) to 17 (LOW / CAUTION) after clarifying blueprint defaults, the
   config toggle warning, the Aseprite MCP comparison, setup's scope/schema/preview paragraphs, and standalone
-  license packaging. Uninstall directory wording is clearer too; all paths and safety rules remain. The hosted
+  license packaging. Minimal Markdown formatting and equivalent phrasing also clear seven stock SkillSpector
+  2.13.2 parser failures, lowering its static score from 61 (HIGH) to 17 (LOW / CAUTION) with the same content
+  findings. Uninstall directory wording is clearer too; all paths and safety rules remain. The hosted
   model-based audit has not been rerun, and a LOW score alone does not guarantee a clean registry badge.
 - **Document optional helper dependencies.** The README now lists which helpers need Python, Pillow, NumPy or SciPy, gives a user-wide install command, a virtual-environment fallback and a paste-to-agent request, and clarifies that `/pixellab-pip setup` configures PixelLab access rather than installing Python or packages. Setup ends with a one-line note that these packages are optional, and when a helper skips, Pip names the missing or outdated package.
 - **Matches PixelLab's 2026-10-25 public docs.** Standard tilesets are quoted at 1 generation (Pro at 15 or 25), and

@@ -63,7 +63,7 @@ Template:
 
 > 💳 **Approve this PixelLab run?** — **~{N} generations** *(or credits)*.
 >
-> 1. **`{tool or endpoint}`** · {surface} · {mode/key notes} · ~{cost}
+> 1. **{tool or endpoint}** · {surface} · {mode/key notes} · ~{cost}
 >    - `{long prompt/description}`: "{exact text to send}" *(flag `(enhanced)` or `(rerouted)` if you changed it)*
 >    - `{short param}`: {value} · `{short param}`: {value}  — group short inputs on one line
 > 2. …one numbered entry per predicted paid call…

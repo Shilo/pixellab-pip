@@ -67,7 +67,7 @@ to the back hand at the top, back up the haft on the impact. Draw the top of the
 - **Spike thrust:** A = haft across the hips or high forward, hands pulled back -> B = both arms forward, haft level
   at chest or neck height, `top spike aimed straight ahead toward the right`, deep lunge. Trail: straight line
   (`thrust_streak`), no crescent. Stepped: the generator likes to lift the head into a chop between them.
-- **Hook / pull:** A = haft reaching forward at the enemy's neck or leg height, `axe head hooked beyond the target`
+- **Hook / pull:** A = haft reaching forward at the neck or leg height of the enemy, `axe head hooked beyond the target`
   -> B = `pulling the haft back to his right hip, leaning back, front knee bent`. Hold A for 2 frames, then snap.
   The references show the haft behind a leg and hafts locked at the heads; no crisp edge-hook was drawn.
 - **Haft block:** `haft held upright in front of him, hands far apart, axe head at the top` or `haft level above
