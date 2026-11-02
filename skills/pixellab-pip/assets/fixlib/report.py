@@ -44,7 +44,7 @@ LOOK = [   # what pixel checks can't see (the samurai test: an extra hand, a van
     'a bow keeps its string in every frame, and the arrow nock (feathered end) sits in the drawing hand on the string',
     'the move goes one way: a step done in one key pose is not undone in the next (a bow drawn overhead, then slack and drawn again)',
     'no in-between shows a pose that is in neither key pose (a blade raised overhead in a thrust or a draw-cut): drop it or re-roll the clip with motion wording that rules it out',
-    'a staff, wand or other held prop stays in the same hand and on the same side of the body in every frame (it does not swap hands or drift to the body centre line)',
+    'a staff, wand or other held prop stays in the same hand: trace the forearm, grip and hilt across poses; a cross-body swing may change screen side without swapping hands, and an occluded grip leaves hand continuity unverified',
     'a thrown or cast projectile leaves the hand at the release frame and is not drawn again in the hand afterwards',
     'the same face and skin tone (no pale-to-warm flicker between frames, no single frame with the head turned away or toward the viewer), hair, headgear and outfit piece by piece (shoulder plates, sleeves, chest plate, ornaments), at the same body size',
 ]

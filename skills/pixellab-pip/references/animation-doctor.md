@@ -12,8 +12,10 @@ blade from hilt to tip"). When the fault is in the reference sprite itself, ever
 first, then redo the poses.
 
 `prop_drift` (low, a warning): in a one-shot, a held staff or blade leaves the span of the body side it holds in the
-first and last frames (drifts to the centre line, changes hands). Look at those frames: a swing that crosses the body
-is fine; a prop that should stay put is a re-roll of those frames naming the hand and side ("the staff stays upright in
+first and last frames (drifts to the centre line, changes hands). Trace the forearm to the gripping hand and hilt across
+the flagged poses: a cross-body swing can change screen side without changing hands. If the torso hides the grip,
+report hand continuity as unverified rather than inferring a swap from screen side alone. A prop that should stay put
+is a re-roll of those frames naming the hand and side ("the staff stays upright in
 her near right hand beside the robe").
 
 ## Stepped animations (`--stepped`)

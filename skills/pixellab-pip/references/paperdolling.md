@@ -52,7 +52,7 @@ Both output modes share these steps and branch only at output:
 2. Obtain the base character image/frame and keep it unchanged for every addition edit.
 3. Run each requested layer as a separate existing-image edit against the original base (not the previous edited result), so layers stay independent. Prompt each edit as a single body-region addition using the Prompt Fields above.
 4. Produce the layer per the chosen output mode:
-   - **Separate transparent image files (no editor):** save the PixelLab edit as an intermediate composite, then locally diff it against the base and copy only changed pixels into a transparent PNG, using conservative alpha/difference thresholds that keep the addition and drop noisy unchanged pixels.
+   - **Separate transparent image files (no editor):** save the PixelLab edit as an intermediate composite, then extract a candidate overlay with the helper below. Keep its exact changed pixels; do not threshold away body drift, clip unrelated changes, recolour, or harden alpha to make extraction appear to pass. Any accepted cleanup is a separate derivative under `finishing.md`.
    - **Editor changes-only layer (Aseprite):** put the base frame on its own layer with the correct direction/frame active; use the extension's existing-image edit workflow (not object/map-object generation); optionally constrain with a body-region selection (head for hair/hat, torso for shirt, hands for gloves, feet for boots); click `Set image` and verify it captured the current base/selection, not a stale frame; set the extension `output_method` to the new-layer changes-only mode (treat as a request, not a guarantee); generate, then inspect by hiding/showing the base and export the layer alone.
 5. Verify the layer against the checklist below before accepting it.
 6. Repeat per layer, then compose the final image from base plus accepted layers in the requested order (base, hair, clothing, hat, accessories, VFX).
@@ -66,9 +66,16 @@ Accept a layer only if all hold:
 - Transparent outside the addition; nontransparent bounds overlap the intended body region.
 - No full-body duplicate, moved limbs, face/body redraw, background, or unrelated changed pixels.
 - Base plus layer reads as one coherent character with the addition attached to the intended region.
+- Alpha-compositing the candidate over the unchanged base reproduces the edited composite. Erasure or reduced alpha over existing body pixels cannot be represented by simply copying the edited pixels into an ordinary overlay; reject that extraction instead of filling the gap or claiming a faithful layer.
 - (Editor) unchanged frame count/order when relevant; no loose unregistered parts.
 
 Do not call an extracted PNG or editor layer a reusable layer until it passes these. Reject and retry on a duplicated body, moved limbs, redraw, background change, or loose unregistered parts.
+
+## Exact Pixel Extraction
+
+Use `assets/paperdoll.py extract BASE.png EDIT.png --out DIR [--region LEFT TOP RIGHT BOTTOM]`. The optional region uses exclusive right/bottom edges and rejects changes outside it; it never clips them. Inputs must be registered still images of the same canvas size. It writes `layer.png` and `derivative.json` only after the exact alpha-over comparison passes. `compose BASE.png LAYER.png [LAYER.png ...] --out DIR` writes `composite.png` and a record, stacking layers in the supplied order. Both require a fresh destination and follow the Pillow/skip contract in `local-asset-assembly.md`.
+
+Exit 0 means the operation ran; records remain `needs_visual_review`. Exact recomposition does not distinguish equipment from a redrawn body: inspect every candidate against the checklist above. A state or separately generated animation may redraw the base even with the same named motion. Require pose-matched base/edited frames for each animation frame; do not assume paired template or Skeleton v3 jobs align. Splitting a composite by body overlap cannot recover an addition hidden behind the body; obtain the missing back layer separately or deliver a verified composite.
 
 ## Example Prompt (hair)
 

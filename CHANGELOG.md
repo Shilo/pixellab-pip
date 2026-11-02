@@ -7,8 +7,14 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+### Added
+
+- **Extract faithful paperdoll overlays.** A small local helper copies exact changed pixels from a registered edit, checks alpha-over reconstruction, and composes accepted layers. It preserves alpha, refuses incompatible edits and output collisions, and keeps candidates subject to visual review.
+- **Document managed Skeleton v3 custom motion.** Distinguish MCP's free instruction call and written poses from REST's paid text-generated motion, with current frame/cost guidance and shared-direction reuse. The [archive review](docs/pixellab/paperdoll-skeleton-v3-archive-review.md) records accepted findings, rejected experimental helpers, and evidence limits.
+
 ### Fixed
 
+- **Check weapon continuity across hidden poses.** Inspect behind-body interpolation paths and trace the gripping hand; a cross-body swing can change screen side without switching hands, while a hidden grip remains unverified.
 - **Prefer PixMiniMax for ordinary animation.** Managed characters and raw-image motion now select PixMiniMax explicitly when constraints fit. Plain action names no longer select rigid template motion; explicit template/skeleton requests, exact counts, cost-driven choices, and managed-object v3 limits remain supported.
 - **Ask before local repairs alter detected effects.** Pinhole filling, background cleanup, soft-edge hardening and thin-part restoration now use the existing approval when their changed pixels overlap detected effects, including effects copied from another frame. Ordinary body repairs remain automatic; approval retains each complete original repair.
 - **Keep colour repairs within the approved scope.** Colour corrections that would change effect or uncertain pixels now wait for the existing primary approval; related diagnostics stay pending without suggesting paid retries for the same colour correction. Confident body-only corrections remain automatic, and the original full correction remains available after approval.
