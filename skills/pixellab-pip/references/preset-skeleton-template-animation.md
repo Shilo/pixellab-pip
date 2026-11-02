@@ -6,7 +6,7 @@ SKILL.md holds the global rules this file does not restate: MCP-first routing wi
 
 Four workflows: managed preset/template animation, managed Skeleton v3 template animation, raw Skeleton v3 keypoint animation, and the legacy raw skeleton endpoint. Use Skeleton v3 for an explicit new skeleton workflow; keep the legacy route only when its exact REST payload is required.
 
-PixelLab recommends `animate-with-text-v3` ("Animate with text (new)") over the older preset/template and raw-skeleton routes below for ordinary motion; the Skeleton v3 keypoint workflow is a separate beta. The refreshed REST and MCP descriptions no longer state a Tier 1 gate, but availability and billing still come from the live surface. Default to text animation unless the user explicitly selects PixMiniMax (see `animation.md`), asks for Skeleton v3, wants a named preset motion, or needs to own/edit keypoints.
+Engine selection is canonical in `animation.md` → Route Choice. This reference applies after an explicit preset/template or skeleton choice, or a cost-driven template choice under `cost-routing.md`. The refreshed REST and MCP descriptions no longer state a Tier 1 gate, but availability and billing still come from the live surface.
 
 ## Table of Contents
 
@@ -157,7 +157,7 @@ Public controls when a preset walk/idle/jump is close but needs style correction
 | `outline` | Reassert the original outline when limbs become too thick, broken, or overdrawn. |
 | `color_image` + `force_colors` | Constrain palette when template frames introduce extra dark tones. |
 
-Template mode does not expose direct controls for 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, `bone_scaling`, shadow strength, or keypoint edits, and `frame_count` does not tune preset motion; choose a different template id such as `walking-4-frames`/`walking-6-frames`/`walking-8-frames`. If the rendering style is the problem, retry template mode with conservative style controls. If the gait itself is too rigid or robotic, MCP `animate_character` exposes `ai_freedom` (0–900, default 0 = rigid template following; higher lets the pose deviate more from the template skeleton) — raise it before escalating. Only if the motion is still wrong (missing weight shift, bad limb timing), use v3/pro custom animation or raw skeleton/Aseprite keypoint authoring instead of expecting preset mode to behave like a full rig editor.
+Template mode does not expose direct controls for 3D depth maps, per-bone easing, stride curves, secondary motion, limb IK, `bone_scaling`, shadow strength, or keypoint edits, and `frame_count` does not tune preset motion; choose a different template id such as `walking-4-frames`/`walking-6-frames`/`walking-8-frames`. If the rendering style is the problem, propose a template retry with conservative style controls. If the gait itself is too rigid or robotic, offer free-form animation via `animation.md` → Route Choice; do not require another template attempt first. If the user wants to retain template motion, MCP `animate_character` exposes template-only `ai_freedom` (0–900, default 0 = rigid template following; higher lets the pose deviate more from the template skeleton). It does not tune Skeleton v3. Any extra paid attempt follows the existing retry approval rules.
 
 For template mode keep `action_description` light or omit it; the template id carries the motion. Use `animation_name` for organization. Do not use prompt enhancement for template mode.
 
@@ -460,7 +460,7 @@ sitting
 standing
 ```
 
-Common label mappings and exact-id passthroughs:
+After template mode has been selected, use these label mappings and exact-id passthroughs:
 
 | User says | Use id |
 |---|---|
@@ -477,7 +477,7 @@ Common label mappings and exact-id passthroughs:
 | Humanoid dash, dodge, sprint | Offer `running-slide` or `running-jump` when that motion fits |
 | Humanoid cast, spell, magic | `fireball` when that motion fits |
 
-Do not invent ids such as `hurt`, `dashing`, `casting`, `backstep-dodge`, `shooting`, or `staff-spin-attack`: MCP says they are rejected before queueing. If no preset fits, offer custom v3 action text instead. If an animation exists for one template family but not another, say so and offer the closest same-family option. Do not silently substitute `walking-8-frames` for a quadruped `walk-8-frames` or vice versa.
+Do not invent ids such as `hurt`, `dashing`, `casting`, `backstep-dodge`, `shooting`, or `staff-spin-attack`: MCP says they are rejected before queueing. If no preset fits, offer custom action text via `animation.md` → Route Choice instead. If an animation exists for one template family but not another, say so and offer the closest same-family option. Do not silently substitute `walking-8-frames` for a quadruped `walk-8-frames` or vice versa.
 
 ## Frame Count
 

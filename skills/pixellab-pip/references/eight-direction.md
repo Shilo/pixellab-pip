@@ -7,19 +7,19 @@ Read this for a top-down or 3/4 character move (attack, shot, cast) that must pl
 A requested player walk in 4 or 8 facings (one 4-direction farmer demonstration cost 24 generations with candidates and a redo; this is not a price quote):
 
 1. Front-facing reference and rotation as in [Steps](#steps) 1-2, with `n_directions` 4 or 8; asking for the still `facing the viewer, front view` in its first prompt skips the re-pose. Download the rotation links with `python <skill-dir>/assets/fetch.py --url <link> <out.png>`.
-2. Use the requested supported animation mode/template and agreed direction scope; custom v3 motion can name held props in `action_description` (`walks at a relaxed pace, the green watering can stays in the right hand`). Group the calls with supported `animation_group_id`/`animation_name`. One template-walk example dropped a held can and changed colours; inspect held gear rather than treating that single result as a universal template failure.
+2. Select the animation engine via `animation.md` → Route Choice and use the agreed direction scope; custom motion can name held props in `action_description` (`walks at a relaxed pace, the green watering can stays in the right hand`). Group the calls with supported `animation_group_id`/`animation_name`. One template-walk example dropped a held can and changed colours; inspect held gear rather than treating that single result as a universal template failure.
 3. Record completion/actual exposed usage under `usage-reporting.md`; do not mark a job finished merely because a download was attempted. Optional doctor inspection runs per direction with `--check-only --move walk`.
 
 ## Choose the route
 
 | Route | How | Aim |
 |---|---|---|
-| Text | `create_character(mode="v3")` rotates the reference, then `animate_character(mode="v3")` animates each direction from `action_description` | Loose: the generator picks the arm angle. |
+| Text | `create_character(mode="v3")` rotates the reference, then `animate_character` with the explicit mode selected under `animation.md` → Route Choice animates each direction from `action_description` | Loose: the generator picks the arm angle. |
 | Requested key poses | Per direction: reviewed wind-up/hit or aim/recoil anchors, then supported interpolation; see `animation.md` for the matching raw/managed frame fields | More explicit anchors, extra paid edits; no guarantee of exact motion or fixed cost ratio. |
 
 When useful, offer **5 generated directions** (south, south-east, east, north-east, north) plus accepted mirrors for the other three. Mirroring switches hands/asymmetric gear; disclose that and generate the requested facings when unacceptable. It reduces direction calls, not necessarily total cost by a fixed percentage.
 
-Animation cost is billed on the generated canvas, which the silhouette grows past the sprite, not on the sprite (`cost-routing.md`). Recommend 64-128 px characters for 8-direction games; a tall side-view hero sprite animates on a canvas several times as expensive.
+For v3 animation, cost is billed on the generated canvas, which the silhouette grows past the sprite, not on the sprite. Use the selected engine's own size/frame pricing in `cost-routing.md`; do not apply that v3 expansion or cost formula to PixMiniMax. Recommend 64-128 px characters for 8-direction games; quote the selected route's actual cost rather than assuming a fixed size multiplier.
 
 ## Steps
 

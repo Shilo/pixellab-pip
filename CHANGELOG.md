@@ -9,6 +9,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Fixed
 
+- **Prefer PixMiniMax for ordinary animation.** Managed characters and raw-image motion now select PixMiniMax explicitly when constraints fit. Plain action names no longer select rigid template motion; explicit template/skeleton requests, exact counts, cost-driven choices, and managed-object v3 limits remain supported.
 - **Ask before local repairs alter detected effects.** Pinhole filling, background cleanup, soft-edge hardening and thin-part restoration now use the existing approval when their changed pixels overlap detected effects, including effects copied from another frame. Ordinary body repairs remain automatic; approval retains each complete original repair.
 - **Keep colour repairs within the approved scope.** Colour corrections that would change effect or uncertain pixels now wait for the existing primary approval; related diagnostics stay pending without suggesting paid retries for the same colour correction. Confident body-only corrections remain automatic, and the original full correction remains available after approval.
 - **Keep frame-drop approvals attached to their frames.** Timing change IDs use the original frame identity, so resolving an earlier defect cannot move a later approval to another frame. IDs retain the existing `c`-number format.
