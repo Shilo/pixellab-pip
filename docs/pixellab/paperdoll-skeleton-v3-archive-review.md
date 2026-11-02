@@ -49,3 +49,5 @@ The accepted extractor deliberately does not guess equipment from color, remove 
 ## Validation boundary
 
 The accepted changes require repository QA and the pinned static scanner comparison described in [scanner maintenance](../developer/scanner-maintenance.md). Focused extraction tests exercise the new helper's actual CLI and failure paths. Archive probes run only on local synthetic copies. These checks do not establish live generation quality, eight-direction reliability, or a hosted security-audit result. Ignored `.local/friend-pack-review/` contains the source snapshots, specialist reviews, probe results, and validation logs for this review session.
+
+A subsequent independent review challenged the complete implementation and evidence. No production defect was reproduced. The reviewer and coordinating agent agreed to extend the existing failed-write test: if metadata writing fails after a PNG has been saved, both the image and partial record must be removed, and the source must remain unchanged. This adds regression coverage for the existing rollback contract without changing the runtime helper.

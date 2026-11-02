@@ -121,11 +121,27 @@ class PaperdollTests(unittest.TestCase):
 
     def test_partial_output_is_removed_on_write_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp) / "out"
-            with mock.patch.object(Image.Image, "save", side_effect=OSError("write failed")):
-                with self.assertRaisesRegex(OSError, "write failed"):
-                    paperdoll.write_outputs(out, Image.new("RGBA", (1, 1)), "layer.png", [], {})
-            self.assertEqual(list(out.iterdir()), [])
+            root = Path(tmp)
+            out, source = root / "out", root / "source.png"
+            image = Image.new("RGBA", (1, 1), "red")
+            image.save(source)
+            original = source.read_bytes()
+
+            def fail_record(report, stream, **kwargs):
+                self.assertTrue((out / "layer.png").is_file())
+                stream.write('{"status":')
+                raise OSError("write failed")
+
+            for stage, patcher in (
+                ("image", mock.patch.object(Image.Image, "save", side_effect=OSError("write failed"))),
+                ("metadata", mock.patch.object(paperdoll.json, "dump", side_effect=fail_record)),
+            ):
+                with self.subTest(stage=stage), patcher:
+                    with self.assertRaisesRegex(OSError, "write failed"):
+                        paperdoll.write_outputs(out, image, "layer.png", [source],
+                                                {"status": "needs_visual_review"})
+                self.assertEqual(list(out.iterdir()), [])
+                self.assertEqual(source.read_bytes(), original)
 
 
 if __name__ == "__main__":
