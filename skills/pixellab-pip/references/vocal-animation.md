@@ -17,6 +17,7 @@ Use either a managed `character_id` with a stored portrait or a raw portrait ima
 
 - Supported moods: `neutral`, `happy`, `angry`, `sad`, `surprised`; default `neutral`. Generate one mood per call.
 - `viseme_count` is 3, 5, 7, or 12; default 7. Keep the same count across every mood stored on one character.
+- Price depends on portrait size, mouth-position count, and any extra fill passes; use the MCP schedule and 40-generation ceiling in `cost-routing.md`, rather than assuming every portrait costs the default small-portrait amount.
 - `no_background` defaults to `true`. Preserve transparency unless the user requests a background.
 - Ask for paid-call approval under the normal cost rules. Setting a portrait, rendering the GIF, and requesting the lip-sync plan are free.
 - Poll the dedicated vocal getter every 10–15 seconds. Do not use the generic background-job route. `completed_visemes` may be partial progress; wait for the terminal result and all expected frames.

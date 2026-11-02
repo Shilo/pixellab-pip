@@ -2,6 +2,8 @@
 
 Generated: 2026-07-04.
 
+Current implementation status (2026-11-01): this is a proposal for a larger package workflow, not the shipped CLI contract. Pip now ships [assets/paperdoll.py](../../skills/pixellab-pip/assets/paperdoll.py) with only `extract` and `compose`; actual commands, limits, and review gates live in [paperdolling.md](../../skills/pixellab-pip/references/paperdolling.md). It does not implement the proposed `dev-tools/paperdoll.py`, slot/hardpoint manifests, batch animation processing, package validation, or engine exports below. Pro Flash now documents mask-scoped changes-only output, which remains distinct from semantic equipment extraction. The original tolerant-extraction proposal below is superseded by the shipped exact-overlay contract; do not filter drift to turn a failed candidate into a pass.
+
 Goal: build a high-level PixelLab paperdolling workflow that lets users create reusable RPG equipment layers, especially animated weapons, while staying honest about what PixelLab public APIs return today. The system should start as a Python-assisted wrapper and can later evolve into a visual application.
 
 ## Implementation Branch
@@ -118,7 +120,7 @@ Does the user need hidden/behind-body equipment pixels?
 
 Use the Aseprite extension's `New layer with changes` behavior as the product benchmark, but implement the portable route from public PixelLab outputs.
 
-Current evidence:
+Original editor evidence (2026-07-04; the current Pro Flash exception is described in the linked runtime contract):
 
 - PixelLab's public docs list `New layer with changes` as an editor output method.
 - The installed Aseprite extension sends `output_method` through its extension request JSON and prepares a dedicated PixelLab generation layer/cel for `New layer with changes`.
@@ -131,7 +133,7 @@ Portable implementation:
 1. Call a documented PixelLab route and save the returned composite.
 2. Load base and composite as same-size RGBA arrays.
 3. Run exact-diff extraction as the fast path.
-4. Run tolerant alpha-aware extraction when minor AI drift is present.
+4. Reject body drift or unsupported alpha changes; the original tolerant-extraction step is superseded by the shipped exact-overlay contract.
 5. Reject if body drift, palette drift, unrelated redraw, or full-sprite changes exceed limits.
 6. Copy accepted pixels from the PixelLab composite into a transparent layer PNG.
 7. Recompose base + layer and compare against the composite.
@@ -141,16 +143,16 @@ Portable implementation:
 
 Do not:
 
-- Send `output_method` to public REST unless official REST documentation later exposes it.
+- Send `output_method` to a public endpoint whose schema lacks it. Pro Flash inpainting now explicitly supports it; follow the linked runtime contract rather than assuming all edit routes do.
 - Automate the Aseprite extension's private operation URL.
 - Depend on the user's Aseprite preferences or request history.
-- Use `Modify current layer, only changes` as an automated route because it is editor-specific and in-place.
+- Use Aseprite's `Modify current layer, only changes` as an unapproved in-place editor edit.
 
 The optional Aseprite workspace exporter should use only documented Aseprite CLI/Lua APIs: open or create sprites, create transparent layers, create cels, draw the PNG layers, add frame tags, save a copy, and leave the user's source files untouched.
 
 ## CLI Prototype
 
-Start with a small Python CLI under `dev-tools/` after the docs are approved.
+Unimplemented proposal: the commands in this section are design examples, not runnable shipped commands. Use the linked runtime contract's `assets/paperdoll.py` examples for the current `extract`/`compose` helper.
 
 Possible commands:
 

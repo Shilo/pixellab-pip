@@ -4,11 +4,11 @@ Generated: 2026-07-04.
 
 Scope: research a complete paperdolling system layered on top of PixelLab for RPG-style equipment, especially weapons that animate with a character and can be layered in a game engine. This is human/developer-facing research, not the canonical agent contract. Durable routing rules should be promoted into `skills/pixellab-pip/references/paperdolling.md` only after the wrapper design is implemented or proven.
 
-Current contract note (2026-10-03): MCP `transfer_outfit` now covers the documented outfit-transfer workflow alongside REST `transfer-outfit-v2`; both still return composited frames rather than semantic layers. The dated research findings below remain visual/workflow observations.
+Current implementation note (2026-11-01): the shipped [paperdolling contract](../../skills/pixellab-pip/references/paperdolling.md) integrates the optional `assets/paperdoll.py` exact-overlay extractor and compositor. It does not implement the broader package, slot, hardpoint, or animation-batch design below. MCP `transfer_outfit` and REST `transfer-outfit-v2` still return composited frames. Pro Flash inpainting now exposes mask-scoped changes-only output through `output_method`; it does not extract semantic equipment or hidden back layers. The historical tolerant-extraction proposal is superseded: retain exact pixels and reject unrelated drift rather than filtering it into a passing layer. See the [archive review](paperdoll-skeleton-v3-archive-review.md) for the accepted implementation and rejected heuristics.
 
 ## Executive Summary
 
-PixelLab can generate the base character, animate the character, edit a character image, inpaint selected regions, edit short animation frame sets, transfer outfits to animation frames, estimate skeleton keypoints, and animate from skeleton keypoints. Current public REST/MCP surfaces do not expose semantic paperdoll layers, editor-native layer objects, isolated changed-part outputs, or a first-class "equipment layer" endpoint.
+PixelLab can generate the base character, animate the character, edit a character image, inpaint selected regions, edit short animation frame sets, transfer outfits to animation frames, estimate skeleton keypoints, and animate from skeleton keypoints. Public REST/MCP surfaces do not expose semantic paperdoll layers, editor-native layer objects, or a first-class equipment-layer endpoint. Pro Flash's mask-scoped changes-only images are a narrower capability, subject to the linked contract's verification gates.
 
 That makes paperdolling a wrapper system rather than a single PixelLab call:
 
@@ -30,13 +30,13 @@ Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` retu
 
 | Question | Finding | Verdict |
 |---|---|---|
-| Can PixelLab public APIs create native reusable equipment layers? | No public REST/MCP field currently returns semantic layers or isolated changed pixels. Editor surfaces can have layer-oriented output methods, but those are not REST/MCP contracts. | Not available as a native API feature |
+| Can PixelLab public APIs create native reusable equipment layers? | No semantic equipment-layer API is documented. Pro Flash inpaint can return mask-scoped changes-only images, which still require inspection for unrelated body pixels and occlusion. | No automatic reusable-layer guarantee |
 | Can a wrapper reduce the two-edit workflow to one edit? | Yes, for same-canvas opaque or mostly opaque equipment when the base pixels are preserved enough for alpha-aware differencing. | Promising |
 | Can this scale to animated weapons? | Yes, if every base/composite frame shares the same canvas, frame order, pivot, and direction, and if temporal QA rejects jitter/drift. | Promising but high risk |
 | Can skeleton data anchor equipment to hand bones? | Partially. Skeleton/keypoint data can define hardpoints and validate expected regions, but PixelLab does not expose a deterministic weapon attachment renderer. | Useful metadata, not complete solution |
 | Should this become a standalone app later? | Likely, if visual QA, masks, layer ordering, and manual correction become central to the workflow. A Python prototype can de-risk the deterministic parts first. | Future direction |
 
-## Current PixelLab Capability Boundary
+## PixelLab Capability Research
 
 | Capability | Public surface | Output | Paperdoll implication |
 |---|---|---|---|
@@ -46,6 +46,7 @@ Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` retu
 | Single image edit | REST `edit-image` | One edited composite image | Best low-complexity base for single-frame layer extraction. |
 | Pro/multi image edit | REST `edit-images-v2`; MCP `edit_image` (matches this Pro/batch route, not base `edit-image`) | One or more edited composite images | Useful for small batches or consistent edits, still composite-only. |
 | Inpaint | REST `inpaint` / `inpaint-v3`; MCP `inpaint_image` (matches `inpaint-v3`, has `crop_to_mask`); website/editor Inpaint | Edited/inpainted composite image | Better when a mask can restrict the weapon/body region. |
+| Pro Flash inpaint | MCP `inpaint_image_pro_flash`; REST `inpaint-image-pro-flash` | Composite or mask-scoped changes-only image, selected by `output_method` | Explicit alternative under the current runtime contract; transparency outside the mask does not prove equipment-only pixels inside it. |
 | Edit animation | REST `edit-animation-v2` | Edited/composited frames | Useful for adding equipment to 2-16 frames, then extracting per-frame layers. |
 | Transfer outfit | MCP `transfer_outfit` or REST `transfer-outfit-v2` | Outfit-transferred/composited frames | Good for clothing/armor reskins, but not equipment layers. |
 | Estimate skeleton | REST `estimate-skeleton` | Keypoints with labels and z-index-like data | Useful to infer hardpoints and body regions. |
@@ -85,11 +86,11 @@ PixelLab extension/private backend
   likely decides whether result bytes are full output or changes-only output
 ```
 
-This is an inference from the installed Lua code plus the public option docs, not an official public API guarantee. The public REST v2 OpenAPI schemas inspected for `edit-image`, `edit-images-v2`, `edit-animation-v2`, and `inpaint-v3` do not expose `output_method`. The portable wrapper should therefore not send `output_method` to public REST and should not call the Aseprite extension's private operation URLs.
+This is an inference from the installed Lua code plus the public option docs, not an official public API guarantee. The public REST v2 OpenAPI schemas inspected for `edit-image`, `edit-images-v2`, `edit-animation-v2`, and `inpaint-v3` do not expose `output_method`. Only send that field to a public route whose schema explicitly exposes it, such as the newer Pro Flash inpaint route; never call the Aseprite extension's private operation URLs.
 
 ### Can This Work Outside Aseprite?
 
-Yes, but not by directly asking public REST for `New layer with changes`.
+Yes: use composite extraction on the edit routes above, or explicitly select Pro Flash's documented mask-scoped changes-only output under the current runtime contract. Neither produces verified semantic equipment automatically.
 
 The portable equivalent is:
 
@@ -127,7 +128,7 @@ That workspace assembly should use Aseprite's documented CLI/Lua API, not the Pi
 The system plan should use the Aseprite extension as a behavioral benchmark, not a dependency:
 
 - Recreate the output artifact, not the private protocol.
-- Treat exact pixel equality as a fast path, then use tolerant alpha-aware extraction for small PixelLab redraw artifacts.
+- Use the shipped exact copied-pixel overlay checks; the earlier tolerant alpha-aware extraction proposal is superseded because filtering can hide redraws or erase equipment details.
 - Add drift detection before extraction so body redraws do not turn into false equipment pixels.
 - Export a transparent layer PNG and a visual preview first; add `.aseprite` workspace assembly as an optional packaging step.
 - Once the extractor is proven, promote only the durable route into `skills/pixellab-pip/references/paperdolling.md`: "Aseprite-parity client-extracted layer" from public composites.

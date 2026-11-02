@@ -80,6 +80,8 @@ For animation frame anchors (`first_frame`, `last_frame`) and idle-loop risk, se
 
 For explicit Pro Flash work, read `pro-flash.md`: an owned `source_image_id` or supplied south-facing first frame anchors character/object rotations; the pixel converter is a separate six-generation conversion route; `style_image` guides appearance, while `edit_image_pro_flash`/`inpaint_image_pro_flash` take a target image or MCP-owned source ID. The inpaint mask is a separate same-size black/white image, not a style reference.
 
+MCP `inpaint_image` accepts a grayscale (`L`) PNG mask and converts it, but only pure 0/255 values have defined meaning; its dimensions must match the source exactly and it is never rescaled. Pro Flash additionally rejects gray/colored pixels and masks with no white; its context/reference rules are in `pro-flash.md`.
+
 Exact-mask edits: avoid MCP `inpaint_image` and REST `inpaint-v3` until fixed; live tests changed
 pixels outside the mask or ignored the masked region. For other inpainting, verify both regions and
 report failures without retrying or repairing silently.

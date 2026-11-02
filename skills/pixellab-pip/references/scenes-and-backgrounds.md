@@ -1,6 +1,17 @@
 # Scenes, Backgrounds and Buildings
 
-Read this for a battle/level background, hub/menu backdrop, story picture, region map or building with upgrade tiers. The Intent Router selects the surface/model; this page supplies composition decisions. Apply saved appearance only under `project-style.md`.
+Read this for a battle/level background, hub/menu backdrop, story picture, region map, furnished room with a floor plan, or building with upgrade tiers. The Intent Router selects the surface/model; this page supplies composition decisions. Apply saved appearance only under `project-style.md`.
+
+## Furnished rooms
+
+Use MCP `create_room` for a room asset with planned floor cells and doorways. It requires Tier 2 (Pixel Artisan) or higher and has no public REST v2 counterpart. A normal room backdrop remains an image request. Room tools choose their own transparency: rock outside the walls is transparent, so the image-route `no_background` settings below do not apply.
+
+- Supply a concise `theme` and 1–8 `doors`: each has `side` (`n`, `e`, `s`, `w`), `col` 0–6 and `row` 0–5. Doors must lie on the floor boundary. East/west doors are two cells tall (`row` is the upper cell) and need two wall cells before an inner corner below them.
+- Optional `cells` is six strings of seven characters: `#` floor, `.` solid rock, with one connected floor region. Omit for the full 7×6 floor. Each floor cell is 32px; top-down output is 256×256. Confirm door positions against the actual plan.
+- Default `view="top-down"`; `view="isometric"` uses the same plan, about 248×176 for a full room, with tall north/west walls and low south/east curbs. Isometric supports neither `pieces` nor `style_room_id`.
+- For matching top-down rooms, `style_room_id` must name the user's completed room. It carries walls, wall tops, doors, lights/hangings and, by default, floor; `style_room_floor=false` lets the new theme choose its own floor. The new room keeps its own shape and furniture.
+- Painting costs 10 generations when ready (~2–3 minutes). Leave `pieces=false` unless movable furniture is requested: cutouts cost another 10 and ~5–8 minutes. They can be requested at creation or later with `cut_out_room_furniture(room_id=...)`. Do not request both for the same work.
+- Poll `get_room(room_id=...)` through completion. It returns progress, painted art/downloads and, after extraction, named movable pieces and a website room-editor link. Verify requested floor shape, doors, view and output stage; a painted room does not prove cutouts are ready. Use the returned links rather than constructing room/map endpoints or promising automated map placement of room pieces.
 
 ## Shared settings
 

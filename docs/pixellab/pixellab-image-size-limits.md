@@ -1,6 +1,8 @@
 # PixelLab Image Size Limits (Minimum And Maximum)
 
-Last reviewed: 2026-10-29 (UTC snapshot: font sizes and MCP bounds/aspect clarification).
+Last reviewed: 2026-11-02 (UTC snapshot: managed Skeleton v3 counts, directions and MCP size clarifications).
+
+> **2026-11-02 UTC contract refresh.** Managed custom Skeleton v3 now accepts 3–15 frames (default 8); the shared managed-animation schema's outer minimum falls from 4 to 3, while v3 still requires even 4–16 and PixMiniMax multiples of four 4–40. Managed directions now have an explicit eight-facing enum. MCP Pro Flash creation now states its custom 16–256px, multiple-of-four bounds alongside REST; MCP Character Pro caps input at 128px while REST `ProImageSize` remains 168px. New MCP room tools have fixed floor-plan/view geometry, described in [the room reference](../../skills/pixellab-pip/references/scenes-and-backgrounds.md#furnished-rooms); no REST room route was added.
 
 > **2026-10-29 UTC refresh.** REST `generate-font-pro` and MCP `create_font` add native 12px and 24px glyphs (8/12/16/24/32/64). MCP now prints numeric bounds on existing parameters; this does not establish when server enforcement began. Its `create_image_pro` width description now lists all ten nearest-aspect size buckets, including 21:9 792×336; the per-axis declaration still has no upper bound.
 

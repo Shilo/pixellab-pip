@@ -1,6 +1,6 @@
 # PixelLab MCP Docs vs Pip Skill (Session Context)
 
-Last reviewed: 2026-10-29 (UTC snapshot).
+Last reviewed: 2026-11-02 (UTC snapshot).
 
 This is a decision guide for one specific choice: what PixelLab context to give a coding agent for a session. The two options are PixelLab's official MCP documentation, injected as a prompt link, versus installing the PixelLab Pip Agent Skill. It is a session-context question, not a service question; for the execution-layer comparison (MCP service vs the skill) see [Official PixelLab MCP Service Comparison](official-pixellab-mcp-service-comparison.md).
 
@@ -12,7 +12,7 @@ Sources reviewed:
 
 ## What Each Option Is
 
-**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (118 tools in the 2026-10-29 UTC snapshot, including seven Pro Flash tools), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. It is first-party and live, but its generated examples and prose can disagree with its own parameters; no install is needed to read it.
+**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (121 tools in the 2026-11-02 UTC snapshot, including seven Pro Flash tools), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. It is first-party and live, but its generated examples and prose can disagree with its own parameters; no install is needed to read it.
 
 **Pip Agent Skill.** A skill installed into agents that support skills. `SKILL.md` (the always-loaded router) plus 61 on-demand `references/*.md` cover surface selection across MCP, REST v2, website/Pixelorama editor, Aseprite, and legacy v1, plus cost routing, prompt preparation, secret-handling guardrails, and output verification/reporting. The two are complementary, not rivals.
 
@@ -20,7 +20,7 @@ Sources reviewed:
 
 | Area | Official MCP docs | Pip Skill |
 |---|---|---|
-| MCP tool inventory | Yes — full 118-tool list, authoritative for documented tool names | Partial — routing tables; defers to mcp/docs and visible tool schemas for exact calls |
+| MCP tool inventory | Yes — full 121-tool list, authoritative for documented tool names | Partial — routing tables; defers to mcp/docs and visible tool schemas for exact calls |
 | REST v2 coverage | Linked and described as an alternative, but no route inventory | Yes — endpoint router and fallback policy |
 | Other PixelLab surfaces (Aseprite / Pixelorama / website) | Names them, but gives no operating workflow | Yes |
 | Engine integration guides (Godot / Unity / Python) | Yes — via `pixellab://` resources | No |
@@ -32,13 +32,13 @@ Sources reviewed:
 | Image-role classification | No — lists image params only | Yes — edit / identity / style / mask / palette / frame roles |
 | Localization (non-English requests) | No | Yes — normalize to English, reply in the user's language |
 | Output integrity | No | Yes — "every pixel from PixelLab"; local processing labeled, not passed off as generated |
-| Token footprint | ~150.1k chars (~37.5k est tokens), one flat all-or-nothing document | `SKILL.md` ~62.8k chars (~15.7k est tokens) always, plus 61 `references/*.md` files loaded on demand |
+| Token footprint | ~187.6k chars (~46.9k est tokens), one flat all-or-nothing document | `SKILL.md` ~62.9k chars (~15.7k est tokens) always, plus 61 `references/*.md` files loaded on demand |
 
-Token counts are estimated as chars/4 and measured against the 2026-10-29 UTC MCP snapshot and current skill. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor remains below the flat MCP document.
+Token counts are estimated as chars/4 and measured against the 2026-11-02 UTC MCP snapshot and current skill. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor remains below the flat MCP document.
 
 ## What The Current Official Guide Gets Wrong Or Leaves Unsettled
 
-- Its opening says that if MCP tools are absent, an agent should not try REST v2, yet its own “Other PixelLab Interfaces” section says REST v2 can be called directly and is useful when MCP lacks an endpoint. It also calls the two surfaces the “same functionality,” which the current parity map disproves: 29 REST operations lack a full dedicated MCP match (16 partial, 13 none), and 40 MCP tools lack REST workflow counterparts. The opening is advice for a pure-MCP session, not a ban on Pip's documented, bearer-authenticated REST fallback. Never curl an MCP tool name as though it were a REST path.
+- Its opening says that if MCP tools are absent, an agent should not try REST v2, yet its own “Other PixelLab Interfaces” section says REST v2 can be called directly and is useful when MCP lacks an endpoint. It also calls the two surfaces the “same functionality,” which the current parity map disproves: 29 REST operations lack a full dedicated MCP match (16 partial, 13 none), and 43 MCP tools lack REST workflow counterparts. The opening is advice for a pure-MCP session, not a ban on Pip's documented, bearer-authenticated REST fallback. Never curl an MCP tool name as though it were a REST path.
 - It calls unauthenticated download links freely shareable because their UUID is the access key. Pip treats those URLs as sensitive: anyone with the link may reach the asset, and stale links should be refreshed through the getter. Do not paste one indiscriminately.
 - Its `create_character_pro_flash` “4 directions” hint contradicts `n_directions: Literal[8]`. Both the REST OpenAPI and the MCP guide's declared parameter support eight-direction Pro Flash characters; a connected agent should still check its visible tool schema. Treat generated examples as illustrations, not executable payloads.
 - The `get_image` description says it accepts any raw-image job, but its parenthetical tool list was not updated for the Pro Flash tools (or the prior PixMiniMax tool). Pip uses the returned job ID and checks the connected getter/result rather than treating that list as a closed inventory.

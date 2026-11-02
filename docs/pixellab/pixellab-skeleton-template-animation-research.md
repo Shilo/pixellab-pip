@@ -24,6 +24,10 @@ The refreshed REST docs and MCP guide retain template mode's nominal cost of 1 g
 
 The public MCP guide now gives all 49 humanoid template ids with exact frame counts and examples of rejected invented ids; the unchanged id set matches the existing humanoid catalog. The [operational template reference](../../skills/pixellab-pip/references/preset-skeleton-template-animation.md#preset-animation-ids) owns the frame table and motion-name mappings. Template mode has no frame-count override; managed Skeleton v3 uses that same pose count for its frame-based price. MCP `create_character` explicitly has no seed, and its `direction_images` description permits a JSON-encoded string when the client cannot send an object. Quadruped option lists below remain dated website findings. No paid tests were run.
 
+## 2026-11-02 UTC Custom Motion Addendum
+
+Managed Skeleton v3 now supports custom humanoid motion (3–15 frames), alongside the presets described below. MCP `animate_character` uses free instruction discovery then caller-authored `poses`, optional per-frame `scale`, or a documented `move`. REST `/animate-character` and `/characters/animations` share a schema with none of those fields: the server writes one 3D motion from `action_description`, reused by later directions in the same group. The outer schema now permits 3 frames, but other modes retain their own even/multiple-of-four restrictions. Pip defaults an explicit Skeleton v3 request on a managed humanoid to custom motion; ordinary animation remains PixMiniMax when constraints fit. This is routing policy, not a quality ranking. See [the canonical operational reference](../../skills/pixellab-pip/references/preset-skeleton-template-animation.md#skeleton-v3-custom-motion-managed); older website and template findings below remain dated evidence.
+
 ## Executive Summary
 
 PixelLab has two broad animation categories with four related but distinct workflows:
@@ -31,7 +35,7 @@ PixelLab has two broad animation categories with four related but distinct workf
 | Concept | Meaning | Best supported automation surface |
 | --- | --- | --- |
 | Managed template animation | Animate an existing managed character by applying a named preset motion template such as `walk-8-frames`, `idle`, or `bark`. The output frames are generated per character and per direction. | MCP `animate_character`; REST v2 `POST /characters/animations` or `POST /animate-character`. |
-| Managed Skeleton v3 | Animate an existing managed character by applying a named template through the Skeleton v3 model. | MCP `animate_character(mode="skeleton-v3", template_animation_id=...)` when the connected schema exposes that mode; otherwise REST `POST /animate-character` with `mode="skeleton-v3"` and `template_animation_id`. |
+| Managed Skeleton v3 | Animate a humanoid from one shared custom motion, or apply a requested named preset through Skeleton v3. | MCP `animate_character(mode="skeleton-v3")` discovers instructions then takes written poses; REST generates the motion from action text. Add `template_animation_id` only for a preset. |
 | Raw Skeleton v3 | Generate 3–15 frames from a reference image and per-frame keypoints. | MCP `animate_with_skeleton_v3`; REST v2 `POST /animate-with-skeleton-v3`. |
 | Legacy raw skeleton animation | Generate an animation from the older three-frame payload, with optional init/inpaint/mask images and camera settings. | REST v2 `POST /animate-with-skeleton` when that exact legacy contract is required. |
 
@@ -587,11 +591,12 @@ The endpoint prose lists supported sizes `16`, `32`, `64`, `128`, and `256`, whi
 
 The legacy route is the right public choice only when its exact three-frame payload or optional controls are needed. Current custom sequences use Skeleton v3; neither raw workflow is the same as selecting a managed preset animation id on a character.
 
-Current skill support should cover both managed preset animations and raw skeleton pipeline requests while keeping them separate:
+Current skill support separates managed custom/preset animation from raw keypoint pipelines:
 
 ```text
 Managed preset: managed character id + template_animation_id + directions
-Managed Skeleton v3: managed character id + template_animation_id + mode="skeleton-v3"
+Managed Skeleton v3 preset: managed character id + requested template_animation_id + mode="skeleton-v3"
+Managed Skeleton v3 custom: managed humanoid id + mode="skeleton-v3"; MCP instructions then poses/move, REST action text
 Raw Skeleton v3: reference image + first pose + 3–15 complete per-frame keypoint sets
 Legacy raw skeleton: reference image + exactly 3 keypoint arrays + optional legacy fields
 ```
@@ -602,7 +607,7 @@ Aseprite should be treated as a local editor/workspace surface after PixelLab ge
 
 The Aseprite extension includes local skeleton reference folders and a private template-animation catalog for editor workflows. These names are useful research evidence for pose/keypoint concepts, but they are not documented managed-character `template_animation_id` values and they do not cover every managed website preset id. Keep them separate from the public preset animation ID list unless PixelLab publishes them in REST v2 or MCP docs.
 
-Recommended Aseprite workflow:
+Recommended Aseprite workflow for a requested preset:
 
 1. Use MCP or REST v2 to animate the managed character with `template_animation_id`.
 2. Download the generated frames or character ZIP.
@@ -628,7 +633,11 @@ User wants a new managed character and preset animations
   -> Prefer MCP create_character, then MCP animate_character.
   -> Fall back to REST v2 create-character-* then /characters/animations.
 
-User wants exact skeleton keypoints, exported pose JSON, or custom skeletons
+User explicitly wants Skeleton v3 on an existing managed humanoid, without a preset
+  -> Custom motion via the current MCP instruction/pose workflow or REST action-text workflow in the operational reference.
+  -> Preserve explicit presets and raw keypoint requests; establish a supported plan for other body types or incompatible counts.
+
+User wants exact raw skeleton keypoints or exported COCO-18 pose JSON
   -> REST v2 estimate-skeleton, author a full 3–15-frame keypoint sequence, then use MCP animate_with_skeleton_v3 or REST animate-with-skeleton-v3.
   -> Aseprite can export or organize keypoints, but do not automate private extension calls.
 
@@ -658,9 +667,9 @@ User wants only to import/export/edit frames in Aseprite
 ## Original Implementation Recommendations For `pixellab-pip` (2026-06-30; status updated 2026-09-25)
 
 1. **Complete:** add a dedicated agent-facing reference for preset skeleton/template animation.
-2. **Complete:** trigger that reference on skeleton, preset/template/built-in animation, named motion, and auto-rig requests.
+2. **Complete:** trigger that reference on explicit skeleton, preset/template/built-in animation, and auto-rig requests. Ordinary named actions follow the current animation engine policy.
 3. Prefer MCP for managed preset animations when MCP tools are visible.
 4. Fall back to REST v2 only when MCP is unavailable, exact schema control is needed, or the user explicitly asks for API/code.
 5. **Complete:** add the auto-rig path for existing images: use REST `estimate-skeleton` for one pose, author the remaining poses in a 3–15-frame sequence, then call MCP `animate_with_skeleton_v3` or REST `animate-with-skeleton-v3`.
-6. Keep raw Skeleton v3 sequences separate from managed named templates. Reserve REST legacy `animate-with-skeleton` for callers who need its exact three-frame contract or optional legacy controls; do not automate hidden Aseprite/website internals.
+6. Keep raw Skeleton v3 sequences separate from managed custom motion and named templates. Reserve REST legacy `animate-with-skeleton` for callers who need its exact three-frame contract or optional legacy controls; do not automate hidden Aseprite/website internals.
 7. Preserve template frame counts and returned frame order. Do not locally stretch, duplicate, trim, ping-pong, or reorder generated template frames unless the user explicitly asks for an alternate playback package.

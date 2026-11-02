@@ -8,6 +8,8 @@ REST v2 async jobs normally use `GET /background-jobs/{job_id}` when the create 
 
 The cancellation response is `CancelBackgroundJobResponse`: required `id`, `status`, and `message`; optional `usage`. The returned `status` is `failed` because cancellation terminates the job; it does not mean a generation completed successfully.
 
+MCP `cancel_job` now says successful pending/processing cancellation and failed jobs cost nothing, submission checks reserve rather than deduct generations, and completed jobs cannot be cancelled or refunded by deleting their results. That is MCP's published claim; it conflicts with REST's running-GPU caveat above. Do not turn either into a cross-surface guarantee or assume a timeout means cancellation succeeded; verify terminal status and exposed usage/balance. Multi-stage work can already have completed charged stages.
+
 MCP `wait_for_jobs` waits on all of your running generation jobs, not selected job IDs, and returns once `min_finished` of them (default 1, or all if fewer run) have finished; raise it to cover several jobs of a batch in one call. Use it only when every active job it may wait for belongs to the current task. The default timeout is 240 seconds (`timeout_seconds` 5–540; `min_finished` 1–50); a timeout does not cancel jobs. If the client itself times out the tool call around 60 seconds, pass a `timeout_seconds` below that client limit and call again. After it returns or times out, re-fetch the specific result with its getter before acting.
 
 MCP tilesets (`create_topdown_tileset` → `get_topdown_tileset`) have no such 423/404 window — the getter reports progress directly. For REST `POST /v2/tilesets`, the create response can contain both `background_job_id` and `tileset_id` while the status is still `processing`. Poll `GET /background-jobs/{background_job_id}` first. `GET /tilesets/{tileset_id}` may return `423` while the tileset is still being generated, or `404` until the background job has completed and the tileset object has been persisted; treat those as early lifecycle lookups while the background job is still processing.
@@ -38,6 +40,7 @@ MCP creation tools return asset IDs quickly. Use the matching getter to inspect 
 - Fonts: `get_font`.
 - Portrait-character conversions: `get_portrait_character`.
 - Vocal animations: `get_vocal_animation`; partial visemes may appear before completion, so wait for the terminal result.
+- Rooms: `get_room`; painting and optional furniture extraction have distinct progress stages. See `scenes-and-backgrounds.md`.
 - Raw-image jobs (`create_image_pixflux`/`create_image_pixen`/`create_image_pro`, `edit_image`, `edit_image_pixen`, `transfer_outfit`, `inpaint_image`, `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, `create_normal_map`, `image_to_pixelart`, `image_to_pixelart_pro_flash`, `unzoom_image`, `correct_pixelart`, `reduce_colors` — none need a managed asset): `get_image`, the one shared getter for the whole family. The newer Pro Flash image/edit/inpaint tools also return raw-image job IDs; use `get_image` when the connected getter accepts them, and check `pro-flash.md` for their route-specific rules. `unzoom_image` and `reduce_colors` finish in about a second — poll once instead of backing off.
 - UI assets, tilesets, tiles, projects, or helpers: use the visible matching MCP getter when exposed.
 

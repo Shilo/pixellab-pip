@@ -12,6 +12,7 @@ PixelLab product labels, endpoint names, editor labels, and SDK method names can
 |---|---|
 | `Pro` | Treat as a product/mode label scoped to a specific tool or endpoint. Do not treat it as one global model. |
 | `Pro Flash` | A separate beta image/character/object/edit/inpaint family, not a faster alias for the older Pro endpoints. MCP documents size-based 5/6/9-generation creation/edit/inpaint prices plus separate eight-view rotations; REST retains a provisional five-generation first-image estimate. Exact operation costs and quote limits are in the [Pro Flash reference](../../skills/pixellab-pip/references/pro-flash.md). Creation gives one image; character views are always eight. Its speed, visual quality, and price advantage have not been independently tested here. |
+| `Skeleton v3` | A distinct raw-keypoint and managed-animation family. Managed humanoids support custom shared motion (MCP written poses after free instructions; REST action-generated motion) or explicit named presets. It is separate from text animation `mode="v3"`. |
 | `v3` | Treat as a workflow/version label scoped to endpoints such as character creation, animation, rotation, or inpainting. |
 | `new` | Treat as a UI or workflow label. Map to the concrete endpoint/tool before giving technical advice. |
 | `Pixen` | Public image-generation product/endpoint label. Verify exact endpoint fields in REST v2 docs. |

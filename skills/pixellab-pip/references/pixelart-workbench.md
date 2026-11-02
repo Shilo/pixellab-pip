@@ -8,6 +8,8 @@ For preservation-critical localized edits, compare compatible IDs: two drawing I
 
 Start with `argv=["describe", "start"]` in low mode for brief guidance. Use `argv=["describe", "cli"]` when the command list or syntax is needed. Follow the live command description; do not invent flags. `draw --recipe` supports layered art and animation.
 
+Before exact authoring, read `describe edits`, `paint`, `outline`, or `draw` for the selected operation. `edit --changes` requires `operation`, `layer`, one-based `frames`, and `reason`; pixel coordinates are zero-based and `region=[x0,y0,x1,y1]` is inclusive. JSON colors must be `#RRGGBB` or `#RRGGBBAA` with alpha `00`/`ff`, not bare hex or `rgb()`. Prefer an `argv` argument list. `patch_pixels` accepts 1–10000 `[x,y,expected,replacement]` entries and fails on an expected-color mismatch; `map_colors` must preserve alpha. Other operations have their own required fields: discover them rather than applying one operation's shape to another.
+
 For recipes that cut or move source parts, run `parts <drawing-id>` and fix unassigned or double-claimed pixels. An empty `{}` source part passed one small test but failed on a different larger fixture; use an explicit mask when predictable coverage matters and audit either form.
 
 Use the regular image-generation route for open-ended image creation when no direct pixel-operation workflow is requested. The 0.4.125 announcement reports roughly 70% lower token consumption from PixelLab's testing; treat that as an estimate, not a guaranteed result.

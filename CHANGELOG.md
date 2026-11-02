@@ -9,11 +9,19 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Added
 
+- **Support the latest MCP room workflows.** Route furnished floor-plan rooms to painting/status and optional furniture cutouts, with Tier 2, cost and isometric restrictions.
+
 - **Extract faithful paperdoll overlays.** A small local helper copies exact changed pixels from a registered edit, checks alpha-over reconstruction, and composes accepted layers. It preserves alpha, refuses incompatible edits and output collisions, and keeps candidates subject to visual review.
 - **Document managed Skeleton v3 custom motion.** Distinguish MCP's free instruction call and written poses from REST's paid text-generated motion, with current frame/cost guidance and shared-direction reuse. The [archive review](docs/pixellab/paperdoll-skeleton-v3-archive-review.md) records accepted findings, rejected experimental helpers, and evidence limits.
 
+### Changed
+
+- **Sync the 2026-11-02 UTC public contracts.** MCP grows from 118 to 121 tools; REST stays at 102 paths/113 operations/275 schemas. Update operation-specific costs, Pro tileset eligibility, palette/mask/reference validation, variable tile counts, save-back frame semantics, and the MCP/REST cancellation billing disagreement.
+- **Use custom motion for explicit Skeleton v3 requests on managed humanoids.** Keep requested presets and raw keypoints, preserve incompatible-count/body-plan checks, and retain PixMiniMax for ordinary motion. Reconcile the recent custom-animation instructions with refreshed schemas and remove template-only routing pointers.
+
 ### Fixed
 
+- **Align paperdoll instructions with the shipped helper.** Document executable extraction/composition commands and result handling, distinguish direct Pro Flash changes-only candidates from composite extraction, and mark broader package/CLI proposals as unimplemented. Semantic equipment and exact-mask checks remain required.
 - **Check weapon continuity across hidden poses.** Inspect behind-body interpolation paths and trace the gripping hand; a cross-body swing can change screen side without switching hands, while a hidden grip remains unverified.
 - **Prefer PixMiniMax for ordinary animation.** Managed characters and raw-image motion now select PixMiniMax explicitly when constraints fit. Plain action names no longer select rigid template motion; explicit template/skeleton requests, exact counts, cost-driven choices, and managed-object v3 limits remain supported.
 - **Ask before local repairs alter detected effects.** Pinhole filling, background cleanup, soft-edge hardening and thin-part restoration now use the existing approval when their changed pixels overlap detected effects, including effects copied from another frame. Ordinary body repairs remain automatic; approval retains each complete original repair.
