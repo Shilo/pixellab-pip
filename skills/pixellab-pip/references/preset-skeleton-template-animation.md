@@ -124,14 +124,14 @@ Request shape:
 | Field | Guidance |
 |---|---|
 | `character_id` | Required. Managed character must belong to the authenticated user. |
-| `mode` | `template`, `skeleton-v3`, `v3`, `pixminimax`, or REST-only legacy `pro`. Use `template` for preset ids; an omitted mode may auto-detect template when `template_animation_id` is provided, but be explicit. |
+| `mode` | `template`, `skeleton-v3`, `v3`, `pixminimax`, or REST-only legacy `pro`. Presets support `template` or `skeleton-v3`; use the mode selected under `animation.md` → Route Choice explicitly. Auto-detection selects template with a preset id, v3 otherwise. |
 | `template_animation_id` | Exact preset id. Do not pass display labels. |
 | `directions` | Be explicit to avoid accidental all-direction generation. |
 | `frame_count` | v3: even 4–16; PixMiniMax: multiples of 4 from 4–40; default 8. MCP managed v3 additionally caps `width × height × frame_count` at `8 × 256 × 256` (256px canvas: at most 8 frames; 16 frames: up to about 180px). The REST managed schema does not publish that pixel budget. Custom Skeleton v3: 3–15; later directions reuse the group's count. Ignored by template, preset Skeleton v3, and pro; it does not override a preset's frame count. |
 | `custom_start_frame` | Optional starting pose for v3 or PixMiniMax. Requires exactly one direction; max 256×256. Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
 | `end_frame` | Optional target pose for v3 or PixMiniMax interpolation. Dimensions must match the start frame, requires exactly one direction, and is not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
 | `keep_first_frame` | v3 or PixMiniMax, default `true`. Controls whether the reference frame is stored as frame 0 (see Frame Count). Not available in template or Skeleton v3 mode; REST also rejects it in pro mode. |
-| `action_description` | Optional in the MCP schema; provide it for custom v3 or PixMiniMax motion. REST requires it when `template_animation_id` is omitted. In template mode, use it only for light customization. |
+| `action_description` | Optional in the MCP schema; provide it for custom motion. REST requires it when `template_animation_id` is omitted. In template mode, use it only for light customization. |
 | `subject_description`, `initial_pose` | Optional PixMiniMax-only character and starting-pose captions; see `prompt-limits.md` for their surface-specific length contract. |
 | `enhance_prompt` | REST only, valid for v3 custom mode; do not set it for template, PixMiniMax, pro, or Skeleton v3. |
 
@@ -185,7 +185,7 @@ Only add `action_description` for a variant the route supports:
 
 ## Skeleton v3 Keypoint Animation
 
-Use this route when the user explicitly wants the new skeleton workflow or supplies a pose sequence. It is a beta and requires 3–15 output-frame keypoint sets; each frame supplies the 18 named joints with normalized `x`/`y` coordinates from 0 to 1. The reference image and its `first_frame_keypoints` anchor the first pose, while `keypoints` contains the full ordered output sequence.
+Use this raw-image route with supplied or authored per-frame keypoints. It is a beta and requires 3–15 output-frame keypoint sets; each frame supplies the 18 named joints with normalized `x`/`y` coordinates from 0 to 1. The reference image and its `first_frame_keypoints` anchor the first pose, while `keypoints` contains the full ordered output sequence.
 
 Use MCP `animate_with_skeleton_v3` when available, or REST `POST /v2/animate-with-skeleton-v3` for code and exact REST control. REST returns a background job; poll `GET /background-jobs/{job_id}`. MCP returns a job ID; retrieve the result with `get_image`. The result contains exactly `len(keypoints)` frames, in input order; it does not echo the reference frame.
 
@@ -474,7 +474,7 @@ sitting
 standing
 ```
 
-After template mode has been selected, use these label mappings and exact-id passthroughs:
+After a preset motion has been selected, use these label mappings and exact-id passthroughs:
 
 | User says | Use id |
 |---|---|

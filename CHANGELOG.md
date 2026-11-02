@@ -17,7 +17,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 ### Changed
 
 - **Sync the 2026-11-02 UTC public contracts.** MCP grows from 118 to 121 tools; REST stays at 102 paths/113 operations/275 schemas. Update operation-specific costs, Pro tileset eligibility, palette/mask/reference validation, variable tile counts, save-back frame semantics, and the MCP/REST cancellation billing disagreement.
-- **Use custom motion for explicit Skeleton v3 requests on managed humanoids.** Keep requested presets and raw keypoints, preserve incompatible-count/body-plan checks, and retain PixMiniMax for ordinary motion. Reconcile the recent custom-animation instructions with refreshed schemas and remove template-only routing pointers.
+- **Use custom motion for explicit Skeleton v3 requests on managed humanoids.** Keep requested presets and raw keypoints, preserve incompatible-count/body-plan checks, and retain PixMiniMax for ordinary motion. Reconcile the recent custom-animation instructions with refreshed schemas; remove template-only routing pointers and keep preset-engine and raw-keypoint field guidance consistent with the selected workflow.
 
 ### Fixed
 
