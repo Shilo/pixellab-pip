@@ -64,6 +64,8 @@ Path/road and building-kit MCP routes:
 - `create_path_tiles` (18-config connectable path/road set) and `create_building_kit` (floor, connectable walls, doorways, pillar, stairs) are siblings of `create_tiles_pro`, not `create_topdown_tileset` — all three share `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro`; there is no separate getter/lister/deleter for path tiles or a building kit.
 - REST folds all three into `create-tiles-pro` via `tile_feature`: `"roads"` (path tiles), `"tileset"` (the connectable terrain transition `create_tiles_pro` itself can produce), or `"building"` (building kit, with the `building_*` fields).
 - On REST isometric `create-tiles-pro` requests, `tile_flat_top_px` controls the top/bottom cap: `2` is classic and `4` is modern. It is ignored for non-isometric `tile_type` values.
+- Isometric `tile_view_angle=30` is 2:1 isometric. REST `POST /create-tiles-pro` and MCP `create_tiles_pro` and `create_path_tiles` draw and save angles 26 and 27 as 30. MCP `create_building_kit` also saves 26/27 as 30 and uses 30 as its default isometric angle.
+- MCP building-kit cost depends on `layout` and the drawn sheet: `materials` costs 10 generations at every supported size; `grid` costs 10 at 32px, 15 at 48px, and 25 from 64px for isometric/square-topdown, while oblique costs 10 through 48px and 15 at 64px. Isometric defaults to `grid`; square-topdown and oblique default to `materials`. `wall_tiles` can move an isometric 64px grid kit between bands (1 tile costs 15; 2 or 3 cost 25). The tool may reserve 15 or 25 generations even when the final charge is lower; read the quote and receipt. See `cost-routing.md` for the cost gate.
 
 ## Human Label To API Mapping
 

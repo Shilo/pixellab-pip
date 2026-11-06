@@ -2,6 +2,8 @@
 
 Use this reference when a PixelLab generation request set `no_background: true`, but the returned image still has a visible or opaque background.
 
+PixFlux is transparent only up to a 40,000-pixel canvas area (for example, 128×256 or 192×192). Above that it returns a flat single-color background for the same charge. When that output otherwise meets the request, the MCP guide suggests a PixelArt Workbench `flood_fill` recipe to key out the flat color; use the returned command, inspect the connected background, and verify alpha and art preservation. If the requested size fits the route, Pixen supports transparency through 65,536 pixels of area and refuses larger transparent requests. These limits are route-specific; do not infer PixFlux's behavior from Pixen.
+
 ## Default Behavior
 
 Attempt background removal when the generated image otherwise satisfies the request and the background is safely separable from the requested art. This is an approved exception to the general no-post-processing rule because the structured request already asked PixelLab for a backgroundless result.

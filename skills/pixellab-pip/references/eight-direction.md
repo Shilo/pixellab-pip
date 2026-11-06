@@ -17,6 +17,10 @@ A requested player walk in 4 or 8 facings (one 4-direction farmer demonstration 
 | Text | `create_character(mode="v3")` rotates the reference, then `animate_character` with the explicit mode selected under `animation.md` → Route Choice animates each direction from `action_description` | Loose: the generator picks the arm angle. |
 | Requested key poses | Per direction: reviewed wind-up/hit or aim/recoil anchors, then supported interpolation; see `animation.md` for the matching raw/managed frame fields | More explicit anchors, extra paid edits; no guarantee of exact motion or fixed cost ratio. |
 
+## Oblique View
+
+MCP `create_character` supports `view="oblique"` only in `mode="standard"`, for four directions, and up to 128px. REST `POST /create-character-with-4-directions` also documents `view="oblique"`, drawn with a high top-down look and capped at 128px. The REST eight-direction schema lists `oblique` in its enum but its description says the view is four-direction only; treat that as an unresolved schema conflict and use the four-direction route for oblique requests. Do not infer support for oblique on MCP Pro/v3 or eight-direction REST output.
+
 When useful, offer **5 generated directions** (south, south-east, east, north-east, north) plus accepted mirrors for the other three. Mirroring switches hands/asymmetric gear; disclose that and generate the requested facings when unacceptable. It reduces direction calls, not necessarily total cost by a fixed percentage.
 
 For v3 animation, cost is billed on the generated canvas, which the silhouette grows past the sprite, not on the sprite. Use the selected engine's own size/frame pricing in `cost-routing.md`; do not apply that v3 expansion or cost formula to PixMiniMax. Recommend 64-128 px characters for 8-direction games; quote the selected route's actual cost rather than assuming a fixed size multiplier.

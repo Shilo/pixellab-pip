@@ -9,15 +9,15 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Added
 
-- **Support the latest MCP room workflows.** Route furnished floor-plan rooms to painting/status and optional furniture cutouts, with Tier 2, cost and isometric restrictions.
+- **Support MCP room workflows.** Route furnished floor-plan rooms through painting/status, room listing, project filing, and optional furniture cutouts; document Tier 2 eligibility, 20-generation painting cost, and top-down/isometric/oblique restrictions.
 
 - **Extract faithful paperdoll overlays.** A small local helper copies exact changed pixels from a registered edit, checks alpha-over reconstruction, and composes accepted layers. It preserves alpha, refuses incompatible edits and output collisions, and keeps candidates subject to visual review.
-- **Document managed Skeleton v3 custom motion.** Distinguish MCP's free instruction call and written poses from REST's paid text-generated motion, with current frame/cost guidance and shared-direction reuse. The [archive review](docs/pixellab/paperdoll-skeleton-v3-archive-review.md) records accepted findings, rejected experimental helpers, and evidence limits.
+- **Document managed Skeleton v3 custom motion.** Distinguish MCP's free instruction call and humanoid written poses from its tool-described quadruped move lists and REST's paid text-generated motion, with current frame/cost guidance and shared-direction reuse. The [archive review](docs/pixellab/paperdoll-skeleton-v3-archive-review.md) records accepted findings, rejected experimental helpers, and evidence limits.
 
 ### Changed
 
-- **Sync the 2026-11-02 UTC public contracts.** MCP grows from 118 to 121 tools; REST stays at 102 paths/113 operations/275 schemas. Update operation-specific costs, Pro tileset eligibility, palette/mask/reference validation, variable tile counts, save-back frame semantics, and the MCP/REST cancellation billing disagreement.
-- **Use custom motion for explicit Skeleton v3 requests on managed humanoids.** Keep requested presets and raw keypoints, preserve incompatible-count/body-plan checks, and retain PixMiniMax for ordinary motion. Reconcile the recent custom-animation instructions with refreshed schemas; remove template-only routing pointers and keep preset-engine and raw-keypoint field guidance consistent with the selected workflow.
+- **Sync the 2026-11-06 UTC public contracts.** MCP grows from 121 to 122 tools; REST stays at 102 paths/113 operations/275 schemas, with eight changed schemas but no inventory additions. Update managed-asset downloads, room listing/views/cost, oblique character view limits, PixFlux transparency behavior, template-animation and normal-map costs, building-kit view/pricing, Workbench output limits, and cancellation billing.
+- **Use custom motion for explicit Skeleton v3 requests on managed humanoids.** Keep requested presets and raw keypoints, preserve incompatible-count/body-plan checks, and retain PixMiniMax for ordinary motion. Reconcile the recent custom-animation instructions with refreshed schemas; remove template-only routing pointers and keep preset-engine and raw-keypoint field guidance consistent with the selected workflow. MCP's documented quadruped moves remain a separate allowlisted path.
 
 ### Fixed
 

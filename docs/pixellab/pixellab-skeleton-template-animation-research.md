@@ -28,6 +28,10 @@ The public MCP guide now gives all 49 humanoid template ids with exact frame cou
 
 Managed Skeleton v3 now supports custom humanoid motion (3–15 frames), alongside the presets described below. MCP `animate_character` uses free instruction discovery then caller-authored `poses`, optional per-frame `scale`, or a documented `move`. REST `/animate-character` and `/characters/animations` share a schema with none of those fields: the server writes one 3D motion from `action_description`, reused by later directions in the same group. The outer schema now permits 3 frames, but other modes retain their own even/multiple-of-four restrictions. Pip defaults an explicit Skeleton v3 request on a managed humanoid to custom motion; ordinary animation remains PixMiniMax when constraints fit. This is routing policy, not a quality ranking. See [the canonical operational reference](../../skills/pixellab-pip/references/preset-skeleton-template-animation.md#skeleton-v3-custom-motion-managed); older website and template findings below remain dated evidence.
 
+## 2026-11-06 UTC Move List Clarification
+
+The current MCP `animate_character` description separately lists `move` values for dog, cat, horse, bear, and lion templates. Use the tool's body-specific allowlist and controls for those quadruped moves; `poses` and `scale` remain the humanoid authoring path. REST's managed schema still accepts action text rather than MCP's `poses`, `scale`, or `move`. This updates the current public route summary without changing the dated website/template evidence below.
+
 ## Executive Summary
 
 PixelLab has two broad animation categories with four related but distinct workflows:
@@ -35,7 +39,7 @@ PixelLab has two broad animation categories with four related but distinct workf
 | Concept | Meaning | Best supported automation surface |
 | --- | --- | --- |
 | Managed template animation | Animate an existing managed character by applying a named preset motion template such as `walk-8-frames`, `idle`, or `bark`. The output frames are generated per character and per direction. | MCP `animate_character`; REST v2 `POST /characters/animations` or `POST /animate-character`. |
-| Managed Skeleton v3 | Animate a humanoid from one shared custom motion, or apply a requested named preset through Skeleton v3. | MCP `animate_character(mode="skeleton-v3")` discovers instructions then takes written poses; REST generates the motion from action text. Add `template_animation_id` only for a preset. |
+| Managed Skeleton v3 | Animate a humanoid from one shared custom motion, use a documented MCP move for a supported quadruped template, or apply a requested named preset through Skeleton v3. | MCP `animate_character(mode="skeleton-v3")` discovers instructions then takes humanoid written poses or a tool-described move; REST generates the motion from action text. Add `template_animation_id` only for a preset. |
 | Raw Skeleton v3 | Generate 3–15 frames from a reference image and per-frame keypoints. | MCP `animate_with_skeleton_v3`; REST v2 `POST /animate-with-skeleton-v3`. |
 | Legacy raw skeleton animation | Generate an animation from the older three-frame payload, with optional init/inpaint/mask images and camera settings. | REST v2 `POST /animate-with-skeleton` when that exact legacy contract is required. |
 
@@ -596,7 +600,8 @@ Current skill support separates managed custom/preset animation from raw keypoin
 ```text
 Managed preset: managed character id + template_animation_id + directions
 Managed Skeleton v3 preset: managed character id + requested template_animation_id + mode="skeleton-v3"
-Managed Skeleton v3 custom: managed humanoid id + mode="skeleton-v3"; MCP instructions then poses/move, REST action text
+Managed Skeleton v3 custom: managed humanoid id + mode="skeleton-v3"; MCP instructions then poses/scale or REST action text
+Managed Skeleton v3 quadruped move: supported dog/cat/horse/bear/lion template + tool-described move allowlist
 Raw Skeleton v3: reference image + first pose + 3–15 complete per-frame keypoint sets
 Legacy raw skeleton: reference image + exactly 3 keypoint arrays + optional legacy fields
 ```
@@ -635,7 +640,7 @@ User wants a new managed character and preset animations
 
 User explicitly wants Skeleton v3 on an existing managed humanoid, without a preset
   -> Custom motion via the current MCP instruction/pose workflow or REST action-text workflow in the operational reference.
-  -> Preserve explicit presets and raw keypoint requests; establish a supported plan for other body types or incompatible counts.
+  -> Preserve explicit presets and raw keypoint requests; use an MCP tool-described move for its supported quadruped templates, and establish a supported plan for other body types or incompatible counts.
 
 User wants exact raw skeleton keypoints or exported COCO-18 pose JSON
   -> REST v2 estimate-skeleton, author a full 3–15-frame keypoint sequence, then use MCP animate_with_skeleton_v3 or REST animate-with-skeleton-v3.
