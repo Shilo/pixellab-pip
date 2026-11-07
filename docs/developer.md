@@ -270,11 +270,11 @@ On Windows, [dev-tools/run-skill-benchmark.ps1](../dev-tools/run-skill-benchmark
 .\dev-tools\run-skill-benchmark.ps1 -Preset static        # free, no CLI calls
 .\dev-tools\run-skill-benchmark.ps1 -Preset dry-claude -Reps 2
 .\dev-tools\run-skill-benchmark.ps1 -Preset dry-all
-.\dev-tools\run-skill-benchmark.ps1 -Preset full          # all agents + variants, refreshes the report
+.\dev-tools\run-skill-benchmark.ps1 -Preset full          # all agents + variants, dated results
 .\dev-tools\run-skill-benchmark.ps1 -Preset full -Resume .local/bench/<stamp>   # continue an interrupted run
 ```
 
-The published report at [docs/pixellab-pip-benchmark.md](pixellab-pip-benchmark.md) contains a `<!-- BENCHMARK:GENERATED -->` block that `--report FILE` rewrites from a run (the surrounding prose is preserved). The `full` preset passes `--report docs/pixellab-pip-benchmark.md` automatically, so a full run refreshes the committed report. `--rescore <dir> --report FILE` regenerates the block from an existing results dir without re-calling any CLI. Each run also prints its own approximate agent token/cost total at the end.
+Keep the [historical benchmark](pixellab-pip-benchmark.md) intact; the `full` preset writes new results to its dated `.local/bench/<stamp>/SUMMARY.md`. For an existing separately maintained report with generated markers, explicit `--report FILE` rewrites that block while preserving surrounding prose, which must be reviewed for the new dataset and date. `--rescore <dir> --report FILE` regenerates that block from an existing results dir without re-calling any CLI. Each run also prints its own approximate agent token/cost total at the end.
 
 The `full` preset runs the current scenario list once per selected agent, variant and repetition. It spends no PixelLab generations, but agent-provider token charges apply. Historical runtimes and prices are not a current budget; start with `--static` and scope `--scenarios` before approving a model run. Both repetition defaults are 1.
 

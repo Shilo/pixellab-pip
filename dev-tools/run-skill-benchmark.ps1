@@ -22,7 +22,7 @@ $interactive = -not ([Console]::IsInputRedirected -or [Console]::IsOutputRedirec
 
 # preset -> { Label, Args, NeedCli (agent exes that must be on PATH) }. Planning runs use model tokens; no preset generates PixelLab assets.
 $presets = [ordered]@{
-    "full"       = @{ Label = "full        - paid agent planning suite: all agents, all 4 variants, refreshes the report ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--reps", "$Reps", "--report", "docs/pixellab-pip-benchmark.md"); NeedCli = @("claude", "codex", "opencode") }
+    "full"       = @{ Label = "full        - paid agent planning suite: all agents, all 4 variants, dated results ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }
     "static"     = @{ Label = "static      - free context-size comparison, no CLI calls"; Args = @("--static", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla"); NeedCli = @() }
     "dry-claude" = @{ Label = "dry-claude  - claude only ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude") }
     "dry-all"    = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }

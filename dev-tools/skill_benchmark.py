@@ -316,9 +316,14 @@ def materialize_variant(ref: str, dest: Path) -> Path:
             ["git", "-C", str(REPO), "ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", SKILL_REL.as_posix()]
         ).decode("utf-8").split("\0")
         for name in filter(None, names):
+            source = REPO / name
+            try:
+                source.lstat()
+            except (FileNotFoundError, NotADirectoryError):
+                continue  # Git's cached inventory includes unstaged working-tree deletions.
             target = dest / name
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(REPO / name, target)
+            shutil.copyfile(source, target)
     else:
         proc = subprocess.run(
             ["git", "-C", str(REPO), "archive", "--format=tar", ref, "--", SKILL_REL.as_posix()],
@@ -953,12 +958,6 @@ def main() -> int:
         tcost = sum(c.get("cost_usd") or 0 for c in used)
         cost_note = f", ~${tcost:.2f} where the CLI exposed cost" if tcost else ""
         print(f"Agent usage this run: ~{tin:,} input + ~{tout:,} output tokens across {len(used)} cell(s){cost_note}")
-    # The README benchmark table and the report's prose are hand-maintained; when a report was
-    # refreshed interactively, hand the user a ready-to-paste prompt so their agent syncs both.
-    if args.report and summary and sys.stdout.isatty():
-        print("\n--- Copy this to your coding agent to refresh the published prose ---")
-        print(f"Using the generated Summary table in the latest {args.report}: refresh the README benchmark table (routing % and context tokens), and update the hand-written numbers in {args.report}'s prose OUTSIDE the BENCHMARK:GENERATED markers so they match the regenerated tables. Keep the README Benchmark section linking to that report.")
-        print("---------------------------------------------------------------------")
     if errors:
         print(f"{len(errors)} cell(s) errored — see SUMMARY.md")
     return 0

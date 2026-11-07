@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -53,18 +54,66 @@ class BenchmarkTests(unittest.TestCase):
         self.assertIn('| Pip workflow | Pip | 0%', report)
         self.assertNotIn('Routing correct (avg)', report)
 
-    def test_current_export_omits_unlisted_private_settings(self):
+    def test_current_export_handles_working_tree_changes_and_ignored_settings(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / 'repo'
             source = root / benchmark.SKILL_REL
             source.mkdir(parents=True)
             (source / 'SKILL.md').write_text('test skill', encoding='utf-8')
+            (source / 'obsolete.md').write_text('old reference', encoding='utf-8')
+            replaced = source / 'references'
+            replaced.mkdir()
+            (replaced / 'old.md').write_text('nested reference', encoding='utf-8')
+            subprocess.run(['git', 'init', '--quiet', str(root)], check=True, capture_output=True)
+            subprocess.run(['git', '-C', str(root), 'add', '--', benchmark.SKILL_REL.as_posix()],
+                           check=True, capture_output=True)
+            (source / 'obsolete.md').unlink()
+            (replaced / 'old.md').unlink()
+            replaced.rmdir()
+            replaced.write_text('replacement file', encoding='utf-8')
+            (source / 'new.md').write_text('new reference', encoding='utf-8')
+            (source / '.gitignore').write_text('pixellab-pip.json\n', encoding='utf-8')
             (source / 'pixellab-pip.json').write_text('{"auto": true}', encoding='utf-8')
-            listed = (benchmark.SKILL_REL.as_posix() + '/SKILL.md\0').encode()
-            with patch.object(benchmark, 'REPO', root), patch.object(benchmark.subprocess, 'check_output', return_value=listed):
+            with patch.object(benchmark, 'REPO', root):
                 exported = benchmark.materialize_variant('current', Path(temporary) / 'export')
-            self.assertTrue((exported / 'SKILL.md').is_file())
+                original_lstat = Path.lstat
+
+                def posix_lstat(path, *args, **kwargs):
+                    if path == replaced / 'old.md':
+                        raise NotADirectoryError('POSIX lookup through replacement file')
+                    return original_lstat(path, *args, **kwargs)
+
+                with patch.object(Path, 'lstat', posix_lstat):
+                    posix_export = benchmark.materialize_variant('current', Path(temporary) / 'posix-export')
+                (source / 'SKILL.md').unlink()
+                with self.assertRaisesRegex(SystemExit, 'has no'):
+                    benchmark.materialize_variant('current', Path(temporary) / 'missing-entry')
+            self.assertEqual((exported / 'SKILL.md').read_text(encoding='utf-8'), 'test skill')
+            self.assertEqual((exported / 'new.md').read_text(encoding='utf-8'), 'new reference')
+            self.assertEqual((exported / 'references').read_text(encoding='utf-8'), 'replacement file')
+            self.assertEqual((posix_export / 'references').read_text(encoding='utf-8'), 'replacement file')
+            self.assertFalse((exported / 'obsolete.md').exists())
             self.assertFalse((exported / 'pixellab-pip.json').exists())
+
+    def test_current_export_does_not_hide_unreadable_inputs(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'repo'
+            source = root / benchmark.SKILL_REL / 'SKILL.md'
+            source.parent.mkdir(parents=True)
+            source.write_text('test skill', encoding='utf-8')
+            listed = (benchmark.SKILL_REL.as_posix() + '/SKILL.md\0').encode()
+            original_lstat = Path.lstat
+
+            def checked_lstat(path, *args, **kwargs):
+                if path == source:
+                    raise PermissionError('unreadable input metadata')
+                return original_lstat(path, *args, **kwargs)
+
+            with patch.object(benchmark, 'REPO', root), patch.object(benchmark.subprocess, 'check_output', return_value=listed):
+                with patch.object(Path, 'lstat', checked_lstat), self.assertRaises(PermissionError):
+                    benchmark.materialize_variant('current', Path(temporary) / 'metadata-error')
+                with patch.object(benchmark.shutil, 'copyfile', side_effect=PermissionError), self.assertRaises(PermissionError):
+                    benchmark.materialize_variant('current', Path(temporary) / 'copy-error')
 
 
 if __name__ == '__main__':

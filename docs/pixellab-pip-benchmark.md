@@ -202,9 +202,9 @@ python dev-tools/skill_benchmark.py --agents claude --variants pre-kiss-yagni-re
   --scenarios route-hex-tiles,route-character,route-gui-modular --reps 2
 ```
 
-To refresh the tables in *this* report, run the **full** scenario set (no `--scenarios` filter) with `--report docs/pixellab-pip-benchmark.md`, or use the `full` preset below — a partial `--scenarios` run with `--report` would shrink the published routing table to only those rows.
+Keep this historical snapshot intact. Read new results in their dated `.local/bench/<stamp>/SUMMARY.md`. For an existing separately maintained report with generated markers, explicit `--report FILE` replaces that block; review the surrounding prose and dataset date as well. A filtered `--scenarios` run includes only those scenarios.
 
-On Windows, [`dev-tools/run-skill-benchmark.ps1`](../dev-tools/run-skill-benchmark.ps1) wraps the common runs. Its **`full`** preset runs every agent and every variant (no PixelLab credits; agent/model charges may apply) and refreshes this report automatically. Full methodology, arms, and flags are in [Developer → Skill Benchmark: Routing and Cost](developer.md#skill-benchmark-routing-and-cost).
+On Windows, [`dev-tools/run-skill-benchmark.ps1`](../dev-tools/run-skill-benchmark.ps1) wraps the common runs. Its **`full`** preset runs every agent and every variant (no PixelLab credits; agent/model charges may apply) and writes dated results without replacing this snapshot. Full methodology, arms, and flags are in [Developer → Skill Benchmark: Routing and Cost](developer.md#skill-benchmark-routing-and-cost).
 
 ## Method and caveats
 

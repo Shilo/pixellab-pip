@@ -37,7 +37,7 @@ For plural or complete sets, `32x32 icons` is the per-icon cell size, not the ca
 - `4x4` / 16 icons at 32px each → `image_size: { "width": 128, "height": 128 }`.
 - A `32x32` `image_size` fits only a single icon. At small sizes `generate-image-v2` may return a multi-candidate batch; read `create-image-pro.md` for native-size diversity, no-label, and view guidance, then present candidates and select after visual review.
 
-Generate the sheet first, then verify the original output against the requested cell size. If symbols come out 64px-ish, the layout collapses, or gutters break the cell math, report a failed candidate — do not resize or reassemble it into a claimed final.
+For one-call sheet generation, verify the original sheet against the requested cell size. If symbols come out 64px-ish, the layout collapses, or gutters break the cell math, report a failed candidate — do not resize or reassemble it into a claimed final.
 
 ## Prompt Pattern
 
@@ -55,7 +55,7 @@ Transparent item-icon sheet starting point:
 Complete 8 by 8 sheet of 64 unique fantasy RPG inventory item icons, 8 columns and 8 rows, each cell a readable 32x32 item, perfectly aligned with no spacing, overlap, cropped items, dividers, or drawn grid. Pixel art with clear centered object silhouettes, crisp hard edges, low visual noise, limited palette, consistent high-fantasy inventory style. Include varied common RPG inventory categories: melee weapons, ranged weapons, shields, armor, helmets, jewelry, potions, scrolls, books, food, coins, gems, ores, herbs, monster parts, tools, keys, chests, bags, bombs, and arrows. No text, letters, words, numbers, labels, captions, fake writing, runes, glyphs, UI slots, buttons, borders, frames, rounded corners, watermark, terrain tiles, or decorative grid lines.
 ```
 
-Adapt theme, subject list, and palette; keep the sheet-layout, per-cell-size, no-text, and no-border clauses.
+For sheet prompts, adapt theme, subject list, and palette; keep the sheet-layout, per-cell-size, no-text, and no-border clauses.
 
 For an action-focused ability, use one concrete visible pose instead of the `Pictorial symbols only` anchor when it communicates the mechanic better.
 
