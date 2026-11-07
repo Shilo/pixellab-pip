@@ -25,6 +25,7 @@ import io
 import json
 import re
 import shutil
+import stat
 import statistics
 import subprocess
 import sys
@@ -114,7 +115,10 @@ SCENARIOS = [
     {
         "id": "cheap-animation",
         "task": "I already have a character in PixelLab. What's the cheapest way to give it a walk animation?",
-        "checks": {"route": r"animate[_-]character|characters/animations", "cost_basis": r"size|canvas|frame|template.{0,30}cost|cost.{0,30}template"},
+        "checks": {"route": r"animate[_-]character|characters/animations", "cost_basis": (
+            r"template|compar\w*.{0,60}(?:cost|credit|price)|(?:cost|credit|price).{0,60}compar"
+            r"|\bcheaper\b|\bless expensive\b|\b(?:\d+(?:\.\d+)?|one)\s*(?:gen(?:eration)?s?|credits?)\b|\$\s*\d"
+        )},
         "refs_any": ["cost-routing.md"],
     },
     {
@@ -146,7 +150,7 @@ SCENARIOS = [
         # Independent texture variants or image generation may both deliver the requested grid.
         "id": "route-tiles-vs-tileset",
         "task": "With PixelLab, I want a grid of separate minecraft-style tile textures in one image — not a seamless connecting tileset.",
-        "checks": {"route": r"(?:generate-image-v2|generate-with-style-v2)(?![\w-])|create[ _-]?image[ _-]?(?:pro(?:[ _-]flash)?|pixen|pixflux)(?![\w-])|create[_-]tiles[_-]pro(?![\w-])", "grid": r"grid|sheet|assembl|pack"},
+        "checks": {"route": r"(?:generate-image-v2|generate-with-style-v2)(?![\w-])|create[ _-]?image[ _-]?(?:pro(?:[ _-]flash)?|pixen|pixflux)(?![\w-])|create[_-]tiles[_-]pro(?![\w-])", "grid": r"grid|sheet|assembl|pack", "independent": r"independent|separate|individual|per[- ]texture|non[- ]?connect|not.{0,20}(?:seamless|connect)"},
         "refs_any": ["tileset.md", "create-image-pro.md"],
     },
     {
@@ -311,16 +315,27 @@ def materialize_variant(ref: str, dest: Path) -> Path:
     """Extract one skill variant into dest; returns the skill dir (cwd for agent runs)."""
     skill_dir = dest / SKILL_REL
     if ref == "current":
-        # Match git artifacts: ignored settings, credentials and caches are not benchmark inputs.
-        names = subprocess.check_output(
-            ["git", "-C", str(REPO), "ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", SKILL_REL.as_posix()]
-        ).decode("utf-8").split("\0")
+        # Include tracked and nonignored untracked working-tree files.
+        try:
+            names = subprocess.check_output(
+                ["git", "-C", str(REPO), "ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", SKILL_REL.as_posix()],
+                stderr=subprocess.PIPE,
+            ).decode("utf-8").split("\0")
+        except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+            raise SystemExit("Current variant requires Git and a Git working tree.") from exc
         for name in filter(None, names):
-            source = REPO / name
+            source = REPO
             try:
-                source.lstat()
+                # Check ancestors too: a cached child may survive an ignored directory-link replacement.
+                for part in Path(name).parts:
+                    source = source / part
+                    metadata = source.lstat()
+                    if stat.S_ISLNK(metadata.st_mode):
+                        raise SystemExit(f"Current variant refuses a symbolic link: {source.relative_to(REPO)}")
             except (FileNotFoundError, NotADirectoryError):
                 continue  # Git's cached inventory includes unstaged working-tree deletions.
+            if stat.S_ISDIR(metadata.st_mode):
+                continue  # A tracked file may now be a directory whose children are listed separately.
             target = dest / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)

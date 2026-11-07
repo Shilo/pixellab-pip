@@ -1,6 +1,6 @@
 # Pro Flash
 
-Read this for an explicit PixelLab Pro Flash request or when comparing it with another PixelLab route. Pro Flash is a separate beta family, not `create_image_pro`, `create_character(mode="pro")`, `edit_image`, or `inpaint_image`. REST describes its image-to-pixel-art operation as the same conversion as older Pro at lower cost and higher speed, but visual quality has not been independently tested. Other operations are operation-specific; do not assume the family is faster or better, or replace a suitable route based on its name alone.
+Read this when a PixelLab Pro Flash route is selected or compared with another PixelLab route. Pro Flash is a separate beta family, not `create_image_pro`, `create_character(mode="pro")`, `edit_image`, or `inpaint_image`. REST describes its image-to-pixel-art operation as the same conversion as older Pro at lower cost and higher speed, but visual quality has not been independently tested. Other operations are operation-specific; do not assume the family is faster or better, or replace a suitable route based on its name alone.
 
 | Goal | MCP when visible | REST v2 |
 |---|---|---|

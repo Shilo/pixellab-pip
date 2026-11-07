@@ -216,7 +216,7 @@ only when applicable:
 }
 ```
 
-`inputs` and `outputs` contain unique, local relative paths. An input must be beside the blueprint
+`inputs` and `outputs` contain unique, local relative paths. An input must be within the blueprint's folder tree
 or produced by an earlier step. Name an output exactly when a later step consumes it. Do not use
 absolute paths, parent traversal, transient job IDs, URLs, or secrets there.
 
