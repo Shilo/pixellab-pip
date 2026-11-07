@@ -12,7 +12,7 @@ For style-reference generation, also read `style-reference.md`.
 
 ## Unzoom Upscaled Sources First
 
-Run supplied artwork through `POST /unzoom` (MCP `unzoom_image`, 0.1 generations) before any reference, style, init, or conversion image field — official docs name upscaled input as the most common cause of poor output. Skip it when the source is already at native pixel scale, and note it needs at least 256×256 to detect the grid at all. Its result is opaque, so follow with **remove-background** when the sprite must stay cut out.
+Inspect pixel scale first. Use `POST /unzoom` (MCP `unzoom_image`, 0.1 generations) only for actually upscaled pixel art, not native sprites, photographs or paintings; it always finds some grid and can damage non-pixel inputs. It requires at least 256×256 and flattens transparency onto white. Include any necessary background recovery and its preservation risk in the approved plan; do not promise lossless alpha recovery.
 
 ## MCP Inline Image Transport
 
@@ -53,6 +53,7 @@ These are REST v2 routes; MCP `edit_image`/`inpaint_image`/`animate_image`/`anim
 
 - `create-character-v3`
   - `reference_image`: front-on, south-facing character to rotate into 8 directions (else generates from text); whichever way the source faces is treated as south. A three-quarter view offsets all direction labels by 45°, and there is no facing override; use a front-on frame or re-pose it before a paid call. `outline` and `detail` are ignored when it is set.
+  - Inspect source bounds and carried props before rotation. If there is insufficient room, propose transparent padding in the approved plan without scaling or changing source pixels; respect fixed requested dimensions and verify every returned view for clipping. Padding changes canvas/cost and does not guarantee containment.
 - `create-character-pro` (image role depends on `method`)
   - `method=create_with_style`: `reference_image` is a style reference.
   - `method=create_from_concept`: `concept_image` seeds the design; `reference_image` adds style guidance.
@@ -82,9 +83,7 @@ For explicit Pro Flash work, read `pro-flash.md`: an owned `source_image_id` or 
 
 MCP `inpaint_image` accepts a grayscale (`L`) PNG mask and converts it, but only pure 0/255 values have defined meaning; its dimensions must match the source exactly and it is never rescaled. Pro Flash additionally rejects gray/colored pixels and masks with no white; its context/reference rules are in `pro-flash.md`.
 
-Exact-mask edits: avoid MCP `inpaint_image` and REST `inpaint-v3` until fixed; live tests changed
-pixels outside the mask or ignored the masked region. For other inpainting, verify both regions and
-report failures without retrying or repairing silently.
+For exact-mask edits, MCP `inpaint_image` documents frozen pixels outside the mask; do not generalize this to other surfaces or assume every execution meets it. Choose a supported masked route, then compare dimensions, alpha and visible RGBA outside the mask and inspect whether the requested edit occurred inside it. Treat RGB differences under fully transparent pixels separately. Report failures without silently retrying or repairing. Exact local recoloring still needs the user's explicit non-PixelLab fallback approval under SKILL.md; “change only this” specifies preservation, not processing authority.
 
 ## Clarify When Ambiguous
 

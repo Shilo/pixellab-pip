@@ -225,10 +225,13 @@ When a task consumes a result returned by the immediately preceding PixelLab cal
 the result has been materialized. Treat `verify` as an acceptance gate. If it fails, stop and report
 the failure unless the instruction defines an authorized fallback.
 
-Managed MCP creation is the same pattern when its fresh asset ID is needed for polling or download:
+Managed MCP creation is the same pattern when its fresh asset ID is needed for polling, download or
+later requests:
 record the concrete creation call, then use an immediately following structured `TASK` that tells the
-agent to poll the matching getter with the returned ID and names the saved outputs. Do not add a
-concrete getter step containing the original run's stale ID, and do not invent a binding key.
+agent to poll the matching getter with the returned ID and names the saved outputs. For dependent
+generation calls, keep the recorded bodies exact and have the task substitute fresh character/group
+IDs during replay. Do not add a concrete getter step containing the original run's stale ID, and do
+not invent a binding key.
 
 Generated verification records request guarantees, not incidental observations from one run. Use an
 exact dimension as a future gate only when the recorded request or current route contract guarantees
@@ -351,7 +354,7 @@ When the user selects, links, or names a blueprint:
 4. Resolve image values to what the endpoint requires. Run array steps in order and save produced
    artifacts to the exact relative filenames later steps consume.
 5. After execution, report per `usage-reporting.md` and write a new blueprint and manifest for what
-   the replay actually did. Copy each referenced input image into the new folder.
+   the replay actually did. Preserve consumed input images using SKILL.md's input-copy rule.
 
 A multi-call blueprint spends credits per call, so apply SKILL.md's multi-asset batch approval.
 Same seed does not guarantee identical pixels (`official-pixellab-documentation.md`); a blueprint
@@ -360,8 +363,8 @@ reproduces the workflow and inputs, not exact art.
 ## Sharing
 
 The `*.blueprint.json` file is the shareable unit. With no file inputs, send it alone. Otherwise,
-send it with the referenced files side by side. Before sharing, copy machine-local inputs beside it
-and use relative paths. Embed an image as base64 only on explicit request because every read pays
+send it with its referenced input tree intact and use relative paths. Apply SKILL.md's input-copy rule.
+Embed an image as base64 only on explicit request because every read pays
 the image's token cost. Zip is optional for a multi-file bundle.
 
 ## Recipes

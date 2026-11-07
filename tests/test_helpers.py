@@ -424,7 +424,7 @@ class HelperCliSmokeTests(unittest.TestCase):
         self.assertIn("Pip", block)      # 'current' rendered with its display label
         self.assertIn("Vanilla", block)  # 'vanilla' rendered with its display label
         self.assertNotIn("`current`", block)
-        self.assertIn("routing correct", block)
+        self.assertIn("route signals passed", block)
         self.assertIn("100%", block)     # checks_rate 1.0 rendered as a percent
         self.assertIn("13,000", block)  # input tokens formatted with commas
         with tempfile.TemporaryDirectory() as tmp:
@@ -438,7 +438,7 @@ class HelperCliSmokeTests(unittest.TestCase):
             self.assertIn("intro prose", text)   # prose outside markers preserved
             self.assertIn("outro prose", text)
             self.assertNotIn("OLD", text)         # marked block replaced
-            self.assertIn("routing correct", text)
+            self.assertIn("route signals passed", text)
             bad = Path(tmp) / "bad.md"
             bad.write_text("no markers here", encoding="utf-8")
             with self.assertRaises(SystemExit):  # refuse to write a report lacking markers
@@ -588,19 +588,17 @@ class HelperCliSmokeTests(unittest.TestCase):
         text = (REPO_ROOT / "skills/pixellab-pip/references/prompt-limits.md").read_text(encoding="utf-8")
         self.assertIn("| `POST /generate-font-pro` | `font_name` | 200 |", text)
 
-    def test_readme_benchmark_headline_matches_generated_table(self) -> None:
-        # The README headline percentages are hand-copied from the generated
-        # routing table; this catches drift when the table is regenerated.
+    def test_readme_does_not_present_historical_scores_as_current(self) -> None:
+        # Keep dated evidence accessible without promoting old rubric scores as current results.
         report = (REPO_ROOT / "docs/pixellab-pip-benchmark.md").read_text(encoding="utf-8")
-        rows = [line for line in report.splitlines() if "| routing correct |" in line]
-        self.assertTrue(rows)
-        # columns after the metric cell: Pip, Pip (Old v0.5.0), PixelLab MCP Docs, Vanilla
-        cells = [[int(c.strip().rstrip("%")) for c in line.split("|")[4:8]] for line in rows]
-        pip, _old, docs, vanilla = (round(sum(col) / len(col)) for col in zip(*cells))
+        self.assertIn("Historical July 2026 planning snapshot", report)
+        self.assertIn(skill_benchmark.REPORT_MARK_START, report)
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn(f"| **PixelLab Pip skill** | **~{pip}%** |", readme)
-        self.assertIn(f"| Official `mcp/docs` injected | ~{docs}% |", readme)
-        self.assertIn(f"| No skill (agent knowledge only) | ~{vanilla}% |", readme)
+        section = readme.split("## Benchmark", 1)[1].split("## Security", 1)[0]
+        self.assertIn("historical benchmark", section)
+        self.assertIn("do not establish current", section)
+        self.assertIn("docs/tools/pixellab-mcp-docs-vs-pip-skill.md", section)
+        self.assertNotRegex(section, r"~?\d+%")
 
 
 if __name__ == "__main__":

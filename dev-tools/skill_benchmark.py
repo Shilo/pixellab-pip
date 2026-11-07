@@ -89,10 +89,8 @@ VANILLA_PREAMBLE = FRAME + """
 
 User request: {task}"""
 
-# Every scenario is dry (no network, no PixelLab credits): the agent plans the route and we score the
-# response with regexes. Each scenario scores only on the DECISIVE routing signal(s) — the exact
-# PixelLab tool/endpoint — so a plausible-but-wrong answer scores 0, not partial credit for guessable
-# parameters (image sizes, no_background, generic words).
+# Every scenario is dry: regexes screen route signals, not executable payloads or task success.
+# Supported alternatives may pass; a human still checks parameters, request fidelity and safety.
 # refs_any lists filename substrings acceptable across BOTH skill variants (old and new names).
 SCENARIOS = [
     {
@@ -110,13 +108,13 @@ SCENARIOS = [
     {
         "id": "plan-item-icon-sheet",
         "task": "Using PixelLab, make me one sheet of 64 RPG inventory item icons with transparent backgrounds.",
-        "checks": {"endpoint": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
+        "checks": {"endpoint": r"(?:generate-image-v2|generate-with-style-v2)(?![\w-])|create[ _-]?image[ _-]?(?:pro(?:[ _-]flash)?|pixen|pixflux)(?![\w-])", "sheet": r"sheet|assembl|pack|grid"},
         "refs_any": ["icon.md", "item-icons.md"],
     },
     {
         "id": "cheap-animation",
         "task": "I already have a character in PixelLab. What's the cheapest way to give it a walk animation?",
-        "checks": {"template": r"template", "cost": r"(?:1|one)\s*(generation|gen)"},
+        "checks": {"route": r"animate[_-]character|characters/animations", "cost_basis": r"size|canvas|frame|template.{0,30}cost|cost.{0,30}template"},
         "refs_any": ["cost-routing.md"],
     },
     {
@@ -138,24 +136,24 @@ SCENARIOS = [
         "refs_any": ["preset-skeleton-template-animation.md"],
     },
     {
-        # Showcase-derived: skill-icon SHEETS route to REST Create Image Pro, NOT the MCP UI tool.
+        # Image generation or individually generated icons assembled into a sheet can both fit.
         "id": "route-skill-icons",
         "task": "Using PixelLab, make a sheet of 32px fantasy skill icons with rich illustrated backgrounds.",
-        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
+        "checks": {"route": r"(?:generate-image-v2|generate-with-style-v2)(?![\w-])|create[ _-]?image[ _-]?(?:pro(?:[ _-]flash)?|pixen|pixflux)(?![\w-])", "sheet": r"sheet|assembl|pack|grid"},
         "refs_any": ["icon.md", "create-image-pro.md"],
     },
     {
-        # Showcase-derived: a texture-tile GRID is Create Image Pro, not an autotile tileset tool.
+        # Independent texture variants or image generation may both deliver the requested grid.
         "id": "route-tiles-vs-tileset",
         "task": "With PixelLab, I want a grid of separate minecraft-style tile textures in one image — not a seamless connecting tileset.",
-        "checks": {"route": r"generate-image-v2|create[ _-]?image[ _-]?pro"},
+        "checks": {"route": r"(?:generate-image-v2|generate-with-style-v2)(?![\w-])|create[ _-]?image[ _-]?(?:pro(?:[ _-]flash)?|pixen|pixflux)(?![\w-])|create[_-]tiles[_-]pro(?![\w-])", "grid": r"grid|sheet|assembl|pack"},
         "refs_any": ["tileset.md", "create-image-pro.md"],
     },
     {
-        # Showcase-derived: tileset via PixelLab, then 1-bit/Game Boy recolor is LOCAL, not a PixelLab call.
+        # Palette-constrained generation or an approved local palette variant can both fit.
         "id": "route-1bit-tileset-palette",
         "task": "In PixelLab, make a 1-bit top-down tileset, then give me a Game Boy green version of it.",
-        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset(?!-side)", "local": r"aseprite|local|clamp"},
+        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset(?!-side)", "palette": r"aseprite|local|clamp|target_palette|\bpalette\b"},
         "refs_any": ["tileset.md", "local-asset-assembly.md"],
     },
     {
@@ -173,20 +171,17 @@ SCENARIOS = [
         "refs_any": ["background-removal.md"],
     },
     {
-        # Objects are Pro Tools — a standalone prop routes to the object tools, not general image gen.
+        # A standalone prop image need not be a managed object unless states/IDs are requested.
         "id": "route-object-prop",
         "task": "With PixelLab, I want a standalone treasure chest prop for my dungeon.",
-        # \b keeps create_object_state (an edit variant) from matching; create_map_object is
-        # deliberately not rewarded — it makes a map decoration, not a managed object with states,
-        # animations and tags, which is what a reusable prop needs.
-        "checks": {"object": r"create[_-][18][_-]direction[_-]object|create[_-]object\b"},
+        "checks": {"object": r"create[_-][18][_-]direction[_-]object\b|create[_-]object[_-]pro[_-]flash\b|create[_-]map[_-]object\b|map-objects|generate-image-v2\b|create[_-]image[_-](?:pixen|pixflux|pro(?:[_-]flash)?)\b"},
         "refs_any": [],
     },
     {
-        # REST-only route: no hosted MCP background tool is documented, so mcp-docs has no answer here.
+        # Both MCP raw-image tools and documented REST image routes can make backgrounds.
         "id": "route-background-scene",
         "task": "Using PixelLab, make a forest clearing background for my game's title screen.",
-        "checks": {"background": r"create[_-]image[_-]pixflux[_-]background|pixflux[- ]?background"},
+        "checks": {"background": r"create[_-]image[_-](?:pixflux(?:[_-]background)?|pixen|pro(?:[_-]flash)?)(?![\w-])|(?:generate-image-v2|generate-with-style-v2)(?![\w-])"},
         "refs_any": [],
     },
     {
@@ -274,10 +269,21 @@ SCENARIOS = [
     {
         "id": "blueprint-as-reference",
         "task": "Using PixelLab, create shop icons in the look of hero.blueprint.json. Use the existing hero output images only as style references; do not remake the hero or replay its workflow.",
-        "checks": {"icon_route": r"create[_-]image[_-]pro|generate-image-v2", "reference": r"style|reference"},
+        "checks": {"icon_route": r"create[_-]image[_-]pro(?:[_-]flash)?\b|generate-image-v2\b|generate-with-style-v2\b", "reference": r"style|reference"},
         "refs_any": ["blueprint.md", "icon.md"],
     },
 ]
+
+# These test Pip's own workflow contract, not general MCP tool-routing superiority.
+PIP_WORKFLOW_SCENARIOS = {
+    "setup-codex", "replay-blueprint", "route-animation-doctor", "route-key-pose-move",
+    "route-styled-icons", "inspect-without-repair", "auto-preserves-art-authority",
+    "blueprint-as-reference", "route-bg-removal-fallback",
+}
+
+
+def scenario_group(scenario_id: str) -> str:
+    return "Pip workflow" if scenario_id in PIP_WORKFLOW_SCENARIOS else "Common routing"
 
 
 def est_tokens(text: str) -> int:
@@ -305,7 +311,14 @@ def materialize_variant(ref: str, dest: Path) -> Path:
     """Extract one skill variant into dest; returns the skill dir (cwd for agent runs)."""
     skill_dir = dest / SKILL_REL
     if ref == "current":
-        shutil.copytree(REPO / SKILL_REL, skill_dir)
+        # Match git artifacts: ignored settings, credentials and caches are not benchmark inputs.
+        names = subprocess.check_output(
+            ["git", "-C", str(REPO), "ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", SKILL_REL.as_posix()]
+        ).decode("utf-8").split("\0")
+        for name in filter(None, names):
+            target = dest / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(REPO / name, target)
     else:
         proc = subprocess.run(
             ["git", "-C", str(REPO), "archive", "--format=tar", ref, "--", SKILL_REL.as_posix()],
@@ -371,7 +384,7 @@ def scenario_refs(scenario: dict, files: dict[str, str]) -> list[str]:
 
 def static_report(contexts: dict[str, dict]) -> dict:
     """Deterministic context-size comparison; tokens are chars/4 ESTIMATES."""
-    out: dict = {"note": "token counts are estimated as chars/4", "variants": {}, "scenarios": {}}
+    out: dict = {"note": "chars/4 estimates of injected text plus selected refs_any files; excludes other mandatory/transitive references, tool schemas and conversation. Not actual consumption or a complete task budget.", "variants": {}, "scenarios": {}}
     for name, ctx in contexts.items():
         files = ctx["files"]
         out["variants"][name] = {
@@ -690,7 +703,7 @@ def write_markdown(out_dir: Path, static: dict, summary: dict, variants: list[st
     lines = [f"# pixellab-pip skill benchmark ({out_dir.name})", ""]
     first_col, last_col = variant_label(variants[0]), variant_label(variants[-1])
     lines += [
-        f"Columns: {', '.join(variant_label(v) for v in variants)} (first is always the working-tree Pip skill). Delta compares the last column ({last_col}) against {first_col}. Static tokens are chars/4 estimates.",
+        f"Columns: {', '.join(variant_label(v) for v in variants)} (first is always the working-tree Pip skill). Delta compares the last column ({last_col}) against {first_col}. Static tokens are chars/4 estimates of selected text, not full task context or actual billing.",
         "",
         "## Static context size (estimated tokens)",
         "",
@@ -703,7 +716,7 @@ def write_markdown(out_dir: Path, static: dict, summary: dict, variants: list[st
     lines.append("| Context + all skill references | " + " | ".join(map(str, total_row)) + f" | {delta(total_row[0], total_row[-1])} |")
     for scenario_id, row in static["scenarios"].items():
         values = [row[v]["context_est_tokens"] for v in variants]
-        lines.append(f"| scenario {scenario_id} (context + expected refs) | " + " | ".join(map(str, values)) + f" | {delta(values[0], values[-1])} |")
+        lines.append(f"| scenario {scenario_id} (context + selected refs) | " + " | ".join(map(str, values)) + f" | {delta(values[0], values[-1])} |")
     if summary:
         lines += ["", "## Agent sessions (medians)", ""]
         lines += ["| Scenario | Agent | Metric | " + " | ".join(variant_label(v) for v in variants) + " | delta |", "|---|---|---|" + "---|" * (len(variants) + 1)]
@@ -748,28 +761,28 @@ def render_report_block(static: dict, summary: dict, variants: list[str], agents
         "|---|" + "---|" * len(variants),
     ]
     if summary:
-        # Headline summary above the detail tables — the same aggregation the prose discloses:
-        # mean of per-scenario check rates across agents. Generated, so it can never drift.
-        rates: dict[str, list[float]] = {v: [] for v in variants}
-        for per_agent in summary.values():
-            for per_variant in per_agent.values():
-                for v in variants:
-                    rate = per_variant.get(v, {}).get("checks_rate")
-                    if rate is not None:
-                        rates[v].append(rate)
-        n_scenarios = max(1, len(static["scenarios"]))
         summary_lines = [
             "### Summary",
             "",
-            "| Method | Routing correct (avg) | Up-front context (est. tokens) | Context incl. expected references (est. tokens, avg) |",
-            "|---|---|---|---|",
+            "Regex signals are a screening aid, not payload validation, safety compliance or completed assets. Common routing and Pip-specific workflows are reported separately.",
+            "",
+            "| Scope | Method | Route signals passed (avg) | Up-front context (est. tokens) | Selected context estimate (avg) |",
+            "|---|---|---|---|---|",
         ]
-        for v in variants:
-            avg_rate = sum(rates[v]) / len(rates[v]) if rates[v] else None
-            avg_ctx = sum(static["scenarios"][sid][v]["context_est_tokens"] for sid in static["scenarios"]) / n_scenarios
-            summary_lines.append(
-                f"| {variant_label(v)} | {_fmt_pct(avg_rate)} | {_fmt_int(static['variants'][v]['context_est_tokens'])} | {_fmt_int(avg_ctx)} |"
-            )
+        for group in ("Common routing", "Pip workflow"):
+            ids = [sid for sid in summary if scenario_group(sid) == group]
+            if not ids:
+                continue
+            for v in variants:
+                rates = [per_variant[v]["checks_rate"] for sid in ids
+                         for per_variant in summary[sid].values() if v in per_variant]
+                avg_rate = statistics.mean(rates) if rates else None
+                contexts = [static["scenarios"][sid][v]["context_est_tokens"] for sid in ids
+                            if sid in static["scenarios"]]
+                avg_ctx = statistics.mean(contexts) if contexts else None
+                summary_lines.append(
+                    f"| {group} | {variant_label(v)} | {_fmt_pct(avg_rate)} | {_fmt_int(static['variants'][v]['context_est_tokens'])} | {_fmt_int(avg_ctx)} |"
+                )
         lines[2:2] = summary_lines + [""]  # after the auto-generated note, before "### Context size"
     ctx = [static["variants"][v]["context_est_tokens"] for v in variants]
     lines.append("| Injected context (SKILL.md / MCP docs / none) | " + " | ".join(_fmt_int(c) for c in ctx) + " |")
@@ -778,7 +791,7 @@ def render_report_block(static: dict, summary: dict, variants: list[str], agents
     if summary:
         lines += [
             "",
-            "### Routing correctness and session input (medians)",
+            "### Route signals and session input (medians)",
             "",
             f"| Scenario | Agent | Metric | {cols} |",
             "|---|---|---|" + "---|" * len(variants),
@@ -791,7 +804,7 @@ def render_report_block(static: dict, summary: dict, variants: list[str], agents
         for sid, per_agent in summary.items():
             for agent, per_variant in per_agent.items():
                 cr = [per_variant.get(v, {}).get("checks_rate") for v in variants]
-                lines.append(f"| {sid} | {agent} | routing correct | " + " | ".join(_fmt_pct(x) for x in cr) + " |")
+                lines.append(f"| {sid} | {agent} | route signals passed | " + " | ".join(_fmt_pct(x) for x in cr) + " |")
     return "\n".join(lines)
 
 
@@ -838,7 +851,7 @@ def main() -> int:
         help="comma list of what to compare the current skill against: git refs, 'vanilla' (no context), or 'mcp-docs' (official https://api.pixellab.ai/mcp/docs injected). The current working-tree skill is always the first column.",
     )
     parser.add_argument("--scenarios", default="", help="comma list of scenario ids (default: all applicable)")
-    parser.add_argument("--reps", type=int, default=1, help="repetitions per cell; a full 20-scenario/3-agent/4-variant rep is ~2 hours of sequential agent calls")
+    parser.add_argument("--reps", type=int, default=1, help="repetitions per cell; each non-static cell uses agent-provider tokens")
     parser.add_argument("--timeout", type=int, default=300, help="seconds per agent run")
     parser.add_argument("--static", action="store_true", help="static context comparison only; no CLI calls")
     parser.add_argument("--dry-run", action="store_true", help="print planned CLI commands without executing")

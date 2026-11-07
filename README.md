@@ -253,17 +253,9 @@ Install PixelLab Pip's optional helper packages (Pillow 13 or newer, NumPy, SciP
 
 ## Benchmark
 
-Pip is tested on plain-language routing scenarios against the official MCP docs alone and an agent with no added PixelLab context. The benchmark is dry: it spends no PixelLab credits.
+The [historical benchmark](docs/pixellab-pip-benchmark.md) records a July planning-only comparison. Its old regex scores favor some Pip-specific choices and predate today's MCP tools; they do not establish current routing or output-quality superiority.
 
-| Method | Routes to the exact PixelLab tool | Context tokens per session |
-|---|---|---|
-| **PixelLab Pip skill** | **~98%** | ~7.5k base + discoverable references = ~9.1k average |
-| Official `mcp/docs` injected | ~58% | ~7.7k |
-| No skill (agent knowledge only) | ~24% | 0 |
-
-Dated, nondeterministic results from 20 scenarios and three agents: official docs handled MCP well but missed every REST-only route.
-
-[Full report and reproduction steps ↗](docs/pixellab-pip-benchmark.md)
+The [current comparison review](docs/tools/pixellab-mcp-docs-vs-pip-skill.md) audits the November live evidence, corrects routing and delivery guidance, and separates measured results from untested claims. Current MCP tools and help may be sufficient for a quick asset. Pip adds credit controls, provenance, replay, verification and workflows across PixelLab surfaces, with extra context and review steps.
 
 ## Security
 

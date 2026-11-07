@@ -18,7 +18,7 @@ Pass files in their intended order. The helper decodes every frame of each input
 
 Missing or unusable Pillow returns a JSON `skipped` reason and exit code 3 before inspecting inputs. Treat this as unavailable verification, never a pass; continue with the host-check fallback above. `--help` and argument validation work without Pillow.
 
-Alpha/bounds are observations: a fully transparent effect frame may be intentional, edge contact does not prove clipping, and transparency does not prove the background was correctly removed. Continue visual verification. This helper does not verify GIF disposal or source-pixel fidelity; retain the GIF checks below.
+Alpha/bounds are observations: a fully transparent effect frame may be intentional, edge contact does not prove clipping, and transparency does not prove the background was correctly removed. Continue visual verification. Before calling an apparent matte a baked background, check its decoded alpha; RGB beneath zero alpha is invisible. Use a separate labeled checkerboard inspection aid when the rendering is unclear. This helper does not verify GIF disposal or source-pixel fidelity; retain the GIF checks below.
 
 ## Assembly Helpers
 

@@ -221,9 +221,9 @@ Use these structured settings where the route exposes them:
 ~~~
 
 The 2026-07 test plan used standard mode, four directions, `size: 16`, and the
-documented chibi proportions preset `{"type":"preset","name":"chibi"}`. Pip
-now treats character Standard as deprecated for routing; do not reuse that
-plan as current tool guidance. The test observed a 24x24 canvas. Follow
+documented chibi proportions preset `{"type":"preset","name":"chibi"}`. Standard
+remains supported; these historical settings are not a current schema or quality guarantee.
+The test observed a 24x24 canvas. Follow
 `skills/pixellab-pip/SKILL.md` for current character routes.
 
 For Pro, keep the same text but do not pretend that `flat`, `low detail`,

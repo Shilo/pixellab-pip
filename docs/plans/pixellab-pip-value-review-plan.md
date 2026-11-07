@@ -1,6 +1,6 @@
 # PixelLab Pip Value Review Plan
 
-Status: Deferred. Not started.
+Status: Historical deferred plan; reviewed and partly superseded by the [November evidence review](../tools/pixellab-mcp-docs-vs-pip-skill.md). Its unchecked remedies are not the current specification; several were rejected or already resolved.
 
 Last reviewed: 2026-10-23.
 

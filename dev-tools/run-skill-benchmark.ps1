@@ -1,7 +1,7 @@
 param(
     [ValidateSet("full", "static", "dry-claude", "dry-all", "list", "cancel")]
     [string]$Preset,
-    [int]$Reps = 1,  # 1 rep keeps the full preset at 240 cells (~2 hours); -Reps 2 for tighter medians. The benchmark is dry — no PixelLab credits.
+    [int]$Reps = 1,  # Repetitions multiply the current scenario/agent/variant matrix; model-provider charges apply. No PixelLab generations.
     [string]$Resume  # path to a prior .local/bench/<stamp> dir to continue instead of starting fresh (reuses completed cells)
 )
 
@@ -20,10 +20,10 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $benchmark = Join-Path $repoRoot "dev-tools/skill_benchmark.py"
 $interactive = -not ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected)
 
-# preset -> { Label, Args, NeedCli (agent exes that must be on PATH) }. Every preset is dry (no credits).
+# preset -> { Label, Args, NeedCli (agent exes that must be on PATH) }. Planning runs use model tokens; no preset generates PixelLab assets.
 $presets = [ordered]@{
-    "full"       = @{ Label = "full        - COMPLETE suite: all agents, all 4 variants, refreshes the report ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--reps", "$Reps", "--report", "docs/pixellab-pip-benchmark.md"); NeedCli = @("claude", "codex", "opencode") }
-    "static"     = @{ Label = "static      - free context-size comparison, no CLI calls"; Args = @("--static"); NeedCli = @() }
+    "full"       = @{ Label = "full        - paid agent planning suite: all agents, all 4 variants, refreshes the report ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--reps", "$Reps", "--report", "docs/pixellab-pip-benchmark.md"); NeedCli = @("claude", "codex", "opencode") }
+    "static"     = @{ Label = "static      - free context-size comparison, no CLI calls"; Args = @("--static", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla"); NeedCli = @() }
     "dry-claude" = @{ Label = "dry-claude  - claude only ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude") }
     "dry-all"    = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }
     "list"       = @{ Label = "list        - print scenarios and exit"; Args = @("--list"); NeedCli = @() }

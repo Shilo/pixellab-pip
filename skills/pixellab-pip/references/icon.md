@@ -8,19 +8,18 @@ Use this reference for skill/ability/spell/action-bar/hotbar icons, inventory it
 - [Canvas Sizing](#canvas-sizing)
 - [Prompt Pattern](#prompt-pattern)
 - [Matching An Existing Set](#matching-an-existing-set)
-- [UI Pieces](#ui-pieces)
 - [Request Body](#request-body)
 - [Verification](#verification)
 
 ## Route
 
-Route by icon size first:
+Route by the requested result, then size/style constraints:
 
-- **`16–31px` single icon → MCP `create_image_pixen`/`create-image-pixen` (the "new" / Pixen model); Pro is unreliable for a clean icon below `32px`.** Confirm the route before generating unless the user named the Pixen model (route only — cost-routing and batch-approval still apply). Recipe: `detail: low detail`, `outline: single color black outline`, `view` to suit the subject, `no_background: true`. Pixen returns one image per call, so one item per job. Optional: clamp the palette to ~16–32 colors (`aseprite-cli.md`). Never use `create-image-bitforge` for icons (no MCP equivalent either).
-- **`16–31px` sheet or large set → assemble locally; never generate the sheet in one call.** No route honors sub-32px cell math; the sheet comes back with fewer, larger cells on its own grid, and the missing cells make it unrepairable locally. Pixen one-item-per-job then assemble locally (clean; N paid jobs, get batch approval per SKILL.md), or a guardrailed Pro `create_image_pro`/`generate-image-v2` batch (~64 candidates per job) then cull the muddy ones. State the tradeoff and let the user choose.
-- **`32px+` icon or sheet → MCP `create_image_pro`/`generate-image-v2` (Pro).** Guardrail the prompt: bold single-color black outline, low detail, limited palette, no gradients/noise/stray pixels. On a cheap/budget request, read `cost-routing.md` and offer a Pixen comparison or smaller test first. Use `create_image_pixen`/`create-image-pixen` here when the user wants a cheap attempt, exact `detail`/`outline`/`view` controls, or fast iteration over variety; verify its output reads as the requested icon type.
+- **One small icon:** ordinarily MCP `create_image_pixen` / REST `create-image-pixen` for one native-size result at 1 generation. Use requested outline/detail/view controls rather than forcing a black outline. PixFlux is another single-image option; Pro can fit a stronger style/reference or candidate-variety need, at higher call cost. Do not promise equal quality across models or choose a many-candidate call merely because the icon is 32px. Include route choice in the existing cost card, without a separate route-confirmation turn.
+- **Named distinct icons:** preserve the exact requested subjects and count. Plan one image per concept when exact coverage matters, or an approved sheet/batch followed by verification of every named item. Same-prompt Pro candidates are alternatives, not one output for each name; do not count 64 potion variations as a sword, shield, key and potion set.
+- **A sheet or exploratory variety:** `create_image_pro` / `generate-image-v2` remains a useful option; `create-image-pro.md` covers its candidate counts and prompt-guided grid limits. For cells below 32px, prefer separately generated icons and approved local assembly when reliable cell boundaries matter. An explicit Pro sheet request may be attempted with its documented checks; no text prompt guarantees cell math. Keep generation-versus-assembly scope clear in the plan.
 
-Do not default to object generation (`create_1_direction_object` / `create-1-direction-object`), `create_tiles_pro`, `generate-ui-v2`, or `create-ui-asset` for icons. Object routes produced noisy/downscaled-looking icons with broken contours and weak 32px clarity in testing — avoid them for any icon request, even when the subject is a weapon, potion, or prop. Use UI routes only when the user asks for the slot, button, panel, frame, or container UI itself.
+Do not default to object generation (`create_1_direction_object` / `create-1-direction-object`), `create_tiles_pro`, or UI tools for ordinary icons. Observed object-route icons had weak small-scale clarity; this is a scoped quality preference, not proof that those tools cannot make icons. A supported alternative must still deliver the requested size, subjects and readable art. Use UI routes for the slot, button, panel, frame, or container itself.
 
 Background defaults differ by icon type:
 
@@ -42,7 +41,7 @@ Generate the sheet first, then verify the original output against the requested 
 
 ## Prompt Pattern
 
-Preserve sheet language for complete sheets; do not rewrite the request as separate standalone images unless the user asks for separate generated files. Follow SKILL.md Text Preparation: content only, no operation language, no canvas size or transparency wording already carried by `image_size`/`no_background`.
+Preserve the requested final sheet. For one-call sheet generation, use sheet language; for approved per-concept generation and assembly, prompt each source as a standalone icon and deliver the assembled sheet. Follow SKILL.md Text Preparation: content only, no operation language, no canvas size or transparency wording already carried by `image_size`/`no_background`.
 
 Backgrounded skill-icon sheet starting point:
 
@@ -66,7 +65,7 @@ Avoid positive mentions of `rune`, `glyph`, `sigil`, `spellbook labels`, `UI slo
 
 Item-icon specifics:
 
-- Prefer category coverage over an exact 64-item list for the first candidate; long exact lists over-constrain and produce noisier results. If exact coverage is required, run it as a follow-up candidate and compare.
+- For exploratory variety, category coverage can avoid an overlong catalog. For a user-supplied exact list, retain every requested item from the first plan; do not replace it with categories or postpone missing subjects to an unapproved follow-up.
 - Do not over-prompt outline instructions unless the user asks for a specific outline style; spotty or broken contours are a failed candidate, not a prompt-patch target.
 
 ## Matching An Existing Set
@@ -81,10 +80,6 @@ Item-icon specifics:
 - Icons the engine tints at runtime: `white and light grey only, greyscale, solid black outline`.
 - Picking: show candidates at 3x on the UI's own background colour. Dark iron or black objects vanish on dark panels; upright, symmetric silhouettes read better than tilted ones; skip candidates with stray sparkle pixels in the corners.
 - More failure anchors: `filling the frame` when the subject is small in the cell; say what an ambiguous silhouette must not be (`clearly a scythe, not a pickaxe`, `a lion-head shield, NOT a lion`) and name its direction (`pointing diagonally up-right`).
-
-## UI Pieces
-
-For the UI itself (`create_ui_asset`): a result that comes back as a sheet of many frames needs `isolated single shape not a UI kit sheet` plus `pieces` to pin the geometry; pass `style_image_base64` from the game's existing UI to match it. Describe the frame material and trim and an empty interior (`plain empty face for a text label`, `empty hollow centre for an icon`).
 
 ## Request Body
 

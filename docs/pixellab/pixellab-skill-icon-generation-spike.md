@@ -2,6 +2,8 @@
 
 Last reviewed: 2026-06-29.
 
+Historical scope: the complete backgrounded sheets tested here do not establish a default for one small icon or exact named sets. Follow the current [icon contract](../../skills/pixellab-pip/references/icon.md) and [November comparison](../tools/pixellab-mcp-docs-vs-pip-skill.md); the original experiments below are preserved.
+
 Purpose: capture live-generation findings for fantasy RPG skill icon and item icon requests so `pixellab-pip` can route "skill icon", "ability icon", "spell icon", "action bar icon", "item icon", and similar requests with tested defaults.
 
 This spike is based on live PixelLab generations and human visual review. The human-ranked winner is REST v2 `POST /generate-image-v2` ("Create S-XL image (Pro)") for complete 8x8 finished skill icon sheets. Two `generate-image-v2` prompt variants are close co-winners for different reasons: the original strict-grid prompt has the most authentic RPG hotbar/icon-sheet punch, while the rich-background prompt reduces some border pressure and improves explicit background guidance.

@@ -1,78 +1,253 @@
-# PixelLab MCP Docs vs Pip Skill (Session Context)
+# PixelLab MCP Docs vs Pip Skill
 
-Last reviewed: 2026-11-02 (UTC snapshot).
+Reviewed 2026-11-07. Implementation baseline: `ddd80ae1cc91cfb6379792d734cd020c443207bf`, with a clean working tree. The November evaluation tested its predecessor `6549789`; the intervening documentation refresh already fixed rooms and managed downloads. This review combines current contract research, an independent audit of saved evidence, corrective implementation and a paid four-arm study using fresh isolated agents. Specific improvements are supported; general superiority or output-quality parity with MCP guidance is **not** established.
 
-This is a decision guide for one specific choice: what PixelLab context to give a coding agent for a session. The two options are PixelLab's official MCP documentation, injected as a prompt link, versus installing the PixelLab Pip Agent Skill. It is a session-context question, not a service question; for the execution-layer comparison (MCP service vs the skill) see [Official PixelLab MCP Service Comparison](official-pixellab-mcp-service-comparison.md).
+## Evidence and method
 
-Sources reviewed:
+Current primary sources are the [generated MCP guide](https://api.pixellab.ai/mcp/docs), [REST OpenAPI](https://api.pixellab.ai/v2/openapi.json), [REST index](https://api.pixellab.ai/v2/llms.txt), [MCP setup page](https://www.pixellab.ai/mcp), and connected tool descriptions/schemas. The current inventory is 122 connected MCP tools and 102 REST paths / 113 operations / 275 components. Subsequent read-only MCP initialization and tool listing captured server version 0.2.0's complete 1,168-character instructions and all 122 raw input schemas. These captures were after primary execution and do not establish complete host injection into each subject. A free `search_help` question and a free Pro Flash 64px character capability lookup were executed. Help confirmed supported standard mode, v3 soft outline/detail hints from text, reference-mode ignored hints and v3 animation default; it could not establish vocal eligibility or cross-surface inpaint guarantees. The capability result quoted 5 image + 1 rotation = 6 provisional generations. None of these reads queued generation.
 
-- [PixelLab MCP tool guide](https://api.pixellab.ai/mcp/docs).
-- [PixelLab MCP setup page](https://www.pixellab.ai/mcp).
-- [PixelLab Pip `SKILL.md`](../../skills/pixellab-pip/SKILL.md) and its `references/`.
+Private evidence is retained under `.local/pip-current-review/`: source snapshots, connected-tool metadata, help answer, clean before/after skill inventories and hashes, scanner provenance/reports, static-size artifacts and validation logs. The public Claude artifact could not be opened; its supplied local HTML, searchable text and images were used. All historical materials remain under `.local/pip-vs-mcp-review/`, including both HTML follow-ups, the improvement brief, static reviews, test plan, run log, transcripts, records, metrics, blind keys/grades, inpaint files, author responses and historical guide snapshot. These contain private data and are not published here.
 
-## What Each Option Is
+The October deferred plan, July benchmark and November reviews are evidence from different versions, not current specifications. Supporting context was checked in [service comparison](official-pixellab-mcp-service-comparison.md), [route parity](../pixellab/pixellab-mcp-vs-rest-route-parity.md), [minimal router](../minimal-pixellab-router.md), [historical benchmark](../pixellab-pip-benchmark.md), developer guidance and the benchmark launcher/scorer.
 
-**Official MCP docs as context.** The setup page tells users: "Include this link in your prompts for a complete overview of all PixelLab tools: `@https://api.pixellab.ai/mcp/docs`." That URL is one flat document listing the hosted MCP tool inventory (121 tools in the 2026-11-02 UTC snapshot, including seven Pro Flash tools), the return-ID-then-poll `get_*` job model, UUID download links, bearer-token auth, and engine implementation guides exposed as `pixellab://` resources. It is first-party and live, but its generated examples and prose can disagree with its own parameters; no install is needed to read it.
+Success criteria were recorded privately before implementation: correct confirmed factual contradictions; preserve routes and protections; distinguish requested assets from alternatives; pass QA and comparable pinned scans; obtain independent review; make no output-quality or actual-token claims from static text. The initial contract review used free verification. The user subsequently authorized substantial live PixelLab testing under a total $10 credit cap, with no separately billed model/API evaluations. The live study below supersedes the initial proposed pilot.
 
-**Pip Agent Skill.** A skill installed into agents that support skills. `SKILL.md` (the always-loaded router) plus 61 on-demand `references/*.md` cover surface selection across MCP, REST v2, website/Pixelorama editor, Aseprite, and legacy v1, plus cost routing, prompt preparation, secret-handling guardrails, and output verification/reporting. The two are complementary, not rivals.
+## Findings ledger
 
-## Scope
+Current-status judgments below refer to the baseline and the 2026-11-07 connected/docs snapshot. “Observed” means saved November output, not a new generation. Conditions were one client/model/account in the historical evaluation (reported as Opus 5.5 with auto permission mode; private account eligibility details remain in the local evidence); documentation and clients can change. A schema establishes accepted input, not effective art direction.
 
-| Area | Official MCP docs | Pip Skill |
+| Claim and source | Kind | Supporting evidence and counterevidence | Current decision and verification |
+|---|---|---|---|
+| Standard characters are deprecated — Pip Model Terms, review RC1, author response | Product claim mixed with policy | Connected `create_character` supports standard at 1 generation for 4/8 views; its default is now v3. REST legacy grouping recommends newer routes but explicitly says older routes still work. Small historical comparisons favor v3 detail, not removal of standard. | **Fix.** Name standard for lowest-cost text creation; describe ordinary v3 as a quality preference. Actual relative quality remains sample-bound. |
+| v3 ignores outline/detail — Pip router, review RC1 | Product/behavior claim | Connected tool and current help say soft guidance from text, ignored with a reference; Pro ignores style/proportions. Earlier poor adherence is counterevidence to reliable control, not proof the input has no effect. No controlled current outline study exists. | **Fix/qualify.** Scope ignored controls to reference mode/Pro; inspect art rather than promising adherence. |
+| PixMiniMax is the default animation engine — Pip animation policy, answers | Policy misreported as product fact | Service chooses template with an ID, otherwise v3. Historical slash outcomes favor different engines in different runs. PixMiniMax can be cheaper for large/long clips; templates can fit standard locomotion. | **Fix.** Select an engine by motion/count/canvas, retain explicit engine choices, use valid matching templates for standard managed motion and v3 for fitting free-form work. No universal motion-quality winner demonstrated. |
+| MCP inpaint leaks outside masks — Pip input roles, original article/author | Observed hypothesis generalized to product | Six saved rectangular-mask tests on one transparent 64px sprite independently show zero changed visible/alpha pixels outside the mask, consistent with connected Pro/Flash claims. Website anecdotes and a mislabelled original figure do not establish MCP leaks; tests do not cover custom masks, large/non-square/opaque inputs, REST or website behavior. | **Fix/qualify.** Remove blanket avoidance; verify dimensions/alpha/visible RGBA outside and requested change inside. RGB under alpha zero is a separate comparison. |
+| No cheaper MCP masked edit — cost routing | Product price claim | Pro Flash is 5 at ≤96px versus Pro's 10 for small square inputs. Base REST inpaint has different controls and pricing; Flash is not necessarily cheapest for every condition. | **Fix.** Compare fitting operations and quote free capability results when available; never submit just for a price. |
+| Pro Flash is 1 generation; Pro gives 64 distinct icons for 20 — author responses | Price and value hypotheses | Connected prices are 5 for one 32px Flash image and 10 for one 32px Pro candidate call. Pro candidates share a prompt, not a distinct requested concept per image. A usable candidate can be valuable. | **Reject arithmetic; qualify value.** Use cost per completed usable requested asset and account for selection, failures and retries. The later single-potion comparison below measures available-art yield; unselected alternatives remain distinct from finalized delivery. |
+| Room paint costs 10; isometric cannot reuse room style — earlier Pip/review RC1 | Stale product facts | Baseline already states 20 paint + 10 pieces, same-view style rooms and current oblique restrictions, matching connected tool. | **Already resolved.** Retain floor-plan/door/pieces verification; do not reapply obsolete room edits. |
+| MCP font price absent — cost routing | Stale product fact | Connected `create_font` states 15 generations or at least $0.115; REST agrees. Generated guide can omit details. | **Fix.** Correct MCP wording without changing font routing. |
+| Spritesheet/ZIP export is REST-only — old Pip/review | Stale surface claim | Baseline already uses returned MCP group ZIP/per-state spritesheet links. REST ZIP may add template keypoints; output packages are not identical. | **Already resolved.** Retain getter refresh, package integrity checks and output distinctions. |
+| Vocal animation works on trial — historical help; paid Tier 1+ — tool | Conflicting eligibility claims | Current connected descriptor says paid Tier 1+; current help found no eligibility evidence. Historical help asserted trial eligibility without direct observed execution. Server subscription/credit-fallback overview is not a tool-specific entitlement test. | **Unresolved.** Retain documented tool gate and plan-refusal handling; no paid eligibility probe. Missing help evidence is not proof of exclusion. |
+| All images should be unzoomed first — REST overview and old Pip | Workflow recommendation | Connected unzoom warns it returns some grid on paintings, needs ≥256px and composites alpha onto white. Native sprites need no recovery. | **Fix both-side overgeneralization.** Inspect scale, use only for genuinely upscaled pixel art, and disclose alpha loss/recovery risk. |
+| Text-only animals should first supply/generate a v3 reference — Pip | Policy | v3 text creation is humanoid-only, but standard and Pro/Flash support animal text. Saved reference attempts added turns and carried a decorative border into rotations. A suitable supplied reference is useful counterevidence to banning v3. | **Fix.** Direct supported text route, with cost disclosure; reuse suitable supplied sprites through v3. Standing four-legged wording is a scoped cat/dog aid. |
+| “Walks around” means eight directions — review remedy and graders | Preference/unsupported inference | Eight directions suit some games; four cardinal walks can satisfy others. South-first is Pip's preview policy; one run explicitly acknowledged unfinished extra directions. Both arms also show idle/walk alignment problems. | **Reject universal inference.** Agree required scope in the paid plan; retain south-first unless wider scope approved, and honor that approval without asking twice. |
+| One 32px icon should always use Pro — Pip | Policy/quality hypothesis | Saved Pro run spent 10 and produced 64 native candidates, including a usable recommended one; compared single-image tools spent 1. Other saved icon sets show weak Pixen semantics. Neither proves equal model quality. | **Fix.** A single-image route ordinarily fits one small icon; Pro remains useful for style/detail/variety. Preserve selection policy when alternatives exist. |
+| Always auto-select a primary candidate — review RC4 remedy | User-control proposal | A chosen final improves completion, but the current selection contract reserves the choice unless delegated. Historical potion had usable candidates, not zero output. | **Reject default change.** Avoid unnecessary candidates when one asset is requested; classify awaiting selection honestly. Delegate choice only when the user authorizes it. |
+| Named icon sets can use generic variety first — Pip icon/Pro guidance | Workflow policy | Same-prompt arrays do not map names to images. Long exact lists can harm quality, but dropping requested subjects fails fidelity. | **Fix.** Preserve exact list/count; approve concept-specific calls or verify every named item in a sheet. Readability and semantic uniqueness need visual inspection, not hashes. |
+| UI canvas dimensions describe usable button/bar dimensions — delivery behavior | Observed usability defect | Saved Pip 341×192 health bar had alpha bounds (64,145,276,188), button (81,48,260,144); comparison files were cropped. Tool requires ≥192px per side. Intentional padding/pivots may still matter. | **Fix.** Plan geometry, inspect alpha bounds, report lossless crops and usable pieces; retain fixed dimensions/anchors when required. Never invent a missing fill. |
+| Copied knight belongs beside cat/UI outputs — run behavior | Observed provenance/delivery error | The baseline copy rule already applies only to consumed inputs; unrelated copying misapplied it. Consumed copies support replay. | **Fix clarity, retain feature.** Only consumed inputs, byte-for-byte, under a named input subfolder; identify raw/audit files separately from final assets. |
+| Official hero→Flash enemies/props→Pro tiles recipe guarantees coherence — help/original/review | Workflow hypothesis | Shared anchors and matched view are real controls; the original 13-generation spot check is small. Flash anchor dimensions must fit each output; Pro terrain references differ by surface. Different body plans/scales/facings can still diverge. | **Qualify.** Establish palette, scale, canvas, projection and needed facings across the pack, use compatible role-specific anchors, verify the outputs. Do not mandate one paid recipe. |
+| A grader's famous-character resemblance requires a new IP restriction — review RC8 | Preference/remedy | Grader resemblance is subjective; generic requested archetypes do not establish an intent or a universal defect. | **Reject.** Preserve user subject and explicit originality constraints; no broad new restriction. |
+| Local shield recolor proves Pip's exact-edit workflow wins — follow-up | Observed quality plus policy claim | Saved recolors preserve pixels well, but one final explicitly admits bypassing Pip and neither establishes separate local-method approval. The follow-up calls them request-authorized; that conflicts with the skill's actual fallback contract. | **Qualify.** Record good images and policy deviation separately. “Change only the shield” states the preservation goal, not automatic non-PixelLab processing authority. |
+| Talking request requires a speech bubble — graders | Preference | Exact dialogue and viseme timing can satisfy a talking GIF request; a bubble may help some intended uses but is an additional output choice. | **Reject universal rubric.** Retain exact dialogue, portrait/viseme lifecycle and timing verification. Do not require local text drawing. |
+| Approval waits show generation failures; zero-ask arms are superior — follow-ups | Interpretation | Four saved Pip runs refused a relay, not generation; other Pip runs accepted it and one potion spent without its gate. Real users can legitimately wait; repeated ambiguous checkpoints still hurt usability. | **Qualify/fix friction.** Preserve trusted authorization and Auto-off; reuse approved whole-chain scope. Separate approval, harness, service and output failures. |
+| Manifests, blueprints, previews and sounds should be removed/optional — review remedy | Feature/default proposal | They cost files/context but supply resume, charge audit, replay and completion notification. Existing sound can be disabled and cannot block completion. | **Retain defaults.** Compact chat via linked exact records, remove duplicate instructions, preserve consumed inputs and core artifacts. Default opt-outs require a separate user decision supported by usage evidence. |
+| Generated guide is always correct; tool schema proves quality | Unsupported assumption | Guide retains inconsistent endpoint/four-direction/chaining examples; connected descriptions contain advice beyond the guide and their own discrepancies. Parameter existence proves neither motion quality nor palette/style adherence. | **Reject.** Apply the selected surface's actual schema for calls, inspect observed results and retain unresolved conflicts. |
+| July 98% vs 58% demonstrates present Pip superiority — historical benchmark/pitch | Historical measurement overgeneralized | No connected tools/help were available in that planning benchmark; rubrics excluded valid MCP image alternatives and included Pip-only conventions. Expected-reference estimates omit mandatory/transitive files. | **Fix claims/scorer.** Preserve historical tables with warning; broaden routes, separate task groups, call regexes screening, exclude private settings/caches from current exports. No new agent-CLI routing scores replace the July tables; live image ratings are reported separately below. |
+
+## Official advice retained, rejected or qualified
+
+The generated guide is valuable for inventory and API examples, but it is not a superior authority for every decision. Current connected tool descriptions carry additional mode-selection and risk guidance. Important disagreements:
+
+- The guide's opening forbids REST fallback without MCP, while later sections explicitly support REST integrations. Pip retains documented, authenticated REST fallback unless the user specifically requires MCP. MCP tool names are never guessed REST paths. The [parity map](../pixellab/pixellab-mcp-vs-rest-route-parity.md) documents real asymmetric capabilities.
+- It describes UUID download URLs as freely shareable. Pip retains sensitive-link handling and local persistence because possession grants access.
+- Its four-direction Pro Flash character hint conflicts with the eight-only schema. Use eight; absence of a schema option is evidence about that call, not every product surface.
+- Its immediate tileset-chaining examples conflict with the connected top-down tool's wait/get-base-ID procedure. Retain Pip's wait and returned-ID verification; do not invent example attribute names. Standard shared tiles can be close rather than byte-identical, so exact seam checks remain valuable.
+- The positional `animate_character(id, 'idle')` example is ambiguous against actual named arguments/catalog IDs. Verify a matching catalog ID; plain custom idle belongs in an action field. Historical `search_help` also invented a sword template. Today's help did not repeat it, which does not validate all future answers.
+- Connected animation escalation advises deleting a prior animation before a retry. Pip retains explicit destructive approval and can retain failed takes; a new attempt is not permission to delete.
+- Server instructions summarize asynchronous generation and job IDs, subscription/credit fallback, exact agent-authored Workbench operations, VFX and project Git access. The actual operation still determines the returned ID and getter; managed creation/UI can return an asset ID without a background-job ID. “Free” Workbench describes provider pricing, not AI image generation or evidence of zero overall model cost. Generic Git access is not a request to clone or push a user's project. Existing lifecycle, authorship and user-scope rules suffice; no new runtime subsystem is warranted.
+- REST blanket unzoom advice, universal quality labels and pack recipes remain qualified as above. A provisional submit receipt starts paid work and is not a free quote or contractual cost cap. Use genuine free capabilities/quotes where available.
+
+## What historical results do and do not show
+
+The original article lacks raw prompts, complete rubrics, client/model conditions and a clear independent-generation denominator. Its rewritten MCP text was evaluated on previously seen pack plans; a 13-generation live check is not a quality study. The local pretest audit finds mislabelled shield imagery, an undisclosed mirrored MCP west attack also criticized in another arm, a baked background and text artifacts. Its aggregate cost ratio also does not support the stated upper bound. These weaken strong headline claims without dismissing genuine Pip defects or honest reports of MCP failures.
+
+The local November follow-ups provide much stronger evidence: raw transcripts, output files, tool text, saved guide, randomized labels and blind keys. Their scorecard nevertheless mixes values and facts: the static “12 better topics” includes opinionated defaults and extra policy as if presence established effectiveness. It is not a quality score. The 25 guide / 4 Pip / 5 tie votes are 34 ratings of 17 matched pairs, not 34 independent generations. Small samples and subjective rubrics limit generalization.
+
+An independent recheck reproduces the published clean-run medians: Pip n=23, 13.2 minutes and 140,111 peak context; docs-file n=20, 5.15 minutes and 124,245. Mean reported generations are 4.087 versus 6.65. These pool zero-spend questions, local edits, approval waits, unequal task mixes and some quoted charges incorrectly flagged as observed. They do not measure active latency, actual billed tokens or cost per completed usable result. Four no-output relay waits are separately identifiable. A plain-MCP cat reused shared account art. A notes leak affected the first round; it must remain discounted. Docs-URL runs usually never fetched the guide and cannot represent loaded-guide runs. Outages and unfinished work cannot silently become quality losses.
+
+Observed weakness remains: default Pro for one icon added cost/selection; reference-first animals added avoidable work; padded/duplicate UI hurt usability; cheapest-character answers repeated a false premise. Some plain-MCP sessions substituted code or locally drawn art. Those findings support focused corrections and retained integrity rules; they do not establish Pip universally worse or revised Pip better.
+
+## Implemented changes and static verification
+
+Corrections are in the existing router and relevant operational references, with no new runtime subsystem. Global schema-versus-policy guidance is canonical in `SKILL.md`; specialized inputs, cost, icons, animation and reporting stay in their references. Existing references can be reused when already loaded. Removed duplicated tool inventories and blueprint-format instructions remain discoverable in the router/canonical blueprint reference. Sound, manifest, blueprint, previews, localization, project styles, paperdolls, cinematics, maps, editor/Aseprite/Pixelorama and REST coverage remain supported.
+
+The active human-facing asset-routing map and stale Standard-deprecation/unzoom annotations were also reconciled. Historical generation spikes retain their raw experiments, with scope notes separating old sheet findings and settings from current single-icon/character policy.
+
+| Text measure | Baseline | Frozen improved v1 | Final adaptive revision |
+|---|---:|---:|---:|
+| Always-loaded `SKILL.md` characters | 63,225 | 60,558 | 61,054 |
+| `SKILL.md` chars/4 estimate | 15,806 | 15,139 | 15,263 |
+| Shared run text: skill + Auto + Bark + usage + blueprint, characters | 113,282 | 108,606 | 109,251 |
+| Usage-report characters | 10,179 | 8,179 | 8,179 |
+
+These are normalized Unicode-character counts of identified clean exports. Final entry/shared text is about 3.4%/3.6% smaller than baseline, excluding route/helper/tool context. Exact requests remain in linked local records. The static benchmark additionally compares the current tree, baseline, fetched MCP guide and vanilla; its selected-reference rows are explicitly incomplete task budgets. This static comparison measures neither actual tokens nor latency. Live yield and blind output ratings are reported separately below. Fewer characters alone is not success.
+
+The initial ten previous prompts and five transfer cases were traced against old/new contracts. This table records that earlier static scope; the later live study covers only the trials reported below:
+
+| Request/case | Revised decision and preserved gate | What remains unmeasured |
 |---|---|---|
-| MCP tool inventory | Yes — full 121-tool list, authoritative for documented tool names | Partial — routing tables; defers to mcp/docs and visible tool schemas for exact calls |
-| REST v2 coverage | Linked and described as an alternative, but no route inventory | Yes — endpoint router and fallback policy |
-| Other PixelLab surfaces (Aseprite / Pixelorama / website) | Names them, but gives no operating workflow | Yes |
-| Engine integration guides (Godot / Unity / Python) | Yes — via `pixellab://` resources | No |
-| Cost / credit control | Per-tool estimates, but no cross-route approval or retry policy | Yes — `references/cost-routing.md` and the paid-call gate |
-| Prompt preparation | Partial — parameter examples | Yes — enhancement and text-prep rules |
-| Auth / secret handling | Partial — bearer header setup | Yes — `PIXELLAB_SECRET`, no-paste guardrails |
-| Output verification / reporting | No | Yes — `references/usage-reporting.md` contract |
-| Setup | Partial — per-client config snippets | Yes — interactive setup wizard |
-| Image-role classification | No — lists image params only | Yes — edit / identity / style / mask / palette / frame roles |
-| Localization (non-English requests) | No | Yes — normalize to English, reply in the user's language |
-| Output integrity | No | Yes — "every pixel from PixelLab"; local processing labeled, not passed off as generated |
-| Token footprint | ~187.6k chars (~46.9k est tokens), one flat all-or-nothing document | `SKILL.md` ~62.9k chars (~15.7k est tokens) always, plus 61 `references/*.md` files loaded on demand |
+| Knight, all directions | v3 humanoid; only consume intended references, inspect bounds/gear and every facing | Rotation quality/clipping frequency |
+| Orange cat walks around | Direct supported text-animal creation; establish approved direction/motion scope instead of assuming eight | Loop quality and required game coverage |
+| One 32px potion | Ordinarily one native single-image call; Pro remains an explicit variety/style option | Accepted-icon cost/yield |
+| Six named inventory icons | Preserve all six concepts, approve whole chain and inspect each result | Readability/consistency across models |
+| Health bar + Start | Structured UI, alpha-bound checks and reported lossless crop/split | Visual polish, fill usability |
+| Hero/slime/terrain pack | Shared projection/scale/anchors/facings, fit actual reference dimensions, terrain-specific checks | Pack cohesion; no single recipe proven |
+| Exact shield recolor | Supported mask route with preservation diff; local repaint needs explicit fallback authority | Other masks/canvases/surfaces |
+| Supplied knight sword swing | Raw animation; fitting engine/count, room for weapon, strike/continuity checks | Motion quality |
+| Cheapest characters question | Standard supported and lowest-cost text option; v3 tradeoff and costs qualified | Current output quality at matched intent |
+| Knight says exact dialogue | Portrait/visemes/GIF timing, exact words; no mandatory speech bubble | Dialogue perceptibility in actual GIF |
+| Existing south-facing animal | Reuse supplied sprite through matching v3 body/template, no new reference-generation call | Identity drift |
+| Exact named small icon grid | Coverage and cell checks before accepting/assembling; batch approval retained | Generation success rate |
+| Non-square opaque custom-mask edit | Validate selected surface fields; compare size/alpha/visible outside-mask pixels | Guarantee on this untested condition |
+| Multi-turn approved directions/retries | Resume saved jobs and ledger, reuse actual bounded approval without relays raising authority | Native-host behavior across turns |
+| Missing MCP plus REST/Aseprite request | Honor explicit surface, public REST authentication, documented local export only | Native editor execution |
 
-Token counts are estimated as chars/4 and measured against the 2026-11-02 UTC MCP snapshot and current skill. The footprints are not directly comparable: mcp/docs loads in full whenever the link is fetched, while Pip loads `SKILL.md` every time and pulls only the references a task needs. Pip's always-on floor remains below the flat MCP document.
+Comparable clean before/after scans pass at **17 / LOW / CAUTION**, with the same findings/coverage baseline, reviewed four unresolved reference notices and unsupported WAV analysis. An intermediate revision scored 46 after flagging negated source-reading language and continuation within an approved scope; its full artifact/report are preserved. The final wording explicitly requires source text and limits continuation to expressly approved work. Scanner pins, baseline, file coverage and suppressions were unchanged. The independent reviewer verified exported hashes against baseline/current files and found no remaining runtime blocker. A scan is partial static evidence, not a hosted audit or proof of behavioral safety.
 
-## What The Current Official Guide Gets Wrong Or Leaves Unsettled
+Final full validation of the v7 runtime and implementation: `python dev-tools/qa.py` passes, including **411 unit tests** in 150.390 seconds. Sandbox temp/hardlink restrictions required a writable ignored test directory and execution outside the sandbox for the unchanged hardlink-integrity case; no test was skipped or weakened to obtain a pass. New benchmark regression cases cover supported alternatives, nonexistent-name suffixes, grouping and exclusion of private settings. Initial failing test logs were retained. Subsequent report-only result updates receive the applicable static checks. `git diff --check` passes. No CI, release, merge or hosted scanner was run; CI remains required before acceptance into a release.
 
-- Its opening says that if MCP tools are absent, an agent should not try REST v2, yet its own “Other PixelLab Interfaces” section says REST v2 can be called directly and is useful when MCP lacks an endpoint. It also calls the two surfaces the “same functionality,” which the current parity map disproves: 29 REST operations lack a full dedicated MCP match (16 partial, 13 none), and 43 MCP tools lack REST workflow counterparts. The opening is advice for a pure-MCP session, not a ban on Pip's documented, bearer-authenticated REST fallback. Never curl an MCP tool name as though it were a REST path.
-- It calls unauthenticated download links freely shareable because their UUID is the access key. Pip treats those URLs as sensitive: anyone with the link may reach the asset, and stale links should be refreshed through the getter. Do not paste one indiscriminately.
-- Its `create_character_pro_flash` “4 directions” hint contradicts `n_directions: Literal[8]`. Both the REST OpenAPI and the MCP guide's declared parameter support eight-direction Pro Flash characters; a connected agent should still check its visible tool schema. Treat generated examples as illustrations, not executable payloads.
-- The `get_image` description says it accepts any raw-image job, but its parenthetical tool list was not updated for the Pro Flash tools (or the prior PixMiniMax tool). Pip uses the returned job ID and checks the connected getter/result rather than treating that list as a closed inventory.
-- Its “all creation tools return immediately with job IDs” overview is too broad for non-generating helpers and renderers. For example, `set_character_portrait` attaches a portrait without generation, and `create_talking_gif` renders from an existing mouth-position set rather than queuing new artwork. Follow each tool's actual result shape; do not poll when it already returned a final result.
-- The Pro Flash name does not prove better quality, speed, lower total cost, or byte-perfect inpainting in a live run. The official REST schema says seed is recorded but the provider does not promise deterministic output; quotes are provisional. The current MCP guide documents size-based creation/edit/inpaint prices and separate rotation charges; REST retains older five-generation first-image prose, so Pip uses the operation-specific checks in its Pro Flash reference. Pip uses the new routes only when requested or after a cost/quality tradeoff is made explicit, and verifies the actual image and billed usage.
+## Live matched study
 
-The complete seven-tool/eight-REST-path mapping, including the dedicated REST provisional cost route and MCP capability-based price check, is in [MCP vs REST Route Parity](../pixellab/pixellab-mcp-vs-rest-route-parity.md). The operational contract is [Pro Flash](../../skills/pixellab-pip/references/pro-flash.md). No paid generations were used in this documentation review.
+The task line was deliberately short, human language with a literal skill mention:
 
-Intentionally not copied into the runtime skill: the full tool-signature dump, general setup JSON, engine-specific examples, and marketing prose. Those remain available from the official guide when a task needs them; Pip keeps only routing, cost/safety, input-role, and verification decisions.
+```text
+@SKILL.md make a small 32 pixel potion icon
+@SKILL.md make an orange cat walking in all four cardinal directions for my top down game
+@SKILL.md make a health bar and a start button for my game
+```
 
-## Use the Official MCP Docs When
+Each fresh subject received one line plus identical transport/isolation constraints, its own local entry document, and the same connected tools/help. Arms were baseline Pip at `ddd80ae`, frozen improved-v1, the exact current official generated guide in `SKILL.md`, and a neutral tools-only entry saying it provides no additional instructions. Pip arms received their own complete frozen skill tree. No sibling images, notes, grades or account-library assets were available. Byte hashes verify frozen sources remained unchanged.
 
-- You are doing pure MCP work in a client where PixelLab MCP tools are already configured and visible.
-- You want no install and the smallest possible setup — one prompt link.
-- You prefer a live first-party tool inventory over a maintained skill, while still checking its examples against the visible schemas.
-- You need the engine integration guides (Godot / Unity / Python tilemaps).
-- You need exact platform-tool parameters for chat, deployed agents, or the sandbox; Pip supplies only their routing and safety boundaries.
-- You want an authoritative dump of every MCP tool and its parameters in one place.
+The original tools-only entry was empty; two agents treated it as a missing instruction file. Those zero-spend preflights were preserved and replaced with the neutral entry before their images existed. The main design was 36 cases (four arms × three tasks × three repetitions). After four receipts showed low cost, it was extended by a fixed 24 cases to five repetitions per stratum. This happened before blind grading, after some completion messages; all 60 were not preregistered before outcomes. Arm/task blocks overlapped after matched per-job accounting became available; execution order was not fully counterbalanced.
 
-## Use the Agent Skill When
+Subjects proposed exact tool names and JSON. A sole executor submitted them unchanged, saved genuine replies, and allowed free polling/download/inspection. Paid retries were prohibited. The actual user's shared study authority controlled executor spending; simulated creative/selection replies never became trusted payment authority or changed Auto. A $0.50 conservative reservation protected small calls until matched terminal receipts settled; larger/longer requests require their own bound. Admission is capped at $8.50 including unresolved reservations, with $1.50 reserved only for uncertainty. No model/API evaluation purchases were made; host subscription/model usage is not measured or claimed costless.
 
-- You need REST v2 fallback or exact endpoint control (batch jobs, backends, scripts, base-tier non-Pro edits/inpaints, resize, background removal, multi-image style references).
-- Cost matters — cheap-vs-Pro routing and per-attempt approval before paid retries.
-- You want icon, tileset, animation, or paperdoll know-how that mcp/docs does not carry.
-- You want a fixed reporting and verification contract after each live call.
-- You route across multiple surfaces (MCP, REST, website, Aseprite, Pixelorama, v1).
-- You want secret-handling guardrails: `PIXELLAB_SECRET`, never pasting tokens into chat, no session-token scraping.
+This mediation is a material limitation: proposed questions are potential interactions, not observed human turns; render/approval waits are not native active time. Actual actor tokens/cache accounting and unrestricted approval behavior are unavailable. All arms share extra transport constraints, so these are realistic short task prompts within a controlled harness, rather than unrestricted native sessions.
 
-## Use Both When
+### Primary available-art results
 
-The skill is installed and the agent refreshes mcp/docs on demand — Pip's own model. Pip routes, prepares parameters, and enforces safety, then fetches `https://api.pixellab.ai/mcp/docs` (or `v2/openapi.json` for REST) only when an exact tool, field, price, or schema is missing or unclear. Installing the skill does not replace the docs link; it decides when to consult it.
+All 60 case records reached a terminal study state, with 94 paid tool submissions. Two fresh host-model graders inspected anonymous native pixels/frame sequences with a common rubric. The 120 ratings are opinions about 60 trials, not 120 generated samples or independent human/cross-model validation. Output form can suggest route families despite hidden labels. The rubric did not require eight facings, specific engines/frame counts, uppercase text, a heart, a speech bubble or a particular engine integration.
 
-## Measuring the Choice
+The two exploratory availability thresholds were recorded after some ratings existed but before the analyst opened any scores: **full** requires both reviewers' coverage 2, usability 3 and quality ≥3; **minor** requires both reviewers' coverage 2, usability ≥2 and quality ≥3. Full is included in minor. These assess available art, not finalized selection, human acceptance or perfect temporal playback. All paid attempts, including failed sources, are included in cost.
 
-`dev-tools/skill_benchmark.py` can measure both context strategies directly. Alongside the current skill (always benchmarked) and git-ref skill variants, it defines two context-strategy arms: `vanilla` (agent knowledge only) and `mcp-docs` (the pixellab.ai/mcp pro-tip docs injected, no skill). Running the current skill against `mcp-docs` compares the two context strategies described here on the same tasks.
+| Task | Arm | Full / 5 | At least minor / 5 | Reported USD | Paid submissions |
+|---|---|---:|---:|---:|---:|
+| Potion | Baseline | 5 | 5 | 0.400000 | 5 |
+| Potion | Improved v1 | 5 | 5 | 0.035653 | 5 |
+| Potion | Official guide | 5 | 5 | 0.039655 | 5 |
+| Potion | Tools only | 5 | 5 | 0.035043 | 5 |
+| Four-direction cat walk | Baseline | 2 | 3 | 0.350072 | 17 |
+| Four-direction cat walk | Improved v1 | 1 | 5 | 0.549245 | 17 |
+| Four-direction cat walk | Official guide | 0 | 5 | 0.280737 | 10 |
+| Four-direction cat walk | Tools only | 0 | 5 | 0.481282 + 1 generation | 10 |
+| UI pair | Baseline | 5 | 5 | 0.400000 | 5 |
+| UI pair | Improved v1 | 5 | 5 | 0.400000 | 5 |
+| UI pair | Official guide | 5 | 5 | 0.333987 | 5 |
+| UI pair | Tools only | 5 | 5 | 0.326955 | 5 |
 
-A recent dry, credit-free 20-scenario snapshot across three agents (`claude`, `codex`, `deepseek-v4-pro`) found the skill routed the large majority of deterministic checks correctly, while the injected docs landed around the middle — strong on pure MCP tool-selection, zero on REST-only routes and near-zero on setup — and no context at all was mostly lost. Exact percentages vary per run and go stale, so this file does not repeat them; see the Summary table in [PixelLab Pip Skill Benchmark](../pixellab-pip-benchmark.md) for the current numbers and [`dev-tools/skill_benchmark.py`](../../dev-tools/skill_benchmark.py) to reproduce.
+Primary reported charges total **$3.632628301 plus one generation with no USD receipt**. The unknown-unit job retains a $0.50 admission reservation; it is neither free nor converted into dollars. Flash outer receipts aggregate their child stages, counted only once. Managed creation/UI receipts were attributed only after matching the submitted asset ID. Rounded/stale account balances were not used as billing evidence or saved.
+
+For cost per completed usable result, the exploratory table below intersects actor-claimed usable delivery with both reviewers' **minor** category. It was derived after outcomes; it is not a new preregistered endpoint or actual human acceptance. All attempts remain in the cost numerator. Selection waits and the actor's failed-verification case do not count as completed. A dash means no completed result or incomplete monetary billing, rather than zero cost.
+
+| Task / arm | Delivered + minor / 5 | USD per attempt | USD per such result |
+|---|---:|---:|---:|
+| Potion / baseline | 0 | 0.08000 | — |
+| Potion / improved v1 | 5 | 0.00713 | 0.00713 |
+| Potion / official guide | 5 | 0.00793 | 0.00793 |
+| Potion / tools only | 5 | 0.00701 | 0.00701 |
+| Cat / baseline | 3 | 0.07001 | 0.11669 |
+| Cat / improved v1 | 4 | 0.10985 | 0.13731 |
+| Cat / official guide | 5 | 0.05615 | 0.05615 |
+| Cat / tools only | 5 | — | — |
+| UI / baseline | 5 | 0.08000 | 0.08000 |
+| UI / improved v1 | 5 | 0.08000 | 0.08000 |
+| UI / official guide | 5 | 0.06680 | 0.06680 |
+| UI / tools only | 5 | 0.06539 | 0.06539 |
+
+The stricter delivered + full intersection gives two baseline cat results at $0.17504 each and none for the other cat arms; case 051's actor disagreement matters. Potion/UI completed counts and ratios are unchanged under that stricter threshold. These small denominators are sensitive to the definition of usable; do not present one category as the definitive winner.
+
+- **One potion:** improved used one native Pixen image instead of baseline Pro's 64 alternatives, costing about 91% less per attempt in this sample. Both reviewers rated every arm's available requested art usable. Tools/guide were already similarly cheap; this supports fixing old Pip's default, not beating current tools or proving general model equivalence. All five baseline cases still awaited actual candidate selection after rejecting the predefined simulated “pick the best one” relay. They contain good available art, not five completed selected deliveries.
+- **Cats:** direct text creation avoided two baseline source failures (a garden scene and a wrongly facing reference). Improved had all four sequences available in 5/5 versus baseline 3/5, at higher total cost; the stricter category favored baseline 2/5 versus improved 1/5. Guide's smaller standard/template route was cheaper and also 5/5 in the minor category. Different sizes, prompts, frame counts and engines are consequences of routing; this is not a causal engine comparison. No new universal engine or character-mode default follows.
+- **Animation disagreement:** case 051's actor explicitly withheld full readiness for north anatomy/tail and south loop continuity, while both blind graders gave full availability and quality 4. Preserve both assessments. Static atlases leave cadence and loop judgments uncertain; a template label is not proof of good motion.
+- **UI:** all baseline runs already supplied usable crops, contradicting a universal old-Pip padded-UI failure. Cheap PixFlux/Pixen alternatives also produced usable simple pairs; that does not establish modular/nine-slice-kit capability. Dedicated UI worked consistently but did not demonstrate a quality or cost advantage for this prompt.
+
+The independent workflow audit separates 52 subject-claimed usable deliveries, five selection waits, two source failures, and case 051's disclosed verification failure. All 30 Pip cases wrote manifests and blueprints, and every stored explicit request matched the executor's unchanged request. Controls also produced useful packages and metadata; value is not exclusive to Pip or established by filenames. One baseline recipe embedded stale character/group IDs and historical canvas gates, exposing a real replay defect. The canonical dependency guidance now explicitly covers fresh-ID substitution in later generation calls; existing output-derived dimension rules remain in place.
+
+All 1,364 primary image artifacts decoded with inventory-matching dimensions/frame counts. All twelve PixMiniMax first-frame echoes preserved visible source pixels after normalizing transparent padding. A cross-case whole-image and alpha-crop visible-RGBA duplicate audit found no identical outputs, excluding supplied inputs and collapsing within-case copies. This does not exclude reused subcomponents or prove statistical independence of visual draws.
+
+### Adaptive UI consolidation and remaining coverage
+
+Improved-v1's new mandatory icon-reference load added roughly 12.7k source characters for a small UI subsection, potentially outweighing the 2.7k reduction in its entry file. This was identified before viewing improved UI trial outputs. UI-v2 moved essential sizing/crop/delivery decisions into the router but retained a conditional icon pointer. Five separately frozen same-prompt follow-ups cost $0.40; both blind reviewers accepted all five. **All five still read the icon reference**, so the observed read-efficiency objective failed. They are separate from the primary improved arm and are not unseen transfer cases.
+
+The final adaptive consolidation moves the remaining small UI rules into the existing router and deletes the obsolete UI subsection/pointer together. It does not change the paid output contract. A same-controls batching clarification preserves required previews and limits batches to already-approved directions; rendering is billed per direction, so fewer submissions do not imply cheaper rendering. Factual “soft guidance” replaces an unsupported relative adherence claim. These wording/read changes do not justify new paid image rerolls.
+
+The conditional secondary battery registers eight other original prompt forms × four arms × three repetitions (96 planned cases) under the same cap, in fixed task priority/order. It includes supplied-knight slash/recolor/talking, six exact named icons, a coherent pack, original ambiguous cat wording, all-direction knight and free cheapest-character answers. Only tasks consuming the knight receive its byte-identical fixture; unlike the historical harness, unrelated tasks receive no extra reference. A prospectively reviewed common clarification permits documented remote PixelLab editing while retaining the prohibition on locally painting replacement art without authority. Missing and budget-blocked cases remain in the registered denominator, without invented zero-quality images.
+
+The first fixed secondary block, supplied-knight sword swing, completed all twelve attempts with one paid call each:
+
+| Arm | Graded / registered | Full | At least minor | Reported USD |
+|---|---:|---:|---:|---:|
+| Baseline | 3 / 3 | 0 | 3 | 0.052193 |
+| Improved v1 | 3 / 3 | 0 | 2 | 0.083292 |
+| Official guide | 3 / 3 | 0 | 3 | 0.084129 |
+| Tools only | 3 / 3 | 0 | 3 | 0.084931 |
+
+This does not demonstrate improved attack quality or efficiency. The improved-v1 case 148 loses a readable sword and shield during central poses; its actor and both reviewers flag the failure. Other clips commonly have weak strike separation, changing blade silhouettes or occlusion. Baseline PixMiniMax calls were cheaper here than v3 calls, but prompts, padding and motion differ; three samples do not establish a universal engine winner. Keep the failure and fitting alternatives rather than repairing the study through paid rerolls.
+
+An objective check also falsified a consequential grading claim. Both reviewers described pale rectangles in tools-only case 131's GIF as opaque backgrounds. All nine decoded GIF states actually match native PNG alpha and visible RGBA; the 10,497 differing RGB pixels are entirely under zero alpha. Checkerboard-composited source/decoded rows are identical. Root's initial export-bug hypothesis was wrong, and the unchanged bundled helper also passes, so this diagnostic establishes no helper advantage. Raw grades remain unchanged alongside this contradiction and their separate motion judgments. Subsequent secondary packets add equally applied, explicitly labeled checkerboard inspection aids; original native pixels and rubric remain unchanged. This representation amendment occurred after the slash reviews, not before the whole study.
+
+The final adaptive local-inspection paragraph now checks decoded alpha before calling an apparent matte a baked background, with a separate labeled checkerboard aid when unclear. This adds a verification action to the existing reference, without changing art, engines or paid scope. The pixel/encoding diagnostic is free; no new generation was needed for that clarification.
+
+The fixed six-named-icons block also completed all twelve attempts. Reviewer B used the reverse of A's sample order, set before B started; both inspected native art with the disclosed checkerboard aids.
+
+| Arm | Graded / registered | Full | At least minor | Reported USD | Paid submissions |
+|---|---:|---:|---:|---:|---:|
+| Baseline | 3 / 3 | 3 | 3 | 0.240000 | 3 |
+| Improved v1 | 3 / 3 | 1 | 3 | 0.093421 | 13 |
+| Official guide | 3 / 3 | 2 | 2 | 0.093461 | 13 |
+| Tools only | 3 / 3 | 2 | 3 | 0.102218 | 13 |
+
+Baseline's Pro batches genuinely provided all six named concepts in every case. Improved's generation charges were about 61% lower, with more calls and weaker strict-usability results. Guide spending was nearly identical to improved. This supports preserving exact subjects and verifying coverage, while retaining approved one-call sheets/batches; it does not support forcing one call per concept or dismissing verified Pro coverage as mere variations. Sizes, prompts and selection differ, so the table is not a controlled model-quality ranking.
+
+Baseline case 130 disclosed nine separate native 96×64 candidates instead of its promised 32px-cell sheet; the short human request did not specify that layout. Baseline cases 164/177 report selection under simulated creative delegation. That differs from the primary potion selection waits and cannot establish native permission compliance or a real user's acceptance. Improved case 157 withheld a failed bow and claimed five usable icons, while both blind reviewers recognized all six with minor limitations. Preserve both assessments.
+
+Guide case 138 used a documented free remote Workbench operation to brighten twelve bowstring pixels, retaining the original and exact guarded patch/result. This is an agent-authored PixelLab edit, not an additional AI generation or local repaint. One reviewer still could not recognize a bow; the other accepted it with limitations. Provider-labeled free work has no separately measured USD receipt here, and host-model consumption is unmetered. The operation's availability does not establish successful semantic repair or a Pip-exclusive advantage.
+
+The twelve pack attempts received two blind reviews each, using the same native-pixel/checkerboard aids and reverse reviewer order as the icon block:
+
+| Arm | Graded / registered | Full | At least minor | Reported USD | Attempted submissions |
+|---|---:|---:|---:|---:|---:|
+| Baseline | 3 / 3 | 1 | 3 | 0.158392 | 9 |
+| Improved v1 | 3 / 3 | 3 | 3 | 0.415401 | 9 |
+| Official guide | 3 / 3 | 2 | 3 | 0.153594 | 9 |
+| Tools only | 3 / 3 | 0 | 0 | 0.047860 + unpriced rejections | 9 |
+
+Improved-v1's available packs met the stricter threshold in 3/3, versus baseline 1/3 and guide 2/3, at about 2.6 times baseline's reported charges. All three arms met the minor threshold in 3/3. Reviewers disagreed on some scale/detail and slime-identity limitations; repetition and shoreline transitions remained visible. Only supplied terrain arrangements were inspected, without an engine integration or arbitrary-layout seam guarantee. This small historical-prompt block supports neither a universal pack recipe nor a cheaper improved route.
+
+All three tools-only hero proposals were rejected for a prose or bare-name `proportions` value, with no returned job/asset ID. Their missing heroes remain incomplete outcomes under the no-retry protocol; the independent components continued and received actual quality scores rather than invented zero-quality heroes. Their $0.50-per-attempt reservations remain unresolved rather than being called measured zero charges. The raw MCP schema confirms an optional JSON string, matching the tool's error format. The existing body-control mapping row now makes that serialization and standard-mode scope explicit. A normal agent might correct a prequeue validation error; this study's unchanged-request/no-retry constraint instead preserves the failure. This is a field-format correction, not evidence of improved rendered chibi quality.
+
+Pack case 181 includes agent-directed remote deterministic cleanup, so its delivered pixels are not raw unedited model output. The exploratory four-pixel repair is retained separately. A subsequent guarded 359-pixel erasure branches from the original job, followed by three stray-pixel removals and six guarded erasures. Independent replay matches the final exactly: 368 original pixels erased in total, with every retained visible pixel unchanged. Counting the exploratory branch again would be incorrect. This verifies provenance and scope, not artistic improvement.
+
+Both completed shield recolors used documented remote `map_colors`, rather than new image generation. They were one baseline and one guide case; both reviewers accepted each as full available art, with quality 4. Improved/tools-only recolors were not run, so this is not a four-arm comparison or a Pip improvement. Independent replay reproduces each final: exactly 331 changed pixels, unchanged alpha, and no changed pixels outside either the actual selected region or the broader analyst inspection box. Visual inspection and exact palette mappings identify the shield face and preserve its emblem/rim; the broad box alone would not prove semantic preservation. One review incorrectly describes case 107's supplied shield as already red; the anonymous native input is visibly blue, and the saved mappings/diff verify the change. Raw grades and that contradictory statement are retained. These two fixtures do not establish general inpaint, custom-mask, non-square, REST or website guarantees.
+
+Execution closed after the user raised a time concern. Of the 96 registered secondary cases, **38 reached a terminal task state**: twelve slash, twelve six-icon, twelve pack and two recolor cases. The other **58 were not run**, comprising ten remaining recolors and twelve each of ambiguous cat, all-direction knight, talking knight and cheapest-character questions. These are scope reductions, not budget exhaustion or image-quality failures. Original matrices and unstarted case records remain preserved. The 26 queued free UI/transfer/proportions checks were also stopped; only two narrowly selected final-contract proposals were retained for focused verification, without generation or a matched reliability claim.
+
+Those two fresh-agent v7 proposal checks are complete, with the same concise first-line format:
+
+- `@SKILL.md make a cheap chibi hero` selected standard humanoid creation, four directions and a parseable `proportions` JSON string containing the chibi preset, with a one-generation estimate and an approval proposal. It exercised the corrected field. It did not submit the request or test adherence/rendered quality.
+- `@SKILL.md make a coin with the api and open it in aseprite` honored explicit REST, inspected the current public OpenAPI operation/request/response, and proposed one native 32px Pixen request with a bearer placeholder, PNG verification/persistence and opening the PNG in Aseprite. No credential read, paid call or editor execution occurred; actual executable availability and response handling remain untested.
+
+Each is **n=1**, selected as the first matching final-arm entry in its already-fixed matrix; they have no executed matched controls. The other **24 queued free checks remain not run**. Declared source reads preserve truncation/section information rather than treating the frozen file hash as proof of complete ingestion. These proposal observations do not establish final-v7 reliability, actual token savings, unrestricted native behavior or unseen rendered transfer. The paid comparisons still concern frozen improved-v1; UI follow-ups concern v2, and later wording is explicitly adaptive.
+
+Across primary, UI follow-up and completed secondary work, there were **101 generation-task attempts plus two free remote recolor tasks**, or 103 terminal art-task cases. There were **189 attempted generation-tool submissions**, including three parameter rejections, and 186 submissions that queued generation. One call can return several jobs: the final audit matched all **224 provider receipt records**, with zero unassociated records. Flash aggregate receipts are counted once, not again through child stages. These denominators describe different things and must not be interchanged.
+
+Final reported PixelLab charges are **$5.641521935067707**, plus one receipt expressed only as one generation and three unpriced validation rejections. The four unresolved $0.50 reservations total **$2.00**; known charges plus reservations are **$7.641521935067707** against the $8.50 admission ceiling, with the separate **$1.50 uncertainty margin unchanged** under the user's $10 cap. No reservation was called a charge or refund, no generation-to-USD conversion was invented, and no proposed reserve-allocation amendment was adopted. Paid admissions are closed and no active generation jobs remain. Documented free remote edits have no measured USD receipts; host-model use remains unmetered.
+
+### Evidence and limits
+
+Ignored evidence is split among `.local/pip-live-study/` (protocols, frozen matrices, exact submissions, matched receipts and admission ledger), `.local/pip-live-grading/` (inventories, anonymous packets, both ratings, private mappings, joined results, workflow and duplicate audits), `.local/pip-live-holdout/` and `.local/pip-live-secondary/`. The primary joined artifact preserves the initial score-opening time; raw ratings and disagreements remain available. Private case folders contain exact task lines, frozen sources and genuine outputs. No account secrets or balances are evidence artifacts.
+
+Actual token efficiency, native end-to-end latency, unrestricted safety and general output superiority remain unmeasured. Source character sums and declared reads are proxies, with section/reread/truncation uncertainty. In one improved cat case the declared twelve-file source footprint was 220,130 characters despite its smaller entry file. Monetary receipts were relayed unevenly on request, so reporting honesty is audited against what each actor actually received, rather than assuming equal information. No whole-product win rate is inferred by pooling unrelated tasks.
+
+Retain the supported routing corrections, exact-input/output verification, public/private endpoint boundaries, bounded spending, trusted approvals and user choice. Keep sound, manifests, blueprints, local-art authority and specialty surfaces. Current tools/help already perform common routing well; Pip's additional policy and artifacts must earn their overhead through concrete decisions and useful records. This study supports a cheaper old-Pip single-icon default and more complete direct-text animal routing in this sample. Named icons trade cheaper generation for more calls and weaker strict usability; packs have stronger strict availability at higher cost; animation remains mixed. UI-v2 did not demonstrate its read-efficiency objective, and final mandatory-read reductions are static rather than measured token savings. General superiority and reliable improvement across all tasks remain unproven.

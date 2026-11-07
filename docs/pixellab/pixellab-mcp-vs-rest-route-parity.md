@@ -271,6 +271,8 @@ New in the 2026-09-08 refresh. All three are cheap (MCP documents 0.1 generation
 
 `/unzoom` is not merely a utility: the API description now instructs callers to run user-supplied artwork through it **before** sending it to any endpoint that takes a reference or style image, because upscaled pixel art (every art pixel a block of screen pixels) is the most common cause of poor output.
 
+That blanket recommendation is overbroad: inspect scale and use unzoom only for genuinely upscaled pixel art. Native sprites need no grid recovery; a detected grid on a painting does not prove pixel art. Its opaque output also requires disclosing alpha-loss/recovery risk. See the [evidence review](../tools/pixellab-mcp-docs-vs-pip-skill.md).
+
 ### Raw Animation, Rotation, Skeleton
 
 MCP `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, and `transfer_outfit` are standalone raw-animation tools; the first two take frame URLs/base64, Skeleton v3 takes a reference image and keypoint sequence, and outfit transfer takes an animation frame list plus a same-character reference image. They match REST `animate-with-text-v3`, `animate-pixminimax`, `animate-with-skeleton-v3`, and `transfer-outfit-v2` respectively. REST retains route-specific `drift_threshold`, the older raw-skeleton endpoints, and other exact controls. Managed animation remains a separate full-parity family.

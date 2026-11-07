@@ -35,7 +35,7 @@ Legend: ✅ shipped as documented behavior or code · 🟡 partial or different-
 | Website/editor (Pixelorama) assistance with permission boundaries | ❌ | ✅ |
 | Aseprite plugin boundary, CLI/Lua workspace integration | ❌ | ✅ — `references/aseprite-cli.md`, `references/aseprite-mcp.md` |
 | Editor-only utilities mapping (Canny/Pose/Depth, reshape, Try on) | ❌ | ✅ — `references/editor-only-utilities.md` |
-| Pixel-art cleanup routes (`correct-pixelart`, `reduce-colors`, `unzoom`, first seen in the 2026-09-08 refresh) | ❌ | ✅ — routed from SKILL.md with per-call size budgets and the unzoom-before-reference rule |
+| Pixel-art cleanup routes (`correct-pixelart`, `reduce-colors`, `unzoom`, first seen in the 2026-09-08 refresh) | ❌ | ✅ — routed with per-call size budgets; inspect scale and unzoom genuinely upscaled pixel art, rather than every reference |
 | Undocumented/internal endpoint prohibition | 🟡 — "do not invent an API path if the route is not present in current docs" | ✅ — named prohibitions: website root routes, Aseprite extension internals, session tokens |
 | Account asset management (list/get/tags/ZIP) | ✅ — DELETE excluded by policy | ✅ — delete helpers allowed behind approval gates |
 | MCP platform tools (projects, sandbox, chat, deployed agents, help/feedback) | ❌ | ✅ — `references/mcp-platform-tools.md` with approval boundaries |

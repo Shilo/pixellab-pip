@@ -6,9 +6,11 @@ Scope: focused research on PixelLab UI generation after an outdated routing clai
 
 > **2026-09-08 update.** The two MCP field gaps this research found have closed: MCP `create_ui_asset` now exposes `style_image_base64` (a base64 PNG/JPEG, ideally ≤1024px per side, from which only the art style is copied — never its content or layout) and `project_id`. The "prefer REST because it has the fuller field set" recommendation below therefore no longer holds on field coverage alone; prefer REST for exact schemas, code, and polling control, and MCP `create_ui_asset` freely in an MCP-first workflow. Statements below marked as MCP gaps are kept as the state at the time of the original pass.
 
-> **2026-10-29 UTC update.** MCP now quotes 2–4 minutes and explains aspect-adjusted pricing: square canvases cost 10 generations up to 256×256, 15 up to 341×341, 25 above; 16:9 costs 10 up to 341×192, 15 up to 456×256, 25 from width 457. There is no UI quote endpoint; the response gives the actual charge. REST remains unchanged and does not publish these generation-unit bands.
+> **2026-10-29 UTC update.** MCP now quotes 2–4 minutes and explains aspect-adjusted pricing: square canvases cost 10 generations up to 256×256, 15 up to 341×341, 25 above; 16:9 costs 10 up to 341×192, 15 up to 456×256, 25 from width 457. There is no UI quote endpoint; submitting starts paid work. A cost label alone is not a matched final usage receipt. REST does not publish these generation-unit bands.
 
-## Verdict
+> **2026-11-07 update.** Use the current [router](../../skills/pixellab-pip/SKILL.md) and [comparison review](../tools/pixellab-mcp-docs-vs-pip-skill.md): MCP structured pieces/getters are appropriate when visible; REST fits exact controls, integration code or fallback. Inspect visible alpha bounds and identify usable crops separately from large source canvases. The following June recommendation is historical, not a reason to prefer REST on field coverage or assume a dedicated tool always beats general-image alternatives for simple UI.
+
+## Original June Verdict (Read Updates Above)
 
 The previous shape-piece limitation is outdated for the current public surface.
 
