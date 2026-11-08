@@ -7,6 +7,12 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+## [3.2.4] - 2026-11-08
+
+### Security
+
+- **Scope ground-texture palette references to authorized images.** Use a region background only when supplied, selected or approved for that task's palette reference, reusing covered map-workflow authorization. Keep approved image matching and text-only generation available; clarify an uncovered reference when matching is required, without exposing private access URLs or adding a repeated transfer warning.
+
 ## [3.2.3] - 2026-11-08
 
 ### Security
@@ -199,7 +205,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
-[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.3...HEAD
+[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.4...HEAD
+[3.2.4]: https://github.com/Shilo/pixellab-pip/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/Shilo/pixellab-pip/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/Shilo/pixellab-pip/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/Shilo/pixellab-pip/compare/v3.2.0...v3.2.1
