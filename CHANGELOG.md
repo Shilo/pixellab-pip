@@ -7,6 +7,13 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+## [3.2.2] - 2026-11-07
+
+### Security
+
+- **Disclose task inputs before their first transfer to PixelLab.** Use the existing plan or approval/Auto card to identify PixelLab as the recipient of the selected text and images, including free uploads before paid work. Exclude unrelated private context without adding another approval step or changing supported workflows.
+- **Reject a non-clean hosted static result when supplied.** Keep the separate mandatory static regression gate and accept the retired public field's absence, while failing closed if ClawHub returns a non-clean result. Record executable-batch planning as prepublication evidence alongside static scans.
+
 ## [3.2.1] - 2026-11-07
 
 ### Fixed
@@ -181,7 +188,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
-[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.2...HEAD
+[3.2.2]: https://github.com/Shilo/pixellab-pip/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/Shilo/pixellab-pip/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/Shilo/pixellab-pip/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/Shilo/pixellab-pip/compare/v3.0.0...v3.1.0

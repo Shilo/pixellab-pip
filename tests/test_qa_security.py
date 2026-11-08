@@ -104,6 +104,15 @@ class ReleaseSecurityGateTests(unittest.TestCase):
                 exec(compile(source, "release hosted audit gate", "exec"), {})
 
         check(valid)
+        for static in (None, {"status": "clean"}, {"status": "CLEAN"}):
+            data = json.loads(json.dumps(valid))
+            data["report"]["staticAnalysis"] = static
+            check(data)
+        for static in ({}, {"status": "failed"}, {"status": "suspicious"}, {"status": "pending"}):
+            data = json.loads(json.dumps(valid))
+            data["report"]["staticAnalysis"] = static
+            with self.subTest(static=static), self.assertRaises(SystemExit):
+                check(data)
         for section, key, value in (
             (None, "status", "failed"), (None, "sourceKind", "local"),
             (None, "writtenBack", False), ("artifact", "version", "3.1.0"),

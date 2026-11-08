@@ -950,6 +950,9 @@ jobs:
           require(str(clawscan.get("confidence", "")).casefold() == "high", "ClawHub ClawScan confidence is not high")
           # ClawHub retired staticAnalysis from public reports. The pinned static
           # regression gate above scans these exact skill files before packaging.
+          static = report.get("staticAnalysis")
+          if static is not None:
+              require(str(static.get("status", "")).casefold() == "clean", "ClawHub static analysis is not clean")
 
           virustotal = report.get("virustotal")
           if virustotal is not None:
