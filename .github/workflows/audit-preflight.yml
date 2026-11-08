@@ -1,0 +1,104 @@
+name: Full model audit preflight
+run-name: Full model audit preflight (no release)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pixellab-pip-model-preflight
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      # Reviewed ClawHub worker source pin, not the moving npm/runtime latest.
+      CLAWSCAN_COMMIT: 80d11a34a97a9181213c806fc3013123360f9012
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require model credentials
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        shell: bash
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "Set repository secret OPENAI_API_KEY to enable this paid, manually dispatched audit."
+            echo "No model audit ran. A static scan cannot substitute for this result."
+            exit 1
+          fi
+
+      - name: Checkout reviewed full scanner
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: openclaw/clawscan
+          ref: ${{ env.CLAWSCAN_COMMIT }}
+          path: .local/clawscan-source
+          persist-credentials: false
+
+      - name: Build matched binary and sandbox image
+        working-directory: .local/clawscan-source
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$CLAWSCAN_COMMIT"
+          go build -trimpath -o "$RUNNER_TEMP/clawscan" ./cmd/clawscan
+          docker build -t pixellab-pip-audit:reviewed docker/clawscan-runtime
+          mkdir -p "$GITHUB_WORKSPACE/.local/model-audit"
+          docker image inspect pixellab-pip-audit:reviewed --format '{{.Id}}' > "$GITHUB_WORKSPACE/.local/model-audit/image-id.txt"
+
+      - name: Export only committed skill files
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/audit-input"
+          git archive --format=tar HEAD skills/pixellab-pip | tar -x -C "$RUNNER_TEMP/audit-input"
+          python - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ["RUNNER_TEMP"]) / "audit-input/skills/pixellab-pip"
+          evidence = {
+              "skill_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "clawscan_commit": os.environ["CLAWSCAN_COMMIT"],
+              "mode": "full-model-preflight-not-registry-verdict",
+              "files": {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                        for p in sorted(root.rglob("*")) if p.is_file()},
+              "differences": ["No registry job or verified publisher context", "Different host, time and resolved dependencies"],
+          }
+          pathlib.Path(".local/model-audit/input.json").write_text(json.dumps(evidence, indent=2) + "\n")
+          PY
+
+      - name: Run full model profile without publishing
+        # Outside the checkout so a project-local profile cannot replace the bundled one.
+        working-directory: ${{ runner.temp }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/clawscan" "$RUNNER_TEMP/audit-input/skills/pixellab-pip" \
+            --profile clawhub --sandbox-image pixellab-pip-audit:reviewed \
+            --output "$GITHUB_WORKSPACE/.local/model-audit/audit.json"
+
+      - name: Explain evidence scope
+        if: always()
+        shell: bash
+        run: |
+          echo 'Full model preflight; no version uploaded, tagged or released.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Read the raw scanner reports, coverage, model provenance and judge result in the artifact. A successful CLI run alone is not a benign verdict or release approval.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The actual registry audit and every existing release gate remain mandatory.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve full preflight evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: full-model-audit-preflight
+          path: .local/model-audit/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

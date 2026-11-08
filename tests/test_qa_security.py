@@ -114,6 +114,11 @@ class ReleaseSecurityGateTests(unittest.TestCase):
              'python dev-tools/check_scanner.py .local/scanner-results/report.json', "true"),
             (".github/actions/scanner-regression/action.yml",
              'hashlib.sha256(patch).hexdigest() != os.environ["PATCH_SHA256"]', "False"),
+            (".github/actions/scanner-regression/action.yml",
+             '--planner-output .local/scanner-results/planner.json --input-tokens 128000', ""),
+            (".github/actions/scanner-regression/action.yml",
+             '    - name: Check offline executable scan capacity (not a hosted verdict)',
+             '    - name: Check offline executable scan capacity (not a hosted verdict)\n      if: false'),
         )
         qa.check_workflows()
         for name, before, after in mutations:

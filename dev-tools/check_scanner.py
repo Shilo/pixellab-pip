@@ -9,10 +9,13 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+import hashlib
 import json
 import math
 from pathlib import Path, PurePosixPath
 import sys
+from types import SimpleNamespace
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -161,17 +164,84 @@ def validate(report: dict, baseline: dict, skill_dir: Path) -> None:
             require(analyzer["completed"] == python_files, "Behavioral analyzer omitted Python files")
 
 
+def plan_tp4(report: dict, skill_dir: Path, input_tokens: int, tp4, yaml) -> dict:
+    """Exercise the installed planner with inference mocked, never assess safety.
+
+    The caller validates the static report and attests scanner provenance first.
+    No planner limits are changed; the token capacity is an explicit assumption.
+    """
+    require(type(input_tokens) is int and input_tokens > 0, "Invalid planner token capacity")
+    files = {entry["path"]: (skill_dir / relative_path(entry["path"])).read_bytes()
+             for entry in report["components"]}
+    skill = files["SKILL.md"].decode("utf-8")
+    frontmatter = skill.split("---", 2)
+    require(len(frontmatter) == 3 and not frontmatter[0].strip(), "Missing skill frontmatter")
+    manifest = yaml.safe_load(frontmatter[1])
+    require(isinstance(manifest, dict) and bool(manifest.get("description")), "Missing skill description")
+    batches = []
+
+    class OfflineAnalyzer:
+        inference_usage = []
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def arun_batches_detailed(self, planned):
+            batches.extend(planned)
+            return SimpleNamespace(
+                successful=[(batch, [tp4._TP4AnalysisResult(is_mismatch=False)]) for batch in planned],
+                failures=[],
+            )
+
+    state = {"manifest": manifest, "component_metadata": report["components"],
+             "file_cache": {name: raw.decode("utf-8", errors="replace") for name, raw in files.items()},
+             "model_config": {"default": "offline-planner-mock"}}
+    with patch.object(tp4, "_TP4Analyzer", OfflineAnalyzer), \
+            patch.object(tp4, "get_max_input_tokens", return_value=input_tokens):
+        result = tp4._check_tp4(state)
+    exceptions = [event for event in result.ledger if event.get("outcome") != "completed"]
+    completed = sum(event.get("outcome") == "completed" for event in result.ledger)
+    ok = (bool(batches) and not exceptions and completed == len(batches)
+          and not result.inference_usage and bool(result.record) and result.record.get("ok") is True)
+    return {
+        "mode": "offline-planner-only", "inference_mocked": True, "security_verdict": None,
+        "ok": ok, "input_tokens_assumed": input_tokens,
+        "analyzer_sha256": hashlib.sha256(Path(tp4.__file__).read_bytes()).hexdigest(),
+        "inventory": {name: hashlib.sha256(raw).hexdigest() for name, raw in files.items()},
+        "manifest": manifest, "batch_cap": tp4.TP4_MAX_BATCHES, "planned_batches": len(batches),
+        "batch_headroom": tp4.TP4_MAX_BATCHES - len(batches),
+        "batch_paths": dict(Counter(batch.file_path for batch in batches)),
+        "partial_or_failed_events": exceptions, "ledger": result.ledger,
+        "note": "Planning only; no semantic assessment, hosted confidence or production score. "
+                "Zero batch headroom warrants review even when this check passes.",
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report", type=Path)
     parser.add_argument("--baseline", type=Path, default=ROOT / "dev-tools/scanner-baseline.json")
     parser.add_argument("--skill-dir", type=Path, default=ROOT / "skills/pixellab-pip")
+    parser.add_argument("--planner-output", type=Path,
+                        help="Also run the pinned TP4 planner offline and save its evidence")
+    parser.add_argument("--input-tokens", type=int, default=128000,
+                        help="Explicit model input-capacity assumption for the offline planner")
     args = parser.parse_args(argv)
     try:
         baseline = json.loads(args.baseline.read_text(encoding="utf-8"))
         report = json.loads(args.report.read_text(encoding="utf-8"))
         validate(report, baseline, args.skill_dir)
-    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+        if args.planner_output:
+            import yaml
+            from skillspector.nodes.analyzers import mcp_tool_poisoning as tp4
+
+            evidence = plan_tp4(report, args.skill_dir, args.input_tokens, tp4, yaml)
+            evidence.update({key: baseline[key] for key in ("scanner_commit", "clawscan_commit", "patch_sha256")})
+            args.planner_output.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+            require(evidence["ok"], "Offline TP4 planning incomplete; inspect planner evidence")
+            print(f"[planner] PASS (inference mocked): {evidence['planned_batches']}/{evidence['batch_cap']} batches; "
+                  f"{evidence['batch_headroom']} headroom; hosted verdict remains untested")
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, ImportError) as error:
         print(f"[scanner] FAIL: {error}", file=sys.stderr)
         return 1
     print(f"[scanner] PASS: score {report['risk_assessment']['score']}; findings and coverage within reviewed baseline")

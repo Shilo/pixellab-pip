@@ -478,11 +478,15 @@ def check_workflows() -> None:
         '--no-llm --format json',
         'python dev-tools/check_scanner.py .local/scanner-results/report.json',
         "name: skillspector-risk-regression", "if: always()",
+        '--planner-output .local/scanner-results/planner.json --input-tokens 128000',
     ):
         if required not in static_action:
             raise AssertionError(f"shared static regression action is missing its gate: {required}")
     if "continue-on-error" in static_action:
         raise AssertionError("static regression failures must fail the calling job")
+    planner_step = static_action.split("    - name: Check offline executable scan capacity (not a hosted verdict)\n", 1)[-1].split("\n    - ", 1)[0]
+    if "if:" in planner_step:
+        raise AssertionError("offline planner must not be skipped after successful static validation")
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     # Assert the step is present regardless of the pinned major version, so a
     # routine setup-python/@vN bump does not red QA on an otherwise correct

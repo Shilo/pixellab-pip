@@ -7,6 +7,10 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+### Changed
+
+- **Pre-test audits independently of releases.** Add a manual full ClawScan model preflight with a matched, reviewed binary and Docker runtime, exact input hashes and retained reports; it requires separate model credentials and never publishes a version. Automate the offline executable-batch capacity check in CI and release, and document the remaining findings and hosted-test limits in an audit improvement handoff.
+
 ## [3.2.5] - 2026-11-08
 
 ### Changed

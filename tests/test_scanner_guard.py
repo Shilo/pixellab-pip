@@ -1,11 +1,13 @@
 """Exercise accidental risk, failed-scan and missing-coverage regressions offline."""
 from copy import deepcopy
+import asyncio
 import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 
 from test_helpers import REPO_ROOT, load_module
 
@@ -188,6 +190,54 @@ class ScannerGuardTests(unittest.TestCase):
         # Defaults resolve from the repository, even from an unrelated working directory.
         result = subprocess.run(command, cwd=self.skill.parent, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class ScannerPlannerTests(unittest.TestCase):
+    def test_offline_planning_retains_limits_and_exposes_incomplete_work(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            skill = Path(tmp)
+            (skill / "SKILL.md").write_text('---\n{"description":"fixture"}\n---\n# Fixture', encoding="utf-8")
+            report = {"components": [{"path": "SKILL.md", "type": "markdown"}]}
+            state_seen = []
+            tp4 = SimpleNamespace(__file__=__file__, TP4_MAX_BATCHES=64,
+                                  _TP4AnalysisResult=lambda **kw: SimpleNamespace(**kw),
+                                  _TP4Analyzer=None, get_max_input_tokens=None)
+
+            def forbidden(*args, **kwargs):
+                raise AssertionError("Real model setup must never be called")
+
+            tp4._TP4Analyzer = tp4.get_max_input_tokens = forbidden
+            for mode in ("complete", "partial", "failed", "empty", "unaccounted", "usage", "record-failed"):
+                def check(state):
+                    state_seen.append(state)
+                    self.assertEqual(tp4.get_max_input_tokens("mock"), 128000)
+                    self.assertEqual(tp4.TP4_MAX_BATCHES, 64)
+                    batches = [] if mode == "empty" else [SimpleNamespace(file_path="SKILL.md")]
+                    outcome = asyncio.run(tp4._TP4Analyzer("mock").arun_batches_detailed(batches))
+                    self.assertEqual(len(outcome.successful), len(batches))
+                    return SimpleNamespace(
+                        ledger=[] if mode in ("empty", "unaccounted") else [
+                            {"path": "SKILL.md", "outcome": mode if mode in ("partial", "failed") else "completed"}],
+                        inference_usage=[{}] if mode == "usage" else [], record={"ok": mode != "record-failed"},
+                    )
+
+                tp4._check_tp4 = check
+                with self.subTest(mode=mode):
+                    evidence = guard.plan_tp4(report, skill, 128000, tp4, SimpleNamespace(safe_load=json.loads))
+                    self.assertEqual(evidence["ok"], mode == "complete")
+                    self.assertIsNone(evidence["security_verdict"])
+                    self.assertTrue(evidence["inference_mocked"])
+                    self.assertEqual(evidence["batch_cap"], 64)
+                    self.assertEqual(set(evidence["inventory"]), {"SKILL.md"})
+                    self.assertIs(tp4._TP4Analyzer, forbidden)
+                    self.assertIs(tp4.get_max_input_tokens, forbidden)
+            self.assertEqual(state_seen[0]["manifest"]["description"], "fixture")
+            for capacity in (0, -1, True):
+                with self.subTest(capacity=capacity), self.assertRaises(ValueError):
+                    guard.plan_tp4(report, skill, capacity, tp4, SimpleNamespace(safe_load=json.loads))
+            (skill / "SKILL.md").write_text("no manifest", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                guard.plan_tp4(report, skill, 128000, tp4, SimpleNamespace(safe_load=json.loads))
 
 
 if __name__ == "__main__":

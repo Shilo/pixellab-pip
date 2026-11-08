@@ -48,6 +48,8 @@ The user-facing security story lives in [Security And Trust](security.md): the S
 
 Follow [Scanner Maintenance](developer/scanner-maintenance.md) for the reviewed risk baseline, the additional ClawHub-compatible static CI check, and the before/after review procedure. These development checks add no installed-skill work.
 
+For security work independent of a release, start with the [audit improvement handoff](developer/audit-improvement-handoff.md). It records the 3.2.5 production findings, test limits and the separate full model preflight.
+
 ### OpenSSF Scorecard (maintainer-only)
 
 [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/Shilo/pixellab-pip) runs weekly for repo-hygiene tracking, but is intentionally kept off the README and out of the Code Scanning tab. Its checks describe repository practices, not an install-safety verdict. `Maintained` reflects recent activity; `Code-Review` reflects review history and can improve through collaborator-reviewed changes. Review each check's evidence: branch protection and required CI checks, least-privilege workflow tokens, dependency pins and hashes, and release provenance are actionable safeguards. Packaging, signing, or fuzzing checks can also have detection or applicability limits; investigate those limits before adding machinery just to raise the aggregate.
