@@ -63,6 +63,35 @@ class SecurityTriggerPatternTests(unittest.TestCase):
 
 
 class ReleaseSecurityGateTests(unittest.TestCase):
+    def test_promotion_checks_current_stored_audit_without_requiring_a_card(self):
+        workflow = (REPO_ROOT / ".github/workflows/release-skill.yml").read_text(encoding="utf-8")
+        step = workflow.split("      - name: Promote the audited ClawHub version\n", 1)[1]
+        source = textwrap.dedent(step.split("python - <<'PY'\n", 1)[1].split("\n          PY", 1)[0])
+        valid = {"skill": {"slug": "pixellab-pip"}, "owner": {"handle": "ExamplePublisher"},
+                 "version": {"version": "3.2.2", "security": {"status": "clean", "scanners": {
+                     "llm": {"verdict": "benign", "confidence": "high"}}}}}
+
+        def check(data):
+            with patch.dict(os.environ, {"RELEASE_VERSION": "3.2.2", "CLAWHUB_RESOLVED_OWNER": "examplepublisher"}), \
+                    patch.object(Path, "read_text", return_value=json.dumps(data)), patch("builtins.print"):
+                exec(compile(source, "release promotion audit gate", "exec"), {})
+
+        check(valid)
+        for path, value in (
+            (("skill", "slug"), "another-skill"), (("owner", "handle"), "another-publisher"),
+            (("version", "version"), "3.2.1"), (("version", "security", "status"), "pending"),
+            (("version", "security", "scanners", "llm", "verdict"), "suspicious"),
+            (("version", "security", "scanners", "llm", "confidence"), "medium"),
+            (("version", "security", "scanners", "llm"), {}), (("version", "security"), {}),
+        ):
+            data = json.loads(json.dumps(valid))
+            target = data
+            for key in path[:-1]:
+                target = target[key]
+            target[path[-1]] = value
+            with self.subTest(path=path, value=value), self.assertRaises(SystemExit):
+                check(data)
+
     def test_static_evidence_cannot_be_skipped_or_allowed_to_fail(self):
         read = Path.read_text
         mutations = (

@@ -1073,6 +1073,29 @@ jobs:
         run: |
           npx --yes clawhub@0.23.3 --no-input login --token "$CLAWHUB_TOKEN"
           skill_ref="@${CLAWHUB_RESOLVED_OWNER}/pixellab-pip"
+          # Concurrent audits can replace the stored verdict after our scan returns.
+          npx --yes clawhub@0.23.3 --no-input inspect "$skill_ref" --version "$RELEASE_VERSION" --json > dist/clawhub-promotion-audit.json
+          python - <<'PY'
+          import json, os, pathlib
+
+          data = json.loads(pathlib.Path("dist/clawhub-promotion-audit.json").read_text(encoding="utf-8"))
+          record = data.get("version") or {}
+          owner = data.get("owner") or {}
+          security = record.get("security") or {}
+          clawscan = (security.get("scanners") or {}).get("llm") or {}
+
+          def require(condition, message):
+              if not condition:
+                  raise SystemExit(message)
+
+          require((data.get("skill") or {}).get("slug") == "pixellab-pip", "ClawHub promotion audit is for another skill")
+          require(str(owner.get("handle", "")).casefold() == os.environ["CLAWHUB_RESOLVED_OWNER"].casefold(), "ClawHub promotion audit is for another publisher")
+          require(record.get("version") == os.environ["RELEASE_VERSION"], "ClawHub promotion audit is for another version")
+          require(security.get("status") == "clean", "ClawHub current stored security status is not clean")
+          require(str(clawscan.get("verdict", "")).casefold() == "benign", "ClawHub current stored verdict is not benign")
+          require(str(clawscan.get("confidence", "")).casefold() == "high", "ClawHub current stored confidence is not high")
+          print("ClawHub current stored audit passed before promotion")
+          PY
           current_json="dist/clawhub-current-after-audit.json"
 
           latest_version() {

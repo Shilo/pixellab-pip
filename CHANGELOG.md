@@ -7,6 +7,10 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+### Security
+
+- **Recheck the stored hosted verdict before promotion.** Require the exact publisher and version's current ClawScan verdict to remain benign with high confidence before moving ClawHub's latest tag, including resumed or already-latest releases. This catches completed concurrent audits that supersede the original scan response without requiring an optional skill card.
+
 ## [3.2.2] - 2026-11-07
 
 ### Security

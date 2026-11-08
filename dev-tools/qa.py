@@ -624,6 +624,15 @@ def check_workflows() -> None:
         "- name: Promote the audited ClawHub version"
     ):
         raise AssertionError("release-skill.yml must promote the audited ClawHub version before GitHub release")
+    promotion = release_workflow.split("- name: Promote the audited ClawHub version\n", 1)[1].split("\n      - name:", 1)[0]
+    if not (
+        0 <= promotion.find('inspect "$skill_ref" --version "$RELEASE_VERSION" --json > dist/clawhub-promotion-audit.json')
+        < promotion.find('security.get("status") == "clean"')
+        < promotion.find('clawscan.get("confidence", "")).casefold() == "high"')
+        < promotion.find('latest="$(latest_version)"')
+        < promotion.find('skill tag "$skill_ref" "$RELEASE_VERSION" --tag latest --yes')
+    ):
+        raise AssertionError("release-skill.yml must recheck current stored security before every promotion success path")
     if not (
         release_workflow.find("- name: Publish and verify exact ClawHub version")
         < release_workflow.find("- name: Scan the published ClawHub version")
