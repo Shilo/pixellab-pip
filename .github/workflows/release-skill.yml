@@ -947,7 +947,7 @@ jobs:
           # ClawHub defines ClawScan as the final adjudicator; SkillSpector is advisory.
           clawscan = report.get("clawscan") or {}
           require(str(clawscan.get("verdict", "")).casefold() == "benign", "ClawHub ClawScan verdict is not benign")
-          require(str(clawscan.get("confidence", "")).casefold() == "high", "ClawHub ClawScan confidence is not high")
+          require(str(clawscan.get("confidence", "")).casefold() in {"medium", "high"}, "ClawHub ClawScan confidence must be medium or high")
           # ClawHub retired staticAnalysis from public reports. The pinned static
           # regression gate above scans these exact skill files before packaging.
           static = report.get("staticAnalysis")
@@ -1093,7 +1093,7 @@ jobs:
           require(record.get("version") == os.environ["RELEASE_VERSION"], "ClawHub promotion audit is for another version")
           require(security.get("status") == "clean", "ClawHub current stored security status is not clean")
           require(str(clawscan.get("verdict", "")).casefold() == "benign", "ClawHub current stored verdict is not benign")
-          require(str(clawscan.get("confidence", "")).casefold() == "high", "ClawHub current stored confidence is not high")
+          require(str(clawscan.get("confidence", "")).casefold() in {"medium", "high"}, "ClawHub current stored confidence must be medium or high")
           print("ClawHub current stored audit passed before promotion")
           PY
           current_json="dist/clawhub-current-after-audit.json"

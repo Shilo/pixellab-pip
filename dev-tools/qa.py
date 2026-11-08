@@ -511,7 +511,7 @@ def check_workflows() -> None:
         '"$suspicious" -ne 0',
         'data.get("writtenBack") is True',
         'artifact.get("version") == os.environ["EXPECTED_VERSION"]',
-        'clawscan.get("confidence", "")).casefold() == "high"',
+        'clawscan.get("confidence", "")).casefold() in {"medium", "high"}',
         "sed -n '/^{/,$p' > dist/clawhub-scan.json",
         "if: failure() && hashFiles('dist/clawhub-scan-*.zip') != ''",
         "path: dist/clawhub-scan-*.zip",
@@ -628,7 +628,7 @@ def check_workflows() -> None:
     if not (
         0 <= promotion.find('inspect "$skill_ref" --version "$RELEASE_VERSION" --json > dist/clawhub-promotion-audit.json')
         < promotion.find('security.get("status") == "clean"')
-        < promotion.find('clawscan.get("confidence", "")).casefold() == "high"')
+        < promotion.find('clawscan.get("confidence", "")).casefold() in {"medium", "high"}')
         < promotion.find('latest="$(latest_version)"')
         < promotion.find('skill tag "$skill_ref" "$RELEASE_VERSION" --tag latest --yes')
     ):

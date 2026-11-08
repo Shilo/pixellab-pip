@@ -7,6 +7,10 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+### Changed
+
+- **Accept benign hosted audits with medium or high confidence.** Apply the same policy to the completed scan and current stored verdict before promotion. Low, missing or unknown confidence and non-benign verdicts remain blocked; static regression, malware, exact-artifact, publisher/version and provenance checks remain required. Existing tagged releases can resume with unchanged skill files.
+
 ## [3.2.4] - 2026-11-08
 
 ### Security

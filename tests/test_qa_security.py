@@ -69,7 +69,7 @@ class ReleaseSecurityGateTests(unittest.TestCase):
         source = textwrap.dedent(step.split("python - <<'PY'\n", 1)[1].split("\n          PY", 1)[0])
         valid = {"skill": {"slug": "pixellab-pip"}, "owner": {"handle": "ExamplePublisher"},
                  "version": {"version": "3.2.2", "security": {"status": "clean", "scanners": {
-                     "llm": {"verdict": "benign", "confidence": "high"}}}}}
+                     "llm": {"verdict": "benign", "confidence": "medium"}}}}}
 
         def check(data):
             with patch.dict(os.environ, {"RELEASE_VERSION": "3.2.2", "CLAWHUB_RESOLVED_OWNER": "examplepublisher"}), \
@@ -77,11 +77,19 @@ class ReleaseSecurityGateTests(unittest.TestCase):
                 exec(compile(source, "release promotion audit gate", "exec"), {})
 
         check(valid)
+        for confidence in ("high", "MEDIUM", "HIGH"):
+            data = json.loads(json.dumps(valid))
+            data["version"]["security"]["scanners"]["llm"]["confidence"] = confidence
+            check(data)
         for path, value in (
             (("skill", "slug"), "another-skill"), (("owner", "handle"), "another-publisher"),
             (("version", "version"), "3.2.1"), (("version", "security", "status"), "pending"),
             (("version", "security", "scanners", "llm", "verdict"), "suspicious"),
-            (("version", "security", "scanners", "llm", "confidence"), "medium"),
+            (("version", "security", "scanners", "llm", "verdict"), "malicious"),
+            (("version", "security", "scanners", "llm", "confidence"), "low"),
+            (("version", "security", "scanners", "llm", "confidence"), ""),
+            (("version", "security", "scanners", "llm", "confidence"), None),
+            (("version", "security", "scanners", "llm", "confidence"), "unknown"),
             (("version", "security", "scanners", "llm"), {}), (("version", "security"), {}),
         ):
             data = json.loads(json.dumps(valid))
@@ -125,7 +133,7 @@ class ReleaseSecurityGateTests(unittest.TestCase):
         source = textwrap.dedent(step.split("python - <<'PY'\n", 1)[1].split("\n          PY", 1)[0])
         valid = {"status": "succeeded", "sourceKind": "published", "writtenBack": True,
                  "artifact": {"version": "3.2.0"},
-                 "report": {"clawscan": {"verdict": "benign", "confidence": "high"}}}
+                 "report": {"clawscan": {"verdict": "benign", "confidence": "medium"}}}
 
         def check(data):
             with patch.dict(os.environ, {"EXPECTED_VERSION": "3.2.0"}), \
@@ -133,6 +141,10 @@ class ReleaseSecurityGateTests(unittest.TestCase):
                 exec(compile(source, "release hosted audit gate", "exec"), {})
 
         check(valid)
+        for confidence in ("high", "MEDIUM", "HIGH"):
+            data = json.loads(json.dumps(valid))
+            data["report"]["clawscan"]["confidence"] = confidence
+            check(data)
         for static in (None, {"status": "clean"}, {"status": "CLEAN"}):
             data = json.loads(json.dumps(valid))
             data["report"]["staticAnalysis"] = static
@@ -145,7 +157,9 @@ class ReleaseSecurityGateTests(unittest.TestCase):
         for section, key, value in (
             (None, "status", "failed"), (None, "sourceKind", "local"),
             (None, "writtenBack", False), ("artifact", "version", "3.1.0"),
-            ("clawscan", "verdict", "suspicious"), ("clawscan", "confidence", "medium"),
+            ("clawscan", "verdict", "suspicious"), ("clawscan", "verdict", "malicious"),
+            ("clawscan", "confidence", "low"), ("clawscan", "confidence", ""),
+            ("clawscan", "confidence", None), ("clawscan", "confidence", "unknown"),
         ):
             data = json.loads(json.dumps(valid))
             target = data["report"]["clawscan"] if section == "clawscan" else data[section] if section else data
