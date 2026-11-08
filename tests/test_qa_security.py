@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import os
+import textwrap
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -56,6 +60,65 @@ class SecurityTriggerPatternTests(unittest.TestCase):
             "Poll `GET /background-jobs/{job_id}`.",
         ):
             self.assertFalse(self._hit(ok), f"should NOT flag: {ok!r}")
+
+
+class ReleaseSecurityGateTests(unittest.TestCase):
+    def test_static_evidence_cannot_be_skipped_or_allowed_to_fail(self):
+        read = Path.read_text
+        mutations = (
+            (".github/workflows/release-skill.yml", "        uses: ./.github/actions/scanner-regression",
+             "        if: false\n        uses: ./.github/actions/scanner-regression"),
+            (".github/workflows/security-scan.yml", "        uses: ./.github/actions/scanner-regression", ""),
+            (".github/workflows/release-skill.yml", "        uses: ./.github/actions/scanner-regression",
+             "        uses: ./.github/actions/scanner-regression\n        continue-on-error: true"),
+            (".github/actions/scanner-regression/action.yml", "    - name: Read reviewed scanner pins",
+             "    - name: Read reviewed scanner pins\n      continue-on-error: true"),
+            (".github/actions/scanner-regression/action.yml",
+             'python dev-tools/check_scanner.py .local/scanner-results/report.json', "true"),
+            (".github/actions/scanner-regression/action.yml",
+             'hashlib.sha256(patch).hexdigest() != os.environ["PATCH_SHA256"]', "False"),
+        )
+        qa.check_workflows()
+        for name, before, after in mutations:
+            target = REPO_ROOT / name
+
+            def changed(path, *args, **kwargs):
+                text = read(path, *args, **kwargs)
+                return text.replace(before, after) if path == target else text
+
+            with self.subTest(path=name, mutation=before), patch.object(Path, "read_text", changed):
+                with self.assertRaises(AssertionError):
+                    qa.check_workflows()
+
+    def test_hosted_verdict_stays_fail_closed_after_retired_static_section(self):
+        workflow = (REPO_ROOT / ".github/workflows/release-skill.yml").read_text(encoding="utf-8")
+        step = workflow.split("      - name: Scan the published ClawHub version\n", 1)[1]
+        source = textwrap.dedent(step.split("python - <<'PY'\n", 1)[1].split("\n          PY", 1)[0])
+        valid = {"status": "succeeded", "sourceKind": "published", "writtenBack": True,
+                 "artifact": {"version": "3.2.0"},
+                 "report": {"clawscan": {"verdict": "benign", "confidence": "high"}}}
+
+        def check(data):
+            with patch.dict(os.environ, {"EXPECTED_VERSION": "3.2.0"}), \
+                    patch.object(Path, "read_text", return_value=json.dumps(data)), patch("builtins.print"):
+                exec(compile(source, "release hosted audit gate", "exec"), {})
+
+        check(valid)
+        for section, key, value in (
+            (None, "status", "failed"), (None, "sourceKind", "local"),
+            (None, "writtenBack", False), ("artifact", "version", "3.1.0"),
+            ("clawscan", "verdict", "suspicious"), ("clawscan", "confidence", "medium"),
+        ):
+            data = json.loads(json.dumps(valid))
+            target = data["report"]["clawscan"] if section == "clawscan" else data[section] if section else data
+            target[key] = value
+            with self.subTest(section=section, key=key), self.assertRaises(SystemExit):
+                check(data)
+        for key in ("malicious", "suspicious"):
+            data = json.loads(json.dumps(valid))
+            data["report"]["virustotal"] = {key: 1}
+            with self.subTest(detection=key), self.assertRaises(SystemExit):
+                check(data)
 
 
 if __name__ == "__main__":

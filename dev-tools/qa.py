@@ -459,6 +459,30 @@ def check_python_compiles() -> None:
 def check_workflows() -> None:
     qa_workflow = (REPO_ROOT / ".github/workflows/qa.yml").read_text(encoding="utf-8")
     release_workflow = (REPO_ROOT / ".github/workflows/release-skill.yml").read_text(encoding="utf-8")
+    security_workflow = (REPO_ROOT / ".github/workflows/security-scan.yml").read_text(encoding="utf-8")
+    static_action = (REPO_ROOT / ".github/actions/scanner-regression/action.yml").read_text(encoding="utf-8")
+    static_step = ("      - name: Run reviewed static risk regression\n"
+                   "        uses: ./.github/actions/scanner-regression\n")
+    for workflow in (release_workflow, security_workflow):
+        if workflow.count(static_step) != 1:
+            raise AssertionError("CI and release must run the shared static regression gate unconditionally")
+        call = workflow.split("      - name: Run reviewed static risk regression\n", 1)[1].split("\n      - ", 1)[0].strip()
+        if call not in ("uses: ./.github/actions/scanner-regression",
+                        "uses: ./.github/actions/scanner-regression\n        timeout-minutes: 20"):
+            raise AssertionError("static regression calls must not skip or ignore failures")
+    for required in (
+        "using: composite", "ref: ${{ steps.pins.outputs.scanner_commit }}",
+        'hashlib.sha256(patch).hexdigest() != os.environ["PATCH_SHA256"]',
+        'actual != os.environ["SCANNER_COMMIT"]',
+        'python -m venv "$RUNNER_TEMP/skillspector"',
+        '--no-llm --format json',
+        'python dev-tools/check_scanner.py .local/scanner-results/report.json',
+        "name: skillspector-risk-regression", "if: always()",
+    ):
+        if required not in static_action:
+            raise AssertionError(f"shared static regression action is missing its gate: {required}")
+    if "continue-on-error" in static_action:
+        raise AssertionError("static regression failures must fail the calling job")
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     # Assert the step is present regardless of the pinned major version, so a
     # routine setup-python/@vN bump does not red QA on an otherwise correct
@@ -570,6 +594,7 @@ def check_workflows() -> None:
     if not (
         release_workflow.find("- name: Run QA checks")
         < release_workflow.find("- name: Use the tagged skill files")
+        < release_workflow.find("- name: Run reviewed static risk regression")
         < release_workflow.find("- name: Run skill security scan")
         < release_workflow.find("- name: Build skill archive")
     ):

@@ -7,6 +7,17 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-11-07
+
+### Fixed
+
+- **Clarify approved local palette conversion.** Keep explicitly requested or approved palette/index remapping available as a labeled derivative while preserving source-pixel, approval, and non-PixelLab drawing boundaries. This resolves contradictory wording around the existing Aseprite palette-clamp workflow.
+- **Keep the full skill within the pinned audit's batch budget.** Consolidate a duplicate humanoid preset example into its existing numbered workflow, retaining every parameter decision and the selected animation engine. This removes one redundant executable batch without excluding files, hiding code, or changing the scanner limit.
+
+### Security
+
+- **Verify static evidence during release.** Run the same pinned, hash-verified static risk and coverage regression gate used by CI on the selected release files, including resumed tags. This replaces ClawHub's retired public static-analysis field; the hosted benign/high-confidence verdict, exact-file verification, malware scan, and provenance gates remain required.
+
 ## [3.2.0] - 2026-11-07
 
 ### Added
@@ -170,7 +181,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
-[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/Shilo/pixellab-pip/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/Shilo/pixellab-pip/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/Shilo/pixellab-pip/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/Shilo/pixellab-pip/compare/v2.3.0...v3.0.0

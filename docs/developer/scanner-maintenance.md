@@ -10,6 +10,8 @@ The existing [Skill Security Audit](../../.github/workflows/security-scan.yml) r
 
 The existing QA security-trigger guard, unit tests, HOL scan, Code Scanning, release checks and Scorecard remain in place. Dependabot merges also wait for the new check. Requiring it for every human merge is a separate repository branch-rule setting; this change does not modify GitHub settings.
 
+CI and release share the pinned setup and validator through [the static regression action](../../.github/actions/scanner-regression/action.yml). Release runs it after restoring any resumed tag's skill files and before packaging. ClawHub [retired its public `staticAnalysis` and `virustotal` report sections](https://github.com/openclaw/clawhub/blob/81c4dfc6d9e45aa364cee39c92113278d51f2b3c/convex/securityScan.test.ts#L2066); their absence is not a clean result. The explicit static regression gate supplies the release's static evidence, while the direct VirusTotal archive scan and hosted benign/high-confidence ClawScan requirement remain mandatory.
+
 ## Reviewed baseline
 
 The baseline records the reviewed source commit and scanner provenance. It starts at **17 / LOW / CAUTION** for the pinned ClawScan-compatible static scan. Do not compare numbers across different scanner revisions, patches, modes or artifacts as if they were interchangeable.

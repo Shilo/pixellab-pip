@@ -11,7 +11,7 @@ PixelLab MCP or documented REST v2
   -> `.aseprite`, PNG sequence, GIF, spritesheet, metadata, or visible Aseprite workspace
 ```
 
-Aseprite is a local workspace/import/export tool applied after PixelLab generated the pixels. It arranges PixelLab/user images into layers, frames, tags, cels, and exports; it never authors content (per SKILL.md Asset Integrity — no Lua draw/brush/shape/scripted pixel placement unless the user approves a labeled non-PixelLab fallback).
+Aseprite arranges PixelLab/user images into layers, frames, tags, cels, and exports. Palette/index conversion remaps existing source pixels; it does not draw new art. Apply SKILL.md Asset Integrity to these transformations and any non-PixelLab fallback.
 
 For explicit Aseprite MCP requests, read `aseprite-mcp.md`; return here when the task also needs direct CLI/Lua file handling.
 

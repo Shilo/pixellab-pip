@@ -146,6 +146,10 @@ jobs:
           fi
           echo "Releasing the skill files of ${RELEASE_TAG}."
 
+      - name: Run reviewed static risk regression
+        uses: ./.github/actions/scanner-regression
+        timeout-minutes: 20
+
       - name: Run skill security scan
         shell: bash
         # Same pinned SkillSpector as security-scan.yml; blocks the release if the risk score exceeds its threshold.
@@ -944,8 +948,8 @@ jobs:
           clawscan = report.get("clawscan") or {}
           require(str(clawscan.get("verdict", "")).casefold() == "benign", "ClawHub ClawScan verdict is not benign")
           require(str(clawscan.get("confidence", "")).casefold() == "high", "ClawHub ClawScan confidence is not high")
-          static = report.get("staticAnalysis") or {}
-          require(str(static.get("status", "")).casefold() == "clean", "ClawHub static analysis is not clean")
+          # ClawHub retired staticAnalysis from public reports. The pinned static
+          # regression gate above scans these exact skill files before packaging.
 
           virustotal = report.get("virustotal")
           if virustotal is not None:

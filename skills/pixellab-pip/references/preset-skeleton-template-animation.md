@@ -50,21 +50,11 @@ Flow for an existing or wanted managed character:
 
 1. `get_character(character_id)` to confirm status, template/body type, directions, size, existing animations, and downloadable assets.
 2. Choose `template_animation_id` from the character's template family (catalog below).
-3. `animate_character` with explicit `directions`.
+3. `animate_character` with `character_id`, the chosen `template_animation_id`, explicit `directions`, and the `mode` selected under `animation.md` → Route Choice (`template` or `skeleton-v3`); optionally set `animation_name` as an organizational label.
 4. Poll with `get_character` or the returned job IDs, per visible MCP tool behavior.
 5. Download frames/ZIP only after completion if local files are needed.
 
 Verify by canonical `template_animation_id`, direction, and frame count, not by a custom display name: MCP smoke (2026-06-30) showed `animation_name` did not override the stored canonical template label returned by `get_character`, and MCP exposed no usage/cost.
-
-```python
-animate_character(
-    character_id="...",
-    template_animation_id="walking-8-frames",
-    animation_name="walk",
-    directions=["south"],
-    mode="template",
-)
-```
 
 To turn a reference image or GIF frame into a managed character first, use MCP `create_character(mode="v3", description=..., reference_image_url=...)` — v3 is the only MCP mode that accepts a reference sprite; from scratch it outputs 8 directions, while a reference allows `n_directions` 4 or 8. Prefer the URL form over inline base64 (MCP clients truncate large inline base64). Choose text-only quadruped creation through SKILL.md's quadruped row rather than requiring a new reference. Reuse a supplied south-facing quadruped with matching `body_type="quadruped"` and `template` when v3 is selected; v3 from text is humanoid-only. With a v3 reference, set `n_directions` to 4 or 8 and pass a south-facing sprite as `reference_image_url`. Supply other views through `direction_images` to preserve them exactly and generate only missing directions. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. Directions must match their labels and use the reference canvas size. If the MCP client cannot send an object for `direction_images`, send that same object JSON-encoded as a string. REST `create-character-v3` supports the corresponding quadruped reference with matching `template_id`. Then animate the returned `character_id` once the character completes. Fall back to REST when MCP is unavailable or REST's matching `template_id`, `no_background`, or `enhance_prompt` fields matter.
 
