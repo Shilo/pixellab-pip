@@ -14,7 +14,7 @@
     "_comment": "Overhead two-handed axe chop from a side-view sprite facing right: two key poses (wind-up, hit) painted on a padded canvas, a pause to approve them, then animate_image between them. A 256x256 canvas gives a long haft room and caps the clip at 8 generated frames.",
     "_comment_prompt": "/pixellab-pip run the overhead-axe-chop blueprint on hero.png",
     "TASK": {
-      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). Copy {{standing sprite}} in as standing.png; it must face right. Paste it unscaled onto a transparent {{canvas width | default: 256}}x{{canvas height | default: 256}} canvas at x={{pad x | default: 72}} with its lowest drawn row on the bottom edge (assets/pad_sprite.py does this), save padded.png and record the paste offset in pad.json. Stop if the sprite does not fit, the canvas breaks the animate_image limit (width x height x 8 <= 524288, at most 256 per side), or any check fails. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm an authenticated PixelLab MCP connection, and create the declared output directory empty (lowest free -2 suffix if taken). This recipe is for a two-handed axe chop; if the requested or source weapon, grip or facing does not fit, stop and replan the choreography under references/key-pose-animation.md instead of replacing the requested weapon or pose. Copy {{standing sprite}} in as standing.png; it must face right. Paste it unscaled onto a transparent {{canvas width | default: 256}}x{{canvas height | default: 256}} canvas at x={{pad x | default: 72}} with its lowest drawn row on the bottom edge (assets/pad_sprite.py does this), save padded.png and record the paste offset in pad.json. Stop if the sprite does not fit, the canvas breaks the animate_image limit (width x height x 8 <= 524288, at most 256 per side), or any check fails. Resolve current-request overrides before execution; the blueprint is a recipe, not permission. Follow the canonical approval and content-review contracts in references/auto.md and references/reviewable-candidates.md. The user must accept any proposed local pixel/playback transformations separately from spending approval.",
       "outputs": [
         "standing.png",
         "padded.png",
@@ -27,7 +27,7 @@
     "MCP edit_image_pro_flash": {
       "image_base64": "padded.png",
       "method": "text",
-      "description": "The same {{character description}}, wind-up of an overhead chop: holding one {{weapon | default: two-handed greataxe}} with both hands together at the end of the haft over the shoulder, the axe head up behind the head, edge facing up toward the upper left of the image, torso arched back, very long stride, front knee bent, back leg straight. The same axe head, same size, the haft as long as in the original. Same size, same colours and pixel style, feet in the same place, no background.",
+      "description": "The same {{character description}}, wind-up of an overhead chop: holding one {{axe description | default: two-handed greataxe}} with both hands together at the end of the haft over the shoulder, the axe head up behind the head, edge facing up toward the upper left of the image, torso arched back, very long stride, front knee bent, back leg straight. The same axe head, same size, the haft as long as in the original. Same size, same colours and pixel style, feet in the same place.",
       "no_background": true,
       "use_color_palette_correction": true
     }
@@ -45,7 +45,7 @@
     "MCP edit_image_pro_flash": {
       "image_base64": "padded.png",
       "method": "text",
-      "description": "The same {{character description}}, the hit of an overhead chop: torso folded forward over the deep front knee, both arms extended low in front, holding one {{weapon | default: two-handed greataxe}}, the axe head at knee height in front, edge facing toward the lower right of the image, back heel lifted. The same axe head, same size, the haft as long as in the original. Same size, same colours and pixel style, feet in the same place, no background.",
+      "description": "The same {{character description}}, the hit of an overhead chop: torso folded forward over the deep front knee, both arms extended low in front, holding one {{axe description | default: two-handed greataxe}}, the axe head at knee height in front, edge facing toward the lower right of the image, back heel lifted. The same axe head, same size, the haft as long as in the original. Same size, same colours and pixel style, feet in the same place.",
       "no_background": true,
       "use_color_palette_correction": true
     }

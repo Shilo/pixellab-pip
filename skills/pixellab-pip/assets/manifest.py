@@ -4,7 +4,7 @@
     python manifest.py done RUN JOB
     python manifest.py outcome RUN JOB OUTCOME [NOTE]
     python manifest.py plan RUN JSONFILE  record current-run audit metadata, not permission (JSONFILE - = stdin)
-    python manifest.py spent RUN...       exact reported charges; unknown exits 2
+    python manifest.py spent RUN... [--unit usd]  exact reported charges; unknown exits 2
     python manifest.py committed RUN...   actual charge, otherwise estimate; unknown exits 2
 
 Failure is not evidence of a refund. Record a provider-confirmed zero charge as
@@ -195,17 +195,21 @@ def set_plan(run_dir: str, plan: dict[str, Any]) -> None:
         _write(run_dir, data)
 
 
-def _usage(job: dict[str, Any], *, estimate: bool = False) -> float:
+def _usage(job: dict[str, Any], *, estimate: bool = False, unit: str = "generations") -> float:
+    if unit not in ("generations", "usd"):
+        raise ValueError("usage unit must be generations or usd")
     for key in (("reported_usage", "estimated_usage") if estimate else ("reported_usage",)):
         usage = job.get(key)
-        if isinstance(usage, dict) and "generations" in usage:
-            return number(usage["generations"])
-    raise ValueError("unknown generations for job " + job["job_id"])
+        if isinstance(usage, dict) and unit in usage:
+            return number(usage[unit])
+    raise ValueError("unknown " + unit + " for job " + job["job_id"])
 
 
-def spent(run_dir: str) -> float:
-    """Exact reported charges across every status; unknown is never zero."""
-    return sum(_usage(j) for j in jobs(run_dir))
+def spent(run_dir: str, *, unit: str = "generations") -> float:
+    """Exact reported charges in one unit across every status; unknown is never zero."""
+    if unit not in ("generations", "usd"):
+        raise ValueError("usage unit must be generations or usd")
+    return sum(_usage(j, unit=unit) for j in jobs(run_dir))
 
 
 def committed(run_dir: str) -> float:
@@ -223,7 +227,10 @@ def main(argv: list[str]) -> int:
     add.add_argument("--generations", type=float, help="exact charge reported by PixelLab")
     add.add_argument("--estimate", type=float, help="conservative reservation, never a reported charge")
     for command in ("spent", "committed"):
-        commands.add_parser(command).add_argument("runs", nargs="+")
+        total = commands.add_parser(command)
+        total.add_argument("runs", nargs="+")
+        if command == "spent":
+            total.add_argument("--unit", choices=("generations", "usd"), default="generations")
     done = commands.add_parser("done")
     done.add_argument("run")
     done.add_argument("job")
@@ -239,7 +246,10 @@ def main(argv: list[str]) -> int:
     try:
         if args.command in ("spent", "committed"):
             fn = spent if args.command == "spent" else committed
-            out = {args.command: sum(fn(run) for run in dict.fromkeys(args.runs))}
+            options = {"unit": args.unit} if args.command == "spent" else {}
+            out = {args.command: sum(fn(run, **options) for run in dict.fromkeys(args.runs))}
+            if options.get("unit") == "usd":
+                out["unit"] = "usd"
         elif args.command == "add":
             entry = {"job_id": args.job, "status": "submitted"}
             if args.tool:

@@ -77,7 +77,7 @@ Filled example:
 >
 > 1. **`create_character`** · MCP · v3 · ~2 gen
 >    - `description`: "stout dwarf blacksmith, flat pixel art, leather apron" *(enhanced)*
->    - `size`: 48 · `view`: side · `detail`: high detail
+>    - `size`: 48 · `view`: side · `detail`: highly detailed
 > 2. **`animate_character`** · MCP · ~1 gen
 >    - `action_description`: "walk" · `directions`: ["south"] · `template_animation_id`: `walking-8-frames`
 >

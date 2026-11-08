@@ -61,7 +61,7 @@
       text('pip-context', l.project + ': ' + s.project + ' · ' + l.run + ': ' + (s.run || l.none));
       text('pip-freshness', l.snapshot + ': ' + s.created_at + ' · ' + l.snapshot_help);
       const amount = value => value === null ? l.unknown : String(value);
-      text('pip-usage', l.usage_scope + ': ' + amount(s.usage.charged) + ' ' + l.charged + '; ' + amount(s.usage.committed) + ' ' + l.committed + ' (' + l.cost_explanation + ').');
+      text('pip-usage', l.usage_scope + ': ' + amount(s.usage.charged) + ' ' + l.charged + '; ' + amount(s.usage.committed) + ' ' + l.committed + '; ' + amount(s.usage.charged_usd) + ' ' + l.charged_usd + ' (' + l.cost_explanation + ').');
       text('pip-style', l.style + ': ' + s.style);
       for (const warning of s.warnings) {
         const p = document.createElement('p'); p.textContent = warning; find('pip-warnings').append(p);

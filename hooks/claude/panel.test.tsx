@@ -138,6 +138,29 @@ test('panel tool registers without adding a competing command or connector', asy
   expect(h.writes.length).toBe(0)
 })
 
+test('native panel shows reported USD without replacing unknown generations', async ($, on) => {
+  const s = await fixture()
+  s.usage.charged = null
+  ;(s.usage as any).charged_usd = 0.125
+  s.labels.charged_usd = 'charged USD'
+  const h = engine(on, () => JSON.stringify(s))
+  await $.session.start({ cwd: '/project-a', surface: 'desktop', isInteractive: true })
+  await $.tool.call({ tool: TOOL, snapshot_path: PATH })
+  const ui = await $.ui.mount(pane('desktop') as any)
+  const cost = (await ui.find({ type: 'Text', text: /charged USD/ }))?.text
+  expect(cost).toContain('charged USD: 0.125')
+  expect(cost).toContain('charged generations: unknown')
+  expect(h.writes.length).toBe(0)
+  for (const value of [0, null]) {
+    ;(s.usage as any).charged_usd = value
+    expect(parseSnapshot(JSON.stringify(s)).usage.charged_usd).toBe(value)
+  }
+  for (const value of [-1, '0.125', false]) {
+    ;(s.usage as any).charged_usd = value
+    expect(() => parseSnapshot(JSON.stringify(s))).toThrow()
+  }
+})
+
 test('visual review requests preserve selected project B rather than session project A, digest and zero cost', async ($, on) => {
   const s = await fixture()
   const h = engine(on, () => JSON.stringify(s))

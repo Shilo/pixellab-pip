@@ -70,7 +70,7 @@ def test_free_fixes_then_a_question(tmp_path):
     out = str(tmp_path / 'k') + '_fixed'
     r = report(out)
     (a,) = r['anims']
-    assert r['verdict'] == 'ready after free fixes' and not a['plans']   # the question, not a paid re-roll
+    assert r['verdict'] == 'awaiting approval' and not a['plans']   # the question, not a paid re-roll
     (p,) = a['proposals']
     assert p['check'] == 'flash'
     assert {c['check'] for c in a['changes'] if c['result'] == 'fixed'} >= {'specks', 'brightness'}
@@ -110,6 +110,37 @@ def test_style_soft_edges_from_the_profile(tmp_path):
     (tmp_path / 'pixellab-pip-style.json').write_text(json.dumps({'look': 'painterly, soft anti-aliased edges'}), encoding='utf-8')
     r = json.loads(fix(tmp_path / 'k', '--json', '--check-only', '--profile', tmp_path / 'pixellab-pip-style.json', cwd=tmp_path))
     assert 'soft_edge' not in {f['check'] for f in r['anims'][0]['findings_before']}
+
+
+def test_negated_soft_styles_and_explicit_overrides(tmp_path):
+    from fix import load_style
+    path = tmp_path / 'pixellab-pip-style.json'
+    for profile, expected in (
+        ({'look': 'no anti-aliasing'}, False),
+        ({'look': 'without soft edges'}, False),
+        ({'look': 'avoid antialiasing'}, False),
+        ({'look': 'no anti-aliasing, soft edges'}, True),
+        ({'look': 'painterly, soft edges', 'soft_edges': False}, False),
+        ({'look': 'crisp edges', 'soft_edges': True}, True),
+    ):
+        path.write_text(json.dumps(profile), encoding='utf-8')
+        assert load_style(str(path))['soft_edges'] is expected, profile
+
+
+def test_airborne_repair_waits_for_approval_without_moving_pixels(tmp_path):
+    fs = [synth.figure(), synth.shift(synth.figure(), 0, -5), synth.figure()]
+    src = synth.save(fs, tmp_path / 'airborne', 'hero_jump')
+    r = json.loads(fix(tmp_path / 'airborne', '--move', 'jump', '--json'))
+    (a,) = r['anims']
+    proposal = next(p for p in a['proposals'] if p['check'] == 'ground')
+    assert r['verdict'] == 'awaiting approval'
+    assert not a['plans'] and not a['changes']
+    for path in src:
+        assert open(path, 'rb').read() == open(tmp_path / 'airborne_fixed' / os.path.basename(path), 'rb').read()
+    accepted = json.loads(fix(tmp_path / 'airborne', '--move', 'jump', '--accept', proposal['id'],
+                              '--out', tmp_path / 'accepted-airborne', '--json'))
+    assert accepted['verdict'] == 'ready after free fixes'
+    assert any(c['check'] == 'ground' and c['result'] == 'fixed' for c in accepted['anims'][0]['changes'])
 
 
 def test_default_output_stays_beside_input_files(tmp_path):

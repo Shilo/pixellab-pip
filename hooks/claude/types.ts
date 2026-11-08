@@ -14,7 +14,7 @@ export type PanelSnapshot = {
   run: string | null;
   created_at: string;
   style: string;
-  usage: { charged: number | null; committed: number | null };
+  usage: { charged: number | null; committed: number | null; charged_usd?: number | null };
   jobs: { job_id: string; tool?: string; status?: string; outcome?: string }[];
   images: PanelImage[];
   warnings: string[];

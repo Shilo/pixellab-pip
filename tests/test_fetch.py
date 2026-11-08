@@ -411,6 +411,58 @@ class FetchTests(unittest.TestCase):
         self.assertEqual(calls, [1])
         self.assertFalse((self.root / "clip").exists())
 
+    def test_documented_file_hosts_and_redirect_boundaries(self) -> None:
+        import urllib.request
+        for host in ("api.pixellab.ai", "backblaze.pixellab.ai", "supabase.pixellab.ai", "cdn.pixellab.ai"):
+            url = "https://" + host + "/result.png"
+            fetch.check_host(url)
+            req = fetch.PixelLabOnly().redirect_request(urllib.request.Request(LINK), None, 302, "", {}, url)
+            self.assertEqual(req.full_url, url)
+            self.assertNotIn("Authorization", req.headers)
+        for url in ("https://unused.pixellab.ai/x.png", "https://pixellab.ai.evil.test/x.png",
+                    "https://cdn.pixellab.ai.evil.test/x.png", "http://cdn.pixellab.ai/x.png",
+                    "https://token@cdn.pixellab.ai/x.png"):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                fetch.PixelLabOnly().redirect_request(urllib.request.Request(LINK), None, 302, "", {}, url)
+
+    def test_tileset_pending_retry_after_ready_or_deadline(self) -> None:
+        import urllib.error
+        class Clock:
+            now = 0
+            def monotonic(self): return self.now
+            def sleep(self, delay): self.now += delay
+        for retry, limit, ready in (("7", 20, True), ("1000", 10, False), ("invalid", 10, False)):
+            with self.subTest(retry=retry):
+                run = self.root / retry
+                clock = Clock()
+                error = urllib.error.HTTPError(LINK, 423, "pending", {"Retry-After": retry}, None)
+                with patch.object(fetch, "_download", side_effect=[error, PNG]) as download, \
+                        patch.object(fetch, "time", clock), redirect_stdout(io.StringIO()):
+                    code = fetch.main(["j", str(run / "raw.png"), "--run", str(run), "--url", LINK,
+                                       "--estimate", "7", "--timeout", str(limit)])
+                self.assertEqual(code, 0 if ready else 3)
+                self.assertEqual(download.call_count, 2 if ready else 1)
+                self.assertEqual(clock.now, 7 if ready else limit)
+                self.assertEqual((run / "raw.png").exists(), ready)
+                entry, = manifest.jobs(str(run))
+                self.assertEqual(entry["download_status"], "ok" if ready else "wait")
+                self.assertEqual(entry["estimated_usage"], {"generations": 7})
+                self.assertNotIn("reported_usage", entry)
+
+    def test_pending_direct_download_is_one_shot_and_retry_dates_are_bounded(self) -> None:
+        import urllib.error
+        error = urllib.error.HTTPError(LINK, 423, "pending", {"Retry-After": "7"}, None)
+        out = self.root / "raw.png"
+        with patch.object(fetch, "_download", side_effect=error) as download, redirect_stdout(io.StringIO()):
+            self.assertEqual(fetch.main(["--url", LINK, str(out)]), 3)
+        download.assert_called_once()
+        self.assertFalse(out.exists())
+        with patch.object(fetch.time, "time", return_value=0):
+            self.assertEqual(fetch._retry_delay("Thu, 01 Jan 1970 00:00:07 GMT"), 7)
+        for value in (None, "nonsense", "nan", "inf", "-1"):
+            self.assertEqual(fetch._retry_delay(value), 15)
+        self.assertEqual(fetch._retry_delay("0"), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

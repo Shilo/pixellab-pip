@@ -19,7 +19,7 @@
     "_comment": "A configurable knight character sprite.",
     "_comment_prompt": "/pixellab-pip create the knight blueprint",
     "TASK": {
-      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty; if any precondition fails, stop before spending.",
+      "instruction": "Before any PixelLab call, require an explicit current-user request to run this blueprint, confirm PIXELLAB_SECRET is available without printing or storing its value, and resolve output_directory by using the declared path when available or appending the lowest available suffix starting at -2. Create that directory empty; if any precondition fails, stop before spending. Include any user-specified equipment placement or holding hand in the resolved equipment descriptions themselves, not just the variable names; preserve the requested loadout.",
       "verify": "Run authority and credential presence are confirmed, and the output directory is new, empty, writable, and inside the current project."
     }
   },
@@ -27,7 +27,7 @@
     "MCP create_character": {
       "body_type": "humanoid",
       "detail": "medium detail",
-      "description": "a knight in {{armor color | default: shining silver}} armor holding a {{weapon in the knight's left hand | default: sword}} and {{item held in the knight's right hand | default: shield}}",
+      "description": "a knight in {{armor color | default: shining silver}} armor holding {{weapon description | default: a sword}} and {{other equipment description | default: a shield}}",
       "mode": "v3",
       "name": "Knight",
       "size": 48,

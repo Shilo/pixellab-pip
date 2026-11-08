@@ -118,11 +118,30 @@ class PanelTests(unittest.TestCase):
                      {'job_id': 'pending', 'status': 'submitted', 'estimated_usage': {'generations': 7}}])
         before = (self.run / 'manifest.json').read_bytes()
         result = panel.build_snapshot(str(self.root), str(self.run.relative_to(self.root)))
-        self.assertEqual(result['usage'], {'charged': None, 'committed': 11})
+        self.assertEqual(result['usage'], {'charged': None, 'committed': 11, 'charged_usd': None})
         self.assertEqual([j['status'] for j in result['jobs']], ['failed', 'submitted'])
         self.assertEqual(result['manifest_sha256'], hashlib.sha256(before).hexdigest())
         self.assertEqual((self.run / 'manifest.json').read_bytes(), before)
         self.assertTrue(result['warnings'])
+
+    def test_usd_panel_is_separate_from_generation_accounting(self):
+        self.ledger([{'job_id': 'failed', 'status': 'failed', 'reported_usage': {'usd': 0.125},
+                      'estimated_usage': {'generations': 7}},
+                     {'job_id': 'free', 'reported_usage': {'usd': 0, 'generations': 0}}])
+        before = (self.run / 'manifest.json').read_bytes()
+        snapshot = panel.build_snapshot(str(self.root), str(self.run.relative_to(self.root)))
+        self.assertEqual(snapshot['usage'], {'charged': None, 'committed': 7, 'charged_usd': 0.125})
+        self.assertEqual(snapshot['labels']['charged_usd'], 'charged USD')
+        self.assertEqual((self.run / 'manifest.json').read_bytes(), before)
+        result = self.cli(self.root, '--run', self.run.relative_to(self.root))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        paths = json.loads(result.stdout)
+        html = Path(paths['panel']).read_text(encoding='utf-8')
+        self.assertIn('amount(s.usage.charged_usd)', html)
+        self.assertEqual(json.loads(Path(paths['snapshot']).read_text())['usage']['charged_usd'], 0.125)
+        self.ledger([{'job_id': 'known', 'reported_usage': {'usd': 0.125}}, {'job_id': 'unknown'}])
+        snapshot = panel.build_snapshot(str(self.root), str(self.run.relative_to(self.root)))
+        self.assertIsNone(snapshot['usage']['charged_usd'])
 
     def test_empty_project_requires_no_profile_or_manifest_and_does_not_create_them(self):
         result = self.cli(self.root)
@@ -130,7 +149,7 @@ class PanelTests(unittest.TestCase):
         paths = json.loads(result.stdout)
         snapshot = json.loads(Path(paths['snapshot']).read_text(encoding='utf-8'))
         self.assertIsNone(snapshot['run'])
-        self.assertEqual(snapshot['usage'], {'charged': None, 'committed': None})
+        self.assertEqual(snapshot['usage'], {'charged': None, 'committed': None, 'charged_usd': None})
         self.assertFalse((self.root / 'pixellab-pip-style.json').exists())
         self.assertFalse((self.root / 'manifest.json').exists())
         self.assertEqual(set(paths), {'snapshot', 'panel'})
@@ -253,7 +272,7 @@ class PanelTests(unittest.TestCase):
         self.ledger([{'job_id': str(i), 'reported_usage': {'generations': 1}} for i in range(205)])
         snapshot = panel.build_snapshot(str(self.root), str(self.run.relative_to(self.root)))
         self.assertEqual(len(snapshot['jobs']), panel.MAX_JOBS)
-        self.assertEqual(snapshot['usage'], {'charged': 205, 'committed': 205})
+        self.assertEqual(snapshot['usage'], {'charged': 205, 'committed': 205, 'charged_usd': None})
         self.assertIn('usage covers all', snapshot['warnings'][0])
 
     def test_oversize_inline_fragment_requires_standalone_render(self):

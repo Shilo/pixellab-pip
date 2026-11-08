@@ -38,6 +38,25 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(manifest.jobs(self.run)[0]["job_id"], "a")
         self.assertEqual(manifest.jobs(self.run)[0]["waited_s"], 40)
 
+    def test_usd_charges_never_convert_or_resolve_generation_reservations(self) -> None:
+        manifest.add_job(self.run, {"job_id": "a", "status": "failed", "reported_usage": {"usd": 0},
+                                   "estimated_usage": {"generations": 7}})
+        manifest.add_job(self.run, {"job_id": "b", "reported_usage": {"usd": 0.25},
+                                   "estimated_usage": {"generations": 5}})
+        self.assertEqual(manifest.spent(self.run, unit="usd"), 0.25)
+        with self.assertRaisesRegex(ValueError, "unknown generations"):
+            manifest.spent(self.run)
+        self.assertEqual(manifest.committed(self.run), 12)
+        result = subprocess.run([sys.executable, str(SCRIPT), "spent", self.run, "--unit", "usd"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {"spent": 0.25, "unit": "usd"})
+        manifest.add_job(self.run, {"job_id": "c", "reported_usage": {"generations": 2}})
+        with self.assertRaisesRegex(ValueError, "unknown usd"):
+            manifest.spent(self.run, unit="usd")
+        with self.assertRaisesRegex(ValueError, "usage unit"):
+            manifest.spent(self.run, unit="credits")
+
     def test_plan_cli_initializes_only_empty_runs_and_preserves_existing_audit(self) -> None:
         with tempfile.TemporaryDirectory() as source:
             path = Path(source) / "plan.json"

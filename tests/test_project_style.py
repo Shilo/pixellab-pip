@@ -203,6 +203,24 @@ class ProjectStyleTests(unittest.TestCase):
         self.assertIn("heroes", json.loads(shown.stdout)["invalid_anchors"])
         self.assertNotEqual(run(self.dir, "show", "--style", "unknown").returncode, 0)
 
+    def test_consumed_animation_appearance_hints_survive_save_and_show(self) -> None:
+        src = self.dir / "style.json"
+        src.write_text(json.dumps({"soft_edges": False, "palette_size": 16, "auto": True}), encoding="utf-8")
+        self.assertEqual(run(self.dir, "save", "crisp", "--from", "style.json", "--use").returncode, 0)
+        shown = json.loads(run(self.dir, "show").stdout)["style"]
+        self.assertEqual(shown, {"soft_edges": False, "palette_size": 16})
+        path = self.dir / "pixellab-pip-style.json"
+        before = path.read_bytes()
+        for fields in ({"soft_edges": "false"}, {"soft_edges": 0}, {"palette_size": True},
+                       {"palette_size": 0}, {"palette_size": 1.5}):
+            src.write_text(json.dumps(fields), encoding="utf-8")
+            self.assertNotEqual(run(self.dir, "save", "bad", "--from", "style.json").returncode, 0)
+            self.assertEqual(path.read_bytes(), before)
+        src.write_text('{"soft_edges":null,"palette_size":null}', encoding="utf-8")
+        self.assertEqual(run(self.dir, "save", "clear", "--from", "style.json").returncode, 0)
+        self.assertEqual(json.loads(run(self.dir, "show", "--style", "clear").stdout)["style"],
+                         {"soft_edges": None, "palette_size": None})
+
     def test_source_relative_reference_rebased_and_checked_from_other_cwd(self) -> None:
         source = self.dir / "source"
         source.mkdir()

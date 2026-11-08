@@ -14,9 +14,11 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+from email.utils import parsedate_to_datetime
 from http.client import HTTPException
 import io
 import json
+import math
 from pathlib import Path
 import sys
 import time
@@ -29,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _assembly import require_pillow  # noqa: E402
 import manifest  # noqa: E402
 
-HOSTS = {"api.pixellab.ai", "backblaze.pixellab.ai"}
+HOSTS = {"api.pixellab.ai", "backblaze.pixellab.ai", "supabase.pixellab.ai", "cdn.pixellab.ai"}
 UA = "pixellab-pip-fetch/1 (+https://github.com/Shilo/pixellab-pip)"
 MAX_BYTES = 32 * 1024 * 1024
 
@@ -82,12 +84,32 @@ def _validate(Image, data: bytes, suffix: str | None) -> None:
             image.load()
 
 
+def _retry_delay(value: str | None) -> float:
+    try:
+        delay = float(value)
+    except (TypeError, ValueError):
+        try:
+            delay = parsedate_to_datetime(value).timestamp() - time.time()
+        except (TypeError, ValueError, OverflowError):
+            return 15
+    return max(1, delay) if math.isfinite(delay) and delay >= 0 else 15
+
+
+class DownloadPending(Exception):
+    def __init__(self, retry_after: float):
+        self.retry_after = retry_after
+
+
 def get(url: str, *, timeout: float = 30) -> tuple[str, bytes | None]:
     try:
         data = _download(url, timeout=timeout)
     except urllib.error.HTTPError as exc:
-        # Not found yet, timeouts, rate limits and server errors can clear; other client errors never do.
-        return ("wait", None) if exc.code in (404, 408, 429) or exc.code >= 500 else ("unavailable", None)
+        # Tileset files return 423 while generating; a file error proves neither failure nor refund.
+        if exc.code == 423:
+            raise DownloadPending(_retry_delay(exc.headers.get("Retry-After") if exc.headers else None)) from exc
+        if exc.code in (404, 408, 429) or exc.code >= 500:
+            return "wait", None
+        return "unavailable", None
     except (OSError, HTTPException):
         return "wait", None
     return "ok", data
@@ -166,7 +188,12 @@ def main(argv: list[str] | None = None) -> int:
         if argv[:1] == ["--url"] and len(argv) == 3:
             check_host(argv[1])
             preflight(argv[2], 0)
-            data = _download(argv[1])
+            try:
+                data = _download(argv[1])
+            except urllib.error.HTTPError as exc:
+                if exc.code == 423:
+                    raise DownloadPending(_retry_delay(exc.headers.get("Retry-After") if exc.headers else None)) from exc
+                raise
             validate_image(data, Path(argv[2]).suffix)
             write(Path(argv[2]), [data])
             print(argv[2])
@@ -207,11 +234,15 @@ def main(argv: list[str] | None = None) -> int:
             check_metadata(root)
         started = time.monotonic()
         while True:
-            status = try_job(a.url, a.out, deadline=started + a.timeout)
+            retry_after = 15
+            try:
+                status = try_job(a.url, a.out, deadline=started + a.timeout)
+            except DownloadPending as exc:
+                status, retry_after = "wait", exc.retry_after
             elapsed = time.monotonic() - started
             if status in ("ok", "unavailable") or elapsed >= a.timeout:
                 break
-            time.sleep(max(0, min(15, a.timeout - elapsed)))
+            time.sleep(max(0, min(retry_after, a.timeout - elapsed)))
         update = {"job_id": a.job, "waited_s": round(elapsed), "download_status": status}
         if status == "ok":
             update.update(status="ok", outputs=expected)
@@ -222,7 +253,7 @@ def main(argv: list[str] | None = None) -> int:
         print("DOWNLOAD %s for %s; inspect the matching getter before continuing; do not resubmit or infer a refund"
               % ("unavailable" if status == "unavailable" else "not ready", a.job))
         return 2 if status == "unavailable" else 3
-    except HTTPException:
+    except (HTTPException, DownloadPending):
         print("DOWNLOAD not ready; inspect the matching getter before continuing; do not resubmit or infer a refund")
         return 3
     except (ValueError, OSError) as exc:

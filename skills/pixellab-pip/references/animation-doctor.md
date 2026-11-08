@@ -7,7 +7,7 @@ from 1, like the file names, and each finding, change and plan lists its `files`
 
 The checks are pixel measures. They can't see an extra hand, a scabbard that vanished while the sword is drawn,
 a shortened blade, or a weapon missing in a fast-swing frame. When produced, `fix_sheet.png` puts the reference first; otherwise compare the original frames and reference with host tools. Answer the report's `look` list. A failed item overrides the verdict; plan its re-roll by hand,
-naming the fix in the prompt ("exactly two arms", "the empty black scabbard stays at the left hip", "the whole
+naming the fix in the prompt from the supplied image or user (the intended limb count, the empty scabbard on its established side, "the whole
 blade from hilt to tip"). When the fault is in the reference sprite itself, every move inherits it: fix the sprite
 first, then redo the poses.
 
@@ -48,6 +48,7 @@ broken, and the doctor planned a paid redraw). The report says so under `skipped
 
 - `ready`: no significant measured anomaly; not a visual-quality certification.
 - `ready after free fixes`: everything that mattered was fixed locally (0 generations).
+- `awaiting approval`: a proposed local change is pending; the original anomaly is not resolved.
 - `needs re-rolls`: something still fails; each failure has a plan (tool, frames, the change, cost).
 
 Calibration comes from the source project's animation corpus, not every art style or size. Single-pixel details, intentional lighting and effects can be misclassified. Inspect before/after and reject a harmful suggested repair; no heuristic verdict supersedes visual checks or the requested output.
@@ -60,14 +61,14 @@ PixelLab returned; with `--accept` they are applied and listed; `timing.json` ha
 (a 0 ms frame is a dropped one kept as a copy, for engines that load a fixed frame count).
 Input GIF zero-delay frames remain unchanged in `--check-only` reports. Repair output is refused before writing because its verified preview requires positive durations; choose playback timing explicitly through `local-asset-assembly.md` rather than treating a source zero delay as an accepted drop or inventing a delay.
 
-## Proposals: ask before touching effects
+## Proposals: ask before uncertain changes
 
 Effects (slashes, glows, smoke) and soft effect edges are never changed on their own. They come back as `proposed`
 changes. Ask the user **one** question listing each proposal with its recommended fix, e.g.
 "Frame 3 has a flash that appears in no other frame - remove it? (recommended) / keep it". Then re-run `fix.py`
 with the same helper version and unchanged inputs, one animation only, a fresh output location and `--accept c2,c5`. Acceptance IDs are local to that animation; never apply them to a batch. A lasting effect (2+ frames) is reported as information only: keep it.
-Whole-frame grid, size and ground-line repairs are also proposals when the original frame contains effect candidates or uncertain detached parts; accepting one includes that whole-frame scope. Colour corrections that may alter effect candidates use one proposal for the frame; related colour checks wait for that same approval. Use `--fx` to exclude known effect frames even when their colours resemble the body.
-For intentionally airborne moves, use the appropriate explicit inspection options and visual review; a ground-line heuristic cannot prove a defect. When the selected project profile says soft edges are intended, pass `--profile <selected-root>/pixellab-pip-style.json`; the helper does not search the process working directory. Without this explicit path it uses no saved style facts.
+Whole-frame grid and size repairs are also proposals when the original frame contains effect candidates or uncertain detached parts; accepting one includes that whole-frame scope. Colour corrections that may alter effect candidates use one proposal for the frame; related colour checks wait for that same approval. Use `--fx` to exclude known effect frames even when their colours resemble the body.
+Ground-line shifts and thin-part copies always require their proposal IDs: a raised body may be intentional motion, and a thin part may be hidden rather than missing. Approve only after inspecting that frame and its neighbours; an accepted general repair scope does not resolve those ambiguities. For intentionally airborne moves, use the appropriate explicit inspection options and visual review; a ground-line heuristic cannot prove a defect. When the selected project profile says soft edges are intended, pass `--profile <selected-root>/pixellab-pip-style.json`; the helper does not search the process working directory. Without this explicit path it uses no saved style facts. An explicit boolean `soft_edges` takes precedence over descriptive style words.
 
 ## Re-roll plans
 

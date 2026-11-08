@@ -27,7 +27,7 @@ from _assembly import load_pillow  # noqa: E402
 
 STYLE_KEYS = ("setting", "density", "look", "palette", "palette_hex", "colors", "outline", "shading", "dither",
               "light", "view", "facing", "sizes", "negatives", "rules", "anim", "anchors", "seed", "reference",
-              "analysed_from", "notes")
+              "analysed_from", "notes", "soft_edges", "palette_size")
 FAMILIES = ("heroes", "monsters", "backgrounds", "scenes", "buildings", "icons", "ui")
 
 # Starting points offered by name; written into a project only when the user picks one.
@@ -91,6 +91,11 @@ def validate_style(style: dict) -> None:
             raise ValueError(key + " keys must be nonempty strings")
     def positive_number(value):
         return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value) and value > 0
+    if style.get("soft_edges") is not None and not isinstance(style["soft_edges"], bool):
+        raise ValueError("soft_edges must be a boolean or null")
+    if style.get("palette_size") is not None and (type(style["palette_size"]) is not int
+                                                  or not positive_number(style["palette_size"])):
+        raise ValueError("palette_size must be a positive integer or null")
     for size in (style.get("sizes") or {}).values():
         if size is not None and not (isinstance(size, list) and len(size) == 2 and all(isinstance(v, int) and positive_number(v) for v in size)):
             raise ValueError("sizes entries must be [width, height] positive integers or null")

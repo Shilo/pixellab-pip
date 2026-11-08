@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 
 BG = (0, 0, 0, 0)
 FLAG = (255, 70, 70, 255)
-ORDER = {'ready': 0, 'ready after free fixes': 1, 'needs re-rolls': 2}
+ORDER = {'ready': 0, 'ready after free fixes': 1, 'awaiting approval': 2, 'needs re-rolls': 3}
 
 
 def _number(d, names):
@@ -32,19 +32,19 @@ def change(c, names):
 LOOK = [   # what pixel checks can't see (the samurai test: an extra hand, a vanished scabbard, a short blade)
     'arms, hands and legs: the same count as the reference in every frame, each joined to the body',
     'props from the reference (scabbard, sheath, quiver, shield, belt items) stay where they belong; a drawn sword leaves its empty scabbard at the hip',
-    'props point the same way and sit on the same side as in the reference (hilt forward, scabbard running back), never reversed',
-    'gear on the right side of the body for the facing: a right-facing figure shows its right side, so left-hip gear sits on the far side',
+    'attached gear retains its established orientation and side from the reference, accounting for the requested motion and occlusion',
+    'gear stays on the side established by the supplied image or user; facing alone does not establish anatomical left/right',
     'the same number of weapons: a drawn blade leaves an empty scabbard, not a second hilt',
     'weapons whole: full length from hilt to tip, both ends, nothing drawn out of thin air',
-    'the first frame holds the weapon like the idle does (sheathed in idle -> the move starts sheathed and draws)',
+    'the first frame follows the requested starting grip or sheathed state; a draw action preserves its empty scabbard',
     'a sheathed weapon reads as one piece: the hilt and the scabbard end on one straight line through the hip',
     'nothing cut by the canvas edge (feet, blade tips, capes)',
-    'a two-handed weapon keeps both hands on the hilt in every pose; a shield or buckler stays on its arm (not dropped, not doubled)',
+    'weapon grips (both hands when required) and shield attachments stay consistent with the reference and requested action, including deliberate releases or grip changes',
     'a hand holding a staff or prop stays joined to the body by its arm: no gap of background between the grip and the body, the arm its normal length',
     'a bow keeps its string in every frame, and the arrow nock (feathered end) sits in the drawing hand on the string',
     'the move goes one way: a step done in one key pose is not undone in the next (a bow drawn overhead, then slack and drawn again)',
     'no in-between shows a pose that is in neither key pose (a blade raised overhead in a thrust or a draw-cut): drop it or re-roll the clip with motion wording that rules it out',
-    'a staff, wand or other held prop stays in the same hand: trace the forearm, grip and hilt across poses; a cross-body swing may change screen side without swapping hands, and an occluded grip leaves hand continuity unverified',
+    'a held prop keeps its established hand unless the action calls for a change: trace the forearm, grip and hilt across poses; a cross-body swing may change screen side without swapping hands, and an occluded grip leaves hand continuity unverified',
     'a thrown or cast projectile leaves the hand at the release frame and is not drawn again in the hand afterwards',
     'the same face and skin tone (no pale-to-warm flicker between frames, no single frame with the head turned away or toward the viewer), hair, headgear and outfit piece by piece (shoulder plates, sleeves, chest plate, ornaments), at the same body size',
 ]

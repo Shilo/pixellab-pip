@@ -37,6 +37,7 @@ export function parseSnapshot(raw: string): PanelSnapshot {
       !text(s.lang, 64) || !/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(s.lang) ||
       !(s.run === null || relative(s.run)) || !text(s.created_at, 64) || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|\+00:00)$/.test(s.created_at) || !Number.isFinite(Date.parse(s.created_at)) ||
       !text(s.style) || !object(s.usage) || !amount(s.usage.charged) || !amount(s.usage.committed) ||
+      (s.usage.charged_usd !== undefined && (!amount(s.usage.charged_usd) || !text(s.labels?.charged_usd))) ||
       !object(s.labels) || Object.keys(s.labels).length > 100 || !Object.values(s.labels).every(value => text(value, 2048) && value.trim().length > 0) ||
       !LABEL_KEYS.every(key => typeof s.labels[key] === 'string') ||
       !(s.manifest_sha256 === null || digest(s.manifest_sha256)) ||
@@ -185,7 +186,8 @@ export const register: Register = on => {
       <Text>{l.project + ': ' + basename(s.project) + '\n' + l.run + ': ' + (s.run ? basename(s.run) : l.none) + '\n' + l.style + ': ' + (s.style || l.style_none)}</Text>
       <Text>{l.snapshot + ': ' + s.created_at}</Text>
       <Text>{l.charged + ': ' + (s.usage.charged === null ? l.unknown : s.usage.charged) +
-        '\n' + l.committed + ': ' + (s.usage.committed === null ? l.unknown : s.usage.committed)}</Text>
+        '\n' + l.committed + ': ' + (s.usage.committed === null ? l.unknown : s.usage.committed) +
+        (s.usage.charged_usd === undefined ? '' : '\n' + l.charged_usd + ': ' + (s.usage.charged_usd === null ? l.unknown : s.usage.charged_usd))}</Text>
       {s.warnings.map((warning, i) => <Text key={'warning-' + i}>{warning}</Text>)}
       {empty && <Text>{l.welcome}</Text>}
       {visible && strips.map((strip, i) => <Box key={'strip-' + i} flexDirection="column">

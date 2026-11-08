@@ -15,6 +15,12 @@ MOVES = {'idle': 'loop', 'walk': 'loop', 'run': 'loop', 'attack': 'oneshot', 'sk
 EXT = ('.png', '.gif')
 
 
+def _move(value):
+    """Known loop names and their template labels; never infer from a substring."""
+    label = re.fullmatch(r'(idle|walk|walking|run|running)(?:[-_ ]\d+[-_ ]frames)?', value.lower())
+    return {'walking': 'walk', 'running': 'run'}.get(label[1], label[1]) if label else value
+
+
 def _natural(s):
     return [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)]
 
@@ -99,9 +105,10 @@ def _parse(path):
         toks = [t for t in re.split(r'[_\-\s]+', folder) if t] or ['frames']
     move = 'other'
     for i in range(len(toks) - 1, -1, -1):
-        if toks[i].lower() in MOVES:
-            move = toks[i].lower()
-            toks = toks[:i] + toks[i + 1:]
+        if _move(toks[i].lower()) in MOVES:
+            move = _move(toks[i].lower())
+            suffix = toks[i + 1:]
+            toks = toks[:i] if len(suffix) == 2 and suffix[0].isdigit() and suffix[1].lower() == 'frames' else toks[:i] + suffix
             break
     return '_'.join(toks) or 'frames', move, num
 
@@ -120,6 +127,7 @@ def _canvas(raw):
 
 
 def _anim(character, move, raw, paths, durations=None, source=''):
+    move = _move(move)
     keyed = [key_background(f) for f in raw]
     bgs = {b for _, b in keyed if b}
     raw2 = [f for f, _ in keyed]
@@ -140,6 +148,7 @@ def _typical(fs):
 
 
 def load(inputs, sheet=None, ref=None, move=None):
+    move = _move(move) if move else None
     files = _expand(inputs)
     anims = []
     groups = {}

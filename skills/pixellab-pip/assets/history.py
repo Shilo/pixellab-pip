@@ -59,9 +59,10 @@ def history(root: str, runs: int, *, since: date | None = None, until: date | No
         stamps = [_date(j.get("created_at")) for j in matches]
         latest = max((d for d in stamps if d is not None), default=None)
         totals = {}
-        for key, estimate in (("spent", False), ("committed", True)):
+        for key, estimate, unit in (("spent", False, "generations"), ("committed", True, "generations"),
+                                    ("spent_usd", False, "usd")):
             try:
-                totals[key] = sum(manifest._usage(j, estimate=estimate) for j in matches)
+                totals[key] = sum(manifest._usage(j, estimate=estimate, unit=unit) for j in matches)
             except ValueError:
                 totals[key] = None
         out.append({"name": path.parent.name, "jobs": len(matches), **totals,
@@ -103,6 +104,7 @@ def main(argv=None) -> int:
             if "error" in row:
                 continue
             cost = "unknown charged generations" if row["spent"] is None else "%g charged generations" % row["spent"]
+            cost += "; " + ("unknown charged USD" if row["spent_usd"] is None else "%g charged USD" % row["spent_usd"])
             outcomes = ", ".join("%s %s" % (v, k) for k, v in sorted(row["outcomes"].items())) or "not judged"
             print("%s: %s jobs, %s, %s; date %s%s" %
                   (row["name"], row["jobs"], cost, outcomes, row["created_at"] or "unknown",

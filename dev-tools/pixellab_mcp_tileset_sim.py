@@ -138,6 +138,9 @@ MCP_TOOLS = {
             "boundary_seed",
             "step_slope",
             "connect_diagonals",
+            "palette",
+            "palette_name",
+            "max_colors",
         },
         "defaults": {
             "transition_description": None,
@@ -513,8 +516,21 @@ def validate_request(
     }:
         raise SystemExit("shading is not a recognized PixelLab MCP shading value.")
     outline = request_value(tool, request, "outline")
-    if outline is not None and outline not in {"single color black outline", "single color outline", "selective outline", "lineless"}:
-        raise SystemExit("outline must be single color black outline, single color outline, selective outline, or lineless.")
+    if outline is not None and outline not in {"single color outline", "selective outline", "lineless"}:
+        raise SystemExit("outline must be single color outline, selective outline, or lineless for these MCP tools.")
+    if tool == "create_topdown_tileset":
+        palette, palette_name, max_colors = (request.get(k) for k in ("palette", "palette_name", "max_colors"))
+        if any(v is not None for v in (palette, palette_name, max_colors)):
+            if mode != "pro":
+                raise SystemExit("Top-down palette settings require mode='pro'.")
+            if palette is not None and (not isinstance(palette, list) or not 2 <= len(palette) <= 256
+                                       or any(not isinstance(c, str) or not c.strip() for c in palette)):
+                raise SystemExit("palette must contain 2-256 nonempty colour strings; use the service's documented hex format.")
+            if palette_name is not None and (not isinstance(palette_name, str) or palette is None):
+                raise SystemExit("palette_name labels a supplied palette and cannot be sent alone.")
+            if max_colors is not None and (type(max_colors) is not int or not 2 <= max_colors <= 64):
+                raise SystemExit("max_colors must be an integer from 2 to 64.")
+            warnings.append("Palette fields are recognized, but this compact renderer does not enforce palette or max_colors or validate service colour syntax.")
     if tool == "create_topdown_tileset":
         shape_style = request_value(tool, request, "shape_style")
         if shape_style is not None:

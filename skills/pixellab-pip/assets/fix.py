@@ -12,7 +12,7 @@ Findings require visual review and do not certify art quality.
   python fix.py --table  # defect -> cause -> change guidance; with inputs, also inspects them
 
 Writes into <input folder>_fixed/, or <name>_fixed/ beside input files (or --out): the fixed frames, timing.json, fix_report.json, fix_report.txt,
-fix_sheet.png and <character>_<move>_preview.gif (frames in subfolders keep their subfolder). Effects (slashes, glows) and frame drops are never changed without --accept. Every fixed frame is a local derivative
+fix_sheet.png and <character>_<move>_preview.gif (frames in subfolders keep their subfolder). Effects, ground-line shifts, thin-part copies and frame drops are never changed without --accept. Every fixed frame is a local derivative
 of PixelLab's output, reported as such.
 Needs Pillow, numpy, scipy.
 """
@@ -28,6 +28,7 @@ _assembly.require_numpy(scipy=True)
 from fixlib import frames as framesmod, measure, plan, repair, report, timing  # noqa: E402
 
 SOFT_WORDS = ('soft edge', 'soft anti', 'anti-alias', 'antialias', 'painterly', 'smooth edges', 'no outline / soft edges')
+NEGATED_SOFT = re.compile(r'\b(?:no|not|without|avoid)\s+(?:soft\s+)?(?:anti[- ]?alias(?:ing|ed)?|edges?|smooth edges|painterly)\b')
 
 
 def load_style(path):
@@ -41,7 +42,8 @@ def load_style(path):
     styles = validate_profile(prof)
     st = overlay(prof, styles.get(prof.get('active_style'), {}))
     words = ' '.join(str(st.get(k, '')) for k in ('look', 'outline', 'style')).lower()
-    return {'soft_edges': bool(st.get('soft_edges')) or any(w in words for w in SOFT_WORDS),
+    explicit = st.get('soft_edges')
+    return {'soft_edges': explicit if isinstance(explicit, bool) else any(w in NEGATED_SOFT.sub('', words) for w in SOFT_WORDS),
             'scale': st.get('scale'), 'palette_size': st.get('palette_size')}
 
 
@@ -94,7 +96,7 @@ def doctor(anim, accept, style, log_path, report_name, check_only, stepped=False
     for c in changes:
         if c.result == 'fixed' and c.check != 'timing' and any((c.check, (i,)) in still for i in c.frames):
             c.result = 'still failing'
-    # a finding with a question waiting gets no re-roll plan and doesn't hold the verdict: one "yes" fixes it for free
+    # Pending local proposals wait for approval instead of also authorizing a paid re-roll plan.
     pending = {(check, i) for c in changes if c.result == 'proposed'
                for check in (repair.COLOUR if c.check in repair.COLOUR else (c.check,))
                for i in c.frames}

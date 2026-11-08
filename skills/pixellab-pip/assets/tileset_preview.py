@@ -36,9 +36,10 @@ for sheet in a.sheets:
     meta = Path(sheet).with_suffix(".json")
     img = Image.open(sheet).convert("RGBA")
     tiles = json.loads(meta.read_text(encoding="utf-8"))["tileset_data"]["tiles"]
-    if any("transition" in t["corners"].values() for t in tiles):
-        # ponytail: 16-tile sets only; 25-tile cliff sets need the wall-row rule (a wall fills the cell below)
-        sys.exit(f"{meta} is a 25-tile set (transition corners); this preview handles 16-tile sets")
+    if len(tiles) != 16 or any(set(t["corners"]) != {"NW", "NE", "SW", "SE"}
+                               or not set(t["corners"].values()) <= {"lower", "upper"} for t in tiles):
+        # Tall sets need pattern_4x4 and the wall-row rule, even when corners have no transition label.
+        sys.exit(f"{meta} needs exactly 16 tiles with lower/upper NW/NE/SW/SE corners; tall sets are unsupported")
     lut = {}
     for t in tiles:
         b, c = t["bounding_box"], t["corners"]
@@ -46,7 +47,9 @@ for sheet in a.sheets:
                 or b['x'] + b['width'] > img.width or b['y'] + b['height'] > img.height):
             sys.exit("tile bounding box falls outside the source sheet")
         key = tuple(int(c[k] == "upper") for k in ("NW", "NE", "SW", "SE"))
-        lut.setdefault(key, img.crop((b["x"], b["y"], b["x"] + b["width"], b["y"] + b["height"])))
+        if key in lut:
+            sys.exit(f"{meta} has duplicate corner combinations; cannot preview this layout")
+        lut[key] = img.crop((b["x"], b["y"], b["x"] + b["width"], b["y"] + b["height"]))
     missing = [k for k in np.ndindex(2, 2, 2, 2) if k not in lut]
     if missing:
         sys.exit(f"{meta} lacks corner combinations {missing}")

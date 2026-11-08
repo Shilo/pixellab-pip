@@ -25,7 +25,7 @@ def test_weapon_lost_plan_finds_the_job(tmp_path):
     a.paths = paths
     (p,) = plan.make(a, [F('weapon_lost', [5])], str(log))
     assert p['tool'] == 'edit_image_pro_flash' and p['frames'] == [5]
-    assert 'write the weapon into the pose' in p['prompt_change']
+    assert 'actual missing part' in p['prompt_change']
     assert p['cost'] == 5                                    # 48 x 56 canvas: the <= 96 px tier
     assert p['job']['job_id'] == 'j-123'
     assert p['reroll'] == 'Re-roll plan 1 for %s in fix_report.json' % a.key   # a plain request: no /pga-* command
@@ -53,6 +53,7 @@ def test_verdicts():
     assert plan.verdict([F('specks', [1], 'low')], [], []) == 'ready'
     assert plan.verdict([F('brightness', [1], 'mid')], [], [Change('c1', 'brightness', [1], 'x', 'fixed')]) == 'ready after free fixes'
     assert plan.verdict([F('flash', [1])], [F('flash', [1])], [Change('c1', 'flash', [1], 'x', 'proposed')]) == 'needs re-rolls'
+    assert plan.verdict([F('ground', [1])], [], [Change('c1', 'ground', [1], 'x', 'proposed')]) == 'awaiting approval'
 
 
 def test_table_lists_every_rule():

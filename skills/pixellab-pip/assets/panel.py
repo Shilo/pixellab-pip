@@ -43,6 +43,7 @@ DEFAULT_LABELS = {
     "none": "none selected", "snapshot": "Snapshot",
     "snapshot_help": "Not live. Run /pixellab-pip panel again in a fresh output directory to refresh.",
     "charged": "charged generations", "committed": "committed generations", "unknown": "unknown",
+    "charged_usd": "charged USD",
     "preview_alt": "Selected preview", "preview_unavailable": "Preview could not be displayed. Open the original and rebuild the panel.",
     "no_images": "No previews selected. Ask the agent to open the panel with explicit image roles and paths.",
     "note": "Request or correction notes", "request": "Compose request", "redo": "Request redo",
@@ -148,7 +149,7 @@ def build_snapshot(project: str, run: str | None = None, images=(), labels: str 
         "version": 1, "project": str(root), "run": None, "lang": language_tag(lang),
         "created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "style": _style(root, diagnostics, label_map), "labels": label_map,
-        "usage": {"charged": None, "committed": None},
+        "usage": {"charged": None, "committed": None, "charged_usd": None},
         "jobs": [], "images": [], "manifest_sha256": None, "warnings": diagnostics,
     }
     if run is not None:
@@ -165,6 +166,10 @@ def build_snapshot(project: str, run: str | None = None, images=(), labels: str 
                     snapshot["usage"][key] = reader(str(selected))
                 except ValueError:
                     diagnostics.append(key.capitalize() + " generations are unknown for this selected run.")
+            try:
+                snapshot["usage"]["charged_usd"] = manifest.spent(str(selected), unit="usd")
+            except ValueError:
+                pass  # The separately labeled USD total stays unknown, never zero or converted.
             if before != read_bounded(ledger, MAX_JSON_BYTES):
                 raise ValueError("manifest changed while reading; rebuild the panel")
             snapshot["manifest_sha256"] = digest(before)
@@ -175,7 +180,7 @@ def build_snapshot(project: str, run: str | None = None, images=(), labels: str 
             if len(entries) > MAX_JOBS:
                 diagnostics.append(f"Showing the first {MAX_JOBS} of {len(entries)} selected run jobs; usage covers all its jobs.")
         except (OSError, ValueError) as exc:
-            snapshot["usage"] = {"charged": None, "committed": None}
+            snapshot["usage"] = {"charged": None, "committed": None, "charged_usd": None}
             diagnostics.append("Selected run accounting is unavailable: " + str(exc))
     else:
         diagnostics.append("No run selected. Usage and jobs are not project lifetime totals.")

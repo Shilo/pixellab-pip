@@ -18,10 +18,10 @@ def _animate(anim, frames):
 
 PF, AN = 'edit_image_pro_flash', 'animate_image'
 RULES = {
-    'weapon_lost': dict(cause='the pose prompt left the weapon out, so the generator dropped it',
-                        tool=PF, prompt_change='write the weapon into the pose ("... raising the staff high in both hands")', cost=_pro_flash),
-    'broken_thin': dict(cause='thin parts (blades, staffs) break when a pose is redrawn',
-                        tool=PF, prompt_change='name the weapon and its whole length in the pose; the reference as style image', cost=_pro_flash),
+    'weapon_lost': dict(cause='a thin part differs from nearby frames; it may be missing, occluded or intentionally changed',
+                        tool=PF, prompt_change='identify the actual missing part from the reference and preserve its visible shape and attachment in this pose', cost=_pro_flash),
+    'broken_thin': dict(cause='a thin part differs from nearby frames; inspect whether it is broken or intentionally hidden',
+                        tool=PF, prompt_change='name the actual broken part and its intact shape from the reference; the reference as style image', cost=_pro_flash),
     'flash': dict(cause='the action words invited a painted effect (burst, swipe)',
                   tool=AN, prompt_change='motion only, no burst, no swipe arc ("... in one fast snap")', cost=_animate),
     'weird_change': dict(cause='the in-between redrew part of the character',
@@ -40,8 +40,8 @@ RULES = {
                             tool=AN, prompt_change='animate from the last frame back to the standing pose', cost=_animate),
     'edge': dict(cause='the pose touches the canvas border, so every in-between is cut',
                  tool=PF, prompt_change='re-pose on a canvas with more room on that side', cost=_pro_flash),
-    'detached': dict(cause='a piece came off the body (a thrown weapon or a floating bit)',
-                     tool=PF, prompt_change='write the weapon into the pose, held in the hand', cost=_pro_flash),
+    'detached': dict(cause='a piece is separate from the main body; inspect whether that separation is intentional',
+                     tool=PF, prompt_change='identify the unintended detached part and restore its actual attachment from the reference', cost=_pro_flash),
     'grid': dict(cause='the frame was drawn at another pixel size than the set',
                  tool=PF, prompt_change='re-draw the frame at the set\'s pixel size (no upscaling)', cost=_pro_flash),
     'mixels': dict(cause='mixed pixel sizes in one frame (an upscale painted over)',
@@ -140,6 +140,10 @@ def make(anim, still_failing, log_path, report='fix_report.json', *, allow_whole
 
 def verdict(findings_before, findings_after, changes) -> str:
     serious = lambda fs: [f for f in fs if f.severity in ('mid', 'high')]
+    if serious(findings_after):
+        return 'needs re-rolls'
+    if any(c.result == 'proposed' for c in changes):
+        return 'awaiting approval'
     if not serious(findings_before) and not any(c.result == 'fixed' for c in changes):
         return 'ready'
-    return 'needs re-rolls' if serious(findings_after) else 'ready after free fixes'
+    return 'ready after free fixes'

@@ -22,6 +22,8 @@ Fastest top-down smoke test:
 
 The simulator accepts MCP create-tool JSON for the compact layouts it supports and writes local PNGs. Its purpose is cheap prompt/request experimentation before spending PixelLab generations.
 
+Top-down Pro `palette`, `palette_name` and `max_colors` are validated against their documented inputs, but the compact renderer does not enforce those colours or their count. Its warning records that limit; simulator art is not evidence of PixelLab palette quality.
+
 Important: the PNG is a schematic semantic preview, not a PixelLab-style visual prediction. Use it to classify where colors/details are expected to land, not to judge whether the final PixelLab art will have the same silhouette, brick texture, wobble, palette drift, dithering taste, or hand-drawn contour.
 
 Pass MCP JSON, not REST JSON. REST-only fields such as `color_image`, `lower_reference_image`, `upper_reference_image`, and `transition_reference_image` are intentionally rejected here.

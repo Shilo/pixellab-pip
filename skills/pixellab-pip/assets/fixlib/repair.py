@@ -158,8 +158,8 @@ def run(anim, findings, accept=frozenset(), style=None):
         changes.append(c)
         return c
 
-    def local_change(check, i, candidate, action, source_effect=None):
-        c = new(check, [i], action)
+    def local_change(check, i, candidate, action, source_effect=None, require_approval=False):
+        c = new(check, [i], action, 'proposed' if require_approval else 'fixed')
         changed = np.any(candidate != b.frames[i], axis=2)
         if changed.any():
             effect = _effect_pixels(b, b.frames[i])
@@ -175,8 +175,8 @@ def run(anim, findings, accept=frozenset(), style=None):
             b.frames[i] = candidate
             c.result = 'fixed'
 
-    def whole_frame(check, i, candidate, action):
-        c = new(check, [i], action)
+    def whole_frame(check, i, candidate, action, require_approval=False):
+        c = new(check, [i], action, 'proposed' if require_approval else 'fixed')
         if i not in whole_frame_risk:
             whole_frame_risk[i] = i in effect_frames
             if not whole_frame_risk[i]:
@@ -260,7 +260,7 @@ def run(anim, findings, accept=frozenset(), style=None):
         elif f.check in ('weapon_lost', 'broken_thin'):
             src = next((j for d in (1, -1, 2, -2) for j in [i + d] if 0 <= j < len(b.frames) and j not in weapon), None)
             if src is None:
-                new(f.check, [i], 'no clean frame within 2 frames to copy the %s from' % 'weapon', 'still failing')
+                new(f.check, [i], 'no clean frame within 2 frames to copy thin parts from', 'still failing')
                 continue
             g = anim.frames[src]
             gon, on = g[..., 3] >= 128, a[..., 3] >= 128
@@ -272,8 +272,8 @@ def run(anim, findings, accept=frozenset(), style=None):
             candidate[thin] = gs[thin]
             source_effect = _shift(_effect_pixels(anim, g), best[1], best[2]) & thin
             local_change(f.check, i, candidate,
-                         'copied the thin parts (weapon, staff) into frame %d from frame %d' % (i + 1, src + 1),
-                         source_effect)
+                         'copy the thin parts into frame %d from frame %d; verify they are missing, not occluded or intentionally changed' % (i + 1, src + 1),
+                         source_effect, require_approval=True)
         elif f.check in COLOUR:
             if i in colour_done:
                 primary = colour_done[i]
@@ -305,7 +305,8 @@ def run(anim, findings, accept=frozenset(), style=None):
             colour_done[i] = c
         elif f.check == 'ground':
             whole_frame('ground', i, _shift(a, 0, int(f.measured)),
-                        'moved frame %d down %d px onto the ground line' % (i + 1, f.measured))
+                        'move frame %d down %d px onto the ground line; verify it should be grounded' % (i + 1, f.measured),
+                        require_approval=True)
         elif f.check == 'flash':
             c = new('flash', [i], 'remove the one-frame effect in frame %d' % (i + 1), 'proposed')
             if c.id in accept:

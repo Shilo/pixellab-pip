@@ -93,4 +93,4 @@ def test_a_question_is_not_also_a_reroll(tmp_path):
     r = json.loads(fix(tmp_path / 'k', '--json'))
     (a,) = r['anims']
     assert a['proposals'] and not a['plans']
-    assert r['verdict'] == 'ready after free fixes' and r['totals']['proposals'] == 1
+    assert r['verdict'] == 'awaiting approval' and r['totals']['proposals'] == 1

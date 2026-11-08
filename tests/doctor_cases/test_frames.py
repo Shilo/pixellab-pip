@@ -58,6 +58,19 @@ def test_detect_scale():
     assert frames.detect_scale(synth.figure()) == 1
 
 
+def test_documented_loop_labels_and_negative_names(tmp_path):
+    for label, canonical in (('walking-8-frames', 'walk'), ('running-6-frames', 'run'), ('idle', 'idle')):
+        folder = tmp_path / label
+        paths = synth.save(synth.walk(3), folder, 'hero_' + label)
+        for override in (None, label):
+            (a,) = frames.load(paths, move=override)
+            assert a.move == canonical and a.kind == 'loop'
+            assert a.character == 'hero'
+    assert frames._parse('moonwalker_1.png')[1] == 'other'
+    assert frames._parse('hero_walkway_1.png')[1] == 'other'
+    assert frames._anim('hero', 'walking-away', synth.walk(3), []).kind == 'oneshot'
+
+
 def test_opaque_background_is_keyed(tmp_path):
     fs = [synth.solid_bg(f, (255, 0, 255)) for f in synth.walk(3)]
     synth.save(fs, tmp_path, 'knight_idle')

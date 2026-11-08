@@ -82,6 +82,23 @@ class HistoryTests(unittest.TestCase):
         self.assertIn('error', rows['bad'])
         self.assertEqual(rows['valid']['spent'], 2)
 
+    def test_usd_totals_respect_filters_and_do_not_hide_unknown_units(self):
+        manifest.add_job(str(self.root / 'usd'), {'job_id': 'a', 'tool': 'REST create-image-pixen',
+                                                 'status': 'failed', 'reported_usage': {'usd': 0.25}})
+        manifest.add_job(str(self.root / 'usd'), {'job_id': 'b', 'tool': 'MCP create_image_pixen',
+                                                 'reported_usage': {'generations': 1}})
+        mixed = history.history(str(self.root), 10)[0]
+        self.assertIsNone(mixed['spent'])
+        self.assertIsNone(mixed['spent_usd'])
+        usd = history.history(str(self.root), 10, tool='REST')[0]
+        self.assertIsNone(usd['spent'])
+        self.assertEqual(usd['spent_usd'], 0.25)
+        out = io.StringIO()
+        with redirect_stdout(out):
+            history.main(['--root', str(self.root), '--tool', 'REST'])
+        self.assertIn('0.25 charged USD', out.getvalue())
+        self.assertIn('unknown charged generations', out.getvalue())
+
     def test_older_manifests_never_push_runs_out_of_the_limit(self):
         # review: 11 older-format manifests filled --runs 10 and hid the one real run
         for i in range(11):

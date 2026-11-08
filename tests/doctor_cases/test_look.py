@@ -6,7 +6,7 @@ import os
 from PIL import Image
 
 import synth
-from fixlib import plan
+from fixlib import plan, report as doctor_report
 from test_cli import fix, report
 from test_measure_clean import anim
 from test_plan import F
@@ -29,13 +29,7 @@ def test_report_carries_the_look_checklist(tmp_path):
     synth.save(synth.walk(4), tmp_path / 'k', 'knight_walk')
     out = fix(tmp_path / 'k', '--out', tmp_path / 'o')
     r = report(tmp_path / 'o')
-    assert any('arms' in q for q in r['look']) and any('scabbard' in q for q in r['look'])
-    assert any('reversed' in q for q in r['look']) and any('second hilt' in q for q in r['look'])
-    assert any('shoulder plates' in q for q in r['look']) and any('neither key pose' in q for q in r['look'])
-    assert any('like the idle' in q for q in r['look']) and any('one straight line' in q for q in r['look'])
-    # e2e demo (frost mage): a staff swapping hands, a one-frame head turn and a thrown shard were not on the list
-    assert any('same hand' in q for q in r['look']) and any('head turned' in q for q in r['look'])
-    assert any('projectile' in q for q in r['look'])
+    assert r['look'] == doctor_report.LOOK
     assert 'look at fix_sheet.png' in out.lower()
 
 

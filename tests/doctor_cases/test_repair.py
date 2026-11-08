@@ -33,9 +33,6 @@ CASES = {
     'holes': _hole,
     'brightness': lambda fs: fs.__setitem__(2, synth.bright(fs[2], 1.3)),
     'palette': _red,
-    'ground': lambda fs: fs.__setitem__(3, synth.shift(fs[3], 0, -5)),
-    'broken_thin': lambda fs: fs.__setitem__(5, synth.cut_staff(fs[5])),
-    'weapon_lost': lambda fs: fs.__setitem__(5, synth.drop_staff(fs[5])),
     'soft_edge': lambda fs: fs.__setitem__(2, synth.blur_edges(fs[2])),
 }
 
@@ -51,6 +48,27 @@ def test_free_repair_clears_the_finding():
         assert check not in {f.check for f in after}, (check, [(f.check, f.frames) for f in after])
         assert any(c.check == check and c.result == 'fixed' for c in changes), check
         assert a.frames[0] is not b.frames[0]                       # a copy: the input Anim is untouched
+
+
+def test_ground_and_thin_changes_require_frame_specific_approval():
+    for check, inject in (
+        ('ground', lambda f: synth.shift(f, 0, -5)),
+        ('broken_thin', synth.cut_staff),
+        ('weapon_lost', synth.drop_staff),
+    ):
+        fs = synth.walk(9)
+        fs[5] = inject(fs[5])
+        a = anim(fs)
+        before = [f.copy() for f in fs]
+        b, changes, _ = fix(a)
+        proposal = next(c for c in changes if c.check == check and c.frames == [5])
+        assert proposal.result == 'proposed', check
+        assert all(np.array_equal(old, new) for old, new in zip(before, b.frames)), check
+        accepted, applied, after = fix(a, {proposal.id})
+        assert any(c.id == proposal.id and c.result == 'fixed' for c in applied), check
+        assert not np.array_equal(accepted.frames[5], before[5]), check
+        assert not any(f.check == check and f.frames == [5] for f in after), check
+        assert all(np.array_equal(old, new) for old, new in zip(before, a.frames)), check
 
 
 def test_bg_leak_repair():
