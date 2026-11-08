@@ -13,6 +13,7 @@ Content placement (progressive discovery):
 - skills/pixellab-pip/SKILL.md — agent-facing canonical contract and lean router: triggers, guardrails, surface selection, pointers. It must classify common requests and point directly to any required reference.
 - skills/pixellab-pip/references/*.md — agent-facing operational contracts loaded on demand: durable routing rules, schema mappings, safety constraints, verification. Never restate SKILL.md globals (it is always co-loaded); use a pointer.
 - docs/ — human/developer research, evidence, and background; not required for normal runtime routing. Promote a finding into SKILL.md or references/ only when it changes agent behavior. (docs/pixellab/ terminology and routing research; docs/tools/ integration background; docs/developer.md repo structure and local install; docs/showcase/README.md showcase rules.)
+- handoffs/ — scoped work briefs for repository agents: tasks, starting evidence, constraints, and completion checks; not installed skill content. For audit improvement work, start with [the audit handoff](handoffs/audit-improvement.md).
 - .local/ — temporary agent-generated or cache files.
 
 Validate every edit: `python dev-tools/qa.py` (includes the unit tests).

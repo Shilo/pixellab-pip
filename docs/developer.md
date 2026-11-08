@@ -48,7 +48,7 @@ The user-facing security story lives in [Security And Trust](security.md): the S
 
 Follow [Scanner Maintenance](developer/scanner-maintenance.md) for the reviewed risk baseline, the additional ClawHub-compatible static CI check, and the before/after review procedure. These development checks add no installed-skill work.
 
-For security work independent of a release, start with the [audit improvement handoff](developer/audit-improvement-handoff.md). It records the 3.2.5 production findings, test limits and the separate full model preflight.
+For security work independent of a release, start with the [audit improvement handoff](../handoffs/audit-improvement.md). It records the 3.2.5 production findings, test limits and the separate full model preflight.
 
 ### OpenSSF Scorecard (maintainer-only)
 
