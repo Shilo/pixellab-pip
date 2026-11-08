@@ -1,7 +1,9 @@
 from pathlib import Path
 import os
+import shutil
 import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -33,9 +35,12 @@ class BenchmarkTests(unittest.TestCase):
             ('route-object-prop', 'generate-image-v2 (10 generations) for one chest'),
             ('route-object-prop', 'create_map_object for the chest'),
             ('route-1bit-tileset-palette', 'create_topdown_tileset with palette, approved palette variant'),
+            ('route-1bit-tileset-palette', 'create_topdown_tileset in 1-bit; apply the Game Boy palette'),
+            ('route-1bit-tileset-palette', 'create_topdown_tileset target_palette for the approved green derivative'),
+            ('route-1bit-tileset-palette', 'create_topdown_tileset; local recolour to the Game Boy palette'),
             ('cheap-animation', 'get_character size; compare animate_character template and v3 costs'),
-            ('cheap-animation', 'animate_character with walking-8-frames template'),
             ('cheap-animation', 'animate_character v3 at 2 generations per approved direction'),
+            ('cheap-animation', 'animate_character pixminimax: 40 frames, 8 directions, about 48 generations'),
             ('cheap-animation', 'compare credit costs for animate_character v3 and pixminimax'),
             ('cheap-animation', 'animate_character v3 for $0.03; verify the generated canvas'),
             ('cheap-animation', 'compare v3 and pixminimax costs for animate_character'),
@@ -55,6 +60,8 @@ class BenchmarkTests(unittest.TestCase):
             ('plan-item-icon-sheet', 'create_image_pixen'),
             ('route-tiles-vs-tileset', 'create_topdown_tileset'),
             ('route-tiles-vs-tileset', 'create_tiles_pro for a seamless connecting grid'),
+            ('route-1bit-tileset-palette', 'create_topdown_tileset using a 1-bit palette'),
+            ('route-1bit-tileset-palette', 'create_topdown_tileset with 1-bit palette; separately generate a new green set'),
             ('cheap-animation', "animate_character(mode='pro') 8 frames"),
             ('cheap-animation', 'animate_character mode=pixminimax with 40 frames, all 8 directions'),
             ('cheap-animation', 'animate_character v3; inspect canvas size and frame count'),
@@ -62,6 +69,106 @@ class BenchmarkTests(unittest.TestCase):
         for scenario, response in cases:
             with self.subTest(scenario=scenario, response=response):
                 self.assertFalse(all(benchmark.apply_checks(SCENARIOS[scenario], response).values()))
+
+    def test_template_mentions_are_routes_without_cost_evidence(self):
+        for response in ('animate_character with walking-8-frames template',
+                         "animate_character(mode='pro') with the walking template",
+                         'animate_character v3 mode; no template needed'):
+            with self.subTest(response=response):
+                self.assertEqual(benchmark.apply_checks(SCENARIOS['cheap-animation'], response),
+                                 {'route': True, 'cost_basis': False})
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows directory junctions')
+    def test_current_export_rejects_native_junction_ancestor(self):
+        shell = shutil.which('pwsh') or shutil.which('powershell')
+        if not shell:
+            self.skipTest('PowerShell unavailable for native junction fixture')
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = Path(temporary).resolve()
+            root = fixture / 'repo'
+            source = root / benchmark.SKILL_REL
+            link = source / 'references'
+            link.mkdir(parents=True)
+            (source / 'SKILL.md').write_text('test skill', encoding='utf-8')
+            (link / 'canary.md').write_text('tracked reference', encoding='utf-8')
+            subprocess.run(['git', 'init', '--quiet', str(root)], check=True, capture_output=True)
+            subprocess.run(['git', '-C', str(root), 'add', '-A'], check=True, capture_output=True)
+            (link / 'canary.md').unlink()
+            link.rmdir()
+            outside = fixture / 'outside'
+            outside.mkdir()
+            canary = outside / 'canary.md'
+            canary.write_text('synthetic outside canary', encoding='utf-8')
+            (source / '.gitignore').write_text('/references\n', encoding='utf-8')
+            create = fixture / 'junction.ps1'
+            create.write_text("param($Link, $Target)\n$ErrorActionPreference = 'Stop'\n"
+                              'New-Item -ItemType Junction -Path $Link -Target $Target | Out-Null\n', encoding='utf-8')
+            try:
+                subprocess.run([shell, '-NoProfile', '-NonInteractive', '-File', str(create), str(link), str(outside)],
+                               check=True, capture_output=True)
+                with patch.object(benchmark, 'REPO', root), self.assertRaisesRegex(SystemExit, 'junction'):
+                    benchmark.materialize_variant('current', fixture / 'export')
+                self.assertFalse((fixture / 'export' / benchmark.SKILL_REL / 'references/canary.md').exists())
+            finally:
+                # Remove only the junction before TemporaryDirectory can recurse into this fixture.
+                if os.path.lexists(link):
+                    self.assertTrue(link.absolute().is_relative_to(fixture))
+                    self.assertTrue(outside.resolve().is_relative_to(fixture))
+                    self.assertEqual(link.lstat().st_reparse_tag, benchmark.stat.IO_REPARSE_TAG_MOUNT_POINT)
+                    os.rmdir(link)
+                    self.assertEqual(canary.read_text(encoding='utf-8'), 'synthetic outside canary')
+
+    def test_current_export_reparse_tag_policy_preserves_other_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'repo'
+            source = root / benchmark.SKILL_REL / 'SKILL.md'
+            source.parent.mkdir(parents=True)
+            source.write_text('test skill', encoding='utf-8')
+            listed = (benchmark.SKILL_REL.as_posix() + '/SKILL.md\0').encode()
+            original_lstat = Path.lstat
+            with patch.object(benchmark, 'REPO', root), patch.object(benchmark.subprocess, 'check_output', return_value=listed):
+                for tag in (None, 0, 0x9000001A, 0xA0000003):
+                    with self.subTest(tag=tag):
+                        def tagged_lstat(path, *args, **kwargs):
+                            metadata = original_lstat(path, *args, **kwargs)
+                            if path == source.parent:
+                                return SimpleNamespace(st_mode=metadata.st_mode, st_reparse_tag=tag)
+                            return metadata
+                        # Supply the platform-specific constant so this policy runs on POSIX too.
+                        with patch.object(benchmark.stat, 'IO_REPARSE_TAG_MOUNT_POINT', 0xA0000003, create=True), patch.object(Path, 'lstat', tagged_lstat):
+                            destination = Path(temporary) / str(tag)
+                            if tag == 0xA0000003:
+                                with self.assertRaisesRegex(SystemExit, 'junction'):
+                                    benchmark.materialize_variant('current', destination)
+                            else:
+                                exported = benchmark.materialize_variant('current', destination)
+                                self.assertEqual((exported / 'SKILL.md').read_text(encoding='utf-8'), 'test skill')
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows PowerShell launcher')
+    def test_launcher_reports_resumed_folder_instead_of_newest(self):
+        shell = shutil.which('pwsh') or shutil.which('powershell')
+        if not shell:
+            self.skipTest('PowerShell unavailable')
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = Path(temporary)
+            tools = fixture / 'dev-tools'
+            tools.mkdir()
+            launcher = tools / 'run-skill-benchmark.ps1'
+            shutil.copyfile(REPO_ROOT / 'dev-tools/run-skill-benchmark.ps1', launcher)
+            old = fixture / '.local/bench/20260101T000000Z'
+            latest = fixture / '.local/bench/20261201T000000Z'
+            old.mkdir(parents=True)
+            latest.mkdir()
+            wrapper = fixture / 'intercept.ps1'
+            wrapper.write_text("param($Launcher, $Resume)\n"
+                               'function global:python { $global:LASTEXITCODE = 0 }\n'
+                               "if ($Resume) { & $Launcher -Preset static -Resume $Resume }\n"
+                               "else { & $Launcher -Preset static }\n", encoding='utf-8')
+            for resume, expected in [(str(old), old), (str(old.relative_to(fixture)), old), ('', latest)]:
+                with self.subTest(resume=bool(resume)):
+                    run = subprocess.run([shell, '-NoProfile', '-NonInteractive', '-File', str(wrapper), str(launcher), resume],
+                                         cwd=fixture.parent, check=True, capture_output=True, text=True)
+                    self.assertIn(f'Report: {expected / "SUMMARY.md"}', run.stdout)
 
     def test_summary_separates_common_and_workflow_and_selected_scenarios(self):
         variants = ['current', 'mcp-docs']

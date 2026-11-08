@@ -592,7 +592,15 @@ class HelperCliSmokeTests(unittest.TestCase):
         # Keep dated evidence accessible without promoting old rubric scores as current results.
         report = (REPO_ROOT / "docs/pixellab-pip-benchmark.md").read_text(encoding="utf-8")
         self.assertIn("Historical July 2026 planning snapshot", report)
-        self.assertIn(skill_benchmark.REPORT_MARK_START, report)
+        self.assertNotIn(skill_benchmark.REPORT_MARK_START, report)
+        self.assertNotIn(skill_benchmark.REPORT_MARK_END, report)
+        with tempfile.TemporaryDirectory() as temporary:
+            copy = Path(temporary) / 'historical.md'
+            copy.write_text(report, encoding='utf-8')
+            original = copy.read_bytes()
+            with self.assertRaisesRegex(SystemExit, 'needs exactly one'):
+                skill_benchmark.write_report_doc(copy, 'new dataset')
+            self.assertEqual(copy.read_bytes(), original)
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
         section = readme.split("## Benchmark", 1)[1].split("## Security", 1)[0]
         self.assertIn("historical benchmark", section)

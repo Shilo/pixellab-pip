@@ -22,8 +22,8 @@ $interactive = -not ([Console]::IsInputRedirected -or [Console]::IsOutputRedirec
 
 # preset -> { Label, Args, NeedCli (agent exes that must be on PATH) }. Planning runs use model tokens; no preset generates PixelLab assets.
 $presets = [ordered]@{
-    "full"       = @{ Label = "full        - paid agent planning suite: all agents, all 4 variants, dated results ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }
-    "static"     = @{ Label = "static      - free context-size comparison, no CLI calls"; Args = @("--static", "--variants", "pre-kiss-yagni-refactor,mcp-docs,vanilla"); NeedCli = @() }
+    "full"       = @{ Label = "full        - paid agent planning suite: all agents, all 4 variants, dated results ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--variants", "6fdae41bf0445674a7ea8b41604df57671285d5a,mcp-docs,vanilla", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }
+    "static"     = @{ Label = "static      - free context-size comparison, no CLI calls"; Args = @("--static", "--variants", "6fdae41bf0445674a7ea8b41604df57671285d5a,mcp-docs,vanilla"); NeedCli = @() }
     "dry-claude" = @{ Label = "dry-claude  - claude only ($Reps reps)"; Args = @("--agents", "claude", "--reps", "$Reps"); NeedCli = @("claude") }
     "dry-all"    = @{ Label = "dry-all     - claude + codex + deepseek-v4-pro ($Reps reps)"; Args = @("--agents", "claude,codex,deepseek-v4-pro", "--reps", "$Reps"); NeedCli = @("claude", "codex", "opencode") }
     "list"       = @{ Label = "list        - print scenarios and exit"; Args = @("--list"); NeedCli = @() }
@@ -75,11 +75,18 @@ finally {
     Pop-Location
 }
 
-# Point at the newest report (skill_benchmark.py writes .local/bench/<stamp>/).
+# Point at the resumed report, or the newest run (skill_benchmark.py writes .local/bench/<stamp>/).
 if ($code -eq 0 -and $Preset -notin @("list")) {
-    $latest = Get-ChildItem -Path (Join-Path $repoRoot ".local/bench") -Directory -ErrorAction SilentlyContinue |
-        Sort-Object Name -Descending | Select-Object -First 1
-    if ($latest) { Write-Host "Report: $(Join-Path $latest.FullName 'SUMMARY.md')" }
+    if ($Resume) {
+        $reportDir = $Resume
+        if (-not [IO.Path]::IsPathRooted($reportDir)) { $reportDir = Join-Path $repoRoot $reportDir }
+        Write-Host "Report: $(Join-Path $reportDir 'SUMMARY.md')"
+    }
+    else {
+        $latest = Get-ChildItem -Path (Join-Path $repoRoot ".local/bench") -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending | Select-Object -First 1
+        if ($latest) { Write-Host "Report: $(Join-Path $latest.FullName 'SUMMARY.md')" }
+    }
 }
 
 if ($interactive) { Read-Host "Press Enter to close" | Out-Null }

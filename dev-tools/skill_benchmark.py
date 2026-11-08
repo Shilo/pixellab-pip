@@ -3,7 +3,7 @@
 
 Compares how much agent-side context/tokens the skill costs (SKILL.md injection +
 progressively loaded references/*.md) between git variants of the skill, e.g. the
-pre-KISS/YAGNI tag vs the current working tree, across claude / codex / opencode
+pre-KISS/YAGNI baseline vs the current working tree, across claude / codex / opencode
 (deepseek-v4-pro) CLIs. It measures the agent session only — never PixelLab credits.
 
 Modes:
@@ -37,7 +37,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 SKILL_REL = Path("skills") / "pixellab-pip"
-DEFAULT_BASELINE = "pre-kiss-yagni-refactor"
+DEFAULT_BASELINE = "6fdae41bf0445674a7ea8b41604df57671285d5a"
 OPENCODE_MODELS = {"deepseek-v4-pro": "deepseek/deepseek-v4-pro"}
 AGENTS = ("claude", "codex", *OPENCODE_MODELS)
 # Context-strategy arms compared against the current skill (besides git refs):
@@ -46,10 +46,10 @@ AGENTS = ("claude", "codex", *OPENCODE_MODELS)
 MCP_DOCS_URL = "https://api.pixellab.ai/mcp/docs"
 
 # Human-readable column labels for the markdown output only; raw keys still drive --variants, git
-# refs, cell IDs, and results.json. When the pre-refactor commit is tagged (e.g. v0.5.0), update the
-# key below and DEFAULT_BASELINE together.
+# refs, cell IDs, and results.json. Keep the former tag key for rescoring saved runs.
 VARIANT_LABELS = {
     "current": "Pip",
+    DEFAULT_BASELINE: "Pip (Old v0.5.0)",
     "pre-kiss-yagni-refactor": "Pip (Old v0.5.0)",
     "mcp-docs": "PixelLab MCP Docs",
     "vanilla": "Vanilla",
@@ -116,7 +116,7 @@ SCENARIOS = [
         "id": "cheap-animation",
         "task": "I already have a character in PixelLab. What's the cheapest way to give it a walk animation?",
         "checks": {"route": r"animate[_-]character|characters/animations", "cost_basis": (
-            r"template|compar\w*.{0,60}(?:cost|credit|price)|(?:cost|credit|price).{0,60}compar"
+            r"compar\w*.{0,60}(?:cost|credit|price)|(?:cost|credit|price).{0,60}compar"
             r"|\bcheaper\b|\bless expensive\b|\b(?:\d+(?:\.\d+)?|one)\s*(?:gen(?:eration)?s?|credits?)\b|\$\s*\d"
         )},
         "refs_any": ["cost-routing.md"],
@@ -157,7 +157,7 @@ SCENARIOS = [
         # Palette-constrained generation or an approved local palette variant can both fit.
         "id": "route-1bit-tileset-palette",
         "task": "In PixelLab, make a 1-bit top-down tileset, then give me a Game Boy green version of it.",
-        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset(?!-side)", "palette": r"aseprite|local|clamp|target_palette|\bpalette\b"},
+        "checks": {"tileset": r"create[_-]topdown[_-]tileset|create-tileset(?!-side)", "palette": r"aseprite|local|clamp|target_palette|\bpalette\b", "version": r"recolou?r|remap|palette[- ]swap|\bclamp\b|\b(?:variant|version|derivative)\b|\bapply\b.{0,40}\bpalette\b"},
         "refs_any": ["tileset.md", "local-asset-assembly.md"],
     },
     {
@@ -330,8 +330,9 @@ def materialize_variant(ref: str, dest: Path) -> Path:
                 for part in Path(name).parts:
                     source = source / part
                     metadata = source.lstat()
-                    if stat.S_ISLNK(metadata.st_mode):
-                        raise SystemExit(f"Current variant refuses a symbolic link: {source.relative_to(REPO)}")
+                    if (stat.S_ISLNK(metadata.st_mode)
+                            or getattr(metadata, "st_reparse_tag", None) == getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", -1)):
+                        raise SystemExit(f"Current variant refuses a symbolic link or junction: {source.relative_to(REPO)}")
             except (FileNotFoundError, NotADirectoryError):
                 continue  # Git's cached inventory includes unstaged working-tree deletions.
             if stat.S_ISDIR(metadata.st_mode):
@@ -753,7 +754,7 @@ def write_markdown(out_dir: Path, static: dict, summary: dict, variants: list[st
     (out_dir / "SUMMARY.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-# Markers in the published report (docs/pixellab-pip-benchmark.md); --report rewrites only between them.
+# --report rewrites only between these markers in a separately maintained report.
 REPORT_MARK_START = "<!-- BENCHMARK:GENERATED:START -->"
 REPORT_MARK_END = "<!-- BENCHMARK:GENERATED:END -->"
 
