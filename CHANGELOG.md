@@ -16,6 +16,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Changed
 
+- **Prefer modern character routes even on a budget.** Exclude outdated Standard character creation from automatic routing; use suitable v3, Pro Flash or approved Pro. Explain budget and Standard-only feature conflicts instead of silently falling back or increasing spend. Preserve deliberate user mode choices, existing assets and the separate Standard tileset workflow. Continued API support is not a quality recommendation.
 - **Preserve the requested character and scene design.** Scope Pixen's tested south-facing idle recipe and specialty choreography to their actual conditions; keep requested facing, poses, loadouts and handedness. Stop incompatible axe-recipe substitutions, retain explicit knight equipment placement, and leave ordinary top-down terrain boundaries flat unless elevation is requested. Remove unneeded UI and cinematic prompt boilerplate while retaining visual inspection.
 - **Report charged dollars separately.** Add an explicit USD ledger query and independent dollar totals to history and both review-panel views. Missing units remain unknown; dollar receipts never convert to generations or clear unresolved generation reservations.
 - **Clarify custom Pro Flash bodies and current room timing.** Document MCP Pro Flash's accepted template values in the canonical body-plan table without assuming skeleton support, and refresh the documented room-generation estimate while preserving its price and polling rules.

@@ -14,6 +14,8 @@ The managed character animation schema now documents `mode="pixminimax"` on REST
 
 ## 2026-10-08 Contract Addendum
 
+Routing note: the preferences in this dated addendum are historical. Current [character routing](../../skills/pixellab-pip/SKILL.md) uses Pro Flash for text-only quadrupeds and matching v3 for suitable supplied sprites, with approved Pro available when it fits; Standard is excluded from automatic character routing even on a budget.
+
 The refreshed MCP guide lists text-only quadrupeds for standard and Pro character creation, while v3 without a reference image is humanoid-only. Pip defaults quadruped creation to v3 with a supplied reference; text-only Pro is an opt-in after the user accepts its size-based cost. Since 2026-10-25 the MCP guide also recommends `create_character_pro_flash(template_id=...)` for a text-only quadruped (6 generations at 64px), which Pip offers as a second opt-in. V3 reference creation supports quadrupeds with matching `body_type`/`template` and 4 or 8 directions. REST v3 accepts a matching `template_id` for quadruped references. MCP `direction_images` preserves supplied views on the same canvas as the south-facing reference. When the south-facing reference and `direction_images` cover every requested direction, PixelLab imports the supplied views for 0.25 generation total. REST managed Pro animation now costs 10/15/25 generations per direction by image size. These are public-contract changes only; no character or animation jobs were run.
 
 ## 2026-10-15 Contract Addendum

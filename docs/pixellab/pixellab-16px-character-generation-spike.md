@@ -48,9 +48,9 @@ Pixen:
 
 Historical 2026-08 result: when 24px output was acceptable, managed
 `create_character` in standard mode produced the cleanest flat color clusters
-and consistent directional identity. Pip now treats character Standard as
-deprecated for routing, so this is test evidence rather than current route
-advice. The `size: 16` request returned 24x24 rotation canvases; do not crop or
+and consistent directional identity. Pip now excludes outdated character Standard
+from automatic routing, so this is test evidence rather than current route
+advice, not a claim of official deprecation. The `size: 16` request returned 24x24 rotation canvases; do not crop or
 resize that output and call it native 16px.
 
 Pro exposes no structured `detail`, `outline`, `shading`, or palette controls;

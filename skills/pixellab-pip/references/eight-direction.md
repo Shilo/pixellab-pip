@@ -19,7 +19,7 @@ A requested player walk in 4 or 8 facings (one 4-direction farmer demonstration 
 
 ## Oblique View
 
-MCP `create_character` supports `view="oblique"` only in `mode="standard"`, for four directions, and up to 128px. REST `POST /create-character-with-4-directions` also documents `view="oblique"`, drawn with a high top-down look and capped at 128px. The REST eight-direction schema lists `oblique` in its enum but its description says the view is four-direction only; treat that as an unresolved schema conflict and use the four-direction route for oblique requests. Do not infer support for oblique on MCP Pro/v3 or eight-direction REST output.
+MCP `create_character` supports `view="oblique"` only in `mode="standard"`, for four directions, and up to 128px. REST `POST /create-character-with-4-directions` also documents it; the eight-direction schema conflicts with its own four-direction-only description. Report this feature limitation under SKILL.md's character-mode policy rather than selecting Standard or silently changing the view. Offer a supported modern-route view for approval. Do not claim oblique support on MCP Pro/v3/Pro Flash or eight-direction REST output.
 
 When useful, offer **5 generated directions** (south, south-east, east, north-east, north) plus accepted mirrors for the other three. Mirroring switches hands/asymmetric gear; disclose that and generate the requested facings when unacceptable. It reduces direction calls, not necessarily total cost by a fixed percentage.
 

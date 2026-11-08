@@ -5,7 +5,7 @@ Status: executed 2026-07-27. Results: `../pixellab/pixellab-mcp-new-tools-test-r
 (the schema-verified parity source every comparison below is drawn from) and
 `../pixellab/pixellab-doc-watch-cache.md` (the refresh mechanism that surfaced these tools).
 
-This is a historical, completed plan; do not rerun it verbatim. Character Standard remains supported and is Pip's lowest-cost text option. For any repeat, follow `skills/pixellab-pip/SKILL.md`, verify current fields and recalculate the cost budget.
+This is a historical, completed plan; do not rerun it verbatim. Character Standard remains API-supported but is excluded from Pip's automatic routing, including budget requests. For any repeat, follow `skills/pixellab-pip/SKILL.md`, verify current fields and recalculate the cost budget.
 
 ## Goal
 

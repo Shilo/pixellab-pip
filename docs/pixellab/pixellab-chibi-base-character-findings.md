@@ -164,7 +164,7 @@ Cute unisex tall chibi avatar base character, young adult proportions, tiny tape
 
 ## Model And Setting Findings (Historical 2026-07 Study)
 
-These comparisons describe the routes tested at the time. Standard remains supported and is Pip's lowest-cost text option; use `skills/pixellab-pip/SKILL.md` for current routes, fields and quality/cost preferences.
+These comparisons describe the routes tested at the time. Standard remains API-supported, but Pip excludes it from automatic character routing even on a budget; use `skills/pixellab-pip/SKILL.md` for current routes, fields and quality/cost policy.
 
 Character Standard (historical):
 
@@ -603,7 +603,7 @@ Findings:
 
 ## Historical Next Test Plan (2026-07-15)
 
-The original plan proposed character standard mode with 4 directions, chibi proportions, low top-down view, size target 64, low or default detail, and omitted/default outline. Standard is still supported, but verify the current contract and budget in `skills/pixellab-pip/SKILL.md` rather than executing historical settings verbatim.
+The original plan proposed character standard mode with 4 directions, chibi proportions, low top-down view, size target 64, low or default detail, and omitted/default outline. Pip now excludes outdated Standard character creation from automatic routing, despite continued API support. Follow `skills/pixellab-pip/SKILL.md` rather than executing historical settings verbatim; the recorded results below remain historical evidence.
 
 Prefer a small batch that tests only one variable at a time:
 
