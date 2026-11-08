@@ -362,6 +362,8 @@ reproduces the workflow and inputs, not exact art.
 
 ## Sharing
 
+Writing a local blueprint and returning it to the requesting user does not authorize publishing it or sending its inputs to other recipients. Before external sharing, review `_comment_prompt`, request values, filenames and referenced images for sensitive or identifying content, and state the contents and destination. Reuse explicit sharing authorization that covers them; clarify only uncertain scope or sensitive material not already covered. Preserve the full local recipe and source inputs; agree on any redaction instead of silently changing replay data.
+
 The `*.blueprint.json` file is the shareable unit. With no file inputs, send it alone. Otherwise,
 send it with its referenced input tree intact and use relative paths. Apply SKILL.md's input-copy rule.
 Embed an image as base64 only on explicit request because every read pays

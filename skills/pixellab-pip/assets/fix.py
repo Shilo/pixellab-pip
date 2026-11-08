@@ -1,6 +1,8 @@
 """Heuristic animation inspection, optional local repairs and advisory re-roll plans.
 
-Without --check-only, writes repair copies; originals remain untouched.
+--check-only writes fix_report.json and fix_report.txt in the output directory.
+Without it, also writes repair copies and previews; originals remain untouched.
+--json additionally prints the report as JSON to stdout.
 Findings require visual review and do not certify art quality.
 
   python fix.py out/knight_attack_*.png                 # one animation (files, a folder, a sheet or a GIF)
@@ -8,7 +10,7 @@ Findings require visual review and do not certify art quality.
   python fix.py sheet.png --sheet 96x200 --move attack  # a sprite sheet of 96x200 frames
   python fix.py frames/ --ref hero.png                  # compare against this standing sprite
   python fix.py frames/ --accept c2,c5                  # also apply these proposed effect fixes (asked first)
-  python fix.py frames/ --check-only --json             # measure and plan only; report to stdout
+  python fix.py frames/ --check-only --json             # inspection reports on disk + JSON to stdout
   python fix.py --table  # defect -> cause -> change guidance; with inputs, also inspects them
 
 Writes into <input folder>_fixed/, or <name>_fixed/ beside input files (or --out): the fixed frames, timing.json, fix_report.json, fix_report.txt,

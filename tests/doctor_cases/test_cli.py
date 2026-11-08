@@ -89,6 +89,10 @@ def test_check_only_writes_only_the_reports(tmp_path):
     fix(tmp_path / 'k', '--check-only')
     out = str(tmp_path / 'k') + '_fixed'
     assert sorted(os.listdir(out)) == ['fix_report.json', 'fix_report.txt']
+    json_out = tmp_path / 'json-reports'
+    printed = json.loads(fix(tmp_path / 'k', '--check-only', '--json', '--out', json_out))
+    assert sorted(os.listdir(json_out)) == ['fix_report.json', 'fix_report.txt']
+    assert printed == report(str(json_out))
 
 
 def test_json_to_stdout(tmp_path):

@@ -7,9 +7,16 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+## [3.2.3] - 2026-11-08
+
 ### Security
 
 - **Recheck the stored hosted verdict before promotion.** Require the exact publisher and version's current ClawScan verdict to remain benign with high confidence before moving ClawHub's latest tag, including resumed or already-latest releases. This catches completed concurrent audits that supersede the original scan response without requiring an optional skill card.
+- **Review blueprint contents before external sharing.** Keep complete local recipes and copied inputs while checking original prompts, request values, filenames and images before sending them to other recipients. Reuse sharing authorization that covers the contents and destination; agree on redaction without silently changing replay data.
+
+### Fixed
+
+- **Clarify animation inspection outputs.** State that `--check-only` saves the two inspection reports and `--json` also prints JSON. Preserve report output, collision checks, source protection and repair behavior; verify the combined flags against both saved and printed results.
 
 ## [3.2.2] - 2026-11-07
 
@@ -192,7 +199,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
-[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.2...HEAD
+[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.3...HEAD
+[3.2.3]: https://github.com/Shilo/pixellab-pip/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/Shilo/pixellab-pip/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/Shilo/pixellab-pip/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/Shilo/pixellab-pip/compare/v3.1.0...v3.2.0
