@@ -7,9 +7,15 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+## [3.2.5] - 2026-11-08
+
 ### Changed
 
 - **Accept benign hosted audits with medium or high confidence.** Apply the same policy to the completed scan and current stored verdict before promotion. Low, missing or unknown confidence and non-benign verdicts remain blocked; static regression, malware, exact-artifact, publisher/version and provenance checks remain required. Existing tagged releases can resume with unchanged skill files.
+
+### Security
+
+- **Summarize Workbench task notes.** Put a concise summary of the requested pixel-art or effect task and its material constraints in first-call notes, retaining high-mode plans and observations and the existing global transfer and exact-field rules.
 
 ## [3.2.4] - 2026-11-08
 
@@ -209,7 +215,8 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
-[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.4...HEAD
+[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.5...HEAD
+[3.2.5]: https://github.com/Shilo/pixellab-pip/compare/v3.2.4...v3.2.5
 [3.2.4]: https://github.com/Shilo/pixellab-pip/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/Shilo/pixellab-pip/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/Shilo/pixellab-pip/compare/v3.2.1...v3.2.2
