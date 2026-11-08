@@ -94,7 +94,7 @@ def validate_style(style: dict) -> None:
     if style.get("soft_edges") is not None and not isinstance(style["soft_edges"], bool):
         raise ValueError("soft_edges must be a boolean or null")
     if style.get("palette_size") is not None and (type(style["palette_size"]) is not int
-                                                  or not positive_number(style["palette_size"])):
+            or not positive_number(style["palette_size"])):
         raise ValueError("palette_size must be a positive integer or null")
     for size in (style.get("sizes") or {}).values():
         if size is not None and not (isinstance(size, list) and len(size) == 2 and all(isinstance(v, int) and positive_number(v) for v in size)):

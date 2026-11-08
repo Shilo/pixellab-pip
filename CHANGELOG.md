@@ -7,6 +7,8 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-11-07
+
 ### Added
 
 - **Support MCP room workflows.** Route furnished floor-plan rooms through painting/status, room listing, project filing, and optional furniture cutouts; document Tier 2 eligibility, 20-generation painting cost, and top-down/isometric/oblique restrictions.
@@ -28,6 +30,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Fixed
 
+- **Use ordinary indentation for palette-size validation.** Remove excessive continuation-line spacing that the pinned SkillSpector scanner mistook for context-window stuffing; validation behavior is unchanged.
 - **Correct final-review download, preview and repair defects.** Accept the two additional documented PixelLab file hosts; honor pending tileset downloads and bounded retry delays. Refuse ambiguous or tall layouts in the compact tileset preview. Require review of ground snapping and neighbouring-frame thin-part copies, expose pending approvals in the doctor verdict, recognize walk/run template labels, and preserve explicit soft-edge preferences through style saves. Refresh surface-specific enum/count guidance and simulator palette-field recognition without claiming simulated palette enforcement.
 - **Repair offline benchmark defaults and remaining export/report gaps.** Pin the old baseline by its existing commit, reject Windows directory junctions without rejecting ordinary cloud placeholders, require cost and palette-version signals, refuse updates to the unmarked historical archive, and point resumed launcher runs to their actual report folder. Generic marked reports and supported route alternatives remain available.
 - **Correct review-confirmed benchmark and blueprint gaps.** Require meaningful animation-cost and independent-texture signals, retain supported route alternatives, handle file-to-directory export replacements, reject symlink inputs, and clearly require a Git checkout for current-tree exports. Permit blueprint inputs throughout its local folder tree while retaining traversal and secret restrictions.
@@ -167,5 +170,7 @@ the [merge status](docs/tools/pixellab-game-art-skill/pixellab-game-art-pr-11-me
 
 Thanks to lexingel for pixellab-game-art and its adopted code (MIT; notices ship with the skill).
 
+[Unreleased]: https://github.com/Shilo/pixellab-pip/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/Shilo/pixellab-pip/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/Shilo/pixellab-pip/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/Shilo/pixellab-pip/compare/v2.3.0...v3.0.0
