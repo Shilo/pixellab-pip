@@ -1,6 +1,6 @@
 {
   "name": "pixellab-pip",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "description": "Routes PixelLab asset/API requests across MCP, REST v2, website/editor workflows, Aseprite, Pixelorama, and legacy v1.",
   "license": "MIT",
   "author": {
