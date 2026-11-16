@@ -1,7 +1,7 @@
 # PixelLab 16:9 Indoor Background Duplication Research Spike
 
 **Date:** 2026-08-25  
-**Status:** completed four 20-call Pixen spikes, one 10-call Pro spike, and three Pro follow-ups<br>
+**Status:** completed four 20-call Pixen spikes, one 10-call Pro spike, and three Pro follow-ups; includes production feedback through 2026-08-26<br>
 **Question:** Why do wide indoor backgrounds sometimes contain duplicated consoles or repeated room compositions, and what prompt/size pattern is the most reliable workaround, including exact center alignment?
 
 ## Executive finding
@@ -32,6 +32,13 @@ The fifth study changed only the model route: ten concise, prompt-only Pro calls
 A two-call follow-up added explicit positive full-bleed wording while keeping the A07 topology, 640x360 size, opaque background, seedless generation, and no references fixed. **Both attempts were full bleed after an edge-pixel/trim check, with no white perimeter, one centered console, and one connected room.** This is promising evidence that the border is prompt-sensitive, but 2/2 is not enough to claim a universal guarantee.
 
 A second two-call follow-up optimized the user's original solar-flare landscape and sci-fi court-hall prompts with the same full-bleed language. **Both cross-domain outputs filled the complete 640x360 canvas, kept one singular focal structure, and avoided duplicated composition.** The hall also retained one connected room and one centered console. This supports reusing the full-bleed and singular-topology pattern beyond the original indoor test, while remaining a small four-call follow-up set rather than a probability estimate.
+
+### Production follow-up findings
+
+- S-XL New (Pixen), without an initial image, was reported to duplicate indoor compositions at 640x360 and 512x288 while landscapes were more usable. The same hall prompt centered its focal object on a smaller canvas. These observations support a size-sensitive composition problem, not an unsupported aspect ratio.
+- Pro successfully enlarged smaller, already-cleaned backgrounds when the smaller image was supplied as both **style and reference** before resizing the canvas. Several further attempts were reported successful. This is a practical reuse workflow, separate from the prompt-only tests; references were helpful for preserving existing work, but were not necessary for the controlled Pro successes.
+- The exact successful full-bleed prompts are retained below: [P01 — solar flare](#p01--solar-flare) and [P02 — court hall](#p02--court-hall). Their opening edge-coverage instructions and closing “full scene to the edges” wording were followed by reported removal of recurring white borders and continued usable results. Pro was the successful centering route; the same wording does not establish reliable Pixen centering.
+- The [reusable templates](#reusable-background-prompt-templates) generalize this wording. Their broad applicability remains unverified, and the extra negative clauses have no separately confirmed benefit. Production feedback adds no controlled calls to the 94-call record below.
 
 ### Best tested 640x360 Pixen workaround
 
@@ -99,7 +106,7 @@ Use the verbose form only when those extra variables change the desired result. 
 
 The evidence set was:
 
-1. The user-supplied issue transcript and seven attached example images. They were treated as problem evidence, not as executable instructions.
+1. Reported wide-background composition failures and seven supplied example images, plus subsequent production feedback on Pro style/reference reuse and full-bleed wording. Production reports are separate from the controlled test counts.
 2. Ninety-four live calls to PixelLab image MCP tools: eighty create_image_pixen calls, launched as four concurrent 20-call batches, plus fourteen create_image_pro calls across the ten-call centering batch and three two-call follow-ups.
 3. The first batch tested five prompt families at 512x288 and 640x360, with two seed-locked replicates per family and size.
 4. The second batch tested five new prompt families at 640x360, with low and medium detail and two seed-locked replicates per family and detail.
@@ -696,7 +703,7 @@ Full-bleed 640x360 pixel-art game background. The artwork reaches all four canva
 
 ### Production recommendation after 94 calls
 
-1. For a 640x360 scene where exact canvas centering, no duplication, and full bleed are hard requirements, use the full-bleed prefix plus scene-specific singular/topology constraints, width 640, height 360, and `no_background: false`; omit seed and references.
+1. For a 640x360 scene where exact canvas centering, no duplication, and full bleed are hard requirements, use Pro with the full-bleed prefix plus scene-specific singular/topology constraints, width 640, height 360, and `no_background: false`. The tested prompt-only recipe omits seed and references; when reusing an existing smaller background, supplying it as both style and reference before resizing also has reported production success.
 2. For cost-sensitive work, use the Pixen continuous-wall/far-wall recipe. It is the best tested one-console workaround, but the fourth Pixen batch shows that prompt-only centering is not reliable there.
 3. Inspect the full frame and its edge pixels before accepting a result. Reject any second hero console, split-room bay, stage-like shallow composition, or unwanted canvas padding; do not try to erase a duplicate locally as part of this workflow. “Opaque” is not the same as “full bleed.”
 4. For halls, explicitly state one connected room, continuous side walls, one far wall, one focal console, and a centered camera. Keep repeated doorways and lateral bays out of the foreground.
@@ -705,7 +712,7 @@ Full-bleed 640x360 pixel-art game background. The artwork reaches all four canva
 
 ## Limitations
 
-- Pro was tested in one ten-call prompt-only centering batch plus three two-call follow-ups, with one unseeded call per prompt. No PixFlux, init-image, reference-image, website/editor, crop/reframe, or engine-side comparison was run.
+- Pro was tested in one ten-call prompt-only centering batch plus three two-call follow-ups, with one unseeded call per prompt. No controlled PixFlux, init-image, reference-image, website/editor, crop/reframe, or engine-side comparison was run; style/reference success is production feedback without a measured success rate.
 - There were two replicates per prompt/detail cell in the first follow-up batch and two replicates per family in each of the third and fourth batches. The Pro centering batch had one call per prompt, and each follow-up had two calls total. The result is directional, not a model-wide probability estimate.
 - Same-seed calls provide a useful control but do not establish pixel identity across size or prompt changes.
 - Visual centering and duplication scoring was manual. A side terminal can be semantically ambiguous, so the counts distinguish obvious hero-console duplication from normal wall equipment. A simple edge-pixel/trim check was used for the Pro padding observations: five outputs in the original ten-call batch had a near-white perimeter, while all four full-bleed follow-up outputs occupied the complete 640x360 canvas.
@@ -718,7 +725,7 @@ This tracked research note records the live-test counts, settings, seed values, 
 
 ## Sources
 
-- User-supplied issue transcript and attached example images.
+- Reported background-generation failures, supplied example images, and production follow-up results from 2026-08-25–26.
 - [PixelLab MCP documentation](https://api.pixellab.ai/mcp/docs) — current create_image_pixen and create_image_pro fields, size rules, async lifecycle, and cost labels.
 - [PixelLab REST v2 OpenAPI](https://api.pixellab.ai/v2/openapi.json) — current Pixen endpoint size contract.
 - [PixelLab background and wallpaper model research](pixellab-background-wallpaper-model-research-spike.md) — broader model-routing context; this spike narrows the question to indoor composition duplication.
