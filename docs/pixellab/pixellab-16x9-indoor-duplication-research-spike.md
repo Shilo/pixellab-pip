@@ -35,6 +35,8 @@ A second two-call follow-up optimized the user's original solar-flare landscape 
 
 ### Production follow-up findings
 
+For general wallpaper guidance and copyable successful scene prompts, see [full-bleed 16:9 backgrounds](pixellab-background-wallpaper-model-research-spike.md#full-bleed-169-backgrounds-practical-findings-and-prompts). This study retains the detailed indoor composition tests.
+
 - S-XL New (Pixen), without an initial image, was reported to duplicate indoor compositions at 640x360 and 512x288 while landscapes were more usable. The same hall prompt centered its focal object on a smaller canvas. These observations support a size-sensitive composition problem, not an unsupported aspect ratio.
 - Pro successfully enlarged smaller, already-cleaned backgrounds when the smaller image was supplied as both **style and reference** before resizing the canvas. Several further attempts were reported successful. This is a practical reuse workflow, separate from the prompt-only tests; references were helpful for preserving existing work, but were not necessary for the controlled Pro successes.
 - The exact successful full-bleed prompts are retained below: [P01 — solar flare](#p01--solar-flare) and [P02 — court hall](#p02--court-hall). Their opening edge-coverage instructions and closing “full scene to the edges” wording were followed by reported removal of recurring white borders and continued usable results. Pro was the successful centering route; the same wording does not establish reliable Pixen centering.

@@ -9,7 +9,7 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ### Changed
 
-- **Clarify wide-background research findings.** Record successful Pro reuse of smaller backgrounds as style/reference, reported white-border relief from full-bleed wording, and links to the exact successful scene prompts; distinguish production feedback from controlled test counts and unverified template generalizations.
+- **Clarify wide-background research findings.** Record successful Pro reuse of smaller backgrounds as style/reference, reported white-border relief from full-bleed wording, and the exact successful scene prompts in both wallpaper and indoor research, with a minimal reusable template; distinguish production feedback from controlled test counts and unverified template generalizations.
 - **Pre-test audits independently of releases.** Add a manual full ClawScan model preflight with a matched, reviewed binary and Docker runtime, exact input hashes and retained reports; it requires separate model credentials and never publishes a version. Automate the offline executable-batch capacity check in CI and release, and document the remaining findings and hosted-test limits in a top-level `handoffs/` agent work brief.
 
 ## [3.2.5] - 2026-11-08

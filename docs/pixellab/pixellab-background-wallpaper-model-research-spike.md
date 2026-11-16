@@ -1,7 +1,7 @@
 # PixelLab Background And Wallpaper Model Research Spike
 
 **Date:** 2026-08-05  
-**Status:** directional finding; suitable for routing guidance, not a new blind benchmark  
+**Status:** directional model comparison with full-bleed composition findings through 2026-08-26; not a new blind benchmark<br>
 **Question:** Which PixelLab image model is the best fit for game backgrounds, wallpapers, and wide environmental scenes?
 
 ## Executive finding
@@ -19,10 +19,42 @@ The four models have distinct practical roles for this category:
 
 - Choose **Pixen** when the wallpaper is a full scene with a prominent subject and the user asks for detail.
 - Choose **PixFlux** for a stylized atmospheric backdrop, especially when the focal subject is absent or intentionally simple.
-- Choose **Pro** for a premium hero image where a strong mix of finish, readability, and stylized art direction justifies the cost.
+- Choose **Pro** for a premium hero image where a strong mix of finish, readability, and stylized art direction justifies the cost, or for wide scenes where accurate centering is essential (see the follow-up findings below).
 - Do not choose **BitForge** as the default for a production 16:9 wallpaper. Use it only when a low-resolution output is acceptable or when its specialized controls—such as coverage or reference-style guidance—are the actual requirement.
 
 This is more useful than a single “best model” ranking: **subjectless backdrop** and **subject-plus-environment scene** are different wallpaper jobs.
+
+## Full-bleed 16:9 backgrounds: practical findings and prompts
+
+Follow-up evidence from 2026-08-25–26 adds a composition-specific exception to the model comparison above:
+
+- **Use Pro when centering matters.** S-XL New (Pixen) could reduce indoor mirroring/duplication with continuous-room wording, but prompt-only centering remained unreliable at 640x360. Landscapes were more usable; this is not a universal 16:9 limitation.
+- **Request edge coverage explicitly.** Pro also produced white borders until prompts specified full bleed, artwork reaching all four edges, and continuous scene surfaces. All four explicit full-bleed Pro follow-ups passed edge checks; production feedback also reported that this wording resolved recurring white borders. `no_background: false` requests opacity, not edge-to-edge composition.
+- **Reuse smaller backgrounds when available.** Supplying a smaller, already-cleaned image as both style and reference before resizing the canvas produced repeated reported Pro successes. References were helpful for preserving existing artwork; the controlled Pro successes below needed no reference or initial image.
+
+### Minimal reusable prompt
+
+~~~text
+640x360 full-bleed game background of {{scene_description}}. Artwork reaches all four edges of the canvas.
+~~~
+
+This is a compact starting template derived from the successful full-bleed wording, not a separately validated universal recipe. Include the desired camera and focal placement in the scene description. Extra exclusions for borders, mirrored layouts, split compositions, or duplicate subjects have no separately confirmed benefit.
+
+### Successful Pro prompt: solar-flare landscape
+
+~~~text
+Full-bleed 640x360 pixel-art game background. The sky, atmosphere, and volcanic ground continue to all four edges of the canvas. No white border, no white margin, no inset frame, no letterboxing. One single desolate alien landscape during a violent solar flare. A single massive erupting sun hangs low on the distant horizon; no second sun and no duplicated horizon. Jagged obsidian rock formations and deep glowing fissures lead across the foreground. The sky is a continuous gradient of searing orange, deep violet, and blinding yellow with wisps of ionized gas. Crystalline dust and restrained heat haze texture the ground. Wide cinematic composition, full scene to the edges.
+~~~
+
+### Successful Pro prompt: centered court hall
+
+~~~text
+Full-bleed 640x360 pixel-art game background. The artwork reaches all four canvas edges; no white border, margin, frame, or letterbox. One single connected deep sci-fi court hall viewed straight-on from the south entrance with a centered camera. Continuous left and right walls terminate at one far wall; one central vanishing axis and broad reflective floor. One raised dais at the center of the far wall holds one unique floating control console with tactile backlit buttons and metallic levers. Use wall-attached obsidian and chrome arches, sparse cyan conduits, and a few holographic celestial maps. Keep the side walls continuous; no mirrored hall, split bay, duplicate dais, duplicate console, or rows of separate rooms. Add a few small surveillance drones tethered near the ceiling without creating another focal object. Deep atmospheric perspective, full scene to the edges.
+~~~
+
+Each exact scene prompt produced one successful full-bleed 640x360 Pro output with a single focal structure and no duplicated composition; the hall also retained a centered console. Both used `no_background: false`, no seed, and no references or style overrides. Each call reported 40 generations in that test. Inspect the full frame for padding, duplicate subjects, and placement before acceptance.
+
+These are small-sample results. Production feedback is separate from controlled counts, and neither establishes reliable Pixen centering or guaranteed success across themes. The [16:9 indoor composition study](pixellab-16x9-indoor-duplication-research-spike.md) retains the detailed tests and [longer prompt templates](pixellab-16x9-indoor-duplication-research-spike.md#reusable-background-prompt-templates).
 
 ## Test setup
 
@@ -110,7 +142,7 @@ The retry prompt used for PixFlux and BitForge was:
 Wide fantasy pixel-art lake panorama, fixed eye-level side-on landscape composition. A calm expansive lake fills the center; layered blue, partly snow-capped mountains sit on the horizon beneath a luminous peach-gold-lavender sky. Forested islands frame both foreground sides. Make one large, unmistakable majestic dragon the main focal subject in the upper center, fully visible in profile with wings spread; place a clear full-body mirrored dragon reflection directly below it on the water. Also reflect the sky, mountains, and islands across the lake. Full-bleed opaque scene, strong silhouette contrast, readable dragon and reflection at small resolution, crisp pixel art, no text.
 ```
 
-All routes used opaque full-bleed output (`no_background: false`) and a side view where supported. PixFlux and BitForge used highly detailed detail/shading settings; BitForge also used `coverage_percentage: 100`. The BitForge retry negative description was:
+All routes requested opaque scenes (`no_background: false`), full bleed through prompt wording, and a side view where supported. PixFlux and BitForge used highly detailed detail/shading settings; BitForge also used `coverage_percentage: 100`. The BitForge retry negative description was:
 
 ```text
 text, logos, borders, blank margins, tiny or hidden dragon, missing dragon, unclear dragon reflection, duplicate dragons, people, boats, buildings
