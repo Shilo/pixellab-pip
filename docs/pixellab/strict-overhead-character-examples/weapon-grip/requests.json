@@ -809,5 +809,140 @@
       "subject_description": "ninja in black cloth holding a wakizashi",
       "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
     }
+  },
+  {
+    "name": "a3-idle-mobster",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-onehand-mobster output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Breathe quietly in place: the shoulders gently rise and settle and the weapon sways very slightly with them. The right hand keeps the same weapon at the same angle; the head stays centered.",
+      "direction": "north",
+      "subject_description": "mobster in a gray pinstripe suit holding a pistol",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the pistol held at the right side."
+    }
+  },
+  {
+    "name": "a3-run-mobster",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-onehand-mobster output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Run in place with quick, long alternating strides. Left and right shoe tips reach well ahead of and behind the shoulder ring, and the shoulders twist slightly with each stride. The right hand keeps the same weapon at the same angle; the head stays centered.",
+      "direction": "north",
+      "subject_description": "mobster in a gray pinstripe suit holding a pistol",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the pistol held at the right side."
+    }
+  },
+  {
+    "name": "a3-attack96-mobster",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4 mobster output pasted at x=16, y=16 on a transparent 96x96 canvas",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Fire once: the pistol kicks back a little toward the right shoulder with a small flash at its tip, then returns to the same aim. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "mobster in a gray pinstripe suit holding a pistol",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the pistol held at the right side."
+    }
+  },
+  {
+    "name": "a3-idle-swat",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-long-swat output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Breathe quietly in place: the shoulders gently rise and settle and the weapon sways very slightly with them. The right hand keeps the same weapon at the same angle; the head stays centered.",
+      "direction": "north",
+      "subject_description": "SWAT officer in black body armor holding an assault rifle",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the assault rifle held at the right side."
+    }
+  },
+  {
+    "name": "a3-run-swat",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-long-swat output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Run in place with quick, long alternating strides. Left and right shoe tips reach well ahead of and behind the shoulder ring, and the shoulders twist slightly with each stride. The right hand keeps the same weapon at the same angle; the head stays centered.",
+      "direction": "north",
+      "subject_description": "SWAT officer in black body armor holding an assault rifle",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the assault rifle held at the right side."
+    }
+  },
+  {
+    "name": "a3-attack96-swat",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4 swat output pasted at x=16, y=16 on a transparent 96x96 canvas",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Fire once: the assault rifle kicks back a little toward the right shoulder with a small flash at its tip, then returns to the same aim. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "SWAT officer in black body armor holding an assault rifle",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the assault rifle held at the right side."
+    }
+  },
+  {
+    "name": "a3-idle-ninja",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-melee-ninja output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Breathe quietly in place: the shoulders gently rise and settle and the weapon sways very slightly with them. The right hand keeps the same weapon at the same angle; the head stays centered.",
+      "direction": "north",
+      "subject_description": "ninja in black cloth holding a wakizashi",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
+    }
+  },
+  {
+    "name": "a3-run-ninja",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-melee-ninja output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Run in place with quick, long alternating strides. Left and right shoe tips reach well ahead of and behind the shoulder ring, and the shoulders twist slightly with each stride. The right hand keeps the same weapon at the same angle; the head stays centered.",
+      "direction": "north",
+      "subject_description": "ninja in black cloth holding a wakizashi",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
+    }
+  },
+  {
+    "name": "a3-attack96-ninja",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4 ninja output pasted at x=16, y=16 on a transparent 96x96 canvas",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "One quick slash: the right arm sweeps the wakizashi from the top-right corner across the top edge to the top-left, then returns to the starting angle. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "ninja in black cloth holding a wakizashi",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
+    }
   }
 ]

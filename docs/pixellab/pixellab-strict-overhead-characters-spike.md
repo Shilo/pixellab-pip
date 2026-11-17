@@ -875,22 +875,54 @@ supporting left hand rarely appears. Some sprites still show a little of the bac
 brim, so the camera check remains necessary. The pass rate measures weapon placement
 only. Twelve fresh seeds do not prove it works for every subject or weapon.
 
-### PixMiniMax animation of the new sprites
+
+### PixMiniMax animation templates
 
 Three round-4 sprites (pistol, assault rifle, wakizashi) were animated with raw
-`animate-pixminimax`: `direction: "north"`, eight frames, the subject and weapon in
-`subject_description`, and a straight-down `initial_pose`.
+`animate-pixminimax`. Surprisingly, PixMiniMax draws the feet: during locomotion the shoe
+tips peek out from under the shoulders, which reads correctly from straight above.
 
-| Motion | Result | Clips |
-|---|---|---|
-| Walk | **Provisional pass, 3/3.** Feet alternately peek out from under the shoulders; the weapon keeps its hand and angle. Small shoulder bumps on the rifle walk need playback review. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a1-walk-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a1-walk-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a1-walk-ninja.gif) |
-| Attack, positive wording | Uncertain. Readable recoil and slash, but detached specks after the pistol shot, a muzzle flash clipped by the top edge on the rifle, and a large white slash smear. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a1-attack-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a1-attack-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a1-attack-ninja.gif) |
-| Attack, "no flash / no smear" wording | Worse: bigger flashes, more particles, and the smear remained. Negative wording does not suppress effects here. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a2-attack-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a2-attack-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a2-attack-ninja.gif) |
+Shared request fields for every motion:
 
-Frame sheets: [first attempts](strict-overhead-character-examples/weapon-grip/a1-sheet.png),
-[attack retry](strict-overhead-character-examples/weapon-grip/a2-sheet.png).
+```json
+{
+  "first_frame": "<approved overhead sprite facing the top edge>",
+  "frame_count": 8,
+  "no_background": true,
+  "enhance_prompt": false,
+  "direction": "north",
+  "subject_description": "<subject> holding <weapon>",
+  "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the <weapon> held at the right side.",
+  "description": "<motion template below>"
+}
+```
+
+| Motion | `description` | Result (3 sprites) | Clips |
+|---|---|---|---|
+| **Walk** | Walk in place with short alternating footfalls. Left and right shoe tips alternately peek out ahead of and behind the shoulder ring. The right hand keeps the same {weapon} at the same angle; the head and shoulders stay centered. | **Provisional pass, 3/3.** Clear alternating feet; the weapon keeps its hand and angle. Small shoulder bumps on the rifle walk. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a1-walk-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a1-walk-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a1-walk-ninja.gif) |
+| **Idle** | Breathe quietly in place: the shoulders gently rise and settle and the weapon sways very slightly with them. The right hand keeps the same weapon at the same angle; the head stays centered. | **Provisional pass, 3/3.** Stable identity and grip; the motion is very subtle. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a3-idle-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a3-idle-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a3-idle-ninja.gif) |
+| **Run** | Run in place with quick, long alternating strides. Left and right shoe tips reach well ahead of and behind the shoulder ring, and the shoulders twist slightly with each stride. The right hand keeps the same weapon at the same angle; the head stays centered. | **Uncertain, 3/3.** Clearly faster and longer than the walk, but legs reach past the head and the free arm pumps; on the rifle a forward leg sits beside the barrel and can read as a second object. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a3-run-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a3-run-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a3-run-ninja.gif) |
+| **Gun attack** | Fire once: the {weapon} kicks back a little toward the right shoulder with a small flash at its tip, then returns to the same aim. The head and shoulders hold still. | **Uncertain, leaning pass on a padded canvas.** Readable shot and recoil; the flash stays inside the frame; a few detached spark pixels follow the flash. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a3-attack96-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a3-attack96-swat.gif) |
+| **Melee attack** | One quick slash: the right arm sweeps the {weapon} from the top-right corner across the top edge to the top-left, then returns to the starting angle. The head and shoulders hold still. | **Uncertain.** Readable sweep and return, but PixMiniMax adds a white slash smear. | [melee](strict-overhead-character-examples/weapon-grip/animations/a3-attack96-ninja.gif) |
+
+**Pad attacks.** The weapon reaches the top of a 64x64 sprite, so the first attacks clipped
+the muzzle flash at the edge ([pistol](strict-overhead-character-examples/weapon-grip/animations/a1-attack-mobster.gif),
+[rifle](strict-overhead-character-examples/weapon-grip/animations/a1-attack-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a1-attack-ninja.gif)). Pasting the unchanged
+sprite at x=16, y=16 on a transparent 96x96 canvas kept every flash and swing inside the
+frame. Crop or offset the frames in the game. At this size, eight frames still cost the
+same number of generations.
+
+**Describe effects positively.** Adding "no muzzle flash, sparks or particles" or "no motion
+trail, smear or effects" produced bigger flashes and more particles, and kept the smear
+([pistol](strict-overhead-character-examples/weapon-grip/animations/a2-attack-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a2-attack-swat.gif),
+[melee](strict-overhead-character-examples/weapon-grip/animations/a2-attack-ninja.gif)).
+
+Frame sheets: [walk and first attacks](strict-overhead-character-examples/weapon-grip/a1-sheet.png),
+[negative-wording attacks](strict-overhead-character-examples/weapon-grip/a2-sheet.png),
+[idle, run and padded attacks](strict-overhead-character-examples/weapon-grip/a3-sheet.png).
+Every clip is one seed on one sprite per weapon class; playback review is still needed
+before production use.
 
 The [PixMiniMax animation MVP blueprint](../../skills/pixellab-pip/blueprints/strict-overhead-pixminimax-animation-mvp.blueprint.json)
-uses the walk wording as its default motion. Attacks remain unresolved. A weapon that
-reaches the top edge leaves no room for a flash or swing, so a padded canvas is the next
-thing to test.
+defaults to the walk, selects the tested template for idle, run or attack, and pads attacks
+automatically.

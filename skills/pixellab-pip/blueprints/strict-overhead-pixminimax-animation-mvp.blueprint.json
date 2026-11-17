@@ -1,6 +1,6 @@
 [
   {
-    "_comment": "Animate one strict-overhead sprite facing the top edge with raw PixMiniMax. Use the output of strict-overhead-character-mvp. The default walk was a provisional pass on 3/3 tested pistol, rifle and melee sprites; other motions are untested here and every clip needs frame and playback review.",
+    "_comment": "Animate one strict-overhead sprite facing the top edge with raw PixMiniMax. Use the output of strict-overhead-character-mvp. Tested on pistol, rifle and melee sprites: walk 3/3 and idle 3/3 provisional passes (idle motion is subtle); run and attacks were uncertain. Every clip needs frame and playback review.",
     "_pixellab": {
       "api_base_url": "https://api.pixellab.ai",
       "auth": {
@@ -13,11 +13,12 @@
       "output_collision_policy": "create_unique"
     },
     "TASK": {
-      "instruction": "Require an explicit current-user request to run this paid blueprint and authenticated access to the documented REST v2 surface. Resolve all variables before spending. Create the declared output directory empty, or append the lowest available numeric suffix starting at -2 if it already exists. Copy {{overhead sprite}} into it unchanged as first-frame.png. It must be a transparent PNG no larger than 256x256 showing a strict straight-down character facing the top edge with its weapon at the right side, such as an approved character.png from strict-overhead-character-mvp. Stop if a precondition fails.",
+      "instruction": "Require an explicit current-user request to run this paid blueprint and authenticated access to the documented REST v2 surface. Resolve all variables before spending. Create the declared output directory empty, or append the lowest available numeric suffix starting at -2 if it already exists. Unless the user supplies a motion, choose the tested one for the requested animation: walk uses the default; idle uses 'Breathe quietly in place: the shoulders gently rise and settle and the weapon sways very slightly with them. The right hand keeps the same weapon at the same angle; the head stays centered.'; run uses 'Run in place with quick, long alternating strides. Left and right shoe tips reach well ahead of and behind the shoulder ring, and the shoulders twist slightly with each stride. The right hand keeps the same weapon at the same angle; the head stays centered.'; a gun attack uses 'Fire once: the {weapon} kicks back a little toward the right shoulder with a small flash at its tip, then returns to the same aim. The head and shoulders hold still.'; a melee attack uses 'One quick slash: the right arm sweeps the {weapon} from the top-right corner across the top edge to the top-left, then returns to the starting angle. The head and shoulders hold still.' Fill {weapon} with the sprite's weapon. Describe effects positively; 'no flash' or 'no smear' wording made effects larger. Copy {{overhead sprite}} into it unchanged as source.png. For an attack, paste source.png unscaled at x=16, y=16 on a transparent canvas 32 pixels wider and taller and save that as first-frame.png, so the flash or swing stays inside the frame; otherwise save an unchanged copy as first-frame.png. The source must be a transparent PNG no larger than 256x256 showing a strict straight-down character facing the top edge with its weapon at the right side, such as an approved character.png from strict-overhead-character-mvp. Stop if a precondition fails.",
       "outputs": [
+        "source.png",
         "first-frame.png"
       ],
-      "verify": "This run is authorized, REST access is configured without exposing the bearer token, the output directory is new and inside the project, and first-frame.png is byte-identical to the supplied sprite."
+      "verify": "This run is authorized, REST access is configured without exposing the bearer token, the output directory is new and inside the project, source.png is byte-identical to the supplied sprite, and first-frame.png equals it unchanged or, for an attack, pixel-for-pixel at offset 16,16 on the padded canvas."
     }
   },
   {
