@@ -1,0 +1,62 @@
+[
+  {
+    "_comment": "Research example knight; verify camera, prop direction and subject adherence.",
+    "POST /v2/create-image-pro-flash": {
+      "description": "Straight-down floor-plan sprite: a round steel helmet dome in the center, inside a wider oval of dark steel pauldron tops; both arms reach toward the right edge holding a sword lying flat, seen lengthwise. Nothing below the shoulders shows. A knight in dark steel armor. Pixel art.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 983323901
+    }
+  },
+  {
+    "_comment": "Research example hoodie; verify camera, prop direction and subject adherence.",
+    "POST /v2/create-image-pro-flash": {
+      "description": "Straight-down floor-plan sprite: a round red hood top in the center, inside a wider oval of red hoodie shoulders; both arms reach toward the left edge holding a baseball bat lying flat, seen lengthwise. Nothing below the shoulders shows. A woman in a red hoodie. Pixel art.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 53741105
+    }
+  },
+  {
+    "_comment": "Research example orc; verify camera, prop direction and subject adherence.",
+    "POST /v2/create-image-pro-flash": {
+      "description": "Straight-down floor-plan sprite: a round bald green scalp in the center, inside a wider oval of brown leather shoulder tops; both arms reach toward the left edge holding a hammer lying flat, seen lengthwise. Nothing below the shoulders shows. A bulky green orc in leather armor. Pixel art.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 983708321
+    }
+  },
+  {
+    "_comment": "Research example staff; verify camera, prop direction and subject adherence.",
+    "POST /v2/create-image-pro-flash": {
+      "description": "Straight-down floor-plan sprite: a round brown hair crown in the center, inside a wider oval of teal coat shoulder tops; both arms reach toward the top edge holding a wooden staff lying flat, seen lengthwise. Nothing below the shoulders shows. A woman in a long teal coat. Pixel art.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 8671389
+    }
+  },
+  {
+    "_comment": "Research example astronaut; verify camera, prop direction and subject adherence.",
+    "POST /v2/create-image-pro-flash": {
+      "description": "Straight-down floor-plan sprite: a round white helmet dome in the center, inside a wider oval of orange spacesuit shoulder tops; both arms reach toward the bottom edge holding a wrench lying flat, seen lengthwise. Nothing below the shoulders shows. A woman astronaut in an orange spacesuit. Pixel art.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 588047029
+    }
+  }
+]

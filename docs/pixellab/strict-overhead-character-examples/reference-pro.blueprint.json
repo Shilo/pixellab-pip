@@ -1,0 +1,26 @@
+{
+  "_comment": "Research example; overhead pixel-art guide by Ghostbyte_dev, CC-BY 3.0, https://opengameart.org/content/ghostbyte-dev-actionhorror-topdowncharacter-48x48 . Crop and transparent padding only; review outputs.",
+  "POST /v2/generate-image-v2": {
+    "description": "A man in a white jacket and blue jeans aiming a pistol up, seen from directly overhead. Only the crown of the head, shoulder tops, arms and pistol are visible; face, chest and legs are hidden beneath the head and shoulders. Pixel art.",
+    "image_size": {
+      "width": 64,
+      "height": 64
+    },
+    "no_background": true,
+    "seed": 311029228,
+    "style_image": {
+      "image": "inputs/ghostbyte-pistol-frame1-padded64.png",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "usage_description": "Match the straight-down overhead camera and pixel rendering; use the requested new character."
+    },
+    "style_options": {
+      "color_palette": false,
+      "outline": true,
+      "detail": true,
+      "shading": true
+    }
+  }
+}

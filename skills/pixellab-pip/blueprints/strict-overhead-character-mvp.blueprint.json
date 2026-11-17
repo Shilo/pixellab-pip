@@ -1,0 +1,40 @@
+[
+  {
+    "_comment": "Text-only strict 90-degree overhead MVP. Defaults reproduce the reviewed gritty archer request. Pro Flash was the strongest text-only route; broader testing passed all criteria in only 7/30 cases, so this is a candidate workflow, not a reliability guarantee.",
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/strict-overhead-character-mvp",
+      "output_collision_policy": "create_unique"
+    },
+    "TASK": {
+      "instruction": "Require an explicit current-user request to run this paid blueprint and authenticated access to the documented REST v2 surface. Resolve all variables before spending. Create the declared output directory empty, or append the lowest available numeric suffix starting at -2 if it already exists. Stop if a precondition fails.",
+      "verify": "This run is authorized, REST access is configured without exposing the bearer token, and the resolved project-relative output directory is new, empty and writable."
+    }
+  },
+  {
+    "POST /v2/create-image-pro-flash": {
+      "description": "Straight-down floor-plan sprite: a round {{head top | default: green hood top}} in the center, inside a wider oval of {{shoulder tops | default: green leather shoulder tops}}; both arms reach toward the {{facing edge | default: top}} edge holding a {{prop | default: bow with a nocked arrow}} lying flat, seen lengthwise. Nothing below the shoulders shows. A {{subject | default: red-haired archer in green leather}}. {{rendering | default: Heavy dark outlines, muted colors, rough worn surfaces.}}",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 414414483
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Save the returned image unchanged as character.png in the resolved output directory. If the response is asynchronous, follow the documented returned job to completion without resubmitting. Inspect the native image at enlarged nearest-neighbor scale. Check crown inside shoulder tops, strict straight-down camera, hidden face and chest, coherent two-arm anatomy, requested prop attached to hands, facing and rendering. Report ambiguous or failed checks plainly; do not retry or repair automatically.",
+      "outputs": [
+        "character.png"
+      ],
+      "verify": "The saved PNG is 64x64, preserves the returned pixels and transparency, and each camera, anatomy, prop, facing and rendering check has a recorded verdict. A completed API job alone is not a visual pass."
+    }
+  }
+]

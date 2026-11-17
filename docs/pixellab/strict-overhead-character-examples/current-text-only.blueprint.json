@@ -1,0 +1,12 @@
+{
+  "_comment": "Current text-only prompt example, no input image and no redundant Pixel art phrase. Passed the strict camera/style/weapon review in this one trial.",
+  "POST /v2/create-image-pro-flash": {
+    "description": "Straight-down floor-plan sprite: a round green hood top in the center, inside a wider oval of green leather shoulder tops; both arms reach toward the top edge holding a bow with a nocked arrow lying flat, seen lengthwise. Nothing below the shoulders shows. A red-haired archer in green leather. Heavy dark outlines, muted colors, rough worn surfaces.",
+    "image_size": {
+      "width": 64,
+      "height": 64
+    },
+    "no_background": true,
+    "seed": 414414483
+  }
+}

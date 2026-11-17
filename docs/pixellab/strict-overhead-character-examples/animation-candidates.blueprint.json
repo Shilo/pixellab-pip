@@ -1,0 +1,58 @@
+[
+  {
+    "_comment": "Research candidate idle; inspect camera, grip, motion and loop before use. Returned sourceecho+8generatedframes preserved.",
+    "POST /v2/animate-pixminimax": {
+      "first_frame": "inputs/gunman-south.png",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Breathe quietly in place: shoulders gently expand and settle while the head, feet and both hands keep their positions on one pistol.",
+      "direction": "south",
+      "subject_description": "brown-haired gunman in a white jacket and blue jeans holding one pistol",
+      "initial_pose": "Both hands hold one pistol toward the bottom edge; the crown sits inside the shoulder ring."
+    }
+  },
+  {
+    "_comment": "Research candidate walk; inspect camera, grip, motion and loop before use. Returned sourceecho+8generatedframes preserved.",
+    "POST /v2/animate-pixminimax": {
+      "first_frame": "inputs/gunman-south.png",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Walk in place with short alternating footfalls. Left and right shoe tips alternately advance and withdraw behind the shoulder ring; keep both hands together on one pistol aimed down-screen.",
+      "direction": "south",
+      "subject_description": "brown-haired gunman in a white jacket and blue jeans holding one pistol",
+      "initial_pose": "Both hands hold one pistol toward the bottom edge; the crown sits inside the shoulder ring."
+    }
+  },
+  {
+    "_comment": "Research candidate run; inspect camera, grip, motion and loop before use. Returned sourceecho+8generatedframes preserved.",
+    "POST /v2/animate-pixminimax": {
+      "first_frame": "inputs/gunman-south.png",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Run in place with quick short alternating strides. Left and right shoe tips alternately advance and withdraw behind the shoulder ring; keep both hands together on one pistol aimed down-screen.",
+      "direction": "south",
+      "subject_description": "brown-haired gunman in a white jacket and blue jeans holding one pistol",
+      "initial_pose": "Both hands hold one pistol toward the bottom edge; the crown sits inside the shoulder ring."
+    }
+  },
+  {
+    "_comment": "Research candidate shoot; inspect camera, grip, motion and loop before use. Returned sourceecho+8generatedframes preserved.",
+    "POST /v2/animate-pixminimax": {
+      "first_frame": "inputs/gunman-south.png",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "One controlled pistol shot: squeeze the trigger, draw both hands and the same pistol a little toward the crown, then extend both hands back to the original aim. The rest of the body holds still.",
+      "direction": "south",
+      "subject_description": "brown-haired gunman in a white jacket and blue jeans holding one pistol",
+      "initial_pose": "Both hands hold one pistol toward the bottom edge; the crown sits inside the shoulder ring."
+    }
+  }
+]
