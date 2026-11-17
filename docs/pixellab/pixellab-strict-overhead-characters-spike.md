@@ -12,6 +12,11 @@ one walk is a provisional pass; the best idle, run and shoot remain uncertain. A
 sprite rotated in the game avoids directional asset production, which the user dropped
 from scope after the already-submitted exploratory tests.
 
+**Weapon placement is solved for stills.** The original G1 wording made characters hold
+weapons centered and across the body, like a gift. A weapon-grip prompt, with one grip per
+weapon class, put the weapon at the right side pointing forward in **12/12** fresh-seed
+tests of its final wording. See [weapon placement follow-up](#weapon-placement-follow-up).
+
 See [follow-up verification](#follow-up-verification-styles-and-single-direction-animation)
 for the broader results. The original Stages 1–10 below remain historical evidence.
 Their exact requests retain their original wording; current templates and follow-up
@@ -32,14 +37,15 @@ method; verify every output against the [rubric](#strict-overhead-rubric).
 | **Pixen** `create-image-pixen` / `edit-image-pixen` | **No flexible method found.** | 0/8 text, 0/5 edits. |
 | **PixFlux** `create-image-pixflux` | **No flexible method found.** | 0/10. Text stayed upright. An init image either copied the source (strength 300+) or lost the subject (100). |
 
-The bundled [text-only MVP blueprint](../../skills/pixellab-pip/blueprints/strict-overhead-character-mvp.blueprint.json) defaults to the tested gritty archer and exposes subject, head top, shoulder tops, prop, facing edge and rendering as variables. Its defaults reproduce one reviewed request; overrides still require fresh visual verification.
+The bundled [text-only MVP blueprint](../../skills/pixellab-pip/blueprints/strict-overhead-character-mvp.blueprint.json) uses the [weapon-grip prompt](#weapon-placement-follow-up), always facing the top edge. It defaults to the tested ninja and exposes subject, head top, shoulder tops, weapon, weapon grip and rendering as variables. The [PixMiniMax animation MVP blueprint](../../skills/pixellab-pip/blueprints/strict-overhead-pixminimax-animation-mvp.blueprint.json) animates that still, defaulting to the tested walk. Defaults reproduce reviewed requests; overrides still require fresh visual verification.
 
 Templates:
 
 These are useful prototypes found within the tested variants, not proven shortest prompts.
 
 ```text
-Pro Flash G1: Straight-down floor-plan sprite: a round {head-top} in the center, inside a wider oval of {shoulder-tops}; both arms reach toward the {facing} edge holding a {prop} lying flat, seen lengthwise. Nothing below the shoulders shows. A {subject}.
+Pro Flash armed (current MVP): see the weapon placement follow-up.
+Pro Flash G1 (weapon held centered, like a gift): Straight-down floor-plan sprite: a round {head-top} in the center, inside a wider oval of {shoulder-tops}; both arms reach toward the {facing} edge holding a {prop} lying flat, seen lengthwise. Nothing below the shoulders shows. A {subject}.
 Pro + R1 style_image (G2): Same straight-down camera and head-inside-shoulders layout as the style image. New character: a {subject} with a {head-top} and {shoulder-tops}, arms reaching toward the {facing} edge with a {prop} lying flat.
 Overhead-source edit: Replace the character with {subject} holding {prop} {facing}. Keep the same straight-down overhead camera, crown and shoulder tops, hidden face and torso, and rendering.
 ```
@@ -820,3 +826,71 @@ A game using one curated sprite and engine rotation remains feasible; **these te
 validate unattended generation of its complete animation library**. Art selection, human
 playback review and deliberate cleanup would still be required. No manual pixel cleanup
 was performed here, and no clip was shortened, repaired or retimed to hide a failure.
+
+## Weapon placement follow-up
+
+**Problem.** G1 asks for "both arms reach toward the edge holding a {prop} lying flat, seen
+lengthwise". The characters held weapons out in front, centered and often across the body,
+like a gift: a rifle lying left-to-right above the head, or a sword held straight out by
+both hands in the middle.
+
+**Method.** Text-only Pro Flash, 64x64, `no_background: true`, the character always facing
+the top edge (the game rotates the sprite). Four rounds: three subjects × four wordings,
+then grips per weapon class, then two rounds of fresh seeds on new subjects and weapons.
+Every output was inspected at 4x nearest-neighbour scale. The exact requests are in
+[requests.json](strict-overhead-character-examples/weapon-grip/requests.json).
+
+| Round | Change | Result | Sheet |
+|---|---|---|---|
+| 1 | Asymmetric arms (v1), combat stance (v2), one-handed grip (v3), shooter-sprite framing (v4) | Weapons moved to the right side and pointed forward in 11/11 returned images; one request was blocked by the content filter. v3 tilted the camera (beard or legs visible). v4 was cleanest. | [round 1](strict-overhead-character-examples/weapon-grip/r1-sheet.png) |
+| 2 | v4 framing plus a grip per weapon class (v5), and a diagonal melee grip (v6) | 12/12 natural placement. The diagonal melee grip read most like a weapon held ready. | [round 2](strict-overhead-character-examples/weapon-grip/r2-sheet.png) |
+| 3 | v5 for guns and v6 for melee on eight new subjects, two fresh seeds each | 16/16 natural placement. | [round 3](strict-overhead-character-examples/weapon-grip/r3-sheet.png) |
+| 4 | Final unified template below on twelve new subjects, fresh seeds | **12/12 natural placement**: four melee weapons, four one-handed guns, four long guns. | [round 4](strict-overhead-character-examples/weapon-grip/r4-sheet.png) |
+
+What fixed it:
+
+- **Name one hand and one side.** "The right hand holds…" and "the weapon right of
+  center" moved the weapon beside the head instead of across it.
+- **Point the weapon along the facing direction**, or diagonally toward the top-right
+  corner for melee, instead of "lying flat, seen lengthwise".
+- **Give the left hand a separate job** (near the left shoulder, or supporting a barrel),
+  so the arms stop mirroring each other.
+- **Use game-sprite framing** ("Top-down action game sprite facing the top edge, ready to
+  attack"). This produced compact, readable poses.
+
+Template (Pro Flash, text only):
+
+```text
+Straight-down floor-plan sprite: a {head-top} in the center, inside a wider oval of {shoulder-tops}. Top-down action game sprite facing the top edge, ready to attack with a {weapon}, the weapon right of center. {grip} Nothing below the shoulders shows. A {subject}. {rendering}
+```
+
+| Weapon class | `{grip}` |
+|---|---|
+| Melee (sword, knife, bat, axe, spear) | The right hand holds the weapon out from the right shoulder, angled diagonally outward toward the top-right corner; the left hand stays near the left shoulder. |
+| One-handed gun (pistol, revolver, sawed-off) | The right arm extends forward from the right shoulder and the right hand grips the weapon, pointing it at the top edge; the left hand stays near the left shoulder. |
+| Long gun (rifle, shotgun, submachine gun) | Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. |
+
+Limits: long guns usually read as held upright in one hand at the shoulder; the
+supporting left hand rarely appears. Some sprites still show a little of the back or a hat
+brim, so the camera check remains necessary. The pass rate measures weapon placement
+only. Twelve fresh seeds do not prove it works for every subject or weapon.
+
+### PixMiniMax animation of the new sprites
+
+Three round-4 sprites (pistol, assault rifle, wakizashi) were animated with raw
+`animate-pixminimax`: `direction: "north"`, eight frames, the subject and weapon in
+`subject_description`, and a straight-down `initial_pose`.
+
+| Motion | Result | Clips |
+|---|---|---|
+| Walk | **Provisional pass, 3/3.** Feet alternately peek out from under the shoulders; the weapon keeps its hand and angle. Small shoulder bumps on the rifle walk need playback review. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a1-walk-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a1-walk-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a1-walk-ninja.gif) |
+| Attack, positive wording | Uncertain. Readable recoil and slash, but detached specks after the pistol shot, a muzzle flash clipped by the top edge on the rifle, and a large white slash smear. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a1-attack-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a1-attack-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a1-attack-ninja.gif) |
+| Attack, "no flash / no smear" wording | Worse: bigger flashes, more particles, and the smear remained. Negative wording does not suppress effects here. | [pistol](strict-overhead-character-examples/weapon-grip/animations/a2-attack-mobster.gif), [rifle](strict-overhead-character-examples/weapon-grip/animations/a2-attack-swat.gif), [melee](strict-overhead-character-examples/weapon-grip/animations/a2-attack-ninja.gif) |
+
+Frame sheets: [first attempts](strict-overhead-character-examples/weapon-grip/a1-sheet.png),
+[attack retry](strict-overhead-character-examples/weapon-grip/a2-sheet.png).
+
+The [PixMiniMax animation MVP blueprint](../../skills/pixellab-pip/blueprints/strict-overhead-pixminimax-animation-mvp.blueprint.json)
+uses the walk wording as its default motion. Attacks remain unresolved. A weapon that
+reaches the top edge leaves no room for a flash or swing, so a padded canvas is the next
+thing to test.

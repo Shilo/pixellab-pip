@@ -1,0 +1,53 @@
+[
+  {
+    "_comment": "Animate one strict-overhead sprite facing the top edge with raw PixMiniMax. Use the output of strict-overhead-character-mvp. The default walk was a provisional pass on 3/3 tested pistol, rifle and melee sprites; other motions are untested here and every clip needs frame and playback review.",
+    "_pixellab": {
+      "api_base_url": "https://api.pixellab.ai",
+      "auth": {
+        "type": "bearer",
+        "env": "PIXELLAB_SECRET",
+        "required_before_calls": true
+      },
+      "paid_call_policy": "explicit_user_run_request_required",
+      "output_directory": "pixellab-pip-generations/strict-overhead-pixminimax-animation-mvp",
+      "output_collision_policy": "create_unique"
+    },
+    "TASK": {
+      "instruction": "Require an explicit current-user request to run this paid blueprint and authenticated access to the documented REST v2 surface. Resolve all variables before spending. Create the declared output directory empty, or append the lowest available numeric suffix starting at -2 if it already exists. Copy {{overhead sprite}} into it unchanged as first-frame.png. It must be a transparent PNG no larger than 256x256 showing a strict straight-down character facing the top edge with its weapon at the right side, such as an approved character.png from strict-overhead-character-mvp. Stop if a precondition fails.",
+      "outputs": [
+        "first-frame.png"
+      ],
+      "verify": "This run is authorized, REST access is configured without exposing the bearer token, the output directory is new and inside the project, and first-frame.png is byte-identical to the supplied sprite."
+    }
+  },
+  {
+    "POST /v2/animate-pixminimax": {
+      "first_frame": "first-frame.png",
+      "description": "{{motion | default: Walk in place with short alternating footfalls. Left and right shoe tips alternately peek out ahead of and behind the shoulder ring. The right hand keeps the same weapon at the same angle; the head and shoulders stay centered.}}",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "direction": "north",
+      "subject_description": "{{subject holding weapon | default: ninja in black cloth holding a wakizashi}}",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the weapon held at the right side."
+    }
+  },
+  {
+    "TASK": {
+      "instruction": "Follow the documented returned job to completion without resubmitting. Save every returned image unchanged and in returned order as frames/00.png onward; 00.png is the echoed first frame. Inspect every frame at enlarged nearest-neighbor scale and in looping playback. Check strict straight-down camera, identity, one weapon kept in the right hand at the starting angle, readable motion, detached pixels, edge clipping and the loop seam. Report ambiguous or failed checks plainly; do not retry, repair or retime automatically.",
+      "outputs": [
+        "frames/00.png",
+        "frames/01.png",
+        "frames/02.png",
+        "frames/03.png",
+        "frames/04.png",
+        "frames/05.png",
+        "frames/06.png",
+        "frames/07.png",
+        "frames/08.png"
+      ],
+      "verify": "The nine frames are PNGs at the first frame's size with returned pixels and transparency preserved, and each camera, identity, weapon, motion, artifact and loop check has a recorded verdict. A completed API job alone is not a visual pass."
+    }
+  }
+]

@@ -1,6 +1,6 @@
 [
   {
-    "_comment": "Text-only strict 90-degree overhead MVP. Defaults reproduce the reviewed gritty archer request. Pro Flash was the strongest text-only route; broader testing passed all criteria in only 7/30 cases, so this is a candidate workflow, not a reliability guarantee.",
+    "_comment": "Text-only strict 90-degree overhead armed character facing the top edge, for games that rotate one sprite. Defaults reproduce the reviewed ninja request. This exact weapon-grip wording gave natural, off-center weapon placement in 12/12 fresh-seed tests across melee weapons, one-handed guns and long guns (16/16 for a near-identical earlier wording); camera and anatomy still vary, so this is a candidate workflow, not a reliability guarantee.",
     "_pixellab": {
       "api_base_url": "https://api.pixellab.ai",
       "auth": {
@@ -13,28 +13,28 @@
       "output_collision_policy": "create_unique"
     },
     "TASK": {
-      "instruction": "Require an explicit current-user request to run this paid blueprint and authenticated access to the documented REST v2 surface. Resolve all variables before spending. Create the declared output directory empty, or append the lowest available numeric suffix starting at -2 if it already exists. Stop if a precondition fails.",
-      "verify": "This run is authorized, REST access is configured without exposing the bearer token, and the resolved project-relative output directory is new, empty and writable."
+      "instruction": "Require an explicit current-user request to run this paid blueprint and authenticated access to the documented REST v2 surface. Resolve all variables before spending. Unless the user supplies a weapon grip, choose the tested one for the weapon class: melee (sword, knife, bat, axe, spear) uses the default; a pistol, revolver or other one-handed gun uses 'The right arm extends forward from the right shoulder and the right hand grips the weapon, pointing it at the top edge; the left hand stays near the left shoulder.'; a rifle, shotgun or submachine gun uses 'Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head.' Create the declared output directory empty, or append the lowest available numeric suffix starting at -2 if it already exists. Stop if a precondition fails.",
+      "verify": "This run is authorized, REST access is configured without exposing the bearer token, the grip matches the weapon class or the user's choice, and the resolved project-relative output directory is new, empty and writable."
     }
   },
   {
     "POST /v2/create-image-pro-flash": {
-      "description": "Straight-down floor-plan sprite: a round {{head top | default: green hood top}} in the center, inside a wider oval of {{shoulder tops | default: green leather shoulder tops}}; both arms reach toward the {{facing edge | default: top}} edge holding a {{prop | default: bow with a nocked arrow}} lying flat, seen lengthwise. Nothing below the shoulders shows. A {{subject | default: red-haired archer in green leather}}. {{rendering | default: Heavy dark outlines, muted colors, rough worn surfaces.}}",
+      "description": "Straight-down floor-plan sprite: a {{head top | default: round black hood top}} in the center, inside a wider oval of {{shoulder tops | default: black cloth shoulder tops}}. Top-down action game sprite facing the top edge, ready to attack with a {{weapon | default: wakizashi}}, the weapon right of center. {{weapon grip | default: The right hand holds the weapon out from the right shoulder, angled diagonally outward toward the top-right corner; the left hand stays near the left shoulder.}} Nothing below the shoulders shows. A {{subject | default: ninja in black cloth}}. {{rendering | default: Heavy dark outlines, muted colors.}}",
       "image_size": {
         "width": 64,
         "height": 64
       },
       "no_background": true,
-      "seed": 414414483
+      "seed": 82756738
     }
   },
   {
     "TASK": {
-      "instruction": "Save the returned image unchanged as character.png in the resolved output directory. If the response is asynchronous, follow the documented returned job to completion without resubmitting. Inspect the native image at enlarged nearest-neighbor scale. Check crown inside shoulder tops, strict straight-down camera, hidden face and chest, coherent two-arm anatomy, requested prop attached to hands, facing and rendering. Report ambiguous or failed checks plainly; do not retry or repair automatically.",
+      "instruction": "Save the returned image unchanged as character.png in the resolved output directory. If the response is asynchronous, follow the documented returned job to completion without resubmitting. Inspect the native image at enlarged nearest-neighbor scale. Check crown inside shoulder tops, strict straight-down camera, hidden face and chest, coherent two-arm anatomy, one requested weapon attached to the right hand, weapon right of the head and pointing toward the top edge (melee may angle toward the top-right corner) rather than held across or centered in front, and rendering. Report ambiguous or failed checks plainly; do not retry or repair automatically.",
       "outputs": [
         "character.png"
       ],
-      "verify": "The saved PNG is 64x64, preserves the returned pixels and transparency, and each camera, anatomy, prop, facing and rendering check has a recorded verdict. A completed API job alone is not a visual pass."
+      "verify": "The saved PNG is 64x64, preserves the returned pixels and transparency, and each camera, anatomy, weapon placement, facing and rendering check has a recorded verdict. A completed API job alone is not a visual pass."
     }
   }
 ]

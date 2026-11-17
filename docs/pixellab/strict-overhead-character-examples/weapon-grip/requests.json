@@ -1,0 +1,813 @@
+[
+  {
+    "name": "r1-v1-hunter",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. The right arm reaches toward the top edge holding a hunting rifle at the right side of the body, pointing at the top edge; the left arm bends with its hand on the hunting rifle near the right hand. The hunting rifle runs parallel to the facing direction, beside the head, not across it. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 52114207
+    }
+  },
+  {
+    "name": "r1-v2-hunter",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. Combat stance aiming toward the top edge: the hunting rifle is held in the right hand on the right side, its tip pointing at the top edge; the left hand supports it just ahead of the right hand. The hunting rifle is off-center, to the right of the head. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 52114207
+    }
+  },
+  {
+    "name": "r1-v3-hunter",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. One-handed grip: the right hand holds a hunting rifle out toward the top edge on the right side of the head, pointing forward; the left arm hangs relaxed at the left shoulder. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 52114207
+    }
+  },
+  {
+    "name": "r1-v4-hunter",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. Top-down shooter player sprite facing the top edge, held ready to attack: a hunting rifle in the right hand points forward to the top edge from the right shoulder, the weapon vertical in the image and right of center. The left hand stays near the left shoulder. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 52114207
+    }
+  },
+  {
+    "name": "r1-v1-knight",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. The right arm reaches toward the top edge holding a longsword at the right side of the body, pointing at the top edge; the left arm bends with its hand on the longsword near the right hand. The longsword runs parallel to the facing direction, beside the head, not across it. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 73390151
+    }
+  },
+  {
+    "name": "r1-v2-knight",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. Combat stance aiming toward the top edge: the longsword is held in the right hand on the right side, its tip pointing at the top edge; the left hand supports it just ahead of the right hand. The longsword is off-center, to the right of the head. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 73390151
+    }
+  },
+  {
+    "name": "r1-v3-knight",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. One-handed grip: the right hand holds a longsword out toward the top edge on the right side of the head, pointing forward; the left arm hangs relaxed at the left shoulder. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 73390151
+    }
+  },
+  {
+    "name": "r1-v4-knight",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. Top-down shooter player sprite facing the top edge, held ready to attack: a longsword in the right hand points forward to the top edge from the right shoulder, the weapon vertical in the image and right of center. The left hand stays near the left shoulder. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 73390151
+    }
+  },
+  {
+    "name": "r1-v1-gunman",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown hair crown in the center, inside a wider oval of white jacket shoulder tops. The right arm reaches toward the top edge holding a pistol at the right side of the body, pointing at the top edge; the left arm bends with its hand on the pistol near the right hand. The pistol runs parallel to the facing direction, beside the head, not across it. Nothing below the shoulders shows. A gunman in a white jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 31102922
+    }
+  },
+  {
+    "name": "r1-v2-gunman",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown hair crown in the center, inside a wider oval of white jacket shoulder tops. Combat stance aiming toward the top edge: the pistol is held in the right hand on the right side, its tip pointing at the top edge; the left hand supports it just ahead of the right hand. The pistol is off-center, to the right of the head. Nothing below the shoulders shows. A gunman in a white jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 31102922
+    }
+  },
+  {
+    "name": "r1-v3-gunman",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown hair crown in the center, inside a wider oval of white jacket shoulder tops. One-handed grip: the right hand holds a pistol out toward the top edge on the right side of the head, pointing forward; the left arm hangs relaxed at the left shoulder. Nothing below the shoulders shows. A gunman in a white jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 31102922
+    }
+  },
+  {
+    "name": "r1-v4-gunman",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown hair crown in the center, inside a wider oval of white jacket shoulder tops. Top-down shooter player sprite facing the top edge, held ready to attack: a pistol in the right hand points forward to the top edge from the right shoulder, the weapon vertical in the image and right of center. The left hand stays near the left shoulder. Nothing below the shoulders shows. A gunman in a white jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 31102922
+    }
+  },
+  {
+    "name": "r2-v5-hunter",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a hunting rifle, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 52114207
+    }
+  },
+  {
+    "name": "r2-v5-knight",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. Top-down shooter player sprite facing the top edge, ready to attack with a longsword, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the longsword, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 73390151
+    }
+  },
+  {
+    "name": "r2-v5-gunman",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown hair crown in the center, inside a wider oval of white jacket shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a pistol, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the pistol, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A gunman in a white jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 31102922
+    }
+  },
+  {
+    "name": "r2-v5-thug",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hair crown in the center, inside a wider oval of green tracksuit shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a baseball bat, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the baseball bat, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A thug in a green tracksuit. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 64218830
+    }
+  },
+  {
+    "name": "r2-v5-soldier",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round olive helmet dome in the center, inside a wider oval of olive vest shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a assault rifle, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A soldier in olive combat gear. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 90517344
+    }
+  },
+  {
+    "name": "r2-v5-rogue",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hood top in the center, inside a wider oval of dark leather shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a dagger, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the dagger, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A rogue in dark leather. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 28840615
+    }
+  },
+  {
+    "name": "r2-v6-knight",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. Top-down action game sprite facing the top edge: the right hand holds a longsword out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 73390151
+    }
+  },
+  {
+    "name": "r2-v6-thug",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hair crown in the center, inside a wider oval of green tracksuit shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a baseball bat out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A thug in a green tracksuit. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 64218830
+    }
+  },
+  {
+    "name": "r2-v6-rogue",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hood top in the center, inside a wider oval of dark leather shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a dagger out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A rogue in dark leather. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 28840615
+    }
+  },
+  {
+    "name": "r2-v4-thug",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hair crown in the center, inside a wider oval of green tracksuit shoulder tops. Top-down shooter player sprite facing the top edge, held ready to attack: a baseball bat in the right hand points forward to the top edge from the right shoulder, the weapon vertical in the image and right of center. The left hand stays near the left shoulder. Nothing below the shoulders shows. A thug in a green tracksuit. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 64218830
+    }
+  },
+  {
+    "name": "r2-v4-soldier",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round olive helmet dome in the center, inside a wider oval of olive vest shoulder tops. Top-down shooter player sprite facing the top edge, held ready to attack: a assault rifle in the right hand points forward to the top edge from the right shoulder, the weapon vertical in the image and right of center. The left hand stays near the left shoulder. Nothing below the shoulders shows. A soldier in olive combat gear. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 90517344
+    }
+  },
+  {
+    "name": "r2-v4-rogue",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hood top in the center, inside a wider oval of dark leather shoulder tops. Top-down shooter player sprite facing the top edge, held ready to attack: a dagger in the right hand points forward to the top edge from the right shoulder, the weapon vertical in the image and right of center. The left hand stays near the left shoulder. Nothing below the shoulders shows. A rogue in dark leather. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 28840615
+    }
+  },
+  {
+    "name": "r3-v5-cop-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round navy police cap top in the center, inside a wider oval of navy uniform shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a pump shotgun, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A police officer in a navy uniform. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 28235051
+    }
+  },
+  {
+    "name": "r3-v5-cop-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round navy police cap top in the center, inside a wider oval of navy uniform shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a pump shotgun, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A police officer in a navy uniform. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 28718177
+    }
+  },
+  {
+    "name": "r3-v5-biker-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black biker helmet dome in the center, inside a wider oval of black leather jacket shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a submachine gun, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A biker in a black leather jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 85287871
+    }
+  },
+  {
+    "name": "r3-v5-biker-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black biker helmet dome in the center, inside a wider oval of black leather jacket shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a submachine gun, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A biker in a black leather jacket. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 54294780
+    }
+  },
+  {
+    "name": "r3-v5-cowboy-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round tan cowboy-hat crown in the center, inside a wider oval of brown duster coat shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a revolver, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the revolver, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A cowboy in a brown duster coat. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 45276285
+    }
+  },
+  {
+    "name": "r3-v5-cowboy-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round tan cowboy-hat crown in the center, inside a wider oval of brown duster coat shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a revolver, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the revolver, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A cowboy in a brown duster coat. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 67677932
+    }
+  },
+  {
+    "name": "r3-v5-hunter-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a hunting rifle, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 86851207
+    }
+  },
+  {
+    "name": "r3-v5-hunter-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round brown cowboy-hat crown in the center, inside a wider oval of red plaid flannel shoulder tops. Top-down shooter player sprite facing the top edge, ready to attack with a hunting rifle, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A bearded hunter in a red plaid flannel shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 43179440
+    }
+  },
+  {
+    "name": "r3-v6-samurai-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black topknot crown in the center, inside a wider oval of red lacquered armor shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a katana out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A samurai in red lacquered armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 77134239
+    }
+  },
+  {
+    "name": "r3-v6-samurai-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black topknot crown in the center, inside a wider oval of red lacquered armor shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a katana out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A samurai in red lacquered armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 1765687
+    }
+  },
+  {
+    "name": "r3-v6-viking-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round iron helmet dome in the center, inside a wider oval of fur cloak shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a battle axe out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A viking in a fur cloak. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 67904668
+    }
+  },
+  {
+    "name": "r3-v6-viking-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round iron helmet dome in the center, inside a wider oval of fur cloak shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a battle axe out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A viking in a fur cloak. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 25344764
+    }
+  },
+  {
+    "name": "r3-v6-punk-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round pink mohawk crown in the center, inside a wider oval of studded denim vest shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a lead pipe out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A punk in a studded denim vest. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 92288585
+    }
+  },
+  {
+    "name": "r3-v6-punk-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round pink mohawk crown in the center, inside a wider oval of studded denim vest shoulder tops. Top-down action game sprite facing the top edge: the right hand holds a lead pipe out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A punk in a studded denim vest. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 880593
+    }
+  },
+  {
+    "name": "r3-v6-knight-1",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. Top-down action game sprite facing the top edge: the right hand holds a longsword out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 69980206
+    }
+  },
+  {
+    "name": "r3-v6-knight-2",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gold helmet dome in the center, inside a wider oval of gold pauldron tops. Top-down action game sprite facing the top edge: the right hand holds a longsword out from the right shoulder, the weapon angled diagonally outward toward the top-right corner. The left hand stays near the left shoulder. Nothing below the shoulders shows. A knight in gold armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 67372412
+    }
+  },
+  {
+    "name": "r4-melee-pirate",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round red bandana top in the center, inside a wider oval of blue coat shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a cutlass, the weapon right of center. The right hand holds the weapon out from the right shoulder, angled diagonally outward toward the top-right corner; the left hand stays near the left shoulder. Nothing below the shoulders shows. A pirate in a blue coat. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 55793467
+    }
+  },
+  {
+    "name": "r4-melee-butcher",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round bald scalp in the center, inside a wider oval of white apron strap shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a meat cleaver, the weapon right of center. The right hand holds the weapon out from the right shoulder, angled diagonally outward toward the top-right corner; the left hand stays near the left shoulder. Nothing below the shoulders shows. A butcher in a bloody white apron. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 17684208
+    }
+  },
+  {
+    "name": "r4-melee-guard",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round steel kettle-helmet dome in the center, inside a wider oval of chainmail shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a spear, the weapon right of center. The right hand holds the weapon out from the right shoulder, angled diagonally outward toward the top-right corner; the left hand stays near the left shoulder. Nothing below the shoulders shows. A guard in chainmail. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 3818675
+    }
+  },
+  {
+    "name": "r4-melee-ninja",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black hood top in the center, inside a wider oval of black cloth shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a wakizashi, the weapon right of center. The right hand holds the weapon out from the right shoulder, angled diagonally outward toward the top-right corner; the left hand stays near the left shoulder. Nothing below the shoulders shows. A ninja in black cloth. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 82756738
+    }
+  },
+  {
+    "name": "r4-onehand-mobster",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round gray fedora crown in the center, inside a wider oval of pinstripe suit shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a pistol, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the weapon, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A mobster in a gray pinstripe suit. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 52380320
+    }
+  },
+  {
+    "name": "r4-onehand-agent",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round slick black hair crown in the center, inside a wider oval of black suit shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a silenced pistol, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the weapon, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A agent in a black suit. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 50861803
+    }
+  },
+  {
+    "name": "r4-onehand-sheriff",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round tan cowboy-hat crown in the center, inside a wider oval of tan shirt shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a revolver, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the weapon, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A sheriff in a tan shirt. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 43082364
+    }
+  },
+  {
+    "name": "r4-onehand-raider",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round shaved head in the center, inside a wider oval of spiked pauldron tops. Top-down action game sprite facing the top edge, ready to attack with a sawed-off shotgun, the weapon right of center. The right arm extends forward from the right shoulder and the right hand grips the weapon, pointing it at the top edge; the left hand stays near the left shoulder. Nothing below the shoulders shows. A wasteland raider. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 36925220
+    }
+  },
+  {
+    "name": "r4-long-swat",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round black tactical helmet dome in the center, inside a wider oval of black body armor shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a assault rifle, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A SWAT officer in black body armor. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 24818226
+    }
+  },
+  {
+    "name": "r4-long-sniper",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round ghillie hood top in the center, inside a wider oval of green ghillie shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a sniper rifle, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A sniper in a green ghillie suit. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 69195106
+    }
+  },
+  {
+    "name": "r4-long-farmer",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round straw hat crown in the center, inside a wider oval of denim overall-strap shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a double-barrel shotgun, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A farmer in denim overalls. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 66256668
+    }
+  },
+  {
+    "name": "r4-long-mercenary",
+    "route": "POST /v2/create-image-pro-flash",
+    "body": {
+      "description": "Straight-down floor-plan sprite: a round tan beret top in the center, inside a wider oval of khaki shirt shoulder tops. Top-down action game sprite facing the top edge, ready to attack with a submachine gun, the weapon right of center. Its stock rests against the right shoulder and its barrel runs forward past the right side of the head to the top edge; the right hand grips it at the shoulder and the left hand supports the barrel ahead of the head. Nothing below the shoulders shows. A mercenary in khaki. Heavy dark outlines, muted colors.",
+      "image_size": {
+        "width": 64,
+        "height": 64
+      },
+      "no_background": true,
+      "seed": 3213188
+    }
+  },
+  {
+    "name": "a1-walk-mobster",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-onehand-mobster output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Walk in place with short alternating footfalls. Left and right shoe tips alternately peek out ahead of and behind the shoulder ring. The right hand keeps the same pistol at the same angle; the head and shoulders stay centered.",
+      "direction": "north",
+      "subject_description": "mobster in a gray pinstripe suit holding a pistol",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the pistol held at the right side."
+    }
+  },
+  {
+    "name": "a1-attack-mobster",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-onehand-mobster output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Fire once: the pistol kicks back a little toward the right shoulder with a small flash at its tip, then returns to the same aim. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "mobster in a gray pinstripe suit holding a pistol",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the pistol held at the right side."
+    }
+  },
+  {
+    "name": "a1-walk-swat",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-long-swat output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Walk in place with short alternating footfalls. Left and right shoe tips alternately peek out ahead of and behind the shoulder ring. The right hand keeps the same assault rifle at the same angle; the head and shoulders stay centered.",
+      "direction": "north",
+      "subject_description": "SWAT officer in black body armor holding an assault rifle",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the assault rifle held at the right side."
+    }
+  },
+  {
+    "name": "a1-attack-swat",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-long-swat output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Fire once: the assault rifle kicks back a little toward the right shoulder with a small flash at its tip, then returns to the same aim. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "SWAT officer in black body armor holding an assault rifle",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the assault rifle held at the right side."
+    }
+  },
+  {
+    "name": "a1-walk-ninja",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-melee-ninja output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Walk in place with short alternating footfalls. Left and right shoe tips alternately peek out ahead of and behind the shoulder ring. The right hand keeps the same wakizashi at the same angle; the head and shoulders stay centered.",
+      "direction": "north",
+      "subject_description": "ninja in black cloth holding a wakizashi",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
+    }
+  },
+  {
+    "name": "a1-attack-ninja",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-melee-ninja output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "One quick slash: the right arm sweeps the wakizashi from the top-right corner across the top edge to the top-left, then returns to the starting angle. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "ninja in black cloth holding a wakizashi",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
+    }
+  },
+  {
+    "name": "a2-attack-mobster",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-onehand-mobster output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Fire once: the pistol recoils a short step back toward the right shoulder, then returns to the same aim. No muzzle flash, sparks or particles. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "mobster in a gray pinstripe suit holding a pistol",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the pistol held at the right side."
+    }
+  },
+  {
+    "name": "a2-attack-swat",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-long-swat output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "Fire once: the assault rifle recoils a short step back toward the right shoulder, then returns to the same aim. No muzzle flash, sparks or particles. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "SWAT officer in black body armor holding an assault rifle",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the assault rifle held at the right side."
+    }
+  },
+  {
+    "name": "a2-attack-ninja",
+    "route": "POST /v2/animate-pixminimax",
+    "body": {
+      "first_frame": "r4-melee-ninja output",
+      "frame_count": 8,
+      "no_background": true,
+      "seed": 393910525,
+      "enhance_prompt": false,
+      "description": "One quick slash: the right arm swings the wakizashi from the top-right corner across in front of the head toward the top-left, then back to the starting angle. The blade stays a solid weapon, with no motion trail, smear or effects. The head and shoulders hold still.",
+      "direction": "north",
+      "subject_description": "ninja in black cloth holding a wakizashi",
+      "initial_pose": "Seen straight down: the crown sits inside the shoulder ring, facing the top edge, the wakizashi held at the right side."
+    }
+  }
+]
