@@ -2,16 +2,7 @@
 
 Last reviewed: 2026-11-16. Status: **complete**.
 
-- Total: **180 completed API calls**, one rejected validation request, and **1,099 native
-  64x64 PNG outputs**. This includes 30 follow-up style/subject cells and **38
-  single-direction animation clips** (326 returned frames, including input echoes).
-- Reported receipt subtotals: **USD 6.4712 and 10 generation units**, kept separate.
-  The follow-up contributed **USD 2.0745 and five generation units**. These are exposed
-  receipt units, not a dollar-to-generation conversion or an account-balance measurement.
-- Conservative planned reserves: **998.1 / 1,000 generation units** for the whole study
-  and **USD 9.38 / 10** for the follow-up. Actual receipts are much lower; estimates
-  must not be presented as charges. The rejected request's estimate remains reserved.
-- All 1,099 saved outputs decode as 64x64 PNGs. File integrity does not establish camera,
+- All saved outputs decode as 64x64 PNGs. File integrity does not establish camera,
   anatomy, natural motion, correct gear, or a usable loop.
 
 **Current conclusion:** the workflow is not reliable enough to generate a complete,
@@ -108,15 +99,15 @@ The reference blueprint carries the same attribution.
 
 ## Documented route facts (public REST v2, live OpenAPI unchanged from 2026-11-06 cache)
 
-| Route | Projection-relevant controls | 64x64 cost (generations) | Output per call |
-|---|---|---|---|
-| `POST /v2/create-image-pixen` | `view` ∈ `side`, `low top-down`, `high top-down` (no overhead/orthographic value); `direction` (8 compass values); `outline`, `detail`, `enhance_prompt` | 1 | 1 image |
-| `POST /v2/generate-image-v2` (Pro) | prompt; `style_image` + `style_options` (`color_palette`, `outline`, `detail`, `shading` only); up to 4 `reference_images` with `usage_description` (≤500 chars) | 10 (Pro 10/15/25 size band; MCP prices the same 64px sheet at 10) | 16 candidates (51–64 px band) |
-| `POST /v2/create-image-pro-flash` | prompt; `style_image` (must fit inside the output without rescaling) + `style_options`; `seed` is recorded but not deterministic | 5 (provisional; free `GET /v2/pro-flash/cost`) | 1 image |
-| `POST /v2/generate-with-style-v2` | `style_images`; output size comes from the style images (a 64x64 guide gives 64x64) | Same Pro band (unverified; check usage) | Same count ladder as Pro |
-| `POST /v2/edit-image-pixen` | `image` + `description` (≤500 chars), 1 generation | 1 | 1 image |
-| `POST /v2/edit-image-pro-flash` | `method` = `text` or `reference` (`reference_image` must fit the source canvas); `no_background` defaults to **false** | 5 | 1 image |
-| `POST /v2/edit-images-v2` (Pro) | `edit_with_text` / `edit_with_reference`; `no_background` defaults to false | 10 | 1 image per input at 64 px |
+| Route | Projection-relevant controls | Output per call |
+|---|---|---|
+| `POST /v2/create-image-pixen` | `view` ∈ `side`, `low top-down`, `high top-down` (no overhead/orthographic value); `direction` (8 compass values); `outline`, `detail`, `enhance_prompt` | 1 image |
+| `POST /v2/generate-image-v2` (Pro) | prompt; `style_image` + `style_options` (`color_palette`, `outline`, `detail`, `shading` only); up to 4 `reference_images` with `usage_description` (≤500 chars) | 16 candidates (51–64 px band) |
+| `POST /v2/create-image-pro-flash` | prompt; `style_image` (must fit inside the output without rescaling) + `style_options`; `seed` is recorded but not deterministic | 1 image |
+| `POST /v2/generate-with-style-v2` | `style_images`; output size comes from the style images (a 64x64 guide gives 64x64) | Same count ladder as Pro |
+| `POST /v2/edit-image-pixen` | `image` + `description` (≤500 chars) | 1 image |
+| `POST /v2/edit-image-pro-flash` | `method` = `text` or `reference` (`reference_image` must fit the source canvas); `no_background` defaults to **false** | 1 image |
+| `POST /v2/edit-images-v2` (Pro) | `edit_with_text` / `edit_with_reference`; `no_background` defaults to false | 1 image per input at 64 px |
 
 Implications:
 
@@ -129,9 +120,7 @@ Implications:
   at about 20°). Hypothesis: the bare phrase "top-down" pulls output toward the oblique
   front view.
 
-Usage reporting: the runner keeps **estimated generations** separate from each completed
-job's **reported USD or generation receipt**. A generation estimate is not a charge,
-and a provisional Pro Flash quote is not a receipt. The local experiment record is
+The local experiment record is
 `pixellab-pip-generations/strict-overhead-64-research/manifest.json`; its sibling
 `stage1-plan.json` through `stage10-plan.json` hold the exact requests, and each test
 folder contains a concrete blueprint and only its consumed input copies.
@@ -151,7 +140,7 @@ folder contains a concrete blueprint and only its consumed input copies.
 
 ## Stage 1 results (observed; one call per cell, one subject)
 
-Stage 1 run plan (10 calls, 49 estimated generations, all 64x64,
+Stage 1 run plan (all 64x64,
 `no_background: true`, same seed): three prompts × {Pixen, Pro, Pro Flash}, plus Pixen B
 without `view`. Pixen calls used `view: "high top-down"`, `direction: "south"` and
 `enhance_prompt: false`. Every prompt asked for a man in a white jacket and blue jeans
@@ -177,18 +166,6 @@ without `view`. Pixen calls used `view: "high top-down"`, `direction: "south"` a
 
 Pass count: at most 1 of 55 images (Pro Flash C, provisional).
 
-Receipts per route, from the completed jobs' `usage`:
-
-| Route | Images | Estimated generations | USD receipts |
-|---|---|---|---|
-| Pixen | 4 | 4 | ≈ 0.0333 |
-| Pro | 48 | 30 | ≈ 0.2470 |
-| Pro Flash | 3 | 15 | ≈ 0.0713 |
-
-Each Pro call cost about USD 0.081–0.083 and each Pro Flash call about USD 0.024. Seen
-from the receipts, the estimated-generation ratio between routes (10 : 5 : 1) is close
-to the USD ratio, but the runner keeps the two figures separate.
-
 Reading (hypotheses drawn from one subject, not conclusions):
 
 1. Pixen's oblique front-view prior beat every wording tried, including removing `view`.
@@ -205,8 +182,7 @@ Reading (hypotheses drawn from one subject, not conclusions):
 
 ## Stage 2 (observed)
 
-All 10 calls are 64x64 with `no_background: true` and seed 311029228, about 76 estimated
-generations in total.
+All 10 calls are 64x64 with `no_background: true` and seed 311029228.
 
 **Reference input.** Every reference call uses the R2 Kenney sprite
 `PNG/Hitman 1/hitman1_gun.png` (49x43, faces east), padded to 64x64 without resampling.
@@ -259,9 +235,6 @@ Method:
   beyond the body footprint toward the bottom of the image. That points to a residual
   south tilt rather than true 90°.
 - Where the two reads differ, both are recorded.
-
-Usage: 76 estimated generations; USD 0.5598 across nine USD receipts. The Pixen edit
-reported one charged generation, with no USD amount.
 
 | Cell | Images | Classification |
 |---|---|---|
@@ -341,8 +314,7 @@ gate decides; this metric never overrides it.
 Report each cell three ways:
 
 - calls with at least one pass;
-- passing images ÷ returned images;
-- estimated generations, and USD receipts, per passing image.
+- passing images ÷ returned images.
 
 Pro returns 16 candidates per call, so a per-call pass rate alone would favour it unfairly.
 
@@ -388,7 +360,7 @@ which reference images PixelLab will receive.
 
 ## Stage 3: prompt minimization (observed)
 
-Stage 3 ran 10 text-only calls (49 estimated generations, USD 0.3471 in receipts). All were
+Stage 3 ran 10 text-only calls. All were
 64x64 with `no_background: true`, seed 311029228, aiming right. Each of the three prompts
 ran on all three routes:
 
@@ -443,8 +415,7 @@ This snapshot was later tested with fresh seeds and varied subjects (Stage 5).
 
 ## Stage 4: R1 pixel guide, varied-subject edits (observed)
 
-Stage 4 ran 10 calls (76 estimated generations, USD 0.5553 across nine USD receipts,
-plus one charged generation reported for the Pixen edit). Inputs:
+Stage 4 ran 10 calls. Inputs:
 
 - Frames of R1 (Ghostbyte), padded to 64x64 without resampling.
 - R2 `hitman1_gun`.
@@ -500,7 +471,7 @@ Observed effects:
 
 ## Stage 5: fresh-seed validation of prompt E (observed)
 
-Stage 5 ran 10 calls (75 estimated generations, USD 0.5299 in receipts): prompt E on Pro
+Stage 5 ran 10 calls: prompt E on Pro
 and Pro Flash, one fresh seed per subject. Exact requests are in `stage5-plan.json`.
 
 | Subject (action, facing) | Pro (16 per sheet) | Pro Flash (1) |
@@ -527,7 +498,7 @@ Observed effects:
 
 ## Stage 6: fresh-seed validation of prompt E, round 2 (observed)
 
-Stage 6 ran 10 calls (75 estimated generations, USD 0.5277 in receipts): prompt E on Pro
+Stage 6 ran 10 calls: prompt E on Pro
 and Pro Flash with a new seed per subject. Exact requests are in `stage6-plan.json`.
 
 | Subject (action, facing) | Pro (16 per sheet) | Pro Flash (1) |
@@ -547,8 +518,7 @@ fail):
 
 ## Stage 7: R1 guide on new subjects, and minimal source edits (observed)
 
-Stage 7 ran 10 calls (58 estimated generations, USD 0.3958 across seven USD receipts,
-plus three charged generations reported by the three Pixen edits). Exact requests are
+Stage 7 ran 10 calls. Exact requests are
 in `stage7-plan.json`.
 
 The guided cells used R1 pistol frame 1 as `style_image`, with `style_options` `{color_palette: false, outline/detail/shading: true}`, `usage_description`
@@ -571,7 +541,7 @@ underneath, arms and held item seen lengthwise from above. Pixel art.`
 
 ## Stage 8: PixFlux text and init-image controls (observed)
 
-Stage 8 ran 10 `create-image-pixflux` calls (10 estimated generations, USD 0.0680),
+Stage 8 ran 10 `create-image-pixflux` calls,
 64x64 with seed 311029228. Exact requests are in `stage8-plan.json`.
 
 | Cell | Classification |
@@ -589,7 +559,7 @@ changed, or the camera was lost along with the subject.
 
 ## Stage 9: geometry-first prompts G1 and G2 (observed)
 
-Stage 9 ran 10 calls (75 estimated generations, USD 0.5315 in receipts), all with the original seed 311029228,
+Stage 9 ran 10 calls, all with the original seed 311029228,
 64x64 and `no_background: true`. It covered the three subjects that failed prompt E:
 knight with sword (right), woman in a red hoodie with a bat (left), and orc with a hammer
 (left).
@@ -635,7 +605,7 @@ Observed effects:
 
 ## Stage 10: fresh-seed G1 validation (observed)
 
-Stage 10 ran 10 calls (75 estimated generations, USD 0.5299 in receipts): G1 on Pro and
+Stage 10 ran 10 calls: G1 on Pro and
 Pro Flash, no reference, one fresh seed per subject. Exact requests are in
 `stage10-plan.json`.
 
@@ -733,8 +703,8 @@ contains all 30 still reviews, ten rotation reviews and 38 animation reviews. Th
 [animation GIF index](strict-overhead-character-examples/animation-gifs/README.md) links **every GIF**. Its model/path folders are flat:
 `v3` (11 GIFs), `pixminimax` (11), `skeleton-v3-raw` (8), and
 `skeleton-v3-character-creator` (8). Files are named by motion and attempt, such as
-`walk-02.gif` or `shoot-05.gif`. The PNGs, exact requests, blueprints and receipts remain
-in the original per-call folders; organizing GIFs made no new paid calls.
+`walk-02.gif` or `shoot-05.gif`. The PNGs, exact requests, and blueprints remain
+in the original per-call folders.
 
 ### Broader still-image verification
 

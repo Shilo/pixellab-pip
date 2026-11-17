@@ -1,10 +1,10 @@
 # One-direction overhead animation attempts
 
-All 38 attempts are preserved, including failures. No new generations were made to organize this folder.
+All 38 attempts are preserved, including failures.
 
 Each model/path folder is flat and contains GIFs only. Names are motion + attempt number; attempts 01 and 02 are the initial and controlled rounds. Shooting attempts 03â€“05 are the final targeted variants.
 
-GIFs are faithful 4x nearest-neighbour inspection previews at 10 fps. V3/PixMiniMax retain the input echo plus 8 generated frames (9 total); Skeleton v3 returns 8 generated frames. Original 64x64 PNGs, input copies, exact requests, blueprints and receipts remain in the local run's original per-call folders. The portable [validation record](../follow-up-validation.json) contains every review; the [research report](../../pixellab-strict-overhead-characters-spike.md) records the requests and findings.
+GIFs are faithful 4x nearest-neighbour inspection previews at 10 fps. V3/PixMiniMax retain the input echo plus 8 generated frames (9 total); Skeleton v3 returns 8 generated frames. Original 64x64 PNGs, input copies, exact requests and blueprints remain in the local run's original per-call folders. The portable [validation record](../follow-up-validation.json) contains every review; the [research report](../../pixellab-strict-overhead-characters-spike.md) records the requests and findings.
 
 ## Result
 
