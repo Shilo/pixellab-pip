@@ -8,9 +8,9 @@
 [![Clones over 14 days](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FShilo%2Fpixellab-pip%2Fbadge-data%2Fclones.json&style=flat-square)](docs/developer/adoption-metrics.md#what-the-badges-count)
 
 [![Skill Security Audit](https://github.com/Shilo/pixellab-pip/actions/workflows/security-scan.yml/badge.svg)](https://github.com/Shilo/pixellab-pip/security/code-scanning)
-[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F3.2.5&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
-[![VirusTotal](https://img.shields.io/static/v1?label=VirusTotal&message=0%20malicious%20%7C%200%20suspicious&color=2ea44f&logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/8890e3f7fcd19acf4f7d3b6d85397d9200befcdbc7a97ba6d84919c1dd3d6fe8/detection)
-[![Build Provenance attested](https://img.shields.io/badge/Build_Provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations/65028795)
+[![ClawHub security audit](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fclawhub.ai%2Fapi%2Fv1%2Fskills%2Fpixellab-pip%2Fversions%2F3.3.0&query=%24.version.security.status&label=ClawHub%20Audit&color=2b7fff&cacheSeconds=3600)](https://clawhub.ai/shilo/skills/pixellab-pip/security-audit)
+[![VirusTotal](https://img.shields.io/static/v1?label=VirusTotal&message=0%20malicious%20%7C%200%20suspicious&color=2ea44f&logo=virustotal&logoColor=white)](https://www.virustotal.com/gui/file/f1cd9f5d40fe38e8287f4b47ce33c121dc647d98bc8ae300cf427362fa33a56c/detection)
+[![Build Provenance attested](https://img.shields.io/badge/Build_Provenance-attested-2ea44f)](https://github.com/Shilo/pixellab-pip/attestations/72043018)
 [![HOL Plugin Scanner](https://github.com/Shilo/pixellab-pip/actions/workflows/hol-plugin-scanner.yml/badge.svg?branch=main)](https://github.com/Shilo/pixellab-pip/actions/workflows/hol-plugin-scanner.yml)
 
 Meet PixelLab Pip: a tiny pup who fetches the right PixelLab workflow. He follows human commands to create, edit, and animate pixel assets, then sniffs out a bigger prompt, scouts for a useful tool, and carries back what happened.
