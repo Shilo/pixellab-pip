@@ -17,6 +17,7 @@ Engine selection is canonical in `animation.md` → Route Choice. Read this afte
 - [Template Rendering And Tuning](#template-rendering-and-tuning)
 - [Skeleton v3 Keypoint Animation](#skeleton-v3-keypoint-animation)
 - [Skeleton v3 Custom Motion (Managed)](#skeleton-v3-custom-motion-managed)
+- [Custom Rig Skeleton](#custom-rig-skeleton)
 - [Skeleton Estimation And Legacy Raw Animation](#skeleton-estimation-and-legacy-raw-animation)
 - [Auto-Rig Skeleton Pipeline](#auto-rig-skeleton-pipeline)
 - [Aseprite Boundary](#aseprite-boundary)
@@ -34,11 +35,11 @@ Engine selection is canonical in `animation.md` → Route Choice. Read this afte
 | Managed Skeleton v3 animation | Custom humanoid motion, an MCP `move` from the documented quadruped lists, or an explicitly requested named preset. | MCP `animate_character(mode="skeleton-v3")`; without a template, MCP takes humanoid written poses or a tool-described move, while REST generates motion from action text. `poses`/`scale` are the humanoid path. For a requested preset add `template_animation_id`. See Skeleton v3 Custom Motion (Managed). |
 | Legacy raw skeleton animation | Generate from the older three-frame skeleton payload with a reference image and optional masks/init images. | REST v2 `/animate-with-skeleton`. |
 
-REST `/estimate-skeleton` estimates keypoints for one pose and remains a shared helper in the auto-rig pipeline; it is not a legacy animation route.
+Both MCP `estimate_skeleton` and REST `/estimate-skeleton` estimate keypoints for one pose and remain shared helpers in the auto-rig pipeline; neither is a legacy animation route. Use MCP `estimate_custom_skeleton` or REST `/estimate-custom-skeleton` for a non-humanoid rig (wings, tails, weapons, extra legs).
 
 ## MCP vs REST v2 Field Coverage
 
-The current public MCP `animate_character` schema exposes `template`, `skeleton-v3`, `v3`, and `pixminimax` modes; it does not expose managed `pro`. It includes `template_animation_id`, `directions`, mode-specific `frame_count`, template-only `ai_freedom`, custom start/end frame base64/URL fields for v3 and PixMiniMax, `keep_first_frame`, `animation_group_id`, and PixMiniMax-only `subject_description`/`initial_pose`. For custom Skeleton v3 it also exposes `poses`, `scale`, and `move`, which REST does not expose. It does not expose REST's inline `enhance_prompt`. Connected client schemas may lag; check the visible mode before calling managed Skeleton v3 or PixMiniMax. Separate MCP `animate_with_skeleton_v3` accepts a raw reference image and keypoint sequence; it does not expose REST `/estimate-skeleton`.
+The current public MCP `animate_character` schema exposes `template`, `skeleton-v3`, `v3`, and `pixminimax` modes; it does not expose managed `pro`. It includes `template_animation_id`, `directions`, mode-specific `frame_count`, template-only `ai_freedom`, custom start/end frame base64/URL fields for v3 and PixMiniMax, `keep_first_frame`, `animation_group_id`, `direction_prompts`, `template_action`, `motion_adjustments`, and PixMiniMax-only `subject_description`/`initial_pose`. For custom Skeleton v3 it also exposes `poses`, `scale`, and `move`, which REST does not expose. It does not expose REST's inline `enhance_prompt`. Connected client schemas may lag; check the visible mode before calling managed Skeleton v3 or PixMiniMax. Separate MCP `animate_with_skeleton_v3` accepts raw references, keypoints, a custom `rig`, and action-written motion; both surfaces also expose dedicated skeleton estimators.
 
 It is not field-for-field equivalent to REST `/characters/animations`. REST additionally exposes `description`, `text_guidance_scale`, `outline`, `shading`, `detail`, `isometric`, `color_image`, `force_colors`, `target_palette` (pro, Skeleton v3, v3, and PixMiniMax modes), `seed`, and inline `enhance_prompt` (v3 mode); REST also retains managed `pro`. The REST `subject_description` and `initial_pose` fields are PixMiniMax-only; see `prompt-limits.md` for their surface-specific length contract. Use REST when those extra fields matter, for integration code, or to validate exact API behavior.
 
@@ -179,7 +180,7 @@ Use this raw-image route with supplied or authored per-frame keypoints. It is a 
 
 Use MCP `animate_with_skeleton_v3` when available, or REST `POST /v2/animate-with-skeleton-v3` for code and exact REST control. REST returns a background job; poll `GET /background-jobs/{job_id}`. MCP returns a job ID; retrieve the result with `get_image`. The result contains exactly `len(keypoints)` frames, in input order; it does not echo the reference frame.
 
-The first pose is redrawn from the prompt and keypoints, so provide a close reference pose: a mismatch can affect the learned palette, background, and transparency. The input image is limited to 256×256. Supply each of the 18 named joints exactly once in `first_frame_keypoints` and every `keypoints` frame; their order is arbitrary. The joint labels are listed below; they are OpenPose COCO-18, so `ARM` is the wrist and `LEG` the ankle, and LEFT/RIGHT are the character's own sides (facing `east`, the RIGHT limbs are the near ones). Optional `z_index` accepts any integer as draw order (higher draws on top; default 0). Optional `depth` is 0–255 (about 128 is body center; higher is nearer); when omitted, the template's standing-pose depth for that direction is used. `description` is an appearance noun phrase (not pose, motion, style, or background); `action` is a short motion label because the keypoints carry the pose sequence. REST requires `direction`; `view` defaults to `low top-down` and `template_id` to `mannequin`, so set view/direction when the art needs a specific camera. Current cost examples are in `cost-routing.md`.
+The first pose is redrawn from the prompt and keypoints, so provide a close reference pose: a mismatch can affect the learned palette, background, and transparency. The input image is limited to 256×256. Supply each of the 18 named joints exactly once in `first_frame_keypoints` and every `keypoints` frame; with a custom `rig`, use that rig's joint names instead. Their order is arbitrary. The joint labels are listed below; they are OpenPose COCO-18, so `ARM` is the wrist and `LEG` the ankle, and LEFT/RIGHT are the character's own sides (facing `east`, the RIGHT limbs are the near ones). Optional `z_index` accepts any integer as draw order (higher draws on top; default 0). Optional `depth` is 0–255 (about 128 is body center; higher is nearer); when omitted, the template's standing-pose depth for that direction is used. `description` is an appearance noun phrase (not pose, motion, style, or background); `action` is a short motion label because the keypoints carry the pose sequence. Send `keypoints` or `write_motion_frames` (3–15 frames, or 1–15 with a custom `rig`), not both. REST requires `direction`; `view` defaults to `low top-down` and `template_id` to `mannequin`, so set view/direction when the art needs a specific camera. Current cost examples are in `cost-routing.md`.
 
 For managed motion follow the surface-specific section below; a requested preset instead adds `template_animation_id` to MCP `animate_character(mode="skeleton-v3")` or either REST managed-animation alias. Raw per-frame keypoints belong on `animate_with_skeleton_v3` or REST `/animate-with-skeleton-v3`.
 
@@ -196,16 +197,22 @@ Poll queued directions with `get_character` (REST: each returned `background_job
 
 Inspect every direction for grip continuity, missing or smeared held gear, limb occlusion and canvas growth. Coherent body motion or shared poses do not prove correct gear or handedness. A hand crossing the screen center during a cross-body swing is not by itself a hand switch.
 
+## Custom Rig Skeleton
+
+For a body that is not a humanoid (wings, tails, weapons, extra legs, a lid), use MCP `estimate_custom_skeleton` or REST `POST /estimate-custom-skeleton` before Skeleton v3. It builds a custom rig of 2–64 joints and places it on 1–16 same-size frames (up to 256×256); without a supplied `rig`, the rig is built on the first frame. A supplied `rig` plus its `reference` frame carries the edited rig onto the other images. Cost is 1 generation per 8 frames started (1–8 frames = 1, 9–16 = 2), charged when the estimate completes; a fully transparent frame is refused.
+
+The completed result returns `rig` (joints, parents first), `kind` (`person`, `four-legged`, or `other`; null for a supplied rig) and one keypoint set per frame. Pass the rig to `animate-with-skeleton-v3` as `rig`; use one frame's keypoints as `first_frame_keypoints` and the rest, edited, as `keypoints`. For a four-legged estimate use `template_id="dog"`, otherwise `mannequin`. Use `write_motion_frames` (3–15) instead of authoring every pose when the action text should drive the motion; the completed job returns the drawn keypoints for later editing. Poll the generic background job for REST and the returned job id through MCP.
+
 ## Skeleton Estimation And Legacy Raw Animation
 
-REST `estimate-skeleton` remains useful for estimating one starting pose in an auto-rig pipeline; it does not create a full motion sequence. Use the legacy animation route only when the user needs its exact three-frame payload or optional legacy fields. New custom 3–15-frame pose sequences belong on Skeleton v3.
+MCP `estimate_skeleton` and REST `estimate-skeleton` remain useful for estimating one starting pose in an auto-rig pipeline; neither creates a full motion sequence. Use the legacy animation route only when the user needs its exact three-frame payload or optional legacy fields. New custom 3–15-frame pose sequences belong on Skeleton v3.
 
 ```text
 POST /v2/estimate-skeleton
 POST /v2/animate-with-skeleton
 ```
 
-`estimate-skeleton` takes a character image (body `{"image": {...}}`, any size up to 256×256) and returns one pose's keypoints, with `x`/`y` as 0–1 fractions of the image you sent, ready for Skeleton v3 `keypoints`/`first_frame_keypoints`. It costs 0.1 generation; a fully transparent image is refused with 422 before any charge. `animate-with-skeleton` accepts fields such as:
+`estimate-skeleton` takes a character image (REST body `{"image": {...}}`, any size up to 256×256) and returns one pose's keypoints, with `x`/`y` as 0–1 fractions of the image you sent, ready for Skeleton v3 `keypoints`/`first_frame_keypoints`. It costs 0.1 generation; a fully transparent image is refused with 422 before any charge. `animate-with-skeleton` accepts fields such as:
 
 ```text
 image_size
@@ -221,15 +228,15 @@ color_image
 seed
 ```
 
-MCP `animate_with_skeleton_v3` accepts raw keypoints for Skeleton v3, but there is no MCP equivalent of REST `estimate-skeleton` or the legacy `/animate-with-skeleton` payload. Use REST for estimation or the legacy route; do not treat the new animation tool as field-for-field support for the legacy route.
+MCP `animate_with_skeleton_v3` accepts raw keypoints for Skeleton v3 and now shares the estimator workflow: use MCP `estimate_skeleton` (or REST) for a humanoid pose, and `estimate_custom_skeleton` for a custom rig. Only the legacy `/animate-with-skeleton` payload remains REST-only; do not treat the Skeleton v3 tool as field-for-field support for that legacy route.
 
 ## Auto-Rig Skeleton Pipeline
 
-Use this workflow for "auto rig", "estimate skeleton", "rig this sprite", "export skeleton for API", "animate with this skeleton", "my keypoints", "pose JSON", or a skeleton pipeline from a simple humanoid prompt. Estimation remains REST-first; use Skeleton v3 for per-frame animation when the full pose sequence is available:
+Use this workflow for "auto rig", "estimate skeleton", "rig this sprite", "export skeleton for API", "animate with this skeleton", "my keypoints", "pose JSON", or a skeleton pipeline from a simple humanoid prompt. Use MCP `estimate_skeleton` when visible (REST fallback), then Skeleton v3 for per-frame animation when the full pose sequence is available:
 
 ```text
 source image or generated reference frame
-  -> REST estimate-skeleton
+  -> MCP estimate_skeleton or REST estimate-skeleton
   -> save/export keypoint JSON
   -> author or edit a 3–15-frame pose sequence
   -> MCP animate_with_skeleton_v3 or REST animate-with-skeleton-v3
@@ -267,7 +274,7 @@ Current schema requires `image_size` and `reference_image`; custom keypoint work
 
 ## Aseprite Boundary
 
-Estimate skeleton maps to REST `POST /v2/estimate-skeleton`; Skeleton v3 animation maps to MCP `animate_with_skeleton_v3` or REST `POST /v2/animate-with-skeleton-v3`; the legacy route remains REST `POST /v2/animate-with-skeleton`. Pose-guided image generation maps to REST `create-image-bitforge` (`skeleton_keypoints`/`skeleton_guidance_scale`). Aseprite exports normalized `pose_keypoints`; map the joints and frames to the selected live schema rather than assuming the legacy `skeleton_keypoints` shape is interchangeable. Other Aseprite extension operations (edit skeleton, re-pose, insert template skeleton, private template-animation flow, and local skeleton JSON) remain editor-internal for public automation. Aseprite's local template catalog is older/smaller than the managed preset IDs below; do not assume every managed id such as `breathing-idle` or `jumping-1` exists there.
+Estimate skeleton maps to MCP `estimate_skeleton` or REST `POST /v2/estimate-skeleton`; a custom non-humanoid rig maps to MCP `estimate_custom_skeleton` or REST `POST /v2/estimate-custom-skeleton`; Skeleton v3 animation maps to MCP `animate_with_skeleton_v3` or REST `POST /v2/animate-with-skeleton-v3`; the legacy route remains REST `POST /v2/animate-with-skeleton`. Pose-guided image generation maps to REST `create-image-bitforge` (`skeleton_keypoints`/`skeleton_guidance_scale`). Aseprite exports normalized `pose_keypoints`; map the joints and frames to the selected live schema rather than assuming the legacy `skeleton_keypoints` shape is interchangeable. Other Aseprite extension operations (edit skeleton, re-pose, insert template skeleton, private template-animation flow, and local skeleton JSON) remain editor-internal for public automation. Aseprite's local template catalog is older/smaller than the managed preset IDs below; do not assume every managed id such as `breathing-idle` or `jumping-1` exists there.
 
 ## Preset Template Families
 
@@ -289,7 +296,7 @@ Choose the template family by body plan and stance, not species. Map human/perso
 
 ## Preset Animation IDs
 
-Use exact ids. Do not send labels such as "Walk (8 frames)". The humanoid ids and frame counts below are verified against the refreshed public MCP guide; the quadruped lists retain the 2026-06-30 website catalog and should be checked with `get_character` for the selected template. Official REST docs expose the `template_animation_id` field but no stable public enum endpoint; refresh visible MCP tool docs or official docs before claiming "all available animations" or building long-lived integrations.
+Use exact ids. Do not send labels such as "Walk (8 frames)". The humanoid ids and frame counts below were last fully enumerated in the 2026-11-06 public MCP guide; the 2026-11-25 guide no longer lists the full set, so confirm the character's available templates with `get_character`'s `available_animations` and treat this table as the last published catalog. The quadruped lists retain the 2026-06-30 website catalog and should be checked with `get_character` for the selected template. Official REST docs expose the `template_animation_id` field but no stable public enum endpoint; refresh visible MCP tool docs or official docs before claiming "all available animations" or building long-lived integrations.
 
 Ordered by likely request frequency, mannequin/humanoid first because most player, NPC, human, and biped requests map there.
 

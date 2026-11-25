@@ -1,10 +1,10 @@
 # Style Reference Generation
 
-Read this for MCP `create_image_pro` style-image input, REST `generate-with-style-v2`, website/Aseprite "Create image from style reference (pro)", or any request where a supplied image should define visual style, pixel size, palette, rendering, or sheet layout without preserving the exact subject identity.
+Read this for MCP `create_image_pro`/`create_image_pro_from_style` style-image input, REST `generate-with-style-v2`, website/Aseprite "Create image from style reference (pro)", or any request where a supplied image should define visual style, pixel size, palette, rendering, or sheet layout without preserving the exact subject identity.
 
 ## REST `generate-with-style-v2` Size Handling
 
-For REST `POST /generate-with-style-v2`, do not send `image_size`. The current schema retains it only as an optional deprecated property marked as removed; it is not a supported output-size control. The endpoint always derives a square output from the supplied style images:
+REST `POST /generate-with-style-v2` and MCP `create_image_pro_from_style` share the 1–4 style-image workflow and square-output rule; above a 170px canvas MCP returns one candidate and accepts exactly one style image. REST additionally exposes the exact OpenAPI schema and deprecated `image_size` property. For REST `POST /generate-with-style-v2`, do not send `image_size`. The current schema retains it only as an optional deprecated property marked as removed; it is not a supported output-size control. The endpoint always derives a square output from the supplied style images:
 
 - Inspect all style images and use the largest dimension across them as the effective output size, bounded to `16`–`512` pixels.
 - Non-square style images are centered on the square output canvas. Do not scale, stretch, crop, or redraw them to choose a different output size.
@@ -17,7 +17,7 @@ For website/Aseprite workflows, or a local preparation task that explicitly requ
 
 Do not maximize the number of generated subjects by enlarging the canvas. For style fidelity, preserve the style reference's scale first.
 
-For `generate-with-style-v2`, output count follows the refreshed `generate-image-v2` ladder through `170px`; `171–512px` returns one image. See [Create Image Pro](create-image-pro.md#native-size-multi-output-batches) for the current size-to-count bands. The output size is still derived from the style images.
+For `generate-with-style-v2` and `create_image_pro_from_style`, output count follows the refreshed `generate-image-v2` ladder through `170px`; `171–512px` returns one image. See [Create Image Pro](create-image-pro.md#native-size-multi-output-batches) for the current size-to-count bands. The output size is still derived from the style images.
 
 When the style reference's target size yields one image, generate one output asset, or one requested sheet/atlas, per request unless the user explicitly accepts a packed multi-asset atlas. A packed atlas competes with scale, layout, and style fidelity.
 
@@ -37,7 +37,7 @@ For managed 8-direction assets, MCP `create_character(mode="pro", style_characte
 
 After generation, verify:
 
-- REST output dimensions equal the square size deduced from the style images, not a separately requested `image_size`.
+- Style-based output dimensions equal the square size deduced from the style images, not a separately requested `image_size`.
 - Transparency was preserved in unused padded areas.
 - Visible content remains at the reference-relative footprint and scale.
 - For sheet outputs, rows, columns, and cell occupancy match the requested structure.

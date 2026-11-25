@@ -6,7 +6,8 @@ Read this for stored character portraits, mouth/viseme generation, talking GIFs,
 
 | Need | MCP | REST v2 | Cost and lifecycle |
 |---|---|---|---|
-| Attach/replace a character portrait | `set_character_portrait(character_id, image=...)`, or `from_job_id` from a completed portrait-character conversion | `POST /characters/{character_id}/portrait` with `image` | Free and synchronous. Replacing an existing portrait is destructive; get explicit approval first. |
+| Attach/replace a character portrait | `set_character_portrait(character_id, image=...)`, or `from_job_id` from a completed portrait-character conversion | HTTP POST on `/characters/{character_id}/portrait` with `image` | Free and synchronous. Replacing an existing portrait is destructive; get explicit approval first. |
+| Remove a portrait or one expression | `set_character_portrait(remove_portrait=true)` or `remove_expression=<mood>` | HTTP DELETE on `/characters/{character_id}/portrait` and `/characters/{character_id}/vocal-animation/{mood}` | Destructive; get explicit approval. Removing the portrait leaves existing expressions working; removing the last expression removes the set. |
 | Generate mouth visemes | `create_vocal_animation` then `get_vocal_animation` | `POST /vocal-animation` then dedicated `GET /vocal-animation/{job_id}` | Paid-plan async generation; this is the only credit-spending step in this workflow. |
 | Render a talking GIF | `create_talking_gif` | `POST /talking-gif` | Free and synchronous; no polling. |
 | Return a lip-sync frame plan | `get_lip_sync` | `POST /lip-sync` | Free and synchronous. MCP requires a managed character; REST also supports stateless `viseme_count`. |
@@ -18,6 +19,7 @@ Use either a managed `character_id` with a stored portrait or a raw portrait ima
 - Supported moods: `neutral`, `happy`, `angry`, `sad`, `surprised`; default `neutral`. Generate one mood per call.
 - `viseme_count` is 3, 5, 7, or 12; default 7. Keep the same count across every mood stored on one character.
 - Price depends on portrait size, mouth-position count, and any extra fill passes; use the MCP schedule and 40-generation ceiling in `cost-routing.md`, rather than assuming every portrait costs the default small-portrait amount.
+- `engine="pixminimax"` (beta) keeps the eyes, brows and head still while only the mouth moves. It costs 3 generations for 7 positions at any portrait size up to 256px (2 for 3, 4 for 12), versus v3's size-scaled price (3 at 64px, 6 at 128px, 24 at 256px). Read the submit receipt for the actual quote.
 - `no_background` defaults to `true`. Preserve transparency unless the user requests a background.
 - Ask for paid-call approval under the normal cost rules. Setting a portrait, rendering the GIF, and requesting the lip-sync plan are free.
 - Poll the dedicated vocal getter every 10–15 seconds. Do not use the generic background-job route. `completed_visemes` may be partial progress; wait for the terminal result and all expected frames.

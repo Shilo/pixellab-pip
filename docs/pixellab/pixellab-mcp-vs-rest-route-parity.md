@@ -1,8 +1,10 @@
 # PixelLab MCP vs REST v2 Route Parity
 
-Last reviewed: 2026-11-06 (UTC snapshot).
+Last reviewed: 2026-11-25 (UTC snapshot).
 
-> **2026-11-06 UTC refresh:** all seven sources completed without failures. REST remains **102 path templates / 113 operations / 275 schemas**; MCP grows **121 → 122 tools** with `list_rooms` and no removals. MCP-only tools grow **43 → 44**; two REST spritesheet operations now have documented MCP download-URL counterparts (not tools), so REST-only/partial operations fall **29 → 27** (16 partial, 11 none). The character ZIP route remains partial because REST metadata includes keypoints for template-based characters while the MCP group ZIP documents state/frame metadata without keypoints. REST OpenAPI changed descriptions in eight schemas but added no route or schema; notable changes include `template_id="custom"` for REST Pro/v3 character creation (no skeleton animation), `target_palette` for managed Skeleton v3, PixFlux's 40,000-pixel transparency limit, and the four-direction-only oblique view. The REST eight-direction schema also lists `oblique` while its description limits that view to four directions; use the four-direction route until that conflict is resolved.
+> **2026-11-25 UTC refresh:** all seven sources completed without failures. REST grows **102 → 140 path templates (113 → 164 operations) and 275 → 347 schemas**; MCP grows **122 → 156 tools**. No route, tool, or schema was removed. New public families: game music and sound effects (both surfaces), REST rooms (create/list/get/delete/furniture cutout/kit ZIP), UI template split/states/9-slice/ZIP, REST `POST /save-to-asset`, and stored character/object management (rename, duplicate/ungroup, canvas resize, animation mirroring, 8-direction expansion, import, and GIF/`.aseprite`/ZIP export). MCP also adds `create_image_pro_from_style`, `image_to_pixelart_pro`, `remove_background`, `rotate_image`, `edit_animation`, `estimate_skeleton`, `estimate_custom_skeleton`, `import_object`, `import_tiles`, `export_asset`, `manage_project`, `manage_state`, `rename_asset`, `set_canvas_size`, `mirror_animation`, and the map tools `inpaint_map`/`edit_map_areas`. This closes most former gaps: `generate-with-style-v2`, `image-to-pixelart-pro`, `remove-background`, `edit-animation-v2`, `estimate-skeleton`, and `generate-8-rotations-v3` now have MCP counterparts, while rooms and `save_to_asset` leave the MCP-only list. REST-only/partial operations fall **27 → 21** (12 partial, 9 with no documented MCP overlap); MCP-only tools fall **44 → 42**. Schema changes: object animations add PixMiniMax and `direction_prompts` (4–40 frames); managed character animations add PixMiniMax `template_action`, `motion_adjustments`, `direction_prompts`, and cross-mode append validation; Skeleton v3 adds a custom `rig` and `write_motion_frames`; vocal generation adds `engine="pixminimax"`; sidescroller tilesets add REST `mode`/`enhance`/`platform_thickness`, cap `transition_size` at 0.5, and retire the older model; tilesets add 24px standard tiles, standard `raggedness`/`shape_seed`/side-wall controls, and terrain walkability flags; tiles-pro connectable sets add `elevation`/`step_slope`; `correct_pixelart` corrects each frame separately; character detail exposes the `oblique` view value. Website docs had raw build changes only; the MCP page also rewrote its visible overview/available-tools copy with no contract change; REST docs/ReDoc shells were unchanged. No source failed.
+
+
 
 > MCP now prices rooms at 20 generations plus 10 for pieces, supports top-down/isometric/oblique room views and `project_id`, and exposes `list_rooms`. It also documents managed character/object ZIPs and spritesheets, inline Workbench animation results with a 1024px sheet limit, target-pose semantics for managed `end_frame`, delivery-based normal-map charges per call, and more exact cancellation billing. Both surfaces normalize 26/27-degree isometric tile angles to 30: REST `POST /create-tiles-pro` and MCP `create_tiles_pro`, plus MCP `create_path_tiles`; MCP `create_building_kit` also normalizes these angles and defaults isometric output to 30. Its cost depends on layout and geometry. REST `llms.txt` and both REST docs shells are unchanged; website docs and MCP pages had raw build changes with unchanged normalized content. No source failed.
 
@@ -74,8 +76,8 @@ Purpose: a route-level comparison of PixelLab's hosted MCP tool surface against 
 
 Parity is a moving target because both surfaces ship independently. This review compares:
 
-- **REST v2 index:** [official `llms.txt`](https://api.pixellab.ai/v2/llms.txt), cross-checked against the [OpenAPI spec](https://api.pixellab.ai/v2/openapi.json), refreshed snapshot 2026-11-06 (102 path templates / 113 operations; 275 schemas). `llms.txt` is the curated published index; OpenAPI is the fuller machine-readable schema. Where both agree a route is absent, it is treated as genuinely absent, not an index abbreviation.
-- **MCP inventory:** [official MCP tool guide](https://api.pixellab.ai/mcp/docs), auto-generated snapshot 2026-11-06 (122 tools). This is the authoritative public MCP tool list; the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` is not.
+- **REST v2 index:** [official `llms.txt`](https://api.pixellab.ai/v2/llms.txt), cross-checked against the [OpenAPI spec](https://api.pixellab.ai/v2/openapi.json), refreshed snapshot 2026-11-25 (140 path templates / 164 operations; 347 schemas). `llms.txt` is the curated published index; OpenAPI is the fuller machine-readable schema. Where both agree a route is absent, it is treated as genuinely absent, not an index abbreviation.
+- **MCP inventory:** [official MCP tool guide](https://api.pixellab.ai/mcp/docs), auto-generated snapshot 2026-11-25 (156 tools). This is the authoritative public MCP tool list; the abbreviated "Available Tools" list at `https://www.pixellab.ai/mcp` is not.
 
 Absence from a snapshot is not proof of absence from the live API. When a route or tool matters for code, re-verify against current OpenAPI/MCP docs (SKILL.md → Current Docs Refresh).
 
@@ -85,56 +87,57 @@ Three surfaces are conflated in casual usage; they are not the same contract:
 
 - **MCP tools** are called through an MCP client (bare or host-prefixed such as `mcp__pixellab__create_character`). They are not HTTP paths; do not curl a tool name as `/v2/...`.
 - **REST v2 endpoints** are HTTP paths under `https://api.pixellab.ai/v2`.
-- **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-pixminimax`, Skeleton v3, legacy `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP `animate_character`/`animate_object` cover managed assets, while `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, and `transfer_outfit` take raw inputs directly. REST retains route-specific drift correction, prompt enhancement, legacy skeleton estimation/animation, and single-image rotate controls; animation-frame editing has partial overlap through MCP `edit_image`, which applies one edit consistently across a list of frames.
+- **Managed-asset animation** (`/animate-character`, `/characters/animations`, `/objects/{id}/animations`) and **raw animation** (`/animate-with-text*`, `/animate-pixminimax`, Skeleton v3, legacy `/animate-with-skeleton`, `/interpolation-v2`, …) are different endpoint families. MCP `animate_character`/`animate_object` cover managed assets, while `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, and `transfer_outfit` take raw inputs directly. REST retains route-specific drift correction, prompt enhancement, legacy skeleton animation, and single-image rotate controls; animation-frame editing has full parity through MCP `edit_animation`, which applies one edit consistently across a list of frames.
 
 ## At a Glance
 
 **Matching basis:** counterparts are judged by **functional capability, not tool name** — a REST endpoint counts as "covered" if any MCP tool or documented MCP parameter does the same job, even under a different name or bundled into a broader tool (and the reverse for MCP tools). A scoped or partial overlap (for example, an MCP capability that works only on a managed asset) is marked partial (◐), not dropped.
 
-**Current parity context:** REST `DELETE /background-jobs/{job_id}` matches MCP `cancel_job`; the two character-animation delete routes match MCP `delete_animation`; and REST `POST /transfer-outfit-v2` matches MCP `transfer_outfit`. Skeleton v3 remains full core-workflow parity, but REST exposes `drift_threshold` and `target_palette` beyond MCP. PixelArt Workbench and MCP `list_images`/`save_to_asset` have no REST workflow counterpart. MCP `vfx_workbench` has a partial REST counterpart, `POST /vfx`: both produce saved animated effects, but the MCP workbench is agent-authored while REST runs PixelLab's own effects artist from a description. Several broader MCP tools partially overlap REST operations without a full match: `create_image_pro` supports one style image for `generate-with-style-v2`, `image_to_pixelart_pro_flash` covers automatic-scale conversion through a different model than `image-to-pixelart-pro`, and `edit_image` can apply one edit consistently across animation frames for `edit-animation-v2`. REST `POST /image-to-text` has no MCP counterpart. A shared route label means core workflow coverage, not identical schemas; the matrix calls out material one-sided modes and controls.
+**Current parity context:** REST `DELETE /background-jobs/{job_id}` matches MCP `cancel_job`; the character/object animation delete routes match MCP `delete_animation`; and REST `POST /transfer-outfit-v2` matches MCP `transfer_outfit`. Skeleton v3 remains full core-workflow parity, with REST exposing `drift_threshold` and `target_palette` beyond MCP. PixelArt Workbench has no REST workflow counterpart, and gallery listing remains MCP-only, but REST `POST /save-to-asset` now matches MCP `save_to_asset`. MCP `vfx_workbench` has a partial REST counterpart, `POST /vfx`: both produce saved animated effects, but the MCP workbench is agent-authored while REST runs PixelLab's own effects artist; the new `GET/DELETE /vfx/effects` routes are covered by the workbench's `effects`/`delete` commands. Music and sound effects have full create/get/list/rename/delete parity, with a documented tier disagreement noted below. Several broader MCP tools partially overlap REST operations without a full match: `edit_image` covers base `edit-image`, `inpaint_image` covers base `inpaint`, managed `animate_character`/`animate_object` cover the legacy `pro` modes only partially, and `rotate_image` produces loose 8 directions while REST `rotate` performs an arbitrary-degree transform. REST `POST /image-to-text` and `POST /resize` have no MCP counterpart. A shared route label means core workflow coverage, not identical schemas; the matrix calls out material one-sided modes and controls.
 
 **On both surfaces — core workflow parity, so they live in the [Coverage Matrix](#coverage-matrix) below, not in the gap lists:** characters (4/8-direction, v3, Pro Flash, state, and common managed animation modes, including one-state deletion and animation-group/direction deletion; REST-only managed Pro animation differences are partial), **portrait ↔ character conversion** (`portrait-character-pro` ↔ `create_portrait_character`), **managed portraits and talking output** (portrait attachment, vocal-viseme generation, and talking GIF rendering), objects (1/8-direction, Pro Flash, state, animate, review, list/get/delete, **including per-object animation delete** — `DELETE /objects/{id}/animations` ↔ `delete_animation`), map objects, top-down / sidescroller / isometric / pro tilesets & tiles, **path/road tiles and building kits** (`create-tiles-pro` `tile_feature` ↔ `create_path_tiles`/`create_building_kit`), structured UI assets, **pixel font Pro** (`generate-font-pro` ↔ `create_font`), balance, **tag setting** (`PATCH .../tags` ↔ `update_character_tags` / `update_object_tags`), **raw text-to-image on PixFlux (both the base and background-oriented path share one identical schema) and Pixen** (`create-image-pixflux`/`create-image-pixflux-background`/`create-image-pixen` ↔ `create_image_pixflux`/`create_image_pixen`), **Pro image generation with labelled/style and hex-palette controls** (`generate-image-v2` ↔ `create_image_pro`), **normal-map generation** (`POST /normal-map` ↔ `create_normal_map`), **Pro Flash one-image generation, edit, inpaint, and pixel-art conversion**, **arbitrary-image edit at Pro tier** (`edit-images-v2` ↔ `edit_image`), **arbitrary-image inpaint at Pro tier** (`inpaint-v3` ↔ `inpaint_image`), **raw text-driven animation** (`animate-with-text-v3` ↔ `animate_image`), **raw PixMiniMax animation** (`animate-pixminimax` ↔ `animate_image_pixminimax`), **outfit transfer** (`transfer-outfit-v2` ↔ `transfer_outfit`), **Pixen-tier image edit** (`edit-image-pixen` ↔ `edit_image_pixen`), **image-to-pixel-art conversion** (`image-to-pixelart` ↔ `image_to_pixelart`), and the **Cleanup family** (`correct-pixelart` ↔ `correct_pixelart`, `reduce-colors` ↔ `reduce_colors`, `unzoom` ↔ `unzoom_image`). REST background-job cancellation also overlaps MCP job control. Lip-sync planning overlaps too, but only partially because MCP lacks REST's stateless form. Pro Flash is core-workflow parity, not field-for-field parity; MCP has URL/source-ID conveniences and REST has a separate cost estimator.
 
-**REST v2 operations without a full MCP match (27; ◐ = partial overlap via a broader or narrower tool).** Of these, 16 have partial overlap and 11 have no documented MCP overlap. See [REST v2 Operations Without a Full MCP Match](#rest-v2-operations-without-a-full-mcp-match).
+**New in the 2026-11-25 snapshot:** game music and sound effects are full create/get/list/rename/delete families on both surfaces; rooms, `save-to-asset`, UI split/states/ZIP, stored character/object rename/duplicate/canvas/mirror/import/export, style-reference generation, the Pro converter, background removal, animation editing, humanoid skeleton estimation, and raw 8-direction rotation now have MCP tools. The remaining asymmetry is listed below.
+
+**REST v2 operations without a full MCP match (21; ◐ = partial overlap via a broader or narrower tool).** Of these, 12 have partial overlap and 9 have no documented MCP overlap. See [REST v2 Operations Without a Full MCP Match](#rest-v2-operations-without-a-full-mcp-match).
 
 | Category | # | REST v2 endpoints |
 |---|---|---|
-| Raw image generation | 3 | `create-image-bitforge`, `generate-with-style-v2` (◐), `generate-ui-v2` |
-| Image edit / convert / resize / prompt description | 5 | `edit-image` (◐), `image-to-pixelart-pro` (◐), `image-to-text`, `resize`, `remove-background` |
+| Raw image generation | 2 | `create-image-bitforge`, `generate-ui-v2` |
+| Image edit / convert / resize / prompt description | 3 | `edit-image` (◐), `image-to-text`, `resize` |
 | Inpaint | 1 | `inpaint` (◐) |
-| Raw animation / rotation / skeleton | 9 | `animate-with-text` (◐), `animate-with-text-v2` (◐), `animate-with-skeleton`, `estimate-skeleton`, `edit-animation-v2` (◐), `interpolation-v2` (◐), `generate-8-rotations-v2` (◐), `generate-8-rotations-v3` (◐), `rotate` |
+| Raw animation / rotation / skeleton | 6 | `animate-with-text` (◐), `animate-with-text-v2` (◐), `animate-with-skeleton`, `interpolation-v2` (◐), `generate-8-rotations-v2` (◐), `rotate` |
 | Managed-character route differences | 3 | `create-character-pro` (◐), `animate-character` and `characters/animations` (◐) |
 | Prompt enhancement | 3 | `enhance-pixen-prompt`, `enhance-character-v3-prompt`, `enhance-animation-v3-prompt` |
 | Managed-asset export | 1 | `characters/{id}/zip` (◐; MCP group ZIP differs in metadata) |
 | Talking portraits | 1 | `lip-sync` (◐: MCP is managed-character only; REST also supports stateless `viseme_count`) |
 | Animated VFX | 1 | `vfx` (◐: MCP `vfx_workbench` is agent-authored, not PixelLab's effects artist) |
 
-`create-image-pixen`, `create-image-pixflux`, `create-image-pixflux-background`, `generate-image-v2`, `edit-images-v2`, `inpaint-v3`, and (since the 2026-09-08 refresh) `image-to-pixelart` are no longer in this list — they graduated to full `=` parity (see the 2026-07-26 re-audit note above) and now live in the "full parity" prose and the Coverage Matrix. Base `edit-image` and base `inpaint` newly *entered* this list in their place — the earlier snapshot had the base/Pro assignment backwards for both families. `transfer-outfit-v2` also graduated in this refresh via MCP `transfer_outfit`.
+`generate-with-style-v2`, `image-to-pixelart-pro`, `remove-background`, `edit-animation-v2`, `estimate-skeleton`, and `generate-8-rotations-v3` graduated to `=` parity in this refresh via `create_image_pro_from_style`, `image_to_pixelart_pro`, `remove_background`, `edit_animation`, `estimate_skeleton`, and `rotate_image`; see the size caveats in the matrix for the style route and background removal. Base `edit-image` and base `inpaint` remain partial because MCP's tools match the Pro tiers; `rotate` remains REST-only because MCP `rotate_image` makes 8 directions rather than an arbitrary-degree transform.
 
-◐ **Partial overlap** (16 of the 27 — no *dedicated, tier-matched* MCP tool, or MCP covers only a narrower form). These are `create-character-pro`, `generate-with-style-v2`, base `edit-image`, `image-to-pixelart-pro`, base `inpaint`, `animate-with-text`, `animate-with-text-v2`, `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `edit-animation-v2`, `characters/{id}/zip`, stateless `lip-sync`, `animate-character` and `characters/animations` in REST-only legacy `pro` mode, and `vfx`. Per-endpoint notes are below.
+◐ **Partial overlap** (12 of the 21 — no *dedicated, tier-matched* MCP tool, or MCP covers only a narrower form). These are `create-character-pro`, base `edit-image`, base `inpaint`, `animate-with-text`, `animate-with-text-v2`, `interpolation-v2`, `generate-8-rotations-v2`, `characters/{id}/zip`, stateless `lip-sync`, `animate-character` and `characters/animations` in REST-only legacy `pro`/palette forms, and `vfx`. Per-endpoint notes are below.
 
-**Missing from REST v2 — MCP has it, no REST endpoint (44 tools).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
+**Missing from REST v2 — MCP has it, no REST endpoint (42 tools).** See [MCP Tools With No REST v2 Counterpart](#mcp-tools-with-no-rest-v2-counterpart).
 
 | Category | # | MCP tools |
 |---|---|---|
-| Maps | 11 | `create_map`, `delete_map`, `list_maps`, `get_map`, `edit_map`, `view_map`, `place_map_tiles`, `place_map_object`, `list_map_objects`, `move_map_object`, `remove_map_object` |
-| Rooms | 4 | `create_room`, `get_room`, `list_rooms`, `cut_out_room_furniture` |
-| Projects | 3 | `list_projects`, `add_to_project`, `remove_from_project` |
+| Maps | 13 | `create_map`, `delete_map`, `list_maps`, `get_map`, `edit_map`, `view_map`, `inpaint_map`, `edit_map_areas`, `place_map_tiles`, `place_map_object`, `list_map_objects`, `move_map_object`, `remove_map_object` |
+| Projects | 4 | `list_projects`, `manage_project`, `add_to_project`, `remove_from_project` |
 | Chat (game-building agent) | 3 | `chat_list_conversations`, `chat_get_messages`, `chat_send_message` |
 | Sandbox (code execution + deploy) | 12 | `sandbox_create_session`, `sandbox_destroy_session`, `sandbox_bash`, `sandbox_run`, `sandbox_read`, `sandbox_read_image`, `sandbox_write`, `sandbox_edit`, `sandbox_sync`, `sandbox_deploy_worker`, `sandbox_undeploy`, `sandbox_playtest` |
 | Deployed agents | 3 | `agent_list`, `agent_inspect`, `agent_talk` |
 | Job control | 2 | `list_jobs`, `wait_for_jobs` |
 | MCP meta | 3 | `search_help`, `agent_feedback`, `search_knowledge` |
 | Pixel-art commands | 1 | `pixelart_workbench` |
-| Gallery and asset save | 2 | `list_images`, `save_to_asset` |
+| Gallery listing | 1 | `list_images` |
 
 ## Practical Picking Rule
 
-MCP is a managed-asset tool layer inside an agent that also exposes raw-image primitives (including Pro Flash, Skeleton v3, and the Cleanup family), PixelArt Workbench, animated VFX Workbench, gallery browsing/save-back, and talking-portrait helpers. REST v2 remains the complete HTTP API for image-to-text, legacy skeleton estimation/animation, stateless lip sync, and code control.
+MCP is a managed-asset tool layer inside an agent that also exposes raw-image primitives (including Pro Flash, Skeleton v3, and the Cleanup family), PixelArt Workbench, animated VFX Workbench, gallery save-back, games music/sound effects, and talking-portrait helpers. REST v2 remains the complete HTTP API for image-to-text, arbitrary-degree rotation, legacy skeleton animation, stateless lip sync, and code control.
 
 | Use MCP when | Use REST v2 when |
 |---|---|
-| You're in an MCP-enabled agent and want a managed asset with IDs and lifecycle helpers, raw PixFlux/Pixen/Pro-tier or Skeleton v3 image work, animated VFX via `vfx_workbench`, gallery browse/save-back, PixelArt Workbench commands, pixel-art cleanup, outfit transfer, or a managed talking-portrait workflow | You need BitForge, multi-image style references (MCP covers one), base-tier edit/inpaint controls, image-to-text, the older Pro image-to-pixel-art tier (MCP Pro Flash performs the same conversion through a different model), legacy skeleton estimation/animation, stateless lip sync, REST ZIP keypoints for a template-based character, batch/code/backend control, exact schemas, PixelLab's own VFX artist (`/vfx`), or any of the 27 REST-only/partial operations |
+| You're in an MCP-enabled agent and want a managed asset with IDs and lifecycle helpers, raw PixFlux/Pixen/Pro-tier or Skeleton v3 image work, game music/sound effects, animated VFX via `vfx_workbench`, gallery save-back, PixelArt Workbench commands, pixel-art cleanup, outfit transfer, or a managed talking-portrait workflow | You need BitForge, base-tier edit/inpaint controls (including a BitForge-style init or weak-guidance workflow), image-to-text, an arbitrary-degree rotate, legacy skeleton animation, stateless lip sync, REST ZIP keypoints for a template-based character, batch/code/backend control, exact schemas, PixelLab's own VFX artist (`/vfx`), or any of the 21 REST-only/partial operations |
 | You need the platform layer — maps, projects, chat, sandbox, deployed agents, active-job list/all-job wait, or other MCP-only helpers | You need a freeform UI image (`generate-ui-v2`) or any capability with no MCP tool |
 
 One line: **MCP is the convenient managed-asset, raw-image, and managed talking-portrait path inside an agent; REST v2 remains the complete API for stateless lip sync, exact code control, and the remaining REST-only operations.**
@@ -153,13 +156,19 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 | `POST /create-character-pro` | `create_character(mode="pro")`, including concept images and `style_character_id`; separate MCP v3 mode supports exact-sprite rotation | ◐ — MCP has the concept and rotation workflows, but REST alone exposes the Pro route's `method` selector (`create_with_style`, `create_from_concept`, `rotate_character`) and `style_description`. |
 | `POST /create-character-pro-flash` | `create_character_pro_flash` — eight views; MCP adds first-frame URL while both accept an owned source-image ID | =, core workflow |
 | `POST /create-character-state` | `create_character_state` | = |
-| `POST /animate-character`, `POST /characters/animations` | `animate_character` for `template`, `skeleton-v3`, `v3`, and `pixminimax`; REST also exposes legacy `pro` and `target_palette` | ◐ — REST retains `pro` and `target_palette`; MCP custom Skeleton v3 has `poses`/`scale`/`move` after free instruction discovery, while REST generates the shared motion from action text. |
+| `POST /animate-character`, `POST /characters/animations` | `animate_character` for `template`, `skeleton-v3`, `v3`, and `pixminimax`; REST also exposes legacy `pro` and `target_palette` | ◐ — REST retains `pro` and `target_palette`; MCP custom Skeleton v3 has `poses`/`scale`/`move` after free instruction discovery, while REST generates the shared motion from action text. Both surfaces now expose PixMiniMax `template_action`, `direction_prompts`, and `motion_adjustments`; MCP documents the free append-mode rule. |
 | `GET /characters` | `list_characters` | = |
 | `GET /characters/{id}` | `get_character` | = |
 | `DELETE /characters/{id}` | `delete_character` — deletes one state; repeat per state to remove a multi-state group | = |
 | `GET /characters/{id}/zip` | `get_character` `/download` URL returns a group ZIP; its documented `metadata.json` does not include REST's keypoints for template-based characters | ◐ |
 | `GET /characters/{id}/spritesheet` (ZIP: one sheet + layout JSON) | `get_character` `/spritesheet` URL (current state only) | =, documented download URL |
 | `PATCH /characters/{id}/tags` | `update_character_tags` | = |
+| `PATCH /characters/{id}` | `rename_asset` | = — renames the asset or one state and can update the character description. |
+| `POST /characters/{id}/duplicate`, `POST /characters/{id}/ungroup` | `manage_state` (`duplicate`/`ungroup`) | = |
+| `POST /characters/{id}/canvas` | `set_canvas_size` | = — transparent margin only, never a rescale; animations keep their original canvas. |
+| `POST /characters/{id}/animations/{animation_group_id}/mirror` | `mirror_animation` | = — east↔west, south-east↔south-west, north-east↔north-west; south/north cannot be mirrored. |
+| `GET /characters/{id}/gif`, `GET /characters/{id}/aseprite` | `export_asset` (`gif`/`aseprite`) | = |
+| `DELETE /characters/{id}/portrait`, `DELETE /characters/{id}/vocal-animation/{mood}` | `set_character_portrait(remove_portrait=true)` or `remove_expression=<mood>` | = |
 | `POST /portrait-character-pro`, `GET /portrait-character-pro/{job_id}` | `create_portrait_character` + `get_portrait_character` | = |
 | `POST /characters/{id}/portrait` | `set_character_portrait` | = |
 | `POST /vocal-animation`, `GET /vocal-animation/{job_id}` | `create_vocal_animation` + `get_vocal_animation` | = |
@@ -185,7 +194,14 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 | `GET /objects`, `GET /objects/{id}`, `DELETE /objects/{id}` | `list_objects`, `get_object`, `delete_object` | = |
 | `DELETE /objects/{id}/animations` | `delete_animation` (same tool as the character row above — its docstring explicitly covers "a character or object") | = |
 | `PATCH /objects/{id}/tags` | `update_object_tags` | = |
-| `GET /objects/{id}/spritesheet` (ZIP: one packed uniform-grid sheet + layout JSON) | `get_object` `/spritesheet` URL | =, documented download URL |
+| `PATCH /objects/{id}` | `rename_asset` | = |
+| `POST /objects/{id}/duplicate`, `POST /objects/{id}/ungroup` | `manage_state` (`duplicate`/`ungroup`) | = |
+| `POST /objects/{id}/canvas` | `set_canvas_size` | = — character 8–256, object 8–400, multiples of 4. |
+| `POST /objects/{id}/animations/{animation_group_id}/mirror`, `PATCH /objects/{id}/animations/{animation_group_id}` | `mirror_animation`, `rename_asset` with `animation_group_id` | = |
+| `POST /objects/{id}/expand-rotations` | `expand_object_to_8_directions` | = — follows `review-expansion`; keep with `select_object_frames` (no indices) or discard with `dismiss_review`. |
+| `POST /objects/import` | `import_object` | = — free; PNG only, up to 256×256. |
+| `GET /objects/{id}/zip`, `GET /objects/{id}/gif`, `GET /objects/{id}/aseprite` | `export_asset` (`zip`/`gif`/`aseprite`) | = |
+| `GET /objects/{id}/spritesheet` (ZIP: one packed uniform-grid sheet + layout JSON) | `get_object` `/spritesheet` URL; `export_asset(format="spritesheet")` | = |
 | `POST /map-objects`, `GET /map-objects/{id}` | `create_map_object` + `get_map_object` | = core workflow — REST additionally exposes `init_image`, `init_image_strength`, `color_image`, `text_guidance_scale`, and `seed`; MCP has no equivalent parameters for those controls. |
 
 ### Tiles & Tilesets
@@ -193,11 +209,13 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 | REST v2 | MCP tool | Parity |
 |---|---|---|
 | `POST /create-tileset`, `POST /tilesets`, `GET /tilesets`, `GET /tilesets/{id}`, `DELETE /tilesets/{id}` | `create_topdown_tileset`, `get_topdown_tileset`, `list_topdown_tilesets`, `delete_topdown_tileset` | = — both expose `roundness`, `boundary_amplitude`, `boundary_seed`, `step_slope`, and `connect_diagonals` for Pro; standard `shape_style` remains separate. See `tileset.md` for exact restrictions. |
-| `POST /create-tileset-sidescroller`, `POST /tilesets-sidescroller`, `GET /tilesets-sidescroller`, `GET /tilesets-sidescroller/{id}`, `DELETE /tilesets-sidescroller/{id}` | `create_sidescroller_tileset`, `get_sidescroller_tileset`, `list_sidescroller_tilesets`, `delete_sidescroller_tileset` | = standard workflow; MCP-only `mode="pro"`, `enhance`, and Pro `base_tile_id`; REST-only `lower_reference_image`, `transition_reference_image`, and `color_image`. |
+| `POST /create-tileset-sidescroller`, `POST /tilesets-sidescroller`, `GET /tilesets-sidescroller`, `GET /tilesets-sidescroller/{id}`, `DELETE /tilesets-sidescroller/{id}` | `create_sidescroller_tileset`, `get_sidescroller_tileset`, `list_sidescroller_tilesets`, `delete_sidescroller_tileset` | = — both now expose `mode` (`standard`/`pro`), `enhance`, and standard `platform_thickness`; `base_tile_id` is Pro-only. REST-only `lower_reference_image`, `transition_reference_image`, and `color_image`. |
 | `POST /create-isometric-tile`, `GET /isometric-tiles`, `GET /isometric-tiles/{id}`, `DELETE /isometric-tiles/{id}` | `create_isometric_tile`, `list_isometric_tiles`, `get_isometric_tile`, `delete_isometric_tile` | = |
 | `POST /create-tiles-pro`, `GET /tiles-pro`, `GET /tiles-pro/{id}`, `DELETE /tiles-pro/{id}` | `create_tiles_pro`, `get_tiles_pro`, `list_tiles_pro`, `delete_tiles_pro` | = |
 | `POST /create-tiles-pro` (`tile_feature: "roads"`) | `create_path_tiles` (shares `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro` — no dedicated getter) | = |
-| `POST /create-tiles-pro` (`tile_feature: "building"`, `building_*` fields) | `create_building_kit` (shares `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro` — no dedicated getter) | = core workflow; MCP-only `roof_profile` (`gable`/`round`, materials layout only), absent from REST `CreateTilesProRequest` |
+| `POST /create-tiles-pro` (`tile_feature: "building"`, `building_*` fields) | `create_building_kit` (shares `get_tiles_pro`/`list_tiles_pro`/`delete_tiles_pro` — no dedicated getter) | = core workflow; both expose `roof_profile` (`gable`/`round`, materials layout only) |
+| `POST /tilesets/import`, `POST /tiles-pro/import` | `import_tiles` | = — free; a tileset import needs one PixelLab-layout Wang sheet. |
+| `PATCH /tilesets/{id}` | `rename_asset` | = |
 
 `create_tiles_pro` map compatibility depends on the input: omit `tile_height` or use `tile_size` or twice that value. The MCP guide explicitly allows a flat 2:1 isometric floor by omitting `tile_height` and setting `tile_view_angle=30`, `tile_depth_ratio=0`. Independent-tile capacity varies with size and geometry: small non-oblique sheets hold up to 16, while larger/oblique calls can return fewer; confirm the getter's count. That schedule does not apply to connectable sets and is not stated in REST. Both surfaces now estimate generation at 1–2 minutes.
 
@@ -207,12 +225,33 @@ Parity legend (functional, not name-based): **=** covered by a dedicated MCP too
 |---|---|---|
 | `POST /generate-font-pro`, `GET /generate-font-pro/{job_id}` | `create_font` + `get_font` | = — both support `glyph_px` 8/12/16/24/32/64 (default 16); MCP docs specify a 10×8 row-major atlas for the 80-character glyph sequence and no space glyph. |
 | `POST /create-ui-asset`, `GET /ui-assets`, `GET /ui-assets/{id}`, `DELETE /ui-assets/{id}` | `create_ui_asset`, `list_ui_assets`, `get_ui_asset`, `delete_ui_asset` | = |
+| `POST /ui-assets/{id}/split`, `PATCH /ui-assets/{id}` | `update_ui_asset` (`split=true`, `split_boxes`, `nine_slice`, `clear_nine_slice`) plus `rename_asset` for the name field | = |
+| `POST /ui-assets/states` | `create_ui_states` | = — one labelled grid prices the whole set; a completed job names the created state IDs. |
+| `GET /ui-assets/{id}/zip` | `get_ui_asset` download links | =, documented download |
+| `POST /save-to-asset` | `save_to_asset` — replaces a rotation, animation direction, gallery image, or tileset sheet, or adds `gallery:new`; REST returns `previous_frames` for undo | = |
 | `POST /generate-ui-v2` (freeform UI; no `pieces`/`elements`) | — (MCP has no freeform UI generator) | none |
 | `GET /balance` | `get_balance` | = |
 | `GET /background-jobs/{job_id}` | per-resource `get_*` tools | different model |
 | `DELETE /background-jobs/{job_id}` | `cancel_job` | = |
 
-**Note on UI generation.** MCP `create_ui_asset` — structured `pieces`/`elements` with labeled sub-parts — has a full REST equivalent, `POST /create-ui-asset` (same `pieces`/`elements`; as of the 2026-09-08 snapshot MCP also exposes `style_image_base64` and `project_id`, so neither is REST-only any more); that is the `=` row above. REST's *other* UI endpoint, `POST /generate-ui-v2`, is a simpler freeform generator (text + optional `concept_image`, no `pieces`/`elements`) with **no** MCP counterpart — MCP exposes no freeform UI-image tool. Details: [`pixellab-ui-generation-surfaces-research.md`](pixellab-ui-generation-surfaces-research.md).
+**Note on UI generation.** MCP `create_ui_asset` — structured `pieces`/`elements` with labeled sub-parts — has a full REST equivalent, `POST /create-ui-asset`; REST's *other* UI endpoint, `POST /generate-ui-v2`, is a simpler freeform generator with no MCP counterpart. Both surfaces now split a template into elements, generate element states, apply 9-slice insets, and download the result as a ZIP; see [UI Generation Surfaces Research](pixellab-ui-generation-surfaces-research.md).
+
+### Music And Sound Effects
+
+| REST v2 | MCP tool | Parity |
+|---|---|---|
+| `POST /music`, `GET /music`, `GET /music/{id}`, `PATCH /music/{id}`, `DELETE /music/{id}` | `create_music`, `list_music`, `get_music`, `rename_music`, `delete_music` | = — one request makes two takes; 10 generations or $0.08, Tier 2+. MCP also accepts `project_id`, absent from REST. |
+| `POST /music/{id}/loop` | `make_music_loop` | = — a completed instrumental; 4 generations or $0.033. MCP states Tier 2+, REST states Tier 1+. |
+| `POST /music/improve-style`, `POST /music/lyrics` | `improve_music_style`, `write_music_lyrics` | = — 0.05 generations each, synchronous. |
+| `POST /sound-effects`, `GET /sound-effects`, `GET /sound-effects/{id}`, `PATCH /sound-effects/{id}`, `DELETE /sound-effects/{id}` | `create_sound_effect`, `list_sound_effects`, `get_sound_effect`, `rename_sound_effect`, `delete_sound_effect` | = — priced by length; MCP states Tier 2+, REST states Tier 1+. MCP accepts `project_id`, absent from REST. |
+
+Operational details and destructive rules: [audio.md](../../skills/pixellab-pip/references/audio.md).
+
+### Rooms
+
+| REST v2 | MCP tool | Parity |
+|---|---|---|
+| `POST /create-room`, `GET /rooms`, `GET /rooms/{id}`, `DELETE /rooms/{id}`, `POST /rooms/{id}/cut-out-furniture`, `GET /rooms/{id}/kit.zip` | `create_room`, `list_rooms`, `get_room`, `delete_room`, `cut_out_room_furniture`; the kit ZIP comes from `get_room`'s download link | = — Tier 1+, 20 generations painted (25 for `tile_size` 48/64), 10 for furniture pieces. Top-down, isometric, or oblique; oblique has no furniture cutout. `delete_room`/DELETE is destructive. |
 
 **Note on async retrieval and management rows.** Where a `=` row bundles MCP `get_*` / `list_*` helpers against a single REST `POST`, REST retrieval is via `GET /background-jobs/{job_id}` (the generic async poll) plus, where present, a dedicated GET such as `/tilesets/{id}`, `/isometric-tiles/{id}`, `/tiles-pro/{id}`, or `/characters/{id}`. So MCP `get_*` tools are never true gaps. As of the 2026-07-19 snapshot REST v2 also exposes the *list* routes for sidescroller tilesets (`GET /tilesets-sidescroller`) and tiles-pro (`GET /tiles-pro`), and *delete* routes for every tile/tileset family and for managed character animations — so these families now have full create/retrieve/list/delete parity on both surfaces. (Before 2026-07-19 the `list`/`delete` half was MCP-only.)
 
@@ -229,11 +268,11 @@ MCP's model-specific raw-image tools mirror REST's PixFlux, Pixen, Pro, and sepa
 | `POST /generate-image-v2` (Pro) | `create_image_pro` + `get_image` | = — both expose exact palette and per-image color-cap controls under surface-specific names; REST additionally documents beta `smart` and the size-based output-count ladder. |
 | `POST /create-image-pro-flash` (one image, native size) | `create_image_pro_flash` + raw-image job retrieval | =, core workflow |
 | `GET /pro-flash/capabilities` (supported native sizes/controls) | `get_pro_flash_capabilities` | =, core workflow |
-| `POST /generate-with-style-v2` (Pro, style ref) | `create_image_pro` accepts one style image (URL or base64) plus `style_copy`; REST supports 1–4 `style_images` and optional `style_description`, and derives a square output size from the references | ◐ |
+| `POST /generate-with-style-v2` (Pro, 1–4 style refs) | `create_image_pro_from_style` — same 1–4 `style_images`, `style_description`, transparent default, palette/cap, and seed; above a 170px canvas it returns one candidate and accepts exactly one style image, while REST keeps 1–4; REST keeps the deprecated `image_size` field | = with the >170px MCP style-count limit |
 
 ### Image Edit, Convert, Resize
 
-**Re-audit correction:** MCP `edit_image` is the Pro workflow matching `EditImagesV2Request`: it accepts 1–16 edit targets plus optional reference mode, now through preferred URLs or inline base64. Base `EditImageRequest` is text-only and has `color_image`/`text_guidance_scale`, so it remains only partially covered. As of 2026-09-25, `image-to-text` is another REST-only image operation; the Pro converter, resize, and remove-background also remain REST-only.
+**Re-audit correction:** MCP `edit_image` is the Pro workflow matching `EditImagesV2Request`: it accepts 1–16 edit targets plus optional reference mode, now through preferred URLs or inline base64. Base `EditImageRequest` is text-only and has `color_image`/`text_guidance_scale`, so it remains only partially covered. As of 2026-09-25, `image-to-text` is another REST-only image operation; `resize` also remains REST-only. The Pro converter and background removal gained MCP tools in the 2026-11-25 refresh.
 
 | REST v2 | MCP functional counterpart | Parity |
 |---|---|---|
@@ -243,11 +282,11 @@ MCP's model-specific raw-image tools mirror REST's PixFlux, Pixen, Pro, and sepa
 | `POST /edit-image-pixen` (Pixen tier; 1 generation, source ≤256px/side, target area ≤256x256) | `edit_image_pixen` + `get_image` — but the **default diverges**: REST defaults `no_background: true`, while MCP leaves it unset and follows the input (a transparent input stays transparent, an opaque one stays opaque) | = |
 | `POST /image-to-pixelart` | `image_to_pixelart` + `get_image` — MCP `faithful` is REST `fixer`, `output_width`/`output_height` are REST `output_size`, and `init_image_strength`/`text_guidance_scale`/`seed` match | = |
 | `POST /image-to-text` (PixelLab prompt from image) | — no MCP image-to-text tool | none |
-| `POST /image-to-pixelart-pro` (older Pro; no output-size field, native scale auto-detected) | `image_to_pixelart_pro_flash` performs the same native-scale conversion through the separate Pro Flash model/tier | ◐ |
+| `POST /image-to-pixelart-pro` (older Pro; no output-size field, native scale auto-detected) | `image_to_pixelart_pro` + `get_image` — same native-scale detection and optional `description`/palette/seed; MCP prefers URL inputs | = |
 | `POST /image-to-pixelart-pro-flash` (6 generations; detects native scale/output size) | `image_to_pixelart_pro_flash` + `get_image` | =, core workflow |
 | `POST /normal-map` (sprite PNG or horizontal animation strip; `lite` 0.1 or `pro` 0.5 generation when delivered) | `create_normal_map` + `get_image` — MCP also accepts PixelLab asset references and image URLs | = |
 | `POST /resize` | — | none |
-| `POST /remove-background` | generation-time `no_background` only, not post-hoc removal | none |
+| `POST /remove-background` | `remove_background` — takes a URL/reference or base64; REST requires the encoded `image` and `image_size` and caps the source at 400×400 area, while MCP documents no such cap | = with the REST size limit |
 
 ### Inpaint
 
@@ -261,7 +300,7 @@ MCP's model-specific raw-image tools mirror REST's PixFlux, Pixen, Pro, and sepa
 
 ### Cleanup
 
-New in the 2026-09-08 refresh. All three are cheap (MCP documents 0.1 generations each). `correct-pixelart` and `reduce-colors` take one or more same-size frames, so an animation or a character's directions stay consistent with each other; `unzoom` takes a single image. REST returns the corrected images synchronously; MCP queues a job retrieved with `get_image`.
+New in the 2026-09-08 refresh. All three are cheap (MCP documents 0.1 generations each). `correct-pixelart` and `reduce-colors` take one or more same-size frames, so one call can cover an animation; `correct-pixelart` corrects each frame separately (it does not synchronize them), while `reduce-colors` can share one palette across the call. `unzoom` takes a single image. REST returns the corrected images synchronously; MCP queues a job retrieved with `get_image`.
 
 | REST v2 | MCP functional counterpart | Parity |
 |---|---|---|
@@ -283,21 +322,23 @@ MCP `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, and
 | `POST /animate-with-text-v2` (Pro; `reference_image`+`action`; optional shared-frame `target_palette`) | `animate_*(action_description)`; no matching Pro/v2 mode is documented in MCP, `animate_character` has no hex-palette field, and `animate_object` lists one without a mode limit while REST documents it only for `mode="pro"`; managed | ◐ |
 | `POST /animate-with-text-v3` (new; `first_frame`+optional `last_frame`+`action`) | `animate_image` — no managed asset needed; functionally equivalent, but REST additionally exposes `drift_threshold` and `enhance_prompt`, while MCP accepts frame URLs | = |
 | `POST /animate-pixminimax` (Beta; `first_frame`+optional `last_frame`+`description`) | `animate_image_pixminimax` — no managed asset needed; both expose motion enhancement plus caption fields for subject, pose, view, and facing, MCP adds preferred frame URLs, and REST additionally exposes `drift_threshold` | = |
-| `POST /animate-with-skeleton-v3` (Beta; reference image + 3–15 keypoint frames) | `animate_with_skeleton_v3` — raw keypoint sequence, max 256×256; REST additionally exposes `drift_threshold`; MCP retrieves output with `get_image` | = core workflow |
+| `POST /animate-with-skeleton-v3` (Beta; reference + 3–15 keypoint frames, or a custom rig + action-written motion) | `animate_with_skeleton_v3` — raw keypoints, optional custom `rig`, and `write_motion_frames`; max 256×256; REST additionally exposes `drift_threshold`; MCP retrieves output with `get_image` | = core workflow |
 | `POST /interpolation-v2` (Pro; *required* `start_image`+`end_image`) | `animate_image(first_frame_base64, last_frame_base64)` reaches the same start+end capability — but that `last_frame_base64` is `animate-with-text-v3`'s own optional `last_frame`, so this is the v3 model doing interpolation, not the Pro `interpolation-v2` model | ◐ |
 | `POST /generate-8-rotations-v2` (Pro; rotate/style/concept methods) | `create_character(mode="v3", reference_image_url/base64)` rotates the exact character sprite into managed directions; `create_8_direction_object` covers 8-direction object creation but does not expose REST's method selector | ◐ |
-| `POST /generate-8-rotations-v3` | `create_character(mode="v3", reference_image_url/base64)` rotates the exact character sprite, but persists it as a managed character; MCP has no matching raw-image result workflow | ◐ |
-| `POST /edit-animation-v2` (Pro; same edit across all frames) | `edit_image` applies the same text edit consistently to a list of images/frames; it is a broader Pro image-edit tool, not the dedicated animation endpoint | ◐ |
+| `POST /generate-8-rotations-v3` (raw 8 directions from one view, optional `direction_images`/`first_frame_direction`/`view`) | `rotate_image` — loose raw 8 directions from a URL/base64 sprite, with optional `direction_images` and `view`; MCP adds URL inputs | = |
+| `POST /edit-animation-v2` (Pro; same edit across all frames) | `edit_animation` — same per-frame text edit, with managed animation references and URL/base64 frames | = |
 | `POST /transfer-outfit-v2` (Pro) | `transfer_outfit` — reskins two or more animation frames with a same-character outfit reference; both are composited-frame workflows | = |
 | `POST /animate-with-skeleton` (`skeleton_keypoints`, legacy three-frame shape) | — no equivalent MCP tool; Skeleton v3 uses a different request contract | none |
-| `POST /estimate-skeleton` | — | none |
-| `POST /rotate` (single arbitrary rotation) | — | none |
+| `POST /estimate-skeleton` | `estimate_skeleton` — same one-pose humanoid estimate; MCP accepts asset references and URLs | = |
+| `POST /estimate-custom-skeleton` | `estimate_custom_skeleton` — custom rig built for a non-humanoid sprite and placed on 1–16 frames | = |
+| `POST /rotate` (single arbitrary rotation / view change) | — MCP `rotate_image` produces 8 directions, not an arbitrary-degree transform | none |
 
 ### Animated VFX
 
 | REST v2 | MCP functional counterpart | Parity |
 |---|---|---|
 | `POST /vfx` (description-driven effects artist, `lite`/`pro`; optional sprite; `effect_id` changes save over a saved effect) | `vfx_workbench` — same saved-effect family (GIF, spritesheet PNG/JSON, game-pack ZIP, reopen by effect ID), but the agent composes it with commands | ◐ |
+| `GET /vfx/effects`, `DELETE /vfx/effects/{effect_id}` | `vfx_workbench` commands `effects` / `delete <effect id>` | = |
 
 ### Prompt Enhancement
 
@@ -323,7 +364,7 @@ The MCP docs also provide direct downloads for top-down tilesets (`/mcp/tilesets
 
 This is the core deliverable. These REST v2 operations lack full MCP parity. Rows marked ◐ have a narrower or broader MCP workflow with material differences; rows marked none have no documented MCP overlap. Route to REST v2 when its unmatched controls or workflow are needed.
 
-### 1. Raw image generation (3) — BitForge and freeform UI have no MCP overlap; multi-image style generation has narrower MCP support
+### 1. Raw image generation (2) — BitForge and freeform UI have no MCP overlap
 
 MCP briefly shipped one generic `create_image` tool on 2026-07-26, then split it the same day (21:03 follow-up) into `create_image_pixflux`, `create_image_pixen`, and `create_image_pro`, each needing no managed asset and matching its REST counterpart field-for-field — closing four of the seven rows below outright (a re-audit found the fourth: `create-image-pixflux-background` uses the byte-identical `CreateImagePixfluxRequest` schema, confirmed from the raw OpenAPI path definitions, not just a same-named coincidence):
 
@@ -332,18 +373,18 @@ MCP briefly shipped one generic `create_image` tool on 2026-07-26, then split it
 - `POST /create-image-pixflux-background` — = full parity: same tool, same schema (`CreateImagePixfluxRequest`) — this is a second URL for the identical operation, not a distinct model
 - `POST /create-image-bitforge` — none: no MCP tool has `coverage_percentage` (BitForge's one unique control), `skeleton_keypoints`/`skeleton_guidance_scale` pose guidance, or its `inpainting_image`/`mask_image`/`style_image`/`style_strength` combination
 - `POST /generate-image-v2` (Pro) — = functional parity: `create_image_pro` + `get_image`; MCP also accepts reference/style URLs
-- `POST /generate-with-style-v2` (Pro, style reference) — ◐ partial: MCP `create_image_pro` accepts one style image with `style_copy`; REST accepts 1–4 `style_images` and optional `style_description`, and derives a square output size from the references
-- `POST /generate-ui-v2` (freeform UI image; no `pieces`/`elements`) — none: MCP's only UI tool, `create_ui_asset`, is a structured panel builder (its REST twin is `create-ui-asset`), not a freeform generator, and lacks `concept_image`; MCP has no `generate-ui-v2` equivalent
+- `POST /generate-with-style-v2` (Pro, 1–4 style references) — = functional parity: `create_image_pro_from_style` takes the same 1–4 `style_images`, optional `style_description`, palette/cap, and seed; MCP adds URL inputs
+- `POST /generate-ui-v2` (freeform UI image; no `pieces`/`elements`) — none: MCP's only UI tools are the structured `create_ui_asset` family (its REST twin is `create-ui-asset`) and the freeform-generator gap remains
 
-### 2. Image edit / convert / resize / prompt description (5) — MCP's Pro edit tool is edit-images-v2, not base edit-image
+### 2. Image edit / convert / resize / prompt description (3) — MCP's Pro edit tool is edit-images-v2, not base edit-image
 
 **Re-audit correction:** MCP `edit_image` is tagged **"(pro)"** in its own description and takes a *list* of images plus an optional reference-image mode switch — that shape matches `EditImagesV2Request` (`edit_images` list of 1-16 + `method`: text/reference + `reference_image`), not base `EditImageRequest` (single `image`, text-only, has `color_image`/`text_guidance_scale` that `edit_image` lacks). So `edit-images-v2` is the full `=` match; base `edit-image` is ◐ (a scoped subset of the broader Pro tool). Still REST-only or partial:
 
 - `POST /edit-image` (base) — ◐ partial: `edit_image` can perform a single-image, text-only edit as a subset of its range, but is the Pro/batch tool, not a dedicated base-tier match. Note this is *not* the cheap MCP edit path either — `edit_image_pixen` (2026-09-08, 1 generation) is, and it matches `edit-image-pixen`, a different endpoint again
-- `POST /image-to-pixelart-pro` (older Pro) — ◐ partial: MCP `image_to_pixelart_pro_flash` performs the same automatic native-scale conversion, but uses the separate Pro Flash model/tier
 - `POST /image-to-text` — returns a PixelLab-ready text description from an image; no MCP tool is documented
 - `POST /resize`
-- `POST /remove-background`
+
+Note: `remove-background` now has MCP `remove_background`, and `image-to-pixelart-pro` now has MCP `image_to_pixelart_pro`; both are `=` matches in the Coverage Matrix, with the REST background-removal 400×400 limit noted there.
 
 Note: MCP `create_map_object` may accept `background_image` / `inpainting` parameters. Those are map-object generation controls, not generic replacements for `edit-image` or `inpaint`.
 
@@ -353,19 +394,18 @@ Note: MCP `create_map_object` may accept `background_image` / `inpainting` param
 
 - `POST /inpaint` (base) — ◐ partial: `inpaint_image` covers the core mask-regenerate job but lacks base's extra weak-guidance generation controls, and is fundamentally the Pro-shaped tool, not a dedicated base-tier match
 
-### 4. Raw animation, rotation, skeleton (9) — MCP now has standalone raw-animation and outfit-transfer tools
+### 4. Raw animation, rotation, skeleton (6) — MCP now has standalone raw-animation, frame-edit, rotation, and estimator tools
 
-MCP `animate_image` animates an arbitrary supplied image directly from frame URLs or inline base64, closing the core `animate-with-text-v3` gap and partially covering interpolation at v3 tier. MCP `edit_image` also applies one edit consistently across a list of frames, partially covering `edit-animation-v2`. MCP `transfer_outfit` now covers the documented animation outfit-transfer workflow. MCP `animate_character` / `animate_object` separately require managed assets. Fully REST-only: legacy skeleton estimation/animation and single-image rotate.
+MCP `animate_image` animates an arbitrary supplied image directly from frame URLs or inline base64, closing the core `animate-with-text-v3` gap and partially covering interpolation at v3 tier. MCP `edit_animation` now covers the dedicated frame edit, `rotate_image` covers loose 8-direction rotation, and both estimators are exposed. MCP `transfer_outfit` covers the documented animation outfit-transfer workflow. MCP `animate_character` / `animate_object` separately require managed assets. Fully REST-only: legacy skeleton animation and the arbitrary-degree rotate.
 
 - `POST /animate-with-text` (base/legacy; `reference_image`+`action`) — ◐ partial: capability covered by MCP `animate_*` `action_description` (modern `mode="v3"`), managed asset only — `reference_image`'s subject/style role has no match on raw `animate_image` either
 - `POST /animate-with-text-v2` (Pro; `reference_image`+`action`) — ◐ partial: same as above, and MCP documents no matching Pro/v2 mode, so the version match is unconfirmed; managed asset only
 - `POST /interpolation-v2` (Pro; *required* `start_image`+`end_image`) — ◐ partial: MCP `animate_image(first_frame_base64, last_frame_base64)` covers the capability with no managed asset needed, but `last_frame_base64` is `animate-with-text-v3`'s own optional `last_frame` field — so it is the v3 model interpolating, not the Pro `interpolation-v2` model; `animate_*(mode="v3", custom_start_frame_base64, end_frame_base64)` covers the managed-asset case
 - `POST /generate-8-rotations-v2` (Pro) — ◐ partial: MCP `create_character(mode="v3", reference_image_url/base64)` rotates an exact character sprite into managed directions; `create_8_direction_object` creates eight object views but does not expose REST's `method` selector
-- `POST /generate-8-rotations-v3` — ◐ partial: MCP v3 rotates the exact character sprite, but stores the result as a managed character; it has no matching raw-image result workflow
-- `POST /edit-animation-v2` (Pro) — ◐ partial: MCP `edit_image` applies the same text edit consistently across a list of frames, but does not expose REST's dedicated animation endpoint or its shared `target_palette` control
 - `POST /animate-with-skeleton` (`skeleton_keypoints`, legacy three-frame shape) — fully REST-only; MCP Skeleton v3 uses a different request contract
-- `POST /estimate-skeleton` — fully REST-only
-- `POST /rotate` (single arbitrary rotation) — fully REST-only
+- `POST /rotate` (single arbitrary rotation) — fully REST-only; MCP `rotate_image` makes 8 directions instead
+
+`generate-8-rotations-v3`, `edit-animation-v2`, `estimate-skeleton`, and `estimate-custom-skeleton` now have full MCP counterparts (`rotate_image`, `edit_animation`, `estimate_skeleton`, `estimate_custom_skeleton`) and appear in the matrix instead.
 
 There is no public raw *4-rotation batch* route: the batch rotation routes are 8-direction only. The *managed object* animation endpoint `/objects/{id}/animations` is a full `=` match to MCP `animate_object`. Managed character routes share template, Skeleton v3, v3, and PixMiniMax modes but retain REST-only `pro`, so those partial differences are listed under managed-character route differences above. `animate-with-text-v3`, raw `animate-pixminimax`, and Skeleton v3 are full `=` matches via `animate_image`, `animate_image_pixminimax`, and `animate_with_skeleton_v3`; they do not appear in the raw-animation gap list.
 
@@ -392,7 +432,7 @@ MCP exposes `search_help` for docs Q&A, which is not a prompt rewriter:
 
 ### 9. Animated VFX (1)
 
-- `POST /vfx` — ◐ partial: MCP `vfx_workbench` makes and saves the same kind of animated effect, but it is agent-authored; no MCP tool runs PixelLab's description-driven effects artist. PixelLab's REST description itself recommends the MCP workbench for agents.
+- `POST /vfx` — ◐ partial: MCP `vfx_workbench` makes and saves the same kind of animated effect, but it is agent-authored; no MCP tool runs PixelLab's description-driven effects artist. `GET/DELETE /vfx/effects` have MCP counterparts in the workbench's `effects`/`delete` commands.
 
 ### Not counted as asset gaps
 
@@ -400,35 +440,32 @@ MCP exposes `search_help` for docs Q&A, which is not a prompt rewriter:
 - `GET /llms.txt` — the docs index itself, not an asset operation.
 - `GET /pro-flash/cost` — REST's provisional operation/size/direction estimate. MCP documents the same price-check purpose through its existing capability lookup, without a separate tool; actual charged usage belongs to the completed job.
 
-**Total: 27 public REST v2 operations without a full, dedicated MCP match** (3 image gen + 5 edit/convert/description + 1 inpaint + 9 raw animation/rotation + 3 managed-character differences + 3 prompt enhance + 1 managed-character ZIP export + 1 talking-portrait route + 1 animated VFX route). Sixteen have partial overlap: `create-character-pro`, `generate-with-style-v2`, base `edit-image`, `image-to-pixelart-pro`, base `inpaint`, `animate-with-text`, `animate-with-text-v2`, `interpolation-v2`, `generate-8-rotations-v2`, `generate-8-rotations-v3`, `edit-animation-v2`, `characters/{id}/zip`, stateless `lip-sync`, both managed character-animation endpoints' REST `pro` mode, and `vfx`.
+**Total: 21 public REST v2 operations without a full, dedicated MCP match** (2 image gen + 3 edit/convert/description + 1 inpaint + 6 raw animation/rotation + 3 managed-character differences + 3 prompt enhance + 1 managed-character ZIP export + 1 talking-portrait route + 1 animated VFX route). Twelve have partial overlap: `create-character-pro`, base `edit-image`, base `inpaint`, `animate-with-text`, `animate-with-text-v2`, `interpolation-v2`, `generate-8-rotations-v2`, `characters/{id}/zip`, stateless `lip-sync`, `animate-character`, `characters/animations`, and `vfx`.
 
 ## MCP Tools With No REST v2 Counterpart
 
-The mirror of the gap list above: MCP tools without a documented public REST v2 counterpart. Of the 122 MCP tools in the snapshot, 44 have no documented REST v2 counterpart: 37 map/platform tools, four room tools, two gallery/asset-save tools, and PixelArt Workbench. The 2026-11-06 refresh added MCP-only `list_rooms`; the 2026-10-19 refresh added MCP-only `place_map_tiles`, while `vfx_workbench` now has the partial REST counterpart `POST /vfx` and leaves this list.
+The mirror of the gap list above: MCP tools without a documented public REST v2 counterpart. Of the 156 MCP tools in the snapshot, 42 have no documented REST v2 counterpart: 40 map/platform tools, one gallery-listing tool, and PixelArt Workbench. Rooms and `save_to_asset` left this list in the 2026-11-25 refresh, which added their REST routes.
 
-### Maps, platform, agent, sandbox, chat (37) — genuinely MCP-only
+### Maps, platform, agent, sandbox, chat (40) — genuinely MCP-only
 
 No public REST v2 art API covers these; they exist only as MCP tools. Every platform tool except `get_balance` (which maps to `GET /balance`) is here. There is no REST fallback to offer — if these tools are not visible, the capability is unavailable.
 
-- **Maps (new in the 2026-09-08 refresh; `place_map_tiles` added 2026-10-19):** `create_map`, `delete_map`, `list_maps`, `get_map`, `edit_map`, `view_map`, `place_map_tiles`, `place_map_object`, `list_map_objects`, `move_map_object`, `remove_map_object`
-- **Projects:** `list_projects`, `add_to_project` (accepts characters, objects, tilesets, maps, rooms, gallery images, and saved VFX effect IDs in game or folder projects), `remove_from_project`
+- **Maps (new in the 2026-09-08 refresh; `place_map_tiles` added 2026-10-19; `inpaint_map` and `edit_map_areas` added 2026-11-25):** `create_map`, `delete_map`, `list_maps`, `get_map`, `edit_map`, `view_map`, `inpaint_map`, `edit_map_areas`, `place_map_tiles`, `place_map_object`, `list_map_objects`, `move_map_object`, `remove_map_object`
+- **Projects:** `list_projects`, `manage_project`, `add_to_project` (accepts characters, objects, tilesets, maps, rooms, gallery images, and saved VFX effect IDs in game or folder projects), `remove_from_project`
 - **Chat (game-building agent):** `chat_list_conversations`, `chat_get_messages`, `chat_send_message`
 - **Sandbox (code execution + deploy):** `sandbox_create_session`, `sandbox_destroy_session`, `sandbox_bash`, `sandbox_run`, `sandbox_read`, `sandbox_read_image`, `sandbox_write`, `sandbox_edit`, `sandbox_sync`, `sandbox_deploy_worker`, `sandbox_undeploy`, `sandbox_playtest`
 - **Deployed agents:** `agent_list`, `agent_inspect`, `agent_talk`
 - **Job control:** `list_jobs`, `wait_for_jobs` — REST now matches cancellation with `DELETE /background-jobs/{job_id}`, but still has no active-job list or all-jobs wait
 - **MCP meta:** `search_help` (docs Q&A), `agent_feedback`, `search_knowledge` (Phaser/game-dev knowledge base)
 
-**Maps are now a real public surface.** Before the 2026-09-08 refresh no public map CRUD was documented anywhere, and map work meant the website Map Workshop. MCP now creates a map from a top-down tileset (`create_map`, which also attaches every connected tileset sharing that tile size and base tile), paints terrain with `edit_map` `path`/`rect` ops over negative-capable cell coordinates (with `dry_run` to preview without saving), reads it back as an ASCII grid (`get_map`) or a rendered image (`view_map`), and places, moves, lists, or removes objects and characters on it. `edit_map` with an empty `ops` list paints nothing and attaches library tilesets that blend any two map terrains, including terrains not yet painted. Since 2026-10-19, `create_map` can instead start a tile map from a tiles-pro, path, or building tile group (`tile_group_id`), and `place_map_tiles` places, stacks (levels 0–63), or erases that group's tiles on tile layers, adds further groups, and supports `dry_run`; erasing at a level also removes everything stacked above it. The latest MCP docs add exact world-pixel placement with `foot` or `top_left` anchors and atomic multi-placement batches; moves can set a new layer without changing the stored position. REST v2 still has no map CRUD or placement routes.
+**Maps are now a real public surface.** Before the 2026-09-08 refresh no public map CRUD was documented anywhere, and map work meant the website Map Workshop. MCP now creates a map from a top-down tileset (`create_map`, which also attaches every connected tileset sharing that tile size and base tile), paints terrain with `edit_map` `path`/`rect` ops over negative-capable cell coordinates (with `dry_run` to preview without saving), regenerates one rectangular area with `inpaint_map` (not for sidescroller maps or maps with tile layers), declares walkable/blocking terrain layers with `edit_map_areas`, reads it back as an ASCII grid (`get_map`) or a rendered image (`view_map`), and places, moves, lists, or removes objects and characters on it. `edit_map` with an empty `ops` list paints nothing and attaches library tilesets that blend any two map terrains, including terrains not yet painted. Since 2026-10-19, `create_map` can instead start a tile map from a tiles-pro, path, or building tile group (`tile_group_id`), and `place_map_tiles` places, stacks (levels 0–63), or erases that group's tiles on tile layers, adds further groups, and supports `dry_run`; erasing at a level also removes everything stacked above it. The latest MCP docs add exact world-pixel placement with `foot` or `top_left` anchors and atomic multi-placement batches; moves can set a new layer without changing the stored position. REST v2 still has no map CRUD or placement routes.
 
 Handle these per [`mcp-platform-tools.md`](../../skills/pixellab-pip/references/mcp-platform-tools.md) — most are account reads or state-changing actions that need explicit approval.
 
-### Rooms (4) — MCP-only
+### Formerly MCP-only, now on REST too
 
-`create_room` paints a furnished top-down, isometric, or oblique room, `get_room` returns progress and completed art/downloads, `list_rooms` lists existing rooms, and `cut_out_room_furniture` optionally extracts movable furniture for the website room editor. Tier 2+ is required; painting costs 20 generations and pieces add 10. Top-down, isometric and oblique use the same 7×6 grid of 32px floor cells, with view-specific rendered sizes; oblique draws walls, doors and floor only and requires `pieces=false`. A `style_room_id` must use the same view. There are no public REST room endpoints. Operational constraints belong in [Scenes and Backgrounds](../../skills/pixellab-pip/references/scenes-and-backgrounds.md#furnished-rooms).
-
-### Formerly MCP-only, now on REST too (as of 2026-07-19)
-
-The 2026-07-19 snapshot added REST routes for the `delete` / `list` lifecycle helpers this section previously listed as MCP-only, so they are no longer gaps: `delete_topdown_tileset` (`DELETE /tilesets/{id}`), `delete_sidescroller_tileset` (`DELETE /tilesets-sidescroller/{id}`), `delete_isometric_tile` (`DELETE /isometric-tiles/{id}`), `delete_tiles_pro` (`DELETE /tiles-pro/{id}`), `delete_animation` (`DELETE /characters/{id}/animations`), `list_sidescroller_tilesets` (`GET /tilesets-sidescroller`), `list_tiles_pro` (`GET /tiles-pro`).
+- The 2026-11-25 snapshot added the room family on REST (`create-room`, `rooms` list/get/delete, `rooms/{id}/cut-out-furniture`, `rooms/{id}/kit.zip`) and `POST /save-to-asset`, so rooms and `save_to_asset` are no longer gaps; both appear in the Coverage Matrix.
+- The 2026-07-19 snapshot added REST routes for the `delete` / `list` lifecycle helpers this section previously listed as MCP-only: `delete_topdown_tileset` (`DELETE /tilesets/{id}`), `delete_sidescroller_tileset` (`DELETE /tilesets-sidescroller/{id}`), `delete_isometric_tile` (`DELETE /isometric-tiles/{id}`), `delete_tiles_pro` (`DELETE /tiles-pro/{id}`), `delete_animation` (`DELETE /characters/{id}/animations`), `list_sidescroller_tilesets` (`GET /tilesets-sidescroller`), `list_tiles_pro` (`GET /tiles-pro`).
 
 ### Not counted as MCP-only
 
@@ -439,25 +476,25 @@ The 2026-07-19 snapshot added REST routes for the `delete` / `list` lifecycle he
 
 `pixelart_workbench` is the model-authored pixel-art command tool. It accepts PixelLab IDs and supported image references, not local paths, and has no public REST route. The 0.4.125 announcement reports lower token use from PixelLab's testing; that estimate was not independently measured here. For the accepted input forms and live help contract, see the [PixelArt Workbench reference](../../skills/pixellab-pip/references/pixelart-workbench.md).
 
-### Gallery and asset save (2) — MCP-only
+### Gallery listing (1) — MCP-only
 
-`list_images` reads the Creator gallery and `save_to_asset` writes a generated or edited image into a character, object, animation direction, gallery entry, or an existing top-down or sidescroller tileset. Tileset saves replace the full sheet while keeping its ID and tile layout; no public REST v2 endpoint documents these operations. `save_to_asset` can replace existing remote content, so apply SKILL.md's explicit destructive-action gate before using it on an existing target.
+`list_images` reads the Creator gallery. REST `POST /save-to-asset` now matches MCP `save_to_asset` for writing a generated or edited image into a character, object, animation direction, gallery entry, or an existing top-down or sidescroller tileset; tileset saves replace the full sheet while keeping its ID and tile layout. `save_to_asset` can replace existing remote content, so apply SKILL.md's explicit destructive-action gate before using it on an existing target.
 
-**Total: 44 MCP tools without a documented REST v2 counterpart** — 37 in map/platform layers, four room tools, two gallery/asset-save tools, and one PixelArt Workbench tool. The 2026-11-06 refresh added `list_rooms` to the room tools; the 2026-11-02 refresh added the other three. Version 0.4.125 added `remove_from_project`, `wait_for_jobs`, and `pixelart_workbench`; the 2026-10-03 refresh added `list_images` and `save_to_asset`; the 2026-10-11 refresh added `vfx_workbench`, which left this list when REST `POST /vfx` appeared on 2026-10-19 (partial parity; see Animated VFX above); the same refresh added `place_map_tiles`. The new Skeleton v3 tool and `transfer_outfit` have REST counterparts and are counted as parity.
+**Total: 42 MCP tools without a documented REST v2 counterpart** — 40 in map/platform layers, one gallery-listing tool, and one PixelArt Workbench tool. The 2026-11-25 refresh added `inpaint_map`, `edit_map_areas`, and `manage_project`, and removed rooms and `save_to_asset` when their REST routes appeared. The 2026-11-06 refresh added `list_rooms` to the room tools; the 2026-11-02 refresh added the other three. Version 0.4.125 added `remove_from_project`, `wait_for_jobs`, and `pixelart_workbench`; the 2026-10-03 refresh added `list_images` and `save_to_asset`; the 2026-10-11 refresh added `vfx_workbench`, which left this list when REST `POST /vfx` appeared on 2026-10-19 (partial parity; see Animated VFX above); the same refresh added `place_map_tiles`. The new Skeleton v3 tool and `transfer_outfit` have REST counterparts and are counted as parity.
 
 ## Routing Implications
 
 These follow from the gaps above and are already encoded in SKILL.md's Intent Router and Surface Rules — this section states *why*, not new rules:
 
-- Category 1's BitForge/freeform UI gaps and partial multi-image style route, category 2's base `edit-image` (◐, not a dedicated match — route there when the extra `color_image`/`text_guidance_scale` controls matter, or when `edit_image_pixen` is too small and Pro-tier `edit_image` overreaches), its partial older Pro converter (`image-to-pixelart-pro`; MCP Pro Flash performs the same conversion on a different tier), and the remaining `resize`/`remove-background` gaps, category 3's base `inpaint` (◐, same reasoning — its weak-guidance controls aren't on `inpaint_image`), and category 5 are why the Intent Router still sends those specific operations to REST v2 even in an MCP-enabled agent.
-- Category 4 no longer means a user asking to "animate this sprite I attached" is REST-only — MCP `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, and `transfer_outfit` animate or transform raw supplied frames directly. `edit_image` also applies one edit consistently across frame lists, with REST retaining the dedicated animation endpoint and its `target_palette` control. Legacy skeleton estimation/animation and single-image rotate remain REST-only.
-- Managed asset types (character, object, tileset, tile, font, UI asset, map object) are the overlap zone: prefer MCP when its tools are visible, fall back to the matching REST endpoint otherwise. Raw-image generate/edit/inpaint/animate are now a second overlap zone: MCP covers PixFlux, Pixen, and Pro-tier generate/edit/inpaint/animate; REST remains necessary for BitForge, multi-image style controls, base (non-Pro) edit/inpaint controls, and the older Pro image-to-pixel-art tier when its model matters.
-- The 2026-09-08 Cleanup family (`correct-pixelart`, `reduce-colors`, `unzoom`) and `image-to-pixelart` are a third overlap zone with full parity both ways, so an MCP-first agent no longer has to fall back to REST — or to a labeled local fallback — for palette reduction, unzooming, or pixel-art clean-up. Maps, gallery browsing/save-back, and active-job list/all-job wait are the reverse case: MCP-only, with no REST route to offer if the tools are not visible; job cancellation itself is now shared.
+- Category 1's BitForge/freeform UI gaps, category 2's base `edit-image` (◐, not a dedicated match — route there when the extra `color_image`/`text_guidance_scale` controls matter, or when `edit_image_pixen` is too small and Pro-tier `edit_image` overreaches) and `resize`, category 3's base `inpaint` (◐, same reasoning — its weak-guidance controls aren't on `inpaint_image`), and category 5 are why the Intent Router still sends those specific operations to REST v2 even in an MCP-enabled agent. Multi-image style generation and the older Pro converter are no longer REST-only; they use `create_image_pro_from_style` and `image_to_pixelart_pro`.
+- Category 4 no longer means a user asking to "animate this sprite I attached" is REST-only — MCP `animate_image`, `animate_image_pixminimax`, `animate_with_skeleton_v3`, and `transfer_outfit` animate or transform raw supplied frames directly. `edit_animation` also applies one edit consistently across frame lists, with REST retaining the dedicated animation endpoint and its `target_palette` control. Legacy skeleton animation and single-image rotate remain REST-only.
+- Managed asset types (character, object, tileset, tile, font, UI asset, map object) are the overlap zone: prefer MCP when its tools are visible, fall back to the matching REST endpoint otherwise. Raw-image generate/edit/inpaint/animate are now a second overlap zone: MCP covers PixFlux, Pixen, Pro-tier generate/edit/inpaint/animate, multi-image style references, the Pro converter, and background removal; REST remains necessary for BitForge and base (non-Pro) edit/inpaint controls.
+- The 2026-09-08 Cleanup family (`correct-pixelart`, `reduce-colors`, `unzoom`) and `image-to-pixelart` are a third overlap zone with full parity both ways, so an MCP-first agent no longer has to fall back to REST — or to a labeled local fallback — for palette reduction, unzooming, or pixel-art clean-up. Maps, gallery listing, and active-job list/all-job wait are the reverse case: MCP-only, with no REST route to offer if the tools are not visible; job cancellation and gallery save-back are now shared.
 - Pro Flash adds a fourth overlap zone for one-image creation, character/object rotations, editing, masked editing, and image-to-pixel-art conversion. It is not a new default: prices are provisional, no quality test was run, and the exact-mask promise has not been verified. Check native dimensions and the price split with MCP `get_pro_flash_capabilities`, or REST capabilities plus `/pro-flash/cost`, before seeking approval; use completed-job usage as the charge.
 
 ## Caveats
 
-- Snapshot-bound: the MCP inventory and REST index/OpenAPI were refreshed on 2026-11-06 (UTC). Counts cover 102 REST path templates (113 operations), 275 schema components, and 122 MCP tools; field descriptions and behavior can change without affecting these counts. Both surfaces can drift; the doc-watch cache workflow ([`pixellab-doc-watch-cache.md`](pixellab-doc-watch-cache.md)) is how drift is detected.
+- Snapshot-bound: the MCP inventory and REST index/OpenAPI were refreshed on 2026-11-25 (UTC). Counts cover 140 REST path templates (164 operations), 347 schema components, and 156 MCP tools; field descriptions and behavior can change without affecting these counts. Both surfaces can drift; the doc-watch cache workflow ([`pixellab-doc-watch-cache.md`](pixellab-doc-watch-cache.md)) is how drift is detected.
 - MCP↔REST are not guaranteed pixel-identical for the same prompt/seed even where parity is `=`; treat them as one workflow family with overlapping controls, not field-for-field twins. REST generally exposes the fuller documented schema, but Pro Flash MCP adds URL/source-ID inputs and a capability-based price check, while REST has a dedicated cost-estimator route. Pro Flash's image provider explicitly does not promise deterministic output from a recorded seed.
 - Re-audit correction (2026-10-08): the refreshed MCP `create_character` schema now supports v3 reference images for quadrupeds when `body_type="quadruped"` and the matching `template` are supplied, closing the former REST/MCP reference gap. MCP v3 without a reference image is now documented as humanoid-only; quadruped text creation remains available in standard and Pro modes. REST supports matching quadruped `template_id` references. `create-character-pro` is partial: both surfaces accept concept images, while REST retains the Pro-route `method` selector and `style_description` controls that MCP lacks; MCP's exact-sprite rotation is on its separate v3 workflow. Managed character animation also has a mode-level gap: REST retains legacy `mode="pro"`, while current MCP `animate_character` offers template, Skeleton v3, v3, and PixMiniMax. Custom Skeleton v3 additionally differs in motion authoring as described in the current refresh note and matrix.
 - This spike compares only public REST v2 and public MCP. Website/Map Workshop, Pixelorama/editor, Aseprite-extension, and legacy v1 routes are out of scope here; see [User-Facing Term To Backend Mapping](pixellab-user-facing-term-backend-mapping.md) for those surfaces.

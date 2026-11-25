@@ -14,13 +14,13 @@ For flat exterior backgrounds, first try the bundled deterministic helper:
 python assets/background_removal.py input.png output.png --report report.json
 ```
 
-Run it on the original failed generation. The helper removes only edge-connected background, then analyzes enclosed background-colored components as uncertainty signals. Use the output only when its JSON report says `local_result_status: passed_conservative_checks` and visual verification confirms it preserved the requested art. If the report says `needs_pixellab_fallback`, continue to PixelLab `/remove-background` with the original failed generation.
+Run it on the original failed generation. The helper removes only edge-connected background, then analyzes enclosed background-colored components as uncertainty signals. Use the output only when its JSON report says `local_result_status: passed_conservative_checks` and visual verification confirms it preserved the requested art. If the report says `needs_pixellab_fallback`, continue to PixelLab `remove_background` (REST `POST /remove-background` fallback) with the original failed generation.
 
 For non-default flat backgrounds, pass `--bg-color R,G,B` instead of auto-sampling. Use `--tolerance` only for near-flat compression or anti-alias variation, kept conservative so art pixels sharing the background color survive. Run `--help` for the full tuning surface before changing enclosed-component or outline thresholds.
 
-If the helper cannot execute, such as missing Python, missing Pillow, a file error, or an ambiguous background-sampling error, skip further local guessing and use PixelLab `POST /remove-background` with the original failed generation as the image input. If local removal leaves enclosed background inside holes, loops, handles, straps, or similar negative spaces, do not globally remove the color when it may also appear in the art; use PixelLab fallback unless the user explicitly approves a different source or repair path.
+If the helper cannot execute, such as missing Python, missing Pillow, a file error, or an ambiguous background-sampling error, skip further local guessing and use PixelLab `remove_background` (REST `POST /remove-background`) with the original failed generation as the image input. If local removal leaves enclosed background inside holes, loops, handles, straps, or similar negative spaces, do not globally remove the color when it may also appear in the art; use PixelLab fallback unless the user explicitly approves a different source or repair path.
 
-For PixelLab `/remove-background`, always set `background_removal_task` to `remove_simple_background` for PixelLab Pip background-failure recovery.
+For PixelLab background removal, always set `background_removal_task` to `remove_simple_background` for PixelLab Pip background-failure recovery. MCP `remove_background` accepts a URL/reference or base64 plus an optional `description`; REST requires the base64 image and its `image_size`, and caps the source at 400×400 area. Prefer MCP for a larger sprite when it is visible.
 
 If safe background removal cannot be achieved, report the output as a failed candidate and ask how to proceed. Do not spend credits on another generation or edit unless the user approves the retry.
 

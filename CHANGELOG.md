@@ -7,8 +7,14 @@ All notable changes to PixelLab Pip are listed here, newest first. The format fo
 
 ## [Unreleased]
 
+### Added
+
+- **Generate game music and sound effects.** Route music from a style (two takes), seamless loops, restyle, lyrics, and sound effects through the matching MCP tools or REST `/music` and `/sound-effects` routes, with documented prices, tier statements, polling, and destructive-delete approval. The completion chime stays separate.
+- **Cover the expanded stored-asset, UI, and skeleton surfaces.** Add routing for character/object rename, duplicate/ungroup, canvas resize, animation mirroring, 8-direction expansion, imports, and GIF/`.aseprite`/ZIP export; UI template split, element states, 9-slice, and ZIP; custom skeleton estimation; and fixes for multi-image style, background removal, the Pro converter, animation editing, and loose 8-direction rotation.
+
 ### Changed
 
+- **Sync public contracts after the 2026-11-25 refresh.** REST is now 140 paths (164 operations) and 347 schemas; MCP has 156 tools. Rooms and `save-to-asset` now have REST routes; sidescroller tilesets expose `mode`/`enhance`/`platform_thickness` and cap `transition_size` at 0.5; object animation and vocal generation add PixMiniMax modes; tilesets add 24px standard sizes and new geometry controls. Remaining one-sided gaps are 21 REST-only/partial operations and 42 MCP-only tools.
 - **Hold weapons naturally in strict overhead characters.** The text-only MVP blueprint now uses a weapon-grip prompt that faces the top edge, with tested grips for melee weapons, one-handed guns and long guns, so weapons sit at the right side pointing forward instead of being held out centered like a gift. Add a PixMiniMax animation MVP blueprint with tested walk, idle, run and attack templates: walk and idle provisionally passed on pistol, rifle and melee sprites, while run and attacks remain uncertain. Attacks pad the sprite so flashes and swings stay inside the frame.
 - **Research strict overhead characters and animation.** Compare text-only and reference workflows across Pixen, Pro, Pro Flash and PixFlux at 64×64, then verify broader styles and 38 single-direction animation attempts through v3, PixMiniMax and raw/managed custom Skeleton v3. Commit every attempt as a GIF in flat per-model folders and bundle a configurable text-only Pro Flash MVP blueprint, with reusable recipes and explicit limits on camera, anatomy, gear and production reliability.
 - **Clarify wide-background research findings.** Record successful Pro reuse of smaller backgrounds as style/reference, reported white-border relief from full-bleed wording, and the exact successful scene prompts in both wallpaper and indoor research, with a minimal reusable template; distinguish production feedback from controlled test counts and unverified template generalizations.

@@ -47,16 +47,16 @@ Skeletons are useful, but not a silver bullet. PixelLab `estimate-skeleton` retu
 | Pro/multi image edit | REST `edit-images-v2`; MCP `edit_image` (matches this Pro/batch route, not base `edit-image`) | One or more edited composite images | Useful for small batches or consistent edits, still composite-only. |
 | Inpaint | REST `inpaint` / `inpaint-v3`; MCP `inpaint_image` (matches `inpaint-v3`, has `crop_to_mask`); website/editor Inpaint | Edited/inpainted composite image | Better when a mask can restrict the weapon/body region. |
 | Pro Flash inpaint | MCP `inpaint_image_pro_flash`; REST `inpaint-image-pro-flash` | Composite or mask-scoped changes-only image, selected by `output_method` | Explicit alternative under the current runtime contract; transparency outside the mask does not prove equipment-only pixels inside it. |
-| Edit animation | REST `edit-animation-v2` | Edited/composited frames | Useful for adding equipment to 2-16 frames, then extracting per-frame layers. |
+| Edit animation | MCP `edit_animation` or REST `edit-animation-v2` | Edited/composited frames | Useful for adding equipment to animation frames, then extracting per-frame layers. |
 | Transfer outfit | MCP `transfer_outfit` or REST `transfer-outfit-v2` | Outfit-transferred/composited frames | Good for clothing/armor reskins, but not equipment layers. |
-| Estimate skeleton | REST `estimate-skeleton` | Keypoints with labels and z-index-like data | Useful to infer hardpoints and body regions. |
+| Estimate skeleton | MCP `estimate_skeleton` or REST `estimate-skeleton` | Keypoints with labels and z-index-like data | Useful to infer hardpoints and body regions. |
 | Animate with skeleton | REST `animate-with-skeleton` | Generated animation frames | Useful for raw skeleton generation, not layer isolation. |
 | Aseprite extension changes-only layer | Visible editor/private extension workflow | Editor layer when verified | Useful manual/editor workflow and design reference, not a public REST/MCP contract. |
 
 Important official-doc nuance:
 
 - `edit-image`, `edit-images-v2`, `inpaint-v3`, `edit-animation-v2`, and `transfer-outfit-v2` are documented as returning edited images or frames, not native layer files.
-- MCP now exposes generic raw-image tools alongside the managed character/state/animation/object/tile/UI helpers: `create_image_pixflux`/`create_image_pixen`/`create_image_pro` (+ `get_image`), `edit_image` (Pro, matches REST `edit-images-v2`), `inpaint_image` (Pro, matches REST `inpaint-v3`), `animate_image` (matches REST `animate-with-text-v3`, no managed asset needed), `animate_with_skeleton_v3` (matches REST `animate-with-skeleton-v3`), and `transfer_outfit` (matches REST `transfer-outfit-v2`). MCP still has no equivalent for `edit-animation-v2` or the legacy `estimate-skeleton` / `animate-with-skeleton` routes.
+- MCP now exposes generic raw-image tools alongside the managed character/state/animation/object/tile/UI helpers: `create_image_pixflux`/`create_image_pixen`/`create_image_pro` (+ `get_image`), `edit_image` (Pro, matches REST `edit-images-v2`), `edit_animation` (matches REST `edit-animation-v2`), `inpaint_image` (Pro, matches REST `inpaint-v3`), `animate_image` (matches REST `animate-with-text-v3`, no managed asset needed), `animate_with_skeleton_v3` (matches REST `animate-with-skeleton-v3`), `estimate_skeleton`/`estimate_custom_skeleton`, and `transfer_outfit` (matches REST `transfer-outfit-v2`). MCP still has no equivalent for the legacy `animate-with-skeleton` route.
 - `animate-with-skeleton` defaults are side/east in the public schema; RPG paperdoll workflows should set `view` and `direction` explicitly.
 
 ## Aseprite Changes-Only Layer Findings

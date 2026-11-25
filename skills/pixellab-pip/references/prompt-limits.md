@@ -2,7 +2,7 @@
 
 Read this when a PixelLab REST v2 call rejects a natural-language field for length, when writing exact API code, or when preparing unusually long prompts.
 
-These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-10-19. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
+These limits were checked against `https://api.pixellab.ai/v2/openapi.json` on 2026-11-25. OpenAPI is the source of truth for exact current REST v2 schemas; refresh it when failures or exact code depend on current limits.
 
 ## Pattern
 
@@ -44,9 +44,24 @@ These are the rows that do not follow the tier you would guess from the field na
 | `POST /vfx` | `description` | 8000 |
 | `POST /talking-gif` | `text` | 500 |
 | `POST /lip-sync` | `text` | 500 |
+| `POST /music` | `style` | 1000 |
+| `POST /music` | `lyrics` | 5000 |
+| `POST /music` | `about` | 200 |
+| `POST /music` | `voice` | 100 |
+| `POST /music` | `exclude` | 1000 |
+| `POST /sound-effects` | `prompt` | 1000 |
+| `POST /create-room` | `theme` | 300 |
+| `POST /estimate-custom-skeleton` | `description` | 500 |
+| `POST /estimate-custom-skeleton` | `action` | 200 |
+| `POST /objects/{object_id}/expand-rotations` | `description` | 2000 |
+| `POST /save-to-asset` | `description` | 500 |
+| `POST /ui-assets/states` | `states[].description` | 2000 |
+| `POST /create-tiles-pro` | `description` | 4000 |
+| `POST /tiles-pro/import` | `description` | 4000 |
+| `POST /characters/{character_id}/animations`, object animations | `direction_prompts.*` | 1000 |
 
 ## No Declared Max Length
 
-Some REST v2 request schemas include natural-language string fields without a declared `maxLength` in OpenAPI, including older image, tileset, tile, base animation, and base inpaint routes (for example `create-image-pixen`/`pixflux`/`bitforge.description`, `create-isometric-tile.description`, `create-tiles-pro.description`, `create-tileset.*_description`, `create-tileset-sidescroller.*_description`, `animate-with-text.action`/`description`/`negative_description`, `inpaint.description`/`negative_description`). Do not infer that these are unlimited; keep them concise and refresh OpenAPI or interactive docs before exact integrations.
+Some REST v2 request schemas include natural-language string fields without a declared `maxLength` in OpenAPI, including older image, tileset, tile, base animation, and base inpaint routes (for example `create-image-pixen`/`pixflux`/`bitforge.description`, `create-isometric-tile.description`, `create-tileset.*_description`, `create-tileset-sidescroller.*_description`, `animate-with-text.action`/`description`/`negative_description`, `inpaint.description`/`negative_description`). Do not infer that these are unlimited; keep them concise and refresh OpenAPI or interactive docs before exact integrations.
 
 MCP tool schemas may expose different parameter descriptions or validation. The current managed `animate_character` descriptor marks PixMiniMax `subject_description` and `initial_pose` optional but publishes no length bound; do not infer REST's 1–300 character limits apply to MCP. Follow the visible tool schema and keep prompts concise. PixMiniMax's other request rules are canonical in `animation.md`.

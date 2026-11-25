@@ -1,6 +1,8 @@
 # PixelLab Top-Down Tileset Transition Findings
 
-Last reviewed: 2026-10-25.
+Last reviewed: 2026-11-25.
+
+> **2026-11-25 public-contract note:** the current schemas mark `color_image` as no effect on both top-down and sidescroller tilesets. The `color_image` instructions and observations below are historical test notes, not current controls; use the route's documented palette fields instead.
 
 > **2026-10-15 public-contract note:** REST and MCP now document additional Pro boundary controls: `roundness`, `boundary_amplitude`/`boundary_seed`, `step_slope`, and `connect_diagonals`. They were not covered by the live-generation tests recorded here; the results below do not establish their visual quality or behavior. See the [tileset reference](../../skills/pixellab-pip/references/tileset.md) for eligibility and defaults.
 

@@ -202,7 +202,7 @@ The current exposed MCP tool descriptor likewise describes an asynchronous job a
 ### Practical call sequence
 
 1. Choose a source sprite that fits within 256×256 and identify its actual facing and camera angle.
-2. Create the initial 18-joint pose. REST `POST /v2/estimate-skeleton` can estimate keypoints from an image, but the estimate may need editing; PixelLab’s editor guide explicitly recommends checking and correcting estimates. `estimate-skeleton` is REST-only in the public tool inventory.
+2. Create the initial 18-joint pose. REST `POST /v2/estimate-skeleton` can estimate keypoints from an image, but the estimate may need editing; PixelLab’s editor guide explicitly recommends checking and correcting estimates. At the time of this spike, `estimate-skeleton` was REST-only in the public tool inventory; it now also has MCP `estimate_skeleton`.
 3. Author or convert the remaining 3–15 poses into the same 18-label format. The starting pose must match the pixels in `first_frame` closely.
 4. Submit the appearance description, short action label, direction, view, starting pose, and complete ordered pose sequence.
 5. Poll the job, retrieve all returned frames, and inspect timing, pose readability, silhouette, colors, edges, background transparency, and loop closure. Keep or correct the art based on actual output; the pose controls do not guarantee pixel-perfect limb placement.
@@ -268,7 +268,7 @@ For a managed character and a standard named motion, the managed `skeleton-v3` m
 - **Preparation:** each frame requires 18 named points. A 15-frame sequence means 270 points plus the 18-point starting pose if counting input entries; authoring, checking labels, and keeping poses coherent can exceed the effort of writing a text action.
 - **Model uncertainty:** pose conditioning is not pixel locking. The source redraw, style rendering, occlusion, silhouette, and cleanup remain model-dependent.
 
-The separate REST `estimate-skeleton` helper has its own public estimates around $0.0051 in the catalog. If used, account for that separately from the animation estimate. It is not an MCP equivalent in the published tool inventory.
+The separate REST `estimate-skeleton` helper has its own public estimates around $0.0051 in the catalog. If used, account for that separately from the animation estimate. At the time of this spike it was not in the MCP tool inventory; it now also has MCP `estimate_skeleton`.
 
 ### Failure modes and review checklist
 

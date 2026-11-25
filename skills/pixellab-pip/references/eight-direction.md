@@ -15,13 +15,14 @@ A requested player walk in 4 or 8 facings (one 4-direction farmer demonstration 
 | Route | How | Aim |
 |---|---|---|
 | Text | `create_character(mode="v3")` rotates the reference, then `animate_character` with the explicit mode selected under `animation.md` → Route Choice animates each direction from `action_description` | Loose: the generator picks the arm angle. |
+| Loose sprite | MCP `rotate_image` (or REST `generate-8-rotations-v3`) turns one supplied view into loose 8-direction sprites without a managed asset; supply other views with `direction_images` and their `view` to preserve them. | Raw frames, not a stored character; inspect every facing. |
 | Requested key poses | Per direction: reviewed wind-up/hit or aim/recoil anchors, then supported interpolation; see `animation.md` for the matching raw/managed frame fields | More explicit anchors, extra paid edits; no guarantee of exact motion or fixed cost ratio. |
 
 ## Oblique View
 
 MCP `create_character` supports `view="oblique"` only in `mode="standard"`, for four directions, and up to 128px. REST `POST /create-character-with-4-directions` also documents it; the eight-direction schema conflicts with its own four-direction-only description. Report this feature limitation under SKILL.md's character-mode policy rather than selecting Standard or silently changing the view. Offer a supported modern-route view for approval. Do not claim oblique support on MCP Pro/v3/Pro Flash or eight-direction REST output.
 
-When useful, offer **5 generated directions** (south, south-east, east, north-east, north) plus accepted mirrors for the other three. Mirroring switches hands/asymmetric gear; disclose that and generate the requested facings when unacceptable. It reduces direction calls, not necessarily total cost by a fixed percentage.
+When useful, offer **5 generated directions** (south, south-east, east, north-east, north) plus accepted mirrors for the other three. MCP `mirror_animation`/REST `POST /.../animations/{group}/mirror` creates a missing opposite direction for free when the animation already has its pair (east↔west, south-east↔south-west, north-east↔north-west); south and north cannot be mirrored. Mirroring switches hands/asymmetric gear; disclose that and generate the requested facings when unacceptable. It reduces direction calls, not necessarily total cost by a fixed percentage. A 1-direction object can be expanded to 8 directions with MCP `expand_object_to_8_directions`/REST `POST /objects/{id}/expand-rotations` (10–25 generations), then kept or discarded in review.
 
 For v3 animation, cost is billed on the generated canvas, which the silhouette grows past the sprite, not on the sprite. Use the selected engine's own size/frame pricing in `cost-routing.md`; do not apply that v3 expansion or cost formula to PixMiniMax. Recommend 64-128 px characters for 8-direction games; quote the selected route's actual cost rather than assuming a fixed size multiplier.
 

@@ -334,7 +334,7 @@ For managed preset template animations, MCP and REST v2 expose essentially the s
 | Select mode `template` / `skeleton-v3` / `v3` / `pixminimax` | Yes when the connected tool schema exposes the mode; refresh a stale connection if it does not. | Yes in OpenAPI schema, plus REST-only `pro`. |
 | Exact schema introspection | Limited to MCP tool schema/docs visible in client. | Strong, via OpenAPI. |
 | Managed polling/download helpers | Strong, through `get_character`. | Available via background jobs and character endpoints. |
-| Raw Skeleton v3 keypoints | MCP `animate_with_skeleton_v3` accepts caller-supplied per-frame keypoints; it has no estimator. | `POST /animate-with-skeleton-v3` accepts the matching raw v3 sequence; `POST /estimate-skeleton` estimates one pose. |
+| Raw Skeleton v3 keypoints | MCP `animate_with_skeleton_v3` accepts caller-supplied per-frame keypoints; it now has `estimate_skeleton`/`estimate_custom_skeleton` estimators. | `POST /animate-with-skeleton-v3` accepts the matching raw v3 sequence; `POST /estimate-skeleton` and `POST /estimate-custom-skeleton` estimate one pose or a custom rig. |
 | Legacy raw skeleton payload | No equivalent MCP tool. | `POST /animate-with-skeleton` remains REST-only for its older three-frame payload and optional controls. |
 
 Recommendation:
@@ -365,7 +365,7 @@ The Aseprite extension exposes a richer interactive skeleton editor than MCP or 
 
 | Aseprite feature | What the extension does | Public MCP equivalent | Public REST v2 equivalent | Automation guidance |
 | --- | --- | --- | --- | --- |
-| Estimate skeleton | Sends one or more sprite frames through the editor's private estimation channel, receives normalized keypoints, maps them back onto the canvas, repairs duplicates, and writes them into local pose data. | None documented as a standalone MCP tool. | `POST /v2/estimate-skeleton` returns `keypoints` for an image. | Use REST for programmatic estimation. Use Aseprite only when the user wants interactive overlay/editing in the editor. |
+| Estimate skeleton | Sends one or more sprite frames through the editor's private estimation channel, receives normalized keypoints, maps them back onto the canvas, repairs duplicates, and writes them into local pose data. | `estimate_skeleton` (added 2026-11-25; not present when this research was written). | `POST /v2/estimate-skeleton` returns `keypoints` for an image. | Use MCP or REST for programmatic estimation. Use Aseprite only when the user wants interactive overlay/editing in the editor. |
 | Edit skeleton | Toggles an Aseprite editing mode over a local pose layer, lets the user move keypoints, redraws the skeleton overlay, and persists points in cel/layer properties. | None. | No edit endpoint; editing is client-side manipulation of `Point[]`/keypoint JSON before another call. | Implement local JSON/keypoint editing in our tooling if needed; do not call extension internals. |
 | Replace/insert template skeleton | Loads a local skeleton reference and inserts it into the current Aseprite frame. | Managed template animations exist via `animate_character`; raw v3 animation accepts caller keypoints but does not insert an Aseprite rig into an asset. | No public catalog endpoint for these local Aseprite skeletons. Map edited poses to the v3 18-joint schema for raw animation; the legacy route remains for its exact payload. | Treat local references as editor assets/research, not public template ids. |
 | Export skeleton for API | Exports selected/all frame keypoints as normalized JSON shaped as `{ "pose_keypoints": [[...], ...] }`. | `animate_with_skeleton_v3` accepts raw per-frame keypoints, but exported labels/frames may need mapping to its current schema. | Skeleton v3 uses `first_frame_keypoints` plus 3–15 full `keypoints` poses; legacy `animate-with-skeleton` expects exactly 3 nested arrays under `skeleton_keypoints`. `create-image-bitforge` accepts a single keypoint array. | Map/export pose data to the selected public schema; do not assume the editor JSON and API payload are interchangeable. |
@@ -375,7 +375,7 @@ The Aseprite extension exposes a richer interactive skeleton editor than MCP or 
 | Pose-guided style generation | Sends pose keypoints with a style/image request. | None documented. | `create-image-bitforge` has `skeleton_keypoints` and `skeleton_guidance_scale`; some image/edit routes have init/reference controls. | Use public skeleton-guided image generation only where OpenAPI exposes keypoint fields. |
 | Local skeleton preview/3D controls | Projects bundled 3D skeletons into 2D, supports direction/tilt controls, and previews overlays. | None. | None as a hosted endpoint. | Local/editor functionality only. |
 
-Current public MCP exposes raw `animate_with_skeleton_v3` and managed `animate_character` Skeleton v3 mode, but not `estimate_skeleton`, the legacy `animate_with_skeleton` endpoint, `edit_skeleton`, `export_skeleton`, or local skeleton-template insertion tools. It also exposes managed character workflows that store skeleton/template metadata: `create_character`, `create_character_state`, `get_character`, and `delete_animation`.
+Current public MCP exposes raw `animate_with_skeleton_v3`, `estimate_skeleton`, `estimate_custom_skeleton`, and managed `animate_character` Skeleton v3 mode, but not the legacy `animate_with_skeleton` endpoint, `edit_skeleton`, `export_skeleton`, or local skeleton-template insertion tools. It also exposes managed character workflows that store skeleton/template metadata: `create_character`, `create_character_state`, `get_character`, and `delete_animation`.
 
 Current public REST v2 exposes these skeleton-related primitives:
 
@@ -388,7 +388,7 @@ Current public REST v2 exposes these skeleton-related primitives:
 | `GET /v2/characters/{character_id}` | Managed character details can include `skeletons`, but this is returned metadata, not an edit surface. |
 | `POST /v2/characters/animations` / `POST /v2/animate-character` | Managed preset/template/custom/pro/Skeleton v3 character animation. Managed `skeleton-v3` mode applies a named `template_animation_id`, not raw keypoints. |
 
-The practical conclusion: Aseprite has an interactive rigging/pose-authoring workflow. Public REST has estimation, raw Skeleton v3 generation, and the legacy three-frame route. MCP has raw Skeleton v3 generation and managed-character Skeleton v3 mode, but not pose estimation or Aseprite's local rigging/editor primitives.
+The practical conclusion: Aseprite has an interactive rigging/pose-authoring workflow. Public REST has estimation, raw Skeleton v3 generation, and the legacy three-frame route. MCP has raw Skeleton v3 generation, both estimators, and managed-character Skeleton v3 mode, but not Aseprite's local rigging/editor primitives.
 
 The installed extension exposes local skeleton reference families labeled `bipedal realistic`, `bipedal semi-chibi`, and `quadrupedal tiny`. It also exposes local walk references for those families. The local keypoint data uses labeled body points such as neck, face, shoulder, hip, and knee points. That supports the conclusion that PixelLab preset animation is skeleton/keypoint-guided under the hood. However, the extension's private editor channels are not stable public REST contracts.
 
@@ -400,7 +400,7 @@ Recommended current implementation:
 
 ```text
 source sprite/reference frame
-  -> REST /estimate-skeleton
+  -> MCP estimate_skeleton (or REST /estimate-skeleton)
   -> normalize/save keypoints and metadata
   -> map the starting pose and author a complete 3–15-frame sequence
   -> MCP animate_with_skeleton_v3 or REST /animate-with-skeleton-v3
@@ -412,7 +412,7 @@ Current route choice:
 | Step | Preferred surface now | Reason |
 | --- | --- | --- |
 | Create a prompt-only humanoid reference | MCP `create_character` or REST `create-character-v3` when a managed character is useful; REST image/character route when only a raw reference frame is needed | The skeleton estimator requires an image. Simple humanoid prompts need a reference frame before raw keypoint work can begin. |
-| Auto-rig an existing sprite | REST `POST /v2/estimate-skeleton` | Public route that returns keypoints from an image. |
+| Auto-rig an existing sprite | MCP `estimate_skeleton` or REST `POST /v2/estimate-skeleton` | Public routes that return keypoints from an image; MCP `estimate_custom_skeleton` handles a non-humanoid rig. |
 | Store/export the rig | Local sidecar JSON and optional Aseprite export/import | Editing/export is client-side data handling, not a hosted MCP/API edit endpoint. |
 | Animate from an authored raw pose sequence | MCP `animate_with_skeleton_v3` or REST `POST /v2/animate-with-skeleton-v3` | Current 3–15-frame route; the legacy `/animate-with-skeleton` is only for its exact older payload. |
 | Create a single skeleton-guided image | REST `POST /v2/create-image-bitforge` | Public route that accepts one keypoint array plus `skeleton_guidance_scale`. |
@@ -421,7 +421,7 @@ Current route choice:
 MCP priority should be conditional:
 
 - Use MCP first for managed character creation and managed preset animation.
-- Use MCP `animate_with_skeleton_v3` for raw 3–15-frame pose sequences when visible; use REST `POST /animate-with-skeleton-v3` for API/code or when that MCP tool is unavailable. REST `estimate-skeleton` remains the one-pose estimator.
+- Use MCP `animate_with_skeleton_v3` for raw 3–15-frame pose sequences when visible; use REST `POST /animate-with-skeleton-v3` for API/code or when that MCP tool is unavailable. MCP `estimate_skeleton`/REST `estimate-skeleton` remains the one-pose estimator (MCP also has `estimate_custom_skeleton` for a custom rig).
 - Use REST `POST /animate-with-skeleton` only when the legacy three-frame payload or its optional controls are specifically required; do not route new custom sequences there by default.
 - Inspect the visible MCP runtime schema before depending on mode-specific fields, cost confirmation fields, or the absence/presence of raw-skeleton tools.
 
