@@ -190,7 +190,7 @@ Two enhancer endpoints carry an `image_size` that shapes the returned prompt (th
 
 | Endpoint | Field | Allowed values | Notes |
 |---|---|---|---|
-| `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 32, 64]`, default 16 | `standard` mode: 16/32, and 16 only when `transition_size` is above 0.5 (25-tile 4x8 layout). `pro` mode: 16/32/64 plus shape controls. `shape_style` (`square`/`round`, standard-only, `round` when omitted) supports 16/32 only. |
+| `create-tileset` / `tilesets` (top-down) | `tile_size` (w/h) | `enum [16, 24, 32, 64]`, default 16 | `standard` mode: 16/24/32, and 16 only when `transition_size` is above 0.5 (25-tile 4x8 layout). `pro` mode: 16/32/64 plus shape controls. `shape_style` (`square`/`round`, standard-only, `round` when omitted) has no documented size restriction. |
 | `create-tileset-sidescroller` / `tilesets-sidescroller` | `tile_size` (w/h) | `enum [16, 32]`, default 16 | No 64 option. |
 | `create-tiles-pro` | `tile_size` (int) | 16–**128**, default 32 | Schema, prose, and the MCP tool agree since the 2026-09-08 refresh (the schema previously allowed 256). Connectable sets (`tile_feature`) have tighter per-shape ranges, and square top-down roads are exactly 32. 32 recommended. `tile_height` 16–256 for non-square; `style_images` override shape/size. |
 | `create-isometric-tile` | `image_size` | 16×16 to 64×64 | Sizes above 24×24 documented as better. `isometric_tile_size` default 16 (recommended 16 or 32). |
@@ -309,7 +309,7 @@ Bounds read from the live MCP tool schemas. **Schema-read only — the probe swe
 | MCP tool | Size parameter | Default | MCP schema bound | vs REST |
 |---|---|---|---|---|
 | `create_character` | `size` | 48 (prose; schema `null`) | 16–256, **mode-blind** | Prose limits Standard/Pro to 128 and v3 to 256. Standard `size` means subject size; the stored canvas is about 40% larger (64→92×92, 128→180×180) for animation room. The 2026-07 probe's size-16 results remain historical, not a current Pip route recommendation. |
-| `create_topdown_tileset` | `tile_size` | `{16, 16}` | **none declared** — plain integer object; "16 or 32 for standard; 64 requires `mode='pro'`" is prose only | REST declares `enum [16,32,64]`; MCP does not, so a bad value is not caught by the tool schema |
+| `create_topdown_tileset` | `tile_size` | `{16, 16}` | **none declared** — plain integer object; "16, 24 or 32 for standard; 16, 32 or 64 for `mode='pro'`" is prose only | REST declares `enum [16,24,32,64]`; MCP does not, so a bad value is not caught by the tool schema |
 | `create_sidescroller_tileset` | `tile_size` | `{16, 16}` | **none declared** — prose "16 or 32 pixels" only | REST declares `enum [16,32]`; MCP does not |
 | `create_isometric_tile` | `size` | 32 | 16–64 | matches REST `image_size`. MCP exposes no `isometric_tile_size` — it has `tile_shape` instead |
 | `create_tiles_pro` | `tile_size` | 32 | **16–128** | Matches REST since the 2026-09-08 refresh, when the REST schema dropped from 256 to 128. `tile_height` 16–256 on both |
@@ -346,7 +346,7 @@ The Pro Flash MCP page lists `width`/`height` but not their full validation boun
 | `16px` character | No verified current Pip route for clean, exact-size output | The legacy character-standard route matched 16px in a historical probe, but Pip no longer recommends it. MCP Pro Flash lists 16×16 experimentally, with no live quality result here; current native presets also include 48×48 and 128×128. |
 | `16px` object | One direction is schema-supported; eight directions are not on the older object route | `create-1-direction-object` minimum fell to 16 in the 2026-09-08 schema refresh; `create-8-direction-object` minimum is 24. The earlier 32px rejection probes predate that change. Pro Flash also lists experimental 16×16 for one or eight directions and now lists native 48×48 and 128×128, but neither output is live-verified. |
 | From-scratch `8px` icons / items | **No** on dedicated creation routes | `generate-image-v2` and the other from-scratch image generators start at 16px; image-processing routes have separate bounds. |
-| `8px` tilesets | **No** | Top-down/sidescroller `tile_size` enum is `[16,32,64]`/`[16,32]`; `create-tiles-pro` min 16; isometric min 16×16. All reject 8. |
+| `8px` tilesets | **No** | Top-down/sidescroller `tile_size` enum is `[16,24,32,64]`/`[16,32]`; `create-tiles-pro` min 16; isometric min 16×16. All reject 8. |
 | `8px` font glyphs | Yes | `generate-font-pro.glyph_px` enum includes 8 — a native 8px glyph-creation path. |
 
 Conclusion for the goal:

@@ -13,11 +13,11 @@ Read this for game music, seamless loops, lyrics/vocals, or sound effects. This 
 | Write lyrics | `write_music_lyrics` | `POST /music/lyrics` | 0.05 generations, synchronous. Returns two versions with section tags. |
 | List/get music | `list_music`, `get_music` | `GET /music`, `GET /music/{song_id}` | Free. `list_music` is newest first. |
 | Rename music | `rename_music` | `PATCH /music/{song_id}` | Free; renames it in the library and in games. |
-| Delete music | `delete_music` | `DELETE /music/{song_id}` | Destructive; see below. |
+| Delete music | `delete_music` | HTTP DELETE on `/music/{song_id}` | Destructive; see below. |
 | Sound effect | `create_sound_effect` | `POST /sound-effects` | One clip per request. Priced by length. MCP states Tier 2+, REST Tier 1+. |
 | List/get sound effects | `list_sound_effects`, `get_sound_effect` | `GET /sound-effects`, `GET /sound-effects/{sound_effect_id}` | Free. |
 | Rename sound effect | `rename_sound_effect` | `PATCH /sound-effects/{sound_effect_id}` | Free. |
-| Delete sound effect | `delete_sound_effect` | `DELETE /sound-effects/{sound_effect_id}` | Destructive; see below. |
+| Delete sound effect | `delete_sound_effect` | HTTP DELETE on `/sound-effects/{sound_effect_id}` | Destructive; see below. |
 
 Sound-effect cost is charged only when the clip is made: 1 generation up to 1.6 s, 2 up to 3.2 s, 4 at 6 s, 7 at 10 s, 19 at 30 s (0.614 per second, rounded up; $0.0027 per second in credits). `seconds` is 0.5–30, default 2.
 
@@ -45,7 +45,7 @@ Sound-effect cost is charged only when the clip is made: 1 generation up to 1.6 
 
 ## Destructive Actions
 
-Deleting a song or sound effect removes it from the library and from games, and cannot be undone. A pending song is stopped together with its other take and is charged if it had already started. Follow SKILL.md's Destructive Remote Actions gate: name the item and consequence and get explicit approval first. Renaming is not destructive.
+Deleting a song or sound effect removes it from the library and from games, and cannot be undone. A pending song is stopped together with its other take and is charged if it had already started. Follow SKILL.md's Destructive Remote Actions gate; renaming is not destructive.
 
 ## Prompt Preparation
 

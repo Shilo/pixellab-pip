@@ -50,7 +50,7 @@ Sidescroller MCP `create_sidescroller_tileset` route:
 - Required platform body field: `lower_description`.
 - Required platform surface/top field: `transition_description`.
 - Base tile field for chaining: `base_tile_id` (REST `create-tileset-sidescroller` names it `lower_base_tile_id`). It is `mode="pro"` only: the platform body is reused, so repeat the same body in `lower_description` and describe only the new top in `transition_description`.
-- Route-only field: `seed`. Both surfaces now expose `mode` and `enhance`; standard runs on Pixen and costs 1 generation, while Pro costs 15 through 32px and 25 above. The older sidescroller model is no longer offered.
+- Route-only field: `seed`. Both surfaces now expose `mode` and `enhance`; standard runs on Pixen and costs 1 generation, while Pro costs 15 at the supported 16/32px sizes (the guide's higher bracket is unreachable through this schema). The older sidescroller model is no longer offered.
 - `transition_size` controls how much of the surface/top layer appears on the platform tile; allowed values are 0, 0.25, and 0.5, and MCP snaps to the nearest. Standard `platform_thickness` (0–1) sets the platform body thickness; omit it to adapt to `transition_size`.
 
 Isometric MCP `create_isometric_tile` route:

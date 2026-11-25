@@ -58,7 +58,8 @@ These are the rows that do not follow the tier you would guess from the field na
 | `POST /ui-assets/states` | `states[].description` | 2000 |
 | `POST /create-tiles-pro` | `description` | 4000 |
 | `POST /tiles-pro/import` | `description` | 4000 |
-| `POST /characters/{character_id}/animations`, object animations | `direction_prompts.*` | 1000 |
+| Object animations | `direction_prompts.*` | 1000 |
+| Character animations | `direction_prompts.*` | no declared bound |
 
 ## No Declared Max Length
 
