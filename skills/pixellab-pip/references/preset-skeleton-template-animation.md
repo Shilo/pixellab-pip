@@ -296,7 +296,7 @@ Choose the template family by body plan and stance, not species. Map human/perso
 
 ## Preset Animation IDs
 
-Use exact ids. Do not send labels such as "Walk (8 frames)". The humanoid ids and frame counts below were last fully enumerated in the 2026-11-06 public MCP guide; the 2026-11-25 guide no longer lists the full set, so confirm the character's available templates with `get_character`'s `available_animations` and treat this table as the last published catalog. The quadruped lists retain the 2026-06-30 website catalog and should be checked with `get_character` for the selected template. Official REST docs expose the `template_animation_id` field but no stable public enum endpoint; refresh visible MCP tool docs or official docs before claiming "all available animations" or building long-lived integrations.
+Use exact ids. Do not send labels such as "Walk (8 frames)". The humanoid ids and frame counts below were last fully enumerated in the 2026-11-06 public MCP guide; the 2026-11-25 guide no longer lists the full set, so confirm the available templates from `get_character` (`available_animations`) and treat this table as the last published catalog. The quadruped lists retain the 2026-06-30 website catalog and should be checked with `get_character` for the selected template. Official REST docs expose the `template_animation_id` field but no stable public enum endpoint; refresh visible MCP tool docs or official docs before claiming "all available animations" or building long-lived integrations.
 
 Ordered by likely request frequency, mannequin/humanoid first because most player, NPC, human, and biped requests map there.
 

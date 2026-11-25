@@ -4,7 +4,7 @@ Read this for MCP `create_image_pro`/`create_image_pro_from_style` style-image i
 
 ## REST `generate-with-style-v2` Size Handling
 
-REST `POST /generate-with-style-v2` and MCP `create_image_pro_from_style` share the 1–4 style-image workflow and square-output rule; above a 170px canvas MCP returns one candidate and accepts exactly one style image. REST additionally exposes the exact OpenAPI schema and deprecated `image_size` property. For REST `POST /generate-with-style-v2`, do not send `image_size`. The current schema retains it only as an optional deprecated property marked as removed; it is not a supported output-size control. The endpoint always derives a square output from the supplied style images:
+REST `POST /generate-with-style-v2` and MCP `create_image_pro_from_style` share the 1–4 style-image workflow and square output behavior; above a 170px canvas MCP returns one candidate and accepts exactly one style image. REST additionally exposes the exact OpenAPI schema and deprecated `image_size` property. For REST `POST /generate-with-style-v2`, do not send `image_size`. The current schema retains it only as an optional deprecated property marked as removed; it is not a supported output-size control. The endpoint always derives a square output from the supplied style images:
 
 - Inspect all style images and use the largest dimension across them as the effective output size, bounded to `16`–`512` pixels.
 - Non-square style images are centered on the square output canvas. Do not scale, stretch, crop, or redraw them to choose a different output size.
